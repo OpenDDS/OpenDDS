@@ -21,7 +21,7 @@ class OpenDDS_Udp_Export UdpGenerator
 public:
   virtual TransportImplFactory* new_factory();
 
-  virtual TransportConfiguration* new_configuration(const TransportIdType id);
+  virtual TransportInst* new_configuration(const TransportIdType id);
 
   virtual void default_transport_ids(TransportIdList& ids);
 };

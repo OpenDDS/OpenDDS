@@ -16,7 +16,7 @@
 #include "TransportReactorTask_rch.h"
 #include "TransportGenerator.h"
 #include "TransportGenerator_rch.h"
-#include "TransportConfiguration_rch.h"
+#include "TransportInst_rch.h"
 #include "ace/Synch.h"
 #include "ace/Configuration.h"
 
@@ -71,36 +71,36 @@ public:
   /// Transfer the configuration in ACE_Configuration_Heap object to the TransportFactory
   /// object which uses hash map to cache those configuration. This is called by the
   /// Service_Participant at initialization time. This function iterates each sections
-  /// in the configuration file, if it's transport section then a TransportConfiguration
+  /// in the configuration file, if it's transport section then a TransportInst
   /// object is created and added to the configuration_map_.
   int load_transport_configuration(ACE_Configuration_Heap& cf);
 
   /// This interface is used when the transport_id is configured via the configuration
-  /// file. In this case, the TransportConfiguration object should be already registered
+  /// file. In this case, the TransportInst object should be already registered
   /// as transport_id in the configuration_map_. If the configuration is not registered
   /// then an exception (Transport::NotConfigured) is raised.
-  TransportConfiguration_rch get_configuration(TransportIdType transport_id);
+  TransportInst_rch get_configuration(TransportIdType transport_id);
 
   /// This interface is used when the transport_id is NOT configured in the configuration
-  /// file. A new TransportConfiguration object with default/hardcoded configuration is
+  /// file. A new TransportInst object with default/hardcoded configuration is
   /// created and registered as the transport_id in the configuration map. If the
   /// transport_id is already configured then an exception (Transport::duplicate)
   /// is raised.
-  TransportConfiguration_rch create_configuration(TransportIdType transport_id,
+  TransportInst_rch create_configuration(TransportIdType transport_id,
                                                   ACE_TString transport_type);
 
-  /// This interface is the easiest way for user to get the TransportConfiguration
+  /// This interface is the easiest way for user to get the TransportInst
   /// object without knowing whether the application is configured via a
   /// configuration file or not.
   /// Necessary conflict is checked in this method. If the transport_id is already
-  /// configured and the transport type in the TransportConfiguration object is
+  /// configured and the transport type in the TransportInst object is
   /// different from provided transport_type then the an exception
   /// (Transport::ConfigurationConflict) is raised.:
-  TransportConfiguration_rch get_or_create_configuration(TransportIdType transport_id,
+  TransportInst_rch get_or_create_configuration(TransportIdType transport_id,
                                                          ACE_TString transport_type);
 
   /// This interface is used when the transport_id is configured via the configuration
-  /// file. In this case, the TransportConfiguration object should be already registered
+  /// file. In this case, the TransportInst object should be already registered
   /// as transport_id in the configuration_map_.
   ///
   /// The configuration specifies the type of transport which is used to create the
@@ -109,7 +109,7 @@ public:
   /// See the create_transport_impl_i() for implementation.
   ///
   /// The auto_configure flag gives option to configure the TransportImpl object with the
-  /// registered TransportConfiguration object via TransportImpl::configure() call.
+  /// registered TransportInst object via TransportImpl::configure() call.
   TransportImpl_rch create_transport_impl(TransportIdType transport_id,
                                           bool auto_configure = AUTO_CONFIG);
 
@@ -118,12 +118,12 @@ public:
   /// passed to the internal implementation. See the create_transport_impl_i() for
   /// implementation.
   ///
-  /// This interface can also be used when the TransportConfiguration already exists
+  /// This interface can also be used when the TransportInst already exists
   /// which could be created during loading configuration file or created by the user
   /// before this function is called.
   ///
   /// The auto_configure flag gives option to configure the TransportImpl object with the
-  /// registered TransportConfiguration object via TransportImpl::configure() call.
+  /// registered TransportInst object via TransportImpl::configure() call.
   TransportImpl_rch create_transport_impl(TransportIdType transport_id,
                                           ACE_TString transport_type,
                                           bool auto_configure = AUTO_CONFIG);
@@ -159,7 +159,7 @@ private:
 
   /// Bind the transport_id->TransportConfigInfo object to the configuration_map_.
   void register_configuration(TransportIdType             transport_id,
-                              TransportConfiguration_rch  config);
+                              TransportInst_rch  config);
 
   /// This function creates a TransportImpl object using the specified
   /// TransportImplFactory instance. See comments in definition section of this
@@ -172,11 +172,11 @@ private:
   ///  Value == TransportGenerator object
   typedef std::map<ACE_TString, TransportGenerator_rch> GeneratorMap;
 
-  /// The "TransportConfiguration Map"
+  /// The "TransportInst Map"
   ///
   ///  Key  == "transport id"
-  ///  Value == TransportConfiguration object
-  typedef std::map<TransportIdType, TransportConfiguration_rch> ConfigurationMap;
+  ///  Value == TransportInst object
+  typedef std::map<TransportIdType, TransportInst_rch> ConfigurationMap;
 
   /// The "TranportImplFactory instance Map".
   /// Since each transport type has just one TransportImplFactory then we can

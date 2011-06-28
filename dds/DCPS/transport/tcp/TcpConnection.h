@@ -9,8 +9,8 @@
 #ifndef OPENDDS_TCPCONNECTION_H
 #define OPENDDS_TCPCONNECTION_H
 
-#include "TcpConfiguration.h"
-#include "TcpConfiguration_rch.h"
+#include "TcpInst.h"
+#include "TcpInst_rch.h"
 #ifdef __BORLANDC__
 #  include "TcpDataLink.h"
 #endif
@@ -51,7 +51,7 @@ public:
   int active_connect(const ACE_INET_Addr& remote_address,
                      const ACE_INET_Addr& local_address,
                      CORBA::Long          priority,
-                     TcpConfiguration_rch tcp_config);
+                     TcpInst_rch tcp_config);
 
   /// This will be called by the DataLink (that "owns" us) when
   /// the TcpTransport has been told to shutdown(), or when
@@ -79,7 +79,7 @@ public:
   virtual int close(u_long);
   virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
-  void set_sock_options(TcpConfiguration* tcp_config);
+  void set_sock_options(TcpInst* tcp_config);
 
   int reconnect(bool on_new_association = false);
 
@@ -126,7 +126,7 @@ private:
   /// the reconnect_lock_ before calling this function.
   int active_establishment(const ACE_INET_Addr& remote_address,
                            const ACE_INET_Addr& local_address,
-                           TcpConfiguration_rch tcp_config);
+                           TcpInst_rch tcp_config);
 
   int active_reconnect_i();
   int passive_reconnect_i();
@@ -153,7 +153,7 @@ private:
   /// Local address.
   ACE_INET_Addr local_address_;
   /// The configuration used by this connection.
-  TcpConfiguration_rch tcp_config_;
+  TcpInst_rch tcp_config_;
   /// Datalink object which is needed for connection lost callback.
   TcpDataLink_rch      link_;
   /// TODO: This can be removed since we do not need it for checking the

@@ -16,8 +16,8 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "TransportDefs.h"
-#include "TransportConfiguration.h"
-#include "TransportConfiguration_rch.h"
+#include "TransportInst.h"
+#include "TransportInst_rch.h"
 #include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
@@ -50,7 +50,7 @@ class Monitor;
 *     is always after DomainParticipant factory shutdown.
 *   2)The concrete transport object owns the datalink objects.
 *   3)Own  a DataLinkCleanup object.
-*   4)Reference to TransportConfiguration object and TransportReactorTask object owned
+*   4)Reference to TransportInst object and TransportReactorTask object owned
 *     by TransportFactory.
 *   5)During transport shutdown, if this object does not have ownership of an object
 *     but has a references via smart pointer then the reference should be freed;
@@ -65,7 +65,7 @@ public:
   /// TransportImpl has been created.  This *must* be called
   /// prior to attempting to attach this TransportImpl to a
   /// TransportInterface object.
-  int configure(TransportConfiguration* config);
+  int configure(TransportInst* config);
 
   /// Called by the PublisherImpl to register datawriter upon
   /// datawriter creation.
@@ -126,10 +126,10 @@ public:
 
   /// Expose the configuration information so others can see what
   /// we can do.
-  TransportConfiguration* config() const;
+  TransportInst* config() const;
 
   /// Accessor for the "swap bytes" flag that was supplied to this
-  /// TransportImpl via the TransportConfiguration object supplied
+  /// TransportImpl via the TransportInst object supplied
   /// to our configure() method.
   int swap_bytes() const;
 
@@ -172,9 +172,9 @@ protected:
     bool                    active) = 0;
 
   /// Concrete subclass gets a shot at the config object.  The subclass
-  /// will likely downcast the TransportConfiguration object to a
+  /// will likely downcast the TransportInst object to a
   /// subclass type that it expects/requires.
-  virtual int configure_i(TransportConfiguration* config) = 0;
+  virtual int configure_i(TransportInst* config) = 0;
 
   /// Called during the shutdown() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when
@@ -325,9 +325,9 @@ private:
   /// "attached" to this TransportImpl.
   InterfaceMapType interfaces_;
 
-  /// A reference (via a smart pointer) to the TransportConfiguration
+  /// A reference (via a smart pointer) to the TransportInst
   /// object that was supplied to us during our configure() method.
-  TransportConfiguration_rch config_;
+  TransportInst_rch config_;
 //MJM: I still don't understand why this is shareable.
 
   /// The reactor (task) object - may not even be used if the concrete

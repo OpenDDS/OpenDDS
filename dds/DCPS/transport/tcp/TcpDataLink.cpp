@@ -9,7 +9,7 @@
 #include "Tcp_pch.h"
 #include "TcpDataLink.h"
 #include "TcpReceiveStrategy.h"
-#include "TcpConfiguration.h"
+#include "TcpInst.h"
 #include "TcpSendStrategy.h"
 #include "dds/DCPS/transport/framework/TransportControlElement.h"
 #include "dds/DCPS/DataSampleHeader.h"

@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportDebug.h"
 #include "TransportFactory.h"
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Service_Participant.h"
 
@@ -189,9 +189,9 @@ OpenDDS::DCPS::TransportFactory::load_transport_configuration(ACE_Configuration_
                            -1);
 
         } else {
-          // Create a TransportConfiguration object and load the transport configuration in
-          // ACE_Configuration_Heap to the TransportConfiguration object.
-          TransportConfiguration_rch config
+          // Create a TransportInst object and load the transport configuration in
+          // ACE_Configuration_Heap to the TransportInst object.
+          TransportInst_rch config
           = this->create_configuration(transport_id, transport_type);
 
           if (!config.is_nil() && config->load(transport_id, cf) == -1)
@@ -208,7 +208,7 @@ OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport_id,
                                                        bool auto_configure)
 {
-  TransportConfiguration_rch config = this->get_configuration(transport_id);
+  TransportInst_rch config = this->get_configuration(transport_id);
 
   return create_transport_impl(transport_id, config->transport_type_, auto_configure);
 }
@@ -229,7 +229,7 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
   = this->create_transport_impl_i(transport_id, transport_type);
 
   if (auto_configure) {
-    TransportConfiguration_rch config
+    TransportInst_rch config
     = this->get_or_create_configuration(transport_id, transport_type);
 
     if (transport_type != config->transport_type_) {
@@ -247,10 +247,10 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
   return trans_impl;
 }
 
-OpenDDS::DCPS::TransportConfiguration_rch
+OpenDDS::DCPS::TransportInst_rch
 OpenDDS::DCPS::TransportFactory::get_configuration(TransportIdType transport_id)
 {
-  TransportConfiguration_rch config;
+  TransportInst_rch config;
   int result = 0;
   {
     GuardType guard(this->lock_);
@@ -264,7 +264,7 @@ OpenDDS::DCPS::TransportFactory::get_configuration(TransportIdType transport_id)
   return config;
 }
 
-OpenDDS::DCPS::TransportConfiguration_rch
+OpenDDS::DCPS::TransportInst_rch
 OpenDDS::DCPS::TransportFactory::create_configuration(TransportIdType transport_id,
                                                       ACE_TString transport_type)
 {
@@ -280,15 +280,15 @@ OpenDDS::DCPS::TransportFactory::create_configuration(TransportIdType transport_
                ACE_TEXT("(%P|%t) TransportFactory::create_configuration: ")
                ACE_TEXT("transport_type=%s is not registered.\n"),
                transport_type.c_str()));
-    return TransportConfiguration_rch();
+    return TransportInst_rch();
   }
 
-  TransportConfiguration_rch config = generator->new_configuration(transport_id);
+  TransportInst_rch config = generator->new_configuration(transport_id);
   this->register_configuration(transport_id, config);
   return config;
 }
 
-OpenDDS::DCPS::TransportConfiguration_rch
+OpenDDS::DCPS::TransportInst_rch
 OpenDDS::DCPS::TransportFactory::get_or_create_configuration(TransportIdType transport_id,
                                                              ACE_TString transport_type)
 {
@@ -298,7 +298,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration(TransportIdType tra
     throw CORBA::BAD_PARAM();
   }
 
-  TransportConfiguration_rch config;
+  TransportInst_rch config;
   int result = 0;
   {
     GuardType guard(this->lock_);
@@ -405,7 +405,7 @@ OpenDDS::DCPS::TransportFactory::register_generator(const ACE_TCHAR* type,
   TransportIdList::iterator itEnd = default_ids.end();
 
   for (TransportIdList::iterator it = default_ids.begin(); it != itEnd; ++it) {
-    TransportConfiguration_rch config = create_configuration(*it, type);
+    TransportInst_rch config = create_configuration(*it, type);
   }
 }
 
@@ -454,7 +454,7 @@ OpenDDS::DCPS::TransportFactory::register_factory(FactoryIdType            facto
 
 void
 OpenDDS::DCPS::TransportFactory::register_configuration(TransportIdType       transport_id,
-                                                        TransportConfiguration_rch  config)
+                                                        TransportInst_rch  config)
 {
   DBG_ENTRY_LVL("TransportFactory","register_configuration",6);
 

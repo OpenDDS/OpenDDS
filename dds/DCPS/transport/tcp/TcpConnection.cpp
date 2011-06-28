@@ -9,7 +9,7 @@
 #include "Tcp_pch.h"
 #include "TcpConnection.h"
 #include "TcpTransport.h"
-#include "TcpConfiguration.h"
+#include "TcpInst.h"
 #include "TcpDataLink.h"
 #include "TcpReceiveStrategy.h"
 #include "TcpSendStrategy.h"
@@ -157,9 +157,9 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
                      -1);
   }
 
-  TcpConfiguration* tcp_config = acceptor->get_configuration();
+  TcpInst* tcp_config = acceptor->get_configuration();
 
-  // Keep a "copy" of the reference to TcpConfiguration object
+  // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
   tcp_config->_add_ref();
   this->tcp_config_ = tcp_config;
@@ -286,7 +286,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 }
 
 void
-OpenDDS::DCPS::TcpConnection::set_sock_options(TcpConfiguration* tcp_config)
+OpenDDS::DCPS::TcpConnection::set_sock_options(TcpInst* tcp_config)
 {
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -339,7 +339,7 @@ int
 OpenDDS::DCPS::TcpConnection::active_establishment
 (const ACE_INET_Addr& remote_address,
  const ACE_INET_Addr& local_address,
- TcpConfiguration_rch tcp_config)
+ TcpInst_rch tcp_config)
 {
   DBG_ENTRY_LVL("TcpConnection","active_establishment",6);
 
@@ -467,7 +467,7 @@ OpenDDS::DCPS::TcpConnection::active_connect
 (const ACE_INET_Addr& remote_address,
  const ACE_INET_Addr& local_address,
  CORBA::Long          priority,
- TcpConfiguration_rch tcp_config)
+ TcpInst_rch tcp_config)
 {
   DBG_ENTRY_LVL("TcpConnection","active_connect",6);
   GuardType guard(this->reconnect_lock_);

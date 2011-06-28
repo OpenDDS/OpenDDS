@@ -7,12 +7,12 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "dds/DCPS/transport/tcp/Tcp.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 
 const char* MY_TOPIC    = "foo";
@@ -74,7 +74,7 @@ int init_reader_transport ()
         = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_MULTICAST,
                                                       ACE_TEXT("multicast"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
-      OpenDDS::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportInst_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC_MULTICAST, ACE_TEXT("multicast"));
 
       if (reader_multicast_impl->configure(reader_config.in()) != 0)
@@ -94,11 +94,11 @@ int init_reader_transport ()
             = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_UDP,
                                                           ACE_TEXT("udp"),
                                                           OpenDDS::DCPS::DONT_AUTO_CONFIG);
-          OpenDDS::DCPS::TransportConfiguration_rch reader_config
+          OpenDDS::DCPS::TransportInst_rch reader_config
             = TheTransportFactory->create_configuration (SUB_TRAFFIC_UDP, ACE_TEXT("udp"));
 
-          OpenDDS::DCPS::UdpConfiguration* reader_udp_config =
-            static_cast<OpenDDS::DCPS::UdpConfiguration*>(reader_config.in());
+          OpenDDS::DCPS::UdpInst* reader_udp_config =
+            static_cast<OpenDDS::DCPS::UdpInst*>(reader_config.in());
 
           reader_udp_config->local_address_.set("localhost:52001");
 
@@ -118,11 +118,11 @@ int init_reader_transport ()
                                                           ACE_TEXT("tcp"),
                                                           OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-          OpenDDS::DCPS::TransportConfiguration_rch reader_config
+          OpenDDS::DCPS::TransportInst_rch reader_config
             = TheTransportFactory->create_configuration (SUB_TRAFFIC_TCP, ACE_TEXT("tcp"));
 
-          OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
-            = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
+          OpenDDS::DCPS::TcpInst* reader_tcp_config
+            = static_cast <OpenDDS::DCPS::TcpInst*> (reader_config.in ());
 
           if (reader_address_given)
             {
@@ -158,7 +158,7 @@ int init_writer_transport ()
                                                       ACE_TEXT("multicast"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportInst_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_MULTICAST, ACE_TEXT("multicast"));
 
       if (writer_multicast_impl->configure(writer_config.in()) != 0)
@@ -179,11 +179,11 @@ int init_writer_transport ()
         ACE_TEXT("udp"),
         OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportInst_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC_UDP, ACE_TEXT("udp"));
 
-      OpenDDS::DCPS::UdpConfiguration* writer_udp_config =
-        static_cast<OpenDDS::DCPS::UdpConfiguration*>(writer_config.in());
+      OpenDDS::DCPS::UdpInst* writer_udp_config =
+        static_cast<OpenDDS::DCPS::UdpInst*>(writer_config.in());
 
       writer_udp_config->local_address_.set("localhost:52000");
 
@@ -204,11 +204,11 @@ int init_writer_transport ()
                                                     ACE_TEXT("tcp"),
                                                     OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-    OpenDDS::DCPS::TransportConfiguration_rch writer_config
+    OpenDDS::DCPS::TransportInst_rch writer_config
       = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("tcp"));
 
-    OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
-      = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
+    OpenDDS::DCPS::TcpInst* writer_tcp_config
+      = static_cast <OpenDDS::DCPS::TcpInst*> (writer_config.in ());
 
     if (writer_address_given)
       {

@@ -15,7 +15,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h>
+#include <performance-tests/DCPS/dummyTCP/DummyTcpInst.h>
 #include <performance-tests/DCPS/dummyTCP/PerformanceTest.h>
 
 #include <ace/streams.h>

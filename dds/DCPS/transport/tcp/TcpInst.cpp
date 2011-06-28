@@ -7,20 +7,20 @@
  */
 
 #include "Tcp_pch.h"
-#include "TcpConfiguration.h"
+#include "TcpInst.h"
 #include <iostream>
 
 #if !defined (__ACE_INLINE__)
-#include "TcpConfiguration.inl"
+#include "TcpInst.inl"
 #endif /* __ACE_INLINE__ */
 
-OpenDDS::DCPS::TcpConfiguration::~TcpConfiguration()
+OpenDDS::DCPS::TcpInst::~TcpInst()
 {
-  DBG_ENTRY_LVL("TcpConfiguration","~TcpConfiguration",6);
+  DBG_ENTRY_LVL("TcpInst","~TcpInst",6);
 }
 
 int
-OpenDDS::DCPS::TcpConfiguration::load(const TransportIdType& id,
+OpenDDS::DCPS::TcpInst::load(const TransportIdType& id,
                                             ACE_Configuration_Heap& cf)
 {
   // The default transport can not be configured by user.
@@ -30,7 +30,7 @@ OpenDDS::DCPS::TcpConfiguration::load(const TransportIdType& id,
     return -1;
   }
 
-  TransportConfiguration::load(id, cf);
+  TransportInst::load(id, cf);
 
   ACE_TString sect_name = id_to_section_name(id);
   const ACE_Configuration_Section_Key &root = cf.root_section();
@@ -74,9 +74,9 @@ OpenDDS::DCPS::TcpConfiguration::load(const TransportIdType& id,
 }
 
 void
-OpenDDS::DCPS::TcpConfiguration::dump(std::ostream& os)
+OpenDDS::DCPS::TcpInst::dump(std::ostream& os)
 {
-  TransportConfiguration::dump(os);
+  TransportInst::dump(os);
 
   os << formatNameForDump(ACE_TEXT("local_address"))                 << this->local_address_str_ << std::endl;
   os << formatNameForDump(ACE_TEXT("enable_nagle_algorithm"))        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;

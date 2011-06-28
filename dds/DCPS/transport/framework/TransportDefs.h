@@ -211,7 +211,7 @@ typedef Cached_Allocator_With_Overflow<
 char[RECEIVE_DATA_BUFFER_SIZE],
 RECEIVE_SYNCH>                  TransportDataAllocator ;
 
-/// Default TransportConfiguration settings
+/// Default TransportInst settings
 enum {
   DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL   = 10,
   DEFAULT_CONFIG_QUEUE_INITIAL_POOLS    = 5,

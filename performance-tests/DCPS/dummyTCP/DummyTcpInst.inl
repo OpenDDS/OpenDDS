@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-OpenDDS::DCPS::DummyTcpConfiguration::DummyTcpConfiguration()
+OpenDDS::DCPS::DummyTcpInst::DummyTcpInst()
   : enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),
     conn_retry_backoff_multiplier_(2.0),
@@ -14,7 +14,7 @@ OpenDDS::DCPS::DummyTcpConfiguration::DummyTcpConfiguration()
     passive_reconnect_duration_(2000),
     passive_connect_duration_ (10000)
 {
-  DBG_ENTRY_LVL("DummyTcpConfiguration","DummyTcpConfiguration",5);
+  DBG_ENTRY_LVL("DummyTcpInst","DummyTcpInst",5);
 
   transport_type_ = ACE_TEXT("DummyTcp");
 
@@ -22,5 +22,5 @@ OpenDDS::DCPS::DummyTcpConfiguration::DummyTcpConfiguration()
                 static_cast<ACE_UINT32> (INADDR_ANY),
                 1) != 0)
     ACE_ERROR((LM_ERROR,"(%P|%t) ERROR: "
-       "DummyTcpConfiguration::DummyTcpConfiguration could not set default addr\n"));
+       "DummyTcpInst::DummyTcpInst could not set default addr\n"));
 }

@@ -7,7 +7,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
 #include "ThreadSynchStrategy.h"
 #include "EntryExit.h"
 
@@ -15,16 +15,16 @@
 #include <sstream>
 
 #if !defined (__ACE_INLINE__)
-# include "TransportConfiguration.inl"
+# include "TransportInst.inl"
 #endif /* !__ACE_INLINE__ */
 
-OpenDDS::DCPS::TransportConfiguration::~TransportConfiguration()
+OpenDDS::DCPS::TransportInst::~TransportInst()
 {
-  DBG_ENTRY_LVL("TransportConfiguration","~TransportConfiguration",6);
+  DBG_ENTRY_LVL("TransportInst","~TransportInst",6);
 }
 
 ACE_TString
-OpenDDS::DCPS::TransportConfiguration::id_to_section_name(const TransportIdType& id)
+OpenDDS::DCPS::TransportInst::id_to_section_name(const TransportIdType& id)
 {
   std::basic_ostringstream<ACE_TCHAR> oss;
   oss << TRANSPORT_SECTION_NAME_PREFIX << id;
@@ -32,7 +32,7 @@ OpenDDS::DCPS::TransportConfiguration::id_to_section_name(const TransportIdType&
 }
 
 int
-OpenDDS::DCPS::TransportConfiguration::load(const TransportIdType& id
+OpenDDS::DCPS::TransportInst::load(const TransportIdType& id
                                             , ACE_Configuration_Heap& cf)
 {
   ACE_TString sect_name = id_to_section_name(id);
@@ -60,13 +60,13 @@ OpenDDS::DCPS::TransportConfiguration::load(const TransportIdType& id
 }
 
 void
-OpenDDS::DCPS::TransportConfiguration::dump()
+OpenDDS::DCPS::TransportInst::dump()
 {
   std::stringstream os;
   dump(os);
 
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("\n(%P|%t) TransportImpl::dump() -\n%C"),
+             ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
              os.str().c_str()));
 }
 
@@ -76,7 +76,7 @@ namespace {
 }
 
 ACE_TString
-OpenDDS::DCPS::TransportConfiguration::formatNameForDump(const ACE_TString& name)
+OpenDDS::DCPS::TransportInst::formatNameForDump(const ACE_TString& name)
 {
   std::basic_ostringstream<ACE_TCHAR> oss;
   oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left
@@ -85,7 +85,7 @@ OpenDDS::DCPS::TransportConfiguration::formatNameForDump(const ACE_TString& name
 }
 
 void
-OpenDDS::DCPS::TransportConfiguration::dump(std::ostream& os)
+OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
 {
   os << formatNameForDump(ACE_TEXT("transport_type"))          << this->transport_type_ << std::endl;
   os << formatNameForDump(ACE_TEXT("swap_bytes"))              << (this->swap_bytes_ ? "true" : "false") << std::endl;

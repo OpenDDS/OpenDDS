@@ -9,7 +9,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include <ace/Arg_Shifter.h>
 #include <string>
@@ -113,11 +113,11 @@ PubDriver::init()
                                                   ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
   // Now we can configure the TransportImpl object.
-  OpenDDS::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportInst_rch config
     = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::TcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpInst* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpInst*> (config.in ());
 
   // We use all of the default configuration settings, except for those
   // that need to be set (ie, the default values are not valid).

@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTCONFIGURATION_RCH_H
-#define OPENDDS_DCPS_TRANSPORTCONFIGURATION_RCH_H
+#ifndef OPENDDS_DCPS_TRANSPORTINST_RCH_H
+#define OPENDDS_DCPS_TRANSPORTINST_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
 
@@ -30,12 +30,12 @@ namespace DCPS {
  */
 
 // Forward declaration of the underlying type.
-class TransportConfiguration;
+class TransportInst;
 
 /// The type definition for the smart-pointer to the underlying type.
-typedef RcHandle<TransportConfiguration> TransportConfiguration_rch;
+typedef RcHandle<TransportInst> TransportInst_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* OPENDDS_DCPS_TRANSPORTCONFIGURATION_RCH_H */
+#endif /* OPENDDS_DCPS_TRANSPORTINST_RCH_H */

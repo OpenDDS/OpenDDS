@@ -220,7 +220,7 @@ int Reader::init_transport ()
 
   OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
 
-  OpenDDS::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportInst_rch reader_config
     = TheTransportFactory->get_or_create_configuration (transportId, ACE_TEXT("tcp"));
 
   reader_transport_impl

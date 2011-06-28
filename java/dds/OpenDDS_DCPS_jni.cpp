@@ -10,9 +10,9 @@
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
 #include "OpenDDS_DCPS_transport_TheTransportFactory.h"
 #include "OpenDDS_DCPS_transport_TransportImpl.h"
-#include "OpenDDS_DCPS_transport_TcpConfiguration.h"
-#include "OpenDDS_DCPS_transport_UdpConfiguration.h"
-#include "OpenDDS_DCPS_transport_MulticastConfiguration.h"
+#include "OpenDDS_DCPS_transport_TcpInst.h"
+#include "OpenDDS_DCPS_transport_UdpInst.h"
+#include "OpenDDS_DCPS_transport_MulticastInst.h"
 #include "DDS_WaitSet.h"
 #include "DDS_GuardCondition.h"
 
@@ -27,9 +27,9 @@
 #include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 #include "dds/DCPS/transport/framework/PoolSynchStrategy.h"
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
@@ -200,14 +200,14 @@ Java_OpenDDS_DCPS_transport_TheTransportFactory_create_1transport_1impl__ILjava_
 
 namespace BaseConfig {
 
-typedef OpenDDS::DCPS::TransportConfiguration Cfg;
-const char *jclassName = "OpenDDS/DCPS/transport/TransportConfiguration";
+typedef OpenDDS::DCPS::TransportInst Cfg;
+const char *jclassName = "OpenDDS/DCPS/transport/TransportInst";
 
 // sendThreadStrategy is written as a special case
 const char *strategySig =
-  "LOpenDDS/DCPS/transport/TransportConfiguration$ThreadSynchStrategy;";
+  "LOpenDDS/DCPS/transport/TransportInst$ThreadSynchStrategy;";
 const char *strategyClass =
-  "OpenDDS/DCPS/transport/TransportConfiguration$ThreadSynchStrategy";
+  "OpenDDS/DCPS/transport/TransportInst$ThreadSynchStrategy";
 
 BoolField<Cfg> sb("swapBytes", &Cfg::swap_bytes_);
 SizetField<Cfg> qmpp("queueMessagesPerPool", &Cfg::queue_messages_per_pool_);
@@ -223,8 +223,8 @@ BaseField<Cfg> *fields[] = {&sb, &qmpp, &qip, &mps, &mspp, &ops, &tpc};
 
 namespace TcpConfig {
 
-typedef OpenDDS::DCPS::TcpConfiguration Tcp;
-const char *jclassName = "OpenDDS/DCPS/transport/TcpConfiguration";
+typedef OpenDDS::DCPS::TcpInst Tcp;
+const char *jclassName = "OpenDDS/DCPS/transport/TcpInst";
 const ACE_TCHAR *configName = ACE_TEXT("tcp");
 
 const ACE_TCHAR *svcName = ACE_TEXT("OpenDDS_Tcp");
@@ -255,11 +255,11 @@ BaseField<Tcp> *fields[] = {&la, &ena, &crid, &crbm, &cra, &mopp, &prd, &pcd};
 
 namespace UdpConfig {
 
-typedef OpenDDS::DCPS::UdpConfiguration config;
+typedef OpenDDS::DCPS::UdpInst config;
 const char *jclassName =
-  "OpenDDS/DCPS/transport/UdpConfiguration";
+  "OpenDDS/DCPS/transport/UdpInst";
 
-const char *jclassNameUdp = "OpenDDS/DCPS/transport/UdpConfiguration";
+const char *jclassNameUdp = "OpenDDS/DCPS/transport/UdpInst";
 const ACE_TCHAR *configName = ACE_TEXT("udp");
 
 const ACE_TCHAR *svcName = ACE_TEXT("OpenDDS_Udp");
@@ -278,11 +278,11 @@ BaseField<config> *fields[] = {
 
 namespace MulticastConfig {
 
-typedef OpenDDS::DCPS::MulticastConfiguration config;
+typedef OpenDDS::DCPS::MulticastInst config;
 const char *jclassName =
-  "OpenDDS/DCPS/transport/MulticastConfiguration";
+  "OpenDDS/DCPS/transport/MulticastInst";
 
-const char *jclassNameUdp = "OpenDDS/DCPS/transport/MulticastConfiguration";
+const char *jclassNameUdp = "OpenDDS/DCPS/transport/MulticastInst";
 const ACE_TCHAR *configName = ACE_TEXT("multicast");
 
 const ACE_TCHAR *svcName =
@@ -361,13 +361,13 @@ jobject get_or_create_impl(JNIEnv *jni, jint id, const ACE_TString &typeCxx)
 
   //unknown type, let OpenDDS find out and throw its exception from get_or_...
 
-  TransportConfiguration_rch tc =
+  TransportInst_rch tc =
     TheTransportFactory->get_or_create_configuration(id, typeCxx);
 
   jmethodID mid_ctor = jni->GetMethodID(clazz_specific, "<init>", "(I)V");
   jobject jConf = jni->NewObject(clazz_specific, mid_ctor, id);
 
-  // Configure common properties (TransportConfiguration)
+  // Configure common properties (TransportInst)
   jclass clazz_tc = findClass(jni, BaseConfig::jclassName);
   toJava(jni, clazz_tc, *tc.in(), jConf, BaseConfig::fields);
   //   private ThreadSynchStrategy sendThreadStrategy;
@@ -495,10 +495,10 @@ jint config_impl(JNIEnv *jni, jobject jThis, jobject jConf)
   jclass clazz_tc = findClass(jni, BaseConfig::jclassName);
   jfieldID fid_id = jni->GetFieldID(clazz_tc, "id", "I");
   jint id = jni->GetIntField(jConf, fid_id);
-  TransportConfiguration_rch tc =
+  TransportInst_rch tc =
     TheTransportFactory->get_configuration(id);
 
-  // Configure common properties (TransportConfiguration)
+  // Configure common properties (TransportInst)
   toCxx(jni, clazz_tc, jConf, *tc.in(), BaseConfig::fields);
   //   private ThreadSynchStrategy sendThreadStrategy;
   {
@@ -556,74 +556,74 @@ namespace {
 template <typename T>
 void narrowTransportConfig(T *&transportConfig, jlong javaPtr)
 {
-  OpenDDS::DCPS::TransportConfiguration *tc =
-    reinterpret_cast<OpenDDS::DCPS::TransportConfiguration *>(javaPtr);
+  OpenDDS::DCPS::TransportInst *tc =
+    reinterpret_cast<OpenDDS::DCPS::TransportInst *>(javaPtr);
   transportConfig = static_cast<T *>(tc);
 }
 
 } // namespace
 
-// TcpConfiguration
+// TcpInst
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_TcpConfiguration_saveSpecificConfig
+Java_OpenDDS_DCPS_transport_TcpInst_saveSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::TcpConfiguration *tc;
+  OpenDDS::DCPS::TcpInst *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, TcpConfig::jclassName);
   toCxx(jni, clazz, jThis, *tc, TcpConfig::fields);
 }
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_TcpConfiguration_loadSpecificConfig
+Java_OpenDDS_DCPS_transport_TcpInst_loadSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::TcpConfiguration *tc;
+  OpenDDS::DCPS::TcpInst *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, TcpConfig::jclassName);
   toJava(jni, clazz, *tc, jThis, TcpConfig::fields);
 }
 
-// UdpConfiguration
+// UdpInst
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_UdpConfiguration_saveSpecificConfig
+Java_OpenDDS_DCPS_transport_UdpInst_saveSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::UdpConfiguration *tc;
+  OpenDDS::DCPS::UdpInst *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, UdpConfig::jclassName);
   toCxx(jni, clazz, jThis, *tc, UdpConfig::fields);
 }
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_UdpConfiguration_loadSpecificConfig
+Java_OpenDDS_DCPS_transport_UdpInst_loadSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::UdpConfiguration *tc;
+  OpenDDS::DCPS::UdpInst *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, UdpConfig::jclassName);
   toJava(jni, clazz, *tc, jThis, UdpConfig::fields);
 }
 
-// MulticastConfiguration
+// MulticastInst
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_MulticastConfiguration_saveSpecificConfig
+Java_OpenDDS_DCPS_transport_MulticastInst_saveSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::MulticastConfiguration *tc;
+  OpenDDS::DCPS::MulticastInst *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, MulticastConfig::jclassName);
   toCxx(jni, clazz, jThis, *tc, MulticastConfig::fields);
 }
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_MulticastConfiguration_loadSpecificConfig
+Java_OpenDDS_DCPS_transport_MulticastInst_loadSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::MulticastConfiguration *tc;
+  OpenDDS::DCPS::MulticastInst *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, MulticastConfig::jclassName);
   toJava(jni, clazz, *tc, jThis, MulticastConfig::fields);

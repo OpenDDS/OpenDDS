@@ -8,7 +8,7 @@
 #include "DummyTcpAcceptor.h"
 #include "DummyTcpSendStrategy.h"
 #include "DummyTcpReceiveStrategy.h"
-#include "DummyTcpConfiguration.h"
+#include "DummyTcpInst.h"
 #include "DummyTcpDataLink.h"
 #include "DummyTcpSynchResource.h"
 #include "DummyTcpConnection.h"
@@ -175,20 +175,20 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
 
 
 int
-OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
+OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportInst* config)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","configure_i",5);
 
-  // Downcast the config argument to a DummyTcpConfiguration*
-  DummyTcpConfiguration* tcp_config =
-    static_cast<DummyTcpConfiguration*>(config);
+  // Downcast the config argument to a DummyTcpInst*
+  DummyTcpInst* tcp_config =
+    static_cast<DummyTcpInst*>(config);
 
   if (tcp_config == 0)
     {
       // The downcast failed.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Failed downcast from TransportConfiguration "
-                        "to DummyTcpConfiguration.\n"),
+                        "(%P|%t) ERROR: Failed downcast from TransportInst "
+                        "to DummyTcpInst.\n"),
                        -1);
     }
 
@@ -248,7 +248,7 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
       // Remember to drop our reference to the tcp_config_ object since
       // we are about to return -1 here, which means we are supposed to
       // keep a copy after all.
-      DummyTcpConfiguration_rch cfg = this->tcp_config_._retn();
+      DummyTcpInst_rch cfg = this->tcp_config_._retn();
 
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n",
@@ -347,7 +347,7 @@ OpenDDS::DCPS::DummyTcpTransport::shutdown_i()
     this->links_.unbind_all();
   }
 
-  // Drop our reference to the DummyTcpConfiguration object.
+  // Drop our reference to the DummyTcpInst object.
   this->tcp_config_ = 0;
 
   // Drop our reference to the TransportReactorTask
@@ -417,7 +417,7 @@ OpenDDS::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link,
 }
 
 
-OpenDDS::DCPS::DummyTcpConfiguration*
+OpenDDS::DCPS::DummyTcpInst*
 OpenDDS::DCPS::DummyTcpTransport::get_configuration()
 {
   return this->tcp_config_.in();

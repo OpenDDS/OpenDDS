@@ -1,12 +1,12 @@
 // -*- C++ -*-
 //
 // $Id$
-#ifndef OPENDDS_DCPS_DUMMYTCPCONFIGURATION_H
-#define OPENDDS_DCPS_DUMMYTCPCONFIGURATION_H
+#ifndef OPENDDS_DCPS_DUMMYTCPINST_H
+#define OPENDDS_DCPS_DUMMYTCPINST_H
 
 #include "DummyTcp_export.h"
 
-#include "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "dds/DCPS/transport/framework/TransportInst.h"
 #include "ace/INET_Addr.h"
 #include <string>
 
@@ -16,13 +16,13 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    class DummyTcp_Export DummyTcpConfiguration
-                                          : public TransportConfiguration
+    class DummyTcp_Export DummyTcpInst
+                                          : public TransportInst
     {
       public:
 
-        DummyTcpConfiguration();
-        virtual ~DummyTcpConfiguration();
+        DummyTcpInst();
+        virtual ~DummyTcpInst();
         virtual int load (const TransportIdType& id,
                           ACE_Configuration_Heap& cf);
 
@@ -84,8 +84,8 @@ namespace OpenDDS
 } /* namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
-#include "DummyTcpConfiguration.inl"
+#include "DummyTcpInst.inl"
 #endif /* __ACE_INLINE__ */
 
 
-#endif  /* OPENDDS_DCPS_DUMMYTCPCONFIGURATION_H */
+#endif  /* OPENDDS_DCPS_DUMMYTCPINST_H */

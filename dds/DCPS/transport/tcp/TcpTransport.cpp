@@ -12,7 +12,7 @@
 #include "TcpAcceptor.h"
 #include "TcpSendStrategy.h"
 #include "TcpReceiveStrategy.h"
-#include "TcpConfiguration.h"
+#include "TcpInst.h"
 #include "TcpDataLink.h"
 #include "TcpSynchResource.h"
 #include "TcpConnection.h"
@@ -203,19 +203,19 @@ OpenDDS::DCPS::TcpTransport::find_or_create_datalink(
 }
 
 int
-OpenDDS::DCPS::TcpTransport::configure_i(TransportConfiguration* config)
+OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
 {
   DBG_ENTRY_LVL("TcpTransport","configure_i",6);
 
-  // Downcast the config argument to a TcpConfiguration*
-  TcpConfiguration* tcp_config =
-    static_cast<TcpConfiguration*>(config);
+  // Downcast the config argument to a TcpInst*
+  TcpInst* tcp_config =
+    static_cast<TcpInst*>(config);
 
   if (tcp_config == 0) {
     // The downcast failed.
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Failed downcast from TransportConfiguration "
-                      "to TcpConfiguration.\n"),
+                      "(%P|%t) ERROR: Failed downcast from TransportInst "
+                      "to TcpInst.\n"),
                      -1);
   }
 
@@ -251,7 +251,7 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportConfiguration* config)
     // Remember to drop our reference to the tcp_config_ object since
     // we are about to return -1 here, which means we are supposed to
     // keep a copy after all.
-    TcpConfiguration_rch cfg = this->tcp_config_._retn();
+    TcpInst_rch cfg = this->tcp_config_._retn();
 
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
@@ -370,7 +370,7 @@ OpenDDS::DCPS::TcpTransport::shutdown_i()
     this->pending_release_links_.unbind_all();
   }
 
-  // Drop our reference to the TcpConfiguration object.
+  // Drop our reference to the TcpInst object.
   this->tcp_config_ = 0;
 
   // Drop our reference to the TransportReactorTask
@@ -459,7 +459,7 @@ OpenDDS::DCPS::TcpTransport::release_datalink_i(DataLink* link,
   }
 }
 
-OpenDDS::DCPS::TcpConfiguration*
+OpenDDS::DCPS::TcpInst*
 OpenDDS::DCPS::TcpTransport::get_configuration()
 {
   return this->tcp_config_.in();

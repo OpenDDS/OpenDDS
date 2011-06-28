@@ -6,21 +6,21 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICASTCONFIGURATION_H
-#define DCPS_MULTICASTCONFIGURATION_H
+#ifndef DCPS_MULTICASTINST_H
+#define DCPS_MULTICASTINST_H
 
 #include "Multicast_Export.h"
 
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
 
-#include "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "dds/DCPS/transport/framework/TransportInst.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Multicast_Export MulticastConfiguration
-  : public TransportConfiguration {
+class OpenDDS_Multicast_Export MulticastInst
+  : public TransportInst {
 public:
   /// Enables IPv6 default group address selection.
   /// The default value is: false.
@@ -91,7 +91,7 @@ public:
   /// If the value is 0, the system default value is used.
   size_t rcv_buffer_size_;
 
-  MulticastConfiguration();
+  MulticastInst();
 
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
@@ -107,4 +107,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif  /* DCPS_MULTICASTCONFIGURATION_H */
+#endif  /* DCPS_MULTICASTINST_H */

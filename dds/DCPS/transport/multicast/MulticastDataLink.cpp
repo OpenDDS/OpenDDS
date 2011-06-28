@@ -52,7 +52,7 @@ MulticastDataLink::~MulticastDataLink()
 }
 
 void
-MulticastDataLink::configure(MulticastConfiguration* config,
+MulticastDataLink::configure(MulticastInst* config,
                              TransportReactorTask* reactor_task)
 {
   this->config_ = config;

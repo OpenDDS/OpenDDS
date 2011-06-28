@@ -151,9 +151,9 @@ MulticastTransport::find_or_create_datalink(
 }
 
 int
-MulticastTransport::configure_i(TransportConfiguration* config)
+MulticastTransport::configure_i(TransportInst* config)
 {
-  this->config_i_ = dynamic_cast<MulticastConfiguration*>(config);
+  this->config_i_ = dynamic_cast<MulticastInst*>(config);
   if (this->config_i_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

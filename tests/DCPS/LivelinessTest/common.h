@@ -10,8 +10,8 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "ace/SString.h"

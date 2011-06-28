@@ -29,8 +29,8 @@ public:
   /// Provide a new TcpFactory instance.
   virtual TransportImplFactory* new_factory();
 
-  /// Provide a new TcpConfiguration instance.
-  virtual TransportConfiguration* new_configuration(const TransportIdType id);
+  /// Provide a new TcpInst instance.
+  virtual TransportInst* new_configuration(const TransportIdType id);
 
   /// Provide a list of default transport id.
   virtual void default_transport_ids(TransportIdList & ids);

@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "MulticastConfiguration.h"
+#include "MulticastInst.h"
 #include "MulticastLoader.h"
 
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
@@ -41,8 +41,8 @@ const char DEFAULT_TTL(1);
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastConfiguration::MulticastConfiguration()
-  : TransportConfiguration(new NullSynchStrategy()),
+MulticastInst::MulticastInst()
+  : TransportInst(new NullSynchStrategy()),
     default_to_ipv6_(DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
@@ -70,10 +70,10 @@ MulticastConfiguration::MulticastConfiguration()
 }
 
 int
-MulticastConfiguration::load(const TransportIdType& id,
+MulticastInst::load(const TransportIdType& id,
                              ACE_Configuration_Heap& config)
 {
-  TransportConfiguration::load(id, config); // delegate to parent
+  TransportInst::load(id, config); // delegate to parent
 
   ACE_Configuration_Section_Key transport_key;
 
@@ -84,7 +84,7 @@ MulticastConfiguration::load(const TransportIdType& id,
                           transport_key) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastConfiguration::load: ")
+                      ACE_TEXT("MulticastInst::load: ")
                       ACE_TEXT("unable to open section: [%C]!\n"),
                       section_name.c_str()),
                      -1);
@@ -142,7 +142,7 @@ MulticastConfiguration::load(const TransportIdType& id,
 }
 
 void
-MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
+MulticastInst::default_group_address(ACE_INET_Addr& group_address,
                                               const TransportIdType& id)
 {
   u_short port_number(this->port_offset_ + id);
@@ -156,9 +156,9 @@ MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
 
 
 void
-MulticastConfiguration::dump(std::ostream& os)
+MulticastInst::dump(std::ostream& os)
 {
-  TransportConfiguration::dump(os);
+  TransportInst::dump(os);
 
   os << formatNameForDump(ACE_TEXT("group_address"))       << this->group_address_.get_host_addr()
                                                            << ":" << this->group_address_.get_port_number() << std::endl;

@@ -16,7 +16,7 @@
 #include "MonitorFactory.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #endif
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
@@ -1151,11 +1151,10 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
                bitTransportPortMap_[ repo]));
   }
 
-  TransportConfiguration_rch config
+  TransportInst_rch config
   = TheTransportFactory->get_or_create_configuration(transportKey, ACE_TEXT("tcp"));
 
-  TcpConfiguration* tcp_config
-  = static_cast <TcpConfiguration*>(config.in());
+  TcpInst* tcp_config = static_cast<TcpInst*>(config.in());
 
   tcp_config->datalink_release_delay_ = 0;
 

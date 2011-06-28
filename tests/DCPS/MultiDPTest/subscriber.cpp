@@ -24,7 +24,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "ace/Arg_Shifter.h"
 
 #include "common.h"
@@ -154,11 +154,11 @@ void init_dcps_objects (int i)
                                                   ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  OpenDDS::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportInst_rch reader_config
     = TheTransportFactory->create_configuration (transport_id[i], ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
-    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::TcpInst* reader_tcp_config
+    = static_cast <OpenDDS::DCPS::TcpInst*> (reader_config.in ());
 
   if (reader_address_str[i] != ACE_TEXT(""))
   {

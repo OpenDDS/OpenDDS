@@ -11,7 +11,7 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastConfiguration.h"
+#include "MulticastInst.h"
 #include "MulticastSendStrategy.h"
 #include "MulticastSendStrategy_rch.h"
 #include "MulticastReceiveStrategy.h"
@@ -51,7 +51,7 @@ public:
 
   MulticastPeer local_peer() const;
 
-  void configure(MulticastConfiguration* config,
+  void configure(MulticastInst* config,
                  TransportReactorTask* reactor_task);
 
   void send_strategy(MulticastSendStrategy* send_strategy);
@@ -62,7 +62,7 @@ public:
 
   TransportSendBuffer* send_buffer();
 
-  MulticastConfiguration* config();
+  MulticastInst* config();
 
   TransportReactorTask* reactor_task();
   ACE_Reactor* get_reactor();
@@ -88,7 +88,7 @@ private:
 
   MulticastPeer local_peer_;
 
-  MulticastConfiguration* config_;
+  MulticastInst* config_;
 
   TransportReactorTask* reactor_task_;
 

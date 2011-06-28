@@ -12,7 +12,7 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 

@@ -8,7 +8,7 @@
 
 #include "UdpGenerator.h"
 #include "UdpFactory.h"
-#include "UdpConfiguration.h"
+#include "UdpInst.h"
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
@@ -23,11 +23,11 @@ UdpGenerator::new_factory()
   return factory;
 }
 
-TransportConfiguration*
+TransportInst*
 UdpGenerator::new_configuration(const TransportIdType /*id*/)
 {
-  TransportConfiguration* configuration;
-  ACE_NEW_RETURN(configuration, UdpConfiguration, 0);
+  TransportInst* configuration;
+  ACE_NEW_RETURN(configuration, UdpInst, 0);
   return configuration;
 }
 

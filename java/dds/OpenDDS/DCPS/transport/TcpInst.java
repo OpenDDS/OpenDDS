@@ -8,9 +8,9 @@
 
 package OpenDDS.DCPS.transport;
 
-public class TcpConfiguration extends TransportConfiguration {
+public class TcpInst extends TransportInst {
 
-    TcpConfiguration(int id) {
+    TcpInst(int id) {
         super(id);
     }
 

@@ -92,9 +92,9 @@ UdpTransport::find_or_create_datalink(
 }
 
 int
-UdpTransport::configure_i(TransportConfiguration* config)
+UdpTransport::configure_i(TransportInst* config)
 {
-  this->config_i_ = dynamic_cast<UdpConfiguration*>(config);
+  this->config_i_ = dynamic_cast<UdpInst*>(config);
   if (this->config_i_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

@@ -6,23 +6,23 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TCPCONFIGURATION_H
-#define OPENDDS_TCPCONFIGURATION_H
+#ifndef OPENDDS_TCPINST_H
+#define OPENDDS_TCPINST_H
 
 #include "Tcp_export.h"
 
-#include "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "dds/DCPS/transport/framework/TransportInst.h"
 #include "ace/INET_Addr.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Tcp_Export TcpConfiguration
-  : public TransportConfiguration {
+class OpenDDS_Tcp_Export TcpInst
+  : public TransportInst {
 public:
 
-  TcpConfiguration();
-  virtual ~TcpConfiguration();
+  TcpInst();
+  virtual ~TcpInst();
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& cf);
 
@@ -88,7 +88,7 @@ public:
 } // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
-#include "TcpConfiguration.inl"
+#include "TcpInst.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* OPENDDS_TCPCONFIGURATION_H */
+#endif  /* OPENDDS_TCPINST_H */

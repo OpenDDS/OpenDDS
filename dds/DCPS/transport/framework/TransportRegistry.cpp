@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportRegistry.h"
 #include "TransportDebug.h"
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
 #include "TransportExceptions.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -186,9 +186,9 @@ TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
                            -1);
 
         } else {
-          // Create a TransportConfiguration object and load the transport configuration in
-          // ACE_Configuration_Heap to the TransportConfiguration object.
-          TransportConfiguration_rch config = this->create_configuration(transport_type);
+          // Create a TransportInst object and load the transport configuration in
+          // ACE_Configuration_Heap to the TransportInst object.
+          TransportInst_rch config = this->create_configuration(transport_type);
 
           if (!config.is_nil() && config->load(transport_id, cf) == -1)
             return -1;
@@ -203,13 +203,13 @@ TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
 
 TransportImpl_rch
 TransportRegistry::create_transport_impl(TransportIdType id,
-                                         TransportConfiguration_rch config)
+                                         TransportInst_rch config)
 {
   return this->create_transport_impl_i(id, config->transport_type_);
 }
 
 
-TransportConfiguration_rch
+TransportInst_rch
 TransportRegistry::create_configuration(ACE_TString transport_type)
 {
   int result = 0;
@@ -224,7 +224,7 @@ TransportRegistry::create_configuration(ACE_TString transport_type)
                ACE_TEXT("(%P|%t) TransportRegistry::create_configuration: ")
                ACE_TEXT("transport_type=%s is not registered.\n"),
                transport_type.c_str()));
-    return TransportConfiguration_rch();
+    return TransportInst_rch();
   }
 
   return generator->new_configuration(TransportIdType() /*TODO: remove this arg*/);
@@ -313,7 +313,7 @@ TransportRegistry::register_generator(const ACE_TCHAR* type,
   TransportIdList::iterator itEnd = default_ids.end();
 
   for (TransportIdList::iterator it = default_ids.begin(); it != itEnd; ++it) {
-    TransportConfiguration_rch config = create_configuration(type);
+    TransportInst_rch config = create_configuration(type);
     create_transport_impl(*it, config);
   }
 }

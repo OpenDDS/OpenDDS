@@ -66,6 +66,15 @@ for my $tgt (@targets) {
                                         "$tgt->[1]");
       }
       else {
+        if ($ant eq 'ant') {
+          # create_process requries full path to script or else it will use ./
+          my @p = split /:/, $ENV{'PATH'};
+          for my $entry (@p) {
+            if (-r $entry . '/ant') {
+              $ant = $entry . '/ant';
+            }
+          }
+        }
         $PROC = PerlDDS::create_process($ant, "@ARGV $extra $tgt->[1]");
       }
       $status = $PROC->SpawnWaitKill(600);

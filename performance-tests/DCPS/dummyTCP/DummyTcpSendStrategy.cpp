@@ -6,7 +6,7 @@
 #include "DummyTcpConnection.h"
 #include "DummyTcpSendStrategy.h"
 #include "DummyTcpTransport.h"
-#include "DummyTcpConfiguration.h"
+#include "DummyTcpInst.h"
 #include "DummyTcpSynchResource.h"
 #include "DummyTcpDataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
@@ -14,7 +14,7 @@
 
 OpenDDS::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
                                      (DummyTcpDataLink*      link,
-                                      DummyTcpConfiguration* config,
+                                      DummyTcpInst* config,
                                       DummyTcpConnection*    connection,
                                       DummyTcpSynchResource* synch_resource,
                                       TransportReactorTask* task,

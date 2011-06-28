@@ -10,7 +10,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE void
-UdpDataLink::configure(UdpConfiguration* config,
+UdpDataLink::configure(UdpInst* config,
                        TransportReactorTask* reactor_task)
 {
   this->config_ = config;
@@ -35,7 +35,7 @@ UdpDataLink::active() const
   return this->active_;
 }
 
-ACE_INLINE UdpConfiguration*
+ACE_INLINE UdpInst*
 UdpDataLink::config()
 {
   return this->config_;

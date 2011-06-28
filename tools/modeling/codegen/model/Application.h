@@ -23,7 +23,7 @@ namespace DDS {
 } // End of namespace DDS
 
 namespace OpenDDS { namespace DCPS {
-  class TransportConfiguration;
+  class TransportInst;
   class TransportImpl;
 } } // End of namespace OpenDDS::DCPS
 

@@ -25,7 +25,7 @@ OpenDDS::DCPS::DummyTcpAcceptor::~DummyTcpAcceptor()
   DBG_ENTRY_LVL("DummyTcpAcceptor","~DummyTcpAcceptor",5);
 }
 
-OpenDDS::DCPS::DummyTcpConfiguration*
+OpenDDS::DCPS::DummyTcpInst*
 OpenDDS::DCPS::DummyTcpAcceptor::get_configuration()
 {
   return this->transport_->get_configuration();

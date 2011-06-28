@@ -7,7 +7,7 @@
 #include "DummyTcp_export.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "DummyTcpConfiguration_rch.h"
+#include "DummyTcpInst_rch.h"
 #include "DummyTcpDataLink_rch.h"
 #include "DummyTcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
@@ -41,7 +41,7 @@ namespace OpenDDS
         DummyTcpTransport();
         virtual ~DummyTcpTransport();
 
-        DummyTcpConfiguration* get_configuration();
+        DummyTcpInst* get_configuration();
 
         int fresh_link (const ACE_INET_Addr&    remote_addr,
                         DummyTcpConnection_rch connection);
@@ -57,7 +57,7 @@ namespace OpenDDS
           CORBA::Long             priority,
           bool                    active);
 
-        virtual int configure_i(TransportConfiguration* config);
+        virtual int configure_i(TransportInst* config);
 
         virtual void shutdown_i();
         virtual void pre_shutdown_i();
@@ -137,7 +137,7 @@ namespace OpenDDS
         DummyTcpAcceptor* acceptor_;
 
         /// Our configuration object, supplied to us in config_i().
-        DummyTcpConfiguration_rch tcp_config_;
+        DummyTcpInst_rch tcp_config_;
 
         /// This is the map of connected DataLinks.
         AddrLinkMap links_;

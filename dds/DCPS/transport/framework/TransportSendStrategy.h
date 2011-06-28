@@ -18,7 +18,7 @@
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
-#include "TransportConfiguration_rch.h"
+#include "TransportInst_rch.h"
 
 #include "ace/Synch.h"
 
@@ -134,7 +134,7 @@ public:
 
 protected:
 
-  TransportSendStrategy(TransportConfiguration* config,
+  TransportSendStrategy(TransportInst* config,
                         ThreadSynchResource*    synch_resource,
                         CORBA::Long             priority);
 
@@ -373,7 +373,7 @@ private:
   /// is created in start if the transport needs it.
   TransportRetainedElementAllocator* retained_element_allocator_;
 
-  TransportConfiguration_rch config_;
+  TransportInst_rch config_;
 
   bool graceful_disconnecting_;
 

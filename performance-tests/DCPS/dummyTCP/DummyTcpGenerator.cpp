@@ -3,7 +3,7 @@
 // $Id$
 #include "DummyTcp_pch.h"
 #include "DummyTcpGenerator.h"
-#include "DummyTcpConfiguration.h"
+#include "DummyTcpInst.h"
 #include "DummyTcpFactory.h"
 
 
@@ -25,14 +25,14 @@ OpenDDS::DCPS::DummyTcpGenerator::new_factory()
   return factory;
 }
 
-OpenDDS::DCPS::TransportConfiguration*
+OpenDDS::DCPS::TransportInst*
 OpenDDS::DCPS::DummyTcpGenerator::new_configuration(const TransportIdType id)
 {
   ACE_UNUSED_ARG (id);
 
-  DummyTcpConfiguration* trans_config = 0;
+  DummyTcpInst* trans_config = 0;
   ACE_NEW_RETURN(trans_config,
-                 DummyTcpConfiguration(),
+                 DummyTcpInst(),
                  0);
   return trans_config;
 }

@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "UdpConfiguration.h"
+#include "UdpInst.h"
 #include "UdpLoader.h"
 
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
@@ -16,17 +16,17 @@
 namespace OpenDDS {
 namespace DCPS {
 
-UdpConfiguration::UdpConfiguration()
-  : TransportConfiguration(new NullSynchStrategy())
+UdpInst::UdpInst()
+  : TransportInst(new NullSynchStrategy())
 {
   this->transport_type_ = UDP_TRANSPORT_TYPE;
 }
 
 int
-UdpConfiguration::load(const TransportIdType& id,
+UdpInst::load(const TransportIdType& id,
                        ACE_Configuration_Heap& config)
 {
-  TransportConfiguration::load(id, config); // delegate to parent
+  TransportInst::load(id, config); // delegate to parent
 
   ACE_Configuration_Section_Key transport_key;
 
@@ -37,7 +37,7 @@ UdpConfiguration::load(const TransportIdType& id,
                           transport_key) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpConfiguration::load: ")
+                      ACE_TEXT("UdpInst::load: ")
                       ACE_TEXT("unable to open section: [%C]!\n"),
                       section_name.c_str()),
                      -1);
@@ -49,7 +49,7 @@ UdpConfiguration::load(const TransportIdType& id,
   if (local_address_s.is_empty()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpConfiguration::load: ")
+                      ACE_TEXT("UdpInst::load: ")
                       ACE_TEXT("local_address not specified!\n")),
                      -1);
   }
@@ -59,9 +59,9 @@ UdpConfiguration::load(const TransportIdType& id,
 }
 
 void
-UdpConfiguration::dump(std::ostream& os)
+UdpInst::dump(std::ostream& os)
 {
-  TransportConfiguration::dump(os);
+  TransportInst::dump(os);
 
   os << formatNameForDump(ACE_TEXT("local_address")) << this->local_address_.get_host_addr()
                                                      << ":" << this->local_address_.get_port_number() << std::endl;

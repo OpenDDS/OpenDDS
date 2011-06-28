@@ -8,7 +8,7 @@
 
 #include "Tcp_pch.h"
 #include "TcpGenerator.h"
-#include "TcpConfiguration.h"
+#include "TcpInst.h"
 #include "TcpFactory.h"
 
 OpenDDS::DCPS::TcpGenerator::TcpGenerator()
@@ -29,14 +29,14 @@ OpenDDS::DCPS::TcpGenerator::new_factory()
   return factory;
 }
 
-OpenDDS::DCPS::TransportConfiguration*
+OpenDDS::DCPS::TransportInst*
 OpenDDS::DCPS::TcpGenerator::new_configuration(const TransportIdType id)
 {
   ACE_UNUSED_ARG(id);
 
-  TcpConfiguration* trans_config = 0;
+  TcpInst* trans_config = 0;
   ACE_NEW_RETURN(trans_config,
-                 TcpConfiguration(),
+                 TcpInst(),
                  0);
   return trans_config;
 }

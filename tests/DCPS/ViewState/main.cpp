@@ -19,7 +19,7 @@
 #include "SimpleTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -69,7 +69,7 @@ int init_tranport ()
                                                       ACE_TEXT("tcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      OpenDDS::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportInst_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("tcp"));
 
       if (reader_transport_impl->configure(reader_config.in()) != 0)
@@ -84,7 +84,7 @@ int init_tranport ()
         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                       ACE_TEXT("tcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportInst_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("tcp"));
 
       if (writer_transport_impl->configure(writer_config.in()) != 0)

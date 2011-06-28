@@ -9,7 +9,7 @@
 #include "ReliableSession.h"
 
 #include "MulticastDataLink.h"
-#include "MulticastConfiguration.h"
+#include "MulticastInst.h"
 
 #include "ace/Global_Macros.h"
 #include "ace/Time_Value.h"
@@ -32,7 +32,7 @@ SynWatchdog::SynWatchdog(ReliableSession* session)
 ACE_Time_Value
 SynWatchdog::next_interval()
 {
-  MulticastConfiguration* config = this->session_->link()->config();
+  MulticastInst* config = this->session_->link()->config();
   ACE_Time_Value interval(config->syn_interval_);
 
   // Apply exponential backoff based on number of retries:
@@ -55,7 +55,7 @@ SynWatchdog::on_interval(const void* /*arg*/)
 ACE_Time_Value
 SynWatchdog::next_timeout()
 {
-  MulticastConfiguration* config = this->session_->link()->config();
+  MulticastInst* config = this->session_->link()->config();
   return config->syn_timeout_;
 }
 
@@ -79,7 +79,7 @@ NakWatchdog::NakWatchdog(ReliableSession* session)
 ACE_Time_Value
 NakWatchdog::next_interval()
 {
-  MulticastConfiguration* config = this->session_->link()->config();
+  MulticastInst* config = this->session_->link()->config();
   ACE_Time_Value interval(config->nak_interval_);
 
   // Apply random backoff to minimize potential collisions:

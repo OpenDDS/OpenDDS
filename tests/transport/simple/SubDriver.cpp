@@ -5,7 +5,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
@@ -165,20 +165,20 @@ SubDriver::init()
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Create a new TcpConfiguration object.\n"));
+             "Create a new TcpInst object.\n"));
 
-  // Get the existing or create a new TcpConfiguration object.  It just has one field
+  // Get the existing or create a new TcpInst object.  It just has one field
   // to set - the local_address_ field.  This is the address that will be
   // used to open an acceptor object to listen for passive connection
   // requests.  This is the TransportImpl object's (local) "endpoint" address.
   // See comments in the $TAO_ROOT/orbsvcs/tests/DDS/transport/simple/
   // PubDriver.cpp (in the PubDriver::init() method) that describes the
   // other configuration options available.
-  OpenDDS::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportInst_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::TcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpInst* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpInst*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) sub_addr_.\n"));

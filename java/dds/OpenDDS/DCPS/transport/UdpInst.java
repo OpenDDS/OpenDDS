@@ -8,9 +8,9 @@
 
 package OpenDDS.DCPS.transport;
 
-public class UdpConfiguration extends TransportConfiguration {
+public class UdpInst extends TransportInst {
 
-    UdpConfiguration(int id) {
+    UdpInst(int id) {
         super(id);
     }
 

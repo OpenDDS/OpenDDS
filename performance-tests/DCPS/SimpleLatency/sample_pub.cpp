@@ -15,8 +15,8 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
-#include <dds/DCPS/transport/udp/UdpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
+#include <dds/DCPS/transport/udp/UdpInst.h>
 #include <ace/streams.h>
 
 
@@ -144,11 +144,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pub_tcp_impl = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
                                                      ACE_TEXT("udp"),
                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-         OpenDDS::DCPS::TransportConfiguration_rch config
+         OpenDDS::DCPS::TransportInst_rch config
            = TheTransportFactory->create_configuration (UDP_IMPL_ID, ACE_TEXT("udp"));
 
-         OpenDDS::DCPS::UdpConfiguration* udp_config
-           = static_cast <OpenDDS::DCPS::UdpConfiguration*> (config.in ());
+         OpenDDS::DCPS::UdpInst* udp_config
+           = static_cast <OpenDDS::DCPS::UdpInst*> (config.in ());
 
          ACE_TString addrStr(ACE_LOCALHOST);
          addrStr += ACE_TEXT(":12345");
@@ -202,11 +202,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
            = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1,
                                                         ACE_TEXT("udp"),
                                                         OpenDDS::DCPS::DONT_AUTO_CONFIG);
-         OpenDDS::DCPS::TransportConfiguration_rch config
+         OpenDDS::DCPS::TransportInst_rch config
            = TheTransportFactory->create_configuration (UDP_IMPL_ID+1, ACE_TEXT("udp"));
 
-         OpenDDS::DCPS::UdpConfiguration* udp_config
-           = static_cast <OpenDDS::DCPS::UdpConfiguration*> (config.in ());
+         OpenDDS::DCPS::UdpInst* udp_config
+           = static_cast <OpenDDS::DCPS::UdpInst*> (config.in ());
 
          ACE_TString addrStr(ACE_LOCALHOST);
          addrStr += ACE_TEXT(":12356");

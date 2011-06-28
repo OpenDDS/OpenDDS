@@ -27,7 +27,7 @@ OpenDDS::DCPS::TcpAcceptor::~TcpAcceptor()
   DBG_ENTRY_LVL("TcpAcceptor","~TcpAcceptor",6);
 }
 
-OpenDDS::DCPS::TcpConfiguration*
+OpenDDS::DCPS::TcpInst*
 OpenDDS::DCPS::TcpAcceptor::get_configuration()
 {
   return this->transport_->get_configuration();

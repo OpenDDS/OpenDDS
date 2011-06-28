@@ -83,7 +83,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Attach Subscriber Transport
     ++transportId;
 
-    OpenDDS::DCPS::TransportConfiguration_rch sub_config =
+    OpenDDS::DCPS::TransportInst_rch sub_config =
       TheTransportFactory->get_or_create_configuration(transportId,
                                                        ACE_TEXT("tcp"));
 
@@ -103,7 +103,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Attach Publisher Transport
     ++transportId;
 
-    OpenDDS::DCPS::TransportConfiguration_rch pub_config =
+    OpenDDS::DCPS::TransportInst_rch pub_config =
       TheTransportFactory->get_or_create_configuration(transportId,
                                                        ACE_TEXT("tcp"));
 

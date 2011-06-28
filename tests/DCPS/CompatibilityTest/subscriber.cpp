@@ -38,7 +38,7 @@ static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transp
                                                   ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  OpenDDS::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportInst_rch reader_config
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("tcp"));
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)

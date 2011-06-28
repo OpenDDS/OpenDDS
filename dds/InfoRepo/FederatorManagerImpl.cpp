@@ -16,7 +16,7 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #include "tao/ORB_Core.h"
 #include "ace/Log_Priority.h"
@@ -175,7 +175,7 @@ ManagerImpl::initialize()
       ACE_TEXT("tcp"),
       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  OpenDDS::DCPS::TransportConfiguration_rch transportConfig
+  OpenDDS::DCPS::TransportInst_rch transportConfig
   = TheTransportFactory->create_configuration(
       this->config_.federationDomain(),
       ACE_TEXT("tcp"));
@@ -198,7 +198,7 @@ ManagerImpl::initialize()
       ACE_TEXT("tcp"),
       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  OpenDDS::DCPS::TransportConfiguration_rch subscriptionTransportConfig
+  OpenDDS::DCPS::TransportInst_rch subscriptionTransportConfig
   = TheTransportFactory->create_configuration(
       1 + this->config_.federationDomain(),
       ACE_TEXT("tcp"));

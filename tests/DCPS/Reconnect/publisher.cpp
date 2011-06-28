@@ -16,7 +16,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
@@ -139,11 +139,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                                     ACE_TEXT("tcp"),
                                                     OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-    OpenDDS::DCPS::TransportConfiguration_rch writer_config
+    OpenDDS::DCPS::TransportInst_rch writer_config
       = TheTransportFactory->create_configuration (TCP_IMPL_ID, ACE_TEXT("tcp"));
 
-    OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
-      = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
+    OpenDDS::DCPS::TcpInst* writer_tcp_config
+      = static_cast <OpenDDS::DCPS::TcpInst*> (writer_config.in ());
 
     writer_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
     writer_tcp_config->local_address_str_ = local_address;

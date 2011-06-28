@@ -10,7 +10,7 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 const long  TEST_DOMAIN   = 411;
@@ -53,11 +53,11 @@ int init_reader_tranport ()
 
   reader_transport_impl =
       TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("multicast"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
-  OpenDDS::DCPS::TransportConfiguration_rch reader_config
+  OpenDDS::DCPS::TransportInst_rch reader_config
     = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("multicast"));
 
-  OpenDDS::DCPS::MulticastConfiguration* reader_multicast_config
-    = static_cast <OpenDDS::DCPS::MulticastConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::MulticastInst* reader_multicast_config
+    = static_cast <OpenDDS::DCPS::MulticastInst*> (reader_config.in ());
 
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), reader_address_str) )
     {
@@ -93,11 +93,11 @@ int init_writer_tranport ()
                                                  ACE_TEXT("multicast"),
                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  OpenDDS::DCPS::TransportConfiguration_rch writer_config
+  OpenDDS::DCPS::TransportInst_rch writer_config
     = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("multicast"));
 
-  OpenDDS::DCPS::MulticastConfiguration* writer_multicast_config
-    = static_cast <OpenDDS::DCPS::MulticastConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::MulticastInst* writer_multicast_config
+    = static_cast <OpenDDS::DCPS::MulticastInst*> (writer_config.in ());
 
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), writer_address_str) )
     {

@@ -12,7 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/transport/framework/TransportImplFactory.h"
-#include "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "dds/DCPS/transport/framework/TransportInst.h"
 
 #include "ace/Synch.h"
 
@@ -41,7 +41,7 @@ public:
 
   virtual TransportImplFactory* new_factory() = 0;
 
-  virtual TransportConfiguration* new_configuration(const TransportIdType id) = 0;
+  virtual TransportInst* new_configuration(const TransportIdType id) = 0;
 
   virtual void default_transport_ids(TransportIdList & ids) = 0;
 

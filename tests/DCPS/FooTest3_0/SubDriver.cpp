@@ -5,7 +5,7 @@
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -190,15 +190,15 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                                   ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-  // Get or create TcpConfiguration object.  It just has one field
+  // Get or create TcpInst object.  It just has one field
   // to set - the local_address_ field.  This is the address that will be
   // used to open an acceptor object to listen for passive connection
   // requests.  This is the TransportImpl object's (local) "endpoint" address.
-  OpenDDS::DCPS::TransportConfiguration_rch config
+  OpenDDS::DCPS::TransportInst_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::TcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpInst* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpInst*> (config.in ());
 
   tcp_config->local_address_ = ACE_INET_Addr (this->sub_addr_.c_str ());
   tcp_config->local_address_str_ = this->sub_addr_.c_str ();

@@ -17,7 +17,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class TcpConfiguration;
+class TcpInst;
 
 class TcpAcceptor : public ACE_Acceptor<TcpConnection,
       ACE_SOCK_ACCEPTOR> {
@@ -33,7 +33,7 @@ public:
   // TcpTransport object.
   void transport_shutdown();
 
-  TcpConfiguration* get_configuration();
+  TcpInst* get_configuration();
 
 private:
 

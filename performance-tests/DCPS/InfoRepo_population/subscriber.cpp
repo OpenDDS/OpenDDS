@@ -17,7 +17,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
@@ -250,7 +250,7 @@ Subscriber::run (void)
               ::OpenDDS::DCPS::DONT_AUTO_CONFIG
             );
 
-        OpenDDS::DCPS::TransportConfiguration_rch config
+        OpenDDS::DCPS::TransportInst_rch config
           = TheTransportFactory->create_configuration(
               this->transport_impl_id_ + count,
               ACE_TEXT("tcp")

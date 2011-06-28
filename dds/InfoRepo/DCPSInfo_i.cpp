@@ -10,7 +10,7 @@
 
 #include /**/ "DCPSInfo_i.h"
 
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "UpdateManager.h"
 #include "ShutdownInterface.h"
@@ -2044,14 +2044,14 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
                                                  ACE_TEXT("tcp"),
                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-    OpenDDS::DCPS::TransportConfiguration_rch config
+    OpenDDS::DCPS::TransportInst_rch config
     = TheTransportFactory->get_or_create_configuration(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
                                                        ACE_TEXT("tcp"));
 
     config->datalink_release_delay_ = 0;
 
-    OpenDDS::DCPS::TcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpConfiguration*>(config.in());
+    OpenDDS::DCPS::TcpInst* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpInst*>(config.in());
 
     tcp_config->conn_retry_attempts_ = 0;
 

@@ -15,7 +15,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #include "ace/High_Res_Timer.h"
 
@@ -290,8 +290,8 @@ Publication::enable(
     }
   }
   if( this->verbose_) {
-    OpenDDS::DCPS::MulticastConfiguration* mcconfig
-      = dynamic_cast<OpenDDS::DCPS::MulticastConfiguration*>(
+    OpenDDS::DCPS::MulticastInst* mcconfig
+      = dynamic_cast<OpenDDS::DCPS::MulticastInst*>(
           transport->config()
         );
     bool isMcast    = false;

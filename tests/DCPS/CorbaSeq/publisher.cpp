@@ -15,7 +15,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <ace/streams.h>
 
 #ifdef ACE_AS_STATIC_LIBS

@@ -8,9 +8,9 @@
 
 package OpenDDS.DCPS.transport;
 
-public class MulticastConfiguration extends TransportConfiguration {
+public class MulticastInst extends TransportInst {
 
-    MulticastConfiguration(int id) {
+    MulticastInst(int id) {
         super(id);
     }
 

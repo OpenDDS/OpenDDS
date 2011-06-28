@@ -11,7 +11,7 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastConfiguration.h"
+#include "MulticastInst.h"
 #include "MulticastDataLink_rch.h"
 #include "MulticastTypes.h"
 
@@ -35,7 +35,7 @@ protected:
     CORBA::Long priority,
     bool active);
 
-  virtual int configure_i(TransportConfiguration* config);
+  virtual int configure_i(TransportInst* config);
 
   virtual void shutdown_i();
 
@@ -47,7 +47,7 @@ protected:
   virtual void release_datalink_i(DataLink* link,
                                   bool release_pending);
 private:
-  MulticastConfiguration* config_i_;
+  MulticastInst* config_i_;
 
   /// link for pubs.
   MulticastDataLink_rch client_link_;

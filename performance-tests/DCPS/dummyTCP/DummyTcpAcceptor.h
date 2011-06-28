@@ -18,7 +18,7 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    class DummyTcpConfiguration;
+    class DummyTcpInst;
 
     class DummyTcpAcceptor : public ACE_Acceptor<DummyTcpConnection,
                                                   ACE_SOCK_ACCEPTOR>
@@ -35,7 +35,7 @@ namespace OpenDDS
         // DummyTcpTransport object.
         void transport_shutdown();
 
-        DummyTcpConfiguration* get_configuration();
+        DummyTcpInst* get_configuration();
 
       private:
 

@@ -120,7 +120,7 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 }
 
 int
-OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
+OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
 {
   DBG_ENTRY_LVL("TransportImpl","configure",6);
 
@@ -780,7 +780,7 @@ OpenDDS::DCPS::TransportImpl::dump()
 void
 OpenDDS::DCPS::TransportImpl::dump(ostream& os)
 {
-  os << TransportConfiguration::formatNameForDump(ACE_TEXT("id"))
+  os << TransportInst::formatNameForDump(ACE_TEXT("id"))
      << get_transport_id_description();
 
   if (this->config_.is_nil()) {

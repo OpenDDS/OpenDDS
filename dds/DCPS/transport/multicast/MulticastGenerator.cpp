@@ -8,7 +8,7 @@
 
 #include "MulticastGenerator.h"
 #include "MulticastFactory.h"
-#include "MulticastConfiguration.h"
+#include "MulticastInst.h"
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
@@ -23,11 +23,11 @@ MulticastGenerator::new_factory()
   return factory;
 }
 
-TransportConfiguration*
+TransportInst*
 MulticastGenerator::new_configuration(const TransportIdType /*id*/)
 {
-  TransportConfiguration* configuration;
-  ACE_NEW_RETURN(configuration, MulticastConfiguration, 0);
+  TransportInst* configuration;
+  ACE_NEW_RETURN(configuration, MulticastInst, 0);
   return configuration;
 }
 

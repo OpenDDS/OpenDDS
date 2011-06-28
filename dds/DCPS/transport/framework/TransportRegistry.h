@@ -16,7 +16,7 @@
 #include "TransportReactorTask_rch.h"
 #include "TransportGenerator.h"
 #include "TransportGenerator_rch.h"
-#include "TransportConfiguration_rch.h"
+#include "TransportInst_rch.h"
 #include "ace/Synch.h"
 #include "ace/Configuration.h"
 
@@ -27,12 +27,7 @@ namespace DCPS {
 
 /**
  * The TransportRegistry is a singleton object which provides a mechanism to
- * the application code to create objects of individual transport implementations.
- * It is possible to have more than a single object of a given implementation
- * in order to support separation of communications between different DDS Domains
- * or application defined areas of control.
- *
- * Notes about object ownership:
+ * the application code to configure OpenDDS's use of the transport layer.
  * 1) Own the transport configuration objects, transport implementation objects
  *    and TransportReactorTask object.
  */
@@ -55,14 +50,15 @@ public:
   /// "uncreate()" method.
   void release(TransportIdType impl_id);
 
-  /// Transfer the configuration in ACE_Configuration_Heap object to the TransportRegistry.
+  /// Transfer the configuration in ACE_Configuration_Heap object to the
+  /// TransportRegistry.
   /// This is called by the Service_Participant at initialization time.
   int load_transport_configuration(ACE_Configuration_Heap& cf);
 
-  TransportConfiguration_rch create_configuration(ACE_TString transport_type);
+  TransportInst_rch create_configuration(ACE_TString transport_type);
 
   TransportImpl_rch create_transport_impl(TransportIdType id,
-                                          TransportConfiguration_rch config);
+                                          TransportInst_rch config);
 
   /// Client application calls this to retrieve a previously
   /// create()'d TransportImpl object, providing the TransportImpl

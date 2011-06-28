@@ -45,11 +45,11 @@ static int init_reader_tranport ()
                                                       ACE_TEXT("udp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      OpenDDS::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportInst_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("udp"));
 
-      OpenDDS::DCPS::UdpConfiguration* reader_udp_config
-        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::UdpInst* reader_udp_config
+        = static_cast <OpenDDS::DCPS::UdpInst*> (reader_config.in ());
 
       if (!reader_address_given)
         {
@@ -78,11 +78,11 @@ static int init_reader_tranport ()
                                                       ACE_TEXT("tcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      OpenDDS::DCPS::TransportConfiguration_rch reader_config
+      OpenDDS::DCPS::TransportInst_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("tcp"));
 
-      OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
-        = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
+      OpenDDS::DCPS::TcpInst* reader_tcp_config
+        = static_cast <OpenDDS::DCPS::TcpInst*> (reader_config.in ());
 
       if (reader_address_given)
         {

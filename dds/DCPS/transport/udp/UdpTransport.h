@@ -11,7 +11,7 @@
 
 #include "Udp_Export.h"
 
-#include "UdpConfiguration.h"
+#include "UdpInst.h"
 #include "UdpDataLink.h"
 #include "UdpDataLink_rch.h"
 
@@ -32,7 +32,7 @@ protected:
     CORBA::Long priority,
     bool active);
 
-  virtual int configure_i(TransportConfiguration* config);
+  virtual int configure_i(TransportInst* config);
 
   virtual void shutdown_i();
 
@@ -45,7 +45,7 @@ protected:
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
 private:
-  UdpConfiguration* config_i_;
+  UdpInst* config_i_;
 
   UdpDataLink_rch server_link_;
 

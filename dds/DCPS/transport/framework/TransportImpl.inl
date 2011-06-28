@@ -7,14 +7,14 @@
  */
 
 #include "TransportInterface.h"
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
 #include "TransportReactorTask.h"
 #include "DataLink_rch.h"
 #include "DataLink.h"
 #include "EntryExit.h"
 
 ACE_INLINE
-OpenDDS::DCPS::TransportConfiguration*
+OpenDDS::DCPS::TransportInst*
 OpenDDS::DCPS::TransportImpl::config() const
 {
   return this->config_.in();

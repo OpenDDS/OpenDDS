@@ -14,7 +14,7 @@
 #include "ReceivedDataSample.h"
 
 #include "TransportImpl.h"
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Service_Participant.h"

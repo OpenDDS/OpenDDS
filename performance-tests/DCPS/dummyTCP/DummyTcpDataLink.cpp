@@ -5,7 +5,7 @@
 #include "DummyTcp_pch.h"
 #include "DummyTcpDataLink.h"
 #include "DummyTcpReceiveStrategy.h"
-#include "DummyTcpConfiguration.h"
+#include "DummyTcpInst.h"
 #include "DummyTcpSendStrategy.h"
 #include "dds/DCPS/transport/framework/TransportControlElement.h"
 #include "dds/DCPS/DataSampleHeader.h"

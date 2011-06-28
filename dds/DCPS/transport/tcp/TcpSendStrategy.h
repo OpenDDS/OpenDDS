@@ -18,14 +18,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TcpConnection;
-class TcpConfiguration;
+class TcpInst;
 class TcpSynchResource;
 
 class TcpSendStrategy : public TransportSendStrategy {
 public:
 
   TcpSendStrategy(TcpDataLink*      link,
-                        TcpConfiguration* config,
+                        TcpInst* config,
                         TcpConnection*    connection,
                         TcpSynchResource* synch_resource,
                         TransportReactorTask*   task,

@@ -12,7 +12,7 @@
 #include "Tcp_export.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "TcpConfiguration_rch.h"
+#include "TcpInst_rch.h"
 #include "TcpDataLink_rch.h"
 #include "TcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
@@ -44,7 +44,7 @@ public:
   TcpTransport();
   virtual ~TcpTransport();
 
-  TcpConfiguration* get_configuration();
+  TcpInst* get_configuration();
 
   int fresh_link(TcpConnection_rch connection);
 
@@ -59,7 +59,7 @@ protected:
     CORBA::Long             priority,
     bool                    active);
 
-  virtual int configure_i(TransportConfiguration* config);
+  virtual int configure_i(TransportInst* config);
 
   virtual void shutdown_i();
   virtual void pre_shutdown_i();
@@ -139,7 +139,7 @@ private:
   TcpAcceptor* acceptor_;
 
   /// Our configuration object, supplied to us in config_i().
-  TcpConfiguration_rch tcp_config_;
+  TcpInst_rch tcp_config_;
 
   /// This is the map of connected DataLinks.
   AddrLinkMap links_;

@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTCONFIGURATION_H
-#define OPENDDS_DCPS_TRANSPORTCONFIGURATION_H
+#ifndef OPENDDS_DCPS_TRANSPORTINST_H
+#define OPENDDS_DCPS_TRANSPORTINST_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
@@ -36,26 +36,26 @@ class ThreadSynchStrategy;
 #endif
 
 /**
- * @class TransportConfiguration
+ * @class TransportInst
  *
  * @brief Base class to hold configuration settings for TransportImpls.
  *
  * Each transport implementation will need to define a concrete
- * subclass of the TransportConfiguration class.  The base
- * class (TransportConfiguration) contains configuration settings that
+ * subclass of the TransportInst class.  The base
+ * class (TransportInst) contains configuration settings that
  * are common to all (or most) concrete transport implementations.
  * The concrete transport implementation defines any configuration
  * settings that it requires within its concrete subclass of this
- * TransportConfiguration base class.
+ * TransportInst base class.
  *
- * The TransportConfiguration object is supplied to the
+ * The TransportInst object is supplied to the
  * TransportImpl::configure() method.
  */
-class OpenDDS_Dcps_Export TransportConfiguration : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export TransportInst : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
   /// Dtor
-  virtual ~TransportConfiguration();
+  virtual ~TransportInst();
 
   /// Mutator for the "send thread strategy" object.  Will delete
   /// the existing strategy object (ie, the default) first.
@@ -117,7 +117,7 @@ protected:
 
   /// Default ctor.
   /// Takes ownership of the strategy argument
-  TransportConfiguration(ThreadSynchStrategy* send_strategy =
+  TransportInst(ThreadSynchStrategy* send_strategy =
                            new PerConnectionSynchStrategy());
 
   static ACE_TString id_to_section_name(const TransportIdType& id);
@@ -137,7 +137,7 @@ private:
 } // namespace OpenDDS
 
 #if defined(__ACE_INLINE__)
-#include "TransportConfiguration.inl"
+#include "TransportInst.inl"
 #endif /* __ACE_INLINE__ */
 
 #endif

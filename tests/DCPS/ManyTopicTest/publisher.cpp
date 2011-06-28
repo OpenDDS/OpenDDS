@@ -44,11 +44,11 @@ static int init_writer_tranport ()
                                                       ACE_TEXT("udp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportInst_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("udp"));
 
-      OpenDDS::DCPS::UdpConfiguration* writer_udp_config
-        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::UdpInst* writer_udp_config
+        = static_cast <OpenDDS::DCPS::UdpInst*> (writer_config.in ());
 
       if (!writer_address_given)
         {
@@ -76,11 +76,11 @@ static int init_writer_tranport ()
                                                       ACE_TEXT("tcp"),
                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
+      OpenDDS::DCPS::TransportInst_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("tcp"));
 
-      OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
-        = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
+      OpenDDS::DCPS::TcpInst* writer_tcp_config
+        = static_cast <OpenDDS::DCPS::TcpInst*> (writer_config.in ());
 
       if (writer_address_given)
         {

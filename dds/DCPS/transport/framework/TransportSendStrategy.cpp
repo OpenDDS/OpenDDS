@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportSendStrategy.h"
 #include "RemoveAllVisitor.h"
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
 #include "ThreadSynchStrategy.h"
 #include "ThreadSynchResource.h"
 #include "TransportQueueElement.h"
@@ -54,7 +54,7 @@ namespace {
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy
-(TransportConfiguration* config,
+(TransportInst* config,
  ThreadSynchResource*    synch_resource,
  CORBA::Long             priority)
   : max_samples_(config->max_samples_per_packet_),

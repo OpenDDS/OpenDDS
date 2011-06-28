@@ -19,7 +19,7 @@
 //MJM: specified lifetime.  I could be very wrong about the use case.
 
 ACE_INLINE
-OpenDDS::DCPS::TransportConfiguration::TransportConfiguration(ThreadSynchStrategy* send_strategy)
+OpenDDS::DCPS::TransportInst::TransportInst(ThreadSynchStrategy* send_strategy)
   : swap_bytes_(0),
     queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
@@ -31,32 +31,32 @@ OpenDDS::DCPS::TransportConfiguration::TransportConfiguration(ThreadSynchStrateg
     datalink_control_chunks_(32),
     send_thread_strategy_(send_strategy)
 {
-  DBG_ENTRY_LVL("TransportConfiguration","TransportConfiguration",6);
+  DBG_ENTRY_LVL("TransportInst","TransportInst",6);
   this->adjust_config_value();
 }
 
 // The class DOES take ownership of the parameter (DCB)
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportConfiguration::send_thread_strategy
+OpenDDS::DCPS::TransportInst::send_thread_strategy
 (ThreadSynchStrategy* strategy)
 {
-  DBG_ENTRY_LVL("TransportConfiguration","send_thread_strategy",6);
+  DBG_ENTRY_LVL("TransportInst","send_thread_strategy",6);
   this->send_thread_strategy_ = strategy;
 }
 
 // This method does NOT give up ownership of the returned strategy (DCB)
 ACE_INLINE
 OpenDDS::DCPS::ThreadSynchStrategy*
-OpenDDS::DCPS::TransportConfiguration::send_thread_strategy()
+OpenDDS::DCPS::TransportInst::send_thread_strategy()
 {
-  DBG_ENTRY_LVL("TransportConfiguration","send_thread_strategy",6);
+  DBG_ENTRY_LVL("TransportInst","send_thread_strategy",6);
   return this->send_thread_strategy_.in();
 }
 
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportConfiguration::adjust_config_value()
+OpenDDS::DCPS::TransportInst::adjust_config_value()
 {
   // Ensure that the number of samples put into the packet does
   // not exceed the allowed number of io vectors to be sent by the OS.

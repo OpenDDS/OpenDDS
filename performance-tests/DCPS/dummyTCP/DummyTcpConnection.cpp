@@ -5,7 +5,7 @@
 #include "DummyTcp_pch.h"
 #include "DummyTcpConnection.h"
 #include "DummyTcpTransport.h"
-#include "DummyTcpConfiguration.h"
+#include "DummyTcpInst.h"
 #include "DummyTcpDataLink.h"
 #include "DummyTcpReceiveStrategy.h"
 #include "DummyTcpSendStrategy.h"
@@ -139,9 +139,9 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
                        -1);
     }
 
-  DummyTcpConfiguration* tcp_config = acceptor->get_configuration();
+  DummyTcpInst* tcp_config = acceptor->get_configuration();
 
-  // Keep a "copy" of the reference to DummyTcpConfiguration object
+  // Keep a "copy" of the reference to DummyTcpInst object
   // for ourselves.
   tcp_config->_add_ref ();
   this->tcp_config_ = tcp_config;
@@ -251,7 +251,7 @@ OpenDDS::DCPS::DummyTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 }
 
 void
-OpenDDS::DCPS::DummyTcpConnection::set_sock_options (DummyTcpConfiguration* tcp_config)
+OpenDDS::DCPS::DummyTcpConnection::set_sock_options (DummyTcpInst* tcp_config)
 {
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -305,7 +305,7 @@ int
 OpenDDS::DCPS::DummyTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
                                      const ACE_INET_Addr& local_address,
-                                     DummyTcpConfiguration_rch tcp_config)
+                                     DummyTcpInst_rch tcp_config)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","active_establishment",5);
 

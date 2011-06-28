@@ -27,7 +27,7 @@ public final class TheTransportFactory {
     public static native TransportImpl create_transport_impl(int id, boolean auto_configure);
     public static native TransportImpl create_transport_impl(int id, String transportType, boolean auto_configure);
 
-    public static native TransportConfiguration get_or_create_configuration(int id, String type);
+    public static native TransportInst get_or_create_configuration(int id, String type);
 
     /// Release all transports and configurations
     public static native void release();

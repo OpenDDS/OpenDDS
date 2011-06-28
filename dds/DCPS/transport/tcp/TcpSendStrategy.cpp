@@ -10,14 +10,14 @@
 #include "TcpConnection.h"
 #include "TcpSendStrategy.h"
 #include "TcpTransport.h"
-#include "TcpConfiguration.h"
+#include "TcpInst.h"
 #include "TcpSynchResource.h"
 #include "TcpDataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   TcpDataLink*      link,
-  TcpConfiguration* config,
+  TcpInst* config,
   TcpConnection*    connection,
   TcpSynchResource* synch_resource,
   TransportReactorTask*   task,

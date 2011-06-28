@@ -10,11 +10,11 @@ package OpenDDS.DCPS.transport;
 
 import java.io.Serializable;
 
-public abstract class TransportConfiguration implements Serializable {
+public abstract class TransportInst implements Serializable {
 
     private int id;
 
-    TransportConfiguration(int id_param) {
+    TransportInst(int id_param) {
         id = id_param;
     }
 
