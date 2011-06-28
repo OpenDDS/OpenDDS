@@ -22,20 +22,20 @@ namespace DCPS {
 
 TcpLoader::TcpLoader()
 {
-  DBG_ENTRY_LVL("TcpLoader","TcpLoader",6);
+  DBG_ENTRY_LVL("TcpLoader", "TcpLoader", 6);
 }
 
 TcpLoader::~TcpLoader()
 {
-  DBG_ENTRY_LVL("TcpLoader","~TcpLoader",6);
+  DBG_ENTRY_LVL("TcpLoader", "~TcpLoader", 6);
 }
 
 const ACE_TCHAR TCP_TRANSPORT_TYPE[] = ACE_TEXT("tcp");
 
 int
-TcpLoader::init(int argc, ACE_TCHAR* argv[])
+TcpLoader::init(int, ACE_TCHAR*[])
 {
-  DBG_ENTRY_LVL("TcpLoader","init",6);
+  DBG_ENTRY_LVL("TcpLoader", "init", 6);
 
   static bool initialized = false;
 

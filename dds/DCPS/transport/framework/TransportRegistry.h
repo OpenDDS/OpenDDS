@@ -77,7 +77,7 @@ public:
                           TransportGenerator_rch generator);
 
 private:
-  template<class T, class L> friend class ACE_Singleton;
+  friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 
   TransportRegistry();
   ~TransportRegistry();
