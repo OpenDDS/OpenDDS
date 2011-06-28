@@ -19,7 +19,9 @@
   </xsl:template>
   
   <!-- kill top level elements that don't represent valid instance documents -->
-  <xsl:template match="/xsd:schema/xsd:element[@name != 'OpenDDSModel' and not(starts-with(@type,'xmi:'))]"/>
+  <xsl:template match="/xsd:schema/xsd:element[@name != 'OpenDDSModel' 
+                                               and @name != 'CodeGen'
+                                               and not(starts-with(@type,'xmi:'))]"/>
   
   <!-- fix all the broken schemmaLocation values, the documents should be FooXMI.xsd instead of foo.xsd -->
     <xsl:template match="@schemaLocation">
