@@ -139,11 +139,11 @@ const value_string sample_sub_id_vals[] = {
   { 0,                                     NULL                    }
 };
 
+} // namespace
+
 extern "C"
 dissector_Export void
 dissect_opendds (tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree);
-
-} // namespace
 
 namespace OpenDDS
 {
@@ -579,38 +579,6 @@ dissect_opendds (tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
                    get_dcps_pdu_len,
                    dissect_dcps_common);
 }
-#if 0
-extern "C"
-dissector_Export gboolean
-dissect_inforepo_giop(tvbuff_t *tvb, packet_info *pinfo,
-                      proto_tree *ptree, int *offset,
-                      ::MessageHeader *header, gchar *operation,
-                      gchar *idlname)
-{
-  ACE_DEBUG ((LM_DEBUG,"pinfo.protocol = %s\n", pinfo->current_proto));
-  if (idlname == 0)
-    return FALSE;
-  OpenDDS::DCPS_DDS_Dissector dissector (tvb, pinfo, ptree);
-  *offset += dissector.dissect_giop (header, operation, idlname);
-  return TRUE;
-}
-
-extern "C"
-dissector_Export gboolean
-dissect_inforepo_giop_heur (tvbuff_t *tvb, packet_info *pinfo,
-                            proto_tree *ptree, int *offset,
-                            ::MessageHeader *header, gchar *operation, gchar *mod)
-{
-  ACE_DEBUG ((LM_DEBUG,"heur pinfo.protocol = %s\n", pinfo->current_proto));
-  return FALSE;
-#if 0
-  OpenDDS::DCPS_DDS_Dissector dissector (tvb, pinfo, ptree);
-  *offset += dissector.dissect_giop (header, operation, idlname);
-  return true;
-#endif
-
-}
-#endif
 
 extern "C"
 dissector_Export gboolean
@@ -621,8 +589,7 @@ dissect_opendds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
   return dissector.dissect_heur();
 }
 
-extern "C"
-dissector_Export void
+void
 proto_register_opendds()
 {
 
@@ -786,22 +753,13 @@ proto_register_opendds()
   proto_register_subtree_array(ett, array_length(ett));
 }
 
-extern "C"
-dissector_Export void
+void
 proto_reg_handoff_opendds()
 {
   dcps_tcp_handle = create_dissector_handle(dissect_opendds, proto_opendds);
-  //  dcps_giop_handle = create_dissector_handle(dissect_inforepo_giop, proto_info_repo);
 
   heur_dissector_add("tcp", dissect_opendds_heur, proto_opendds);
   heur_dissector_add("udp", dissect_opendds_heur, proto_opendds);
-#if 0
-  ACE_DEBUG ((LM_DEBUG, "calling register_giop_user\n"));
-  register_giop_user_module(dissect_inforepo_giop, "InfoRepo", "OpenDDS/DCPS/DCPSInfo", proto_info_repo);
-  register_giop_user(dissect_inforepo_giop_heur, "InfoRepo", proto_info_repo);
-  ACE_DEBUG ((LM_DEBUG, "giop user registered\n"));
-#endif
 
   dissector_add_handle("tcp.port", dcps_tcp_handle);  /* for "decode-as" */
-  // dissector_add_handle("tcp.port", dcps_giop_handle);  /* for "decode-as" */
 }

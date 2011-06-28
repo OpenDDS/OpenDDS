@@ -62,16 +62,14 @@ namespace {
     { OpenDDS::DCPS::INTERNAL_ERROR, "INTERNAL_ERROR" }
   };
 
-  extern "C"
-  dissector_Export void
+  void
   proto_register_repo()
   {
     OpenDDS::DCPS::InfoRepo_Dissector::instance().init ();
     OpenDDS::DCPS::DataWriterRemote_Dissector::instance().init ();
   }
 
-  extern "C"
-  dissector_Export void
+  void
   proto_reg_handoff_repo ()
   {
     OpenDDS::DCPS::InfoRepo_Dissector::instance().register_handoff ();

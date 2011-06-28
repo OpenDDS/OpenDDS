@@ -1,3 +1,12 @@
+Tue Jun 28 15:46:11 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fix for scoreboard error on windows builds.
+
 Tue Jun 28 15:08:46 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:

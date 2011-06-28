@@ -277,10 +277,10 @@ namespace OpenDDS
 }
 
 extern "C"
-void proto_register_opendds();
+dissector_Export void proto_register_opendds();
 
 extern "C"
-void proto_reg_handoff_opendds();
+dissector_Export void proto_reg_handoff_opendds();
 
 
 //----

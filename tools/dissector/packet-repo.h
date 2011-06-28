@@ -160,10 +160,10 @@ namespace OpenDDS
 } // namespace OpenDDS
 
 extern "C"
-void proto_register_repo();
+dissector_Export void proto_register_repo();
 
 extern "C"
-void proto_reg_handoff_repo();
+dissector_Export void proto_reg_handoff_repo();
 
 
 //----
