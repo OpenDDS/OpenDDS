@@ -15,10 +15,10 @@ import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.DCPS.transport.TransportException;
-import OpenDDS.DCPS.transport.TransportConfiguration;
-import OpenDDS.DCPS.transport.TcpConfiguration;
-import OpenDDS.DCPS.transport.UdpConfiguration;
-import OpenDDS.DCPS.transport.MulticastConfiguration;
+import OpenDDS.DCPS.transport.TransportInst;
+import OpenDDS.DCPS.transport.TcpInst;
+import OpenDDS.DCPS.transport.UdpInst;
+import OpenDDS.DCPS.transport.MulticastInst;
 
 public class TransportConfigTest {
 
@@ -50,13 +50,13 @@ public class TransportConfigTest {
 
     protected static void testModifyTransportFromFileTCP() throws Exception {
         final int ID = 1; //matches .ini file
-        TransportConfiguration tc =
+        TransportInst tc =
             TheTransportFactory.get_or_create_configuration(ID,
                 TheTransportFactory.TRANSPORT_TCP);
         // Verify the values were read in from the ini file
         assert tc.isSwapBytes();
         assert tc.getMaxSamplesPerPacket() == 5;
-        TcpConfiguration tc_tcp = (TcpConfiguration) tc;
+        TcpInst tc_tcp = (TcpInst) tc;
         assert tc_tcp.getConnRetryAttempts() == 42;
 
         tc.setSwapBytes(false);
@@ -77,11 +77,11 @@ public class TransportConfigTest {
 
     protected static void testCreateNewTransportUdp() throws Exception {
         final int ID = 2;
-        TransportConfiguration tc =
+        TransportInst tc =
             TheTransportFactory.get_or_create_configuration(ID,
                  TheTransportFactory.TRANSPORT_UDP);
-        tc.setSendThreadStrategy(TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH);
-        UdpConfiguration suc = (UdpConfiguration) tc;
+        tc.setSendThreadStrategy(TransportInst.ThreadSynchStrategy.NULL_SYNCH);
+        UdpInst suc = (UdpInst) tc;
         suc.setLocalAddress("0.0.0.0:1234");
 
         TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
@@ -91,8 +91,8 @@ public class TransportConfigTest {
 
         tc = TheTransportFactory.get_or_create_configuration(ID,
                  TheTransportFactory.TRANSPORT_UDP);
-        assert tc.getSendThreadStrategy() == TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH;
-        suc = (UdpConfiguration) tc;
+        assert tc.getSendThreadStrategy() == TransportInst.ThreadSynchStrategy.NULL_SYNCH;
+        suc = (UdpInst) tc;
         //Only checking endsWith here b/c the 0.0.0.0 is resolved to a hostname
         assert suc.getLocalAddress().endsWith(":1234");
 
@@ -102,11 +102,11 @@ public class TransportConfigTest {
 
     protected static void testCreateNewTransportMulticast() throws Exception {
         final int ID = 3;
-        TransportConfiguration tc =
+        TransportInst tc =
             TheTransportFactory.get_or_create_configuration(ID,
                  TheTransportFactory.TRANSPORT_MULTICAST);
-        tc.setSendThreadStrategy(TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH);
-        MulticastConfiguration mc = (MulticastConfiguration) tc;
+        tc.setSendThreadStrategy(TransportInst.ThreadSynchStrategy.NULL_SYNCH);
+        MulticastInst mc = (MulticastInst) tc;
         mc.setDefaultToIPv6(true);
         mc.setPortOffset((short) 9000);
         mc.setGroupAddress("224.0.0.1:1234");
@@ -125,8 +125,8 @@ public class TransportConfigTest {
 
         tc = TheTransportFactory.get_or_create_configuration(ID,
                  TheTransportFactory.TRANSPORT_MULTICAST);
-        assert tc.getSendThreadStrategy() == TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH;
-        mc = (MulticastConfiguration) tc;
+        assert tc.getSendThreadStrategy() == TransportInst.ThreadSynchStrategy.NULL_SYNCH;
+        mc = (MulticastInst) tc;
         assert mc.getDefaultToIPv6() == true;
         assert mc.getPortOffset() == 9000;
         assert mc.getGroupAddress().equals("224.0.0.1:1234");

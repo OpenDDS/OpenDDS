@@ -36,9 +36,9 @@
   <xsl:text>
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
 #include &lt;model/TransportDirectives.h&gt;
 
 #include &lt;stdexcept&gt;
@@ -95,7 +95,7 @@
                     ' &quot;', $Instname, '&quot;', $newline, $newline)"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:text>  OpenDDS::DCPS::TransportConfiguration_rch config;
+          <xsl:text>  OpenDDS::DCPS::TransportInst_rch config;
   ACE_TString transport_type;
 
   try {
@@ -162,8 +162,8 @@
 <!-- Handle TCP-specific configuration parameters -->
 <xsl:template match="TCPTransport[*]">
   <xsl:text>        {
-          OpenDDS::DCPS::TcpConfiguration* specific_config =
-              (OpenDDS::DCPS::TcpConfiguration*) config.in();
+          OpenDDS::DCPS::TcpInst* specific_config =
+              (OpenDDS::DCPS::TcpInst*) config.in();
 </xsl:text>
   <xsl:apply-templates/>
   <xsl:text>        }
@@ -173,8 +173,8 @@
 <!-- Handle Multicast-specific configuration parameters -->
 <xsl:template match="MulticastTransport[*]">
   <xsl:text>        {
-          OpenDDS::DCPS::MulticastConfiguration* specific_config =
-              (OpenDDS::DCPS::MulticastConfiguration*) config.in();
+          OpenDDS::DCPS::MulticastInst* specific_config =
+              (OpenDDS::DCPS::MulticastInst*) config.in();
 </xsl:text>
   <xsl:apply-templates/>
   <xsl:text>        }
@@ -184,8 +184,8 @@
 <!-- Handle UDP-specific configuration parameters -->
 <xsl:template match="UDPTransport[*]">
   <xsl:text>        {
-          OpenDDS::DCPS::UdpConfiguration* specific_config =
-              (OpenDDS::DCPS::UdpConfiguration*) config.in();
+          OpenDDS::DCPS::UdpInst* specific_config =
+              (OpenDDS::DCPS::UdpInst*) config.in();
 </xsl:text>
   <xsl:apply-templates/>
   <xsl:text>        }

@@ -9,6 +9,11 @@
 #ifndef OPENDDS_DCPS_TRANSPORTINST_H
 #define OPENDDS_DCPS_TRANSPORTINST_H
 
+#include <ace/config.h>
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#pragma once
+#endif
+
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
 #include "ThreadSynchStrategy_rch.h"
@@ -28,12 +33,6 @@ namespace DCPS {
 //            moving the send_thread_strategy_ data member to the public
 //            section, and change its type from dumb to smart pointer.
 class ThreadSynchStrategy;
-
-// TBD - REMOVE THIS WHEN ANSWERED - IT SHOULD STAY REFERENCE COUNTED.
-#if 0
-//MJM: Why is it necessary to ref count this class?  Isn't this just
-//MJM: data?
-#endif
 
 /**
  * @class TransportInst

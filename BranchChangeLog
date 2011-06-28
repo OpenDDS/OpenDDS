@@ -1,3 +1,23 @@
+Tue Jun 28 22:39:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.inl:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportConfig_rch.h:
+        * dds/DCPS/transport/framework/TransportInst.h:
+
+          Added starter files for new TransportConfig class.  A single
+          TransportConfig object represents how a DDS Entity (Data Reader or
+          Data Writer) uses the transport layer.  TransportConfig objects
+          consist of an ordered list of (smart pointers to) TransportInsts.
+
+        * java/tests/transport_config/TransportConfigTest.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          More fixes for TransportConfiguration -> TransportInst rename.
+          Modeling generated code should now work.
+
 Tue Jun 28 20:38:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:

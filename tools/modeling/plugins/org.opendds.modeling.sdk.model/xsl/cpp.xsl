@@ -60,9 +60,9 @@
 
 // For transport configuration
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "model/Utilities.h"
