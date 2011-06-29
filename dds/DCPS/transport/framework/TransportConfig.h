@@ -18,6 +18,8 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "TransportInst_rch.h"
 
+#include <ace/Synch_Traits.h>
+
 #include <vector>
 
 namespace OpenDDS {
