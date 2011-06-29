@@ -1,3 +1,8 @@
+Wed Jun 29 13:50:46 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dcps_lem_stub.mpb:
+          New base project for the dcps lem stub library, needed for dds4ccm
+
 Tue Jun 28 20:52:44 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/validation/modelvalidation/docs/README:
