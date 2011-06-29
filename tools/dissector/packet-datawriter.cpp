@@ -112,12 +112,12 @@ namespace OpenDDS
         ("OpenDDS DataWriterRemote using GIOP",
          this->proto_label_,
          "datawriter-giop");
-      this->ett_base_ = -1;
+#if 0
       static gint *ett[] = {
-        &ett_base_
       };
 
       proto_register_subtree_array(ett, array_length(ett));
+#endif
 
       add_giop_decoder ("add_associations", add_associations);
 

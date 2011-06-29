@@ -1,3 +1,10 @@
+Wed Jun 29 22:33:13 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-datawriter.cpp:
+        
+          This is what I get for not doing a check-compile before
+          committing. Now the build works.
+
 Wed Jun 29 22:14:49 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/dissector.mpc:
