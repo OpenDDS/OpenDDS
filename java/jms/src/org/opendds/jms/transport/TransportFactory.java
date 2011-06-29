@@ -12,15 +12,15 @@ import java.util.Properties;
 
 import javax.jms.JMSException;
 
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportConfiguration;
-import OpenDDS.DCPS.transport.TransportImpl;
-
 import org.opendds.jms.common.beans.BeanHelper;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 import org.opendds.jms.common.util.Serial;
+
+import OpenDDS.DCPS.transport.TheTransportFactory;
+import OpenDDS.DCPS.transport.TransportImpl;
+import OpenDDS.DCPS.transport.TransportInst;
 
 /**
  * @author Steven Stallion
@@ -44,8 +44,8 @@ public class TransportFactory {
         this.properties = properties;
     }
 
-    protected TransportConfiguration createConfiguration() throws JMSException {
-        TransportConfiguration configuration;
+    protected TransportInst createConfiguration() throws JMSException {
+    	TransportInst configuration;
 
         synchronized (serial) {
             if (serial.overflowed()) {
@@ -68,7 +68,7 @@ public class TransportFactory {
     }
 
     public TransportImpl createTransport() throws JMSException {
-        TransportConfiguration configuration = createConfiguration();
+    	TransportInst configuration = createConfiguration();
 
         TransportImpl transport = TheTransportFactory.create_transport_impl(configuration.getId(), false);
         if (transport == null) {

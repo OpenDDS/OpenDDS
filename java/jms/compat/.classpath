@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="build/modules/opendds-jms-compat-ejb.jar"/>
+	<classpathentry kind="lib" path="lib/cargo-ant-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/cargo-core-uberjar-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/commons-discovery-0.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/javaee-5.0.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-1.1.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/junit-remote-0.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jms"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

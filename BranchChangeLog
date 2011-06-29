@@ -1,3 +1,18 @@
+Wed Jun 29 16:27:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+
+          Apply yesterday's renaming to the JMS Provider code.
+
+        * java/jms/.classpath:
+        * java/jms/.project:
+        * java/jms/README:
+        * java/jms/compat/.classpath:
+        * java/jms/compat/.project:
+
+          Adding Eclipse projects and fixed typo in README.
+
 Wed Jun 29 14:16:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfig.h:

@@ -235,7 +235,7 @@ Because the OpenDDS JMS Provider relies heavily on JNI to communicate with
 OpenDDS, the following restrictions must be observed when deploying the
 resource adapter:
 
-  - The resource adpater is not portable between operating systems or
+  - The resource adapter is not portable between operating systems or
     platforms.  All restrictions defined in $DDS_ROOT/java/README must
     be observed.
   - On Windows platforms, the 'opendds.native.debug' system property should
