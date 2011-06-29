@@ -1,3 +1,18 @@
+Wed Jun 29 22:14:49 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Another incremental commit. Split the multiple classes in
+          packet-repo.* into their own header/impl files.
+
 Wed Jun 29 13:50:46 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * MPC/config/dcps_lem_stub.mpb:

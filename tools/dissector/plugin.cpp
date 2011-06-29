@@ -20,6 +20,7 @@ extern "C" {
 
 #include "tools/dissector/packet-opendds.h"
 #include "tools/dissector/packet-repo.h"
+#include "tools/dissector/packet-datawriter.h"
 
 #ifndef ACE_AS_STATIC_LIBS
 extern "C"
@@ -30,7 +31,9 @@ dissector_Export void
 plugin_register()
 {
   proto_register_opendds ();
-  proto_register_repo ();
+  OpenDDS::DCPS::InfoRepo_Dissector::instance().init ();
+  OpenDDS::DCPS::DataWriterRemote_Dissector::instance().init ();
+
 }
 
 extern "C"
@@ -38,6 +41,8 @@ dissector_Export void
 plugin_reg_handoff()
 {
   proto_reg_handoff_opendds ();
-  proto_reg_handoff_repo ();
+  OpenDDS::DCPS::InfoRepo_Dissector::instance().register_handoff ();
+  OpenDDS::DCPS::DataWriterRemote_Dissector::instance().register_handoff ();
 }
+
 #endif  /* ACE_AS_STATIC_LIBS */

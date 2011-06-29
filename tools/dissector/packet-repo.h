@@ -15,6 +15,7 @@ extern "C" {
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
+#include "tools/dissector/giop_base.h"
 
 #include "ace/Synch.h"
 #include "ace/Hash_Map_Manager.h"
@@ -23,51 +24,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    class Dissector_Base;
-
-    typedef void (DecodeFN) (::MessageHeader *);
-    typedef ACE_Hash_Map_Manager <const char *, DecodeFN*, ACE_Null_Mutex> DecodeFN_Map;
-
-    class dissector_Export Dissector_Base
-    {
-    public:
-      int dissect_giop (MessageHeader *header,
-                        gchar *operation,
-                        gchar *idlname);
-      bool dissect_heur ();
-
-      void setPacket (tvbuff_t* buf, packet_info* pi, proto_tree* pt, int *poff)
-      {
-        tvb = buf; pinfo = pi; tree = pt; offset = poff;
-      }
-
-      void start_decoding ();
-      virtual void init () = 0;
-
-    protected:
-      char *proto_label_;
-      char *repo_id_;
-
-      int proto_id_;
-      int ett_;
-
-      tvbuff_t *tvb;
-      packet_info *pinfo;
-      proto_tree *tree;
-      int *offset;
-
-      DecodeFN_Map op_functions_;
-      DecodeFN *find_giop_decoder (gchar *opname);
-      void add_giop_decoder (const char *opname, DecodeFN decoder);
-      void init_proto_label (const char *proto);
-      void init_repo_id (const char *repoid);
-
-      char * current_op_;
-      bool is_big_endian_;
-
-    };
-
-    class dissector_Export InfoRepo_Dissector : public Dissector_Base
+    class dissector_Export InfoRepo_Dissector : public GIOP_Base
     {
     public:
       static InfoRepo_Dissector& instance ();
@@ -113,7 +70,12 @@ namespace OpenDDS
       static void shutdown                       (::MessageHeader *);
 #endif
     private:
+
       static InfoRepo_Dissector instance_;
+
+      static bool initialized_;
+      //----
+      // these are "header field" indicies
       static int hf_topicId;
       static int hf_topicStatus;
 
@@ -121,53 +83,25 @@ namespace OpenDDS
       static int hf_participantId;
       static int hf_topicName;
       static int hf_dataTypeName;
-      static int hf_dds_topicQos;
+      static int hf_topicQos;
 
       static int hf_addEntityRetn;
-    };
+      static int hf_exception;
+      static int hf_qos;
+      static int hf_transInfo;
 
-    class dissector_Export DataWriterRemote_Dissector : public Dissector_Base
-    {
-    public:
-      static DataWriterRemote_Dissector& instance ();
-
-      static gboolean explicit_giop_callback (tvbuff_t *, packet_info *,
-                                              proto_tree *,int *,
-                                              ::MessageHeader *, gchar *,
-                                              gchar *);
-      static gboolean heuristic_giop_callback (tvbuff_t *, packet_info *,
-                                              proto_tree *,int *,
-                                              ::MessageHeader *, gchar *,
-                                              gchar *);
-
-
-
-      virtual void init ();
-      void register_handoff ();
-
-      static void add_associations      (::MessageHeader *);
-
-#if 0
-      static void remove_associations   (::MessageHeader *);
-      static void update_incompatible_qos (::MessageHeader *);
-      static void update_subscription_params (::MessageHeader *);
-#endif
-    private:
-      static DataWriterRemote_Dissector instance_;
+      //-----
+      // these are sub-tree indicies
+      static int ett_ior_;
+      static int ett_topic_qos_;
+      static int ett_domain_qos_;
+      static int ett_writer_qos_;
+      static int ett_publisher_qos_;
+      static int ett_trans_info_;
     };
 
   } // namespace DCPS
 } // namespace OpenDDS
-
-extern "C"
-dissector_Export void proto_register_repo();
-
-extern "C"
-dissector_Export void proto_reg_handoff_repo();
-
-
-//----
-
 
 
 #endif //  _PACKET_REPO_H_

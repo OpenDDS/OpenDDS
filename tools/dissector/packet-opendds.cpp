@@ -624,7 +624,7 @@ proto_register_opendds()
       }
     },
     { &hf_length,
-      { "Length", "opendds.length",
+      { "opendds.length", "Length",
         FT_UINT16, BASE_HEX, NULL_HFILL
       }
     },
