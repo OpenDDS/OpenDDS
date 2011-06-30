@@ -8,13 +8,24 @@
 
 #include "MulticastLoader.h"
 #include "MulticastGenerator.h"
+#include "MulticastInst.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-const ACE_TCHAR* MULTICAST_TRANSPORT_TYPE(ACE_TEXT("multicast"));
+class MulticastType : public TransportType {
+public:
+  const char* name() { return "multicast"; }
+  bool requires_reactor() { return true; }
+
+  TransportInst* new_inst(const std::string& name)
+  {
+    return new MulticastInst(name);
+  }
+};
 
 int
 MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
@@ -23,13 +34,10 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TransportGenerator_rch generator = new MulticastGenerator;
+  TheTransportRegistry->register_type(new MulticastType);
 
-  TheTransportRegistry->register_generator(MULTICAST_TRANSPORT_TYPE,
-                                           generator);
-
-  TheTransportFactory->register_generator(MULTICAST_TRANSPORT_TYPE,
-                                          generator._retn());
+  TheTransportFactory->register_generator(ACE_TEXT("multicast"),
+                                          new MulticastGenerator);
   initialized = true;
 
   return 0;

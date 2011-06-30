@@ -6,7 +6,8 @@
 
 ACE_INLINE
 OpenDDS::DCPS::DummyTcpInst::DummyTcpInst()
-  : enable_nagle_algorithm_(false),
+  : TransportInst("dummy"),
+    enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),
     conn_retry_backoff_multiplier_(2.0),
     conn_retry_attempts_(3),

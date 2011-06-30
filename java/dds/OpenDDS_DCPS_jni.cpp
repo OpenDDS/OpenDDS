@@ -372,15 +372,15 @@ jobject get_or_create_impl(JNIEnv *jni, jint id, const ACE_TString &typeCxx)
   toJava(jni, clazz_tc, *tc.in(), jConf, BaseConfig::fields);
   //   private ThreadSynchStrategy sendThreadStrategy;
   {
-    ThreadSynchStrategy *tss = tc->send_thread_strategy();
+    ThreadSynchStrategy_rch tss = tc->send_thread_strategy();
     jclass enumClazz = findClass(jni, BaseConfig::strategyClass);
     jfieldID enumFid;
 
-    if (dynamic_cast<PerConnectionSynchStrategy *>(tss)) {
+    if (dynamic_cast<PerConnectionSynchStrategy*>(tss.in())) {
       enumFid = jni->GetStaticFieldID(enumClazz, "PER_CONNECTION_SYNCH",
                                       BaseConfig::strategySig);
 
-    } else if (dynamic_cast<PoolSynchStrategy *>(tss)) {
+    } else if (dynamic_cast<PoolSynchStrategy*>(tss.in())) {
       enumFid = jni->GetStaticFieldID(enumClazz, "POOL_SYNCH",
                                       BaseConfig::strategySig);
 
@@ -519,8 +519,8 @@ jint config_impl(JNIEnv *jni, jobject jThis, jobject jConf)
       jobject poolSynch = jni->GetStaticObjectField(enumClazz, fid_ps);
       tc->send_thread_strategy(
         jni->IsSameObject(enumVal, poolSynch)
-        ? static_cast<ThreadSynchStrategy *>(new PoolSynchStrategy)
-        : static_cast<ThreadSynchStrategy *>(new NullSynchStrategy));
+        ? static_cast<ThreadSynchStrategy*>(new PoolSynchStrategy)
+        : static_cast<ThreadSynchStrategy*>(new NullSynchStrategy));
       jni->DeleteLocalRef(poolSynch);
     }
 

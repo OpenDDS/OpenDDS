@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "EntityImpl.h"
 #include "StatusConditionImpl.h"
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -98,6 +99,14 @@ EntityImpl::notify_status_condition()
 {
   dynamic_cast<StatusConditionImpl*>(status_condition_.in())->signal_all();
 }
+
+void
+EntityImpl::transport_config(const TransportConfig_rch& cfg)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  transport_config_ = cfg;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

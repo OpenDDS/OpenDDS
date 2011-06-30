@@ -18,8 +18,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-extern const ACE_TCHAR* MULTICAST_TRANSPORT_TYPE;
-
 class OpenDDS_Multicast_Export MulticastLoader
   : public ACE_Service_Object {
 public:

@@ -91,8 +91,6 @@ public:
   /// If the value is 0, the system default value is used.
   size_t rcv_buffer_size_;
 
-  MulticastInst();
-
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
 
@@ -100,6 +98,10 @@ public:
   virtual void dump(std::ostream& os);
 
 private:
+  friend class MulticastType;
+  friend class MulticastGenerator; //TODO: transitional
+  explicit MulticastInst(const std::string& name);
+
   void default_group_address(ACE_INET_Addr& group_address,
                              const TransportIdType& id);
 };

@@ -10,16 +10,10 @@
 #include "PerConnectionSynchStrategy.h"
 #include "EntryExit.h"
 
-// TBD SOON - The ThreadStrategy objects need to be reference counted.
-// TBD - Resolve Mike's questions/comments.
-//MJM: Shouldn't we just treat them as *_ptr thingies here?  And not
-//MJM: worry about ownership within the configuration object?  I guess I
-//MJM: am assuming that the configuration object is just created to pass
-//MJM: information about, not to maintain the information for a
-//MJM: specified lifetime.  I could be very wrong about the use case.
 
 ACE_INLINE
-OpenDDS::DCPS::TransportInst::TransportInst(ThreadSynchStrategy* send_strategy)
+OpenDDS::DCPS::TransportInst::TransportInst(const std::string& name,
+                                            ThreadSynchStrategy* send_strategy)
   : swap_bytes_(0),
     queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
@@ -29,29 +23,28 @@ OpenDDS::DCPS::TransportInst::TransportInst(ThreadSynchStrategy* send_strategy)
     thread_per_connection_(0),
     datalink_release_delay_(10000),
     datalink_control_chunks_(32),
+    name_(name),
     send_thread_strategy_(send_strategy)
 {
   DBG_ENTRY_LVL("TransportInst","TransportInst",6);
   this->adjust_config_value();
 }
 
-// The class DOES take ownership of the parameter (DCB)
 ACE_INLINE
 void
 OpenDDS::DCPS::TransportInst::send_thread_strategy
-(ThreadSynchStrategy* strategy)
+(const ThreadSynchStrategy_rch& strategy)
 {
   DBG_ENTRY_LVL("TransportInst","send_thread_strategy",6);
   this->send_thread_strategy_ = strategy;
 }
 
-// This method does NOT give up ownership of the returned strategy (DCB)
 ACE_INLINE
-OpenDDS::DCPS::ThreadSynchStrategy*
-OpenDDS::DCPS::TransportInst::send_thread_strategy()
+OpenDDS::DCPS::ThreadSynchStrategy_rch
+OpenDDS::DCPS::TransportInst::send_thread_strategy() const
 {
   DBG_ENTRY_LVL("TransportInst","send_thread_strategy",6);
-  return this->send_thread_strategy_.in();
+  return this->send_thread_strategy_;
 }
 
 ACE_INLINE
@@ -68,4 +61,11 @@ OpenDDS::DCPS::TransportInst::adjust_config_value()
                ACE_TEXT("(%P|%t) NOTICE: \"max_samples_per_packet\" is adjusted from %u to %u\n"),
                old_value, max_samples_per_packet_));
   }
+}
+
+ACE_INLINE
+void
+OpenDDS::DCPS::TransportInst::shutdown()
+{
+  //TODO: fwd to impl
 }

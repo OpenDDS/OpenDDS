@@ -20,9 +20,6 @@ namespace DCPS {
 class OpenDDS_Tcp_Export TcpInst
   : public TransportInst {
 public:
-
-  TcpInst();
-  virtual ~TcpInst();
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& cf);
 
@@ -82,6 +79,13 @@ public:
   /// The default is 0 (wait forever)
   /// This currently doesn't apply to passive reconnections.
   unsigned long passive_connect_duration_;
+
+private:
+  friend class TcpType;
+  friend class TcpGenerator; //TODO: transitional
+  explicit TcpInst(const std::string& name);
+  virtual ~TcpInst();
+
 };
 
 } // namespace DCPS

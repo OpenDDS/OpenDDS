@@ -1,3 +1,46 @@
+Thu Jun 30 00:44:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportType.h:
+        * dds/DCPS/transport/framework/TransportType.cpp:
+        * dds/DCPS/transport/framework/TransportType_rch.h:
+
+          Implemented new public API for transport configuration (using the
+          TransportRegistry instead of TransportFactory).  These are not yet
+          wired in to the DCPS layer's usage of the transport.
+
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpGenerator.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.inl:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpGenerator.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.h:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+
+          Adapted existing transport types to the changes above.
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/jms/.classpath:
+        * java/jms/src/org/opendds/jms/common/beans/spi/ThreadSynchStrategyType.java:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.inl:
+
+          Updated to work with the latest renames and API changes.
+
 Wed Jun 29 16:27:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/src/org/opendds/jms/transport/TransportFactory.java:

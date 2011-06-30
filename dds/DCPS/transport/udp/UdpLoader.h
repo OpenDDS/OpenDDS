@@ -18,8 +18,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-extern const ACE_TCHAR* UDP_TRANSPORT_TYPE;
-
 class OpenDDS_Udp_Export UdpLoader
   : public ACE_Service_Object {
 public:

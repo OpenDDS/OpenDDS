@@ -15,7 +15,7 @@
 	<classpathentry kind="lib" path="lib/shared/javassist-3.4.jar"/>
 	<classpathentry kind="lib" path="native/classes"/>
 	<classpathentry kind="var" path="DDS_ROOT/lib/i2jrt.jar"/>
-	<classpathentry kind="var" path="DDS_ROOT/lib/OpenDDS_DCPS.jar"/>
+	<classpathentry kind="var" path="DDS_ROOT/lib/OpenDDS_DCPS.jar" sourcepath="/DDS_ROOT/java/dds"/>
 	<classpathentry kind="var" path="DDS_ROOT/lib/tao_java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

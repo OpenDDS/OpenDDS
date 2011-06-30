@@ -11,8 +11,10 @@
 #include "TransportDebug.h"
 #include "TransportInst.h"
 #include "TransportExceptions.h"
+#include "TransportType.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/EntityImpl.h"
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -30,122 +32,7 @@ TransportRegistry::instance()
   return ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>::instance();
 }
 
-/// This will create a new TransportImpl object (some concrete subclass of
-/// TransportImpl actually), and "assign it" the provided impl_id as
-/// its unique "instance" identifier.  This identifier can be passed into
-/// the TransportRegistry's obtain() method to obtain a reference (counted)
-/// to the TransportImpl object.  This method will fail with a
-/// Transport::Duplicate exception if the impl_id is already known to the
-/// TransportRegistry as being assigned to a previously created instance.
-///
-/// The type_id value is used to find the already registered TransportImplFactory
-/// object (actually a concrete subclass) or create a new TransportImplFactory
-/// object and bind to the impl_type_map_.
-///
-/// If the TransportImplFactory object (the one registered with the type_id)
-/// fails to create the (concrete) TransportImpl object, then a
-/// Transport::UnableToCreate exception will be raised.
-///
-/// Any other problems will cause a Transport::MiscProblem exception to
-/// be raised.  This would include a failure to create/activate the
-/// TransportReactorTask object (if necessary).
-///
-TransportImpl_rch
-TransportRegistry::create_transport_impl_i(TransportIdType impl_id, FactoryIdType type_id)
-{
-  DBG_ENTRY_LVL("TransportRegistry", "create_transport_impl_i", 6);
-
-  TransportImplFactory_rch impl_factory = this->get_or_create_factory(type_id);
-
-  GuardType guard(this->lock_);
-
-  int created_reactor = 0;
-  TransportImpl_rch impl;
-  TransportReactorTask_rch reactor_task;
-
-  // We have two ways to go here.  If the impl_factory indicates that
-  // it requires a reactor task to be running in order to create the
-  // TransportImpl object, then we have one path of logic to follow.
-  // Otherwise, we have an easier logic path (when no reactor task is
-  // required by the factory).
-  if (false) { //TODO: reactor stuff....
-    //impl_factory->requires_reactor() == 1) {
-
-    // Create a new reactor task for each transport.
-    // We need create (and activate) the reactor task.
-    // In the future, we may let the DDS user choose to
-    // which reactor to use.
-    TransportReactorTask* tp;
-    ACE_NEW_THROW_EX(tp,
-                     TransportReactorTask(),
-                     CORBA::NO_MEMORY());
-    reactor_task = tp;
-
-    created_reactor = 1;
-
-    // Attempt to activate it.
-    if (reactor_task->open(0) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Failed to open TransportReactorTask object for ")
-                 ACE_TEXT("factory (id=%s).\n"), type_id.c_str()));
-      // We failed to activate the reactor task.
-      throw Transport::MiscProblem();
-    }
-
-    // Now we can call the create_impl() on the TransportImplFactory
-    // object and supply it with a reference to the reactor task.
-    impl = impl_factory->create_impl(reactor_task.in());
-
-  } else {
-    // No need to deal with the reactor here.
-    impl = impl_factory->create_impl();
-  }
-
-  if (impl.is_nil()) {
-    if (created_reactor == 1) {
-      reactor_task->stop();
-    }
-
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to create TransportImpl object for ")
-               ACE_TEXT("factory (id=%s).\n"), type_id.c_str()));
-    throw Transport::UnableToCreate();
-  }
-
-  int result = OpenDDS::DCPS::bind(impl_map_, impl_id, impl);
-  impl->set_transport_id(impl_id);
-  impl->set_factory_id(type_id);
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
-  impl->report();
-
-  if (result == 0) {
-    // Success!
-    // The map hold the TransportImpl reference.
-    return impl;
-  }
-
-  // Only error cases get here.
-
-  if (created_reactor == 1) {
-    reactor_task->stop();
-    reactor_task = 0;
-  }
-
-  if (result == 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: transport (%u) has already been created in the ")
-               ACE_TEXT("TransportRegistry.\n"), impl_id));
-    throw Transport::Duplicate();
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to bind transport (%u) to impl_map_.\n"),
-               impl_id));
-    throw Transport::MiscProblem();
-  }
-}
+const std::string TransportRegistry::DEFAULT_CONFIG_NAME = "_OPENDDS_DEFAULT_CONFIG";
 
 int
 TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
@@ -188,10 +75,12 @@ TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
         } else {
           // Create a TransportInst object and load the transport configuration in
           // ACE_Configuration_Heap to the TransportInst object.
+#if 0
           TransportInst_rch config = this->create_configuration(transport_type);
 
           if (!config.is_nil() && config->load(transport_id, cf) == -1)
             return -1;
+#endif
         }
       }
     }
@@ -201,90 +90,103 @@ TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
 }
 
 
-TransportImpl_rch
-TransportRegistry::create_transport_impl(TransportIdType id,
-                                         TransportInst_rch config)
-{
-  return this->create_transport_impl_i(id, config->transport_type_);
-}
-
-
 TransportInst_rch
-TransportRegistry::create_configuration(ACE_TString transport_type)
+TransportRegistry::create_inst(const std::string& name,
+                               const std::string& transport_type)
 {
-  int result = 0;
-  TransportGenerator_rch generator;
-  {
-    GuardType guard(this->lock_);
-    result = find(generator_map_, transport_type, generator);
-  }
+  GuardType guard(this->lock_);
+  TransportType_rch type;
 
-  if (result != 0) {
+  if (find(this->type_map_, transport_type, type) != 0) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) TransportRegistry::create_configuration: ")
-               ACE_TEXT("transport_type=%s is not registered.\n"),
+               ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
+               ACE_TEXT("transport_type=%C is not registered.\n"),
                transport_type.c_str()));
     return TransportInst_rch();
   }
 
-  return generator->new_configuration(TransportIdType() /*TODO: remove this arg*/);
-}
-
-
-TransportImplFactory_rch
-TransportRegistry::get_or_create_factory(FactoryIdType factory_id)
-{
-  DBG_ENTRY_LVL("TransportRegistry", "get_or_create_factory", 6);
-
-  if (factory_id == ACE_TEXT("")) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportRegistry::get_or_create_factory factory_id is null. \n")));
-    throw CORBA::BAD_PARAM();
-  }
-
-  TransportImplFactory_rch factory;
-  int result = 0;
-  {
-    GuardType guard(this->lock_);
-    result = find(impl_type_map_, factory_id, factory);
-  }
-
-  if (result == 0)
-    return factory;
-
-  TransportGenerator_rch generator;
-  {
-    GuardType guard(this->lock_);
-    // The factory_id uses the transport type name, we use the factory_id
-    // to find the generator for the transport type.
-    result = find(generator_map_, factory_id, generator);
-  }
-
-  if (result == 0) {
-    factory = generator->new_factory();
-    this->register_factory(factory_id, factory);
-
-  } else {
+  if (this->inst_map_.count(name)) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: TransportRegistry::get_or_create_factory: transport (type=%s) is not registered.\n "),
-               factory_id.c_str()));
-    throw Transport::NotFound();
+               ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
+               ACE_TEXT("name=%C is already in use.\n"),
+               name.c_str()));
+    return TransportInst_rch();
   }
 
-  return factory;
+  TransportInst_rch inst = type->new_inst(name);
+  this->inst_map_[name] = inst;
+  return inst;
 }
+
+
+TransportInst_rch
+TransportRegistry::get_inst(const std::string& name) const
+{
+  GuardType guard(this->lock_);
+  InstMap::const_iterator found = this->inst_map_.find(name);
+  if (found != this->inst_map_.end()) {
+    return found->second;
+  }
+  return TransportInst_rch();
+}
+
+
+TransportConfig_rch
+TransportRegistry::create_config(const std::string& name)
+{
+  GuardType guard(this->lock_);
+
+  if (this->config_map_.count(name)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) TransportRegistry::create_config: ")
+               ACE_TEXT("name=%C is already in use.\n"),
+               name.c_str()));
+    return TransportConfig_rch();
+  }
+
+  TransportConfig_rch inst = new TransportConfig(name);
+  this->config_map_[name] = inst;
+  return inst;
+}
+
+
+TransportConfig_rch
+TransportRegistry::get_config(const std::string& name) const
+{
+  GuardType guard(this->lock_);
+  ConfigMap::const_iterator found = this->config_map_.find(name);
+  if (found != this->config_map_.end()) {
+    return found->second;
+  }
+  return TransportConfig_rch();
+}
+
 
 void
-TransportRegistry::register_generator(const ACE_TCHAR* type,
-                                      TransportGenerator_rch generator)
+TransportRegistry::bind_config(const TransportConfig_rch& cfg,
+                               DDS::Entity_ptr entity)
+{
+  if (cfg.is_nil()) {
+    throw Transport::NotFound();
+  }
+  EntityImpl* ei = dynamic_cast<EntityImpl*>(entity);
+  if (!ei) {
+    throw Transport::MiscProblem();
+  }
+  ei->transport_config(cfg);
+}
+
+
+void
+TransportRegistry::register_type(const TransportType_rch& type)
 {
   DBG_ENTRY_LVL("TransportRegistry", "register_generator", 6);
   int result;
+  const std::string name = type->name();
 
-  // Attempt to insert the impl_factory into the impl_type_map_ while
-  // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = OpenDDS::DCPS::bind(generator_map_, type, generator);
+    result = OpenDDS::DCPS::bind(type_map_, name, type);
   }
 
   // Check to see if it worked.
@@ -293,84 +195,17 @@ TransportRegistry::register_generator(const ACE_TCHAR* type,
   // -1 means something bad happened.
   if (result == 1) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: transport type=%s already registered ")
-               ACE_TEXT("with TransportRegistry.\n"), type));
+               ACE_TEXT("(%P|%t) ERROR: transport type=%C already registered ")
+               ACE_TEXT("with TransportRegistry.\n"), name.c_str()));
     throw Transport::Duplicate();
 
   } else if (result == -1) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to bind transport type=%s to generator_map_.\n"),
-               type));
+               ACE_TEXT("(%P|%t) ERROR: Failed to bind transport type=%C to ")
+               ACE_TEXT("type_map_.\n"),
+               name.c_str()));
     throw Transport::MiscProblem();
   }
-
-  // Get the list of default transport. Some transports(e.g. SimpleMcast) have multiple default
-  // transport ids.
-  TransportIdList default_ids;
-  generator->default_transport_ids(default_ids);
-
-  // Create default transport configuration associated with the default id.
-  TransportIdList::iterator itEnd = default_ids.end();
-
-  for (TransportIdList::iterator it = default_ids.begin(); it != itEnd; ++it) {
-    TransportInst_rch config = create_configuration(type);
-    create_transport_impl(*it, config);
-  }
-}
-
-void
-TransportRegistry::register_factory(FactoryIdType factory_id,
-                                    TransportImplFactory_rch factory)
-{
-  DBG_ENTRY_LVL("TransportRegistry", "register_factory", 6);
-
-  int result;
-
-  // Attempt to insert the impl_factory into the impl_type_map_ while
-  // we hold the lock.
-  {
-    GuardType guard(this->lock_);
-    result = OpenDDS::DCPS::bind(impl_type_map_, factory_id, factory);
-  }
-
-  // Check to see if it worked.
-  //
-  // 0 means it worked, 1 means it is a duplicate (and didn't work), and
-  // -1 means something bad happened.
-  if (result == 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: factory (id=%s) already registered ")
-               ACE_TEXT("in impl_type_map_.\n"), factory_id.c_str()));
-    throw Transport::Duplicate();
-
-  } else if (result == -1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to bind factory (id=%s) to impl_type_map_.\n"),
-               factory_id.c_str()));
-    throw Transport::MiscProblem();
-  }
-}
-
-
-TransportImpl_rch
-TransportRegistry::obtain(TransportIdType impl_id)
-{
-  DBG_ENTRY_LVL("TransportRegistry", "obtain", 6);
-  GuardType guard(this->lock_);
-
-  // This is a bit complex to avoid creating nil entries in the map.
-  // The entire class would need to be cleansed of assumptions about
-  // contents in order to just
-  //   return this->impl_map_[ impl_id];
-  ImplMap::iterator where = this->impl_map_.find(impl_id);
-
-  if (where == this->impl_map_.end()) {
-    return TransportImpl_rch();
-
-  } else {
-    return where->second;
-  }
-
 }
 
 
@@ -380,51 +215,17 @@ TransportRegistry::release()
   DBG_ENTRY_LVL("TransportRegistry", "release", 6);
   GuardType guard(this->lock_);
 
-  // Iterate over all of the entries in the impl_map_, and
-  // each TransportImpl object to shutdown().
-  for (ImplMap::iterator iter = impl_map_.begin();
-       iter != impl_map_.end();
+  for (InstMap::iterator iter = inst_map_.begin();
+       iter != inst_map_.end();
        ++iter) {
     iter->second->shutdown();
   }
 
-  // Clear the maps.
-  impl_type_map_.clear();
-  impl_map_.clear();
-  generator_map_.clear();
+  type_map_.clear();
+  inst_map_.clear();
+  config_map_.clear();
 }
 
-
-void
-TransportRegistry::release(TransportIdType impl_id)
-{
-  DBG_ENTRY_LVL("TransportRegistry", "release", 6);
-  int result;
-
-  TransportImpl_rch impl;
-
-  // Use separate scope for guard
-  {
-    GuardType guard(this->lock_);
-    result = unbind(impl_map_, impl_id, impl);
-
-    if (TheServiceParticipant->monitor_) {
-      TheServiceParticipant->monitor_->report();
-    }
-
-    // 0 means the unbind was successful, -1 means it failed.
-    if (result == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Unknown impl_id (%d) in impl_map_.\n"),impl_id));
-      // Just leave.  Don't raise an exception here.
-      return;
-    }
-  }
-
-  // Now we can tell the TransportImpl to shutdown (without having to
-  // hold on to our lock_).
-  impl->shutdown();
-}
 
 }
 }

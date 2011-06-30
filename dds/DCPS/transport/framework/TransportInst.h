@@ -23,16 +23,12 @@
 #include "ace/Configuration.h"
 #include "ace/SString.h"
 
+#include <string>
+
 class ACE_Reactor;
 
 namespace OpenDDS {
 namespace DCPS {
-
-// TBD SOON - The ThreadSynchStrategy should be reference counted, and
-//            then we could do away with the mutator and accessor by
-//            moving the send_thread_strategy_ data member to the public
-//            section, and change its type from dumb to smart pointer.
-class ThreadSynchStrategy;
 
 /**
  * @class TransportInst
@@ -53,17 +49,11 @@ class ThreadSynchStrategy;
 class OpenDDS_Dcps_Export TransportInst : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
-  /// Dtor
-  virtual ~TransportInst();
+  std::string name() const { return name_; }
 
-  /// Mutator for the "send thread strategy" object.  Will delete
-  /// the existing strategy object (ie, the default) first.
-  /// This method DOES take ownership of the strategy argument
-  void send_thread_strategy(ThreadSynchStrategy* strategy);
+  void send_thread_strategy(const ThreadSynchStrategy_rch& strategy);
 
-  /// Accessor for the "send thread strategy" object.
-  /// This method does NOT give up ownership of the returned strategy
-  ThreadSynchStrategy* send_thread_strategy();
+  ThreadSynchStrategy_rch send_thread_strategy() const;
 
   /// Overwrite the default configurations with the configuration for the
   /// give transport_id in ACE_Configuration_Heap object.
@@ -114,10 +104,11 @@ public:
 
 protected:
 
-  /// Default ctor.
-  /// Takes ownership of the strategy argument
-  TransportInst(ThreadSynchStrategy* send_strategy =
-                           new PerConnectionSynchStrategy());
+  explicit TransportInst(const std::string& name,
+                         ThreadSynchStrategy* send_strategy =
+                           new PerConnectionSynchStrategy);
+
+  virtual ~TransportInst();
 
   static ACE_TString id_to_section_name(const TransportIdType& id);
 
@@ -126,6 +117,11 @@ private:
   /// Adjust the configuration values which gives warning on adjusted
   /// value.
   void adjust_config_value();
+
+  friend class TransportRegistry;
+  void shutdown();
+
+  const std::string name_;
 
   /// Thread strategy used for sending data samples (and incomplete
   /// packets) when a DataLink has encountered "backpressure".

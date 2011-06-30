@@ -12,6 +12,8 @@
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
+#include <sstream>
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -24,10 +26,12 @@ UdpGenerator::new_factory()
 }
 
 TransportInst*
-UdpGenerator::new_configuration(const TransportIdType /*id*/)
+UdpGenerator::new_configuration(const TransportIdType id)
 {
+  std::ostringstream name;
+  name << id;
   TransportInst* configuration;
-  ACE_NEW_RETURN(configuration, UdpInst, 0);
+  ACE_NEW_RETURN(configuration, UdpInst(name.str()), 0);
   return configuration;
 }
 

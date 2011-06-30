@@ -27,13 +27,17 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export TransportConfig : public RcObject<ACE_SYNCH_MUTEX> {
 public:
+
+  std::string name() const { return name_; }
+
   std::vector<TransportInst_rch> instances_;
 
 private:
   friend class TransportRegistry;
-  TransportConfig();
+  explicit TransportConfig(const std::string& name);
   ~TransportConfig();
 
+  const std::string name_;
 };
 
 }

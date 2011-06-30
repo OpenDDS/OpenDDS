@@ -8,13 +8,24 @@
 
 #include "UdpLoader.h"
 #include "UdpGenerator.h"
+#include "UdpInst.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-const ACE_TCHAR* UDP_TRANSPORT_TYPE(ACE_TEXT("udp"));
+class UdpType : public TransportType {
+public:
+  const char* name() { return "udp"; }
+  bool requires_reactor() { return true; }
+
+  TransportInst* new_inst(const std::string& name)
+  {
+    return new UdpInst(name);
+  }
+};
 
 int
 UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
@@ -23,12 +34,10 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TransportGenerator_rch generator = new UdpGenerator;
+  TheTransportRegistry->register_type(new UdpType);
 
-  TheTransportRegistry->register_generator(UDP_TRANSPORT_TYPE, generator);
+  TheTransportFactory->register_generator(ACE_TEXT("udp"), new UdpGenerator);
 
-  TheTransportFactory->register_generator(UDP_TRANSPORT_TYPE,
-                                          generator._retn());
   initialized = true;
 
   return 0;

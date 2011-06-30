@@ -11,6 +11,8 @@
 #include "TcpInst.h"
 #include "TcpFactory.h"
 
+#include <sstream>
+
 OpenDDS::DCPS::TcpGenerator::TcpGenerator()
 {
 }
@@ -32,11 +34,12 @@ OpenDDS::DCPS::TcpGenerator::new_factory()
 OpenDDS::DCPS::TransportInst*
 OpenDDS::DCPS::TcpGenerator::new_configuration(const TransportIdType id)
 {
-  ACE_UNUSED_ARG(id);
+  std::ostringstream name;
+  name << id;
 
   TcpInst* trans_config = 0;
   ACE_NEW_RETURN(trans_config,
-                 TcpInst(),
+                 TcpInst(name.str()),
                  0);
   return trans_config;
 }

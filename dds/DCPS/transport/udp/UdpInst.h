@@ -18,20 +18,22 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Udp_Export UdpInst
-  : public TransportInst {
+class OpenDDS_Udp_Export UdpInst : public TransportInst {
 public:
   /// The address from which to send/receive data.
   /// The default value is: none.
   ACE_INET_Addr local_address_;
-
-  UdpInst();
 
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
 
   /// Diagnostic aid.
   virtual void dump(std::ostream& os);
+
+private:
+  friend class UdpType;
+  friend class UdpGenerator; //TODO: transitional
+  explicit UdpInst(const std::string& name);
 };
 
 } // namespace DCPS

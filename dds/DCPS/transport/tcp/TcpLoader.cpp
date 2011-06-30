@@ -10,8 +10,10 @@
 
 #include "TcpLoader.h"
 #include "TcpGenerator.h"
+#include "TcpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "tao/debug.h"
@@ -30,7 +32,16 @@ TcpLoader::~TcpLoader()
   DBG_ENTRY_LVL("TcpLoader", "~TcpLoader", 6);
 }
 
-const ACE_TCHAR TCP_TRANSPORT_TYPE[] = ACE_TEXT("tcp");
+class TcpType : public TransportType {
+public:
+  const char* name() { return "tcp"; }
+  bool requires_reactor() { return true; }
+
+  TransportInst* new_inst(const std::string& name)
+  {
+    return new TcpInst(name);
+  }
+};
 
 int
 TcpLoader::init(int, ACE_TCHAR*[])
@@ -43,13 +54,10 @@ TcpLoader::init(int, ACE_TCHAR*[])
   if (initialized)
     return 0;
 
-  TransportGenerator_rch generator = new TcpGenerator;
+  TheTransportRegistry->register_type(new TcpType);
 
-  TheTransportRegistry->register_generator(TCP_TRANSPORT_TYPE,
-                                           generator);
+  TheTransportFactory->register_generator(ACE_TEXT("tcp"), new TcpGenerator);
 
-  TheTransportFactory->register_generator(TCP_TRANSPORT_TYPE,
-                                          generator._retn());
   initialized = true;
   return 0;
 }

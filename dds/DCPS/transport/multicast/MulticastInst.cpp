@@ -41,8 +41,8 @@ const char DEFAULT_TTL(1);
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastInst::MulticastInst()
-  : TransportInst(new NullSynchStrategy()),
+MulticastInst::MulticastInst(const std::string& name)
+  : TransportInst(name, new NullSynchStrategy),
     default_to_ipv6_(DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
@@ -66,7 +66,7 @@ MulticastInst::MulticastInst()
   this->nak_interval_.msec(DEFAULT_NAK_INTERVAL);
   this->nak_timeout_.msec(DEFAULT_NAK_TIMEOUT);
 
-  this->transport_type_ = MULTICAST_TRANSPORT_TYPE;
+  this->transport_type_ = ACE_TEXT("multicast");
 }
 
 int

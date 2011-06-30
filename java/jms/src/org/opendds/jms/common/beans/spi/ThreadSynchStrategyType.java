@@ -8,7 +8,7 @@
 
 package org.opendds.jms.common.beans.spi;
 
-import OpenDDS.DCPS.transport.TransportConfiguration.ThreadSynchStrategy;
+import OpenDDS.DCPS.transport.TransportInst.ThreadSynchStrategy;
 
 import org.opendds.jms.common.beans.UnsupportedTypeException;
 

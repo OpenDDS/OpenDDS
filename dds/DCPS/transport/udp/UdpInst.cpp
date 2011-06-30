@@ -16,10 +16,10 @@
 namespace OpenDDS {
 namespace DCPS {
 
-UdpInst::UdpInst()
-  : TransportInst(new NullSynchStrategy())
+UdpInst::UdpInst(const std::string& name)
+  : TransportInst(name, new NullSynchStrategy)
 {
-  this->transport_type_ = UDP_TRANSPORT_TYPE;
+  this->transport_type_ = ACE_TEXT("udp");
 }
 
 int
