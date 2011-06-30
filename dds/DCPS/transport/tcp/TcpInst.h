@@ -20,8 +20,11 @@ namespace DCPS {
 class OpenDDS_Tcp_Export TcpInst
   : public TransportInst {
 public:
+  /// TODO: Remove
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& cf);
+  virtual int load(ACE_Configuration_Heap& cf,
+                   ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
   virtual void dump(std::ostream& os);

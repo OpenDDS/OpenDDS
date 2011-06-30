@@ -91,8 +91,11 @@ public:
   /// If the value is 0, the system default value is used.
   size_t rcv_buffer_size_;
 
+  /// TODO: Remove
   virtual int load(const TransportIdType& id,
-                   ACE_Configuration_Heap& config);
+                   ACE_Configuration_Heap& cf);
+  virtual int load(ACE_Configuration_Heap& cf,
+                   ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
   virtual void dump(std::ostream& os);

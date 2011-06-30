@@ -23,6 +23,84 @@
 #include "TransportRegistry.inl"
 #endif /* __ACE_INLINE__ */
 
+namespace {
+  /// Helper types and functions for config file parsing
+  typedef std::map<std::string, std::string> ValueMap;
+  typedef std::pair<std::string, ACE_Configuration_Section_Key> SubsectionPair;
+  typedef std::list<SubsectionPair> KeyList;
+
+  ///     Function that pulls all the values from the
+  ///     specified ACE Configuration Section and places them in a
+  ///     value map based on the field name.  Returns the number of
+  ///     values found in the section (and added to the value map).
+  ///
+  ///     cf     ACE_Configuration_Heap object being processed
+  ///     key    ACE_Configuration_Section_Key object that specifies
+  ///            the section of the .ini file to process
+  ///     values Map of field names to values (both std::strings)
+  ///            that this function will add to.
+  ///
+  int pullValues( ACE_Configuration_Heap& cf,
+                  const ACE_Configuration_Section_Key& key,
+                  ValueMap& values ) {
+    int index = 0;
+    ACE_TString name;
+    ACE_Configuration::VALUETYPE type;
+
+    while (cf.enumerate_values( key, index, name, type ) == 0) {
+      ACE_TString value;
+      if (type == ACE_Configuration::STRING) {
+        cf.get_string_value( key, name.c_str(), value );
+        values[name.c_str()] = value.c_str();
+      } else {
+        ACE_DEBUG((LM_WARNING, "Unexpected value type in config file (ignored): "
+                   "name=%s, type=%d\n", name.c_str(), type));
+      }
+      index++;
+    }
+    return index;
+  }
+
+
+  ///     Function that processes the specified ACE Configuration Section
+  ///     for subsections.  If multiple levels of subsections are found,
+  ///     a non-zero value is returned to indicate the error.
+  ///     All valid subsection will be placed into the supplied
+  ///     KeyList (std::pair<> of the subsection number and
+  ///     ACE_Configuration_Section_Key).  A return value of zero indicates
+  ///     error-free success.
+  ///
+  ///
+  ///     cf              ACE_Configuration_Heap object being processed
+  ///     key             ACE_Configuration_Section_Key object that
+  ///                     specifies the section of the .ini file to process
+  ///     subsections     List of subsections found (list contains a
+  ///                     std::pair<> of the subsection number and
+  ///                     ACE_Configuration_Section_Key).
+  ///
+  int processSections( ACE_Configuration_Heap& cf,
+                       const ACE_Configuration_Section_Key& key,
+                       KeyList& subsections ) {
+    int index = 0;
+    ACE_TString name;
+    while (cf.enumerate_sections( key, index, name ) == 0) {
+      ACE_Configuration_Section_Key subkey;
+      cf.open_section( key, name.c_str(), 0, subkey );
+      subsections.push_back( SubsectionPair( name.c_str(), subkey ) );
+
+      int subindex = 0;
+      ACE_TString subname;
+      if (cf.enumerate_sections( subkey, subindex, subname ) == 0) {
+        // Found additional nesting of subsections that we don't care
+        // to allow (e.g. [transport/my/yours]), so return an error.
+        return 1;
+      }
+      index++;
+    }
+    return 0;
+  }
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -39,53 +117,83 @@ TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
 {
   int status = 0;
   const ACE_Configuration_Section_Key &root = cf.root_section();
-  ACE_Configuration_Section_Key trans_sect;
 
   ACE_TString sect_name;
 
   for (int index = 0;
        (status = cf.enumerate_sections(root, index, sect_name)) == 0;
        ++index) {
-    if (ACE_OS::strncasecmp(sect_name.c_str(),
-                            TRANSPORT_SECTION_NAME_PREFIX,
-                            TRANSPORT_SECTION_NAME_PREFIX_LEN) == 0) { // found a [transport_impl_<id>] section
-      TransportIdType transport_id
-      = static_cast <TransportIdType>(ACE_OS::atoi(sect_name.substr(TRANSPORT_SECTION_NAME_PREFIX_LEN).c_str()));
+    if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0) {
+      // found the [transport/*] section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
-
-      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0)
+      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                           ACE_TEXT("failed to open section %s\n"),
                           sect_name.c_str()),
                          -1);
-
-      else {
-        ACE_TString transport_type;
-        // Get the factory_id for the transport.
-        GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("transport_type"), transport_type)
-
-        if (transport_type == ACE_TEXT("")) {
+      } else {
+        // Ensure there are no properties in this section
+        ValueMap vm;
+        if (pullValues(cf, sect, vm) > 0) {
+          // There are values inside [transport]
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                            ACE_TEXT("transport sections must have a section name\n"),
+                            sect_name.c_str()),
+                           -1);
+        }
+        // Process the subsections of this section (the individual transport
+        // impls).
+        KeyList keys;
+        if (processSections( cf, sect, keys ) != 0) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                             ACE_TEXT("missing transport_type in \"%s\" section.\n"),
                             sect_name.c_str()),
                            -1);
+        }
+        for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
+          std::string transport_id = (*it).first;
+          ACE_Configuration_Section_Key inst_sect = (*it).second;
 
-        } else {
-          // Create a TransportInst object and load the transport configuration in
-          // ACE_Configuration_Heap to the TransportInst object.
-#if 0
-          TransportInst_rch config = this->create_configuration(transport_type);
-
-          if (!config.is_nil() && config->load(transport_id, cf) == -1)
-            return -1;
-#endif
+          ValueMap values;
+          if (pullValues( cf, (*it).second, values ) != 0) {
+            // Get the factory_id for the transport.
+            std::string transport_type;
+            ValueMap::const_iterator vm_it = values.find("transport_type");
+            if (vm_it != values.end()) {
+              transport_type = (*vm_it).second;
+            } else {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                ACE_TEXT("missing transport_type in \"%s\" section.\n"),
+                                sect_name.c_str()),
+                               -1);
+            }
+            // Create a TransportInst object and load the transport configuration in
+            // ACE_Configuration_Heap to the TransportInst object.
+            // TODO: Create transport inst.
+            TransportInst_rch inst = this->create_inst(transport_id, transport_type);
+            if (inst == 0) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                ACE_TEXT("transport instance already exists \"%s\" section.\n"),
+                                sect_name.c_str()),
+                               -1);
+            }
+            inst->load(cf, inst_sect);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                              ACE_TEXT("missing transport_type in \"%s\" section.\n"),
+                              sect_name.c_str()),
+                             -1);
+          }
         }
       }
     }
   }
-
   return 0;
 }
 

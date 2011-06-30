@@ -41,3 +41,11 @@ project(*Fragmentation): dcpsexe {
     Fragmentation.cpp
   }
 }
+
+project(*ConfigFile): dcpsexe_with_tcp {
+  exename   = *
+
+  Source_Files {
+    ConfigFile.cpp
+  }
+}

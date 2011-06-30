@@ -1,3 +1,36 @@
+Thu Jun 30 20:50:52 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        
+          Add new parsing code to the TransportRegistry.  This
+          is currently not called by the ServiceParticipant.
+          Add a new load function (with a different signature)
+          to TransportInst.  This includes inst parsing but
+          not config parsing.
+
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        
+          Add the new load function to these transport implementations.
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/tcp.conf:
+        * tests/DCPS/UnitTests/test1.conf:
+        
+          Add a simple unit test to test the TCP config parsing.
+          Much more needs to be added to this.
+
 Thu Jun 30 13:47:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfig.h:

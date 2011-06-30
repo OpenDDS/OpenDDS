@@ -55,10 +55,16 @@ public:
 
   ThreadSynchStrategy_rch send_thread_strategy() const;
 
+  /// TODO: Remove
   /// Overwrite the default configurations with the configuration for the
   /// give transport_id in ACE_Configuration_Heap object.
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
+
+  /// Overwrite the default configurations with the configuration from the
+  /// given section in the ACE_Configuration_Heap object.
+  virtual int load(ACE_Configuration_Heap& cf,
+                   ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
   void dump();

@@ -14,6 +14,7 @@
 #include "TransportImpl_rch.h"
 #include "TransportImplFactory_rch.h"
 #include "TransportReactorTask_rch.h"
+#include "TransportType.h"
 #include "TransportType_rch.h"
 #include "TransportInst_rch.h"
 #include "TransportConfig_rch.h"
@@ -73,9 +74,11 @@ public:
   void register_type(const TransportType_rch& type);
 
   /// For internal use by OpenDDS DCPS layer:
-  /// Transfer the configuration in ACE_Configuration_Heap object to the
-  /// TransportRegistry.
-  /// This is called by the Service_Participant at initialization time.
+  /// Transfer the configuration in ACE_Configuration_Heap object to
+  /// the TransportRegistry.  This is called by the Service_Participant
+  /// at initialization time. This function iterates each section in
+  /// the configuration file, and creates TransportInst and
+  /// TransportConfig objects and adds them to the registry.
   int load_transport_configuration(ACE_Configuration_Heap& cf);
 
 private:

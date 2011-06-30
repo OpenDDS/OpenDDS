@@ -127,6 +127,10 @@ class ACE_Data_Block;
     if (tv != -1) VALUE.msec(tv);                                                \
   }
 
+// The transport section name used in the config file format
+static const ACE_TCHAR TRANSPORT_SECTION_NAME[] = ACE_TEXT("transport");
+
+// TODO: Remove...
 // The transport section name prefix.
 static const ACE_TCHAR  TRANSPORT_SECTION_NAME_PREFIX[] =
   ACE_TEXT("transport_impl_");
@@ -145,6 +149,7 @@ const bool DONT_AUTO_CONFIG = 0;
 /// The TransportImplFactory instance ID type.
 typedef ACE_TString FactoryIdType;
 
+// TODO: Remove
 /// The TransportImpl instance ID type.
 typedef ACE_UINT32 TransportIdType;
 typedef std::vector <TransportIdType> TransportIdList;

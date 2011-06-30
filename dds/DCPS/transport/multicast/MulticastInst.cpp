@@ -141,9 +141,60 @@ MulticastInst::load(const TransportIdType& id,
    return 0;
 }
 
+int
+MulticastInst::load(ACE_Configuration_Heap& cf,
+                    ACE_Configuration_Section_Key& sect)
+{
+  TransportInst::load(cf, sect); // delegate to parent
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("default_to_ipv6"),
+                   this->default_to_ipv6_, bool)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("port_offset"),
+                   this->port_offset_, u_short)
+
+  ACE_TString group_address_s;
+  GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("group_address"),
+                          group_address_s)
+  if (group_address_s.is_empty()) {
+    // TODO: Passing 0 instead of transport id.  Does this cause complications?
+    default_group_address(this->group_address_, 0);
+  } else {
+    this->group_address_.set(group_address_s.c_str());
+  }
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("reliable"), this->reliable_, bool)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("syn_backoff"),
+                   this->syn_backoff_, double)
+
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("syn_interval"), this->syn_interval_)
+
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("syn_timeout"), this->syn_timeout_)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"),
+                   this->nak_depth_, size_t)
+
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_interval"), this->nak_interval_)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_delay_intervals"),
+                        this->nak_delay_intervals_, size_t)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_max"), this->nak_max_, size_t)
+
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_timeout"), this->nak_timeout_)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), this->ttl_, char)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"),
+                   this->rcv_buffer_size_, size_t)
+
+   return 0;
+}
+
 void
 MulticastInst::default_group_address(ACE_INET_Addr& group_address,
-                                              const TransportIdType& id)
+                                     const TransportIdType& id)
 {
   u_short port_number(this->port_offset_ + id);
 

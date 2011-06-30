@@ -155,7 +155,6 @@ OpenDDS::DCPS::TransportFactory::load_transport_configuration(ACE_Configuration_
 {
   int status = 0;
   const ACE_Configuration_Section_Key &root = cf.root_section();
-  ACE_Configuration_Section_Key trans_sect;
 
   ACE_TString sect_name;
 

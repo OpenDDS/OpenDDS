@@ -73,6 +73,44 @@ OpenDDS::DCPS::TcpInst::load(const TransportIdType& id,
   return 0;
 }
 
+int
+OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
+                             ACE_Configuration_Section_Key& trans_sect)
+{
+  TransportInst::load(cf, trans_sect);
+
+  ACE_TString local_address;
+  GET_CONFIG_STRING_VALUE(cf, trans_sect, ACE_TEXT("local_address"), local_address);
+
+  if (local_address != ACE_TEXT("")) {
+    this->local_address_str_ = local_address;
+    this->local_address_.set(local_address_str_.c_str());
+  }
+
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("enable_nagle_algorithm"),
+                   this->enable_nagle_algorithm_, bool)
+
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("conn_retry_initial_delay"),
+                   this->conn_retry_initial_delay_, int)
+
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("conn_retry_backoff_multiplier"),
+                   this->conn_retry_backoff_multiplier_, double)
+
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("conn_retry_attempts"),
+                   this->conn_retry_attempts_, int)
+
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("passive_reconnect_duration"),
+                   this->passive_reconnect_duration_, int)
+
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("passive_connect_duration"),
+                   this->passive_connect_duration_, unsigned int)
+
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("max_output_pause_period"),
+                   this->max_output_pause_period_, int)
+
+  return 0;
+}
+
 void
 OpenDDS::DCPS::TcpInst::dump(std::ostream& os)
 {
