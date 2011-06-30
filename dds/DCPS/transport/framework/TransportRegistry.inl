@@ -7,6 +7,8 @@
  */
 
 #include "EntryExit.h"
+#include "TransportInst.h"
+#include "TransportType.h"
 
 ACE_INLINE
 OpenDDS::DCPS::TransportRegistry::TransportRegistry()

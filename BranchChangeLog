@@ -1,3 +1,14 @@
+Thu Jun 30 13:47:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+
+          Fixes for inline=0 builds.
+
+        * java/build_scripts/jni_check.pl:
+
+          Account for the 64-bit Windows Release-mode function names.
+
 Thu Jun 30 00:44:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/EntityImpl.h:

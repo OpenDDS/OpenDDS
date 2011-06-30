@@ -42,13 +42,14 @@ if ($^O eq 'MSWin32') {
   my $prefix = ($machine eq 'x64' ? '' : '_');
   my $suffix = ($machine eq 'x64' ? ' = @ILT\\+\\d+' : '@\\d+');
   $pattern = " $prefix(Java_\\S+)$suffix";
+  $pattern .= '| (Java_\\S+)' if $machine eq 'x64';
 }
 
 my %exports;
 open TEMP, "$nm $lib |" or die "Can't spawn $nm\n";
 while (<TEMP>) {
   if (/$pattern/o) {
-    $exports{$1} = 1;
+    $exports{defined $1 ? $1 : $2} = 1;
 #    print "DBG: [$1] is exported.\n";
   }
 }
