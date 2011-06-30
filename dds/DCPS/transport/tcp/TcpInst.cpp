@@ -73,6 +73,12 @@ OpenDDS::DCPS::TcpInst::load(const TransportIdType& id,
   return 0;
 }
 
+OpenDDS::DCPS::TcpTransport*
+OpenDDS::DCPS::TcpInst::new_impl()
+{
+  return new TcpTransport;
+}
+
 int
 OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
                              ACE_Configuration_Section_Key& trans_sect)

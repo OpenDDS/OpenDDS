@@ -10,6 +10,7 @@
 #define DCPS_MULTICASTINST_H
 
 #include "Multicast_Export.h"
+#include "MulticastTransport.h"
 
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
@@ -107,6 +108,8 @@ private:
 
   void default_group_address(ACE_INET_Addr& group_address,
                              const TransportIdType& id);
+
+  MulticastTransport* new_impl();
 };
 
 } // namespace DCPS

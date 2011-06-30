@@ -27,6 +27,7 @@
 #include "MonitorFactory.h"
 #include "DataReaderRemoteImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -1189,6 +1190,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
              name.in(),
              topic_servant_->get_id());
 
+    try {
+      this->enable_transport();
+    } catch (const Transport::Exception&) {
+      return DDS::RETCODE_ERROR;
+    }
+
     if (this->monitor_) {
       this->monitor_->report();
     }
@@ -1574,6 +1581,18 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                sample.header_.message_id_));
     break;
   }
+}
+
+EntityImpl*
+DataReaderImpl::parent()
+{
+  return this->subscriber_servant_;
+}
+
+bool
+DataReaderImpl::check_transport_qos(const TransportInst&)
+{
+  return true;
 }
 
 bool

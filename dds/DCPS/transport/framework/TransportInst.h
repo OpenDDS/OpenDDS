@@ -17,8 +17,11 @@
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
 #include "ThreadSynchStrategy_rch.h"
+#include "TransportImpl_rch.h"
+#include "TransportImpl.h"
 #include "PerConnectionSynchStrategy.h"
 #include "dds/DCPS/RcObject_T.h"
+
 #include "ace/Synch.h"
 #include "ace/Configuration.h"
 #include "ace/SString.h"
@@ -127,11 +130,18 @@ private:
   friend class TransportRegistry;
   void shutdown();
 
+  friend class TransportClient;
+  TransportImpl_rch impl();
+  virtual TransportImpl* new_impl() = 0;
+
   const std::string name_;
 
   /// Thread strategy used for sending data samples (and incomplete
   /// packets) when a DataLink has encountered "backpressure".
   ThreadSynchStrategy_rch send_thread_strategy_;
+
+  TransportImpl_rch impl_;
+  ACE_SYNCH_MUTEX lock_;
 };
 
 } // namespace DCPS

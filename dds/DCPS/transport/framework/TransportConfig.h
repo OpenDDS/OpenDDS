@@ -34,6 +34,11 @@ public:
 
   std::vector<TransportInst_rch> instances_;
 
+  /// Insert the TransportInst in sorted order (by name) in the instances_ list.
+  /// Use when the names of the TransportInst objects are specifically assigned
+  /// to have the sorted order make sense.
+  void insert(const TransportInst_rch& inst);
+
 private:
   friend class TransportRegistry;
   explicit TransportConfig(const std::string& name);

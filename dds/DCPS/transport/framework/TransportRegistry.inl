@@ -12,8 +12,10 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportRegistry::TransportRegistry()
+  : global_config_(new TransportConfig(DEFAULT_CONFIG_NAME))
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
+  config_map_[DEFAULT_CONFIG_NAME] = global_config_;
 }
 
 ACE_INLINE

@@ -64,6 +64,9 @@ public:
   void notify_status_condition();
 
   virtual void transport_config(const TransportConfig_rch& cfg);
+  TransportConfig_rch transport_config();
+
+  virtual EntityImpl* parent() { return 0; }
 
 protected:
   /// The flag indicates the entity is enabled.

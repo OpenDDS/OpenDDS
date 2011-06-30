@@ -58,6 +58,12 @@ UdpInst::load(const TransportIdType& id,
   return 0;
 }
 
+UdpTransport*
+UdpInst::new_impl()
+{
+  return new UdpTransport;
+}
+
 int
 UdpInst::load(ACE_Configuration_Heap& cf,
               ACE_Configuration_Section_Key& sect)

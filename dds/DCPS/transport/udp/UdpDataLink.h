@@ -11,7 +11,6 @@
 
 #include "Udp_Export.h"
 
-#include "UdpInst.h"
 #include "UdpSendStrategy.h"
 #include "UdpSendStrategy_rch.h"
 #include "UdpReceiveStrategy.h"
@@ -26,6 +25,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class UdpInst;
 class UdpTransport;
 
 class OpenDDS_Udp_Export UdpDataLink

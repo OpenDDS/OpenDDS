@@ -14,6 +14,7 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleList.h"
@@ -75,11 +76,9 @@ class Monitor;
 class OpenDDS_Dcps_Export DataWriterImpl
   : public virtual DDS::DataWriter,
     public virtual EntityImpl,
+    public virtual TransportClient,
     public virtual TransportSendListener,
     public virtual ACE_Event_Handler
-    // DataWriterLocal is conceptual - no need to implement - just
-    // use DataWriterImpl
-    // public virtual OpenDDS::DCPS::DataWriterLocal
 {
 public:
   friend class WriteDataContainer;
@@ -334,6 +333,8 @@ public:
   /// Deliver a requested SAMPLE_ACK message to this writer.
   virtual void deliver_ack(const DataSampleHeader& header, DataSample* data);
 
+  virtual bool check_transport_qos(const TransportInst& inst);
+
   /// Are coherent changes pending?
   bool coherent_changes_pending();
 
@@ -475,6 +476,8 @@ public:
    * Get an instance handle for a new instance.
    */
   DDS::InstanceHandle_t get_next_handle();
+  
+  virtual EntityImpl* parent();
 
 protected:
 

@@ -111,6 +111,7 @@ TransportRegistry::instance()
 }
 
 const std::string TransportRegistry::DEFAULT_CONFIG_NAME = "_OPENDDS_DEFAULT_CONFIG";
+const std::string TransportRegistry::DEFAULT_INST_PREFIX = "_OPENDDS_";
 
 int
 TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
@@ -288,7 +289,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
 void
 TransportRegistry::register_type(const TransportType_rch& type)
 {
-  DBG_ENTRY_LVL("TransportRegistry", "register_generator", 6);
+  DBG_ENTRY_LVL("TransportRegistry", "register_type", 6);
   int result;
   const std::string name = type->name();
 

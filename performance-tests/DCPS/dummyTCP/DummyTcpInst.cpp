@@ -3,6 +3,8 @@
 // $Id$
 #include "DummyTcp_pch.h"
 #include "DummyTcpInst.h"
+#include "DummyTcpTransport.h"
+
 #include <iostream>
 
 #if !defined (__ACE_INLINE__)
@@ -68,6 +70,14 @@ OpenDDS::DCPS::DummyTcpInst::load (const TransportIdType& id,
 
   return 0;
 }
+
+
+OpenDDS::DCPS::TransportImpl*
+OpenDDS::DCPS::DummyTcpInst::new_impl()
+{
+  return new DummyTcpTransport;
+}
+
 
 void
 OpenDDS::DCPS::DummyTcpInst::dump(std::ostream& os)

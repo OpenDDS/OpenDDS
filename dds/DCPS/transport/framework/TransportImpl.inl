@@ -118,24 +118,6 @@ OpenDDS::DCPS::TransportImpl::connection_info
   return this->connection_info_i(local_info);
 }
 
-/// Note that this will return -1 if the TransportImpl has not been
-/// configure()'d yet.
-ACE_INLINE int
-OpenDDS::DCPS::TransportImpl::swap_bytes() const
-{
-  DBG_ENTRY_LVL("TransportImpl","swap_bytes",6);
-
-  GuardType guard(this->lock_);
-
-  if (this->config_.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl cannot return swap_bytes "
-                      "value - TransportImpl has not been configure()'d.\n"),
-                     -1);
-  }
-
-  return this->config_->swap_bytes_;
-}
 
 ACE_INLINE void
 OpenDDS::DCPS::TransportImpl::pre_shutdown_i()

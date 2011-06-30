@@ -10,6 +10,7 @@
 #define OPENDDS_TCPINST_H
 
 #include "Tcp_export.h"
+#include "TcpTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "ace/INET_Addr.h"
@@ -89,6 +90,7 @@ private:
   explicit TcpInst(const std::string& name);
   virtual ~TcpInst();
 
+  TcpTransport* new_impl();
 };
 
 } // namespace DCPS

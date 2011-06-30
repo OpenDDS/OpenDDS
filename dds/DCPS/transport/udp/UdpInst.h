@@ -10,6 +10,7 @@
 #define DCPS_UDPINST_H
 
 #include "Udp_Export.h"
+#include "UdpTransport.h"
 
 #include "ace/INET_Addr.h"
 
@@ -37,6 +38,8 @@ private:
   friend class UdpType;
   friend class UdpGenerator; //TODO: transitional
   explicit UdpInst(const std::string& name);
+
+  UdpTransport* new_impl();
 };
 
 } // namespace DCPS

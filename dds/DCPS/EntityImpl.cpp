@@ -107,6 +107,12 @@ EntityImpl::transport_config(const TransportConfig_rch& cfg)
   transport_config_ = cfg;
 }
 
+TransportConfig_rch
+EntityImpl::transport_config()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TransportConfig_rch());
+  return transport_config_;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

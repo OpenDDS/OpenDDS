@@ -25,6 +25,11 @@ public:
   {
     return new UdpInst(name);
   }
+
+  static TransportInst* new_default()
+  {
+    return new UdpInst(TransportRegistry::DEFAULT_INST_PREFIX + "0300_UDP");
+  }
 };
 
 int
@@ -34,7 +39,10 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TheTransportRegistry->register_type(new UdpType);
+  TransportRegistry* registry = TheTransportRegistry;
+  registry->register_type(new UdpType);
+  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
+    ->insert(UdpType::new_default());
 
   TheTransportFactory->register_generator(ACE_TEXT("udp"), new UdpGenerator);
 

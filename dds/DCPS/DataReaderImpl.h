@@ -19,6 +19,7 @@
 #include "Definitions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 #include "DisjointSequence.h"
 #include "SubscriptionInstance.h"
 #include "InstanceState.h"
@@ -217,6 +218,7 @@ private:
 class OpenDDS_Dcps_Export DataReaderImpl
   : public virtual LocalObject<DataReaderEx>,
     public virtual EntityImpl,
+    public virtual TransportClient,
     public virtual TransportReceiveListener,
     public virtual ACE_Event_Handler {
 public:
@@ -423,6 +425,8 @@ public:
   /// process a message that has been received - could be control or a data sample.
   virtual void data_received(const ReceivedDataSample& sample);
 
+  virtual bool check_transport_qos(const TransportInst& inst);
+
   RepoId get_subscription_id() const;
   void set_subscription_id(RepoId subscription_id);
 
@@ -580,6 +584,8 @@ public:
 
   // Set the instance related writers to reevaluate the owner.
   void reset_ownership (::DDS::InstanceHandle_t instance);
+
+  virtual EntityImpl* parent();
 
 protected:
 

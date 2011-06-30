@@ -25,6 +25,20 @@ public:
   {
     return new MulticastInst(name);
   }
+
+  static TransportInst* new_default_unreliable()
+  {
+    MulticastInst* mi = new MulticastInst(TransportRegistry::DEFAULT_INST_PREFIX
+                                          + "0410_MCAST_UNRELIABLE");
+    mi->reliable_ = false;
+    return mi;
+  }
+
+  static TransportInst* new_default_reliable()
+  {
+   return new MulticastInst(TransportRegistry::DEFAULT_INST_PREFIX
+                            + "0420_MCAST_RELIABLE");
+  }
 };
 
 int
@@ -34,7 +48,12 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TheTransportRegistry->register_type(new MulticastType);
+  TransportRegistry* registry = TheTransportRegistry;
+  registry->register_type(new MulticastType);
+  TransportConfig_rch cfg =
+    registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME);
+  cfg->insert(MulticastType::new_default_unreliable());
+  cfg->insert(MulticastType::new_default_reliable());
 
   TheTransportFactory->register_generator(ACE_TEXT("multicast"),
                                           new MulticastGenerator);

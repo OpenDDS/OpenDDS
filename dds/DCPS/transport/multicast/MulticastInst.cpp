@@ -8,6 +8,7 @@
 
 #include "MulticastInst.h"
 #include "MulticastLoader.h"
+#include "MulticastTransport.h"
 
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
@@ -205,6 +206,11 @@ MulticastInst::default_group_address(ACE_INET_Addr& group_address,
   }
 }
 
+MulticastTransport*
+MulticastInst::new_impl()
+{
+  return new MulticastTransport;
+}
 
 void
 MulticastInst::dump(std::ostream& os)

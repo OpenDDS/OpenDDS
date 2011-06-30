@@ -18,11 +18,22 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportConfig::TransportConfig(const std::string& name)
-: name_(name)
+  : name_(name)
 {}
 
 TransportConfig::~TransportConfig()
 {}
+
+void
+TransportConfig::insert(const TransportInst_rch& inst)
+{
+  const std::string name = inst->name();
+  std::vector<TransportInst_rch>::iterator it = instances_.begin();
+  while (it != instances_.end() && (*it)->name() < name) {
+    ++it;
+  }
+  instances_.insert(it, inst);
+}
 
 }
 }

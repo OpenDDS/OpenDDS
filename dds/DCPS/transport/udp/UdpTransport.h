@@ -11,7 +11,6 @@
 
 #include "Udp_Export.h"
 
-#include "UdpInst.h"
 #include "UdpDataLink.h"
 #include "UdpDataLink_rch.h"
 
@@ -23,8 +22,9 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Udp_Export UdpTransport
-  : public TransportImpl {
+class UdpInst;
+
+class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
 protected:
   virtual DataLink* find_or_create_datalink(
     RepoId local_id,

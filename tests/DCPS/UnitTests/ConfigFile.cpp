@@ -49,7 +49,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TransportInst_rch inst = TransportRegistry::instance()->get_inst("mytcp");
   TEST_CHECK(inst != 0);
 
-  TcpInst_rch tcp_inst = dynamic_cast<TcpInst*>(inst.in());
+  TcpInst_rch tcp_inst(dynamic_cast<TcpInst*>(inst.in()), false);
   TEST_CHECK(tcp_inst != 0);
 
   tcp_inst->dump(std::cout);

@@ -8,6 +8,7 @@
 
 #include "UdpSendStrategy.h"
 #include "UdpDataLink.h"
+#include "UdpInst.h"
 
 namespace OpenDDS {
 namespace DCPS {

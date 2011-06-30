@@ -29,6 +29,8 @@
 
 #include "Util.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
+
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
@@ -1472,6 +1474,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                        topic_name_.in(),
                                        topic_id_);
 
+  try {
+    this->enable_transport();
+  } catch (const Transport::Exception&) {
+    return DDS::RETCODE_ERROR;
+  }
+
   if (this->monitor_) {
     this->monitor_->report();
   }
@@ -2015,6 +2023,18 @@ DataWriterImpl::deliver_ack(
 
     this->wfaCondition_.broadcast();
   }
+}
+
+EntityImpl*
+DataWriterImpl::parent()
+{
+  return this->publisher_servant_;
+}
+
+bool
+DataWriterImpl::check_transport_qos(const TransportInst&)
+{
+  return true;
 }
 
 bool

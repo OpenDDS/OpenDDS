@@ -8,6 +8,7 @@
 
 #include "UdpDataLink.h"
 #include "UdpTransport.h"
+#include "UdpInst.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"

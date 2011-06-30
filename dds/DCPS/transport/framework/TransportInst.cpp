@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportInst.h"
 #include "ThreadSynchStrategy.h"
+#include "TransportImpl.h"
 #include "EntryExit.h"
 
 #include <iomanip>
@@ -116,4 +117,23 @@ OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
   os << formatNameForDump(ACE_TEXT("thread_per_connection"))   << (this->thread_per_connection_ ? "true" : "false") << std::endl;
   os << formatNameForDump(ACE_TEXT("datalink_release_delay"))  << this->datalink_release_delay_ << std::endl;
   os << formatNameForDump(ACE_TEXT("datalink_control_chunks")) << this->datalink_control_chunks_ << std::endl;
+}
+
+void
+OpenDDS::DCPS::TransportInst::shutdown()
+{
+  if (!this->impl_.is_nil()) {
+    this->impl_->shutdown();
+  }
+}
+
+OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportInst::impl()
+{
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
+  if (this->impl_.is_nil()) {
+    this->impl_ = this->new_impl();
+    this->impl_->configure(this);
+  }
+  return this->impl_;
 }

@@ -1,3 +1,56 @@
+Thu Jun 30 22:29:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+
+          Added default config with instances for each specific type.
+          Insts can now create and cache their corresponding impl.
+          Began integrating with DCPS layer (via new TransportClient class).
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+
+          Fixed a reference counting bug.
+
 Thu Jun 30 20:50:52 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfig.h:
@@ -7,7 +60,7 @@ Thu Jun 30 20:50:52 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
         * dds/DCPS/transport/framework/TransportInst.cpp:
         * dds/DCPS/transport/framework/TransportRegistry.h:
         * dds/DCPS/transport/framework/TransportRegistry.cpp:
-        
+
           Add new parsing code to the TransportRegistry.  This
           is currently not called by the ServiceParticipant.
           Add a new load function (with a different signature)
@@ -20,14 +73,14 @@ Thu Jun 30 20:50:52 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
         * dds/DCPS/transport/tcp/TcpInst.cpp:
         * dds/DCPS/transport/udp/UdpInst.h:
         * dds/DCPS/transport/udp/UdpInst.cpp:
-        
+
           Add the new load function to these transport implementations.
 
         * tests/DCPS/UnitTests/ConfigFile.cpp:
         * tests/DCPS/UnitTests/UnitTests.mpc:
         * tests/DCPS/UnitTests/tcp.conf:
         * tests/DCPS/UnitTests/test1.conf:
-        
+
           Add a simple unit test to test the TCP config parsing.
           Much more needs to be added to this.
 
@@ -36,7 +89,7 @@ Thu Jun 30 13:47:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
         * dds/DCPS/transport/framework/TransportConfig.h:
         * dds/DCPS/transport/framework/TransportRegistry.inl:
 
-          Fixes for inline=0 builds.
+          Fixes for inline=1 builds.
 
         * java/build_scripts/jni_check.pl:
 

@@ -11,7 +11,6 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastInst.h"
 #include "MulticastDataLink_rch.h"
 #include "MulticastTypes.h"
 
@@ -22,8 +21,9 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Multicast_Export MulticastTransport
-  : public TransportImpl {
+class MulticastInst;
+
+class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
   MulticastTransport();
   ~MulticastTransport();

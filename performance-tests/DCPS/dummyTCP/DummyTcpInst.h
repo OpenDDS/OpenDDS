@@ -16,8 +16,7 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    class DummyTcp_Export DummyTcpInst
-                                          : public TransportInst
+    class DummyTcp_Export DummyTcpInst : public TransportInst
     {
       public:
 
@@ -28,6 +27,8 @@ namespace OpenDDS
 
         /// Diagnostic aid.
         virtual void dump(std::ostream& os);
+
+        TransportImpl* new_impl();
 
         /// Describes the local endpoint to be used to accept
         /// passive connections.

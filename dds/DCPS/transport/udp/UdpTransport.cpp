@@ -7,6 +7,7 @@
  */
 
 #include "UdpTransport.h"
+#include "UdpInst.h"
 #include "UdpSendStrategy.h"
 #include "UdpReceiveStrategy.h"
 

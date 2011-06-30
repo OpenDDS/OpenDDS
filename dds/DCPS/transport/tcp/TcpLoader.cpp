@@ -41,6 +41,11 @@ public:
   {
     return new TcpInst(name);
   }
+
+  static TransportInst* new_default()
+  {
+    return new TcpInst(TransportRegistry::DEFAULT_INST_PREFIX + "0500_TCP");
+  }
 };
 
 int
@@ -54,7 +59,10 @@ TcpLoader::init(int, ACE_TCHAR*[])
   if (initialized)
     return 0;
 
-  TheTransportRegistry->register_type(new TcpType);
+  TransportRegistry* registry = TheTransportRegistry;
+  registry->register_type(new TcpType);
+  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
+    ->insert(TcpType::new_default());
 
   TheTransportFactory->register_generator(ACE_TEXT("tcp"), new TcpGenerator);
 

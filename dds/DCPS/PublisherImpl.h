@@ -230,6 +230,8 @@ public:
   /// of this Publisher's Data Writers
   void get_publication_ids(PublicationIdVec& pubs);
 
+  virtual EntityImpl* parent();
+
 private:
   DDS::InstanceHandle_t        handle_;
 

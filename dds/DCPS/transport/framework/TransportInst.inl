@@ -62,10 +62,3 @@ OpenDDS::DCPS::TransportInst::adjust_config_value()
                old_value, max_samples_per_packet_));
   }
 }
-
-ACE_INLINE
-void
-OpenDDS::DCPS::TransportInst::shutdown()
-{
-  //TODO: fwd to impl
-}
