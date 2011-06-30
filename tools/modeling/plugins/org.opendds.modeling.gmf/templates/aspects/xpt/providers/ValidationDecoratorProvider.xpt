@@ -1,0 +1,398 @@
+«IMPORT 'http://www.eclipse.org/gmf/2009/GenModel'»
+
+«AROUND ValidationDecoratorProvider FOR gmfgen::GenDiagram-»
+«EXPAND xpt::Common::copyright FOR editorGen-»
+package «providersPackageName»;
+
+«EXPAND xpt::Common::generatedClassComment»
+public class «validationDecoratorProviderClassName»
+		extends org.eclipse.gmf.runtime.common.core.service.AbstractProvider
+		implements org.eclipse.gmf.runtime.diagram.ui.services.decorator.IDecoratorProvider {
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private static final String KEY = "validationStatus"; «EXPAND xpt::Common::nonNLS»
+	«IF editorGen.application = null-»
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private static final String MARKER_TYPE = «editorGen.plugin.getActivatorQualifiedClassName()».ID +
+			".«getValidationDiagnosticMarkerType()»"; «EXPAND xpt::Common::nonNLS»
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private static MarkerObserver fileObserver;
+	«ENDIF-»
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private static java.util.Map/*<String, List<IDecorator>>*/ allDecorators = new java.util.HashMap();
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	public void createDecorators(org.eclipse.gmf.runtime.diagram.ui.services.decorator.IDecoratorTarget decoratorTarget) {
+		org.eclipse.gef.EditPart editPart = (org.eclipse.gef.EditPart) decoratorTarget.getAdapter(org.eclipse.gef.EditPart.class);
+		if (editPart instanceof org.eclipse.gmf.runtime.diagram.ui.editparts.GraphicalEditPart ||
+				editPart instanceof org.eclipse.gef.editparts.AbstractConnectionEditPart) {
+			Object model = editPart.getModel();
+			if ((model instanceof org.eclipse.gmf.runtime.notation.View)) {
+				org.eclipse.gmf.runtime.notation.View view = (org.eclipse.gmf.runtime.notation.View) model;
+				if (!(view instanceof org.eclipse.gmf.runtime.notation.Edge) && !view.isSetElement()) {
+					return;
+				}
+			}
+			org.eclipse.gef.EditDomain ed = editPart.getViewer().getEditDomain();
+			if (!(ed instanceof org.eclipse.gmf.runtime.diagram.ui.parts.DiagramEditDomain)) {
+				return;
+			}
+			if (((org.eclipse.gmf.runtime.diagram.ui.parts.DiagramEditDomain) ed).getEditorPart() instanceof
+					«editorGen.editor.getQualifiedClassName()») {
+				decoratorTarget.installDecorator(KEY, new StatusDecorator(decoratorTarget));
+			}
+		}
+	}
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	public boolean provides(org.eclipse.gmf.runtime.common.core.service.IOperation operation) {
+		if (!(operation instanceof org.eclipse.gmf.runtime.diagram.ui.services.decorator.CreateDecoratorsOperation)) {
+			return false;
+		}
+		org.eclipse.gmf.runtime.diagram.ui.services.decorator.IDecoratorTarget decoratorTarget =
+				((org.eclipse.gmf.runtime.diagram.ui.services.decorator.CreateDecoratorsOperation) operation).getDecoratorTarget();
+		org.eclipse.gmf.runtime.notation.View view = (org.eclipse.gmf.runtime.notation.View) decoratorTarget.getAdapter(
+				org.eclipse.gmf.runtime.notation.View.class);
+		return view != null && «EXPAND xpt::editor::VisualIDRegistry::modelID».equals(«EXPAND xpt::editor::VisualIDRegistry::getModelIDMethodCall»(view));
+	}
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	public static void refreshDecorators(org.eclipse.gmf.runtime.notation.View view) {
+		refreshDecorators(org.eclipse.gmf.runtime.diagram.core.util.ViewUtil.getIdStr(view), view.getDiagram());
+	}
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	«REM»Custom modifications begin«ENDREM-»
+	private static void refreshDecorators(String viewId, org.eclipse.gmf.runtime.notation.Diagram diagram) {
+		final java.util.List decorators = viewId != null ? (java.util.List) allDecorators.get(viewId) : null;
+		if (decorators == null || decorators.isEmpty() || diagram == null) {
+			return;
+		}
+		«REM»Custom modifications begin«ENDREM-»
+		«REM»Remove declaration of fdiagram«ENDREM-»
+		«REM»Custom modifications end«ENDREM-»
+		org.eclipse.ui.PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+
+			public void run() {
+				try {
+					for (java.util.Iterator it = decorators.iterator(); it.hasNext();) {
+						StatusDecorator decorator = (StatusDecorator) it.next();
+						Refresher refresher = new Refresher(decorator);
+						org.eclipse.emf.transaction.util.TransactionUtil.getEditingDomain(decorator.view).runExclusive(refresher);
+					}
+				} catch (Exception e) {
+					«editorGen.plugin.getActivatorQualifiedClassName()».getInstance().logError(
+							"Decorator refresh failure", e); «EXPAND xpt::Common::nonNLS»
+				}
+			}
+		});
+	}
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private static final class Refresher implements Runnable {
+		private final org.eclipse.gmf.runtime.diagram.ui.services.decorator.IDecorator decorator;
+
+		private Refresher(org.eclipse.gmf.runtime.diagram.ui.services.decorator.IDecorator decorator) {
+			this.decorator = decorator;
+		}
+
+		public void run() {
+			decorator.refresh();
+		}
+	}
+	«REM»Custom modifications end«ENDREM-»
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	public static class StatusDecorator extends org.eclipse.gmf.runtime.diagram.ui.services.decorator.AbstractDecorator {
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		private String viewId;
+
+		«REM»Custom modifications begin«ENDREM-»
+		«EXPAND xpt::Common::generatedMemberComment»
+		private org.eclipse.gmf.runtime.notation.View view;
+		«REM»Custom modifications end«ENDREM-»
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public StatusDecorator(org.eclipse.gmf.runtime.diagram.ui.services.decorator.IDecoratorTarget decoratorTarget) {
+			super(decoratorTarget);
+			try {
+				«REM»Custom modifications begin«ENDREM-»
+				view = (org.eclipse.gmf.runtime.notation.View) getDecoratorTarget().getAdapter(
+						org.eclipse.gmf.runtime.notation.View.class);
+				«REM»Custom modifications end«ENDREM-»
+				org.eclipse.emf.transaction.util.TransactionUtil.getEditingDomain(view).runExclusive(new Runnable() {
+
+					public void run() {
+						StatusDecorator.this.viewId = view != null ?
+								org.eclipse.gmf.runtime.diagram.core.util.ViewUtil.getIdStr(view) : null;
+					}
+				});
+			} catch (Exception e) {
+				«editorGen.plugin.getActivatorQualifiedClassName()».getInstance().logError(
+						"ViewID access failure", e); «EXPAND xpt::Common::nonNLS»
+			}
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void refresh() {
+			removeDecoration();
+			«REM»Custom modifications begin«ENDREM-»
+			«REM»Remove declaration of view«ENDREM-»
+			«REM»Custom modifications end«ENDREM-»
+			if (view == null || view.eResource() == null) {
+				return;
+			}
+			org.eclipse.gef.EditPart editPart = (org.eclipse.gef.EditPart) getDecoratorTarget().getAdapter(org.eclipse.gef.EditPart.class);
+			if (editPart == null || editPart.getViewer() == null) {
+				return;
+			}
+
+			// query for all the validation markers of the current resource
+			«IF editorGen.application = null-»
+			String elementId = org.eclipse.gmf.runtime.diagram.core.util.ViewUtil.getIdStr(view);
+			if (elementId == null) {
+				return;
+			}
+			int severity = org.eclipse.core.resources.IMarker.SEVERITY_INFO;
+			org.eclipse.core.resources.IMarker foundMarker = null;
+			org.eclipse.core.resources.IResource resource = org.eclipse.emf.workspace.util.WorkspaceSynchronizer.getFile(view.eResource());
+			if (resource == null || !resource.exists()) {
+				return;
+			}
+			org.eclipse.core.resources.IMarker[] markers = null;
+			try {
+				markers = resource.findMarkers(MARKER_TYPE, true, org.eclipse.core.resources.IResource.DEPTH_INFINITE);
+			} catch (org.eclipse.core.runtime.CoreException e) {
+				«editorGen.plugin.getActivatorQualifiedClassName()».getInstance().logError(
+						"Validation markers refresh failure", e); «EXPAND xpt::Common::nonNLS»
+			}
+			«ELSE-»
+			int severity = org.eclipse.core.runtime.IStatus.INFO;
+			«EXPAND xpt::editor::ValidationMarker::qualifiedClassName» foundMarker = null;
+			«EXPAND xpt::editor::ValidationMarker::qualifiedClassName»[] markers =
+					«EXPAND xpt::editor::ValidationMarker::qualifiedClassName».getMarkers(editPart.getViewer(), viewId);
+			«ENDIF-»
+			if (markers == null || markers.length == 0) {
+				return;
+			}
+			org.eclipse.draw2d.Label toolTip = null;
+			for (int i = 0; i < markers.length; i++) {
+				«IF editorGen.application = null-»
+				org.eclipse.core.resources.IMarker marker = markers[i];
+				String attribute = marker.getAttribute(org.eclipse.gmf.runtime.common.ui.resources.IMarker.ELEMENT_ID, ""); «EXPAND xpt::Common::nonNLS»
+				if (attribute.equals(elementId)) {
+					int nextSeverity = marker.getAttribute(org.eclipse.core.resources.IMarker.SEVERITY,
+							org.eclipse.core.resources.IMarker.SEVERITY_INFO);
+				«ELSE-»
+				«EXPAND xpt::editor::ValidationMarker::qualifiedClassName» marker = markers[i];
+				int nextSeverity = marker.getStatusSeverity();
+				«ENDIF-»
+					org.eclipse.swt.graphics.Image nextImage = getImage(nextSeverity);
+					if (foundMarker == null) {
+						foundMarker = marker;
+						toolTip = new org.eclipse.draw2d.Label(
+							«IF editorGen.application = null-»
+								marker.getAttribute(org.eclipse.core.resources.IMarker.MESSAGE, ""), «EXPAND xpt::Common::nonNLS»
+							«ELSE-»
+								marker.getMessage(),
+							«ENDIF-»
+								nextImage);
+					} else {
+						if (toolTip.getChildren().isEmpty()) {
+							org.eclipse.draw2d.Label comositeLabel = new org.eclipse.draw2d.Label();
+							org.eclipse.draw2d.FlowLayout fl = new org.eclipse.draw2d.FlowLayout(false);
+							fl.setMinorSpacing(0);
+							comositeLabel.setLayoutManager(fl);
+							comositeLabel.add(toolTip);
+							toolTip = comositeLabel;
+						}
+						toolTip.add(new org.eclipse.draw2d.Label(
+							«IF editorGen.application = null-»
+								marker.getAttribute(org.eclipse.core.resources.IMarker.MESSAGE, ""),  «EXPAND xpt::Common::nonNLS»
+							«ELSE-»
+								marker.getMessage(),
+							«ENDIF-»
+								nextImage));
+					}
+					severity = (nextSeverity > severity) ? nextSeverity : severity;
+				«IF editorGen.application = null-»
+				}
+				«ENDIF-»
+			}
+			if (foundMarker == null) {
+				return;
+			}
+
+			// add decoration
+			if (editPart instanceof org.eclipse.gef.GraphicalEditPart) {
+				if (view instanceof org.eclipse.gmf.runtime.notation.Edge) {
+					setDecoration(getDecoratorTarget().addConnectionDecoration(getImage(severity), 50, true));
+				} else {
+					int margin = -1;
+					if (editPart instanceof org.eclipse.gef.GraphicalEditPart) {
+						margin = org.eclipse.gmf.runtime.draw2d.ui.mapmode.MapModeUtil.getMapMode(
+							((org.eclipse.gef.GraphicalEditPart) editPart).getFigure()).DPtoLP(margin);
+					}
+					setDecoration(getDecoratorTarget().addShapeDecoration(getImage(severity),
+							org.eclipse.gmf.runtime.diagram.ui.services.decorator.IDecoratorTarget.Direction.NORTH_EAST, margin, true));
+				}
+				getDecoration().setToolTip(toolTip);
+			}
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		private org.eclipse.swt.graphics.Image getImage(int severity) {
+			String imageName = org.eclipse.ui.ISharedImages.IMG_OBJS_ERROR_TSK;
+			switch (severity) {
+			«IF editorGen.application = null-»
+			case org.eclipse.core.resources.IMarker.SEVERITY_ERROR:
+				imageName = org.eclipse.ui.ISharedImages.IMG_OBJS_ERROR_TSK;
+				break;
+			case org.eclipse.core.resources.IMarker.SEVERITY_WARNING:
+				imageName = org.eclipse.ui.ISharedImages.IMG_OBJS_WARN_TSK;
+				break;
+			«ELSE-»
+			case org.eclipse.core.runtime.IStatus.ERROR:
+				imageName = org.eclipse.ui.ISharedImages.IMG_OBJS_ERROR_TSK;
+				break;
+			case org.eclipse.core.runtime.IStatus.WARNING:
+				imageName = org.eclipse.ui.ISharedImages.IMG_OBJS_WARN_TSK;
+				break;
+			«ENDIF-»
+			default:
+				imageName = org.eclipse.ui.ISharedImages.IMG_OBJS_INFO_TSK;
+			}
+			return org.eclipse.ui.PlatformUI.getWorkbench().getSharedImages().getImage(imageName);
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void activate() {
+			if (viewId == null) {
+				return;
+			}
+
+			// add self to global decorators registry
+			java.util.List list = (java.util.List) allDecorators.get(viewId);
+			if (list == null) {
+				list = new java.util.ArrayList(2);
+				list.add(this);
+				allDecorators.put(viewId, list);
+			} else if (!list.contains(this)) {
+				list.add(this);
+			}
+			«IF editorGen.application = null-»
+
+			// start listening to changes in resources
+			«REM»Custom modifications begin«ENDREM-»
+			«REM»Remove declaration of view«ENDREM-»
+			«REM»Custom modifications end«ENDREM-»
+			if (view == null) {
+				return;
+			}
+			org.eclipse.gmf.runtime.notation.Diagram diagramView = view.getDiagram();
+			if (diagramView == null) {
+				return;
+			}
+			if (fileObserver == null) {
+				org.eclipse.gmf.runtime.common.ui.resources.FileChangeManager.getInstance().addFileObserver(
+						fileObserver = new MarkerObserver(diagramView));
+			}
+			«ENDIF-»
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void deactivate() {
+			if (viewId == null) {
+				return;
+			}
+
+			// remove self from global decorators registry
+			java.util.List list = (java.util.List) allDecorators.get(viewId);
+			if (list != null) {
+				list.remove(this);
+				if (list.isEmpty()) {
+					allDecorators.remove(viewId);
+				}
+			}
+			«IF editorGen.application = null-»
+
+			// stop listening to changes in resources if there are no more decorators
+			if (fileObserver != null && allDecorators.isEmpty()) {
+				org.eclipse.gmf.runtime.common.ui.resources.FileChangeManager.getInstance().removeFileObserver(fileObserver);
+				fileObserver = null;
+			}
+			«ENDIF-»
+			super.deactivate();
+		}
+	}
+	«IF editorGen.application = null-»
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	static class MarkerObserver implements org.eclipse.gmf.runtime.common.ui.resources.IFileObserver {
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		private org.eclipse.gmf.runtime.notation.Diagram diagram;
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		private MarkerObserver(org.eclipse.gmf.runtime.notation.Diagram diagram) {
+			this.diagram = diagram;
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void handleFileRenamed(org.eclipse.core.resources.IFile oldFile, org.eclipse.core.resources.IFile file) {
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void handleFileMoved(org.eclipse.core.resources.IFile oldFile, org.eclipse.core.resources.IFile file) {
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void handleFileDeleted(org.eclipse.core.resources.IFile file) {
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void handleFileChanged(org.eclipse.core.resources.IFile file) {
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void handleMarkerAdded(org.eclipse.core.resources.IMarker marker) {
+			if (marker.getAttribute(org.eclipse.gmf.runtime.common.ui.resources.IMarker.ELEMENT_ID, null) != null) {
+				handleMarkerChanged(marker);
+			}
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void handleMarkerDeleted(org.eclipse.core.resources.IMarker marker, java.util.Map attributes) {
+			String viewId = (String) attributes.get(org.eclipse.gmf.runtime.common.ui.resources.IMarker.ELEMENT_ID);
+			refreshDecorators(viewId, diagram);
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		public void handleMarkerChanged(org.eclipse.core.resources.IMarker marker) {
+			if (!MARKER_TYPE.equals(getType(marker))) {
+				return;
+			}
+			String viewId = marker.getAttribute(
+					org.eclipse.gmf.runtime.common.ui.resources.IMarker.ELEMENT_ID, ""); «EXPAND xpt::Common::nonNLS»
+			refreshDecorators(viewId, diagram);
+		}
+
+		«EXPAND xpt::Common::generatedMemberComment»
+		private String getType(org.eclipse.core.resources.IMarker marker) {
+			try {
+				return marker.getType();
+			} catch (org.eclipse.core.runtime.CoreException e) {
+				«editorGen.plugin.getActivatorQualifiedClassName()».getInstance().logError(
+						"Validation marker refresh failure", e); «EXPAND xpt::Common::nonNLS»
+				return ""; «EXPAND xpt::Common::nonNLS»
+			}
+		}
+	}
+	«ENDIF-»
+}
+«ENDAROUND»
+
