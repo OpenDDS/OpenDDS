@@ -2,11 +2,11 @@ Thu Jun 30 19:46:02 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/providers/ValidationDecoratorProvider.xpt:
 
-	  Avoid "Decorator refresh failure" that can occur when
-	  validating in one sub-diagram that is the same type as
-	  another opened sub-diagram (e.g. two PolicyLib diagrams).
-	  This problem was causing subsequent validations to fail
-	  in either sub-diagram.
+          Avoid "Decorator refresh failure" that can occur when
+          validating in one sub-diagram that is the same type as
+          another opened sub-diagram (e.g. two PolicyLib diagrams).
+          This problem was causing subsequent validations to fail
+          in either sub-diagram.
 
 Wed Jun 29 22:33:13 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
