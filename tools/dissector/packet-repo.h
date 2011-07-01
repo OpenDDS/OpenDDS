@@ -24,6 +24,25 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+
+    struct Pending_Topic
+    {
+      conversation_t *conv_;
+      ulong           request_;
+      char           *data_name_;
+      Pending_Topic  *next_;
+
+      Pending_Topic ()
+        :conv_(0), request_(0), data_name_(0), next_(0) {}
+      ~Pending_Topic ()
+      {
+        delete [] data_name_;
+      }
+
+    };
+
+    typedef ACE_Hash_Map_Manager <u_long, const char *, ACE_Null_Mutex> Known_Topics;
+
     class dissector_Export InfoRepo_Dissector : public GIOP_Base
     {
     public:
@@ -70,6 +89,12 @@ namespace OpenDDS
       static void shutdown                       (::MessageHeader *);
 #endif
     private:
+      void add_pending (int request_id, const char *dataName);
+      void map_pending (Pending_Topic &, const RepoId *);
+      void discard_pending (Pending_Topic &);
+
+      Pending_Topic *pending_topics_;
+      Known_Topics   known_topics_;
 
       static InfoRepo_Dissector instance_;
 

@@ -160,8 +160,8 @@ namespace OpenDDS
       ACE_UNUSED_ARG (header);
       ACE_UNUSED_ARG (operation);
 
-      ACE_DEBUG ((LM_DEBUG,"DWR_heur pinfo.protocol = %s\n",
-                  pinfo->current_proto));
+      ACE_DEBUG ((LM_DEBUG,"DWR_heur pinfo.protocol = %s type = %d, req_id = %d\n",
+                  pinfo->current_proto, header->message_type, header->req_id));
       return FALSE;
 
     }

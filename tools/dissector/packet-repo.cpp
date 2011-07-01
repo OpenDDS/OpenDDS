@@ -218,13 +218,91 @@ namespace OpenDDS
 #endif
     }
 
-
-
     InfoRepo_Dissector&
     InfoRepo_Dissector::instance()
     {
       return instance_;
     }
+
+    void
+    InfoRepo_Dissector::add_pending (int request_id, const char *dataName)
+    {
+      Pending_Topic *pt = new Pending_Topic;
+      pt->conv_ = this->find_conversation ();
+      pt->request_ = request_id;
+      pt->data_name_ = new char[ACE_OS::strlen(dataName)+1];
+      pt->next_ = 0;
+
+      ACE_OS::strcpy (pt->data_name_, dataName);
+
+      ACE_DEBUG ((LM_DEBUG, "add pending called, data name = \"%s\", conv_id = %d, req_id = %d\n",
+                  pt->data_name_, pt->conv_->index, request_id));
+      if (this->pending_topics_ == 0)
+        {
+          this->pending_topics_ = pt;
+          return;
+        }
+      Pending_Topic *node = this->pending_topics_;
+      while (node->next_ != 0)
+        node = node->next_;
+      node->next_ = pt;
+    }
+
+    void
+    InfoRepo_Dissector::map_pending (Pending_Topic &pt, const RepoId *rid)
+    {
+      Pending_Topic *prev_node = 0;
+      for (Pending_Topic *node = this->pending_topics_;
+           node != 0;
+           node = node->next_)
+        {
+          if (pt.conv_->index == node->conv_->index &&
+              pt.request_ == node->request_)
+            {
+              ACE_DEBUG ((LM_DEBUG,"map_pending found node!\n"));
+              u_long hash_rid = ACE::hash_pjw(reinterpret_cast<const char *>(rid), sizeof (RepoId));
+              this->known_topics_.bind (hash_rid, pt.data_name_);
+              pt.data_name_ = 0;
+              if (prev_node == 0)
+                {
+                  this->pending_topics_ = node->next_;
+                }
+              else
+                {
+                  prev_node->next_ = node->next_;
+                }
+              delete node;
+              return;
+            }
+        }
+      ACE_DEBUG ((LM_DEBUG,"map_pending could not find pending topic\n"));
+    }
+
+    void
+    InfoRepo_Dissector::discard_pending (Pending_Topic &pt)
+    {
+      Pending_Topic *prev_node = 0;
+      for (Pending_Topic *node = this->pending_topics_;
+           node != 0;
+           node = node->next_)
+        {
+          if (pt.conv_->index == node->conv_->index &&
+              pt.request_ == node->request_)
+            {
+              if (prev_node == 0)
+                {
+                  this->pending_topics_ = node->next_;
+                }
+              else
+                {
+                  prev_node->next_ = node->next_;
+                }
+              delete node;
+              return;
+            }
+        }
+    }
+
 
     /*
       // Domain participant calls to notify of a new topic
@@ -245,10 +323,21 @@ namespace OpenDDS
       switch (header->message_type) {
       case Reply:
         {
+          Pending_Topic pt;
+          pt.conv_ = instance().find_conversation();
+          pt.request_ = header->req_id;
+
           switch (header->rep_status) {
           case NO_EXCEPTION:
-            instance().add_topic_status (hf_topicStatus);
-            instance().add_repo_id (hf_topicId);
+            {
+              TopicStatus status = instance().add_topic_status (hf_topicStatus);
+              const RepoId *rid = instance().add_repo_id (hf_topicId);
+              if (status == CREATED || status == ENABLED)
+                {
+                  instance().map_pending (pt,rid);
+                  return;
+                }
+            }
             break;
           case USER_EXCEPTION:
             instance().add_exception (hf_exception,
@@ -258,6 +347,8 @@ namespace OpenDDS
             break;
           default:;
           }
+
+          instance().discard_pending (pt);
           break;
         }
       case Request:
@@ -265,8 +356,11 @@ namespace OpenDDS
           instance().add_ulong (hf_domainId);
           instance().add_repo_id (hf_participantId);
           instance().add_string (hf_topicName);
-          instance().add_string (hf_dataTypeName);
+          const char * dname = instance().add_string (hf_dataTypeName);
 //           instance().add_topic_qos (hf_qos, instance().ett_topic_qos_);
+
+          instance().add_pending (header->req_id, dname);
+
           break;
         }
       default:
@@ -477,7 +571,12 @@ namespace OpenDDS
      ::MessageHeader *header, gchar *operation,
      gchar *idlname)
     {
-      ACE_DEBUG ((LM_DEBUG,"pinfo.protocol = %s\n", pinfo->current_proto));
+      int ofs = 0;
+      header->req_id =
+        ::get_CDR_ulong(tvb, &ofs,
+                        instance().is_big_endian_, GIOP_HEADER_SIZE);
+
+      ACE_DEBUG ((LM_DEBUG,"pinfo.protocol = %s type = %d,  reqid = %d\n", pinfo->current_proto, header->message_type, header->req_id));
       if (idlname == 0)
         return FALSE;
       instance().setPacket (tvb, pinfo, ptree, offset);

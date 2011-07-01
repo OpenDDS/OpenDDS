@@ -5,16 +5,18 @@
 
 extern "C" {
 
-#include "config.h"
+#include <config.h>
 
 #include <glib.h>
 #include <gmodule.h>
 
 #include <epan/packet.h>
+#include <epan/conversation.h>
 #include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 
 #include "ace/Synch.h"
 #include "ace/Hash_Map_Manager.h"
@@ -39,10 +41,13 @@ namespace OpenDDS
         tvb_ = buf; pinfo_ = pi; tree_ = pt; offset_ = poff;
       }
 
+      conversation_t *find_conversation ();
+
       void add_ulong (int fieldId, proto_tree *subtree = 0);
-      void add_repo_id (int fieldId, proto_tree *subtree = 0);
-      void add_string (int fieldId, proto_tree *subtree = 0);
-      void add_topic_status (int fieldId, proto_tree *subtree = 0);
+      const RepoId *add_repo_id (int fieldId, proto_tree *subtree = 0);
+
+      const char * add_string (int fieldId, proto_tree *subtree = 0);
+      TopicStatus add_topic_status (int fieldId, proto_tree *subtree = 0);
 
       void add_trans_info (int fieldId, int ett, proto_tree *subtree = 0);
       void add_domain_qos (int fieldId, int ett, proto_tree *subtree = 0);

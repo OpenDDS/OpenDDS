@@ -1,3 +1,17 @@
+Fri Jul  1 16:13:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Another incremental patch. I found a bug in the giop dissector
+          from wireshark, it was not setting the request ID in the header
+          information passed to a sub-dissector. The request ID is
+          necessary for correlating information in replies to information
+          in requests. Fortunately there is a fairly simple work-around.
+
 Fri Jul  1 14:17:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/run_test.pl:

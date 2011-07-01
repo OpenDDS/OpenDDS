@@ -9,7 +9,6 @@
 #include "tools/dissector/giop_base.h"
 
 
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/RepoIdConverter.h"
 
 #include "ace/Basic_Types.h"
@@ -125,6 +124,16 @@ namespace OpenDDS
 
 
     // dissection helpers
+
+    conversation_t *
+    GIOP_Base::find_conversation()
+    {
+      return ::find_conversation (pinfo_->fd->num,
+                                  &pinfo_->src, &pinfo_->dst,
+                                  pinfo_->ptype, pinfo_->srcport,
+                                  pinfo_->destport, 0);
+    }
+
     void
     GIOP_Base::add_ulong (int fieldId, proto_tree *subtree)
     {
@@ -136,40 +145,41 @@ namespace OpenDDS
       proto_tree_add_uint (tree, fieldId, tvb_, ofs, len, domain_id);
     }
 
-    void
+    const RepoId *
     GIOP_Base::add_repo_id (int fieldId, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
       guint len = 16; // size of RepoId
-      {
-        const RepoId *rid =
-          reinterpret_cast<const RepoId *>(tvb_get_ptr(tvb_, *offset_, len));
-        RepoIdConverter converter (*rid);
-        proto_tree_add_bytes_format_value
-          ( tree, fieldId, tvb_, *offset_, len,
-            reinterpret_cast<const guint8*>(rid),
-            "%s", std::string(converter).c_str() );
-      }
+      const RepoId *rid =
+        reinterpret_cast<const RepoId *>(tvb_get_ptr(tvb_, *offset_, len));
+      RepoIdConverter converter (*rid);
+      proto_tree_add_bytes_format_value
+        ( tree, fieldId, tvb_, *offset_, len,
+          reinterpret_cast<const guint8*>(rid),
+          "%s", std::string(converter).c_str() );
       *offset_ += len;
+      return rid;
     }
 
-    void
+    const char *
     GIOP_Base::add_string (int fieldId, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
       gchar *strbuf = 0;
       int slen = ::get_CDR_string(tvb_,&strbuf, offset_, is_big_endian_, 4);
       proto_tree_add_string (tree, fieldId, tvb_, *offset_-slen, slen, strbuf);
+      return strbuf;
     }
 
 
-    void
+    TopicStatus
     GIOP_Base::add_topic_status (int fieldId, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
       int len = sizeof (TopicStatus);
       guint32 ts = ::get_CDR_enum (tvb_,offset_, is_big_endian_, 4);
       proto_tree_add_int (tree, fieldId, tvb_, *offset_-len, len, ts);
+      return static_cast<TopicStatus>(ts);
     }
 
     void
