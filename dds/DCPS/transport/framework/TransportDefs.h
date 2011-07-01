@@ -127,8 +127,9 @@ class ACE_Data_Block;
     if (tv != -1) VALUE.msec(tv);                                                \
   }
 
-// The transport section name used in the config file format
+// The transport and configuration section name used in the config file format
 static const ACE_TCHAR TRANSPORT_SECTION_NAME[] = ACE_TEXT("transport");
+static const ACE_TCHAR CONFIG_SECTION_NAME[] = ACE_TEXT("config");
 
 // TODO: Remove...
 // The transport section name prefix.

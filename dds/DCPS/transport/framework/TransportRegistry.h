@@ -80,7 +80,8 @@ public:
   /// at initialization time. This function iterates each section in
   /// the configuration file, and creates TransportInst and
   /// TransportConfig objects and adds them to the registry.
-  int load_transport_configuration(ACE_Configuration_Heap& cf);
+  int load_transport_configuration(const std::string& file_name,
+                                   ACE_Configuration_Heap& cf);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;

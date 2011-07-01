@@ -23,11 +23,20 @@
 #include "TransportRegistry.inl"
 #endif /* __ACE_INLINE__ */
 
+#include <sstream>
+
 namespace {
   /// Helper types and functions for config file parsing
   typedef std::map<std::string, std::string> ValueMap;
   typedef std::pair<std::string, ACE_Configuration_Section_Key> SubsectionPair;
   typedef std::list<SubsectionPair> KeyList;
+
+  /// Used for sorting
+  bool predicate( const OpenDDS::DCPS::TransportInst_rch& lhs,
+                  const OpenDDS::DCPS::TransportInst_rch& rhs )
+  {
+    return lhs->name() < rhs->name();
+  }
 
   ///     Function that pulls all the values from the
   ///     specified ACE Configuration Section and places them in a
@@ -114,10 +123,20 @@ const std::string TransportRegistry::DEFAULT_CONFIG_NAME = "_OPENDDS_DEFAULT_CON
 const std::string TransportRegistry::DEFAULT_INST_PREFIX = "_OPENDDS_";
 
 int
-TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
+TransportRegistry::load_transport_configuration(const std::string& file_name,
+                                                ACE_Configuration_Heap& cf)
 {
   int status = 0;
   const ACE_Configuration_Section_Key &root = cf.root_section();
+
+  // Create a vector to hold configuration information so we can populate
+  // them after the transports instances are created.
+  typedef std::pair<TransportConfig_rch, std::vector<std::string> > ConfigInfo;
+  std::vector<ConfigInfo> configInfoVec;
+
+  // Record the transport instances created, so we can place them
+  // in the implicit transport configuration for this file.
+  std::list<TransportInst_rch> instances;
 
   ACE_TString sect_name;
 
@@ -150,7 +169,7 @@ TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
         if (processSections( cf, sect, keys ) != 0) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                            ACE_TEXT("missing transport_type in \"%s\" section.\n"),
+                            ACE_TEXT("too many nesting layers in [%s] section.\n"),
                             sect_name.c_str()),
                            -1);
         }
@@ -168,33 +187,144 @@ TransportRegistry::load_transport_configuration(ACE_Configuration_Heap& cf)
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("missing transport_type in \"%s\" section.\n"),
-                                sect_name.c_str()),
+                                ACE_TEXT("missing transport_type in [transport/%s] section.\n"),
+                                transport_id.c_str()),
                                -1);
             }
             // Create a TransportInst object and load the transport configuration in
             // ACE_Configuration_Heap to the TransportInst object.
-            // TODO: Create transport inst.
             TransportInst_rch inst = this->create_inst(transport_id, transport_type);
             if (inst == 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("transport instance already exists \"%s\" section.\n"),
-                                sect_name.c_str()),
+                                ACE_TEXT("Unable to creat transport instance in [transport/%s] section.\n"),
+                                transport_id.c_str()),
                                -1);
             }
+            instances.push_back(inst);
             inst->load(cf, inst_sect);
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("missing transport_type in \"%s\" section.\n"),
-                              sect_name.c_str()),
+                              ACE_TEXT("missing transport_type in [transport/%s] section.\n"),
+                              transport_id.c_str()),
                              -1);
+          }
+        }
+      }
+    } else if (ACE_OS::strcmp(sect_name.c_str(), CONFIG_SECTION_NAME) == 0) {
+      // found the [config/*] section, now iterate through subsections...
+      ACE_Configuration_Section_Key sect;
+      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                          ACE_TEXT("failed to open section [%s]\n"),
+                          sect_name.c_str()),
+                         -1);
+      } else {
+        // Ensure there are no properties in this section
+        ValueMap vm;
+        if (pullValues(cf, sect, vm) > 0) {
+          // There are values inside [transport]
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                            ACE_TEXT("config sections must have a section name\n"),
+                            sect_name.c_str()),
+                           -1);
+        }
+        // Process the subsections of this section (the individual config
+        // impls).
+        KeyList keys;
+        if (processSections( cf, sect, keys ) != 0) {
+          // Don't allow multiple layers of nesting ([config/x/y]).
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                            ACE_TEXT("too many nesting layers in [%s] section.\n"),
+                            sect_name.c_str()),
+                           -1);
+        }
+        for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
+          std::string config_id = (*it).first;
+
+          ValueMap values;
+          if (pullValues( cf, (*it).second, values ) == 0) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                              ACE_TEXT("no instance defined in [config/%s] section.\n"),
+                              config_id.c_str()),
+                             -1);
+          } else {
+            // Create a TransportConfig object.
+            TransportConfig_rch config = this->create_config(config_id);
+            if (config == 0) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                ACE_TEXT("Unable to create transport config in [config/%s] section.\n"),
+                                config_id.c_str()),
+                               -1);
+            }
+            ConfigInfo configInfo;
+            configInfo.first = config;
+            for (ValueMap::const_iterator it=values.begin();
+                 it != values.end(); ++it) {
+              std::string name = (*it).first;
+              if (name == "transports") {
+                std::string value = (*it).second;
+                std::stringstream ss(value);
+                std::string item;
+                while(std::getline(ss, item, ',')) {
+                  configInfo.second.push_back(item);
+                }
+                configInfoVec.push_back(configInfo);
+              } else {
+                ACE_ERROR_RETURN((LM_ERROR,
+                                  ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                  ACE_TEXT("Unexpected entry (%s) in [config/%s] section.\n"),
+                                  name.c_str(), config_id.c_str()),
+                                 -1);
+              }
+            }
           }
         }
       }
     }
   }
+
+  // Populate the configurations with instances
+  for (unsigned int i = 0; i < configInfoVec.size(); ++i) {
+    TransportConfig_rch config = configInfoVec[i].first;
+    std::vector<std::string>& insts = configInfoVec[i].second;
+    for (unsigned int j = 0; j < insts.size(); ++j) {
+      TransportInst_rch inst = this->get_inst(insts[j]);
+      if (inst == 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                          ACE_TEXT("The inst (%s) in [config/%s] section is undefined.\n"),
+                          insts[j].c_str(), config->name().c_str()),
+                         -1);
+      }
+      config->instances_.push_back(inst);
+    }
+  }
+
+  // Create and populate the default configuration for this
+  // file with all the instances from this file.
+  if (instances.size() > 0) {
+    TransportConfig_rch config = this->create_config(file_name);
+    if (config == 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                        ACE_TEXT("Unable to create default transport config.\n"),
+                        file_name.c_str()),
+                       -1);
+    }
+    instances.sort( predicate );
+    for (std::list<TransportInst_rch>::const_iterator it=instances.begin();
+         it != instances.end(); ++it) {
+      config->instances_.push_back(*it);
+    }
+  }
+
   return 0;
 }
 

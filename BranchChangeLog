@@ -1,3 +1,17 @@
+Fri Jul  1 18:23:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+        * tests/DCPS/UnitTests/test1.conf:
+        
+          Add support for [config/name] sections in the config file.
+          Add creation of a file default configuration for each config
+          file with [transport/*] sections.
+          Clean up a bunch of dodgy config file error messages and logic.
+
+
 Thu Jun 30 22:29:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
