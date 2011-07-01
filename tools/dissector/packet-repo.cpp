@@ -326,12 +326,19 @@ namespace OpenDDS
           Pending_Topic pt;
           pt.conv_ = instance().find_conversation();
           pt.request_ = header->req_id;
-
           switch (header->rep_status) {
           case NO_EXCEPTION:
             {
               TopicStatus status = instance().add_topic_status (hf_topicStatus);
               const RepoId *rid = instance().add_repo_id (hf_topicId);
+
+              if (instance().pinfo_->fd->flags.visited)
+                {
+                  ACE_DEBUG ((LM_DEBUG,"assert_topic reply, visited = true\n"));
+                  return;
+                }
+
+
               if (status == CREATED || status == ENABLED)
                 {
                   instance().map_pending (pt,rid);
@@ -358,6 +365,12 @@ namespace OpenDDS
           instance().add_string (hf_topicName);
           const char * dname = instance().add_string (hf_dataTypeName);
 //           instance().add_topic_qos (hf_qos, instance().ett_topic_qos_);
+          if (instance().pinfo_->fd->flags.visited)
+            {
+              ACE_DEBUG ((LM_DEBUG,"assert_topic request, visited = true\n"));
+              return;
+            }
+
 
           instance().add_pending (header->req_id, dname);
 
@@ -576,7 +589,9 @@ namespace OpenDDS
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
 
-      ACE_DEBUG ((LM_DEBUG,"pinfo.protocol = %s type = %d,  reqid = %d\n", pinfo->current_proto, header->message_type, header->req_id));
+      ACE_DEBUG ((LM_DEBUG,
+                  "pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  pinfo->current_proto, header->message_type, header->req_id, ofs));
       if (idlname == 0)
         return FALSE;
       instance().setPacket (tvb, pinfo, ptree, offset);
@@ -597,11 +612,17 @@ namespace OpenDDS
       //ACE_UNUSED_ARG (pinfo);
       ACE_UNUSED_ARG (ptree);
       ACE_UNUSED_ARG (offset);
-      ACE_UNUSED_ARG (header);
+      //     ACE_UNUSED_ARG (header);
       ACE_UNUSED_ARG (operation);
 
-      ACE_DEBUG ((LM_DEBUG,"inforepo_heur pinfo.protocol = %s\n",
-                  pinfo->current_proto));
+      int ofs = 0;
+      header->req_id =
+        ::get_CDR_ulong(tvb, &ofs,
+                        instance().is_big_endian_, GIOP_HEADER_SIZE);
+
+      ACE_DEBUG ((LM_DEBUG,
+                  "heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  pinfo->current_proto, header->message_type, header->req_id, ofs));
       return FALSE;
 
     }

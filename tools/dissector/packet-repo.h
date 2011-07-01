@@ -28,7 +28,7 @@ namespace OpenDDS
     struct Pending_Topic
     {
       conversation_t *conv_;
-      ulong           request_;
+      gulong          request_;
       char           *data_name_;
       Pending_Topic  *next_;
 
@@ -41,7 +41,7 @@ namespace OpenDDS
 
     };
 
-    typedef ACE_Hash_Map_Manager <u_long, const char *, ACE_Null_Mutex> Known_Topics;
+    typedef ACE_Hash_Map_Manager <gulong, const char *, ACE_Null_Mutex> Known_Topics;
 
     class dissector_Export InfoRepo_Dissector : public GIOP_Base
     {

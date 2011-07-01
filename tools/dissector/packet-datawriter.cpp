@@ -137,7 +137,14 @@ namespace OpenDDS
      ::MessageHeader *header, gchar *operation,
      gchar *idlname)
     {
-      ACE_DEBUG ((LM_DEBUG,"pinfo.protocol = %s\n", pinfo->current_proto));
+      int ofs = 0;
+      header->req_id =
+        ::get_CDR_ulong(tvb, &ofs,
+                        instance().is_big_endian_, GIOP_HEADER_SIZE);
+
+      ACE_DEBUG ((LM_DEBUG,
+                  "DWR pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  pinfo->current_proto, header->message_type, header->req_id, ofs));
       if (idlname == 0)
         return FALSE;
       instance().setPacket (tvb, pinfo, ptree, offset);
@@ -160,8 +167,14 @@ namespace OpenDDS
       ACE_UNUSED_ARG (header);
       ACE_UNUSED_ARG (operation);
 
-      ACE_DEBUG ((LM_DEBUG,"DWR_heur pinfo.protocol = %s type = %d, req_id = %d\n",
-                  pinfo->current_proto, header->message_type, header->req_id));
+      int ofs = 0;
+      header->req_id =
+        ::get_CDR_ulong(tvb, &ofs,
+                        instance().is_big_endian_, GIOP_HEADER_SIZE);
+
+      ACE_DEBUG ((LM_DEBUG,
+                  "DWR_heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  pinfo->current_proto, header->message_type, header->req_id, ofs));
       return FALSE;
 
     }
