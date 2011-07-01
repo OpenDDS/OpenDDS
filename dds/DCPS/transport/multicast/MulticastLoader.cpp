@@ -19,7 +19,6 @@ namespace DCPS {
 class MulticastType : public TransportType {
 public:
   const char* name() { return "multicast"; }
-  bool requires_reactor() { return true; }
 
   TransportInst* new_inst(const std::string& name)
   {
@@ -52,8 +51,8 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   registry->register_type(new MulticastType);
   TransportConfig_rch cfg =
     registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME);
-  cfg->insert(MulticastType::new_default_unreliable());
-  cfg->insert(MulticastType::new_default_reliable());
+  cfg->sorted_insert(MulticastType::new_default_unreliable());
+  cfg->sorted_insert(MulticastType::new_default_reliable());
 
   TheTransportFactory->register_generator(ACE_TEXT("multicast"),
                                           new MulticastGenerator);

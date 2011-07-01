@@ -35,7 +35,6 @@ TcpLoader::~TcpLoader()
 class TcpType : public TransportType {
 public:
   const char* name() { return "tcp"; }
-  bool requires_reactor() { return true; }
 
   TransportInst* new_inst(const std::string& name)
   {
@@ -62,7 +61,7 @@ TcpLoader::init(int, ACE_TCHAR*[])
   TransportRegistry* registry = TheTransportRegistry;
   registry->register_type(new TcpType);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
-    ->insert(TcpType::new_default());
+    ->sorted_insert(TcpType::new_default());
 
   TheTransportFactory->register_generator(ACE_TEXT("tcp"), new TcpGenerator);
 

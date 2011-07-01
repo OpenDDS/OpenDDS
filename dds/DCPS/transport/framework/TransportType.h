@@ -39,10 +39,6 @@ public:
 
   virtual TransportInst* new_inst(const std::string& name) = 0;
 
-  // Subclass should override if it requires the reactor because
-  // the default implementation is that the reactor is not required.
-  virtual bool requires_reactor() { return false; }
-
 protected:
 
   TransportType();

@@ -283,6 +283,8 @@ protected:
   int add_pending_association(RepoId                  local_id,
                               const AssociationInfo&  info);
 
+  void create_reactor_task();
+
 private:
 
   void check_fully_association(const RepoId pub_id);

@@ -92,7 +92,7 @@ MulticastTransport::find_or_create_datalink(
                    0);
 
     // Configure link with transport configuration and reactor task:
-    link->configure(this->config_i_, reactor_task());
+    link->configure(this->config_i_.in(), reactor_task());
 
     // Assign send strategy:
     MulticastSendStrategy* send_strategy;
@@ -163,6 +163,8 @@ MulticastTransport::configure_i(TransportInst* config)
   }
   this->config_i_->_add_ref();
 
+  this->create_reactor_task();
+
   return 0;
 }
 
@@ -175,7 +177,6 @@ MulticastTransport::shutdown_i()
   if (!this->server_link_.is_nil()) {
     this->server_link_->transport_shutdown();
   }
-  this->config_i_->_remove_ref();
   this->config_i_ = 0;
 }
 

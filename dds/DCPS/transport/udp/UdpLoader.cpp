@@ -19,7 +19,6 @@ namespace DCPS {
 class UdpType : public TransportType {
 public:
   const char* name() { return "udp"; }
-  bool requires_reactor() { return true; }
 
   TransportInst* new_inst(const std::string& name)
   {
@@ -42,7 +41,7 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   TransportRegistry* registry = TheTransportRegistry;
   registry->register_type(new UdpType);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
-    ->insert(UdpType::new_default());
+    ->sorted_insert(UdpType::new_default());
 
   TheTransportFactory->register_generator(ACE_TEXT("udp"), new UdpGenerator);
 

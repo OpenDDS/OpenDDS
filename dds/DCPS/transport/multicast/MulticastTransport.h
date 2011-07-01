@@ -47,7 +47,7 @@ protected:
   virtual void release_datalink_i(DataLink* link,
                                   bool release_pending);
 private:
-  MulticastInst* config_i_;
+  RcHandle<MulticastInst> config_i_;
 
   /// link for pubs.
   MulticastDataLink_rch client_link_;

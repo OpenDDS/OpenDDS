@@ -205,7 +205,7 @@ OpenDDS::DCPS::TcpTransport::find_or_create_datalink(
 int
 OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
 {
-  DBG_ENTRY_LVL("TcpTransport","configure_i",6);
+  DBG_ENTRY_LVL("TcpTransport", "configure_i", 6);
 
   // Downcast the config argument to a TcpInst*
   TcpInst* tcp_config =
@@ -219,17 +219,10 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
                      -1);
   }
 
+  this->create_reactor_task();
+
   // Ask our base class for a "copy" of the reference to the reactor task.
   this->reactor_task_ = reactor_task();
-
-  if (this->reactor_task_.is_nil()) {
-    // It looks like our base class has either been shutdown, or it has
-    // erroneously never been supplied with the reactor task.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpTransport requires a reactor in "
-                      "order to open its acceptor_.\n"),
-                     -1);
-  }
 
   // Make a "copy" of the reference for ourselves.
   tcp_config->_add_ref();

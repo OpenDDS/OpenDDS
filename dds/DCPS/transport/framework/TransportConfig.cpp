@@ -25,7 +25,7 @@ TransportConfig::~TransportConfig()
 {}
 
 void
-TransportConfig::insert(const TransportInst_rch& inst)
+TransportConfig::sorted_insert(const TransportInst_rch& inst)
 {
   const std::string name = inst->name();
   std::vector<TransportInst_rch>::iterator it = instances_.begin();

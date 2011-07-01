@@ -45,7 +45,7 @@ protected:
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
 private:
-  UdpInst* config_i_;
+  RcHandle<UdpInst> config_i_;
 
   UdpDataLink_rch server_link_;
 

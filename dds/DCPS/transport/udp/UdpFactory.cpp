@@ -8,6 +8,7 @@
 
 #include "UdpFactory.h"
 #include "UdpTransport.h"
+#include "UdpInst.h"
 
 namespace OpenDDS {
 namespace DCPS {

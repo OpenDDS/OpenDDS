@@ -14,6 +14,10 @@
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/tcp/Tcp.h"
+#endif
+
 #include "../common/TestSupport.h"
 
 #include <iostream>
@@ -49,7 +53,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TransportInst_rch inst = TransportRegistry::instance()->get_inst("mytcp");
   TEST_CHECK(inst != 0);
 
-  TcpInst_rch tcp_inst(dynamic_cast<TcpInst*>(inst.in()), false);
+  TcpInst_rch tcp_inst = dynamic_rchandle_cast<TcpInst>(inst);
   TEST_CHECK(tcp_inst != 0);
 
   // tcp_inst->dump(std::cout);

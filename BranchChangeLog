@@ -1,3 +1,46 @@
+Fri Jul  1 19:47:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RcHandle_T.h:
+
+          Added {static,dynamic,const}_rchandle_cast function templates so
+          that RcHandles can be safely downcast while maintining refcount.
+          Other misc cleanup including a locally-defined swap() and defined
+          operator*.
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+
+          Renamed insert() to sorted_insert() to be more explicit about what
+          this method does.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportType.h:
+
+          Removed TransportType::requires_reactor(), instead each individual
+          transport can optionally call TransportImpl::create_reactor_task().
+
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Adapted to the two framework changes above.
+
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpFactory.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Adapted to the two framework changes above.
+          Use RcHandle instead of manual reference count adjustments.
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+
+          Added conditional #include for static builds.
+          Use the new dynamic_rchandle_cast<>().
+
 Fri Jul  1 18:23:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportDefs.h:
@@ -5,7 +48,7 @@ Fri Jul  1 18:23:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
         * dds/DCPS/transport/framework/TransportRegistry.cpp:
         * tests/DCPS/UnitTests/ConfigFile.cpp:
         * tests/DCPS/UnitTests/test1.conf:
-        
+
           Add support for [config/name] sections in the config file.
           Add creation of a file default configuration for each config
           file with [transport/*] sections.

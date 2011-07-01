@@ -62,7 +62,7 @@ UdpTransport::find_or_create_datalink(
   }
 
   // Configure link with transport configuration and reactor task:
-  link->configure(this->config_i_, reactor_task());
+  link->configure(this->config_i_.in(), reactor_task());
 
   // Assign send strategy:
   UdpSendStrategy* send_strategy;
@@ -103,6 +103,7 @@ UdpTransport::configure_i(TransportInst* config)
                       ACE_TEXT("invalid configuration!\n")),
                      -1);
   }
+  this->config_i_->_add_ref();
 
   if (this->config_i_->local_address_ == ACE_INET_Addr()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -112,7 +113,7 @@ UdpTransport::configure_i(TransportInst* config)
                      -1);
   }
 
-  this->config_i_->_add_ref();
+  this->create_reactor_task();
 
   return 0;
 }
@@ -127,7 +128,6 @@ UdpTransport::shutdown_i()
   }
   this->client_links_.clear();
 
-  this->config_i_->_remove_ref();
   this->config_i_ = 0;
 }
 

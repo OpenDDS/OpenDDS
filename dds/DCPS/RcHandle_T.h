@@ -9,8 +9,6 @@
 #ifndef OPENDDS_RCHANDLE_T_H
 #define OPENDDS_RCHANDLE_T_H
 
-#include <algorithm>
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -24,7 +22,7 @@ public:
     : ptr_(0)
   {}
 
-  RcHandle(T *p, bool take_ownership = true)
+  RcHandle(T* p, bool take_ownership = true)
     : ptr_(p)
   {
     if (!take_ownership) {
@@ -32,73 +30,97 @@ public:
     }
   }
 
-  RcHandle(const RcHandle &b)
+  RcHandle(const RcHandle& b)
     : ptr_(b.ptr_)
   {
     this->bump_up();
   }
 
-  ~RcHandle() {
+  ~RcHandle()
+  {
     this->bump_down();
   }
 
-  RcHandle& operator=(T* p) {
+  RcHandle& operator=(T* p)
+  {
     RcHandle tmp(p);
-    std::swap(this->ptr_, tmp.ptr_);
-
+    swap(tmp);
     return *this;
   }
 
-  RcHandle& operator=(const RcHandle& b) {
+  RcHandle& operator=(const RcHandle& b)
+  {
     RcHandle tmp(b);
-    std::swap(this->ptr_, tmp.ptr_);
+    swap(tmp);
     return *this;
   }
 
-  T* operator->() const {
+  void swap(RcHandle& rhs)
+  {
+    T* t = this->ptr_;
+    this->ptr_ = rhs.ptr_;
+    rhs.ptr_ = t;
+  }
+
+  T* operator->() const
+  {
     return this->ptr_;
   }
 
-  unsigned is_nil() const {
+  T& operator*() const
+  {
+    return *this->ptr_;
+  }
+
+  bool is_nil() const
+  {
     return this->ptr_ == 0;
   }
 
-  T* in() const {
+  T* in() const
+  {
     return this->ptr_;
   }
 
-  T*& inout() {
+  T*& inout()
+  {
     return this->ptr_;
   }
 
-  T*& out() {
+  T*& out()
+  {
     this->bump_down();
     return this->ptr_;
   }
 
-  T *_retn() {
+  T* _retn()
+  {
     T* retval = this->ptr_;
     this->ptr_ = 0;
     return retval;
   }
 
-  bool operator==(const RcHandle& rhs) {
+  bool operator==(const RcHandle& rhs)
+  {
     return in() == rhs.in();
   }
 
-  bool operator!=(const RcHandle& rhs) {
+  bool operator!=(const RcHandle& rhs)
+  {
     return in() != rhs.in();
   }
 
 private:
 
-  void bump_up() {
+  void bump_up()
+  {
     if (this->ptr_ != 0) {
       this->ptr_->_add_ref();
     }
   }
 
-  void bump_down() {
+  void bump_down()
+  {
     if (this->ptr_ != 0) {
       this->ptr_->_remove_ref();
       this->ptr_ = 0;
@@ -108,6 +130,31 @@ private:
   /// The actual "unsmart" pointer to the T object.
   T* ptr_;
 };
+
+
+template <typename T>
+void swap(RcHandle<T>& lhs, RcHandle<T>& rhs)
+{
+  lhs.swap(rhs);
+}
+
+template <typename T, typename U>
+RcHandle<T> static_rchandle_cast(const RcHandle<U>& h)
+{
+  return RcHandle<T>(static_cast<T*>(h.in()), false);
+}
+
+template <typename T, typename U>
+RcHandle<T> const_rchandle_cast(const RcHandle<U>& h)
+{
+  return RcHandle<T>(const_cast<T*>(h.in()), false);
+}
+
+template <typename T, typename U>
+RcHandle<T> dynamic_rchandle_cast(const RcHandle<U>& h)
+{
+  return RcHandle<T>(dynamic_cast<T*>(h.in()), false);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

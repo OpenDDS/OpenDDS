@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportImpl.h"
 #include "DataLink.h"
+#include "TransportExceptions.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
@@ -185,6 +186,19 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
   }
 
   return 0;
+}
+
+void
+OpenDDS::DCPS::TransportImpl::create_reactor_task()
+{
+  if (this->reactor_task_.in()) {
+    return;
+  }
+
+  this->reactor_task_ = new TransportReactorTask;
+  if (0 != this->reactor_task_->open(0)) {
+    throw Transport::MiscProblem(); // error already logged by TRT::open()
+  }
 }
 
 OpenDDS::DCPS::DataLink*
