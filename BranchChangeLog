@@ -1,3 +1,32 @@
+Sat Jul  2 04:34:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Added DCPSGlobalTransportConfig option (command line
+          and config file).
+          Added -DCPSNewConfig command line option.  Pass a value
+          of 1 to use the new config file format (not used by the
+          underlying code yet).
+
+        * tests/DCPS/ConfigFile:
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigFile/tcp.conf:
+        * tests/DCPS/ConfigFile/test1.conf:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Move the ConfigFile test to its own directory and change
+          it to use proper application initialization.
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+        * tests/DCPS/UnitTests/tcp.conf:
+        * tests/DCPS/UnitTests/test1.conf:
+
+          Removed these files.
+
 Fri Jul  1 19:47:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RcHandle_T.h:

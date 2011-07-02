@@ -197,7 +197,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
             if (inst == 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("Unable to creat transport instance in [transport/%s] section.\n"),
+                                ACE_TEXT("Unable to create transport instance in [transport/%s] section.\n"),
                                 transport_id.c_str()),
                                -1);
             }

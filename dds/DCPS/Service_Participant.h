@@ -498,6 +498,14 @@ private:
   /// file.
   ACE_Configuration_Heap cf_;
 
+  /// Specifies the name of the transport configuration that
+  /// is used when the entity tree does not specify one.  If
+  /// not set, the default transport configuration is used.
+  ACE_TString global_transport_config_;
+
+  // TODO: Remove
+  bool new_config_;
+
 public:
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.

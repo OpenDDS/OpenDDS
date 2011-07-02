@@ -7,6 +7,7 @@
  */
 
 #include "ace/OS_main.h"
+#include <dds/DCPS/Service_Participant.h>
 #include "ace/Configuration_Import_Export.h"
 #include "tao/corba.h"
 
@@ -27,28 +28,9 @@ using namespace OpenDDS::DCPS;
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  CORBA::ORB_var orb = CORBA::ORB_init( argc, argv );
-
-  std::string config_fname(ACE_TEXT("test1.conf"));
-
-  FILE* in = ACE_OS::fopen(config_fname.c_str(),
-                           ACE_TEXT("r"));
-
-  TEST_CHECK(in != 0);
-
-  ACE_Configuration_Heap cf;
-  int status = 0;
-  ACE_OS::fclose(in);
-
-  status = cf.open();
-  TEST_CHECK(status == 0);
-
-  ACE_Ini_ImpExp import(cf);
-  status = import.import_config(config_fname.c_str());
-  TEST_CHECK(status == 0);
-
-  status = TransportRegistry::instance()->load_transport_configuration(config_fname, cf);
-  TEST_CHECK(status == 0);
+  DDS::DomainParticipantFactory_var dpf =
+    TheParticipantFactoryWithArgs(argc, argv);
+  TEST_CHECK(dpf.in() != 0);
 
   TransportInst_rch inst = TransportRegistry::instance()->get_inst("mytcp");
   TEST_CHECK(inst != 0);
@@ -88,7 +70,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(config->instances_[1] == inst2);
 
   TransportConfig_rch default_config =
-    TransportRegistry::instance()->get_config(config_fname);
+    TransportRegistry::instance()->get_config("test1.conf");
   TEST_CHECK(default_config != 0);
   //std::cout << "size=" << default_config->instances_.size() << std::endl;
   //for (unsigned int i = 0; i < default_config->instances_.size(); ++i) {
@@ -99,6 +81,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(default_config->instances_[0] == inst2);  // anothertcp
   TEST_CHECK(default_config->instances_[1] == inst);   // mytcp
   TEST_CHECK(default_config->instances_[8]->name() == std::string("tcp7"));
+
+  TransportConfig_rch global_config =
+    TransportRegistry::instance()->global_config();
+  TEST_CHECK(global_config->name() == "myconfig");
 
   return 0;
 }

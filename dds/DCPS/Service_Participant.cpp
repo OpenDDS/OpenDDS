@@ -75,6 +75,7 @@ static bool got_liveliness_factor = false;
 static bool got_bit_transport_port = false;
 static bool got_bit_transport_ip = false;
 static bool got_bit_lookup_duration_msec = false;
+static bool got_global_transport_config = false;
 static bool got_bit_flag = false;
 static bool got_publisher_content_filter = false;
 
@@ -93,6 +94,9 @@ Service_Participant::Service_Participant()
 #endif
     ),
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
+    global_transport_config_(""),
+    // TODO: remove
+    new_config_(false),
     monitor_factory_(0),
     monitor_(0),
     federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
@@ -460,6 +464,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_bit_lookup_duration_msec = true;
 
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSGlobalTransportConfig"))) != 0) {
+      global_transport_config_ = currentArg;
+      arg_shifter.consume_arg();
+      got_global_transport_config = true;
+
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBit"))) != 0) {
       bit_enabled_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
@@ -496,6 +505,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationLivelinessDuration"))) != 0) {
       this->federation_liveliness_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSNewConfig"))) != 0) {
+      // TODO: Remove
+      new_config_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
 
     } else {
@@ -1315,7 +1329,23 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = TheTransportFactory->load_transport_configuration(this->cf_);
+  if (this->new_config_) {
+    status = TransportRegistry::instance()->load_transport_configuration(config_fname.c_str(), this->cf_);
+    if (this->global_transport_config_ != "") {
+      TransportConfig_rch config =
+        TransportRegistry::instance()->get_config(this->global_transport_config_.c_str());
+      if (config == 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+                          ACE_TEXT("Unable to locate specified global transport config: %s\n"),
+                          this->global_transport_config_.c_str()),
+                         -1);
+      }
+      TransportRegistry::instance()->global_config(config);
+    }
+  } else {
+    status = TheTransportFactory->load_transport_configuration(this->cf_);
+  }
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1403,6 +1433,17 @@ Service_Participant::load_common_configuration()
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSBitLookupDurationMsec value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitLookupDurationMsec"), this->bit_lookup_duration_msec_, int)
+    }
+
+    if (got_global_transport_config) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSGlobalTransportConfig value from command option (overrides value if it's in config file).\n")));
+    } else {
+      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSGlobalTransportConfig"), this->global_transport_config_);
+      if (this->global_transport_config_ == "$file") {
+        // When the special string of "$file" is used, substitute the file name
+        this->global_transport_config_ = config_fname;
+      }
     }
 
     if (got_bit_flag) {
