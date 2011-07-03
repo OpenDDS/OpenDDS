@@ -7,6 +7,7 @@
  */
 
 #include "tools/dissector/packet-opendds.h"
+#include "tools/dissector/packet-repo.h"
 
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
@@ -429,9 +430,13 @@ namespace OpenDDS
     }
 
     offset += sample.message_length_; // skip marshaled data
+
+    const char * data_name = 
+      OpenDDS::DCPS::InfoRepo_Dissector::instance().
+      topic_for_pub(&sample.publication_id_);
+    ACE_DEBUG ((LM_DEBUG,"DCPS_DDS_Dissector::dissect_sample_header: data_name = %s\n", data_name));
+
   }
-
-
 
   void
   DCPS_DDS_Dissector::dissect ()

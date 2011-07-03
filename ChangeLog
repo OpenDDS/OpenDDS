@@ -1,3 +1,15 @@
+
+Sun Jul  3 16:54:03 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fuzz fix, complete the association from publication ID to
+          registered topic data type name.
+
 Fri Jul  1 20:00:41 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/packet-datawriter.cpp:

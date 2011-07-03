@@ -178,7 +178,7 @@ namespace OpenDDS
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
       int len = sizeof (TopicStatus);
       guint32 ts = ::get_CDR_enum (tvb_,offset_, is_big_endian_, 4);
-      proto_tree_add_int (tree, fieldId, tvb_, *offset_-len, len, ts);
+      proto_tree_add_item (tree, fieldId, tvb_, *offset_-len, len, ts);
       return static_cast<TopicStatus>(ts);
     }
 

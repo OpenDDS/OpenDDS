@@ -224,10 +224,30 @@ namespace OpenDDS
       return instance_;
     }
 
+    const char *
+    InfoRepo_Dissector::topic_for_pub (const RepoId *pub)
+    {
+      ACE_DEBUG ((LM_DEBUG, "topic_for_pub called\n"));
+      gulong key = ACE::hash_pjw(reinterpret_cast<const char *>(pub), sizeof (RepoId));
+      const RepoId *topicId = 0;
+      if (publications_.find (key,topicId) != 0)
+        {
+          ACE_DEBUG ((LM_DEBUG,"topic_for_pub could not find pub\n"));
+          return 0;
+        }
+      const char *data_name = 0;
+      key =   ACE::hash_pjw(reinterpret_cast<const char *>(topicId), sizeof (RepoId));
+      if (topics_.find (key, data_name) != 0)
+        {
+          ACE_DEBUG ((LM_DEBUG,"topic_for_pub could not find topicid\n"));
+        }
+      return data_name;
+    }
+      
     void
     InfoRepo_Dissector::add_pending (int request_id, const char *dataName)
     {
-      Pending_Topic *pt = new Pending_Topic;
+      Pending *pt = new Pending;
       pt->conv_ = this->find_conversation ();
       pt->request_ = request_id;
       pt->data_name_ = new char[ACE_OS::strlen(dataName)+1];
@@ -237,22 +257,46 @@ namespace OpenDDS
 
       ACE_DEBUG ((LM_DEBUG, "add pending called, data name = \"%s\", conv_id = %d, req_id = %d\n",
                   pt->data_name_, pt->conv_->index, request_id));
-      if (this->pending_topics_ == 0)
+      if (this->pending_ == 0)
         {
-          this->pending_topics_ = pt;
+          this->pending_ = pt;
           return;
         }
-      Pending_Topic *node = this->pending_topics_;
+      Pending *node = this->pending_;
       while (node->next_ != 0)
         node = node->next_;
       node->next_ = pt;
     }
 
     void
-    InfoRepo_Dissector::map_pending (Pending_Topic &pt, const RepoId *rid)
+    InfoRepo_Dissector::add_pending (int request_id, const RepoId *topic)
     {
-      Pending_Topic *prev_node = 0;
-      for (Pending_Topic *node = this->pending_topics_;
+      Pending *pt = new Pending;
+      pt->conv_ = this->find_conversation ();
+      pt->request_ = request_id;
+      pt->topic_id_ = new RepoId;
+      pt->next_ = 0;
+
+      ACE_OS::memcpy (pt->topic_id_, topic, sizeof(RepoId));
+
+      ACE_DEBUG ((LM_DEBUG, "add pending (repoId) called, conv_id = %d, req_id = %d topic_id_ = %p\n",
+                  pt->conv_->index, request_id, pt->topic_id_));
+      if (this->pending_ == 0)
+        {
+          this->pending_ = pt;
+          return;
+        }
+      Pending *node = this->pending_;
+      while (node->next_ != 0)
+        node = node->next_;
+      node->next_ = pt;
+    }
+
+    void
+    InfoRepo_Dissector::map_pending (Pending &pt, const RepoId *rid)
+    {
+      Pending *prev_node = 0;
+      for (Pending *node = this->pending_;
            node != 0;
            node = node->next_)
         {
@@ -260,12 +304,22 @@ namespace OpenDDS
               pt.request_ == node->request_)
             {
               ACE_DEBUG ((LM_DEBUG,"map_pending found node!\n"));
-              u_long hash_rid = ACE::hash_pjw(reinterpret_cast<const char *>(rid), sizeof (RepoId));
-              this->known_topics_.bind (hash_rid, pt.data_name_);
-              pt.data_name_ = 0;
+              gulong hash_rid = ACE::hash_pjw(reinterpret_cast<const char *>(rid), sizeof (RepoId));
+              if (node->data_name_ != 0)
+                {
+                  this->topics_.bind (hash_rid, node->data_name_);
+                  node->data_name_ = 0;
+                }
+              else
+                {
+                  ACE_DEBUG ((LM_DEBUG, "Map pending, topic_id null? %d \n",
+                              node->topic_id_ == 0));
+                  this->publications_.bind (hash_rid, node->topic_id_);
+                  node->topic_id_ = 0;
+                }
               if (prev_node == 0)
                 {
-                  this->pending_topics_ = node->next_;
+                  this->pending_ = node->next_;
                 }
               else
                 {
@@ -279,10 +333,10 @@ namespace OpenDDS
     }
 
     void
-    InfoRepo_Dissector::discard_pending (Pending_Topic &pt)
+    InfoRepo_Dissector::discard_pending (Pending &pt)
     {
-      Pending_Topic *prev_node = 0;
-      for (Pending_Topic *node = this->pending_topics_;
+      Pending *prev_node = 0;
+      for (Pending *node = this->pending_;
            node != 0;
            node = node->next_)
         {
@@ -291,7 +345,7 @@ namespace OpenDDS
             {
               if (prev_node == 0)
                 {
-                  this->pending_topics_ = node->next_;
+                  this->pending_ = node->next_;
                 }
               else
                 {
@@ -323,7 +377,7 @@ namespace OpenDDS
       switch (header->message_type) {
       case Reply:
         {
-          Pending_Topic pt;
+          Pending pt;
           pt.conv_ = instance().find_conversation();
           pt.request_ = header->req_id;
           switch (header->rep_status) {
@@ -337,7 +391,6 @@ namespace OpenDDS
                   ACE_DEBUG ((LM_DEBUG,"assert_topic reply, visited = true\n"));
                   return;
                 }
-
 
               if (status == CREATED || status == ENABLED)
                 {
@@ -370,7 +423,6 @@ namespace OpenDDS
               ACE_DEBUG ((LM_DEBUG,"assert_topic request, visited = true\n"));
               return;
             }
-
 
           instance().add_pending (header->req_id, dname);
 
@@ -408,28 +460,34 @@ namespace OpenDDS
       switch (header->message_type) {
       case Reply:
         {
-          instance().add_repo_id (hf_addEntityRetn);
+          Pending pp;
+          pp.conv_ = instance().find_conversation();
+          pp.request_ = header->req_id;
+          const RepoId *rid = instance().add_repo_id (hf_addEntityRetn);
+          instance().map_pending (pp, rid);
           break;
         }
       case Request:
         {
           instance().add_ulong (hf_domainId);
           instance().add_repo_id (hf_participantId);
-          instance().add_repo_id (hf_topicId);
+          const RepoId *topic_id = instance().add_repo_id (hf_topicId);
           // this is necessary to get the objectId registered
           ::get_CDR_object(instance().tvb_,
                            instance().pinfo_,
                            instance().tree_,
                            instance().offset_,
                            instance().is_big_endian_, 4);
-          instance().add_writer_qos (hf_qos,
-                                     instance().ett_writer_qos_);
-          instance().add_trans_info (hf_transInfo,
-                                     instance().ett_trans_info_);
-          instance().add_publisher_qos (hf_qos,
-                                        instance().ett_publisher_qos_);
+          //instance().add_writer_qos (hf_qos,
+          //                           instance().ett_writer_qos_);
+          //instance().add_trans_info (hf_transInfo,
+          //                           instance().ett_trans_info_);
+          //instance().add_publisher_qos (hf_qos,
+          //                              instance().ett_publisher_qos_);
 
-         break;
+          instance().add_pending (header->req_id, topic_id);
+
+          break;
         }
       default:
         {
@@ -588,10 +646,11 @@ namespace OpenDDS
       header->req_id =
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
-
+#if 0
       ACE_DEBUG ((LM_DEBUG,
-                  "pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  "pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
                   pinfo->current_proto, header->message_type, header->req_id, ofs));
+#endif
       if (idlname == 0)
         return FALSE;
       instance().setPacket (tvb, pinfo, ptree, offset);
@@ -609,7 +668,7 @@ namespace OpenDDS
     {
 
       ACE_UNUSED_ARG (tvb);
-      //ACE_UNUSED_ARG (pinfo);
+      ACE_UNUSED_ARG (pinfo);
       ACE_UNUSED_ARG (ptree);
       ACE_UNUSED_ARG (offset);
       //     ACE_UNUSED_ARG (header);
@@ -619,10 +678,11 @@ namespace OpenDDS
       header->req_id =
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
-
+#if 0
       ACE_DEBUG ((LM_DEBUG,
-                  "heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  "heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
                   pinfo->current_proto, header->message_type, header->req_id, ofs));
+#endif
       return FALSE;
 
     }

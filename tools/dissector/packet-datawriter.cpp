@@ -143,7 +143,7 @@ namespace OpenDDS
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
 
       ACE_DEBUG ((LM_DEBUG,
-                  "DWR pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  "DWR pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
                   pinfo->current_proto, header->message_type, header->req_id, ofs));
       if (idlname == 0)
         return FALSE;
@@ -173,7 +173,7 @@ namespace OpenDDS
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
 
       ACE_DEBUG ((LM_DEBUG,
-                  "DWR_heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n", 
+                  "DWR_heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
                   pinfo->current_proto, header->message_type, header->req_id, ofs));
       return FALSE;
 

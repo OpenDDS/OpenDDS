@@ -14,6 +14,7 @@ extern "C" {
 #include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
+#include "dds/DCPS/Definitions.h"
 #include "tools/dissector/dissector_export.h"
 #include "tools/dissector/giop_base.h"
 
@@ -25,27 +26,32 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    struct Pending_Topic
+    struct Pending
     {
       conversation_t *conv_;
       gulong          request_;
-      char           *data_name_;
-      Pending_Topic  *next_;
+      char           *data_name_; // for pending topics
+      RepoId         *topic_id_; // for pending publications
+      Pending  *next_;
 
-      Pending_Topic ()
-        :conv_(0), request_(0), data_name_(0), next_(0) {}
-      ~Pending_Topic ()
+      Pending ()
+        :conv_(0), request_(0), data_name_(0), topic_id_(0), next_(0) {}
+      ~Pending ()
       {
         delete [] data_name_;
+        delete topic_id_;
       }
 
     };
 
     typedef ACE_Hash_Map_Manager <gulong, const char *, ACE_Null_Mutex> Known_Topics;
+    typedef ACE_Hash_Map_Manager <gulong, const RepoId *, ACE_Null_Mutex> Known_Publications;
 
     class dissector_Export InfoRepo_Dissector : public GIOP_Base
     {
     public:
+      const char *topic_for_pub (const RepoId *);
+
       static InfoRepo_Dissector& instance ();
 
       static gboolean explicit_giop_callback (tvbuff_t *, packet_info *,
@@ -90,11 +96,13 @@ namespace OpenDDS
 #endif
     private:
       void add_pending (int request_id, const char *dataName);
-      void map_pending (Pending_Topic &, const RepoId *);
-      void discard_pending (Pending_Topic &);
+      void add_pending (int request_id, const RepoId *topic_id);
+      void map_pending (Pending &, const RepoId *);
+      void discard_pending (Pending &);
 
-      Pending_Topic *pending_topics_;
-      Known_Topics   known_topics_;
+      Pending           *pending_;
+      Known_Topics       topics_;
+      Known_Publications publications_;
 
       static InfoRepo_Dissector instance_;
 
