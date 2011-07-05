@@ -12,6 +12,9 @@
 
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
+
+#include "ace/Configuration.h"
+
 #include <iostream>
 
 namespace {
@@ -43,7 +46,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastInst::MulticastInst(const std::string& name)
-  : TransportInst(name, new NullSynchStrategy),
+  : TransportInst("multicast", name, new NullSynchStrategy),
     default_to_ipv6_(DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
@@ -66,13 +69,11 @@ MulticastInst::MulticastInst(const std::string& name)
 
   this->nak_interval_.msec(DEFAULT_NAK_INTERVAL);
   this->nak_timeout_.msec(DEFAULT_NAK_TIMEOUT);
-
-  this->transport_type_ = ACE_TEXT("multicast");
 }
 
 int
 MulticastInst::load(const TransportIdType& id,
-                             ACE_Configuration_Heap& config)
+                    ACE_Configuration_Heap& config)
 {
   TransportInst::load(id, config); // delegate to parent
 
@@ -217,21 +218,21 @@ MulticastInst::dump(std::ostream& os)
 {
   TransportInst::dump(os);
 
-  os << formatNameForDump(ACE_TEXT("group_address"))       << this->group_address_.get_host_addr()
+  os << formatNameForDump("group_address")       << this->group_address_.get_host_addr()
                                                            << ":" << this->group_address_.get_port_number() << std::endl;
-  os << formatNameForDump(ACE_TEXT("default_to_ipv6"))     << (this->default_to_ipv6_ ? "true" : "false") << std::endl;
-  os << formatNameForDump(ACE_TEXT("port_offset"))         << this->port_offset_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("reliable"))            << (this->reliable_ ? "true" : "false") << std::endl;
-  os << formatNameForDump(ACE_TEXT("syn_backoff"))         << this->syn_backoff_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("syn_interval"))        << this->syn_interval_.msec() << std::endl;
-  os << formatNameForDump(ACE_TEXT("syn_timeout"))         << this->syn_timeout_.msec() << std::endl;
-  os << formatNameForDump(ACE_TEXT("nak_depth"))           << this->nak_depth_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("nak_interval"))        << this->nak_interval_.msec() << std::endl;
-  os << formatNameForDump(ACE_TEXT("nak_delay_intervals")) << this->nak_delay_intervals_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("nak_max"))             << this->nak_max_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("nak_timeout"))         << this->nak_timeout_.msec() << std::endl;
-  os << formatNameForDump(ACE_TEXT("ttl"))                 << this->ttl_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("rcv_buffer_size"));
+  os << formatNameForDump("default_to_ipv6")     << (this->default_to_ipv6_ ? "true" : "false") << std::endl;
+  os << formatNameForDump("port_offset")         << this->port_offset_ << std::endl;
+  os << formatNameForDump("reliable")            << (this->reliable_ ? "true" : "false") << std::endl;
+  os << formatNameForDump("syn_backoff")         << this->syn_backoff_ << std::endl;
+  os << formatNameForDump("syn_interval")        << this->syn_interval_.msec() << std::endl;
+  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.msec() << std::endl;
+  os << formatNameForDump("nak_depth")           << this->nak_depth_ << std::endl;
+  os << formatNameForDump("nak_interval")        << this->nak_interval_.msec() << std::endl;
+  os << formatNameForDump("nak_delay_intervals") << this->nak_delay_intervals_ << std::endl;
+  os << formatNameForDump("nak_max")             << this->nak_max_ << std::endl;
+  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.msec() << std::endl;
+  os << formatNameForDump("ttl")                 << this->ttl_ << std::endl;
+  os << formatNameForDump("rcv_buffer_size");
 
   if (this->rcv_buffer_size_ == 0) {
     os << "System Default Value" << std::endl;

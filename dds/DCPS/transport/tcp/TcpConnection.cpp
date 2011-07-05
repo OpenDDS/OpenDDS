@@ -199,7 +199,8 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
                      -1);
   }
 
-  NetworkAddress network_order_address(ACE_TEXT_CHAR_TO_TCHAR(buf));
+  const std::string bufstr(buf);
+  NetworkAddress network_order_address(bufstr);
 
   network_order_address.to_addr(this->remote_address_);
 
@@ -407,7 +408,7 @@ OpenDDS::DCPS::TcpConnection::active_establishment
                      -1);
   }
 
-  if (this->peer().send_n(ACE_TEXT_ALWAYS_CHAR(tcp_config_->local_address_str_.c_str()),
+  if (this->peer().send_n(tcp_config_->local_address_str_.c_str(),
                           len)  == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,

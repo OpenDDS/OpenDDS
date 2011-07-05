@@ -30,7 +30,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 $TST = PerlDDS::create_process("ConfigFile",
-                               "-ORBSvcConf tcp.conf -DCPSNewConfig 1 -DCPSConfigFile test1.conf");
+                               "-ORBSvcConf tcp.conf -DCPSNewConfig 1 -DCPSConfigFile test1.ini");
 print STDERR "Running ConfigFile\n";
 my $retcode = $TST->SpawnWaitKill(60);
 if ($retcode != 0) {

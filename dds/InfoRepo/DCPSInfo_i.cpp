@@ -2023,7 +2023,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
 }
 
 int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
-                                       const ACE_TCHAR* listen_str)
+                                       const char* listen_str)
 {
   int status = 0;
 

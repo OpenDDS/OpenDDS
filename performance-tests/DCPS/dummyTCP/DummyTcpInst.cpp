@@ -5,6 +5,8 @@
 #include "DummyTcpInst.h"
 #include "DummyTcpTransport.h"
 
+#include "ace/Configuration.h"
+
 #include <iostream>
 
 #if !defined (__ACE_INLINE__)
@@ -39,7 +41,7 @@ OpenDDS::DCPS::DummyTcpInst::load (const TransportIdType& id,
                        ACE_TEXT ("Failed to open section \"%s\" \n"),
                        sect_name.c_str()), -1);
 
-  ACE_TString local_address;
+  std::string local_address;
   GET_CONFIG_STRING_VALUE (cf, trans_sect, ACE_TEXT ("local_address"), local_address);
   if (local_address != ACE_TEXT (""))
   {
@@ -84,12 +86,12 @@ OpenDDS::DCPS::DummyTcpInst::dump(std::ostream& os)
 {
   TransportInst::dump(os);
 
-  os << formatNameForDump(ACE_TEXT("local_address"))                 << this->local_address_str_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("enable_nagle_algorithm"))        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
-  os << formatNameForDump(ACE_TEXT("conn_retry_initial_delay"))      << this->conn_retry_initial_delay_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("conn_retry_backoff_multiplier")) << this->conn_retry_backoff_multiplier_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("conn_retry_attempts"))           << this->conn_retry_attempts_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("passive_reconnect_duration"))    << this->passive_reconnect_duration_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("passive_connect_duration"))      << this->passive_connect_duration_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("max_output_pause_period"))       << this->max_output_pause_period_ << std::endl;
+  os << formatNameForDump("local_address")                 << this->local_address_str_ << std::endl;
+  os << formatNameForDump("enable_nagle_algorithm")        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
+  os << formatNameForDump("conn_retry_initial_delay")      << this->conn_retry_initial_delay_ << std::endl;
+  os << formatNameForDump("conn_retry_backoff_multiplier") << this->conn_retry_backoff_multiplier_ << std::endl;
+  os << formatNameForDump("conn_retry_attempts")           << this->conn_retry_attempts_ << std::endl;
+  os << formatNameForDump("passive_reconnect_duration")    << this->passive_reconnect_duration_ << std::endl;
+  os << formatNameForDump("passive_connect_duration")      << this->passive_connect_duration_ << std::endl;
+  os << formatNameForDump("max_output_pause_period")       << this->max_output_pause_period_ << std::endl;
 }

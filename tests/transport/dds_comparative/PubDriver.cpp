@@ -125,7 +125,7 @@ PubDriver::init()
   // The only setting that falls into this category is the local address,
   // which we have saved in a data member.
   tcp_config->local_address_ = this->local_address_;
-  tcp_config->local_address_str_ = this->pub_addr_str_;
+  tcp_config->local_address_str_ = this->pub_addr_str_.c_str();
 
   // Supply the config object to the TransportImpl object.
   if (transport_impl->configure(config.in()) != 0)

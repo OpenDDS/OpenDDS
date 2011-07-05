@@ -6,7 +6,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::DummyTcpInst::DummyTcpInst()
-  : TransportInst("dummy"),
+  : TransportInst("DummyTcp", "dummy"),
     enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),
     conn_retry_backoff_multiplier_(2.0),
@@ -16,8 +16,6 @@ OpenDDS::DCPS::DummyTcpInst::DummyTcpInst()
     passive_connect_duration_ (10000)
 {
   DBG_ENTRY_LVL("DummyTcpInst","DummyTcpInst",5);
-
-  transport_type_ = ACE_TEXT("DummyTcp");
 
   if (local_address_.set (static_cast<unsigned short> (0),
                 static_cast<ACE_UINT32> (INADDR_ANY),

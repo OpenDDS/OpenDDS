@@ -459,7 +459,7 @@ public:
   /// Initialize the transport for the Built-In Topics
   /// Returns 0 (zero) if succeeds
   int init_transport(int listen_address_given,
-                     const ACE_TCHAR* listen_str);
+                     const char* listen_str);
 
   bool receive_image(const Update::UImage& image);
 

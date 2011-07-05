@@ -72,7 +72,7 @@ class ACE_Data_Block;
                     KEY));                                                       \
       }                                                                          \
     }                                                                            \
-    else  if (stringvalue == ACE_TEXT(""))                                       \
+    else if (stringvalue == ACE_TEXT(""))                                       \
     {                                                                            \
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
@@ -84,7 +84,7 @@ class ACE_Data_Block;
     }                                                                            \
     else                                                                         \
     {                                                                            \
-      VALUE = stringvalue;                                                       \
+      VALUE = ACE_TEXT_ALWAYS_CHAR(stringvalue.c_str());                         \
     }                                                                            \
   }
 

@@ -157,7 +157,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       = static_cast <OpenDDS::DCPS::TcpInst*> (reader_config.in ());
 
     reader_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
-    reader_tcp_config->local_address_str_ = local_address;
+    reader_tcp_config->local_address_str_ = local_address.c_str();
     // This is needed to get the connection deletion callback.
     reader_tcp_config->datalink_release_delay_ = 0;
 

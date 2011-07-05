@@ -794,7 +794,7 @@ OpenDDS::DCPS::TransportImpl::dump()
 void
 OpenDDS::DCPS::TransportImpl::dump(ostream& os)
 {
-  os << TransportInst::formatNameForDump(ACE_TEXT("id"))
+  os << TransportInst::formatNameForDump("id")
      << get_transport_id_description();
 
   if (this->config_.is_nil()) {

@@ -27,11 +27,11 @@ OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr)
   ACE_TCHAR addr_s[MAXHOSTNAMELEN + 1];
   addr.addr_to_string(addr_s, sizeof (addr_s), 1);
 
-  this->addr_ = addr_s; // obtain copy
+  this->addr_ = ACE_TEXT_ALWAYS_CHAR(addr_s);
 }
 
 ACE_INLINE
-OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_TString& addr)
+OpenDDS::DCPS::NetworkAddress::NetworkAddress(const std::string& addr)
   : reserved_(0)
 {
   DBG_ENTRY_LVL("NetworkAddress","NetworkAddress",6);

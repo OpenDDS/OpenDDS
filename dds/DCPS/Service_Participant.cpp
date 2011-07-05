@@ -1185,9 +1185,9 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
   std::stringstream out;
   out << this->bitTransportPortMap_[ repo];
 
-  tcp_config->local_address_str_ = this->bitTransportIpMap_[ repo];
-  tcp_config->local_address_str_ += ACE_TEXT(":");
-  tcp_config->local_address_str_ += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
+  tcp_config->local_address_str_ =
+    ACE_TEXT_ALWAYS_CHAR(this->bitTransportIpMap_[repo].c_str())
+    + ':' + out.str();
 
   if (this->bitTransportMap_[ domain]->configure(config.in()) != 0) {
     ACE_ERROR((LM_ERROR,

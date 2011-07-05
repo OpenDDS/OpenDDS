@@ -209,7 +209,8 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
 {
   TransportInst_rch config = this->get_configuration(transport_id);
 
-  return create_transport_impl(transport_id, config->transport_type_, auto_configure);
+  return create_transport_impl(transport_id,
+    ACE_TEXT_CHAR_TO_TCHAR(config->transport_type_.c_str()), auto_configure);
 }
 
 OpenDDS::DCPS::TransportImpl_rch
@@ -231,10 +232,10 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
     TransportInst_rch config
     = this->get_or_create_configuration(transport_id, transport_type);
 
-    if (transport_type != config->transport_type_) {
+    if (transport_type.c_str() != config->transport_type_) {
       VDBG_LVL((LM_ERROR,
                 ACE_TEXT("(%P|%t) TransportFactory::create_transport_impl ")
-                ACE_TEXT("transport_type conflict - provided %s configured %s\n")
+                ACE_TEXT("transport_type conflict - provided %s configured %C\n")
                 , transport_type.c_str(),
                 config->transport_type_.c_str()), 0);
       throw Transport::ConfigurationConflict();
@@ -305,9 +306,9 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration(TransportIdType tra
   }
 
   if (result == 0) {
-    if (transport_type != config->transport_type_) {
+    if (transport_type.c_str() != config->transport_type_) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportFactory::get_or_create_configuration transport_type ")
-                 ACE_TEXT("conflict - provided %s configured %s\n"), transport_type.c_str(),
+                 ACE_TEXT("conflict - provided %s configured %C\n"), transport_type.c_str(),
                  config->transport_type_.c_str()));
       throw Transport::ConfigurationConflict();
     }

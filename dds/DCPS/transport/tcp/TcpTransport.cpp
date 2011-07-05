@@ -274,12 +274,11 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
   if (tcp_config_->local_address_.is_any()) {
-    ACE_TString hostname = get_fully_qualified_hostname();
+    std::string hostname = get_fully_qualified_hostname();
 
     this->tcp_config_->local_address_.set(port, hostname.c_str());
     this->tcp_config_->local_address_str_ = hostname;
-    this->tcp_config_->local_address_str_ += ACE_TEXT(":");
-    this->tcp_config_->local_address_str_ += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
+    this->tcp_config_->local_address_str_ += ':' + out.str();
   }
 
   // Now we got the actual listening port. Update the port nnmber in the configuration
@@ -288,9 +287,9 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
     this->tcp_config_->local_address_.set_port_number(port);
 
     if (this->tcp_config_->local_address_str_.length() > 0) {
-      size_t pos = this->tcp_config_->local_address_str_.find(ACE_TEXT(':'));
-      ACE_TString str = this->tcp_config_->local_address_str_.substr(0, pos + 1);
-      str += ACE_TEXT_CHAR_TO_TCHAR(out.str().c_str());
+      size_t pos = this->tcp_config_->local_address_str_.find(':');
+      std::string str = this->tcp_config_->local_address_str_.substr(0, pos + 1);
+      str += out.str();
       this->tcp_config_->local_address_str_ = str;
     }
   }
@@ -380,7 +379,7 @@ OpenDDS::DCPS::TcpTransport::connection_info_i
 {
   DBG_ENTRY_LVL("TcpTransport","connection_info_i",6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport local address str %s\n",
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport local address str %C\n",
             this->tcp_config_->local_address_str_.c_str()), 2);
 
   //Always use local address string to provide to DCPSInfoRepo for advertisement.

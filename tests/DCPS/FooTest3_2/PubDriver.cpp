@@ -435,7 +435,7 @@ PubDriver::run()
   associations[0].readerTransInfo.transport_id = 1; // TBD - not right
   associations[0].readerTransInfo.publication_transport_priority = 0;
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_.c_str());
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;
@@ -600,7 +600,7 @@ void PubDriver::attach_to_transport ()
     = static_cast <OpenDDS::DCPS::TcpInst*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
-  tcp_config->local_address_str_ = this->pub_addr_str_;
+  tcp_config->local_address_str_ = this->pub_addr_str_.c_str();
 
   if (transport_impl->configure(config.in ()) != 0)
     {

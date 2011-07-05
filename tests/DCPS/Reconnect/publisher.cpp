@@ -146,7 +146,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       = static_cast <OpenDDS::DCPS::TcpInst*> (writer_config.in ());
 
     writer_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
-    writer_tcp_config->local_address_str_ = local_address;
+    writer_tcp_config->local_address_str_ = local_address.c_str();
     // This is needed for bp_timeout test.
     writer_tcp_config->max_output_pause_period_ = 2000;
 

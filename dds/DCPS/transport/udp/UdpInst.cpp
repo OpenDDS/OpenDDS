@@ -11,20 +11,22 @@
 
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
+
+#include "ace/Configuration.h"
+
 #include <iostream>
 
 namespace OpenDDS {
 namespace DCPS {
 
 UdpInst::UdpInst(const std::string& name)
-  : TransportInst(name, new NullSynchStrategy)
+  : TransportInst("udp", name, new NullSynchStrategy)
 {
-  this->transport_type_ = ACE_TEXT("udp");
 }
 
 int
 UdpInst::load(const TransportIdType& id,
-                       ACE_Configuration_Heap& config)
+              ACE_Configuration_Heap& config)
 {
   TransportInst::load(id, config); // delegate to parent
 

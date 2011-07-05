@@ -10,7 +10,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TcpInst::TcpInst(const std::string& name)
-  : TransportInst(name),
+  : TransportInst("tcp", name),
     enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),
     conn_retry_backoff_multiplier_(2.0),
@@ -19,7 +19,5 @@ OpenDDS::DCPS::TcpInst::TcpInst(const std::string& name)
     passive_reconnect_duration_(2000),
     passive_connect_duration_(10000)
 {
-  DBG_ENTRY_LVL("TcpInst","TcpInst",6);
-
-  transport_type_ = ACE_TEXT("tcp");
+  DBG_ENTRY_LVL("TcpInst", "TcpInst", 6);
 }

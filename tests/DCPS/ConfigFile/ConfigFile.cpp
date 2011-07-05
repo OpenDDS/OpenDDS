@@ -70,7 +70,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(config->instances_[1] == inst2);
 
   TransportConfig_rch default_config =
-    TransportRegistry::instance()->get_config("test1.conf");
+    TransportRegistry::instance()->get_config("test1.ini");
   TEST_CHECK(default_config != 0);
   //std::cout << "size=" << default_config->instances_.size() << std::endl;
   //for (unsigned int i = 0; i < default_config->instances_.size(); ++i) {

@@ -170,7 +170,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
     = static_cast <OpenDDS::DCPS::TcpInst*> (config.in ());
 
   tcp_config->local_address_ = this->sub_addr_;
-  tcp_config->local_address_str_ = this->sub_addr_str_;
+  tcp_config->local_address_str_ = this->sub_addr_str_.c_str();
 
   if (transport_impl->configure(config.in ()) != 0)
     {
@@ -255,7 +255,7 @@ SubDriver::run()
     publications[i].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
     publications[i].remote_data_.publication_transport_priority = 0;
 
-    OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_);
+    OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_.c_str());
 
     ACE_OutputCDR cdr;
     cdr << network_order_address;

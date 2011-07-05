@@ -23,12 +23,11 @@
 #include "dds/DCPS/RcObject_T.h"
 
 #include "ace/Synch.h"
-#include "ace/Configuration.h"
-#include "ace/SString.h"
 
 #include <string>
 
-class ACE_Reactor;
+class ACE_Configuration_Heap;
+class ACE_Configuration_Section_Key;
 
 namespace OpenDDS {
 namespace DCPS {
@@ -75,7 +74,9 @@ public:
 
   /// Format name of transport configuration parameter for use in
   /// conjunction with dump(std::ostream& os).
-  static ACE_TString formatNameForDump(const ACE_TString& name);
+  static std::string formatNameForDump(const char* name);
+
+  const std::string transport_type_;
 
   /// Flag used to marshall/demarshall bytes sent/received.
   bool swap_bytes_;
@@ -97,8 +98,6 @@ public:
   /// Optimum size (in bytes) of a packet (packet header + sample(s)).
   ACE_UINT32 optimum_packet_size_;
 
-  ACE_TString transport_type_;
-
   /// Flag for whether a new thread is needed for connection to
   /// send without backpressure.
   bool thread_per_connection_;
@@ -113,12 +112,14 @@ public:
 
 protected:
 
-  explicit TransportInst(const std::string& name,
-                         ThreadSynchStrategy* send_strategy =
-                           new PerConnectionSynchStrategy);
+  TransportInst(const char* type,
+                const std::string& name,
+                ThreadSynchStrategy* send_strategy
+                  = new PerConnectionSynchStrategy);
 
   virtual ~TransportInst();
 
+  /// TODO: Remove
   static ACE_TString id_to_section_name(const TransportIdType& id);
 
 private:

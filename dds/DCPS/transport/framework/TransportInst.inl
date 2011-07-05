@@ -12,9 +12,11 @@
 
 
 ACE_INLINE
-OpenDDS::DCPS::TransportInst::TransportInst(const std::string& name,
+OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
+                                            const std::string& name,
                                             ThreadSynchStrategy* send_strategy)
-  : swap_bytes_(0),
+  : transport_type_(type),
+    swap_bytes_(0),
     queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
     max_packet_size_(DEFAULT_CONFIG_MAX_PACKET_SIZE),
@@ -26,7 +28,7 @@ OpenDDS::DCPS::TransportInst::TransportInst(const std::string& name,
     name_(name),
     send_thread_strategy_(send_strategy)
 {
-  DBG_ENTRY_LVL("TransportInst","TransportInst",6);
+  DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
   this->adjust_config_value();
 }
 

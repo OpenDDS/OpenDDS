@@ -158,7 +158,7 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 
   while (arg_shifter.is_anything_left()) {
     if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0) {
-      this->listen_address_str_ = current_arg;
+      this->listen_address_str_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
       this->listen_address_given_ = 1;
       arg_shifter.consume_arg();
 

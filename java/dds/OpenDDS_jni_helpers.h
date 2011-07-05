@@ -176,12 +176,12 @@ struct DoubleField : SimpleField<C, double, jvmSig::DOUBLE, jdouble,
 };
 
 template <typename C>
-struct InetAddrField : Field<C, ACE_TString, jvmSig::STRING> {
-  typedef typename Field<C, ACE_TString, jvmSig::STRING>::memptr_t memptr_t;
+struct InetAddrField : Field<C, std::string, jvmSig::STRING> {
+  typedef typename Field<C, std::string, jvmSig::STRING>::memptr_t memptr_t;
   typedef ACE_INET_Addr C::*inetaddr_t;
   inetaddr_t addr_;
   InetAddrField(const char *j, memptr_t string_field, inetaddr_t addr_field)
-    : Field<C, ACE_TString, jvmSig::STRING> (j, string_field)
+    : Field<C, std::string, jvmSig::STRING> (j, string_field)
     , addr_(addr_field)
   {}
 
@@ -191,7 +191,7 @@ struct InetAddrField : Field<C, ACE_TString, jvmSig::STRING> {
     JStringMgr jsm(jni, static_cast<jstring>(src));
     (cxx.*addr_).set(jsm.c_str());
     if (this->member_ptr_ != 0) {
-      cxx.*(this->member_ptr_) = jsm.tc_str();
+      cxx.*(this->member_ptr_) = jsm.c_str();
     }
   }
 
@@ -199,12 +199,11 @@ struct InetAddrField : Field<C, ACE_TString, jvmSig::STRING> {
     jfieldID fid = this->getFid(jni, clazz);
     jstring str;
     if (this->member_ptr_ != 0) {
-      str = jni->NewStringUTF(ACE_TEXT_ALWAYS_CHAR(
-              (cxx.*(this->member_ptr_)).c_str()));
+      str = jni->NewStringUTF((cxx.*(this->member_ptr_)).c_str());
     } else {
-      ACE_TCHAR buf[64];
+      char buf[64];
       (cxx.*addr_).addr_to_string(buf, sizeof(buf));
-      str = jni->NewStringUTF(ACE_TEXT_ALWAYS_CHAR(buf));
+      str = jni->NewStringUTF(buf);
     }
     jni->SetObjectField(obj, fid, str);
     jni->DeleteLocalRef(str);

@@ -165,7 +165,7 @@ PubDriver::init()
              "Set the config->local_address_ to our (local) pub_addr_.\n"));
 
   tcp_config->local_address_ = this->pub_addr_;
-  tcp_config->local_address_str_ = this->pub_addr_str_;
+  tcp_config->local_address_str_ = this->pub_addr_str_.c_str();
 
   // Here are the other config settings that I could change (they have
   // default values if I don't change them here):
@@ -256,7 +256,7 @@ PubDriver::run()
   subscriptions[0].remote_data_.transport_id = 1;  // TBD - not right
   subscriptions[0].remote_data_.publication_transport_priority = 0;
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_);
+  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_.c_str());
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;

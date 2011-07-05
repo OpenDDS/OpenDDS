@@ -147,7 +147,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
     {
       ACE_INET_Addr reader_address( this->config_.transportAddressName().c_str());
       reader_tcp_config->local_address_ = reader_address;
-      reader_tcp_config->local_address_str_ = this->config_.transportAddressName();
+      reader_tcp_config->local_address_str_ = this->config_.transportAddressName().c_str();
     }
     // else use default address - OS assigned.
 
