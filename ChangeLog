@@ -1,3 +1,14 @@
+Tue Jul  5 22:58:08 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/plugin.cpp:
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Begin laying out the integration of sample dissection.
+
 Tue Jul  5 16:16:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_lem_stub.mpb:

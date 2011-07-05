@@ -14,6 +14,7 @@ project : dcps, wireshark {
     packet-datawriter.cpp
     packet-repo.cpp
     plugin.cpp
+    sample_base.cpp
   }
 
   Resource_Files {
