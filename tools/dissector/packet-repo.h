@@ -1,4 +1,12 @@
 // -*- C++ -*-
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 
 #ifndef _PACKET_REPO_H_
 #define _PACKET_REPO_H_

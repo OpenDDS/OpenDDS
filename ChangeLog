@@ -1,3 +1,13 @@
+Tue Jul  5 13:16:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        
+          more fuzz
 
 Sun Jul  3 16:54:03 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 

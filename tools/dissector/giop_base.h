@@ -1,4 +1,11 @@
 // -*- C++ -*-
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef _GIOP_BASE_H_
 #define _GIOP_BASE_H_

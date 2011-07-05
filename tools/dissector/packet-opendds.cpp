@@ -431,7 +431,7 @@ namespace OpenDDS
 
     offset += sample.message_length_; // skip marshaled data
 
-    const char * data_name = 
+    const char * data_name =
       OpenDDS::DCPS::InfoRepo_Dissector::instance().
       topic_for_pub(&sample.publication_id_);
     ACE_DEBUG ((LM_DEBUG,"DCPS_DDS_Dissector::dissect_sample_header: data_name = %s\n", data_name));

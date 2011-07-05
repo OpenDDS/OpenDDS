@@ -1,4 +1,11 @@
 // -*- C++ -*-
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef _PACKET_DATA_WRITER_H_
 #define _PACKET_DATA_WRITER_H_

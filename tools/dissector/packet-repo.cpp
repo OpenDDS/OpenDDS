@@ -243,7 +243,7 @@ namespace OpenDDS
         }
       return data_name;
     }
-      
+
     void
     InfoRepo_Dissector::add_pending (int request_id, const char *dataName)
     {
