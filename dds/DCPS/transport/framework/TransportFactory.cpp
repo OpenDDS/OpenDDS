@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportDebug.h"
 #include "TransportFactory.h"
+#include "TransportRegistry.h"
 #include "TransportInst.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -525,6 +526,8 @@ OpenDDS::DCPS::TransportFactory::release()
   impl_map_.clear();
   generator_map_.clear();
   configuration_map_.clear();
+
+  TransportRegistry::instance()->release();
 }
 
 void

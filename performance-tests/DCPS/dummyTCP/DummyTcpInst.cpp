@@ -75,9 +75,9 @@ OpenDDS::DCPS::DummyTcpInst::load (const TransportIdType& id,
 
 
 OpenDDS::DCPS::TransportImpl*
-OpenDDS::DCPS::DummyTcpInst::new_impl()
+OpenDDS::DCPS::DummyTcpInst::new_impl(const TransportInst_rch& inst)
 {
-  return new DummyTcpTransport;
+  return new DummyTcpTransport(inst);
 }
 
 

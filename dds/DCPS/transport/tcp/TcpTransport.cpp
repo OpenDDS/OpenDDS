@@ -22,13 +22,16 @@
 #include "dds/DCPS/debug.h"
 #include <sstream>
 
-OpenDDS::DCPS::TcpTransport::TcpTransport()
-  : reverse_reservation_lock_ (this->reservation_lock ()),
+OpenDDS::DCPS::TcpTransport::TcpTransport(const TransportInst_rch& inst)
+  : reverse_reservation_lock_(this->reservation_lock()),
     acceptor_(new TcpAcceptor(this)),
     connections_updated_(this->connections_lock_),
     con_checker_(new TcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
+  if (!inst.is_nil()) {
+    configure(inst.in());
+  }
 }
 
 OpenDDS::DCPS::TcpTransport::~TcpTransport()

@@ -28,7 +28,7 @@ namespace OpenDDS
         /// Diagnostic aid.
         virtual void dump(std::ostream& os);
 
-        TransportImpl* new_impl();
+        TransportImpl* new_impl(const TransportInst_rch& inst = 0);
 
         /// Describes the local endpoint to be used to accept
         /// passive connections.

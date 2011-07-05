@@ -93,7 +93,7 @@ private:
   explicit TcpInst(const std::string& name);
   virtual ~TcpInst();
 
-  TcpTransport* new_impl();
+  TcpTransport* new_impl(const TransportInst_rch& inst);
 };
 
 } // namespace DCPS

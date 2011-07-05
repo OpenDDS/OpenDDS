@@ -41,7 +41,7 @@ class TcpConnectionReplaceTask;
 class OpenDDS_Tcp_Export TcpTransport : public TransportImpl {
 public:
 
-  TcpTransport();
+  TcpTransport(const TransportInst_rch& inst = 0); //TODO: default is only transitional
   virtual ~TcpTransport();
 
   TcpInst* get_configuration();

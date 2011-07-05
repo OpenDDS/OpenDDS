@@ -122,8 +122,10 @@ OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
 void
 OpenDDS::DCPS::TransportInst::shutdown()
 {
+  ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
   if (!this->impl_.is_nil()) {
     this->impl_->shutdown();
+    this->impl_ = 0;
   }
 }
 
@@ -132,8 +134,7 @@ OpenDDS::DCPS::TransportInst::impl()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
   if (this->impl_.is_nil()) {
-    this->impl_ = this->new_impl();
-    this->impl_->configure(this);
+    this->impl_ = this->new_impl(TransportInst_rch(this, false));
   }
   return this->impl_;
 }

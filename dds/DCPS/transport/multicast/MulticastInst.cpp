@@ -208,9 +208,9 @@ MulticastInst::default_group_address(ACE_INET_Addr& group_address,
 }
 
 MulticastTransport*
-MulticastInst::new_impl()
+MulticastInst::new_impl(const TransportInst_rch& inst)
 {
-  return new MulticastTransport;
+  return new MulticastTransport(inst);
 }
 
 void

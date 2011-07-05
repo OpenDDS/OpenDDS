@@ -38,7 +38,7 @@ namespace OpenDDS
     {
       public:
 
-        DummyTcpTransport();
+        DummyTcpTransport(const TransportInst_rch& inst = 0);
         virtual ~DummyTcpTransport();
 
         DummyTcpInst* get_configuration();

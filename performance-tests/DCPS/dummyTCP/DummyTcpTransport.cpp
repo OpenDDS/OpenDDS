@@ -17,12 +17,15 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 
-OpenDDS::DCPS::DummyTcpTransport::DummyTcpTransport()
+OpenDDS::DCPS::DummyTcpTransport::DummyTcpTransport(const TransportInst_rch& inst)
   : acceptor_(new DummyTcpAcceptor (this)),
     connections_updated_(this->connections_lock_),
     con_checker_ (new DummyTcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("DummyTcpTransport","DummyTcpTransport",5);
+  if (!inst.is_nil()) {
+    configure(inst.in());
+  }
 }
 
 

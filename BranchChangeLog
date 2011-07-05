@@ -1,3 +1,42 @@
+Tue Jul  5 22:01:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Allow TransportImpls to be constructed with an Inst_rch parameter
+          so that they are not constructred in a not-configured state.
+          Make sure default Insts are also kept in the registry.
+          Implemented shutdown so that TransportImpls can clean up: this
+          requires TransportClients to be attached to the Impls.
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          Cleaned up style, etc.  No functional changes.
+
 Tue Jul  5 16:31:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4607 through r4638.

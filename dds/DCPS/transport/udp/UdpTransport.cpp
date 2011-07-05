@@ -26,6 +26,13 @@ const CORBA::Long TRANSPORT_INTERFACE_ID(0x4447524D); // DGRM
 namespace OpenDDS {
 namespace DCPS {
 
+UdpTransport::UdpTransport(const TransportInst_rch& inst)
+{
+  if (!inst.is_nil()) {
+    configure(inst.in());
+  }
+}
+
 DataLink*
 UdpTransport::find_or_create_datalink(
   RepoId /*local_id*/,
@@ -104,14 +111,6 @@ UdpTransport::configure_i(TransportInst* config)
                      -1);
   }
   this->config_i_->_add_ref();
-
-  if (this->config_i_->local_address_ == ACE_INET_Addr()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpTransport::configure_i: ")
-                      ACE_TEXT("invalid configuration!  local_address not set.\n")),
-                     -1);
-  }
 
   this->create_reactor_task();
 

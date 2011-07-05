@@ -20,7 +20,12 @@ TransportClient::TransportClient()
 {}
 
 TransportClient::~TransportClient()
-{}
+{
+  for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
+       it != impls_.end(); ++it) {
+    (*it)->detach_client(this);
+  }
+}
 
 void
 TransportClient::enable_transport()
@@ -41,7 +46,21 @@ TransportClient::enable_transport()
   for (size_t i = 0; i < n; ++i) {
     TransportInst_rch inst = tc->instances_[i];
     if (check_transport_qos(*inst.in())) {
-      impls_.push_back(inst->impl());
+      TransportImpl_rch impl = inst->impl();
+      impl->attach_client(this);
+      impls_.push_back(impl);
+    }
+  }
+}
+
+void
+TransportClient::transport_detached(TransportImpl* which)
+{
+  for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
+       it != impls_.end(); ++it) {
+    if (it->in() == which) {
+      impls_.erase(it);
+      return;
     }
   }
 }

@@ -109,7 +109,7 @@ private:
   void default_group_address(ACE_INET_Addr& group_address,
                              const TransportIdType& id);
 
-  MulticastTransport* new_impl();
+  MulticastTransport* new_impl(const TransportInst_rch& inst);
 };
 
 } // namespace DCPS

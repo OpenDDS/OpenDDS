@@ -23,12 +23,13 @@
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
-#include <list>
 #include <map>
+#include <set>
 
 namespace OpenDDS {
 namespace DCPS {
 
+class TransportClient;
 class TransportInterface;
 class TransportReceiveListener;
 class ThreadSynchStrategy;
@@ -209,8 +210,8 @@ private:
   friend class TransportImplFactory;
   friend class TransportFactory;
   friend class TransportInst;
+  friend class TransportClient;
   friend class DataLink;
-//MJM: blech.
 
   /// Our friend (and creator), the TransportImplFactory, will invoke
   /// this method in order to provide us with the TransportReactorTask.
@@ -241,6 +242,9 @@ private:
   /// Called by our friend, the TransportInterface, to detach
   /// itself to this TransportImpl object.
   void detach_interface(TransportInterface* transport_interface);
+
+  void attach_client(TransportClient* client);
+  void detach_client(TransportClient* client);
 
   /// Called by our friend, the TransportInterface, to reserve
   /// a DataLink for a remote subscription association
@@ -327,10 +331,11 @@ private:
   /// "attached" to this TransportImpl.
   InterfaceMapType interfaces_;
 
+  std::set<TransportClient*> clients_;
+
   /// A reference (via a smart pointer) to the TransportInst
   /// object that was supplied to us during our configure() method.
   TransportInst_rch config_;
-//MJM: I still don't understand why this is shareable.
 
   /// The reactor (task) object - may not even be used if the concrete
   /// subclass (of TransportImpl) doesn't require a reactor.

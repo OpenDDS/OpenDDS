@@ -77,9 +77,9 @@ OpenDDS::DCPS::TcpInst::load(const TransportIdType& id,
 }
 
 OpenDDS::DCPS::TcpTransport*
-OpenDDS::DCPS::TcpInst::new_impl()
+OpenDDS::DCPS::TcpInst::new_impl(const TransportInst_rch& inst)
 {
-  return new TcpTransport;
+  return new TcpTransport(inst);
 }
 
 int

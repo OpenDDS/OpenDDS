@@ -25,6 +25,9 @@ namespace DCPS {
 class UdpInst;
 
 class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
+public:
+  UdpTransport(const TransportInst_rch& inst = 0); //TODO: default is only transitional
+
 protected:
   virtual DataLink* find_or_create_datalink(
     RepoId local_id,

@@ -61,9 +61,9 @@ UdpInst::load(const TransportIdType& id,
 }
 
 UdpTransport*
-UdpInst::new_impl()
+UdpInst::new_impl(const TransportInst_rch& inst)
 {
-  return new UdpTransport;
+  return new UdpTransport(inst);
 }
 
 int

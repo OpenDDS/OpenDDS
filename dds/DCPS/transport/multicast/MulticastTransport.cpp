@@ -30,9 +30,12 @@ const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastTransport::MulticastTransport()
+MulticastTransport::MulticastTransport(const TransportInst_rch& inst)
   : config_i_(0)
 {
+  if (!inst.is_nil()) {
+    configure(inst.in());
+  }
 }
 
 MulticastTransport::~MulticastTransport()

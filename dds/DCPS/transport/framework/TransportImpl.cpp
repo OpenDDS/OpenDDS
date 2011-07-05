@@ -100,8 +100,12 @@ OpenDDS::DCPS::TransportImpl::shutdown()
     // Clear our collection of TransportInterface pointers.
     interfaces_.clear();
 
-//MJM: Won't you need to ACE_UNUSED_ARG here since you are depending on
-//MJM: side effects here?
+    for (std::set<TransportClient*>::iterator it = clients_.begin();
+         it != clients_.end(); ++it) {
+      (*it)->transport_detached(this);
+    }
+
+    clients_.clear();
 
     // We can release our lock_ now.
   }
@@ -324,6 +328,24 @@ OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* transport_int
 
   // Everything worked.  Return success code.
   return ATTACH_OK;
+}
+
+void
+OpenDDS::DCPS::TransportImpl::attach_client(TransportClient* client)
+{
+  DBG_ENTRY_LVL("TransportImpl", "attach_client", 6);
+
+  GuardType guard(this->lock_);
+  clients_.insert(client);
+}
+
+void
+OpenDDS::DCPS::TransportImpl::detach_client(TransportClient* client)
+{
+  DBG_ENTRY_LVL("TransportImpl", "attach_client", 6);
+
+  GuardType guard(this->lock_);
+  clients_.erase(client);
 }
 
 int

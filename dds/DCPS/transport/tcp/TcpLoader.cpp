@@ -19,6 +19,10 @@
 #include "tao/debug.h"
 #include "ace/OS_NS_strings.h"
 
+namespace {
+  const char TCP_NAME[] = "tcp";
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -34,16 +38,11 @@ TcpLoader::~TcpLoader()
 
 class TcpType : public TransportType {
 public:
-  const char* name() { return "tcp"; }
+  const char* name() { return TCP_NAME; }
 
   TransportInst* new_inst(const std::string& name)
   {
     return new TcpInst(name);
-  }
-
-  static TransportInst* new_default()
-  {
-    return new TcpInst(TransportRegistry::DEFAULT_INST_PREFIX + "0500_TCP");
   }
 };
 
@@ -60,8 +59,11 @@ TcpLoader::init(int, ACE_TCHAR*[])
 
   TransportRegistry* registry = TheTransportRegistry;
   registry->register_type(new TcpType);
+  TransportInst_rch default_inst =
+    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX + "0500_TCP",
+                          TCP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
-    ->sorted_insert(TcpType::new_default());
+    ->sorted_insert(default_inst);
 
   TheTransportFactory->register_generator(ACE_TEXT("tcp"), new TcpGenerator);
 

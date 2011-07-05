@@ -13,30 +13,20 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
 
+namespace {
+  const char MULTICAST_NAME[] = "multicast";
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
 class MulticastType : public TransportType {
 public:
-  const char* name() { return "multicast"; }
+  const char* name() { return MULTICAST_NAME; }
 
   TransportInst* new_inst(const std::string& name)
   {
     return new MulticastInst(name);
-  }
-
-  static TransportInst* new_default_unreliable()
-  {
-    MulticastInst* mi = new MulticastInst(TransportRegistry::DEFAULT_INST_PREFIX
-                                          + "0410_MCAST_UNRELIABLE");
-    mi->reliable_ = false;
-    return mi;
-  }
-
-  static TransportInst* new_default_reliable()
-  {
-   return new MulticastInst(TransportRegistry::DEFAULT_INST_PREFIX
-                            + "0420_MCAST_RELIABLE");
   }
 };
 
@@ -51,8 +41,18 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   registry->register_type(new MulticastType);
   TransportConfig_rch cfg =
     registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME);
-  cfg->sorted_insert(MulticastType::new_default_unreliable());
-  cfg->sorted_insert(MulticastType::new_default_reliable());
+
+  TransportInst_rch default_unrel =
+    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
+                          + "0410_MCAST_UNRELIABLE", MULTICAST_NAME);
+  MulticastInst* mi = dynamic_cast<MulticastInst*>(default_unrel.in());
+  mi->reliable_ = false;
+  cfg->sorted_insert(default_unrel);
+
+  TransportInst_rch default_rel =
+    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
+                          + "0420_MCAST_RELIABLE", MULTICAST_NAME);
+  cfg->sorted_insert(default_rel);
 
   TheTransportFactory->register_generator(ACE_TEXT("multicast"),
                                           new MulticastGenerator);

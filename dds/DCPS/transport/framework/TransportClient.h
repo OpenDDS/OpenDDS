@@ -39,6 +39,9 @@ protected:
 private:
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
 
+  friend class TransportImpl;
+  void transport_detached(TransportImpl* which);
+
   std::vector<TransportImpl_rch> impls_;
   DataLinkSet links_;
 };
