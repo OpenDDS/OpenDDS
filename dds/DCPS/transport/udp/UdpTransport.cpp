@@ -33,37 +33,16 @@ UdpTransport::UdpTransport(const TransportInst_rch& inst)
   }
 }
 
-DataLink*
-UdpTransport::find_or_create_datalink(
-  RepoId /*local_id*/,
-  const AssociationData* remote_association,
-  CORBA::Long priority,
-  bool active)
+UdpDataLink*
+UdpTransport::make_datalink(const ACE_INET_Addr& remote_address, bool active)
 {
-  ACE_INET_Addr remote_address(
-    connection_info_i(remote_association->remote_data_));
-  bool is_loopback = remote_address == this->config_i_->local_address_;
-  PriorityKey key(priority, remote_address, is_loopback, active);
-
-  if (active) {
-    UdpDataLinkMap::iterator it(this->client_links_.find(key));
-    if (it != this->client_links_.end()) {
-      return UdpDataLink_rch(it->second)._retn(); // found
-    }
-
-  } else if (!this->server_link_.is_nil()) {
-    // A single DataLink is managed for all passive reservations:
-    return UdpDataLink_rch(this->server_link_)._retn(); // found
-  }
-
-  // Create new DataLink for logical connection:
   UdpDataLink_rch link;
   ACE_NEW_RETURN(link, UdpDataLink(this, active), 0);
 
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpTransport::find_or_create_datalink: ")
+                      ACE_TEXT("UdpTransport::make_datalink: ")
                       ACE_TEXT("failed to create DataLink!\n")),
                      0);
   }
@@ -90,12 +69,33 @@ UdpTransport::find_or_create_datalink(
                      0);
   }
 
+  return link._retn();
+}
+
+DataLink*
+UdpTransport::find_or_create_datalink(
+  RepoId /*local_id*/,
+  const AssociationData* remote_association,
+  CORBA::Long priority,
+  bool active)
+{
+  ACE_INET_Addr remote_address(
+    connection_info_i(remote_association->remote_data_));
+  bool is_loopback = remote_address == this->config_i_->local_address_;
+  PriorityKey key(priority, remote_address, is_loopback, active);
+
   if (active) {
-    this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
+    UdpDataLinkMap::iterator it(this->client_links_.find(key));
+    if (it != this->client_links_.end()) {
+      return UdpDataLink_rch(it->second)._retn(); // found
+    }
   } else {
-    this->server_link_ = link;
+    return UdpDataLink_rch(this->server_link_)._retn(); // found
   }
 
+  // Create new DataLink for logical connection:
+  UdpDataLink_rch link = make_datalink(remote_address, active);
+  this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
   return link._retn();
 }
 
@@ -113,6 +113,12 @@ UdpTransport::configure_i(TransportInst* config)
   this->config_i_->_add_ref();
 
   this->create_reactor_task();
+
+  // Our "server side" data link is created here, similar to the acceptor_
+  // in the TcpTransport implementation.  This establishes a socket as an
+  // endpoint that we can advertise to peers via connection_info_i().
+
+  this->server_link_ = make_datalink(ACE_INET_Addr(), false);
 
   return 0;
 }

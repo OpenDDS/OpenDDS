@@ -145,9 +145,8 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
                      -1);
   }
 
-//MJM: So we disallow dynamic reconfiguration?  So if we want a
-//MJM: different configuration, we should kill this one and create and
-//MJM: configure a new one...
+  config->_add_ref();
+  this->config_ = config;
 
   // Let our subclass take a shot at the configuration object.
   if (this->configure_i(config) == -1) {
@@ -155,16 +154,13 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
       dump();
     }
 
+    this->config_ = 0;
+
     // The subclass rejected the configuration attempt.
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
                      -1);
   }
-
-  // Our subclass accepted the configuration attempt.
-  // Save off a "copy" of the reference for ourselves.
-  config->_add_ref();
-  this->config_ = config;
 
   // Open the DL Cleanup task
   // We depend upon the existing config logic to ensure the

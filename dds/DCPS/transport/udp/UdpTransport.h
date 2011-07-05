@@ -48,6 +48,8 @@ protected:
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
 private:
+  UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address, bool active);
+
   RcHandle<UdpInst> config_i_;
 
   UdpDataLink_rch server_link_;
