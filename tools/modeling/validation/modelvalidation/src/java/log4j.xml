@@ -16,6 +16,6 @@
    </root>
 
 </log4j:configuration>
-<!-- 
+<!--
 %d{ABSOLUTE} %-5p @%t [%c{1}] %m%n
  -->

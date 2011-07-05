@@ -1,3 +1,210 @@
+Tue Jul  5 16:16:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_lem_stub.mpb:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/docs/README:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+
+          Fixed whitespace.  Text files must end with a newline to avoid the
+          warning from svn diff: "No newline at end of file"
+
+Tue Jul  5 13:16:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          more fuzz
+
+Sun Jul  3 16:54:03 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fuzz fix, complete the association from publication ID to
+          registered topic data type name.
+
+Fri Jul  1 20:00:41 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fixed use of a non-portable type name as discovered by Adam.
+          Added some more debugging output.
+
+Fri Jul  1 16:13:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Another incremental patch. I found a bug in the giop dissector
+          from wireshark, it was not setting the request ID in the header
+          information passed to a sub-dissector. The request ID is
+          necessary for correlating information in replies to information
+          in requests. Fortunately there is a fairly simple work-around.
+
+Fri Jul  1 14:17:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Arrays/run_test.pl:
+        * tools/modeling/tests/CfTopic/run_test.pl:
+        * tools/modeling/tests/Chained_Topic/run_test.pl:
+        * tools/modeling/tests/Codegen/run_test.pl:
+        * tools/modeling/tests/Comments/run_test.pl:
+        * tools/modeling/tests/CompositeKey/run_test.pl:
+        * tools/modeling/tests/CopyTopicQos/run_test.pl:
+        * tools/modeling/tests/DataLibRef/run_test.pl:
+        * tools/modeling/tests/Deep/Down/Reference/run_test.pl:
+        * tools/modeling/tests/DomainZero/run_test.pl:
+        * tools/modeling/tests/EmptyLibs/run_test.pl:
+        * tools/modeling/tests/Exchange/run_test.pl:
+        * tools/modeling/tests/ExternalPolicies/run_test.pl:
+        * tools/modeling/tests/InvalidNames/run_test.pl:
+        * tools/modeling/tests/Looped/run_test.pl:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/MessengerDpQos/run_test.pl:
+        * tools/modeling/tests/MessengerGlobalNs/run_test.pl:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+        * tools/modeling/tests/MessengerMixed/run_test.pl:
+        * tools/modeling/tests/MessengerMulti/run_test.pl:
+        * tools/modeling/tests/MessengerNoPub/run_test.pl:
+        * tools/modeling/tests/MessengerNoSub/run_test.pl:
+        * tools/modeling/tests/MessengerPubQos/run_test.pl:
+        * tools/modeling/tests/MessengerSimpleTypes/run_test.pl:
+        * tools/modeling/tests/MessengerSplit/run_test.pl:
+        * tools/modeling/tests/MessengerWriterQos/run_test.pl:
+        * tools/modeling/tests/ModuleNameConflict/run_test.pl:
+        * tools/modeling/tests/MultiDCPS/run_test.pl:
+        * tools/modeling/tests/MultiInstance/run_test.pl:
+        * tools/modeling/tests/MultiTopic/run_test.pl:
+        * tools/modeling/tests/PolicyLib/run_test.pl:
+        * tools/modeling/tests/ReaderQos/run_test.pl:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/RemoteInstHandles/run_test.pl:
+        * tools/modeling/tests/ReusedExtTypes/run_test.pl:
+        * tools/modeling/tests/ReusedTypes/run_test.pl:
+        * tools/modeling/tests/Sequences/run_test.pl:
+        * tools/modeling/tests/StockQuoter/run_test.pl:
+        * tools/modeling/tests/SubscriberQos/run_test.pl:
+        * tools/modeling/tests/TopicQos/run_test.pl:
+        * tools/modeling/tests/UDP/run_test.pl:
+
+          delete *.log prior to running tests.
+
+Thu Jun 30 19:46:02 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/providers/ValidationDecoratorProvider.xpt:
+
+          Avoid "Decorator refresh failure" that can occur when
+          validating in one sub-diagram that is the same type as
+          another opened sub-diagram (e.g. two PolicyLib diagrams).
+          This problem was causing subsequent validations to fail
+          in either sub-diagram.
+
+Wed Jun 29 22:33:13 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-datawriter.cpp:
+
+          This is what I get for not doing a check-compile before
+          committing. Now the build works.
+
+Wed Jun 29 22:14:49 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Another incremental commit. Split the multiple classes in
+          packet-repo.* into their own header/impl files.
+
+Wed Jun 29 13:50:46 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dcps_lem_stub.mpb:
+          New base project for the dcps lem stub library, needed for dds4ccm
+
+Tue Jun 28 20:52:44 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/docs/README:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+
+          Refactor validation tool for better ease of use.
+
+Tue Jun 28 15:46:11 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fix for scoreboard error on windows builds.
+
+Tue Jun 28 15:08:46 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/XMI.xsd:
+        * tools/modeling/validation/modelvalidation/build.properties:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/validation/modelvalidation/src/xsl/Default.xslt:
+
+          Added support for validation of .codegen files.
+
+Tue Jun 28 14:26:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.site:
+
+          svn:ignore only
+
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/validation/modelvalidation/src/java/log4j.xml:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSXMISchemaTransformer.java:
+        * tools/modeling/validation/modelvalidation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Whitespace cleanup only.
+
+Mon Jun 27 23:27:09 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Replaced the original packet.cpp with packet-opendds.[cpp|h] and
+          added packet-repo.*. This is not a final commit by any stretch,
+          format is still in flux, lacking documentation, style unification,
+          etc.
+
+          Reformatted original C-style organization of dds packet dissector
+          to be more object oriented, but more work is needed to make that
+          right.
+
+        * tools/dissector/packet.cpp:
+
+          Removed this file.
+
 Fri Jun 24 16:26:14 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/validation/modelvalidation/test/data/satellite.opendds:

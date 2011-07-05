@@ -26,7 +26,7 @@ import org.xml.sax.SAXParseException;
 
 public class XMLUtil {
 	private static final Logger logger = Logger.getLogger(XMLUtil.class.getName());
-	
+
 	public static void transform(final File sourceXML, final File xslt, final File targetXML) throws TransformerException {
 		logger.debug("sourceXML = " + sourceXML);
 		logger.debug("xslt = " + xslt);
@@ -36,7 +36,7 @@ public class XMLUtil {
 		Result result = new StreamResult(targetXML);
 		transformer.transform(source, result);
 	}
-	
+
 	public static List<SAXParseException> validate(final File schemaFile, final File xmlFile) throws SAXException, IOException {
 		logger.debug("schemaFile = " + schemaFile);
 		logger.debug("xmlFile = " + xmlFile);
@@ -50,7 +50,7 @@ public class XMLUtil {
         validator.validate(xmlSource);
         return veh.errors;
 	}
-	
+
 	static class ValidationErrorHandler implements ErrorHandler {
 		final List<SAXParseException> errors = new ArrayList<SAXParseException>();
 		@Override
@@ -70,7 +70,7 @@ public class XMLUtil {
 			logger.debug(exception.getMessage());
 		}
 	}
-	
+
 	static Transformer createTransformer(final File xsltFile) throws TransformerException {
 		try {
 			Source xslSource = new StreamSource(xsltFile);

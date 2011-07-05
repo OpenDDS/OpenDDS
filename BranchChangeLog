@@ -1,3 +1,7 @@
+Tue Jul  5 16:31:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4607 through r4638.
+
 Tue Jul  5 16:23:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

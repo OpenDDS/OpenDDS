@@ -8,11 +8,11 @@
     complianceLevel="6.0" copyrightFields="false" providerRootExtendsClass="" interfaceNamePattern=""
     classNamePattern="">
   <foreignModel>Generator.ecore</foreignModel>
-  <genPackages prefix="Generator" basePackage="org.opendds.modeling.sdk.model" resource="XML"
-      disposableProviderFactory="true" classPackageSuffix="Impl" utilityPackageSuffix="Util"
-      providerPackageSuffix="Provider" presentationPackageSuffix="Presentation" testsPackageSuffix="Tests"
-      generateModelWizard="false" extensibleProviderFactory="true" contentTypeIdentifier=""
-      fileExtensions="gen" ecorePackage="Generator.ecore#/">
+  <genPackages prefix="Generator" basePackage="org.opendds.modeling.sdk.model" disposableProviderFactory="true"
+      classPackageSuffix="Impl" utilityPackageSuffix="Util" providerPackageSuffix="Provider"
+      presentationPackageSuffix="Presentation" testsPackageSuffix="Tests" generateModelWizard="false"
+      extensibleProviderFactory="true" contentTypeIdentifier="" fileExtensions="gen"
+      ecorePackage="Generator.ecore#/">
     <genClasses ecoreClass="Generator.ecore#//CodeGen"/>
     <genClasses ecoreClass="Generator.ecore#//genspec">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//genspec/source"/>
