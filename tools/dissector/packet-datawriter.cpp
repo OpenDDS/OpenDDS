@@ -85,19 +85,19 @@ namespace OpenDDS
       case Reply:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Add_Associations reply\n"));
+          //ACE_DEBUG ((LM_DEBUG,"Decoding Add_Associations reply\n"));
           break;
         }
       case Request:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Add_Associations request\n"));
+          // ACE_DEBUG ((LM_DEBUG,"Decoding Add_Associations request\n"));
           break;
         }
       default:
         {
-          ACE_DEBUG ((LM_DEBUG,"Decoding Add_Associations, msg type = %d\n",
-                      header->message_type));
+          //ACE_DEBUG ((LM_DEBUG,"Decoding Add_Associations, msg type = %d\n",
+          //            header->message_type));
         }
       }
 
@@ -142,9 +142,6 @@ namespace OpenDDS
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
 
-      ACE_DEBUG ((LM_DEBUG,
-                  "DWR pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
-                  pinfo->current_proto, header->message_type, header->req_id, ofs));
       if (idlname == 0)
         return FALSE;
       instance().setPacket (tvb, pinfo, ptree, offset);
@@ -161,7 +158,7 @@ namespace OpenDDS
      ::MessageHeader *header, gchar *operation, gchar *)
     {
       ACE_UNUSED_ARG (tvb);
-      //ACE_UNUSED_ARG (pinfo);
+      ACE_UNUSED_ARG (pinfo);
       ACE_UNUSED_ARG (ptree);
       ACE_UNUSED_ARG (offset);
       ACE_UNUSED_ARG (header);
@@ -172,9 +169,6 @@ namespace OpenDDS
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
 
-      ACE_DEBUG ((LM_DEBUG,
-                  "DWR_heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
-                  pinfo->current_proto, header->message_type, header->req_id, ofs));
       return FALSE;
 
     }

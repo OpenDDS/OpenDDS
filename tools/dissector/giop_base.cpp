@@ -54,9 +54,6 @@ namespace OpenDDS
                              gchar *operation,
                              gchar *idlname)
     {
-      ACE_DEBUG ((LM_DEBUG,"dissect_giop called for %s::%s\n",
-                  idlname, operation));
-
       if (idlname != 0 &&
           ACE_OS::strcmp (idlname, this->repo_id_) != 0)
         return -1;
@@ -98,7 +95,9 @@ namespace OpenDDS
         {
           return func;
         }
-      ACE_DEBUG ((LM_DEBUG,"Unknown operation %s\n", opname));
+      ACE_DEBUG ((LM_DEBUG,
+                  "GIOP_Base::find_giop_decoder: Unknown operation %s\n", 
+                  opname));
       return 0;
     }
 

@@ -1,3 +1,18 @@
+Wed Jul  6 16:17:37 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+        
+          Adding prototype sample dissectors for working out development
+          issues. These are explicitly bound to specific data, captured
+          from the DCPS/MultiTopic test. Also cleaned up some now
+          redundant debug output.
+
 Wed Jul  6 15:47:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:

@@ -26,6 +26,15 @@ namespace OpenDDS
   namespace DCPS
   {
 
+    Sample_Dissector_Manager 
+    Sample_Dissector_Manager::instance_;
+
+    Sample_Dissector_Manager &
+    Sample_Dissector_Manager::instance () 
+    {
+      return instance_;
+    }
+
     Sample_Base::Sample_Base (const char *type_id)
       :typeId_ (0),
        publication_()
@@ -62,20 +71,20 @@ namespace OpenDDS
     }
 
     void
+    Sample_Dissector_Manager::init ()
+    {
+      Sample_Base *dummy = new LocationInfo_Dissector;
+      dummy = new PlanInfo_Dissector;
+      dummy = new MoreInfo_Dissector;
+      dummy = new UnrelatedInfo_Dissector;
+      dummy = new Resulting_Dissector;
+
+      ACE_UNUSED_ARG (dummy);
+    };
+
+    void
     Sample_Dissector_Manager::add (Sample_Base &d)
     {
-#if 0
-      dds_sub_handle_t *subh;
-
-      subh = g_malloc(sizeof (giop_sub_handle_t));
-
-      subh->sub_name = name;
-      subh->sub_fn = sub;
-      subh->sub_proto = find_protocol_by_id(sub_proto);     /* protocol_t for sub dissectors's proto_register_protocol() */
-
-      giop_sub_list = g_slist_append (giop_sub_list, subh);
-#endif
-
       const char *key = d.typeId();
       ACE_DEBUG ((LM_DEBUG,"Adding new dissector for %s\n",key));
 
@@ -88,6 +97,48 @@ namespace OpenDDS
       Sample_Base *result = 0;
       dissectors_.find (data_name, result);
       return result;
+    }
+
+    //--------------------------------------------------------------------
+
+    void LocationInfo_Dissector::dissect (tvbuff_t *tvb,
+                                          packet_info *pinfo,
+                                          proto_tree *tree,
+                                          gint &offset)
+    {
+      ACE_DEBUG ((LM_DEBUG, "LocationInfo_Dissector::dissect\n"));
+    }
+
+    void PlanInfo_Dissector::dissect (tvbuff_t *tvb,
+                                          packet_info *pinfo,
+                                          proto_tree *tree,
+                                          gint &offset)
+    {
+      ACE_DEBUG ((LM_DEBUG, "PlanInfo_Dissector::dissect\n"));
+    }
+
+    void MoreInfo_Dissector::dissect (tvbuff_t *tvb,
+                                          packet_info *pinfo,
+                                          proto_tree *tree,
+                                          gint &offset)
+    {
+      ACE_DEBUG ((LM_DEBUG, "MoreInfo_Dissector::dissect\n"));
+    }
+
+    void UnrelatedInfo_Dissector::dissect (tvbuff_t *tvb,
+                                          packet_info *pinfo,
+                                          proto_tree *tree,
+                                          gint &offset)
+    {
+      ACE_DEBUG ((LM_DEBUG, "UnrelatedInfo_Dissector::dissect\n"));
+    }
+
+    void Resulting_Dissector::dissect (tvbuff_t *tvb,
+                                          packet_info *pinfo,
+                                          proto_tree *tree,
+                                          gint &offset)
+    {
+      ACE_DEBUG ((LM_DEBUG, "Resulting_Dissector::dissect\n"));
     }
 
   }

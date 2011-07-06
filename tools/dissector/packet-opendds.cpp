@@ -176,7 +176,6 @@ namespace OpenDDS
     }
 
     DDS_Dissector::DDS_Dissector ()
-      : sample_manager_ (new Sample_Dissector_Manager)
     {
     }
 
@@ -422,7 +421,8 @@ namespace OpenDDS
           return;
         }
 
-      Sample_Base *data_dissector = this->sample_manager_->find (data_name);
+      Sample_Base *data_dissector = 
+        Sample_Dissector_Manager::instance().find (data_name);
       if (data_dissector == 0)
         {
           ACE_DEBUG ((LM_DEBUG,
@@ -433,7 +433,7 @@ namespace OpenDDS
           offset += header.message_length_; // skip marshaled data
         }
       else
-        data_dissector->dissect (tvb, pinfo, tree);
+        data_dissector->dissect (tvb, pinfo, tree, offset);
     }
 
     void
@@ -475,12 +475,6 @@ namespace OpenDDS
               demarshal_data<DataSampleHeader>(tvb, offset);
 
             std::string sample_str(format(sample));
-
-            if (sample.message_id_ == SAMPLE_DATA)
-              {
-                ACE_DEBUG ((LM_DEBUG, "sample data: is %d, len = %d\n",
-                            offset, tvb->length));
-              }
 
             proto_item* item =
               proto_tree_add_none_format
@@ -601,6 +595,8 @@ namespace OpenDDS
       if (initialized_)
         return;
       initialized_ = true;
+
+      Sample_Dissector_Manager::instance ().init();
 
       //#define HFILL 0, 0, HF_REF_TYPE_NONE, 0, NULL, NULL
 #define NULL_HFILL NULL, 0, NULL, HFILL

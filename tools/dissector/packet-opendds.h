@@ -115,7 +115,6 @@ namespace OpenDDS
                                    const DCPS::DataSampleHeader&,
                                    gint& );
 
-      Sample_Dissector_Manager *sample_manager_;
     };
 
   }
