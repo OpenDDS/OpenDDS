@@ -1,3 +1,9 @@
+Wed Jul  6 15:47:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Same as the previous commit: adapting for alternate Ant installation.
+
 Wed Jul  6 14:01:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/setup.pl:

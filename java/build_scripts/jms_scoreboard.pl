@@ -35,10 +35,16 @@ if (!chdir $opt_d) {
     exit $!;
 }
 
+my $ant = $ANT_HOME . '/bin/ant';
+if (!-r $ant) {
+    $ant = 'ant'; # For Linux packages, ANT_HOME is in /usr/share but the ant
+}                 # launching shell script is not in ANT_HOME (just use PATH).
+
 # This seems to only impact ant on Windows, it's confused by -Dfoo=bar when
 # bar also contains an =
 if ($^O eq 'MSWin32') {
     map s/-D([\w.]+)=(\S+)=(\S+)/-D$1=\\"$2=$3\\"/, @ARGV;
+    $ant = '"' . $ant . '"' if $ant =~ / /;
 }
 
 map {$_ = '"' . $_ . '"' if $_ =~ / /} @ARGV;
@@ -56,17 +62,25 @@ for my $tgt (@targets) {
       my $PROC;
       if ($^O eq 'MSWin32') {
         $PROC = PerlDDS::create_process("$ENV{windir}\\system32\\cmd",
-                                        "/c $ANT_HOME/bin/ant @ARGV $extra " .
+                                        "/c $ant @ARGV $extra " .
                                         "$tgt->[1]");
       }
       else {
-        $PROC = PerlDDS::create_process("$ANT_HOME/bin/ant",
-                                        "@ARGV $extra $tgt->[1]");
+        if ($ant eq 'ant') {
+          # create_process requries full path to script or else it will use ./
+          my @p = split /:/, $ENV{'PATH'};
+          for my $entry (@p) {
+            if (-r $entry . '/ant') {
+              $ant = $entry . '/ant';
+            }
+          }
+        }
+        $PROC = PerlDDS::create_process($ant, "@ARGV $extra $tgt->[1]");
       }
       $status = $PROC->SpawnWaitKill(600);
     }
     else {
-      $status = system("\"$ANT_HOME/bin/ant\" @ARGV $extra $tgt->[1]");
+      $status = system("$ant @ARGV $extra $tgt->[1]");
     }
     my $testfailed = 0;
     if ($operation eq 'test') {
