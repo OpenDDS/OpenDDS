@@ -18,7 +18,11 @@ my $test_lst = "$DDS_ROOT/$dir/modeling_tests.lst";
 my $cwd = getcwd();
 if (defined $ENV{'ANT_HOME'}) {
   chdir '../validation/modelvalidation';
-  my $status = system("\"$ENV{'ANT_HOME'}/bin/ant\" -l ant.log test");
+  my $ant = $ENV{'ANT_HOME'} . '/bin/ant';
+  if (!-r $ant) {
+    $ant = 'ant';
+  }
+  my $status = system("\"$ant\" -l ant.log test");
   open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
   my $testclass;
   while (<LOG>) {

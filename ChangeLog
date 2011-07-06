@@ -1,3 +1,11 @@
+Wed Jul  6 14:01:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Merged a change that was initially developed in the sbir_transport
+          branch: allows location of Ant when it's installed from a Linux
+          package instead of the standard Ant directory layout.
+
 Tue Jul  5 22:58:08 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/dissector.mpc:
