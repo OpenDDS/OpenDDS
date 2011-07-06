@@ -35,7 +35,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
   // leave type name not speficied would register it with _interface_repository_id
   ts->register_type(dp, "");
-  Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
+  CORBA::String_var type_name = ts->get_type_name();
+  Topic_var topic = dp->create_topic("MyTopic", type_name,
     TOPIC_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,

@@ -22,7 +22,8 @@ void test_setup(const DomainParticipant_var& dp,
   const Subscriber_var& sub, const char* topicName, DataWriter_var& dw,
   DataReader_var& dr)
 {
-  Topic_var topic = dp->create_topic(topicName, ts->get_type_name(),
+  CORBA::String_var typeName = ts->get_type_name();
+  Topic_var topic = dp->create_topic(topicName, typeName,
                                      TOPIC_QOS_DEFAULT, 0,
                                      DEFAULT_STATUS_MASK);
 

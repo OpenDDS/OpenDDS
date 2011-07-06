@@ -45,8 +45,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DomainParticipant_var dp = dpf->create_participant(23,
     PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   Messenger::MessageTypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
-  ts->register_type(dp, ts->get_type_name());
-  Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
+  CORBA::String_var message_type_name = ts->get_type_name();
+  ts->register_type(dp, message_type_name);
+  Topic_var topic = dp->create_topic("MyTopic", message_type_name,
     TOPIC_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
