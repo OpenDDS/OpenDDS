@@ -1,3 +1,15 @@
+Wed Jul  6 15:40:25 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Completed implementation of Udp default local address.
+          Re-enabled it in the test.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed a logging format specifier.
+
 Tue Jul  5 22:44:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
