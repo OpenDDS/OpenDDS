@@ -26,48 +26,13 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    Sample_Dissector_Manager 
+    Sample_Dissector_Manager
     Sample_Dissector_Manager::instance_;
 
     Sample_Dissector_Manager &
-    Sample_Dissector_Manager::instance () 
+    Sample_Dissector_Manager::instance ()
     {
       return instance_;
-    }
-
-    Sample_Base::Sample_Base (const char *type_id)
-      :typeId_ (0),
-       publication_()
-    {
-      size_t len = ACE_OS::strlen(type_id);
-      if (len > 0)
-        {
-          this->typeId_ = new char[len+1];
-          ACE_OS::strcpy (this->typeId_, type_id);
-        }
-    }
-
-    Sample_Base::~Sample_Base ()
-    {
-      delete [] this->typeId_;
-    }
-
-    const char *
-    Sample_Base::typeId() const
-    {
-      return this->typeId_;
-    }
-
-    const DCPS::RepoId&
-    Sample_Base::publication () const
-    {
-      return this->publication_;
-    }
-
-    void
-    Sample_Base::publication (const RepoId& pub)
-    {
-      ACE_OS::memcpy (&this->publication_, &pub, sizeof(RepoId));
     }
 
     void
@@ -101,44 +66,175 @@ namespace OpenDDS
 
     //--------------------------------------------------------------------
 
-    void LocationInfo_Dissector::dissect (tvbuff_t *tvb,
-                                          packet_info *pinfo,
-                                          proto_tree *tree,
-                                          gint &offset)
+
+    Sample_Field::Sample_Field (const char *f, gint l)
+      : data_ (0),
+        format_(f),
+        len_(l),
+        nested_ (0),
+        next_(0)
     {
-      ACE_DEBUG ((LM_DEBUG, "LocationInfo_Dissector::dissect\n"));
     }
 
-    void PlanInfo_Dissector::dissect (tvbuff_t *tvb,
-                                          packet_info *pinfo,
-                                          proto_tree *tree,
-                                          gint &offset)
+    Sample_Field::Sample_Field (const char *f, Sample_Base *n)
+      : data_ (0),
+        format_(f),
+        len_(0),
+        nested_ (n),
+        next_(0)
     {
-      ACE_DEBUG ((LM_DEBUG, "PlanInfo_Dissector::dissect\n"));
     }
 
-    void MoreInfo_Dissector::dissect (tvbuff_t *tvb,
-                                          packet_info *pinfo,
-                                          proto_tree *tree,
-                                          gint &offset)
+    Sample_Field::~Sample_Field ()
     {
-      ACE_DEBUG ((LM_DEBUG, "MoreInfo_Dissector::dissect\n"));
+      delete nested_;
+      delete next_;
     }
 
-    void UnrelatedInfo_Dissector::dissect (tvbuff_t *tvb,
-                                          packet_info *pinfo,
-                                          proto_tree *tree,
-                                          gint &offset)
+    guint
+    Sample_Field::length ()
     {
-      ACE_DEBUG ((LM_DEBUG, "UnrelatedInfo_Dissector::dissect\n"));
+      return this->nested_ ? this->nested_->compute_length(this->data_) : this->len_;
     }
 
-    void Resulting_Dissector::dissect (tvbuff_t *tvb,
-                                          packet_info *pinfo,
-                                          proto_tree *tree,
-                                          gint &offset)
+    //------------------------------------------------------------------------
+
+    Sample_Base::Sample_Base (const char *type_id)
+      :fixed_length_ (0),
+       ett_payload_ (-1),
+       proto_ (-1),
+       use_subtree_ (true),
+       typeId_ (0),
+       field_ (0),
+       last_field_ (0)
     {
-      ACE_DEBUG ((LM_DEBUG, "Resulting_Dissector::dissect\n"));
+      size_t len = ACE_OS::strlen(type_id);
+      if (len > 0)
+        {
+          this->typeId_ = new char[len+1];
+          ACE_OS::strcpy (this->typeId_, type_id);
+        }
+    }
+
+    Sample_Base::~Sample_Base ()
+    {
+      delete [] this->typeId_;
+      delete field_;
+    }
+
+    const char *
+    Sample_Base::typeId() const
+    {
+      return this->typeId_;
+    }
+
+    void
+    Sample_Base::add_field (Sample_Field *f)
+    {
+      if (this->field_ == 0)
+        {
+          this->field_ = f;
+        }
+      else
+        {
+          this->last_field_->next_ = f;
+        }
+      this->last_field_ = f;
+      fixed_length_ += f->len_;
+    }
+
+    size_t
+    Sample_Base::dissect_i (tvbuff_t *tvb,
+                            packet_info *pinfo,
+                            proto_tree *tree,
+                            gint offset)
+    {
+      size_t data_pos = 0;
+
+      gint remainder = tvb->length - offset;
+      guint8* data = (guint8*)ep_tvb_memdup(tvb, offset, remainder);
+
+      if (use_subtree_)
+        {
+          proto_item *item =
+            proto_tree_add_item (tree, proto_, tvb, offset, -1, 0);
+          tree = proto_item_add_subtree (item, ett_payload_);
+        }
+
+      for (Sample_Field *sf = field_; sf != 0; sf = sf->next_)
+        {
+          if (sf->nested_ == 0)
+            {
+              proto_tree_add_text (tree, tvb, offset + data_pos, sf->len_,
+                                   sf->format_, *(data + data_pos));
+              data_pos += sf->length();
+            }
+          else
+            {
+              data_pos +=
+                sf->nested_->dissect_i (tvb, pinfo, tree, offset + data_pos);
+            }
+        }
+
+      return data_pos;
+    }
+
+    void
+    Sample_Base::dissect (tvbuff_t *tvb,
+                          packet_info *pinfo,
+                          proto_tree *tree,
+                          gint &offset)
+    {
+      if (tvb->length - offset < this->fixed_length_)
+        return; // error! length is not sufficient for this type.
+
+      offset += this->dissect_i (tvb, pinfo, tree, offset);
+    }
+
+    guint
+    Sample_Base::compute_length (const char *data)
+    {
+
+      this->fixed_length_ = 0;
+      for (Sample_Field *sf = field_; sf != 0; sf = sf->next_)
+        {
+          sf->data_ = data +  this->fixed_length_;
+          this->fixed_length_ += sf->length();
+        }
+      return this->fixed_length_;
+    }
+
+    guint
+    Sample_Base::length () const
+    {
+      return this->fixed_length_;
+    }
+
+
+    //----------------------------------------------------------------------
+
+    LocationInfo_Dissector::LocationInfo_Dissector ()
+      : Sample_Base ("IDL:LocationInfoTypeSupport:1.0")
+    {
+      Sample_Dissector_Manager::instance().add (*this);
+
+      this->add_field (new Sample_Field ("flight_id1: %u", 4));
+      this->add_field (new Sample_Field ("flight_id2: %u", 4));
+      this->add_field (new Sample_Field ("x: %d", 4));
+      this->add_field (new Sample_Field ("y: %d", 4));
+      this->add_field (new Sample_Field ("z: %d", 4));
+
+      gint *ett[] = {
+        &ett_payload_
+      };
+
+      proto_ =
+        proto_register_protocol
+        ("Sample Payload: LocationInfo",
+         "LocationInfo",
+         "locationinfo");
+      proto_register_subtree_array(ett, array_length(ett));
+
     }
 
   }

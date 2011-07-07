@@ -37,25 +37,80 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    class dissector_Export Sample_Base;
+
+
+    class Sample_Field
+    {
+    public:
+      const char   *data_;
+
+      const char   *format_;
+      guint         len_;
+      Sample_Base  *nested_;
+      Sample_Field *next_;
+
+      Sample_Field (const char *f, gint l);
+      Sample_Field (const char *f, Sample_Base *n);
+      ~Sample_Field ();
+
+      guint length ();
+    };
 
     class dissector_Export Sample_Base
     {
     public:
+      Sample_Base ();
       Sample_Base (const char *type_id);
       ~Sample_Base ();
 
-      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint&) = 0;
+      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint&);
 
+      virtual guint compute_length (const char *data);
+      virtual guint length () const;
       const char * typeId() const;
-      const RepoId& publication () const;
-      void publication (const DCPS::RepoId& );
+
+      void add_field (Sample_Field *field);
+
+    protected:
+      virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
+
+      guint fixed_length_;
+      gint ett_payload_;
+      gint proto_;
+      bool use_subtree_;
 
     private:
       char *typeId_;
-      RepoId publication_;
+
+      Sample_Field *field_;
+      Sample_Field *last_field_;
+    };
+
+    class dissector_Export Sample_String : public Sample_Base
+    {
+    public:
+      Sample_String () : Sample_Base ("string") { use_subtree_ = false; }
+
+      virtual guint compute_length (const char *data);
+      virtual guint length () const;
+    protected:
+      virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
     };
 
 
+
+    class dissector_Export Sample_Sequence : public Sample_Base
+    {
+    };
+
+    class dissector_Export Sample_Enum : public Sample_Base
+    {
+    };
+
+    class dissector_Export Sample_Union : public Sample_Base
+    {
+    };
 
     typedef ACE_Hash_Map_Manager <const char *, Sample_Base *, ACE_Null_Mutex> SampleDissectorMap;
 
@@ -70,12 +125,11 @@ namespace OpenDDS
       Sample_Base *find (const char *data_name);
 
     private:
-      static Sample_Dissector_Manager 
+      static Sample_Dissector_Manager
 instance_;
       SampleDissectorMap dissectors_;
 
     };
-
 
 #if 0
 
@@ -95,16 +149,16 @@ struct LocationInfo {
     class dissector_Export LocationInfo_Dissector : public Sample_Base
     {
     public:
-      LocationInfo_Dissector ()
-        : Sample_Base ("IDL:LocationInfoTypeSupport:1.0")
-        {
-          Sample_Dissector_Manager::instance().add (*this);
-        }
-
+      LocationInfo_Dissector ();
       ~LocationInfo_Dissector ();
 
-      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
+//      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
 
+    private:
+//       Sample_Field *field_;
+
+//       gint ett_payload_;
+//       gint proto_;
     };
 
 #if 0
@@ -133,7 +187,7 @@ struct PlanInfo {
 
       ~PlanInfo_Dissector ();
 
-      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
+//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
 
     };
 
@@ -159,7 +213,7 @@ struct MoreInfo {
 
       ~MoreInfo_Dissector ();
 
-      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
+//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
 
     };
 
@@ -185,7 +239,7 @@ struct UnrelatedInfo {
 
       ~UnrelatedInfo_Dissector ();
 
-      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
+//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
 
     };
 
@@ -218,7 +272,7 @@ struct Resulting {
 
       ~Resulting_Dissector ();
 
-      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
+//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
 
     };
 

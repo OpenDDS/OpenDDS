@@ -1,3 +1,12 @@
+Thu Jul  7 22:08:40 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          First pass at making the sample dissection generic. Still using
+          hard-wired initialization, but getting closer to a point where
+          initialization can be done dynamically.
+
 Thu Jul  7 17:44:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
@@ -6,7 +15,7 @@ Thu Jul  7 17:44:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpb.xsl:
 
-          Include models of externaly-referenced topics in our 
+          Include models of externaly-referenced topics in our
           inherited projects list.
 
 Wed Jul  6 16:17:37 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
