@@ -1,3 +1,14 @@
+Thu Jul  7 17:44:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+
+          New template substring-before-last
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpb.xsl:
+
+          Include models of externaly-referenced topics in our 
+          inherited projects list.
+
 Wed Jul  6 16:17:37 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/giop_base.cpp:
@@ -7,7 +18,7 @@ Wed Jul  6 16:17:37 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
         * tools/dissector/packet-repo.cpp:
         * tools/dissector/sample_base.h:
         * tools/dissector/sample_base.cpp:
-        
+
           Adding prototype sample dissectors for working out development
           issues. These are explicitly bound to specific data, captured
           from the DCPS/MultiTopic test. Also cleaned up some now

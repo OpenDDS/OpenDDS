@@ -249,5 +249,25 @@
   <xsl:value-of select="concat($indent, ' */', $newline)"/>
 </xsl:template>
 
+<xsl:template name="substring-before-last">
+  <xsl:param name="value"/>
+  <xsl:param name="to-find"/>
+
+  <xsl:variable name="to-find-length" select="string-length($to-find)"/>
+  <xsl:variable name="value-length" select="string-length($value)"/>
+  <xsl:choose>
+    <xsl:when test="$value-length = 0"></xsl:when>
+    <xsl:when test="substring($value, ($value-length + 1 - $to-find-length), $to-find-length) = $to-find">
+      <xsl:value-of select="substring($value, 1, string-length($value) - string-length($to-find))"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="substring-before-last">
+        <xsl:with-param name="value" select="substring($value, 1, string-length($value) - 1)"/>
+        <xsl:with-param name="to-find" select="$to-find"/>
+      </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
 </xsl:stylesheet>
 
