@@ -67,6 +67,19 @@ namespace OpenDDS
       /// of chains
       Sample_Field *chain (Sample_Field *n);
 
+      /// Iterate over the list to return the n'th link returns null if n
+      /// exceeds the number of links in the chain
+      Sample_Field *get_link (size_t n);
+
+      /// Add the field to the tree, either directly using the configured
+      /// format and supplied data pointer, or by handing off to the attached
+      /// Sample_Base object for further evaluation.
+      size_t dissect_i (tvbuff_t *,
+                        packet_info *,
+                        proto_tree *,
+                        gint,
+                        guint8 *);
+
       /// Fixed length fields supply a printf style format string, typically
       /// of the form "name: %x" where x is the appropriate format identifer
       /// for the native type. The default sample_base dissector uses only a
@@ -131,7 +144,6 @@ namespace OpenDDS
       /// to facilitate simple chain construction.
       Sample_Field* add_field (Sample_Field *field);
 
-    protected:
       /// The actual dissector metheod. Since a sample can be composed of
       /// complex fields which need to do their own dissection, this method
       /// does not directly modify the supplied offset value, rather it
@@ -139,6 +151,7 @@ namespace OpenDDS
       /// however complicated it may be.
       virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
 
+    protected:
       /// Values used by the wireshark framework for rendering a sub-tree.
       /// These get set in init(), a subtree is defined only if label_ is not
       /// empty.
@@ -171,11 +184,21 @@ namespace OpenDDS
     protected:
       virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
 
-      char * label_;
-
     };
 
-#if 0
+    class dissector_Export Sample_WString : public Sample_Base
+    {
+    public:
+      /// @ctor. The supplied label is used as the field identifier in the
+      /// dissector, which uses "%s: %ls" as the format for this string. The
+      /// label supplied here will be printed as the first part, and the
+      /// actual data string as the second part.
+      Sample_WString (const char * label);
+
+    protected:
+      virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
+
+    };
 
     /*
      * A specialized sample dissector for rendering sequences. Sequences
@@ -184,7 +207,12 @@ namespace OpenDDS
     class dissector_Export Sample_Sequence : public Sample_Base
     {
     public:
-      Sample_Sequence (Sample_Base *element);
+      /// @ctor. Creates an empty base element to be initialized after this
+      /// sample sequence holder is created
+      Sample_Sequence (const char *label);
+      ~Sample_Sequence ();
+
+      Sample_Base *element();
 
     protected:
       virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
@@ -192,6 +220,22 @@ namespace OpenDDS
       Sample_Base *element_;
     };
 
+    /*
+     * A specialized sample dissector for rendering Arrays. Arrays may
+     * contain any other type of field, which are rendered separately.
+     *
+     * Arrays differ from sequences in that the size is fixed at compile
+     * time and not carried in the payload.
+     */
+    class dissector_Export Sample_Array : public Sample_Sequence
+    {
+    public:
+      Sample_Array (const char *label, size_t count);
+
+    protected:
+      virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
+      size_t count_;
+    };
 
     /*
      * A specialized sample dissector for rendering Enumerations. An enum
@@ -205,13 +249,15 @@ namespace OpenDDS
     class dissector_Export Sample_Enum : public Sample_Base
     {
     public:
-      Sample_Enum ();
-      Sample_Field *add_label (const char *label);
+      Sample_Enum (const char *label);
+      ~Sample_Enum ();
+
+      Sample_Field *add_name (const char *name);
 
     protected:
       virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
 
-      Sample_Field *label_;
+      Sample_Field *name_;
     };
 
     /*
@@ -227,7 +273,7 @@ namespace OpenDDS
     {
 
     };
-#endif
+
 
     //------------------------------------------------------------------
     typedef ACE_Hash_Map_Manager <const char *, Sample_Base *, ACE_Null_Mutex> SampleDissectorMap;
@@ -284,6 +330,18 @@ namespace OpenDDS
     {
     public:
       Resulting_Dissector ();
+    };
+
+    class dissector_Export Message_Dissector : public Sample_Base
+    {
+    public:
+      Message_Dissector ();
+    };
+
+    class dissector_Export Message2_Dissector : public Sample_Base
+    {
+    public:
+      Message2_Dissector ();
     };
 
   }
