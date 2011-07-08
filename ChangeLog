@@ -1,3 +1,10 @@
+Fri Jul  8 13:25:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added logging for the create_topic() error condition of the type_name
+          not being registered with type support.
+
 Thu Jul  7 22:08:40 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_base.h:
