@@ -51,7 +51,7 @@ namespace OpenDDS
       Sample_Field *next_;
 
       Sample_Field (const char *f, gint l);
-      Sample_Field (const char *f, Sample_Base *n);
+      Sample_Field (Sample_Base *n);
       ~Sample_Field ();
 
       guint length ();
@@ -90,15 +90,16 @@ namespace OpenDDS
     class dissector_Export Sample_String : public Sample_Base
     {
     public:
-      Sample_String () : Sample_Base ("string") { use_subtree_ = false; }
+      Sample_String (const char * label);
 
       virtual guint compute_length (const char *data);
-      virtual guint length () const;
+
     protected:
       virtual size_t dissect_i (tvbuff_t *, packet_info *, proto_tree *, gint);
+
+      char * label_;
+
     };
-
-
 
     class dissector_Export Sample_Sequence : public Sample_Base
     {
@@ -131,152 +132,38 @@ instance_;
 
     };
 
-#if 0
-
-#pragma DCPS_DATA_TYPE "LocationInfo"
-#pragma DCPS_DATA_KEY "LocationInfo flight_id1"
-#pragma DCPS_DATA_KEY "LocationInfo flight_id2"
-struct LocationInfo {
-  unsigned long flight_id1;
-  unsigned long flight_id2;
-  long x;
-  long y;
-  long z;
-};
-
-#endif
+    //-------------------------------------------------------
+    // Temporary type-specific dissectors for testing
 
     class dissector_Export LocationInfo_Dissector : public Sample_Base
     {
     public:
       LocationInfo_Dissector ();
-      ~LocationInfo_Dissector ();
-
-//      virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
-
-    private:
-//       Sample_Field *field_;
-
-//       gint ett_payload_;
-//       gint proto_;
     };
-
-#if 0
-
-#pragma DCPS_DATA_TYPE "PlanInfo"
-#pragma DCPS_DATA_KEY "PlanInfo flight_id1"
-#pragma DCPS_DATA_KEY "PlanInfo flight_id2"
-struct PlanInfo {
-  unsigned long flight_id1;
-  unsigned long flight_id2;
-  string flight_name;
-  string tailno;
-};
-
-#endif
-
 
     class dissector_Export PlanInfo_Dissector : public Sample_Base
     {
     public:
-      PlanInfo_Dissector ()
-        : Sample_Base ("IDL:PlanInfoTypeSupport:1.0")
-        {
-          Sample_Dissector_Manager::instance().add (*this);
-        }
-
-      ~PlanInfo_Dissector ();
-
-//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
-
+      PlanInfo_Dissector ();
     };
-
-#if 0
-
-#pragma DCPS_DATA_TYPE "MoreInfo"
-#pragma DCPS_DATA_KEY "MoreInfo flight_id1"
-struct MoreInfo {
-  unsigned long flight_id1;
-  string more;
-};
-
-#endif
 
     class dissector_Export MoreInfo_Dissector : public Sample_Base
     {
     public:
-      MoreInfo_Dissector ()
-        : Sample_Base ("IDL:MoreInfoTypeSupport:1.0")
-        {
-          Sample_Dissector_Manager::instance().add (*this);
-        }
-
-      ~MoreInfo_Dissector ();
-
-//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
-
+      MoreInfo_Dissector ();
     };
-
-#if 0
-
-#pragma DCPS_DATA_TYPE "UnrelatedInfo"
-// testing cross-joins, this has no keys
-struct UnrelatedInfo {
-  string misc;
-};
-
-#endif
-
 
     class dissector_Export UnrelatedInfo_Dissector : public Sample_Base
     {
     public:
-      UnrelatedInfo_Dissector ()
-        : Sample_Base ("IDL:UnrelatedInfoTypeSupport:1.0")
-        {
-          Sample_Dissector_Manager::instance().add (*this);
-        }
-
-      ~UnrelatedInfo_Dissector ();
-
-//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
-
+      UnrelatedInfo_Dissector ();
     };
-
-#if 0
-
-#pragma DCPS_DATA_TYPE "Resulting"
-#pragma DCPS_DATA_KEY "Resulting flight_id1"
-#pragma DCPS_DATA_KEY "Resulting flight_id2"
-struct Resulting {
-  unsigned long flight_id1;
-  unsigned long flight_id2;
-  string flight_name;
-  long x;
-  long y;
-  long height;
-  string more;
-  string misc;
-};
-
-#endif
 
     class dissector_Export Resulting_Dissector : public Sample_Base
     {
     public:
-      Resulting_Dissector ()
-        : Sample_Base ("IDL:ResultingTypeSupport:1.0")
-        {
-          Sample_Dissector_Manager::instance().add (*this);
-        }
-
-      ~Resulting_Dissector ();
-
-//       virtual void dissect (tvbuff_t *, packet_info *, proto_tree *, gint &);
-
+      Resulting_Dissector ();
     };
-
-
 
   }
 }
