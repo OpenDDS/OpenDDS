@@ -1,10 +1,18 @@
+Fri Jul  8 17:00:03 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Added documentation to the header and simplified the class
+          definitions to the essencials for clutter reduction.
+
 Fri Jul  8 14:16:52 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_base.h:
         * tools/dissector/sample_base.cpp:
 
-          Further generalization of the sample dissection. 
-        
+          Further generalization of the sample dissection.
+
 Fri Jul  8 13:25:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
