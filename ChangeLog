@@ -1,3 +1,50 @@
+Fri Jul  8 18:04:04 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+
+          Provide scope in topic enums.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          Make topic enums scoped and normalized, like type enums.
+          Process all topics rather, than those in your DCPS lib (now may be 
+          referenced).
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          External topic refs:
+          -- switch process-external-refs to taking a string param, rather than
+             a node-set.  (This is so it can easily be appended to as topics are
+             referenced.
+          -- handle an external ref referencing another external ref (with
+             possibly a different starting point)
+
+        * tools/modeling/tests/Codegen/aPublisher.cpp:
+        * tools/modeling/tests/Codegen/aSubscriber.cpp:
+        * tools/modeling/tests/Exchange/subscriber.cpp:
+        * tools/modeling/tests/MultiTopic/subscriber.cpp:
+
+          Incorporate change where topic enum includes scope.
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.opendds:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/publisher.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/subscriber.cpp:
+        * tools/modeling/tests/ReferExternalProj/publisher.cpp:
+        * tools/modeling/tests/ReferExternalProj/subscriber.cpp:
+
+          Ease confusion by renaming some types and packages.
+          Ease confusion by renaming some readers and writers.
+          Add readers and writers referencing topics in different models.
+
+        * tools/modeling/tests/setup.pl:
+
+          Allow command-line specified directories to end with a slash.
+
 Fri Jul  8 17:00:03 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_base.h:

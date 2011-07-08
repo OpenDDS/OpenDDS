@@ -19,7 +19,11 @@
     <xsl:apply-templates select="@*"/>
     <xsl:apply-templates/>
     <external-refs>
-      <xsl:call-template name="process-external-refs"/>
+      <xsl:call-template name="process-external-refs">
+        <xsl:with-param name="refs">
+          <xsl:call-template name="build-refs-param"/>
+        </xsl:with-param>
+      </xsl:call-template>
     </external-refs>
   </xsl:copy>
 </xsl:template>
@@ -66,6 +70,11 @@
     </xsl:when>
     <xsl:when test="name() = 'type'">
       <xsl:attribute name="type">
+        <xsl:value-of select="substring-after(@href, '#')"/>
+      </xsl:attribute>
+    </xsl:when>
+    <xsl:when test="name() = 'topic'">
+      <xsl:attribute name="topic">
         <xsl:value-of select="substring-after(@href, '#')"/>
       </xsl:attribute>
     </xsl:when>
@@ -181,38 +190,95 @@
   </xsl:choose>
 </xsl:template>
 
+<xsl:template name="build-refs-param">
+  <xsl:param name="hrefs" select="//@href"/>
+  <xsl:param name="current-refs" select="''"/>
+
+  <xsl:choose>
+    <xsl:when test="$hrefs">
+      <xsl:call-template name="build-refs-param">
+        <xsl:with-param name="hrefs" select="$hrefs[position() &gt; 1]"/>
+        <xsl:with-param name="current-refs" 
+                      select="concat($current-refs, string($hrefs[1]), ' ')"/>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="$current-refs"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
 <!-- Copy external elements into the result set, with the following
      changes:
      1) make name a qualified name
      2) add the name of model in a new model attribute.
 -->
 <xsl:template name="process-external-refs">
-  <xsl:param name="refs" select="//@href"/>
+  <xsl:param name="refs" />
   <xsl:param name="complete-refs" select="' '"/>
   
-  <xsl:if test="$refs">
-    <xsl:variable name="ref" select="$refs[1]"/>
+  <xsl:if test="contains($refs, '#')">
+    <xsl:variable name="ref"
+    select="substring-before($refs, ' ')"/>
     <xsl:variable name="model" select="substring-before($ref, '#')"/>
     <xsl:variable name="id" select="substring-after($ref, '#')"/>
-    <xsl:if test="not(contains($complete-refs, $id))">
-      <xsl:for-each select="document($model)//*[@xmi:id = $id]">
-        <xsl:copy>
-          <xsl:attribute name="model">
-            <xsl:call-template name="modelname"/>
-          </xsl:attribute>
-          <xsl:if test="name(.) = 'types'">
-            <xsl:attribute name="scope">
-              <xsl:call-template name="scopename"/>
+    <xsl:choose>
+      <xsl:when test="not(contains($complete-refs, concat(' ',$id,' ')))">
+        <xsl:for-each select="document($model)//*[@xmi:id = $id]">
+          <xsl:copy>
+            <xsl:attribute name="model">
+              <xsl:call-template name="modelname"/>
             </xsl:attribute>
-          </xsl:if>
-          <xsl:apply-templates select="@* | node()"/>
-        </xsl:copy>
-      </xsl:for-each>
-    </xsl:if>
-    <xsl:call-template name="process-external-refs">
-      <xsl:with-param name="refs" select="$refs[position() &gt; 1]"/>
-      <xsl:with-param name="complete-refs" select="concat($complete-refs, ' ', $id, ' ')"/>
-    </xsl:call-template>
+            <xsl:if test="name(.) = 'types'">
+              <xsl:attribute name="scope">
+                <xsl:call-template name="scopename"/>
+              </xsl:attribute>
+            </xsl:if>
+            <xsl:if test="name(.) = 'topicDescriptions'">
+              <xsl:attribute name="scope">
+                <xsl:call-template name="scopename"/>
+              </xsl:attribute>
+            </xsl:if>
+            <!-- Replace HREFs as we do in local element -->
+            <xsl:apply-templates select="@*"/>
+            <xsl:for-each select="*[@href]">
+              <xsl:call-template name="replace-href"/>
+            </xsl:for-each>
+            <xsl:apply-templates select="node()"/>
+          </xsl:copy>
+          <!-- if we just copied a topic, add it to the refs param -->
+          <xsl:variable name="newrefswithspace">
+            <xsl:choose>
+              <xsl:when test="name(.) = 'topicDescriptions' and @datatype">
+                <!-- type internal to topic model -->
+                <xsl:value-of select="concat($model, '#', @datatype, ' ')"/>
+              </xsl:when>
+              <xsl:when test="name(.) = 'topicDescriptions' and datatype">
+                <!-- type external to topic model -->
+                <xsl:variable name="model-dirname">
+                  <xsl:call-template name="substring-before-last">
+                    <xsl:with-param name="value" select="$model"/>
+                    <xsl:with-param name="to-find" select="'/'"/>
+                  </xsl:call-template>
+                </xsl:variable>
+                <xsl:value-of select="concat($model-dirname, '/', datatype/@href, ' ')"/>
+              </xsl:when>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:call-template name="process-external-refs">
+            <xsl:with-param name="refs" select="concat($newrefswithspace, 
+                                                substring-after($refs, ' '))"/>
+            <xsl:with-param name="complete-refs" select="concat($complete-refs, $id, ' ')"/>
+          </xsl:call-template>
+        </xsl:for-each>
+      </xsl:when>
+      <xsl:otherwise>
+        <!-- we skipped processing, don't add id to complete refs -->
+        <xsl:call-template name="process-external-refs">
+          <xsl:with-param name="refs" select="substring-after($refs, ' ')"/>
+          <xsl:with-param name="complete-refs" select="$complete-refs"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:if>
 </xsl:template>
 

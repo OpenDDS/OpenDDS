@@ -30,9 +30,19 @@
     <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
     </xsl:when>
     <xsl:when test="name($target) = 'external-refs'">
+      <!-- Scope must included in ref -->
     </xsl:when>
     <xsl:when test="$target/@scope">
       <xsl:value-of select="$target/@scope"/>
+    </xsl:when>
+    <!-- for external topics -->
+    <xsl:when test="name($target) = 'libs' and $target/@xsi:type='opendds:DcpsLib'">
+      <xsl:variable name="prefix">
+        <xsl:call-template name="scopename">
+          <xsl:with-param name="target" select="$target/.."/>
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:value-of select="concat($prefix, $target/@name, '::')"/>
     </xsl:when>
     <xsl:when test="name($target) = 'libs'">
       <xsl:call-template name="scopename">
@@ -67,6 +77,20 @@
   <xsl:call-template name="normalize-identifier">
     <xsl:with-param name="identifier" 
                     select="concat($type/@scope, $type/@name)"/>
+  </xsl:call-template>
+</xsl:template>
+
+<!-- Normalize a topic enumeration identifier -->
+<xsl:template name="topic-enum">
+  <xsl:param name="topic" select="."/>
+  <xsl:variable name="topic-scope">
+    <xsl:call-template name="scopename">
+      <xsl:with-param name="target" select="$topic"/>
+    </xsl:call-template>
+  </xsl:variable>
+  <xsl:call-template name="normalize-identifier">
+    <xsl:with-param name="identifier" 
+                    select="concat($topic-scope, $topic/@name)"/>
   </xsl:call-template>
 </xsl:template>
 

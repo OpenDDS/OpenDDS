@@ -24,15 +24,10 @@
 
 <!-- Node sets -->
 <xsl:variable name="types"        select="//types"/>
+<xsl:variable name="topics"       select="//topicDescriptions"/>
+<xsl:variable name="cf-topics"    select="$topics[@xsi:type='topics:ContentFilteredTopic']"/>
+<xsl:variable name="multitopics"  select="$topics[@xsi:type='topics:MultiTopic']"/>
 <xsl:variable name="policies"     select="//policies"/>
-
-<!-- Indices -->
-<!--
-<xsl:key
-     name  = "policies"
-     match = "//opendds:policy"
-     use   = "@xmi:id"/>
--->
 
 <xsl:key
      name  = "lut-qos-field"
@@ -92,16 +87,13 @@ namespace OpenDDS { namespace Model {
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
-  <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
-  <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type='topics:ContentFilteredTopic']"/>
-  <xsl:variable name="lib-multitopics"  select=".//topicDescriptions[@xsi:type='topics:MultiTopic']"/>
-  <xsl:variable name="defined-types" select="$types[@xmi:id = $lib-topics/@datatype]"/>
+  <xsl:variable name="defined-types"    select="$types[@xmi:id = $topics/@datatype]"/>
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:text>
 inline
 Elements::Data::Data()
 { </xsl:text>
-<xsl:if test="$lib-topics">
+<xsl:if test="$topics">
   <xsl:text>
   for( int index = 0;
        index &lt; Elements::Types::LAST_INDEX;
@@ -109,7 +101,7 @@ Elements::Data::Data()
     this->typeNames_[index] = 0;
   }</xsl:text>
 </xsl:if>
-<xsl:if test="$lib-cf-topics">
+<xsl:if test="$cf-topics">
   <xsl:text>
   for( int index = 0;
        index &lt; Elements::ContentFilteredTopics::LAST_INDEX;
@@ -117,7 +109,7 @@ Elements::Data::Data()
     this->filterExpressions_[index] = 0;
   }</xsl:text>
 </xsl:if>
-<xsl:if test="$lib-multitopics">
+<xsl:if test="$multitopics">
   <xsl:text>
   for( int index = 0;
        index &lt; Elements::MultiTopics::LAST_INDEX;
@@ -141,7 +133,7 @@ Elements::Data::Data()
 inline
 Elements::Data::~Data()
 { </xsl:text>
-<xsl:if test="$lib-topics">
+<xsl:if test="$topics">
   <xsl:text>
   for(int index = 0;
       index &lt; Elements::Types::LAST_INDEX;
@@ -152,7 +144,7 @@ Elements::Data::~Data()
     }
   }</xsl:text>
 </xsl:if>
-<xsl:if test="$lib-cf-topics">
+<xsl:if test="$cf-topics">
   <xsl:text>
   for(int index = 0;
       index &lt; Elements::ContentFilteredTopics::LAST_INDEX;
@@ -164,7 +156,7 @@ Elements::Data::~Data()
   }
 </xsl:text>
 </xsl:if>
-<xsl:if test="$lib-multitopics">
+<xsl:if test="$multitopics">
   <xsl:text>
   for(int index = 0;
       index &lt; Elements::MultiTopics::LAST_INDEX;
@@ -234,14 +226,14 @@ void
 Elements::Data::loadTopics()
 {
 </xsl:text>
-  <xsl:for-each select="$lib-topics">
+  <xsl:for-each select="$topics">
     <xsl:variable name="enum">
-      <xsl:call-template name="normalize-identifier"/>
+      <xsl:call-template name="topic-enum"/>
     </xsl:variable>
     <xsl:text>  this->topicNames_[Topics::</xsl:text>
     <xsl:value-of select="concat($enum, '] = &quot;', @name, '&quot;;', $newline)"/>
     <xsl:choose>
-      <xsl:when test="$lib-cf-topics[@xmi:id = current()/@xmi:id]">
+      <xsl:when test="$cf-topics[@xmi:id = current()/@xmi:id]">
         <xsl:text>  this->cfTopics_[</xsl:text>
         <xsl:value-of select="concat('Topics::', $enum, 
                                      '] = ContentFilteredTopics::', $enum,
@@ -255,7 +247,7 @@ Elements::Data::loadTopics()
       </xsl:otherwise>
     </xsl:choose>
     <xsl:choose>
-      <xsl:when test="$lib-multitopics[@xmi:id = current()/@xmi:id]">
+      <xsl:when test="$multitopics[@xmi:id = current()/@xmi:id]">
         <xsl:text>  this->multiTopics_[</xsl:text>
         <xsl:value-of select="concat('Topics::', $enum, 
                                      '] = MultiTopics::', $enum,
@@ -269,23 +261,23 @@ Elements::Data::loadTopics()
       </xsl:otherwise>
     </xsl:choose>
   </xsl:for-each>
-  <xsl:for-each select="$lib-cf-topics">
-    <xsl:variable name="cf-topic-name">
-      <xsl:call-template name="normalize-identifier"/>
+  <xsl:for-each select="$cf-topics">
+    <xsl:variable name="enum">
+      <xsl:call-template name="topic-enum"/>
     </xsl:variable>
     <xsl:value-of select="concat('  this->filterExpressions_[',
                                  'ContentFilteredTopics::',
-                                 $cf-topic-name, '] = ', 
+                                 $enum, '] = ', 
                                  'CORBA::string_dup(&quot;',
                                  @filter_expression, '&quot;);', $newline)"/>
   </xsl:for-each>
-  <xsl:for-each select="$lib-multitopics">
-    <xsl:variable name="multitopic-name">
-      <xsl:call-template name="normalize-identifier"/>
+  <xsl:for-each select="$multitopics">
+    <xsl:variable name="enum">
+      <xsl:call-template name="topic-enum"/>
     </xsl:variable>
     <xsl:value-of select="concat('  this->topicExpressions_[',
                                  'MultiTopics::',
-                                 $multitopic-name, '] = ', 
+                                 $enum, '] = ', 
                                  'CORBA::string_dup(&quot;',
                                  @subscription_expression, '&quot;);', $newline)"/>
   </xsl:for-each>
@@ -323,9 +315,9 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- defined types -->
-  <xsl:for-each select="$lib-topics[@datatype]">
+  <xsl:for-each select="$topics[@datatype]">
     <xsl:text>  this->types_[ Topics::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
+    <xsl:call-template name="topic-enum"/>
     <xsl:text>] = Types::</xsl:text>
     <xsl:call-template name="type-enum">
       <xsl:with-param name="type" select="$types[@xmi:id = current()/@datatype]"/>
@@ -333,15 +325,15 @@ Elements::Data::loadMaps()
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
-  <xsl:for-each select="$lib-cf-topics">
-    <xsl:variable name="cf-topic-name">
-      <xsl:call-template name="normalize-identifier"/>
+  <xsl:for-each select="$cf-topics">
+    <xsl:variable name="enum">
+      <xsl:call-template name="topic-enum"/>
     </xsl:variable>
     <xsl:value-of select="concat('  this->relatedTopics_[',
                                  'ContentFilteredTopics::',
-                                 $cf-topic-name, '] = Topics::')"/>
-    <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$lib-topics[@xmi:id = current()/@related_topic]/@name"/>
+                                 $enum, '] = Topics::')"/>
+    <xsl:call-template name="topic-enum">
+      <xsl:with-param name="topic" select="$topics[@xmi:id = current()/@related_topic]"/>
     </xsl:call-template>
     <xsl:text>;
 </xsl:text>
@@ -354,8 +346,8 @@ Elements::Data::loadMaps()
     <xsl:text>  this->writerTopics_[ DataWriters::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Topics::</xsl:text>
-    <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$lib-topics[@xmi:id = current()/@topic]/@name"/>
+    <xsl:call-template name="topic-enum">
+      <xsl:with-param name="topic" select="$topics[@xmi:id = current()/@topic]"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -367,8 +359,8 @@ Elements::Data::loadMaps()
     <xsl:text>  this->readerTopics_[ DataReaders::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Topics::</xsl:text>
-    <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$lib-topics[@xmi:id = current()/@topic]/@name"/>
+    <xsl:call-template name="topic-enum">
+      <xsl:with-param name="topic" select="$topics[@xmi:id = current()/@topic]"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -452,15 +444,15 @@ void
 Elements::Data::buildTopicsQos()
 {
 </xsl:text>
-  <xsl:if test="$lib-topics">
+  <xsl:if test="$topics">
     <xsl:text>  TopicQos       topicQos;
   Topics::Values topic;
     </xsl:text>
   </xsl:if>
-  <xsl:for-each select="$lib-topics">
+  <xsl:for-each select="$topics">
     <xsl:value-of select="$newline"/>
     <xsl:text>  topic    = Topics::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
+    <xsl:call-template name="topic-enum"/>
     <xsl:text>;
   topicQos = TheServiceParticipant->initial_TopicQos();
     

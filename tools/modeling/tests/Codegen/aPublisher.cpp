@@ -36,7 +36,7 @@ ACE_TMAIN( int argc, ACE_TCHAR** argv)
     modelinstance1.subscriber( Elements::Subscribers::sub1)->get_qos( subscriberQos);
 
     DDS::TopicQos topicQos;
-    dynamic_cast<DDS::Topic*>(modelinstance1.topic(Elements::Participants::part1, Elements::Topics::topic1).ptr())->get_qos(topicQos);
+    dynamic_cast<DDS::Topic*>(modelinstance1.topic(Elements::Participants::part1, Elements::Topics::Codegen__topic1).ptr())->get_qos(topicQos);
 
     DDS::DomainParticipantQos participantQos;
     modelinstance1.participant( Elements::Participants::part1)->get_qos( participantQos);

@@ -94,6 +94,11 @@ open MWC, '>modeling_tests.mwc' or die "Can't write modeling_tests.mwc";
 print MWC "workspace {\n";
 
 foreach my $dir (get_dirs()) {
+  my $old_sep = $/;
+  $/ = '/';
+  chomp $dir;
+  $/ = $old_sep;
+
   chdir $cwd . '/' . $dir or die "Can't change to $dir\n";
   my @ddsfiles = glob '*.codegen';
   if ($#ddsfiles == -1) {
