@@ -73,10 +73,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t handle,
 // Implementation skeleton destructor
 SubscriberImpl::~SubscriberImpl()
 {
-  // Tell the transport to detach this
-  // Subscriber/TransportInterface.
-  this->detach_transport();
-
   //
   // The datareders should be deleted already before calling delete
   // subscriber.
@@ -309,10 +305,9 @@ DDS::ReturnCode_t
 SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  DBG_ENTRY_LVL("SubscriberImpl","delete_datareader",6);
+  DBG_ENTRY_LVL("SubscriberImpl", "delete_datareader", 6);
 
-  DataReaderImpl* dr_servant
-  = dynamic_cast<DataReaderImpl*>(a_datareader);
+  DataReaderImpl* dr_servant = dynamic_cast<DataReaderImpl*>(a_datareader);
 
   if (dr_servant) { // for MultiTopic this will be false
     DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
@@ -334,8 +329,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
   }
 
-  SubscriberDataReaderInfo* dr_info = 0;
-
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
@@ -346,8 +339,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
     for (it = datareader_map_.begin();
          it != datareader_map_.end();
-         it ++) {
-      if (it->second->local_reader_impl_ == dr_servant) {
+         ++it) {
+      if (it->second == dr_servant) {
         break;
       }
     }
@@ -375,18 +368,16 @@ ACE_THROW_SPEC((CORBA::SystemException))
                         std::string(converter).c_str()),::DDS::RETCODE_ERROR);
     }
 
-    dr_info = it->second;
+    datareader_map_.erase(it);
 
-    datareader_map_.erase(it) ;
-
-    datareader_set_.erase(dr_servant) ;
+    datareader_set_.erase(dr_servant);
   }
 
   if (this->monitor_) {
     this->monitor_->report();
   }
 
-  RepoId subscription_id  = dr_info->subscription_id_ ;
+  RepoId subscription_id  = dr_servant->get_subscription_id();
 
   try {
     DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
@@ -411,40 +402,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // otherwise some callbacks resulted from remove_association may lost.
 
   dr_servant->remove_all_associations();
-
-  OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
-
-  if (impl.is_nil()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("SubscriberImpl::delete_datareader, ")
-               ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
-    return DDS::RETCODE_ERROR;
-  }
-
-  // Unregister the DataReader object with the TransportImpl.
-  else if (impl->unregister_subscription(subscription_id) == -1) {
-    RepoIdConverter converter(subscription_id);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("SubscriberImpl::delete_datareader: ")
-               ACE_TEXT("failed to unregister datareader %C with TransportImpl.\n"),
-               std::string(converter).c_str()));
-    return DDS::RETCODE_ERROR;
-  }
-
-  // Clean up any remaining associations
-  //dr_servant->remove_all_associations();
-
-  delete dr_info;
+  dr_servant->unregister_subscription();
 
   dr_servant->cleanup();
 
   // Decrease the ref count after the servant is removed
   // from the datareader map.
-
   dr_servant->_remove_ref();
-  dr_servant = 0;
 
   return DDS::RETCODE_OK;
 }
@@ -476,7 +440,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     DataReaderMap::iterator itEnd = datareader_map_.end();
 
     for (it = datareader_map_.begin(); it != itEnd; ++it) {
-      drs.push_back(it->second->local_reader_objref_);
+      drs.push_back(it->second);
     }
   }
 
@@ -534,7 +498,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return DDS::DataReader::_nil();
 
   } else {
-    return DDS::DataReader::_duplicate(it->second->local_reader_objref_);
+    return DDS::DataReader::_duplicate(it->second);
   }
 }
 
@@ -605,15 +569,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   for (it = datareader_map_.begin() ; it != datareader_map_.end() ;
        it ++) {
-    if (it->second->local_reader_impl_->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
-      DDS::DataReaderListener_var listener =
-          it->second->local_reader_impl_->get_listener();
+    if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
+      DDS::DataReaderListener_var listener = it->second->get_listener();
       if (!CORBA::is_nil (listener)) {
-        listener->on_data_available(it->second->local_reader_objref_);
+        listener->on_data_available(it->second);
       }
 
-      it->second->local_reader_impl_->set_status_changed_flag(
-        DDS::DATA_AVAILABLE_STATUS, false);
+      it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
     }
   }
 
@@ -662,7 +624,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
         for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
              iter != endIter ; ++iter) {
-          DataReaderImpl* reader = iter->second->local_reader_impl_;
+          DataReaderImpl* reader = iter->second;
           reader->set_subscriber_qos (qos);
           DDS::DataReaderQos qos;
           reader->get_qos(qos);
@@ -917,207 +879,44 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return DDS::RETCODE_OK;
 }
 
-int
+bool
 SubscriberImpl::is_clean() const
 {
-  int sub_is_clean = datareader_map_.empty();
+  bool sub_is_clean = datareader_map_.empty();
 
-  if (sub_is_clean == 0 && !TheTransientKludge->is_enabled()) {
+  if (!sub_is_clean && !TheTransientKludge->is_enabled()) {
     // Four BIT datareaders.
-    sub_is_clean = datareader_map_.size() == 4;
+    return datareader_map_.size() == 4;
   }
 
   return sub_is_clean;
 }
 
 void
-SubscriberImpl::data_received(DataReaderImpl *reader)
+SubscriberImpl::data_received(DataReaderImpl* reader)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->si_lock_);
-  datareader_set_.insert(reader) ;
-}
-
-//SHH This method is not called.
-//    Should it be implemented and called?
-//void
-//SubscriberImpl::cleanup()
-//{
-//  // tbd: add implementation.
-//}
-
-void
-SubscriberImpl::add_associations(
-  const WriterAssociationSeq & writers,
-  DataReaderImpl* reader,
-  const DDS::DataReaderQos /* reader_qos */)
-{
-  if (entity_deleted_ == true) {
-    if (DCPS_debug_level >= 1)
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) SubscriberImpl::add_associations")
-                 ACE_TEXT(" This is a deleted subscriber, ignoring add.\n")));
-
-    return;
-  }
-
-  AssociationInfo info;
-  info.num_associations_ = writers.length();
-
-  // TransportInterface does not take ownership of the associations.
-  // The associations will be deleted when safe_associations falls
-  // out of scope.
-  info.association_data_ = new AssociationData[info.num_associations_];
-  ACE_Auto_Array_Ptr<AssociationData> safe_associations(info.association_data_);
-
-  for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
-    info.association_data_[i].remote_id_ = writers[i].writerId;
-    info.association_data_[i].remote_data_ = writers[i].writerTransInfo;
-  }
-
-  // 1/11/06 SHH - this lock is not required.
-  // it also causes deadlock in some cases.
-  //ACE_GUARD (ACE_Recursive_Thread_Mutex,
-  //           guard,
-  //           this->si_lock_);
-
-  this->add_publications(reader->get_subscription_id(),
-                         info,
-                         0, // no transport priority policy
-                         reader);
-}
-
-void
-SubscriberImpl::remove_associations(
-  const WriterIdSeq& writers,
-  const RepoId&      reader)
-{
-  /// Delegate to the (inherited) TransportInterface version.
-
-  // 1/11/06 SHH - this lock is not required.
-  //ACE_GUARD (ACE_Recursive_Thread_Mutex,
-  //  guard,
-  //  this->si_lock_);
-
-  // TMB - I don't know why I need to call it this way, but gcc complains
-  //       under linux otherwise.
-
-  this->TransportInterface::remove_associations(writers.length(),
-                                                writers.get_buffer(), reader, false) ; // as sub side
+  datareader_set_.insert(reader);
 }
 
 DDS::ReturnCode_t
-SubscriberImpl::reader_enabled(
-  DataReaderRemote_ptr     remote_reader,
-  DDS::DataReader_ptr    local_reader,
-  DataReaderImpl*          local_reader_impl,
-  const char*              topic_name,
-  RepoId                   topic_id)
-ACE_THROW_SPEC((CORBA::SystemException))
+SubscriberImpl::reader_enabled(const char* topic_name,
+                               DataReaderImpl* reader)
 {
-  SubscriberDataReaderInfo* info = new SubscriberDataReaderInfo ;
-  info->remote_reader_objref_  = remote_reader ;
-  info->local_reader_objref_   = local_reader;
-  info->local_reader_impl_     = local_reader_impl ;
-
-  info->topic_id_ = topic_id ;
-
-  try {
-    DDS::DataReaderQos qos;
-    info->local_reader_objref_->get_qos(qos);
-
-    OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info = connection_info();
-    trans_conf_info.publication_transport_priority = 0;
-
-    CORBA::String_var filterExpression = "";
-    DDS::StringSeq exprParams;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-    DDS::ContentFilteredTopic_var cft = local_reader_impl->get_cf_topic();
-    if (cft) {
-      filterExpression = cft->get_filter_expression();
-      cft->get_expression_parameters(exprParams);
-    }
-#endif
-
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
-    info->subscription_id_
-      = repo->add_subscription(this->domain_id_,
-                               participant_->get_id(),
-                               info->topic_id_,
-                               info->remote_reader_objref_,
-                               qos,
-                               trans_conf_info,
-                               this->qos_,
-                               filterExpression,
-                               exprParams);
-
-    if (info->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
-                 ACE_TEXT("add_subscription returned invalid id. \n")));
-      return DDS::RETCODE_ERROR;
-    }
-
-    info->local_reader_impl_->set_subscription_id(info->subscription_id_);
-
-    OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
-
-    if (impl.is_nil()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader, ")
-                 ACE_TEXT("the subscriber has not been attached to the TransportImpl.\n")));
-      return DDS::RETCODE_ERROR;
-    }
-
-    // Register the DataReader object with the TransportImpl.
-    else if (impl->register_subscription(info->subscription_id_,
-                                         info->local_reader_impl_) == -1) {
-      RepoIdConverter converter(info->subscription_id_);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader: ")
-                 ACE_TEXT("failed to register datareader %C with TransportImpl.\n"),
-                 std::string(converter).c_str()));
-      return DDS::RETCODE_ERROR;
-    }
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in SubscriberImpl::reader_enabled");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in SubscriberImpl::reader_enabled");
-    return DDS::RETCODE_ERROR;
-  }
-
-  if (DCPS_debug_level >= 4)
+  if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) ")
-               ACE_TEXT("SubscriberImpl::reader_enabled, ")
+               ACE_TEXT("(%P|%t) SubscriberImpl::reader_enabled, ")
                ACE_TEXT("datareader(topic_name=%C) enabled\n"),
                topic_name));
-
-  DataReaderMap::iterator it
-  = datareader_map_.insert(DataReaderMap::value_type(topic_name,
-                                                     info));
-
-  if (it == datareader_map_.end()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::reader_enabled, ")
-               ACE_TEXT("insert datareader(topic_name=%C) failed. \n"),
-               topic_name));
-    return DDS::RETCODE_ERROR;
   }
+
+  this->datareader_map_.insert(DataReaderMap::value_type(topic_name, reader));
 
   // Increase the ref count when the servant is referenced
   // by the datareader map.
-  info->local_reader_impl_->_add_ref();
+  reader->_add_ref();
 
   if (this->monitor_) {
     this->monitor_->report();
@@ -1175,7 +974,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   for (DataReaderMap::iterator iter = datareader_map_.begin();
        iter != datareader_map_.end();
        ++iter) {
-    subs.push_back(iter->second->subscription_id_);
+    subs.push_back(iter->second->get_subscription_id());
   }
 }
 
@@ -1191,8 +990,8 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
   for (DataReaderMap::iterator iter = datareader_map_.begin();
        iter != datareader_map_.end();
        ++iter) {
-    if (! iter->second->local_reader_impl_->is_bit ()) {
-      iter->second->local_reader_impl_->update_ownership_strength (pub_id, ownership_strength);
+    if (!iter->second->is_bit()) {
+      iter->second->update_ownership_strength(pub_id, ownership_strength);
     }
   }
 }
@@ -1250,17 +1049,3 @@ SubscriberImpl::parent()
 } // namespace DCPS
 } // namespace OpenDDS
 
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class std::multimap<ACE_CString,
-SubscriberDataReaderInfo*> ;
-
-template class std::set<DataReaderImpl *> ;
-
-#elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate std::multimap<ACE_CString,
-SubscriberDataReaderInfo*> ;
-#pragma instantiate std::set<DataReaderImpl *> ;
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

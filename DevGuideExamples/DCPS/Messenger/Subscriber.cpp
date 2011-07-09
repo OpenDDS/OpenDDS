@@ -36,10 +36,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipant_var participant =
       dpf->create_participant(42,
                               PARTICIPANT_QOS_DEFAULT,
-                              DDS::DomainParticipantListener::_nil(),
+                              0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(participant.in())) {
+    if (0 == participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_participant failed!\n")), -1);
@@ -47,9 +47,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =
-      new Messenger::MessageTypeSupportImpl();
+      new Messenger::MessageTypeSupportImpl;
 
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+    if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" register_type failed!\n")), -1);
@@ -59,12 +59,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     CORBA::String_var type_name = ts->get_type_name();
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
-                                type_name.in(),
+                                type_name,
                                 TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
+                                0,
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(topic.in())) {
+    if (0 == topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_topic failed!\n")), -1);
@@ -73,38 +73,25 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create Subscriber
     DDS::Subscriber_var subscriber =
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                     DDS::SubscriberListener::_nil(),
+                                     0,
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(subscriber.in())) {
+    if (0 == subscriber) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_subscriber failed!\n")), -1);
-    }
-
-    // Initialize and attach Transport
-    OpenDDS::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create_transport_impl(OpenDDS::DCPS::DEFAULT_TCP_ID,
-                                                 OpenDDS::DCPS::AUTO_CONFIG);
-
-    OpenDDS::DCPS::AttachStatus status = transport_impl->attach(subscriber.in());
-
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" attach failed!\n")), -1);
     }
 
     // Create DataReader
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
     DDS::DataReader_var reader =
-      subscriber->create_datareader(topic.in(),
+      subscriber->create_datareader(topic,
                              DATAREADER_QOS_DEFAULT,
-                             listener.in(),
+                             listener,
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(reader.in())) {
+    if (0 == reader) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_datareader failed!\n")), -1);
@@ -113,7 +100,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Messenger::MessageDataReader_var reader_i =
       Messenger::MessageDataReader::_narrow(reader);
 
-    if (CORBA::is_nil(reader_i.in())) {
+    if (0 == reader_i) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),
@@ -152,7 +139,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Clean-up!
     participant->delete_contained_entities();
-    dpf->delete_participant(participant.in());
+    dpf->delete_participant(participant);
 
     TheTransportFactory->release();
     TheServiceParticipant->shutdown();

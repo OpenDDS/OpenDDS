@@ -825,11 +825,7 @@ int DCPS_IR_Domain::init_built_in_topics_transport()
     }
 
     // Attach the Publisher with the TransportImpl.
-    OpenDDS::DCPS::PublisherImpl* pubServant
-    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(bitPublisher_.in());
-
-    OpenDDS::DCPS::AttachStatus status
-    = pubServant->attach_transport(transportImpl_.in());
+    OpenDDS::DCPS::AttachStatus status = transportImpl_->attach(bitPublisher_);
 
     if (status != OpenDDS::DCPS::ATTACH_OK) {
       // We failed to attach to the transport for some reason.

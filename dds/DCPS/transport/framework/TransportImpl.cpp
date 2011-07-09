@@ -333,6 +333,7 @@ OpenDDS::DCPS::TransportImpl::attach_client(TransportClient* client)
 
   GuardType guard(this->lock_);
   clients_.insert(client);
+  //TODO: equivalent of register_{publication,subscription}, if needed
 }
 
 void
@@ -719,7 +720,7 @@ OpenDDS::DCPS::TransportImpl::attach(DDS::Publisher_ptr pub)
     return ATTACH_ERROR;
   }
 
-  return pub_impl->attach_transport(this);
+  return ATTACH_OK; //TODO: this method will be removed     pub_impl->attach_transport(this);
 }
 
 OpenDDS::DCPS::AttachStatus
@@ -731,7 +732,7 @@ OpenDDS::DCPS::TransportImpl::attach(DDS::Subscriber_ptr sub)
     return ATTACH_ERROR;
   }
 
-  return sub_impl->attach_transport(this);
+  return ATTACH_OK; //TODO: this method will be removed    sub_impl->attach_transport(this);
 }
 
 OpenDDS::DCPS::TransportIdType

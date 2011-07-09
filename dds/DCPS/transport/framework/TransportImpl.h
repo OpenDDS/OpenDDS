@@ -166,9 +166,26 @@ protected:
   /// be made.  If the find operation works, then we don't need to
   /// establish a connection since the existing DataLink is already
   /// connected.
-  virtual DataLink* find_or_create_datalink(
+  DataLink* find_or_create_datalink(
     RepoId                  local_id,
     const AssociationData*  remote_association,
+    CORBA::Long             priority,
+    bool                    active)
+  {
+    DataLink* link = find_datalink(local_id, *remote_association, priority);
+    if (link) return link;
+
+    return create_datalink(local_id, *remote_association, priority, active);
+  }
+
+  virtual DataLink* find_datalink(
+    RepoId                  local_id,
+    const AssociationData&  remote_association,
+    CORBA::Long             priority) = 0;
+
+  virtual DataLink* create_datalink(
+    RepoId                  local_id,
+    const AssociationData&  remote_association,
     CORBA::Long             priority,
     bool                    active) = 0;
 

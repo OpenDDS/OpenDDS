@@ -50,12 +50,14 @@ public:
 
 protected:
 
-  /// Either find a suitable DataLink that already exists (and is
-  /// connected), or create one, connect it, save it off for reuse,
-  /// and return it.
-  virtual DataLink* find_or_create_datalink(
+  virtual DataLink* find_datalink(
     RepoId                  local_id,
-    const AssociationData*  remote_association,
+    const AssociationData&  remote_association,
+    CORBA::Long             priority);
+
+  virtual DataLink* create_datalink(
+    RepoId                  local_id,
+    const AssociationData&  remote_association,
     CORBA::Long             priority,
     bool                    active);
 

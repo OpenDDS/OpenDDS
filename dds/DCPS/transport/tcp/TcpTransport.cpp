@@ -43,41 +43,33 @@ OpenDDS::DCPS::TcpTransport::~TcpTransport()
   delete con_checker_;
 }
 
-/// This is called from the base class (TransportImpl) as a result of
-/// and add_publications() or add_subscriptions() call on a
-/// TransportInterface object.  The TransportInterface object calls
-/// reserve_datalink() on the TransportImpl, and the TransportImpl calls
-/// find_or_create_datalink() on us (a concrete subclass of TransportImpl).
-///
-/// The active argument will be set to false if this method was called
-/// due to an add_publications() call on a TransportInterface object.
-///
-/// The active argument will be set to true if this method was called
-/// due to an add_subscriptions() call on a TransportInterface object.
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::TcpTransport::find_or_create_datalink(
+OpenDDS::DCPS::TcpTransport::find_datalink(
   RepoId                  /*local_id*/,
-  const AssociationData*  remote_association,
-  CORBA::Long             priority,
-  bool                    active)
+  const AssociationData&  remote_association,
+  CORBA::Long             priority)
 {
-  DBG_ENTRY_LVL("TcpTransport","find_or_create_datalink",6);
+  DBG_ENTRY_LVL("TcpTransport", "find_datalink", 6);
 
-  ACE_INET_Addr& remote_address = const_cast<AssociationData*> (remote_association)->get_remote_address();
+  AssociationData& remote = const_cast<AssociationData&>(remote_association);
 
-  bool is_loopback = remote_address == this->tcp_config_->local_address_;
+  ACE_INET_Addr& remote_address = remote.get_remote_address();
+
+  const bool is_loopback = remote_address == this->tcp_config_->local_address_;
+
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::find_or_create_datalink remote addr str "
-            "\"%s\" remote_address \"%C:%d priority %d is_loopback %d active %d\"\n",
-            const_cast<AssociationData*> (remote_association)->network_order_address_.addr_.c_str(),
+            "\"%s\" remote_address \"%C:%d priority %d is_loopback %d\"\n",
+            remote.network_order_address_.addr_.c_str(),
             remote_address.get_host_name(),
             remote_address.get_port_number(),
-            priority, is_loopback, active),
+            priority, is_loopback),
             2);
 
+  //TODO: need to find out if "active" needs to be part of the key
+  PriorityKey key(priority, remote_address, is_loopback, false /*active*/);
+
+
   TcpDataLink_rch link;
-  PriorityKey key(priority, remote_address, is_loopback, active);
-
-
   { // guard scope
     GuardType guard(this->links_lock_);
 
@@ -139,9 +131,28 @@ OpenDDS::DCPS::TcpTransport::find_or_create_datalink(
   // The "find" part of the find_or_create_datalink has been attempted, and
   // we failed to find a suitable DataLink.  This means we need to move on
   // and attempt the "create" part of "find_or_create_datalink".
+  return 0;
+}
 
-  // Here is where we actually create the DataLink.
-  link = new TcpDataLink(remote_address, this, priority, remote_address == this->tcp_config_->local_address_, active);
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::TcpTransport::create_datalink(
+  RepoId                  /*local_id*/,
+  const AssociationData&  remote_association,
+  CORBA::Long             priority,
+  bool                    active)
+{
+  AssociationData& remote = const_cast<AssociationData&>(remote_association);
+
+  ACE_INET_Addr& remote_address = remote.get_remote_address();
+
+  TcpDataLink_rch link =
+    new TcpDataLink(remote_address, this, priority,
+                    remote_address == this->tcp_config_->local_address_,
+                    active);
+
+  const bool is_loopback = remote_address == this->tcp_config_->local_address_;
+
+  PriorityKey key(priority, remote_address, is_loopback, active);
 
   { // guard scope
     GuardType guard(this->links_lock_);

@@ -20,6 +20,10 @@ namespace DCPS {
 
 class EntityImpl;
 class TransportInst;
+class AssocationInfo;
+class ReaderIdSeq;
+class WriterIdSeq;
+class DataSampleList;
 
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.
@@ -34,16 +38,54 @@ protected:
   TransportClient();
   virtual ~TransportClient();
 
+
+  // Local setup:
+
   void enable_transport();
+  bool swap_bytes() const { return swap_bytes_; }
+  const TransportInterfaceInfo& connection_info() const { return conn_info_; }
+
+
+  // Managing associations to remote peers:
+
+  bool associate(const AssociationData& peer, bool active);
+  void disassociate(const RepoId& peerId);
+
+
+  // Data transfer:
+
+  bool send_response(const RepoId& peer, ACE_Message_Block* payload); // [DR]
+  void send(const DataSampleList& samples);
+  SendControlStatus send_control(ACE_Message_Block* msg, void* extra = 0);
+  bool remove_sample(const DataSampleListElement* sample);
+  bool remove_all_msgs();
 
 private:
-  virtual bool check_transport_qos(const TransportInst& inst) = 0;
 
+  // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
+  virtual bool check_transport_qos(const TransportInst& inst) = 0;
+  virtual const RepoId& get_repo_id() const = 0;
+  virtual CORBA::Long get_priority_value() const { return 0; }
+
+  // transport_detached() is called from TransportImpl when it shuts down
   friend class TransportImpl;
   void transport_detached(TransportImpl* which);
 
+  // helpers
+  void add_link(const DataLink_rch& link, const RepoId& peer);
+  bool associate_i(const AssociationData& data, bool active,
+                   TransportImpl_rch& impl);
+  TransportSendListener* get_send_listener();
+  TransportReceiveListener* get_receive_listener();
+
+  typedef std::map<RepoId, DataLink_rch, GUID_tKeyLessThan> DataLinkIndex;
+  DataLinkIndex data_link_index_;
   std::vector<TransportImpl_rch> impls_;
   DataLinkSet links_;
+  bool swap_bytes_;
+  TransportInterfaceInfo conn_info_;
+
+  enum ROLE {ROLE_UNKNOWN, ROLE_WRITER, ROLE_READER} role_;
 };
 
 }

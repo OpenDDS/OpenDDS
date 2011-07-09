@@ -482,35 +482,33 @@ ACE_Message_Block*
     // block.
 
     OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko_instance_data(instance_data);
-    ACE_NEW_RETURN (mb,
-                    ACE_Message_Block(key_marshaled_size_
-                                      ? key_marshaled_size_
-                                      : OpenDDS::DCPS::gen_find_size(ko_instance_data)),
-                    0);
-    ::OpenDDS::DCPS::Serializer serializer (mb,
-                                            this->get_publisher_servant()->swap_bytes());
+    ACE_NEW_RETURN(mb,
+                   ACE_Message_Block(key_marshaled_size_
+                                     ? key_marshaled_size_
+                                     : OpenDDS::DCPS::gen_find_size(ko_instance_data)),
+                   0);
+    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
     serializer << ko_instance_data;
   } else { // OpenDDS::DCPS::FULL_MARSHALING
-    ACE_NEW_MALLOC_RETURN (mb,
-                           static_cast<ACE_Message_Block*> (
-                               mb_allocator_->malloc (
-                               sizeof (ACE_Message_Block))),
-                           ACE_Message_Block(
-                               marshaled_size_ ? marshaled_size_ :
-                                   OpenDDS::DCPS::gen_find_size(instance_data),
-                               ACE_Message_Block::MB_DATA,
-                               0, //cont
-                               0, //data
-                               data_allocator_, //allocator_strategy
-                               db_lock_pool_->get_lock(), //data block locking_strategy
-                               ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                               ACE_Time_Value::zero,
-                               ACE_Time_Value::max_time,
-                               db_allocator_,
-                               mb_allocator_),
-                            0);
-    ::OpenDDS::DCPS::Serializer serializer (mb,
-                                            this->get_publisher_servant()->swap_bytes());
+    ACE_NEW_MALLOC_RETURN(mb,
+                          static_cast<ACE_Message_Block*>(
+                              mb_allocator_->malloc(
+                              sizeof(ACE_Message_Block))),
+                          ACE_Message_Block(
+                              marshaled_size_ ? marshaled_size_ :
+                                  OpenDDS::DCPS::gen_find_size(instance_data),
+                              ACE_Message_Block::MB_DATA,
+                              0, //cont
+                              0, //data
+                              data_allocator_, //allocator_strategy
+                              db_lock_pool_->get_lock(), //data block locking_strategy
+                              ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                              ACE_Time_Value::zero,
+                              ACE_Time_Value::max_time,
+                              db_allocator_,
+                              mb_allocator_),
+                           0);
+    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
     serializer << instance_data;
   }
 

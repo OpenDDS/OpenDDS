@@ -2195,13 +2195,10 @@ DomainParticipantImpl::attach_bit_transport()
 
   try {
     // Attach the Subscriber with the TransportImpl.
-    OpenDDS::DCPS::SubscriberImpl* sub_servant
-    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(bit_subscriber_.in());
 
     TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl(this->domain_id_);
 
-    OpenDDS::DCPS::AttachStatus status
-    = sub_servant->attach_transport(impl.in());
+    OpenDDS::DCPS::AttachStatus status = impl->attach(bit_subscriber_);
 
     if (status != OpenDDS::DCPS::ATTACH_OK) {
       // We failed to attach to the transport for some reason.

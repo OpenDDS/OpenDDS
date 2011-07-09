@@ -217,9 +217,9 @@ DataWriterImpl::get_next_handle()
 
 void
 DataWriterImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
-                                 const ReaderAssociationSeq & readers)
+                                 const ReaderAssociationSeq& readers)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","add_associations",6);
+  DBG_ENTRY_LVL("DataWriterImpl", "add_associations", 6);
 
   if (DCPS_debug_level >= 1) {
     RepoIdConverter writer_converter(yourId);
@@ -280,15 +280,29 @@ DataWriterImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
     }
   }
 
-  {
-    // I am not sure this guard is necessary for
-    // publisher_servant_->add_associations but better safe than sorry.
-    // 1/11/06 SHH can cause deadlock so avoid getting the lock.
-    //ACE_GUARD (ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  if (DCPS_debug_level > 4) {
+    RepoIdConverter converter(get_publication_id());
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterImpl::add_associations(): ")
+               ACE_TEXT("adding %d subscriptions to publication %C with priority %d.\n"),
+               readers.length(),
+               std::string(converter).c_str(),
+               qos_.transport_priority.value));
+  }
 
-    // add associations to the transport before using
-    // Built-In Topic support and telling the listener.
-    this->publisher_servant_->add_associations(readers, this, qos_);
+  AssociationInfo info;
+  info.num_associations_ = readers.length();
+
+  // TransportInterface does not take ownership of the associations.
+  // The associations will be deleted when transport inform
+  // datawriter fully associated (in DataWriterImpl::fully_associated()).
+  info.association_data_ = new AssociationData[info.num_associations_];
+
+  for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
+    info.association_data_[i].remote_id_ = readers[i].readerId;
+    info.association_data_[i].remote_data_ = readers[i].readerTransInfo;
+    this->associate(info.association_data_[i], true /*active*/);
+    //TODO: if associate() returns false, inform inforepo and try again as pasv
   }
 }
 
@@ -449,11 +463,18 @@ DataWriterImpl::fully_associated(OpenDDS::DCPS::RepoId myid,
     // Since the thread calling fully_associated() is the reactor
     // thread, it may have some performance penalty. If the
     // performance is an issue, we may need a new thread to handle the
-    // data_availble() calls.
+    // data_available() calls.
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->get_lock());
-    this->publisher_servant_->data_available(this, true);
+
+    DataSampleList list = data_container_->get_resend_data();
+
+    if (this->publisher_servant_->is_suspended()) {
+      this->available_data_list_.enqueue_tail_next_send_sample(list);
+    } else {
+      this->send(list);
+    }
   }
 }
 
@@ -593,9 +614,8 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
     }
   }
 
-  if (rds_len > 0) {
-    this->publisher_servant_->remove_associations(rds,
-                                                  this->publication_id_);
+  for (CORBA::ULong i = 0; i < rds.length(); ++i) {
+    this->disassociate(rds[i]);
   }
 
   // If this remove_association is invoked when the InfoRepo
@@ -604,6 +624,12 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   if (notify_lost && handles.length() > 0) {
     this->notify_publication_lost(handles);
   }
+}
+
+void DataWriterImpl::unregister_publication()
+{
+  DBG_ENTRY_LVL("DataWriterImpl", "unregister_publication", 6);
+  //TODO: AHM will we need this?
 }
 
 void DataWriterImpl::remove_all_associations()
@@ -875,7 +901,7 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   ACE_Message_Block* data;
-  if (!token.marshal(data, this->get_publisher_servant()->swap_bytes())) {
+  if (!token.marshal(data, this->swap_bytes())) {
     return DDS::RETCODE_OUT_OF_RESOURCES;
   }
 
@@ -893,17 +919,12 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
   ACE_Message_Block* ack_request =
     this->create_control_message(REQUEST_ACK, data, token.timestamp());
 
-  SendControlStatus status;
-  { // This reaches all associated subscriptions.
-    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
-    status = this->publisher_servant_->send_control(this->publication_id_,
-                                                    this, ack_request
+  const SendControlStatus status =
+    this->send_control(ack_request
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-                                                    , ac.customized_.length()
-                                                        ? &ac : 0
+                       , ac.customized_.length() ? &ac : 0
 #endif
-                                                   );
-  }
+                       );
 
   if (status == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
@@ -929,7 +950,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
 #else
 
   AckCustomization& ac = *static_cast<AckCustomization*>(extra);
-  const bool swap = this->get_publisher_servant()->swap_bytes();
+  const bool swap = this->swap_bytes();
 
   // set of DataLinks that have no targets that need custom control messages
   DataLinkSet notCustomized;
@@ -1468,17 +1489,56 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   this->set_enabled();
 
-  DDS::ReturnCode_t const writer_enabled_result =
-    publisher_servant_->writer_enabled(dw_remote_objref_.in(),
-                                       dw_local_objref_.in(),
-                                       topic_name_.in(),
-                                       topic_id_);
-
   try {
     this->enable_transport();
+
+    TransportInterfaceInfo trans_conf_info = connection_info();
+    trans_conf_info.publication_transport_priority =
+      this->qos_.transport_priority.value;
+
+    DDS::PublisherQos pub_qos;
+    this->publisher_servant_->get_qos(pub_qos);
+
+    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+    this->publication_id_ =
+      repo->add_publication(this->domain_id_,
+                            this->participant_servant_->get_id(),
+                            this->topic_servant_->get_id(),
+                            this->dw_remote_objref_,
+                            this->qos_,
+                            trans_conf_info,
+                            pub_qos);
+
+    if (this->publication_id_ == GUID_UNKNOWN) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+                 ACE_TEXT("add_publication returned invalid id. \n")));
+      return DDS::RETCODE_ERROR;
+    }
+
+    this->data_container_->publication_id_ = this->publication_id_;
+
   } catch (const Transport::Exception&) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+               ACE_TEXT("Transport Exception.\n")));
+    return DDS::RETCODE_ERROR;
+
+  } catch (const CORBA::SystemException& sysex) {
+    sysex._tao_print_exception(
+      "ERROR: System Exception"
+      " in DataWriterImpl::enable");
+    return DDS::RETCODE_ERROR;
+
+  } catch (const CORBA::UserException& userex) {
+    userex._tao_print_exception(
+      "ERROR:  Exception"
+      " in DataWriterImpl::enable");
     return DDS::RETCODE_ERROR;
   }
+
+  const DDS::ReturnCode_t writer_enabled_result =
+    publisher_servant_->writer_enabled(topic_name_.in(), this);
 
   if (this->monitor_) {
     this->monitor_->report();
@@ -1539,16 +1599,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                  data,
                                  source_timestamp);
 
-  SendControlStatus status;
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
-
-    status = this->publisher_servant_->send_control(publication_id_,
-                                                    this,
-                                                    registered_sample);
-  }
-
-  if (status == SEND_CONTROL_ERROR) {
+  if (this->send_control(registered_sample) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
@@ -1598,16 +1649,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                  unregistered_sample_data,
                                  source_timestamp);
 
-  SendControlStatus status;
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
-
-    status = this->publisher_servant_->send_control(publication_id_,
-                                                    this,
-                                                    message);
-  }
-
-  if (status == SEND_CONTROL_ERROR) {
+  if (this->send_control(message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
                       ACE_TEXT(" send_control failed. \n")),
@@ -1688,14 +1730,12 @@ DataWriterImpl::write(DataSample* data,
                      ret);
   }
 
-  ret = this->publisher_servant_->data_available(this);
+  DataSampleList list = this->get_unsent_data();
 
-  if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::write: ")
-                      ACE_TEXT("data_available failed.\n")),
-                     ret);
+  if (this->publisher_servant_->is_suspended()) {
+    this->available_data_list_.enqueue_tail_next_send_sample(list);
+  } else {
+    this->send(list);
   }
 
   this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
@@ -1720,6 +1760,13 @@ DataWriterImpl::write(DataSample* data,
   }
 
   return DDS::RETCODE_OK;
+}
+
+void
+DataWriterImpl::send_suspended_data()
+{
+  this->send(this->available_data_list_);
+  this->available_data_list_.reset();
 }
 
 DDS::ReturnCode_t
@@ -1754,16 +1801,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                  registered_sample_data,
                                  source_timestamp);
 
-  SendControlStatus status;
-  {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
-
-    status  = this->publisher_servant_->send_control(publication_id_,
-                                                     this,
-                                                     message);
-  }
-
-  if (status == SEND_CONTROL_ERROR) {
+  if (this->send_control(message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose: ")
                       ACE_TEXT(" send_control failed. \n")),
@@ -1804,14 +1842,6 @@ DataWriterImpl::unregister_all()
   data_container_->unregister_all();
 }
 
-void
-DataWriterImpl::set_publication_id(RepoId publication_id)
-{
-  publication_id_ = publication_id;
-  data_container_->publication_id_ = publication_id;
-  //data_container_->pub_id (publication_id);
-}
-
 RepoId
 DataWriterImpl::get_publication_id()
 {
@@ -1844,9 +1874,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   DataSampleHeader header_data;
   header_data.message_id_ = message_id;
   header_data.byte_order_ =
-    this->publisher_servant_->swap_bytes()
-    ? !TAO_ENCAP_BYTE_ORDER
-  : TAO_ENCAP_BYTE_ORDER;
+    this->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = 0;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   header_data.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
@@ -1910,7 +1938,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   DataSampleHeader header_data;
   header_data.message_id_ = SAMPLE_DATA;
   header_data.byte_order_ =
-    this->publisher_servant_->swap_bytes()
+    this->swap_bytes()
     ? !TAO_ENCAP_BYTE_ORDER
     : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
@@ -2083,7 +2111,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 
   Serializer serializer(
       data,
-      this->publisher_servant_->swap_bytes());
+      this->swap_bytes());
 
   serializer << end_msg;
 
@@ -2093,10 +2121,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   ACE_Message_Block* control =
     create_control_message(END_COHERENT_CHANGES, data, source_timestamp);
 
-  SendControlStatus status =
-    this->publisher_servant_->send_control(this->publication_id_, this, control);
-
-  if (status == SEND_CONTROL_ERROR) {
+  if (this->send_control(control) == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
                ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
@@ -2110,14 +2135,6 @@ PublisherImpl*
 DataWriterImpl::get_publisher_servant()
 {
   return publisher_servant_;
-}
-
-void
-DataWriterImpl::remove_sample(DataSampleListElement* element,
-                              bool dropped_by_transport)
-{
-  DBG_ENTRY_LVL("DataWriterImpl","remove_sample",6);
-  publisher_servant_->remove_sample(element, dropped_by_transport);
 }
 
 void
@@ -2137,14 +2154,6 @@ DataWriterImpl::control_dropped(ACE_Message_Block* sample,
   DBG_ENTRY_LVL("DataWriterImpl","control_dropped",6);
   ++control_dropped_count_;
   sample->release();
-}
-
-int
-DataWriterImpl::remove_all_msgs()
-{
-  DBG_ENTRY_LVL("DataWriterImpl","remove_all_msgs",6);
-  return
-    publisher_servant_->remove_all_msgs(this->publication_id_);
 }
 
 void
@@ -2247,16 +2256,7 @@ DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
   ACE_Message_Block* liveliness_msg =
     this->create_control_message(DATAWRITER_LIVELINESS, 0, t);
 
-  SendControlStatus status;
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, justMe, publisher_servant_->get_pi_lock(), false);
-
-    status = this->publisher_servant_->send_control(publication_id_,
-                                                    this,
-                                                    liveliness_msg);
-  }
-
-  if (status == SEND_CONTROL_ERROR) {
+  if (this->send_control(liveliness_msg) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
                       ACE_TEXT(" send_control failed. \n")),
