@@ -1,3 +1,9 @@
+Mon Jul 11 16:54:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpc.xsl:
+
+          Add imported-topic models as parents to mpc project.
+
 Mon Jul 11 14:57:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
