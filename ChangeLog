@@ -1,3 +1,9 @@
+Mon Jul 11 19:05:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+
+          Fix duplicate xml:id
+
 Mon Jul 11 16:54:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpc.xsl:

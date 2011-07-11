@@ -19,7 +19,7 @@
         <readers xsi:type="opendds:dataReader" xmi:id="_DqPsQJOcEeC1BqwI_GQPmw" name="remote_topic_reader" copyFromTopicQos="false">
           <topic xsi:type="opendds:topic" href="../MessengerMixed/MessengerMixed.opendds#_mcVnwPDxEd-I4rwicuuPOw2"/>
         </readers>
-        <readers xsi:type="opendds:dataReader" xmi:id="_DqPsQJOcEeC1BqwI_GQPmw" name="transitive_topic_reader" copyFromTopicQos="false">
+        <readers xsi:type="opendds:dataReader" xmi:id="_trDqPsQJOcEeC1BqwI_GQPmw" name="transitive_topic_reader" copyFromTopicQos="false">
           <topic href="../MessengerMixed/MessengerMixed.opendds#_mcVnwPDxEd-I4rwicuuPOw"/>
         </readers>
       </subscribers>
