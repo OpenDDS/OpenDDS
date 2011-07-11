@@ -428,7 +428,6 @@ public:
   virtual bool check_transport_qos(const TransportInst& inst);
 
   RepoId get_subscription_id() const;
-  void set_subscription_id(RepoId subscription_id);
 
   DDS::DataReader_ptr get_dr_obj_ref();
 
@@ -472,6 +471,7 @@ public:
   void liveliness_lost();
 
   void remove_all_associations();
+  void unregister_subscription();
 
   void notify_subscription_disconnected(const WriterIdSeq& pubids);
   void notify_subscription_reconnected(const WriterIdSeq& pubids);
@@ -682,8 +682,10 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  bool verify_coherent_changes_completion (WriterInfo* writer);
-  bool coherent_change_received (WriterInfo* writer);
+  bool verify_coherent_changes_completion(WriterInfo* writer);
+  bool coherent_change_received(WriterInfo* writer);
+
+  const RepoId& get_repo_id() const { return this->subscription_id_; }
 
   friend class WriterInfo;
   friend class InstanceState;

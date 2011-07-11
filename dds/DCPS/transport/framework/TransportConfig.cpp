@@ -18,7 +18,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportConfig::TransportConfig(const std::string& name)
-  : name_(name)
+  : swap_bytes_(false)
+  , name_(name)
 {}
 
 TransportConfig::~TransportConfig()

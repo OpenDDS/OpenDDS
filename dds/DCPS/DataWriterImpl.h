@@ -281,12 +281,6 @@ public:
   DataSampleList get_resend_data();
 
   /**
-   * Cache the publication repository id after adding
-   * datawriter/publication to repository.
-   */
-  void set_publication_id(RepoId publication_id);
-
-  /**
    * Accessor of the repository id of this datawriter/publication.
    */
   RepoId get_publication_id();
@@ -352,22 +346,7 @@ public:
   /**
    * Get associated topic type name.
    */
-  char const * get_type_name() const;
-
-  /**
-   * This method is called when there is no more space in the
-   * instance sample list for a non-blocking write. It requests
-   * the transport to drop the oldest sample.
-   *
-   * The dropped_by_transport parameter will be passed all way to
-   * the transport and is used when the data_dropped() is called
-   * back.
-   *
-   * @see WriterDataContainer::data_dropped() comment for the
-   *      dropped_by_transport parameter.
-   */
-  void remove_sample(DataSampleListElement* element,
-                     bool dropped_by_transport = false);
+  char const* get_type_name() const;
 
   /**
    * This mothod is called by transport to notify the instance
@@ -383,13 +362,6 @@ public:
    */
   void control_dropped(ACE_Message_Block* sample,
                        bool dropped_by_transport);
-
-  /**
-   * Tell transport to remove all messages requested
-   * by this datawriter.
-   * This is called during datawriter shutdown.
-   */
-  int remove_all_msgs();
 
   /**
    * Accessor of the WriterDataContainer's lock.
@@ -428,7 +400,12 @@ public:
   virtual int handle_close(ACE_HANDLE,
                            ACE_Reactor_Mask);
 
+  /// Called by the PublisherImpl to indicate that the Publisher is now
+  /// resumed and any data collected while it was suspended should now be sent.
+  void send_suspended_data();
+
   void remove_all_associations();
+  void unregister_publication();
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);
@@ -558,6 +535,12 @@ private:
   bool lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq & hdls);
 
+  const RepoId& get_repo_id() const { return this->publication_id_; }
+
+  CORBA::Long get_priority_value() const {
+    return this->qos_.transport_priority.value;
+  }
+
   friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_
 
   /// The name of associated topic.
@@ -669,6 +652,9 @@ private:
   RepoIdToSequenceMap idToSequence_;
 
   IdSet                      pending_readers_;
+
+  /// The cached available data while suspending.
+  DataSampleList             available_data_list_;
 
   /// Monitor object for this entity
   Monitor* monitor_;

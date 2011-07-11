@@ -359,7 +359,20 @@ ACE_THROW_SPEC((CORBA::SystemException))
     // usage of an existing connection or initiate creation of a new
     // connection if no suitable connection is available.
     //
-    this->subscriber_servant_->add_associations(writers, this, qos_);
+    AssociationInfo info;
+    info.num_associations_ = writers.length();
+
+    // TransportInterface does not take ownership of the associations.
+    // The associations will be deleted when safe_associations falls
+    // out of scope.
+    info.association_data_ = new AssociationData[info.num_associations_];
+    ACE_Auto_Array_Ptr<AssociationData> safe_associations(info.association_data_);
+
+    for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
+      info.association_data_[i].remote_id_ = writers[i].writerId;
+      info.association_data_[i].remote_data_ = writers[i].writerTransInfo;
+      this->associate(info.association_data_[i], false /*passive*/);
+    }
 
     // Check if any publications have already sent a REQUEST_ACK message.
     {
@@ -601,7 +614,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
   }
 
-  this->subscriber_servant_->remove_associations(updated_writers, this->subscription_id_);
+  for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
+    this->disassociate(updated_writers[i]);
+  }
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
@@ -686,6 +701,13 @@ void DataReaderImpl::remove_all_associations()
 
   } catch (const CORBA::Exception&) {
   }
+}
+
+void DataReaderImpl::unregister_subscription()
+{
+  DBG_ENTRY_LVL("DataReaderImpl", "unregister_subscription", 6);
+  //TODO: AHM will we need this -- as of now we are not using TransportImpl's
+  //dw_map_ and dr_map_
 }
 
 void DataReaderImpl::update_incompatible_qos(
@@ -1180,21 +1202,68 @@ ACE_THROW_SPEC((CORBA::SystemException))
   this->set_enabled();
 
   if (topic_servant_) {
-    CORBA::String_var name = topic_servant_->get_name();
-
-    DDS::ReturnCode_t return_value;
-    return_value = subscriber_servant_->reader_enabled(
-             dr_remote_objref_.in(),
-             dr_local_objref_.in(),
-             this,
-             name.in(),
-             topic_servant_->get_id());
 
     try {
       this->enable_transport();
+
+      TransportInterfaceInfo trans_conf_info = this->connection_info();
+      trans_conf_info.publication_transport_priority = 0;
+
+      CORBA::String_var filterExpression = "";
+      DDS::StringSeq exprParams;
+  #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
+      if (cft) {
+        filterExpression = cft->get_filter_expression();
+        cft->get_expression_parameters(exprParams);
+      }
+  #endif
+
+      DDS::SubscriberQos sub_qos;
+      this->subscriber_servant_->get_qos(sub_qos);
+
+      DCPSInfo_var repo =
+        TheServiceParticipant->get_repository(this->domain_id_);
+      this->subscription_id_ =
+        repo->add_subscription(this->domain_id_,
+                               this->participant_servant_->get_id(),
+                               this->topic_servant_->get_id(),
+                               this->dr_remote_objref_,
+                               this->qos_,
+                               trans_conf_info,
+                               sub_qos,
+                               filterExpression,
+                               exprParams);
+
+      if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+                   ACE_TEXT("add_subscription returned invalid id.\n")));
+        return DDS::RETCODE_ERROR;
+      }
+
     } catch (const Transport::Exception&) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+                   ACE_TEXT("Transport Exception.\n")));
+        return DDS::RETCODE_ERROR;
+
+    } catch (const CORBA::SystemException& sysex) {
+      sysex._tao_print_exception(
+        "ERROR: System Exception"
+        " in DataReaderImpl::enable");
+      return DDS::RETCODE_ERROR;
+
+    } catch (const CORBA::UserException& userex) {
+      userex._tao_print_exception(
+        "ERROR: User Exception"
+        " in DataReaderImpl::enable");
       return DDS::RETCODE_ERROR;
     }
+
+    const CORBA::String_var name = topic_servant_->get_name();
+    DDS::ReturnCode_t return_value =
+      this->subscriber_servant_->reader_enabled(name.in(), this);
 
     if (this->monitor_) {
       this->monitor_->report();
@@ -1607,7 +1676,7 @@ DataReaderImpl::send_sample_ack(
   ACE_Message_Block* data;
   ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
 
-  bool doSwap    = this->subscriber_servant_->swap_bytes();
+  bool doSwap    = this->swap_bytes();
   bool byteOrder = (doSwap? !TAO_ENCAP_BYTE_ORDER: TAO_ENCAP_BYTE_ORDER);
 
   Serializer serializer(data, doSwap);
@@ -1646,7 +1715,7 @@ DataReaderImpl::send_sample_ack(
                std::string(publicationBuffer).c_str()));
   }
 
-  return this->subscriber_servant_->send_response(publication, sample_ack);
+  return this->send_response(publication, sample_ack);
 }
 
 void DataReaderImpl::notify_read_conditions()
@@ -1669,11 +1738,6 @@ SubscriberImpl* DataReaderImpl::get_subscriber_servant()
 RepoId DataReaderImpl::get_subscription_id() const
 {
   return subscription_id_;
-}
-
-void DataReaderImpl::set_subscription_id(RepoId subscription_id)
-{
-  subscription_id_ = subscription_id;
 }
 
 char *

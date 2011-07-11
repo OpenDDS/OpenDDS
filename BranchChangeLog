@@ -1,3 +1,65 @@
+Mon Jul 11 22:28:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Connect TransportClient to the DCPS layer in place of the
+          older TransportInterface (which will eventually be removed).
+          At this point the TransportClient is not complete, but tracking
+          associations and sending data (including wait_for_acks) is working.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Built-In Topics are disabled for now.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          find_or_create_datalink() is now two separate methods,
+          one for finding and one for creating.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Change transport attach API so it will compile.
+          BITs and Federation are diasbled for now.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Make sure to get DR reference before releasing the
+          lock for making a listener upcall.
+
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+
+          Disable monitor's use of transportimpl for now.
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Disable transport attachment from Java for now.
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Cleaned up style.
+          This is the only test that will run with the above changes.
+
 Wed Jul  6 21:51:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * docs/design/UML/DDS_new_transport.uml:

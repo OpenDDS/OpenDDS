@@ -237,18 +237,8 @@ ManagerImpl::initialize()
   }
 
   // Attach the transport to it.
-  OpenDDS::DCPS::SubscriberImpl* subscriberServant
-  = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(
-      subscriber.in());
 
-  if (0 == subscriberServant) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-               ACE_TEXT("failed to extract servant for federation subscriber.\n")));
-    throw Incomplete();
-  }
-
-  switch (subscriberServant->attach_transport(subscriptionTransport.in())) {
+  switch (subscriptionTransport->attach(subscriber)) {
   case OpenDDS::DCPS::ATTACH_OK:
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -295,18 +285,8 @@ ManagerImpl::initialize()
   }
 
   // Attach the transport to it.
-  OpenDDS::DCPS::PublisherImpl* publisherServant
-  = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(
-      publisher.in());
 
-  if (0 == publisherServant) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-               ACE_TEXT("failed to extract servant for federation publisher.\n")));
-    throw Incomplete();
-  }
-
-  switch (publisherServant->attach_transport(transport.in())) {
+  switch (transport->attach(publisher)) {
   case OpenDDS::DCPS::ATTACH_OK:
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {

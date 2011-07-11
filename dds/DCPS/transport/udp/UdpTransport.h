@@ -29,9 +29,15 @@ public:
   UdpTransport(const TransportInst_rch& inst = 0); //TODO: default is only transitional
 
 protected:
-  virtual DataLink* find_or_create_datalink(
+  virtual DataLink* find_datalink(
     RepoId local_id,
-    const AssociationData* remote_association,
+    const AssociationData& remote_association,
+    CORBA::Long priority,
+    bool active);
+
+  virtual DataLink* create_datalink(
+    RepoId local_id,
+    const AssociationData& remote_association,
     CORBA::Long priority,
     bool active);
 

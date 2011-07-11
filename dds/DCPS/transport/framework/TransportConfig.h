@@ -34,6 +34,8 @@ public:
 
   std::vector<TransportInst_rch> instances_;
 
+  bool swap_bytes_;
+
   /// Insert the TransportInst in sorted order (by name) in the instances_ list.
   /// Use when the names of the TransportInst objects are specifically assigned
   /// to have the sorted order make sense.

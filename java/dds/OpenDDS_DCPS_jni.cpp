@@ -465,7 +465,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1publisher
   copyToCxx(jni, pub, jPub);
   OpenDDS::DCPS::PublisherImpl *pub_impl =
     dynamic_cast<OpenDDS::DCPS::PublisherImpl *>(pub.in());
-  OpenDDS::DCPS::AttachStatus stat = pub_impl->attach_transport(ti);
+  OpenDDS::DCPS::AttachStatus stat = OpenDDS::DCPS::ATTACH_ERROR; //TODO: transport   pub_impl->attach_transport(ti);
   jclass clazz = findClass(jni, "OpenDDS/DCPS/transport/AttachStatus");
   jmethodID mid = jni->GetStaticMethodID(clazz, "from_int",
                                          "(I)LOpenDDS/DCPS/transport/AttachStatus;");
@@ -480,7 +480,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1subscriber
   copyToCxx(jni, sub, jSub);
   OpenDDS::DCPS::SubscriberImpl *sub_impl =
     dynamic_cast<OpenDDS::DCPS::SubscriberImpl *>(sub.in());
-  OpenDDS::DCPS::AttachStatus stat = sub_impl->attach_transport(ti);
+  OpenDDS::DCPS::AttachStatus stat = OpenDDS::DCPS::ATTACH_ERROR; //TODO: transport   sub_impl->attach_transport(ti);
   jclass clazz = findClass(jni, "OpenDDS/DCPS/transport/AttachStatus");
   jmethodID mid = jni->GetStaticMethodID(clazz, "from_int",
                                          "(I)LOpenDDS/DCPS/transport/AttachStatus;");
