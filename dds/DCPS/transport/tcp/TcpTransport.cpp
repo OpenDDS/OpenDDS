@@ -47,7 +47,8 @@ OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::TcpTransport::find_datalink(
   RepoId                  /*local_id*/,
   const AssociationData&  remote_association,
-  CORBA::Long             priority)
+  CORBA::Long             priority,
+  bool                    active)
 {
   DBG_ENTRY_LVL("TcpTransport", "find_datalink", 6);
 
@@ -57,7 +58,7 @@ OpenDDS::DCPS::TcpTransport::find_datalink(
 
   const bool is_loopback = remote_address == this->tcp_config_->local_address_;
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::find_or_create_datalink remote addr str "
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::find_datalink remote addr str "
             "\"%s\" remote_address \"%C:%d priority %d is_loopback %d\"\n",
             remote.network_order_address_.addr_.c_str(),
             remote_address.get_host_name(),
@@ -65,9 +66,7 @@ OpenDDS::DCPS::TcpTransport::find_datalink(
             priority, is_loopback),
             2);
 
-  //TODO: need to find out if "active" needs to be part of the key
-  PriorityKey key(priority, remote_address, is_loopback, false /*active*/);
-
+  PriorityKey key(priority, remote_address, is_loopback, active);
 
   TcpDataLink_rch link;
   { // guard scope
@@ -141,6 +140,8 @@ OpenDDS::DCPS::TcpTransport::create_datalink(
   CORBA::Long             priority,
   bool                    active)
 {
+  DBG_ENTRY_LVL("TcpTransport", "create_datalink", 6);
+
   AssociationData& remote = const_cast<AssociationData&>(remote_association);
 
   ACE_INET_Addr& remote_address = remote.get_remote_address();
@@ -192,7 +193,7 @@ OpenDDS::DCPS::TcpTransport::create_datalink(
         dump(os);
 
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) TcpTransport::find_or_create_datalink() -\n%C"),
+                   ACE_TEXT("(%P|%t) TcpTransport::create_datalink() -\n%C"),
                    os.str().c_str()));
       }
     }

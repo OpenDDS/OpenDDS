@@ -73,14 +73,14 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address, bool active)
 }
 
 DataLink*
-UdpTransport::find_or_create_datalink(
+UdpTransport::find_datalink(
   RepoId /*local_id*/,
-  const AssociationData* remote_association,
+  const AssociationData& remote_association,
   CORBA::Long priority,
   bool active)
 {
   ACE_INET_Addr remote_address(
-    connection_info_i(remote_association->remote_data_));
+    connection_info_i(remote_association.remote_data_));
   bool is_loopback = remote_address == this->config_i_->local_address_;
   PriorityKey key(priority, remote_address, is_loopback, active);
 
@@ -92,6 +92,21 @@ UdpTransport::find_or_create_datalink(
   } else {
     return UdpDataLink_rch(this->server_link_)._retn(); // found
   }
+
+  return 0;
+}
+
+DataLink*
+UdpTransport::create_datalink(
+  RepoId /*local_id*/,
+  const AssociationData& remote_association,
+  CORBA::Long priority,
+  bool active)
+{
+  ACE_INET_Addr remote_address(
+    connection_info_i(remote_association.remote_data_));
+  bool is_loopback = remote_address == this->config_i_->local_address_;
+  PriorityKey key(priority, remote_address, is_loopback, active);
 
   // Create new DataLink for logical connection:
   UdpDataLink_rch link = make_datalink(remote_address, active);

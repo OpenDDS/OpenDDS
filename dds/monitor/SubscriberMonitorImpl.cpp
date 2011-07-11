@@ -36,7 +36,7 @@ SubscriberMonitorImpl::report() {
     report.handle = sub_->get_instance_handle();
     DDS::DomainParticipant_var dp = sub_->get_participant();
     report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
-    TransportImpl_rch ti = sub_->get_transport_impl();
+    TransportImpl_rch ti; //TODO: transport    = sub_->get_transport_impl();
     if (ti != 0) {
       report.transport_id = ti->get_transport_id();
     } else {

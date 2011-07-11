@@ -706,7 +706,8 @@ void DataReaderImpl::remove_all_associations()
 void DataReaderImpl::unregister_subscription()
 {
   DBG_ENTRY_LVL("DataReaderImpl", "unregister_subscription", 6);
-  //TODO: AHM will we need this?
+  //TODO: AHM will we need this -- as of now we are not using TransportImpl's
+  //dw_map_ and dr_map_
 }
 
 void DataReaderImpl::update_incompatible_qos(

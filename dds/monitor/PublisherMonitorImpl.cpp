@@ -36,7 +36,7 @@ PublisherMonitorImpl::report() {
     report.handle = pub_->get_instance_handle();
     DDS::DomainParticipant_var dp = pub_->get_participant();
     report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
-    TransportImpl_rch ti = pub_->get_transport_impl();
+    TransportImpl_rch ti; //TODO: transport    = pub_->get_transport_impl();
     if (ti != 0) {
       report.transport_id = ti->get_transport_id();
     } else {

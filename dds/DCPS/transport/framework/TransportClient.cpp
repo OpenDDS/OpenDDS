@@ -13,6 +13,7 @@
 #include "TransportRegistry.h"
 #include "TransportExceptions.h"
 #include "TransportReceiveListener.h"
+#include "DataLinkSetMap.h"
 
 #include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
@@ -115,7 +116,7 @@ TransportClient::associate_i(const AssociationData& data, bool active,
   // Attempt to find an existing DataLink that can be reused
   for (size_t i = 0; i < impls_.size(); ++i) {
 
-    DataLink_rch link = impls_[i]->find_datalink(id, data, priority);
+    DataLink_rch link = impls_[i]->find_datalink(id, data, priority, active);
 
     if (!link.is_nil()) {
       add_link(link, data.remote_id_);
@@ -143,8 +144,9 @@ void
 TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 {
   links_.insert_link(link.in());
+  data_link_index_[peer] = link;
+
   const RepoId& id = get_repo_id();
-  data_link_index_[id] = link;
 
   if (role_ == ROLE_READER) {
     link->make_reservation(peer, id, get_receive_listener());
@@ -157,7 +159,14 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 void
 TransportClient::disassociate(const RepoId& peerId)
 {
-  //TODO
+  DataLinkIndex::iterator found = data_link_index_.find(peerId);
+  if (found == data_link_index_.end()) {
+    //TODO: warning
+    return;
+  }
+  DataLink_rch link = found->second;
+  DataLinkSetMap released;
+  link->release_reservations(peerId, get_repo_id(), released);
 }
 
 bool
@@ -166,7 +175,14 @@ TransportClient::send_response(const RepoId& peer, ACE_Message_Block* payload)
   DataLinkIndex::iterator found = data_link_index_.find(peer);
   if (found == data_link_index_.end()) {
     payload->release();
-    //TODO: warning
+    if (DCPS_debug_level > 4) {
+      RepoIdConverter converter(peer);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TransportClient::send_response: ")
+                 ACE_TEXT("no link for publication %C, ")
+                 ACE_TEXT("not sending response.\n"),
+                 std::string(converter).c_str()));
+    }
     return false;
   }
 

@@ -172,7 +172,8 @@ protected:
     CORBA::Long             priority,
     bool                    active)
   {
-    DataLink* link = find_datalink(local_id, *remote_association, priority);
+    DataLink* link =
+      find_datalink(local_id, *remote_association, priority, active);
     if (link) return link;
 
     return create_datalink(local_id, *remote_association, priority, active);
@@ -181,7 +182,8 @@ protected:
   virtual DataLink* find_datalink(
     RepoId                  local_id,
     const AssociationData&  remote_association,
-    CORBA::Long             priority) = 0;
+    CORBA::Long             priority,
+    bool                    active) = 0;
 
   virtual DataLink* create_datalink(
     RepoId                  local_id,

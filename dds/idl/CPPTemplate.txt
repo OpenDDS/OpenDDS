@@ -1974,11 +1974,11 @@ void
         ++sample_rejected_status_.total_count_change;
         sample_rejected_status_.last_instance_handle = handle;
 
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
         if (listener != 0)
         {
           ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
@@ -2066,11 +2066,11 @@ void
 
         set_status_changed_flag(::DDS::SAMPLE_LOST_STATUS, true);
 
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
         if (listener)
         {
           ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
 
@@ -2102,11 +2102,11 @@ void
         ::DDS::DataReaderListener* listener =
           listener_for (::DDS::DATA_AVAILABLE_STATUS);
 
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
         if (listener != 0)
         {
           ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_data_available(dr.in ());
           set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);

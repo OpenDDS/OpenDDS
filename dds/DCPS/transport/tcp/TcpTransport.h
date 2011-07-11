@@ -53,7 +53,8 @@ protected:
   virtual DataLink* find_datalink(
     RepoId                  local_id,
     const AssociationData&  remote_association,
-    CORBA::Long             priority);
+    CORBA::Long             priority,
+    bool                    active);
 
   virtual DataLink* create_datalink(
     RepoId                  local_id,
