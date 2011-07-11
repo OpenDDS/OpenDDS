@@ -1,3 +1,25 @@
+Mon Jul 11 12:12:23 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+        
+          Renamed "Sample_Base" to "Sample_Dissector" since the model now
+          seems to be satisfied by a common set of discrete field
+          dissectors that are strung together to compose a single
+          dissector for an arbitrarily complex sample. The code for doing
+          the dissection is now separate from the code that manages and
+          will construct the dissectors.
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Removed these files. They are replaced by sample_dissector.* and
+          sample_manager.*.
+
 Fri Jul  8 22:43:33 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_base.h:

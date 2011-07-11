@@ -8,7 +8,7 @@
 
 #include "tools/dissector/packet-opendds.h"
 #include "tools/dissector/packet-repo.h"
-#include "tools/dissector/sample_base.h"
+#include "tools/dissector/sample_manager.h"
 
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
@@ -421,8 +421,8 @@ namespace OpenDDS
           return;
         }
 
-      Sample_Base *data_dissector = 
-        Sample_Dissector_Manager::instance().find (data_name);
+      Sample_Dissector *data_dissector =
+        Sample_Manager::instance().find (data_name);
       if (data_dissector == 0)
         {
           ACE_DEBUG ((LM_DEBUG,
@@ -596,7 +596,7 @@ namespace OpenDDS
         return;
       initialized_ = true;
 
-      Sample_Dissector_Manager::instance ().init();
+      Sample_Manager::instance ().init();
 
       //#define HFILL 0, 0, HF_REF_TYPE_NONE, 0, NULL, NULL
 #define NULL_HFILL NULL, 0, NULL, HFILL
