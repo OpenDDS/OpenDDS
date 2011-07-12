@@ -17,12 +17,12 @@
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
-#include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 #include "TransportReceiveStrategy.h"
 #include "TransportReceiveStrategy_rch.h"
 #include "TransportSendControlElement.h"
 #include "TransportSendListener.h"
+#include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
 #include "ace/Synch.h"
@@ -70,7 +70,6 @@ class  ThreadPerConnectionSendTask;
  */
 class OpenDDS_Dcps_Export DataLink
   : public RcObject<ACE_SYNCH_MUTEX>,
-    public TransportSendListener,
     public ACE_Event_Handler {
 
   friend class DataLinkCleanupTask;
@@ -171,7 +170,7 @@ public:
   /// Notify the datawriters and datareaders that the connection is
   /// disconnected, lost, or reconnected. The datareader/datawriter
   /// will notify the corresponding listener.
-  void notify(enum ConnectionNotice notice);
+  void notify(ConnectionNotice notice);
 
   void notify_connection_deleted();
 
@@ -247,18 +246,14 @@ public:
   /// DataLink's control.
   SendControlStatus send_control(ACE_Message_Block* data);
 
-  // TransportSendListener callbacks for transport control samples:
-  virtual void control_delivered(ACE_Message_Block* message);
-
-  virtual void control_dropped(ACE_Message_Block* message,
-                               bool dropped_by_transport);
-
   /// Return the subset of the input set which are also targets of
   /// this DataLink (see is_target()).
   GUIDSeq* target_intersection(const GUIDSeq& in);
 
   CORBA::ULong num_targets() const;
   RepoIdSet_rch get_targets() const;
+
+  TransportImpl_rch impl() const;
 
 protected:
 
@@ -309,7 +304,7 @@ protected:
 private:
 
   /// Helper function to output the enum as a string to help debugging.
-  const char* connection_notice_as_str(enum ConnectionNotice notice);
+  const char* connection_notice_as_str(ConnectionNotice notice);
 
   /// Used by release_reservations() once it has determined that the
   /// remote_id/local_id being released is, in fact,
@@ -327,6 +322,9 @@ private:
    RepoId               subscriber_id,
    ReceiveListenerSet_rch& listener_set,
    DataLinkSetMap&      released_subscribers);
+
+  TransportSendListener* send_listener_for(const RepoId& pub_id) const;
+  TransportReceiveListener* recv_listener_for(const RepoId& sub_id) const;
 
   /// Save current sub and pub association maps for releasing and create
   /// empty maps for new associations.
@@ -350,6 +348,10 @@ private:
   /// Map publication Id value to TransportSendListener.
   typedef std::map<RepoId, TransportSendListener*, GUID_tKeyLessThan> IdToSendListenerMap;
   IdToSendListenerMap send_listeners_;
+
+  /// Map subscription Id value to TransportReceieveListener.
+  typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> IdToRecvListenerMap;
+  IdToRecvListenerMap recv_listeners_;
 
   /// Map associating each publisher_id with a set of
   /// TransportReceiveListener objects (each with an associated

@@ -28,7 +28,6 @@
 #include "GroupRakeData.h"
 #include "MultiTopicDataReaderBase.h"
 #include "Util.h"
-#include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
 
@@ -402,7 +401,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // otherwise some callbacks resulted from remove_association may lost.
 
   dr_servant->remove_all_associations();
-  dr_servant->unregister_subscription();
 
   dr_servant->cleanup();
 

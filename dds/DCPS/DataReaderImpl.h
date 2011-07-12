@@ -239,19 +239,12 @@ public:
   virtual DDS::InstanceHandle_t get_instance_handle()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void add_associations(
-    OpenDDS::DCPS::RepoId yourId,
-    const OpenDDS::DCPS::WriterAssociationSeq & writers)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void add_associations(const RepoId& yourId,
+                        const WriterAssociationSeq& writers);
 
-  virtual void remove_associations(
-    const OpenDDS::DCPS::WriterIdSeq & writers,
-    CORBA::Boolean callback)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void remove_associations(const WriterIdSeq& writers, bool callback);
 
-  virtual void update_incompatible_qos(
-    const OpenDDS::DCPS::IncompatibleQosStatus & status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void update_incompatible_qos(const IncompatibleQosStatus& status);
 
   /**
   * This is used to retrieve the listener for a certain status change.
@@ -471,7 +464,6 @@ public:
   void liveliness_lost();
 
   void remove_all_associations();
-  void unregister_subscription();
 
   void notify_subscription_disconnected(const WriterIdSeq& pubids);
   void notify_subscription_reconnected(const WriterIdSeq& pubids);

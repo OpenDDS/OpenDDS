@@ -56,99 +56,7 @@ OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportFactory::create_transport_impl_i(TransportIdType impl_id, FactoryIdType type_id)
 {
   DBG_ENTRY_LVL("TransportFactory","create_transport_impl_i",6);
-
-  TransportImplFactory_rch impl_factory = this->get_or_create_factory(type_id);
-
-  GuardType guard(this->lock_);
-
-  int created_reactor = 0;
-  TransportImpl_rch impl;
-  TransportReactorTask_rch reactor_task;
-
-  // We have two ways to go here.  If the impl_factory indicates that
-  // it requires a reactor task to be running in order to create the
-  // TransportImpl object, then we have one path of logic to follow.
-  // Otherwise, we have an easier logic path (when no reactor task is
-  // required by the factory).
-  if (impl_factory->requires_reactor() == 1) {
-    // Create a new reactor task for each transport.
-    // We need create (and activate) the reactor task.
-    // In the future, we may let the DDS user choose to
-    // which reactor to use.
-    TransportReactorTask* tp;
-    ACE_NEW_THROW_EX(tp,
-                     TransportReactorTask(),
-                     CORBA::NO_MEMORY());
-    reactor_task = tp;
-
-    created_reactor = 1;
-
-    // Attempt to activate it.
-    if (reactor_task->open(0) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Failed to open TransportReactorTask object for ")
-                 ACE_TEXT("factory (id=%s).\n"), type_id.c_str()));
-      // We failed to activate the reactor task.
-      throw Transport::MiscProblem();
-    }
-
-    // Now we can call the create_impl() on the TransportImplFactory
-    // object and supply it with a reference to the reactor task.
-    impl = impl_factory->create_impl(reactor_task.in());
-
-  } else {
-    // No need to deal with the reactor here.
-    impl = impl_factory->create_impl();
-  }
-
-  if (impl.is_nil()) {
-    if (created_reactor == 1) {
-      reactor_task->stop();
-    }
-
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to create TransportImpl object for ")
-               ACE_TEXT("factory (id=%s).\n"), type_id.c_str()));
-    throw Transport::UnableToCreate();
-  }
-
-  int result = OpenDDS::DCPS::bind(impl_map_, impl_id, impl);
-  impl->set_transport_id(impl_id);
-  impl->set_factory_id(type_id);
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
-  impl->report();
-
-  if (result == 0) {
-    // Success!
-    // The map hold the TransportImpl reference.
-    return impl;
-
-  } else if (result == 1) {
-    // The TransportImpl object with the transport_id is already created.
-    throw Transport::Duplicate();
-  }
-
-  // Only error cases get here.
-
-  if (created_reactor == 1) {
-    reactor_task->stop();
-    reactor_task = 0;
-  }
-
-  if (result == 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: transport (%u) has already been created in the ")
-               ACE_TEXT("TransportFactory.\n"), impl_id));
-    throw Transport::Duplicate();
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to bind transport (%u) to impl_map_.\n"),
-               impl_id));
-    throw Transport::MiscProblem();
-  }
+  return 0;
 }
 
 int
@@ -269,24 +177,7 @@ OpenDDS::DCPS::TransportInst_rch
 OpenDDS::DCPS::TransportFactory::create_configuration(TransportIdType transport_id,
                                                       ACE_TString transport_type)
 {
-  int result = 0;
-  TransportGenerator_rch generator;
-  {
-    GuardType guard(this->lock_);
-    result = find(generator_map_, transport_type.c_str(), generator);
-  }
-
-  if (result != 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) TransportFactory::create_configuration: ")
-               ACE_TEXT("transport_type=%s is not registered.\n"),
-               transport_type.c_str()));
-    return TransportInst_rch();
-  }
-
-  TransportInst_rch config = generator->new_configuration(transport_id);
-  this->register_configuration(transport_id, config);
-  return config;
+  return 0;
 }
 
 OpenDDS::DCPS::TransportInst_rch
@@ -320,94 +211,16 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration(TransportIdType tra
   return this->create_configuration(transport_id, transport_type);
 }
 
-OpenDDS::DCPS::TransportImplFactory_rch
+void*
 OpenDDS::DCPS::TransportFactory::get_or_create_factory(FactoryIdType factory_id)
 {
-  DBG_ENTRY_LVL("TransportFactory","get_or_create_factory",6);
-
-  if (factory_id == ACE_TEXT("")) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportFactory::get_or_create_factory factory_id is null. \n")));
-    throw CORBA::BAD_PARAM();
-  }
-
-  TransportImplFactory_rch factory;
-  int result = 0;
-  {
-    GuardType guard(this->lock_);
-    result = find(impl_type_map_, factory_id, factory);
-  }
-
-  if (result == 0)
-    return factory;
-
-  TransportGenerator_rch generator;
-  {
-    GuardType guard(this->lock_);
-    // The factory_id uses the transport type name, we use the factory_id
-    // to find the generator for the transport type.
-    result = find(generator_map_, factory_id.c_str(), generator);
-  }
-
-  if (result == 0) {
-    factory = generator->new_factory();
-    this->register_factory(factory_id, factory);
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: TransportFactory::get_or_create_factory: transport (type=%s) is not registered.\n "),
-               factory_id.c_str()));
-    throw Transport::NotFound();
-  }
-
-  return factory;
+  return 0;
 }
 
 void
 OpenDDS::DCPS::TransportFactory::register_generator(const ACE_TCHAR* type,
-                                                    TransportGenerator* generator)
+                                                    void* generator)
 {
-  DBG_ENTRY_LVL("TransportFactory","register_generator",6);
-  // We take ownership (reasons explained above) of the impl_factory
-  // immediately using a (local variable) smart pointer.
-  TransportGenerator_rch generator_rch = generator;
-
-  int result;
-
-  // Attempt to insert the impl_factory into the impl_type_map_ while
-  // we hold the lock.
-  {
-    GuardType guard(this->lock_);
-    result = OpenDDS::DCPS::bind(generator_map_, type, generator_rch);
-  }
-
-  // Check to see if it worked.
-  //
-  // 0 means it worked, 1 means it is a duplicate (and didn't work), and
-  // -1 means something bad happened.
-  if (result == 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: transport type=%s already registered ")
-               ACE_TEXT("with TransportFactory.\n"), type));
-    throw Transport::Duplicate();
-
-  } else if (result == -1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to bind transport type=%s to generator_map_.\n"),
-               type));
-    throw Transport::MiscProblem();
-  }
-
-  // Get the list of default transport. Some transports(e.g. SimpleMcast) have multiple default
-  // transport ids.
-  TransportIdList default_ids;
-  generator_rch->default_transport_ids(default_ids);
-
-  // Create default transport configuration associated with the default id.
-  TransportIdList::iterator itEnd = default_ids.end();
-
-  for (TransportIdList::iterator it = default_ids.begin(); it != itEnd; ++it) {
-    TransportInst_rch config = create_configuration(*it, type);
-  }
 }
 
 /// This method is a bit unusual in regards to the way it treats the
@@ -422,35 +235,8 @@ OpenDDS::DCPS::TransportFactory::register_generator(const ACE_TCHAR* type,
 /// It's this (non-standard) way because of the expected use pattern.
 void
 OpenDDS::DCPS::TransportFactory::register_factory(FactoryIdType            factory_id,
-                                                  TransportImplFactory_rch factory)
+                                                  void* factory)
 {
-  DBG_ENTRY_LVL("TransportFactory","register_factory",6);
-
-  int result;
-
-  // Attempt to insert the impl_factory into the impl_type_map_ while
-  // we hold the lock.
-  {
-    GuardType guard(this->lock_);
-    result = OpenDDS::DCPS::bind(impl_type_map_, factory_id, factory);
-  }
-
-  // Check to see if it worked.
-  //
-  // 0 means it worked, 1 means it is a duplicate (and didn't work), and
-  // -1 means something bad happened.
-  if (result == 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: factory (id=%s) already registered ")
-               ACE_TEXT("in impl_type_map_.\n"), factory_id.c_str()));
-    throw Transport::Duplicate();
-
-  } else if (result == -1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to bind factory (id=%s) to impl_type_map_.\n"),
-               factory_id.c_str()));
-    throw Transport::MiscProblem();
-  }
 }
 
 void
@@ -522,9 +308,9 @@ OpenDDS::DCPS::TransportFactory::release()
   }
 
   // Clear the maps.
-  impl_type_map_.clear();
+//  impl_type_map_.clear();
   impl_map_.clear();
-  generator_map_.clear();
+//  generator_map_.clear();
   configuration_map_.clear();
 
   TransportRegistry::instance()->release();

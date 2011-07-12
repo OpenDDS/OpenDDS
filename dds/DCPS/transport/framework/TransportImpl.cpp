@@ -60,12 +60,9 @@ OpenDDS::DCPS::TransportImpl::~TransportImpl()
     pending_association_sub_map_.begin();
 
   while (penditer != pending_association_sub_map_.end()) {
-    delete(penditer->second);
+    delete penditer->second;
     ++penditer;
   }
-
-  clear(dw_map_);
-  clear(dr_map_);
 }
 
 void
@@ -90,15 +87,6 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 //MJM: So, I read here that config_i() actually "starts" us?
       return;
     }
-
-    for (InterfaceMapType::iterator itr = interfaces_.begin();
-         itr != interfaces_.end();
-         ++itr) {
-      itr->second->transport_detached();
-    }
-
-    // Clear our collection of TransportInterface pointers.
-    interfaces_.clear();
 
     for (std::set<TransportClient*>::iterator it = clients_.begin();
          it != clients_.end(); ++it) {
@@ -292,40 +280,6 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink(
   return link._retn();
 }
 
-/// This is called by a TransportInterface object when it is handling
-/// its own request to attach_transport(TransportImpl*), and this
-/// TransportImpl object is the one to which it should be attached.
-OpenDDS::DCPS::AttachStatus
-OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* transport_interface)
-{
-  DBG_ENTRY_LVL("TransportImpl","attach_interface",6);
-
-  GuardType guard(this->lock_);
-
-  if (this->config_.is_nil()) {
-    // Can't attach to a TransportImpl that isn't currently configured.
-    // This could mean that this TransportImpl object has never had its
-    // configure() method called, or it could mean that this TransportImpl
-    // object was shutdown() after the configure() method was called.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Cannot attach_listener() to TransportImpl "
-                      "object because TransportImpl is not configured, "
-                      "or has been shutdown.\n"),
-                     ATTACH_BAD_TRANSPORT);
-  }
-
-  if (OpenDDS::DCPS::bind(interfaces_, transport_interface, transport_interface) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Cannot attach_listener() to TransportImpl "
-                      "object because TransportImpl thinks the "
-                      "TransportInterface object is already attached.\n"),
-                     ATTACH_BAD_TRANSPORT);
-  }
-
-  // Everything worked.  Return success code.
-  return ATTACH_OK;
-}
-
 void
 OpenDDS::DCPS::TransportImpl::attach_client(TransportClient* client)
 {
@@ -333,7 +287,6 @@ OpenDDS::DCPS::TransportImpl::attach_client(TransportClient* client)
 
   GuardType guard(this->lock_);
   clients_.insert(client);
-  //TODO: equivalent of register_{publication,subscription}, if needed
 }
 
 void
@@ -346,180 +299,10 @@ OpenDDS::DCPS::TransportImpl::detach_client(TransportClient* client)
 }
 
 int
-OpenDDS::DCPS::TransportImpl::register_publication(OpenDDS::DCPS::RepoId pub_id,
-                                                   OpenDDS::DCPS::DataWriterImpl* dw)
-{
-  DBG_ENTRY_LVL("TransportImpl","register_publication",6);
-  GuardType guard(this->lock_);
-
-  int ret = OpenDDS::DCPS::bind(dw_map_, pub_id, dw);
-
-  if (ret != -1) {
-    dw->_add_ref();
-  }
-
-  // It's possiable this function is called after the
-  // add_association is handled and also the FULLY_ASSOCIATED
-  // ack is received by the publisher side, we need check the
-  // map to see if it's the case. If it is,the datawriter will be
-  // notified fully associated at this time.
-
-  check_fully_association(pub_id);
-
-  if (OpenDDS::DCPS::Transport_debug_level > 8) {
-    OpenDDS::DCPS::RepoIdConverter converter(pub_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) transport %x added publication %C.\n"),
-               this,
-               std::string(converter).c_str()));
-  }
-
-  return ret;
-}
-
-int
-OpenDDS::DCPS::TransportImpl::unregister_publication(OpenDDS::DCPS::RepoId pub_id)
-{
-  DBG_ENTRY_LVL("TransportImpl","unregister_publication",6);
-  GuardType guard(this->lock_);
-  PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
-  int ret = -1;
-
-  if (iter != dw_map_.end()) {
-    ret = 0;
-
-    if (iter->second != 0)
-      iter->second->_remove_ref();
-
-    dw_map_.erase(iter);
-  }
-
-  if (OpenDDS::DCPS::Transport_debug_level > 8) {
-    OpenDDS::DCPS::RepoIdConverter converter(pub_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) transport %x released publication %C.\n"),
-               this,
-               std::string(converter).c_str()));
-  }
-
-  return ret;
-}
-
-OpenDDS::DCPS::DataWriterImpl*
-OpenDDS::DCPS::TransportImpl::find_publication(OpenDDS::DCPS::RepoId pub_id, bool safe_cpy)
-{
-  DBG_ENTRY_LVL("TransportImpl","find_publication",6);
-  GuardType guard(this->lock_);
-  PublicationObjectMap::iterator iter = dw_map_.find(pub_id);
-
-  if (iter == dw_map_.end()) {
-    if (OpenDDS::DCPS::Transport_debug_level > 8) {
-      OpenDDS::DCPS::RepoIdConverter converter(pub_id);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportImpl::find_publication: ")
-                 ACE_TEXT("publication %C not found\n"),
-                 std::string(converter).c_str()));
-    }
-
-    return 0;
-
-  } else if (safe_cpy && iter->second != 0) {
-    iter->second->_add_ref();
-  }
-
-  return iter->second;
-}
-
-int
-OpenDDS::DCPS::TransportImpl::register_subscription(OpenDDS::DCPS::RepoId sub_id,
-                                                    OpenDDS::DCPS::DataReaderImpl* dr)
-{
-  DBG_ENTRY_LVL("TransportImpl","register_subscription",6);
-  GuardType guard(this->lock_);
-
-  int ret = OpenDDS::DCPS::bind(dr_map_, sub_id, dr);
-
-  if (ret != -1) {
-    dr->_add_ref();
-  }
-
-  if (OpenDDS::DCPS::Transport_debug_level > 8) {
-    OpenDDS::DCPS::RepoIdConverter converter(sub_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TransportImpl::register_subscription: ")
-               ACE_TEXT("transport %x added subscription %C.\n"),
-               this,
-               std::string(converter).c_str()));
-  }
-
-  return ret;
-}
-
-int
-OpenDDS::DCPS::TransportImpl::unregister_subscription(OpenDDS::DCPS::RepoId sub_id)
-{
-  DBG_ENTRY_LVL("TransportImpl","unregister_subscription",6);
-  GuardType guard(this->lock_);
-
-  SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
-
-  if (iter != dr_map_.end()) {
-    if (iter->second != 0)
-      iter->second->_remove_ref();
-
-    dr_map_.erase(iter);
-
-  } else {
-    OpenDDS::DCPS::RepoIdConverter converter(sub_id);
-    ACE_ERROR((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: TransportImpl::unregister_subscription: ")
-               ACE_TEXT("subscription %C not found to unregister.\n"),
-               std::string(converter).c_str()));
-  }
-
-  if (OpenDDS::DCPS::Transport_debug_level > 8) {
-    OpenDDS::DCPS::RepoIdConverter converter(sub_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TransportImpl::unregister_subscription: ")
-               ACE_TEXT("transport %x released subscription %C.\n"),
-               this,
-               std::string(converter).c_str()));
-  }
-
-  // We can't fail here - at this point the subscription is _not_
-  // registered with this transport.
-  return 0;
-}
-
-OpenDDS::DCPS::DataReaderImpl*
-OpenDDS::DCPS::TransportImpl::find_subscription(OpenDDS::DCPS::RepoId sub_id, bool safe_cpy)
-{
-  DBG_ENTRY_LVL("TransportImpl","find_subscription",6);
-  GuardType guard(this->lock_);
-  SubscriptionObjectMap::iterator iter = dr_map_.find(sub_id);
-
-  if (iter == dr_map_.end()) {
-    if (OpenDDS::DCPS::Transport_debug_level > 8) {
-      OpenDDS::DCPS::RepoIdConverter converter(sub_id);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportImpl::find_subscription: ")
-                 ACE_TEXT("subscription %C not found.\n"),
-                 std::string(converter).c_str()));
-    }
-
-    return 0;
-
-  } else if (safe_cpy && iter->second != 0) {
-    iter->second->_add_ref();
-  }
-
-  return iter->second;
-}
-
-int
 OpenDDS::DCPS::TransportImpl::add_pending_association(
   RepoId                  local_id,
-  const AssociationInfo&  info)
+  const AssociationInfo&  info,
+  TransportSendListener*  tsl)
 {
   DBG_ENTRY_LVL("TransportImpl","add_pending_association",6);
 
@@ -536,6 +319,8 @@ OpenDDS::DCPS::TransportImpl::add_pending_association(
   else {
     AssociationInfoList* infos = new AssociationInfoList;
     infos->push_back(info);
+
+    association_listeners_[local_id] = tsl;
 
     if (OpenDDS::DCPS::bind(pending_association_sub_map_, local_id, infos) == -1) {
       OpenDDS::DCPS::RepoIdConverter converter(local_id);
@@ -616,6 +401,7 @@ void OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id)
     while (iter != associations.end()) {
       if (check_fully_association(penditer->first, *iter)) {
         iter = associations.erase(iter);
+        association_listeners_.erase(pub_id);
 
       } else {
         ++ iter;
@@ -636,27 +422,26 @@ bool OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id,
 
   size_t num_acked = 0;
 
-  PublicationObjectMap::iterator pubiter = dw_map_.find(pub_id);
+  TransportSendListener* tsl = association_listeners_[pub_id];
 
   for (size_t i = 0; i < associations.num_associations_; ++i) {
     RepoId sub_id = associations.association_data_[i].remote_id_;
 
-    if (this->acked(pub_id, sub_id) && pubiter != dw_map_.end()) {
+    if (this->acked(pub_id, sub_id) && tsl) {
       ++num_acked;
     }
   }
 
   bool ret = (num_acked == associations.num_associations_);
 
-  if (ret && pubiter != dw_map_.end()) {
+  if (ret && tsl) {
     for (size_t i = 0; i < associations.num_associations_; ++i) {
       RepoId sub_id = associations.association_data_[i].remote_id_;
       this->remove_ack(pub_id, sub_id);
     }
 
-    pubiter->second->fully_associated(pub_id,
-                                      associations.num_associations_,
-                                      associations.association_data_);
+    tsl->fully_associated(associations.num_associations_,
+                          associations.association_data_);
 
     return true;
 

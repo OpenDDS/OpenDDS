@@ -25,7 +25,7 @@ class MulticastInst;
 
 class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
-  MulticastTransport(const TransportInst_rch& inst = 0); //TODO: default is only transitional
+  explicit MulticastTransport(const TransportInst_rch& inst);
   ~MulticastTransport();
 
 protected:

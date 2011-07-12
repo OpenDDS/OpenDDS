@@ -124,7 +124,6 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
     "dds/DCPS/Qos_Helper.h", "dds/DCPS/PublicationInstance.h",
     "dds/DCPS/PublisherImpl.h", "dds/DCPS/SubscriberImpl.h",
     "dds/DCPS/ReceivedDataElementList.h", "dds/DCPS/RakeResults_T.h",
-    "dds/DCPS/transport/framework/TransportInterface.h",
     "dds/DCPS/BuiltInTopicUtils.h", "dds/DCPS/Util.h",
     "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h",
     "dds/DCPS/MultiTopicDataReader_T.h"

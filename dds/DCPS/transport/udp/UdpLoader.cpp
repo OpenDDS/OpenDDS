@@ -7,7 +7,6 @@
  */
 
 #include "UdpLoader.h"
-#include "UdpGenerator.h"
 #include "UdpInst.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
@@ -44,8 +43,6 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
                           UDP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
-
-  TheTransportFactory->register_generator(ACE_TEXT("udp"), new UdpGenerator);
 
   initialized = true;
 

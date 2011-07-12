@@ -11,7 +11,6 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
-#include "dds/DCPS/transport/framework/TransportImplFactory.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"
 
 #include "ace/Synch.h"

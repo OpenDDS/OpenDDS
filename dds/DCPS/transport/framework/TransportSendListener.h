@@ -25,6 +25,9 @@ typedef ACE_Message_Block DataSample;
 class DataLinkSet;
 typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
+class ReaderIdSeq;
+struct AssociationData;
+
 class OpenDDS_Dcps_Export TransportSendListener {
 public:
 
@@ -37,6 +40,13 @@ public:
   virtual void control_delivered(ACE_Message_Block* sample);
   virtual void control_dropped(ACE_Message_Block* sample,
                                bool dropped_by_transport);
+
+  virtual void notify_publication_disconnected(const ReaderIdSeq& subids) = 0;
+  virtual void notify_publication_reconnected(const ReaderIdSeq& subids) = 0;
+  virtual void notify_publication_lost(const ReaderIdSeq& subids) = 0;
+  virtual void notify_connection_deleted() = 0;
+
+  virtual void remove_associations(const ReaderIdSeq& subids, bool notify) = 0;
 
   /// Hook for the listener to override a normal control message with
   /// customized messages to different DataLinks.
@@ -52,6 +62,10 @@ public:
   virtual void deliver_ack(
     const DataSampleHeader& /* header */,
     DataSample* /* data */)
+  {}
+
+  virtual void fully_associated(size_t /*num_remote_associations*/,
+                                const AssociationData* /*remote_associations*/)
   {}
 
 protected:

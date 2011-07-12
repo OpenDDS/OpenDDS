@@ -36,8 +36,6 @@ class ThreadSynchStrategy;
 class TransportImplFactory;
 class TransportFactory;
 class DataLink;
-class DataWriterImpl;
-class DataReaderImpl;
 class Monitor;
 
 /** The TransportImpl class includes the abstract methods that must be implemented
@@ -67,34 +65,6 @@ public:
   /// prior to attempting to attach this TransportImpl to a
   /// TransportInterface object.
   int configure(TransportInst* config);
-
-  /// Called by the PublisherImpl to register datawriter upon
-  /// datawriter creation.
-  int register_publication(RepoId pub_id, DataWriterImpl* dw);
-
-  /// Called by the PublisherImpl to unregister datawriter upon
-  /// datawriter destruction.
-  int unregister_publication(RepoId pub_id);
-
-  /// Called by the DataLink to find the registered datawriter
-  /// for the lost publication notification.
-  /// If a safe copy (safe_cpy) is requested, the callee is responsible
-  /// for bumping down the ref count.
-  DataWriterImpl* find_publication(RepoId pub_id, bool safe_cpy = false);
-
-  /// Called by the SubscriberImpl to register datareader upon
-  /// datareader creation.
-  int register_subscription(RepoId sub_id, DataReaderImpl* dr);
-
-  /// Called by the SubscriberImpl to unregister datareader upon
-  /// datareader destruction.
-  int unregister_subscription(RepoId sub_id);
-
-  /// Called by the DataLink to find the registered datareader
-  /// for the lost subscription notification.
-  /// If a safe copy (safe_cpy) is requested, the callee is responsible
-  /// for bumping down the ref count.
-  DataReaderImpl* find_subscription(RepoId sub_id, bool safe_cpy = false);
 
   /// Called when the receive strategy received the FULLY_ASSOCIATED
   /// message.
@@ -254,14 +224,6 @@ private:
   /// flag means whether the release happen right away or after some delay.
   void release_datalink(DataLink* link, bool release_pending);
 
-  /// Called by our friend, the TransportInterface, to attach
-  /// itself to this TransportImpl object.
-  AttachStatus attach_interface(TransportInterface* transport_interface);
-
-  /// Called by our friend, the TransportInterface, to detach
-  /// itself to this TransportImpl object.
-  void detach_interface(TransportInterface* transport_interface);
-
   void attach_client(TransportClient* client);
   void detach_client(TransportClient* client);
 
@@ -304,7 +266,8 @@ protected:
   /// association and the associations will be
   /// removed from the pending associations cache.
   int add_pending_association(RepoId                  local_id,
-                              const AssociationInfo&  info);
+                              const AssociationInfo&  info,
+                              TransportSendListener*  tsl);
 
   void create_reactor_task();
 
@@ -321,34 +284,16 @@ private:
   /// another process would connect to this TransportImpl).
   int connection_info(TransportInterfaceInfo& local_info) const;
 
-  typedef std::map<void*, TransportInterface*>         InterfaceMapType;
-
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
-  typedef std::map<RepoId, DataWriterImpl*, GUID_tKeyLessThan>      PublicationObjectMap;
-
-  typedef std::map<RepoId, DataReaderImpl*, GUID_tKeyLessThan>      SubscriptionObjectMap;
-
   typedef std::map<RepoId, AssociationInfoList*, GUID_tKeyLessThan> PendingAssociationsMap;
 
-  /// The collection of the DataWriterImpl objects that are created by
-  /// the PublisherImpl currently "attached" to this TransportImpl.
-  PublicationObjectMap  dw_map_;
-
-  /// The collection of the DataWriterImpl objects that are created by
-  /// the SubscriberImpl currently "attached" to this TransportImpl.
-  SubscriptionObjectMap dr_map_;
   /// Our reservation lock.
   ReservationLockType reservation_lock_;
 
-  /// Lock to protect the interfaces_, config_ and reactor_task_
-  /// data members.
+  /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;
-
-  /// The collection of TransportInterface objects that are currently
-  /// "attached" to this TransportImpl.
-  InterfaceMapType interfaces_;
 
   std::set<TransportClient*> clients_;
 
@@ -365,6 +310,9 @@ private:
   /// pubid -> pending associations (remote sub id, association data,
   /// association status) map.
   PendingAssociationsMap pending_association_sub_map_;
+
+  std::map<PublicationId, TransportSendListener*, GUID_tKeyLessThan>
+    association_listeners_;
 
   /// Fully association acknowledged map. pubid -> *subid
   RepoIdSetMap acked_sub_map_;

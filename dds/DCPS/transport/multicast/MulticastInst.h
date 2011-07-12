@@ -103,7 +103,6 @@ public:
 
 private:
   friend class MulticastType;
-  friend class MulticastGenerator; //TODO: transitional
   explicit MulticastInst(const std::string& name);
 
   void default_group_address(ACE_INET_Addr& group_address,

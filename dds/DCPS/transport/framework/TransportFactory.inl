@@ -7,11 +7,8 @@
  */
 
 #include "TransportImpl.h"
-#include "TransportImplFactory.h"
 #include "TransportReactorTask.h"
 #include "TransportExceptions.h"
-#include "TransportGenerator.h"
-//#include "dds/DCPS/transport/tcp/TcpGenerator.h"
 #include "EntryExit.h"
 
 ACE_INLINE

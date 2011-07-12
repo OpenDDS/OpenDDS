@@ -267,7 +267,7 @@ OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
 
 ACE_INLINE
 const char*
-OpenDDS::DCPS::DataLink::connection_notice_as_str(enum ConnectionNotice notice)
+OpenDDS::DCPS::DataLink::connection_notice_as_str(ConnectionNotice notice)
 {
   static const char* NoticeStr[] = { "DISCONNECTED",
                                      "RECONNECTED",
@@ -289,4 +289,28 @@ void
 OpenDDS::DCPS::DataLink::terminate_send()
 {
   this->send_strategy_->terminate_send(false);
+}
+
+ACE_INLINE
+OpenDDS::DCPS::TransportSendListener*
+OpenDDS::DCPS::DataLink::send_listener_for(const RepoId& pub_id) const
+{
+  IdToSendListenerMap::const_iterator found =
+    this->send_listeners_.find(pub_id);
+  if (found == this->send_listeners_.end()) {
+    return 0;
+  }
+  return found->second;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::TransportReceiveListener*
+OpenDDS::DCPS::DataLink::recv_listener_for(const RepoId& sub_id) const
+{
+  IdToRecvListenerMap::const_iterator found =
+    this->recv_listeners_.find(sub_id);
+  if (found == this->recv_listeners_.end()) {
+    return 0;
+  }
+  return found->second;
 }

@@ -6,7 +6,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "TransportInterface.h"
 #include "TransportInst.h"
 #include "TransportReactorTask.h"
 #include "DataLink_rch.h"
@@ -64,22 +63,6 @@ OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link, bool release_pend
 
   // Delegate to our subclass.
   this->release_datalink_i(link, release_pending);
-}
-
-/// This is called by a TransportInterface object when it is handling
-/// its own request to detach_transport(), and this TransportImpl object
-/// is the one to which it is currently attached.
-ACE_INLINE void
-OpenDDS::DCPS::TransportImpl::detach_interface(TransportInterface* transport_interface)
-{
-  DBG_ENTRY_LVL("TransportImpl","detach_interface",6);
-
-  GuardType guard(this->lock_);
-
-  // We really don't care if this unbind "works" or not.  As long as we
-  // don't have the interface pointer in our interfaces_ collection, then
-  // we are happy.
-  unbind(interfaces_, transport_interface);
 }
 
 ACE_INLINE OpenDDS::DCPS::TransportImpl::ReservationLockType&

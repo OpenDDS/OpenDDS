@@ -75,6 +75,29 @@ TransportClient::enable_transport()
 void
 TransportClient::transport_detached(TransportImpl* which)
 {
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+
+  // Remove any DataLinks created by the 'which' TransportImpl from our local
+  // data structures (both links_ and data_link_index_).
+  for (DataLinkSet::MapType::iterator iter = links_.map().begin();
+       iter != links_.map().end();) {
+    TransportImpl_rch impl = iter->second->impl();
+    if (impl.in() == which) {
+      for (DataLinkIndex::iterator it2 = data_link_index_.begin();
+           it2 != data_link_index_.end();) {
+        if (it2->second.in() == iter->second.in()) {
+          data_link_index_.erase(it2++);
+        } else {
+          ++it2;
+        }
+      }
+      links_.map().erase(iter++);
+    } else {
+      ++iter;
+    }
+  }
+
+  // Remove the 'which' TransportImpl from the impls_ list
   for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
     if (it->in() == which) {
@@ -84,20 +107,20 @@ TransportClient::transport_detached(TransportImpl* which)
   }
 }
 
-
 bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
+
   TransportImpl_rch impl;
   if (associate_i(data, active, impl)) {
     //TODO: fix FULLY_ASSOCIATED
     if (role_ == ROLE_WRITER) {
       const RepoId& id = get_repo_id();
-      impl->register_publication(id, dynamic_cast<DataWriterImpl*>(this));
       AssociationInfo info;
       info.num_associations_ = 1;
       info.association_data_ = const_cast<AssociationData*>(&data);
-      impl->add_pending_association(id, info);
+      impl->add_pending_association(id, info, get_send_listener());
     }
   }
   return false;
@@ -159,14 +182,29 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 void
 TransportClient::disassociate(const RepoId& peerId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+
   DataLinkIndex::iterator found = data_link_index_.find(peerId);
   if (found == data_link_index_.end()) {
-    //TODO: warning
+    if (DCPS_debug_level > 4) {
+      RepoIdConverter converter(peerId);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
+                 ACE_TEXT("no link for remote peer %C\n"),
+                 std::string(converter).c_str()));
+    }
     return;
   }
+
   DataLink_rch link = found->second;
   DataLinkSetMap released;
   link->release_reservations(peerId, get_repo_id(), released);
+
+  data_link_index_.erase(found);
+
+  DataLinkSet singular;
+  singular.insert_link(link.in());
+  links_.remove_links(&singular);
 }
 
 bool
@@ -328,15 +366,15 @@ TransportClient::send_control(ACE_Message_Block* msg, void* extra /* = 0*/)
 bool
 TransportClient::remove_sample(const DataSampleListElement* sample)
 {
-  //TODO
-  return false;
+  const int ret = links_.remove_sample(sample, /*dropped_by_transport*/ false);
+  return ret == 0;
 }
 
 bool
 TransportClient::remove_all_msgs()
 {
-  //TODO
-  return false;
+  const int ret = links_.remove_all_msgs(get_repo_id());
+  return ret == 0;
 }
 
 }

@@ -326,14 +326,13 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 void
-DataWriterImpl::fully_associated(OpenDDS::DCPS::RepoId myid,
-                                 size_t num_remote_associations,
+DataWriterImpl::fully_associated(size_t num_remote_associations,
                                  const AssociationData* remote_associations)
 {
   DBG_ENTRY_LVL("DataWriterImpl","fully_associated",6);
 
   if (DCPS_debug_level >= 1) {
-    RepoIdConverter writer_converter(myid);
+    RepoIdConverter writer_converter(this->publication_id_);
     RepoIdConverter reader_converter(remote_associations[0].remote_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated - ")

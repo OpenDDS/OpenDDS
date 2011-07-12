@@ -9,7 +9,6 @@
 #include "Tcp_pch.h"
 
 #include "TcpLoader.h"
-#include "TcpGenerator.h"
 #include "TcpInst.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -64,8 +63,6 @@ TcpLoader::init(int, ACE_TCHAR*[])
                           TCP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
-
-  TheTransportFactory->register_generator(ACE_TEXT("tcp"), new TcpGenerator);
 
   initialized = true;
   return 0;

@@ -251,9 +251,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return this->participant_servant_->get_handle(subscription_id_);
 }
 
-void DataReaderImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
-                                      const OpenDDS::DCPS::WriterAssociationSeq & writers)
-ACE_THROW_SPEC((CORBA::SystemException))
+void DataReaderImpl::add_associations(const RepoId& yourId,
+                                      const WriterAssociationSeq& writers)
 {
   //
   // The following block is for diagnostic purposes only.
@@ -527,12 +526,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
   delete []infos;
 }
 
-void DataReaderImpl::remove_associations(
-  const OpenDDS::DCPS::WriterIdSeq & writers,
-  CORBA::Boolean notify_lost)
-ACE_THROW_SPEC((CORBA::SystemException))
+void
+DataReaderImpl::remove_associations(const WriterIdSeq& writers,
+                                    bool notify_lost)
 {
-  DBG_ENTRY_LVL("DataReaderImpl","remove_associations",6);
+  DBG_ENTRY_LVL("DataReaderImpl", "remove_associations", 6);
 
   if (DCPS_debug_level >= 1) {
     RepoIdConverter reader_converter(subscription_id_);
@@ -666,7 +664,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 }
 
-void DataReaderImpl::remove_all_associations()
+void
+DataReaderImpl::remove_all_associations()
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",6);
 
@@ -703,16 +702,8 @@ void DataReaderImpl::remove_all_associations()
   }
 }
 
-void DataReaderImpl::unregister_subscription()
-{
-  DBG_ENTRY_LVL("DataReaderImpl", "unregister_subscription", 6);
-  //TODO: AHM will we need this -- as of now we are not using TransportImpl's
-  //dw_map_ and dr_map_
-}
-
-void DataReaderImpl::update_incompatible_qos(
-  const OpenDDS::DCPS::IncompatibleQosStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
+void
+DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataReaderListener* listener =
     listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);

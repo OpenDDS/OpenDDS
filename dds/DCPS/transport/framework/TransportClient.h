@@ -79,13 +79,14 @@ private:
   TransportReceiveListener* get_receive_listener();
 
   typedef std::map<RepoId, DataLink_rch, GUID_tKeyLessThan> DataLinkIndex;
-  DataLinkIndex data_link_index_;
+
   std::vector<TransportImpl_rch> impls_;
   DataLinkSet links_;
+  DataLinkIndex data_link_index_;
   bool swap_bytes_;
   TransportInterfaceInfo conn_info_;
-
-  enum ROLE {ROLE_UNKNOWN, ROLE_WRITER, ROLE_READER} role_;
+  enum ROLE {ROLE_UNKNOWN, ROLE_WRITER, ROLE_READER} role_; //TODO: remove?
+  ACE_Thread_Mutex lock_;
 };
 
 }

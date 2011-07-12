@@ -23,7 +23,6 @@
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/tcp/TcpFactory.h"
 #include "dds/DCPS/transport/tcp/TcpTransport.h"
 
 #include /**/ "ace/Unbounded_Set.h"

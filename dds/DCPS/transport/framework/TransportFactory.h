@@ -12,10 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
-#include "TransportImplFactory_rch.h"
 #include "TransportReactorTask_rch.h"
-#include "TransportGenerator.h"
-#include "TransportGenerator_rch.h"
 #include "TransportInst_rch.h"
 #include "ace/Synch.h"
 #include "ace/Configuration.h"
@@ -24,6 +21,9 @@
 
 namespace OpenDDS {
 namespace DCPS {
+
+class TransportGenerator;
+class TransportImplFactory;
 
 /**
  * The TransportFactory is a singleton object which provides a mechanism to
@@ -66,7 +66,7 @@ public:
   /// Special Note: Caller is "giving away" the generator to
   ///               this TransportFactory.
   void register_generator(const ACE_TCHAR* name,
-                          TransportGenerator* generator);
+                          void* generator);
 
   /// Transfer the configuration in ACE_Configuration_Heap object to the TransportFactory
   /// object which uses hash map to cache those configuration. This is called by the
@@ -151,11 +151,11 @@ private:
   /// Note each type transport supports one instance of TransportImplFactory
   ///      in current implementation, so the factory_id is correspond to the
   ///      transport_type.
-  TransportImplFactory_rch get_or_create_factory(FactoryIdType factory_id);
+ void* get_or_create_factory(FactoryIdType factory_id);
 
   /// Bind the factory_id->TransportImplFactory_rch to the impl_type_map_.
   void register_factory(FactoryIdType            factory_id,
-                        TransportImplFactory_rch impl_factory);
+                        void* impl_factory);
 
   /// Bind the transport_id->TransportConfigInfo object to the configuration_map_.
   void register_configuration(TransportIdType             transport_id,
@@ -170,7 +170,7 @@ private:
   ///
   ///  Key  == "Transport type"
   ///  Value == TransportGenerator object
-  typedef std::map<ACE_TString, TransportGenerator_rch> GeneratorMap;
+  typedef std::map<ACE_TString, RcHandle<TransportGenerator> > GeneratorMap;
 
   /// The "TransportInst Map"
   ///
@@ -184,7 +184,7 @@ private:
   ///
   ///   Key   == "Transport type"
   ///   Value == TransportImplFactory object
-  typedef std::map<FactoryIdType, TransportImplFactory_rch> ImplTypeMap;
+  typedef std::map<FactoryIdType, RcHandle<TransportImplFactory> > ImplTypeMap;
 
   /// Thread Lock type
   typedef ACE_SYNCH_MUTEX     LockType;
@@ -193,13 +193,13 @@ private:
   typedef ACE_Guard<LockType> GuardType;
 
   /// The map of registered TransportGenerator object from the concrete transport library.
-  GeneratorMap generator_map_;
+//  GeneratorMap generator_map_;
 
   /// The map of the registered configuration information for the transport configured.
   ConfigurationMap configuration_map_;
 
   /// The map of registered TransportImplFactory objects.
-  ImplTypeMap impl_type_map_;
+//  ImplTypeMap impl_type_map_;
 
   /// The map of TransportImpl objects that have been create()'d.
   ImplMap     impl_map_;

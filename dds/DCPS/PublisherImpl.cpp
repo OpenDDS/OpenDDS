@@ -21,7 +21,6 @@
 #include "dds/DdsDcpsTypeSupportExtS.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "AssociationData.h"
-#include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "tao/debug.h"

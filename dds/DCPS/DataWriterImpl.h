@@ -188,11 +188,11 @@ public:
   virtual DDS::ReturnCode_t enable()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  void add_associations(OpenDDS::DCPS::RepoId yourId,
-                        const ReaderAssociationSeq & readers);
+  void add_associations(RepoId yourId,
+                        const ReaderAssociationSeq& readers);
 
   void remove_associations(const ReaderIdSeq & readers,
-                           CORBA::Boolean callback);
+                           bool callback);
 
   void update_incompatible_qos(const IncompatibleQosStatus& status);
 
@@ -421,8 +421,7 @@ public:
 
   /// Called by transport after transport received the
   /// FULLY_ASSOCIATED ack from the associated subscriber.
-  void fully_associated(OpenDDS::DCPS::RepoId   yourId,
-                        size_t                  num_remote_associations,
+  void fully_associated(size_t                  num_remote_associations,
                         const AssociationData*  remote_associations);
 
   /**

@@ -12,7 +12,6 @@
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
-#include "TransportImplFactory_rch.h"
 #include "TransportReactorTask_rch.h"
 #include "TransportType.h"
 #include "TransportType_rch.h"

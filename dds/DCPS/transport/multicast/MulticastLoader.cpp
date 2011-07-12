@@ -7,7 +7,6 @@
  */
 
 #include "MulticastLoader.h"
-#include "MulticastGenerator.h"
 #include "MulticastInst.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
@@ -54,8 +53,6 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
                           + "0420_MCAST_RELIABLE", MULTICAST_NAME);
   cfg->sorted_insert(default_rel);
 
-  TheTransportFactory->register_generator(ACE_TEXT("multicast"),
-                                          new MulticastGenerator);
   initialized = true;
 
   return 0;
