@@ -1,3 +1,9 @@
+Tue Jul 12 14:59:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          Handle content filtered topics with external related topics.
+
 Tue Jul 12 12:32:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:

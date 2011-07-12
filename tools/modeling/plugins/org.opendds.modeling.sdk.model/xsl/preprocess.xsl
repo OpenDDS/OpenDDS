@@ -78,6 +78,11 @@
         <xsl:value-of select="substring-after(@href, '#')"/>
       </xsl:attribute>
     </xsl:when>
+    <xsl:when test="name() = 'related_topic'">
+      <xsl:attribute name="related_topic">
+        <xsl:value-of select="substring-after(@href, '#')"/>
+      </xsl:attribute>
+    </xsl:when>
     <xsl:when test="name() = 'entity_factory'">
       <xsl:attribute name="entity_factory">
         <xsl:value-of select="substring-after(@href, '#')"/>
