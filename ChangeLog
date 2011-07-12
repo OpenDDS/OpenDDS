@@ -1,3 +1,23 @@
+Tue Jul 12 21:21:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          Copy in referred QOS policies in an external topic.
+          
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.mwc:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Test reference to external topic with qos policies.
+
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.mpc:
+
+          Removed this file.
+
 Tue Jul 12 19:08:40 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/icons:
@@ -70,8 +90,8 @@ Tue Jul 12 19:08:40 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/.settings:
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/.settings:
 
-	  Undo commit r4667 as numerous changes were accidently committed due to Dean Wette having
-	  Eclipse using spaces instead of tabs (the default).
+          Undo commit r4667 as numerous changes were accidently committed due to Dean Wette having
+          Eclipse using spaces instead of tabs (the default).
 
 Tue Jul 12 18:28:04 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 

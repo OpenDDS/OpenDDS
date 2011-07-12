@@ -11,6 +11,9 @@
         <writers xsi:type="opendds:dataWriter" xmi:id="_X5HXIJONEeC1BqwI_GQPmw3" name="transitive_topic_writer" copyFromTopicQos="false">
           <topic href="../MessengerMixed/MessengerMixed.opendds#_mcVnwPDxEd-I4rwicuuPOw"/>
         </writers>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_zzzX5HXIJONEeC1BqwI_GQPmw3" name="extqos_writer" copyFromTopicQos="true">
+          <topic href="../TopicQos/TopQos.opendds#_qosmcVnwPDxEd-I4rwicuuPOw"/>
+        </writers>
       </publishers>
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
@@ -21,6 +24,9 @@
         </readers>
         <readers xsi:type="opendds:dataReader" xmi:id="_trDqPsQJOcEeC1BqwI_GQPmw" name="transitive_topic_reader" copyFromTopicQos="false">
           <topic xsi:type="opendds:topic" href="../MessengerMixed/MessengerMixed.opendds#_mcVnwPDxEd-I4rwicuuPOw"/>
+        </readers>
+        <readers xsi:type="opendds:dataReader" xmi:id="_zzztrDqPsQJOcEeC1BqwI_GQPmw" name="extqos_reader" copyFromTopicQos="true">
+          <topic href="../TopicQos/TopQos.opendds#_qosmcVnwPDxEd-I4rwicuuPOw"/>
         </readers>
       </subscribers>
     </participants>
