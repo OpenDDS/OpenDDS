@@ -21,77 +21,77 @@ import org.opendds.modeling.diagram.dcpslib.part.Messages;
  * @generated
  */
 public class SubscriberQoSPoliciesCustomEditPart extends
-        ListCompartmentEditPart {
+		ListCompartmentEditPart {
 
-    /**
-     * @generated
-     */
-    public static final int VISUAL_ID = 7013;
+	/**
+	 * @generated
+	 */
+	public static final int VISUAL_ID = 7013;
 
-    /**
-     * @generated
-     */
-    public SubscriberQoSPoliciesCustomEditPart(View view) {
-        super(view);
-    }
+	/**
+	 * @generated
+	 */
+	public SubscriberQoSPoliciesCustomEditPart(View view) {
+		super(view);
+	}
 
-    /**
-     * @generated
-     */
-    protected boolean hasModelChildrenChanged(Notification evt) {
-        return false;
-    }
+	/**
+	 * @generated
+	 */
+	protected boolean hasModelChildrenChanged(Notification evt) {
+		return false;
+	}
 
-    /**
-     * @generated
-     */
-    public String getCompartmentName() {
-        return Messages.SubscriberQoSPoliciesCustomEditPart_title;
-    }
+	/**
+	 * @generated
+	 */
+	public String getCompartmentName() {
+		return Messages.SubscriberQoSPoliciesCustomEditPart_title;
+	}
 
-    /**
-     * @generated
-     */
-    public IFigure createFigure() {
-        ResizableCompartmentFigure result = (ResizableCompartmentFigure) super
-                .createFigure();
-        result.setTitleVisibility(false);
-        return result;
-    }
+	/**
+	 * @generated
+	 */
+	public IFigure createFigure() {
+		ResizableCompartmentFigure result = (ResizableCompartmentFigure) super
+				.createFigure();
+		result.setTitleVisibility(false);
+		return result;
+	}
 
-    /**
-     * @generated
-     */
-    protected void createDefaultEditPolicies() {
-        super.createDefaultEditPolicies();
-        installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE,
-                new ResizableCompartmentEditPolicy());
-        installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-                new SubscriberQoSPoliciesCustomItemSemanticEditPolicy());
-        installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-                new CreationEditPolicy());
-        installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
-                new DragDropEditPolicy());
-        installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-                new SubscriberQoSPoliciesCustomCanonicalEditPolicy());
-    }
+	/**
+	 * @generated
+	 */
+	protected void createDefaultEditPolicies() {
+		super.createDefaultEditPolicies();
+		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE,
+				new ResizableCompartmentEditPolicy());
+		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
+				new SubscriberQoSPoliciesCustomItemSemanticEditPolicy());
+		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
+				new CreationEditPolicy());
+		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
+				new DragDropEditPolicy());
+		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
+				new SubscriberQoSPoliciesCustomCanonicalEditPolicy());
+	}
 
-    /**
-     * @generated
-     */
-    protected void setRatio(Double ratio) {
-        // nothing to do -- parent layout does not accept Double constraints as ratio
-        // super.setRatio(ratio); 
-    }
+	/**
+	 * @generated
+	 */
+	protected void setRatio(Double ratio) {
+		// nothing to do -- parent layout does not accept Double constraints as ratio
+		// super.setRatio(ratio); 
+	}
 
-    /**
-     * Filter out policies that are not owned by a DcpsLib.
-     * @generated NOT
-     */
-    @Override
-    protected java.util.List getModelChildren() {
-        return CompartmentChildrenFinder.filterPoliciesNotOwnedByDcpsLib(
-                ((View) getModel()).getElement(), super.getModelChildren());
-    }
+	/**
+	 * Filter out policies that are not owned by a DcpsLib.
+	 * @generated NOT
+	 */
+	@Override
+	protected java.util.List getModelChildren() {
+		return CompartmentChildrenFinder.filterPoliciesNotOwnedByDcpsLib(
+				((View) getModel()).getElement(), super.getModelChildren());
+	}
 
 }

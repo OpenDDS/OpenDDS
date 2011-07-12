@@ -12,33 +12,33 @@ import org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorPlug
  */
 public class DiagramPreferenceInitializer extends AbstractPreferenceInitializer {
 
-    /**
-     * @generated NOT
-     */
-    public void initializeDefaultPreferences() {
-        IPreferenceStore store = getPreferenceStore();
-        DiagramGeneralPreferencePage.initDefaults(store);
-        DiagramAppearancePreferencePage.initDefaults(store);
-        DiagramConnectionsPreferencePage.initDefaults(store);
-        DiagramPrintingPreferencePage.initDefaults(store);
-        DiagramRulersAndGridPreferencePage.initDefaults(store);
+	/**
+	 * @generated NOT
+	 */
+	public void initializeDefaultPreferences() {
+		IPreferenceStore store = getPreferenceStore();
+		DiagramGeneralPreferencePage.initDefaults(store);
+		DiagramAppearancePreferencePage.initDefaults(store);
+		DiagramConnectionsPreferencePage.initDefaults(store);
+		DiagramPrintingPreferencePage.initDefaults(store);
+		DiagramRulersAndGridPreferencePage.initDefaults(store);
 
-        // Custom code begin
-        // GMFGen file allows diagram preferences to be defined that includes turning off pop-up bars.
-        // However, with GMF 2.2.2 it was found that simply adding the preferences without changing any
-        // values resulted in figures with black background.
-        store
-                .setDefault(
-                        org.eclipse.gmf.runtime.diagram.ui.preferences.IPreferenceConstants.PREF_SHOW_POPUP_BARS,
-                        false);
-        // Custom code end
-    }
+		// Custom code begin
+		// GMFGen file allows diagram preferences to be defined that includes turning off pop-up bars.
+		// However, with GMF 2.2.2 it was found that simply adding the preferences without changing any
+		// values resulted in figures with black background.
+		store
+				.setDefault(
+						org.eclipse.gmf.runtime.diagram.ui.preferences.IPreferenceConstants.PREF_SHOW_POPUP_BARS,
+						false);
+		// Custom code end
+	}
 
-    /**
-     * @generated
-     */
-    protected IPreferenceStore getPreferenceStore() {
-        return OpenDDSDcpsLibDiagramEditorPlugin.getInstance()
-                .getPreferenceStore();
-    }
+	/**
+	 * @generated
+	 */
+	protected IPreferenceStore getPreferenceStore() {
+		return OpenDDSDcpsLibDiagramEditorPlugin.getInstance()
+				.getPreferenceStore();
+	}
 }

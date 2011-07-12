@@ -20,79 +20,79 @@ import org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes
  */
 public class DeadlineQosPolicyCreateCommand extends EditElementCommand {
 
-    /**
-     * @generated
-     */
-    public DeadlineQosPolicyCreateCommand(CreateElementRequest req) {
-        super(req.getLabel(), null, req);
-    }
+	/**
+	 * @generated
+	 */
+	public DeadlineQosPolicyCreateCommand(CreateElementRequest req) {
+		super(req.getLabel(), null, req);
+	}
 
-    /**
-     * FIXME: replace with setElementToEdit()
-     * @generated
-     */
-    @Override
-    protected EObject getElementToEdit() {
-        EObject container = ((CreateElementRequest) getRequest())
-                .getContainer();
-        if (container instanceof View) {
-            container = ((View) container).getElement();
-        }
-        return container;
-    }
+	/**
+	 * FIXME: replace with setElementToEdit()
+	 * @generated
+	 */
+	@Override
+	protected EObject getElementToEdit() {
+		EObject container = ((CreateElementRequest) getRequest())
+				.getContainer();
+		if (container instanceof View) {
+			container = ((View) container).getElement();
+		}
+		return container;
+	}
 
-    /**
-     * @generated
-     */
-    @Override
-    public boolean canExecute() {
-        return true;
+	/**
+	 * @generated
+	 */
+	@Override
+	public boolean canExecute() {
+		return true;
 
-    }
+	}
 
-    /**
-     * @generated NOT
-     */
-    @Override
-    protected CommandResult doExecuteWithResult(IProgressMonitor monitor,
-            IAdaptable info) throws ExecutionException {
+	/**
+	 * @generated NOT
+	 */
+	@Override
+	protected CommandResult doExecuteWithResult(IProgressMonitor monitor,
+			IAdaptable info) throws ExecutionException {
 
-        final String policyAssociationName = "deadline";
+		final String policyAssociationName = "deadline";
 
-        org.opendds.modeling.model.opendds.deadlineQosPolicy newElement = OpenDDSFactory.eINSTANCE
-                .createdeadlineQosPolicy();
+		org.opendds.modeling.model.opendds.deadlineQosPolicy newElement = OpenDDSFactory.eINSTANCE
+				.createdeadlineQosPolicy();
 
-        QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
-                getElementToEdit());
+		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
+				getElementToEdit());
 
-        OpenDDSDcpsLibElementTypes.init_DeadlineQosPolicy_3022(newElement);
+		OpenDDSDcpsLibElementTypes.init_DeadlineQosPolicy_3022(newElement);
 
-        doConfigure(newElement, monitor, info);
+		doConfigure(newElement, monitor, info);
 
-        ((CreateElementRequest) getRequest()).setNewElement(newElement);
+		((CreateElementRequest) getRequest()).setNewElement(newElement);
 
-        return CommandResult.newOKCommandResult(newElement);
-    }
+		return CommandResult.newOKCommandResult(newElement);
+	}
 
-    /**
-     * @generated
-     */
-    protected void doConfigure(
-            org.opendds.modeling.model.opendds.deadlineQosPolicy newElement,
-            IProgressMonitor monitor, IAdaptable info)
-            throws ExecutionException {
-        IElementType elementType = ((CreateElementRequest) getRequest())
-                .getElementType();
-        ConfigureRequest configureRequest = new ConfigureRequest(
-                getEditingDomain(), newElement, elementType);
-        configureRequest.setClientContext(((CreateElementRequest) getRequest())
-                .getClientContext());
-        configureRequest.addParameters(getRequest().getParameters());
-        ICommand configureCommand = elementType
-                .getEditCommand(configureRequest);
-        if (configureCommand != null && configureCommand.canExecute()) {
-            configureCommand.execute(monitor, info);
-        }
-    }
+	/**
+	 * @generated
+	 */
+	protected void doConfigure(
+			org.opendds.modeling.model.opendds.deadlineQosPolicy newElement,
+			IProgressMonitor monitor, IAdaptable info)
+			throws ExecutionException {
+		IElementType elementType = ((CreateElementRequest) getRequest())
+				.getElementType();
+		ConfigureRequest configureRequest = new ConfigureRequest(
+				getEditingDomain(), newElement, elementType);
+		configureRequest.setClientContext(((CreateElementRequest) getRequest())
+				.getClientContext());
+		configureRequest.addParameters(getRequest().getParameters());
+		ICommand configureCommand = elementType
+				.getEditCommand(configureRequest);
+		if (configureCommand != null && configureCommand.canExecute()) {
+			configureCommand.execute(monitor, info);
+		}
+	}
 
 }

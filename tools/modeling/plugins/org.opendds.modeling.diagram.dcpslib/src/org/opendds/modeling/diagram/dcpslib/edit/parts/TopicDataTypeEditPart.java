@@ -20,70 +20,70 @@ import org.opendds.modeling.model.topics.TopicsPackage;
  */
 public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 
-    /**
-     * @generated
-     */
-    public static final int VISUAL_ID = 7050;
+	/**
+	 * @generated
+	 */
+	public static final int VISUAL_ID = 7050;
 
-    /**
-     * @generated
-     */
-    public TopicDataTypeEditPart(View view) {
-        super(view);
-    }
+	/**
+	 * @generated
+	 */
+	public TopicDataTypeEditPart(View view) {
+		super(view);
+	}
 
-    /**
-     * @generated
-     */
-    protected boolean hasModelChildrenChanged(Notification evt) {
-        return false;
-    }
+	/**
+	 * @generated
+	 */
+	protected boolean hasModelChildrenChanged(Notification evt) {
+		return false;
+	}
 
-    /**
-     * @generated
-     */
-    public String getCompartmentName() {
-        return Messages.TopicDataTypeEditPart_title;
-    }
+	/**
+	 * @generated
+	 */
+	public String getCompartmentName() {
+		return Messages.TopicDataTypeEditPart_title;
+	}
 
-    /**
-     * @generated
-     */
-    protected void createDefaultEditPolicies() {
-        super.createDefaultEditPolicies();
-        installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-                new TopicDataTypeItemSemanticEditPolicy());
-        installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-                new CreationEditPolicy());
-        installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
-                new DragDropEditPolicy());
-        installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-                new TopicDataTypeCanonicalEditPolicy());
-    }
+	/**
+	 * @generated
+	 */
+	protected void createDefaultEditPolicies() {
+		super.createDefaultEditPolicies();
+		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
+				new TopicDataTypeItemSemanticEditPolicy());
+		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
+				new CreationEditPolicy());
+		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
+				new DragDropEditPolicy());
+		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
+				new TopicDataTypeCanonicalEditPolicy());
+	}
 
-    /**
-     * @generated
-     */
-    protected void setRatio(Double ratio) {
-        // nothing to do -- parent layout does not accept Double constraints as ratio
-        // super.setRatio(ratio); 
-    }
+	/**
+	 * @generated
+	 */
+	protected void setRatio(Double ratio) {
+		// nothing to do -- parent layout does not accept Double constraints as ratio
+		// super.setRatio(ratio); 
+	}
 
-    /*
-     * Since the Topic's datatype can be changed outside diagram manipulation
-     * through a context menu, make sure the datatype compartment gets refreshed.
-     * generated NOT
-     */
-    @Override
-    protected void handleNotificationEvent(Notification notification) {
-        int type = notification.getEventType();
-        Object feature = notification.getFeature();
-        if (TopicsPackage.eINSTANCE.getTopic_Datatype().equals(feature)
-                && (type == Notification.SET)) {
-            CanonicalEditPolicy canonicalEditPolicy = (CanonicalEditPolicy) getEditPolicy(EditPolicyRoles.CANONICAL_ROLE);
-            canonicalEditPolicy.refresh();
-        }
-        super.handleNotificationEvent(notification);
-    }
+	/*
+	 * Since the Topic's datatype can be changed outside diagram manipulation
+	 * through a context menu, make sure the datatype compartment gets refreshed.
+	 * generated NOT
+	 */
+	@Override
+	protected void handleNotificationEvent(Notification notification) {
+		int type = notification.getEventType();
+		Object feature = notification.getFeature();
+		if (TopicsPackage.eINSTANCE.getTopic_Datatype().equals(feature)
+				&& (type == Notification.SET)) {
+			CanonicalEditPolicy canonicalEditPolicy = (CanonicalEditPolicy) getEditPolicy(EditPolicyRoles.CANONICAL_ROLE);
+			canonicalEditPolicy.refresh();
+		}
+		super.handleNotificationEvent(notification);
+	}
 
 }
