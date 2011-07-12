@@ -1,3 +1,13 @@
+Tue Jul 12 12:32:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+
+          Removed misleading warnings about no structs with isDcpsDataType=true
+          defined and a struct with isDcpsDataType=false not being used
+          elsewhere.
+
 Tue Jul 12 01:23:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/packet-opendds.cpp:
@@ -7,13 +17,13 @@ Tue Jul 12 01:23:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
         * tools/dissector/sample_manager.cpp:
 
           Revised field labeling so that no field-specific information is
-          stored as state in the dissectors. This ensures that a single 
+          stored as state in the dissectors. This ensures that a single
           sample dissector can be used for multiple field instances. Combined
-          the wireshark parameters into a single struct. 
-        
+          the wireshark parameters into a single struct.
+
           Added initial implementation of the Union dissector. Still
           working out the details for defining a Union.
-        
+
 Mon Jul 11 19:05:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:

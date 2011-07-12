@@ -792,9 +792,6 @@
       <category id="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.errors" mandatory="false" name="DataLib Errors">
          <![CDATA[Detects modeling constructs that would result in invalid generated OpenDDS code.]]>
       </category>
-      <category id="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.warnings" mandatory="false" name="DataLib Warnings">
-         <![CDATA[Detects questionable modeling constructs.]]>
-      </category>
       <constraintProvider cache="true">
          <package namespaceUri="http://www.opendds.org/modeling/schemas/Types/1.0"/>
                <constraints categories="org.opendds.modeling.model.types.validations">
@@ -908,38 +905,6 @@ switch.oclIsTypeOf(WChar)
             <target class="types.Case"/>
          </constraint>
                   </constraints>
-         <constraints categories="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.warnings">
-                  <constraint id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
-            lang="OCL"
-            name="No DCPS Data Type Structs defined"
-            mode="Batch"
-            severity="WARNING" statusCode="200">
-            <![CDATA[self.types->select(
-  s | s.oclIsTypeOf(Struct) and
- (s.oclAsType(Struct).isDcpsDataType = true))->notEmpty()]]>
-            <description><![CDATA[Typically at least one Struct to use as a DCPS Data Type is defined]]></description>
-            <message><![CDATA[There are no Structs with isDcpsDataType = true]]></message>
-            <target class="types.DataLib"/>
-         </constraint>
-                  <constraint id="org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"
-            lang="OCL"
-            name="Non DCPS Data Type Struct not used"
-            mode="Batch"
-            severity="WARNING" statusCode="200">
-            <![CDATA[if isDcpsDataType = false
-then
-  Struct.allInstances().fields
-    ->select(type = self)
-      ->notEmpty()
-else
-  true
-endif
-]]>
-            <description><![CDATA[A non DCPS Data Type Struct is not used elsewhere]]></description>
-            <message><![CDATA[A Struct with isDcpsDataType = false is not used]]></message>
-            <target class="types.Struct"/>
-         </constraint>
-                  </constraints>
       </constraintProvider>
    </extension>
 
@@ -959,8 +924,6 @@ endif
                   <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_switch_type_not_correct"/>
                   <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_branches_no_cases"/>
                   <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_case_no_literal"/>
-                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"/>
-                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"/>
                </binding>
 
    </extension>

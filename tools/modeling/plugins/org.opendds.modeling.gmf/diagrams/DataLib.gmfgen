@@ -20,12 +20,6 @@
         description="Detects modeling constructs that would result in invalid generated OpenDDS code."
         path="//@audits/@categories.0 //@audits/@categories.1"
         audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4 //@audits/@rules.5 //@audits/@rules.6 //@audits/@rules.7 //@audits/@rules.8 //@audits/@rules.9"/>
-    <categories
-        id="org.opendds.modeling.model.types.validation.warnings"
-        name="DataLib Warnings"
-        description="Detects questionable modeling constructs."
-        path="//@audits/@categories.0 //@audits/@categories.2"
-        audits="//@audits/@rules.10 //@audits/@rules.11"/>
     <rules
         name="Struct Name Blank"
         description="Struct names should not be empty"
@@ -166,38 +160,8 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Case"/>
       </target>
     </rules>
-    <rules
-        name="No DCPS Data Type Structs defined"
-        description="Typically at least one Struct to use as a DCPS Data Type is defined"
-        id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
-        rule="//@expressionProviders/@providers.0/@expressions.11"
-        message="There are no Structs with isDcpsDataType = true"
-        severity="WARNING"
-        category="//@audits/@categories.2">
-      <target
-          xsi:type="gmfgen:GenDomainElementTarget"
-          contextSelector="//@audits/@clientContexts.0">
-        <element
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib"/>
-      </target>
-    </rules>
-    <rules
-        name="Non DCPS Data Type Struct not used"
-        description="A non DCPS Data Type Struct is not used elsewhere"
-        id="org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"
-        rule="//@expressionProviders/@providers.0/@expressions.12"
-        message="A Struct with isDcpsDataType = false is not used"
-        severity="WARNING"
-        category="//@audits/@categories.2">
-      <target
-          xsi:type="gmfgen:GenDomainElementTarget"
-          contextSelector="//@audits/@clientContexts.0">
-        <element
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Struct"/>
-      </target>
-    </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target //@audits/@rules.6/@target //@audits/@rules.7/@target //@audits/@rules.8/@target //@audits/@rules.9/@target //@audits/@rules.10/@target //@audits/@rules.11/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target //@audits/@rules.6/@target //@audits/@rules.7/@target //@audits/@rules.8/@target //@audits/@rules.9/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -3292,12 +3256,6 @@
       <expressions
           xsi:type="gmfgen:GenConstraint"
           body="not literal.oclIsUndefined() and literal &lt;> ''"/>
-      <expressions
-          xsi:type="gmfgen:GenConstraint"
-          body="self.types->select(&#xA;  s | s.oclIsTypeOf(Struct) and&#xA; (s.oclAsType(Struct).isDcpsDataType = true))->notEmpty()"/>
-      <expressions
-          xsi:type="gmfgen:GenConstraint"
-          body="if isDcpsDataType = false&#xA;then&#xA;  Struct.allInstances().fields&#xA;    ->select(type = self)&#xA;      ->notEmpty()&#xA;else&#xA;  true&#xA;endif&#xA;"/>
     </providers>
   </expressionProviders>
   <labelParsers
