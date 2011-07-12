@@ -651,7 +651,6 @@
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
             <contentExtension pattern="org.opendds.modeling.diagram.policylib.resourceContent"/>
-			<contentExtension pattern="org.opendds.modeling.diagram.policylib.domainResourceContent"/>
             <contentExtension pattern="org.opendds.modeling.diagram.policylib.navigatorLinkHelper"/>
          </includes>
       </viewerContentBinding>
@@ -699,27 +698,6 @@
                </or>
             </parentExpression>
          </commonSorter>
-      </navigatorContent>
-      <navigatorContent
-            id="org.opendds.modeling.diagram.policylib.domainResourceContent" 
-            name="%domainNavigatorContentName" 
-            priority="normal" 
-            contentProvider="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorLabelProvider"
-            icon="icons/obj16/PolicyLib.gif"
-            activeByDefault="true">
-         <triggerPoints>
-            <or>
-	           <and>
-    	          <instanceof value="org.eclipse.core.resources.IFile"/>
-        	      <test property="org.eclipse.core.resources.extension" value="opendds"/>
-               </and>
-               <instanceof value="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorItem"/>
-            </or>
-         </triggerPoints>
-         <possibleChildren>
-            <instanceof value="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorItem"/>
-         </possibleChildren>
       </navigatorContent>
       <actionProvider
             id="org.opendds.modeling.diagram.policylib.navigatorActionProvider"

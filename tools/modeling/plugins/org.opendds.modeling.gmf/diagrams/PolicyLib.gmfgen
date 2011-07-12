@@ -3411,7 +3411,8 @@
   <editor
       iconPath="icons/obj16/PolicyLib.gif"
       iD="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"/>
-  <navigator>
+  <navigator
+      generateDomainModelNavigator="false">
     <childReferences
         child="//@diagram"/>
     <childReferences

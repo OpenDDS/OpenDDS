@@ -1022,7 +1022,6 @@
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
             <contentExtension pattern="org.opendds.modeling.diagram.dcpslib.resourceContent"/>
-			<contentExtension pattern="org.opendds.modeling.diagram.dcpslib.domainResourceContent"/>
             <contentExtension pattern="org.opendds.modeling.diagram.dcpslib.navigatorLinkHelper"/>
          </includes>
       </viewerContentBinding>
@@ -1070,27 +1069,6 @@
                </or>
             </parentExpression>
          </commonSorter>
-      </navigatorContent>
-      <navigatorContent
-            id="org.opendds.modeling.diagram.dcpslib.domainResourceContent" 
-            name="%domainNavigatorContentName" 
-            priority="normal" 
-            contentProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorLabelProvider"
-            icon="icons/obj16/DcpsLib.gif"
-            activeByDefault="true">
-         <triggerPoints>
-            <or>
-	           <and>
-    	          <instanceof value="org.eclipse.core.resources.IFile"/>
-        	      <test property="org.eclipse.core.resources.extension" value="opendds"/>
-               </and>
-               <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorItem"/>
-            </or>
-         </triggerPoints>
-         <possibleChildren>
-            <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorItem"/>
-         </possibleChildren>
       </navigatorContent>
       <actionProvider
             id="org.opendds.modeling.diagram.dcpslib.navigatorActionProvider"

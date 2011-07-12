@@ -6755,7 +6755,8 @@
   <editor
       iconPath="icons/obj16/DcpsLib.gif"
       iD="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"/>
-  <navigator>
+  <navigator
+      generateDomainModelNavigator="false">
     <childReferences
         child="//@diagram"/>
     <childReferences

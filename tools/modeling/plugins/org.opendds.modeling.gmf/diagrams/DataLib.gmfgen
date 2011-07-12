@@ -2029,7 +2029,8 @@
   <editor
       iconPath="icons/obj16/DataLib.gif"
       iD="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"/>
-  <navigator>
+  <navigator
+      generateDomainModelNavigator="false">
     <childReferences
         child="//@diagram"/>
     <childReferences

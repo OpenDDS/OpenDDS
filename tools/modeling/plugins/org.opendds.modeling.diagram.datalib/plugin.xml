@@ -678,7 +678,6 @@
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
             <contentExtension pattern="org.opendds.modeling.diagram.datalib.resourceContent"/>
-			<contentExtension pattern="org.opendds.modeling.diagram.datalib.domainResourceContent"/>
             <contentExtension pattern="org.opendds.modeling.diagram.datalib.navigatorLinkHelper"/>
          </includes>
       </viewerContentBinding>
@@ -732,27 +731,6 @@
                </or>
             </parentExpression>
          </commonSorter>
-      </navigatorContent>
-      <navigatorContent
-            id="org.opendds.modeling.diagram.datalib.domainResourceContent" 
-            name="%domainNavigatorContentName" 
-            priority="normal" 
-            contentProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorLabelProvider"
-            icon="icons/obj16/DataLib.gif"
-            activeByDefault="true">
-         <triggerPoints>
-            <or>
-	           <and>
-    	          <instanceof value="org.eclipse.core.resources.IFile"/>
-        	      <test property="org.eclipse.core.resources.extension" value="opendds"/>
-               </and>
-               <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorItem"/>
-            </or>
-         </triggerPoints>
-         <possibleChildren>
-            <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorItem"/>
-         </possibleChildren>
       </navigatorContent>
       <actionProvider
             id="org.opendds.modeling.diagram.datalib.navigatorActionProvider"
