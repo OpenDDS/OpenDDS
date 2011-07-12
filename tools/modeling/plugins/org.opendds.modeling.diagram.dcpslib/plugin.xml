@@ -1049,11 +1049,17 @@
         	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_dcpslib"/>
                </and>
                <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.dcpslib.isShortcut"/>
+           	   </adapt>
             </or>
          </triggerPoints>
          <possibleChildren>
             <or>
          	   <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.dcpslib.isShortcut"/>
+           	   </adapt>
             </or>
          </possibleChildren>
          <commonSorter 
@@ -1076,6 +1082,9 @@
          <enablement>
             <or>
                <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.dcpslib.isShortcut"/>
+           	   </adapt>
             </or>
          </enablement>
       </actionProvider>
@@ -1377,12 +1386,14 @@
       <super type="org.eclipse.core.resources.problemmarker"/>
       <super type="org.eclipse.gmf.runtime.common.ui.services.marker"/>
       <persistent value="true"/>
-   </extension><extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
+   </extension><extension point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders" id="decorator-provider">
       <?gmfgen generated="true"?>
-      <decoratorProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibValidationDecoratorProvider">
+      <decoratorProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibShortcutsDecoratorProvider">
          <Priority name="Lowest"/>
-         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
-         <context decoratorTargets="PRIMARY_VIEW"/>
+         <object class="org.eclipse.gmf.runtime.notation.Node(org.eclipse.gmf.runtime.notation)" id="generated-top-nodes">
+            <method name="getType()" value="2001,2002,2007,2005,2006"/>
+         </object>
+         <context decoratorTargets="generated-top-nodes"/>
       </decoratorProvider>
    </extension>
 <extension point="org.eclipse.emf.validation.constraintProviders">
@@ -1450,6 +1461,17 @@
                </binding>
 
    </extension>
+<extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isShortcut">
+      <?gmfgen generated="true"?>
+       <propertyTester
+           id="org.opendds.modeling.diagram.dcpslib.ShortcutPropertyTester"
+           type="org.eclipse.gmf.runtime.notation.View"
+           namespace="org.opendds.modeling.diagram.dcpslib"
+           properties="isShortcut"
+           class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibShortcutPropertyTester">
+       </propertyTester>
+   </extension>
+
 
 
 

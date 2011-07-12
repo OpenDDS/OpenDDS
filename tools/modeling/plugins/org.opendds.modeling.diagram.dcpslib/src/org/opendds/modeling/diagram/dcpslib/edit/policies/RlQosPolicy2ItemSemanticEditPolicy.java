@@ -16,28 +16,28 @@ import org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes
  * @generated
  */
 public class RlQosPolicy2ItemSemanticEditPolicy extends
-		OpenDDSDcpsLibBaseItemSemanticEditPolicy {
+        OpenDDSDcpsLibBaseItemSemanticEditPolicy {
 
-	/**
-	 * @generated
-	 */
-	public RlQosPolicy2ItemSemanticEditPolicy() {
-		super(OpenDDSDcpsLibElementTypes.RlQosPolicy_3047);
-	}
+    /**
+     * @generated
+     */
+    public RlQosPolicy2ItemSemanticEditPolicy() {
+        super(OpenDDSDcpsLibElementTypes.RlQosPolicy_3047);
+    }
 
-	/**
-	 * Do not really destroy the element since the compartment holds non-containment
-	 * references while GMF expects the compartment to hold contained references.
-	 * Therefore a DestroyReferenceCommand is returned instead of a DestroyElementCommand.
-	 * @generated NOT
-	 */
-	protected Command getDestroyElementCommand(DestroyElementRequest req) {
-		CompositeTransactionalCommand cmd = new CompositeTransactionalCommand(
-				getEditingDomain(), null);
-		cmd.setTransactionNestingEnabled(false);
-		cmd.add(com.ociweb.gmf.edit.commands.RequestToCommandConverter
-				.destroyElementRequestToDestroyReferenceCommand(req, getHost(),
-						getEditingDomain()));
-		return getGEFWrapper(cmd);
-	}
+    /**
+     * Do not really destroy the element since the compartment holds non-containment
+     * references while GMF expects the compartment to hold contained references.
+     * Therefore a DestroyReferenceCommand is returned instead of a DestroyElementCommand.
+     * @generated NOT
+     */
+    protected Command getDestroyElementCommand(DestroyElementRequest req) {
+        CompositeTransactionalCommand cmd = new CompositeTransactionalCommand(
+                getEditingDomain(), null);
+        cmd.setTransactionNestingEnabled(false);
+        cmd.add(com.ociweb.gmf.edit.commands.RequestToCommandConverter
+                .destroyElementRequestToDestroyReferenceCommand(req, getHost(),
+                        getEditingDomain()));
+        return getGEFWrapper(cmd);
+    }
 }

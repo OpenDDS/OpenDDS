@@ -6,5 +6,5 @@ package org.opendds.modeling.diagram.dcpslib.sheet;
  * @generated NOT
  */
 public class ElementCommentPropertySection extends
-		org.opendds.modeling.common.gmf.ElementCommentPropertySection {
+        org.opendds.modeling.common.gmf.ElementCommentPropertySection {
 }

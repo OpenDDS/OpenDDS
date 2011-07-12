@@ -24,63 +24,63 @@ import org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes
  * @generated
  */
 public class ReliabilityQosPolicy2ItemSemanticEditPolicy extends
-		OpenDDSDcpsLibBaseItemSemanticEditPolicy {
+        OpenDDSDcpsLibBaseItemSemanticEditPolicy {
 
-	/**
-	 * @generated
-	 */
-	public ReliabilityQosPolicy2ItemSemanticEditPolicy() {
-		super(OpenDDSDcpsLibElementTypes.ReliabilityQosPolicy_3046);
-	}
+    /**
+     * @generated
+     */
+    public ReliabilityQosPolicy2ItemSemanticEditPolicy() {
+        super(OpenDDSDcpsLibElementTypes.ReliabilityQosPolicy_3046);
+    }
 
-	/**
-	 * Do not really destroy the element since the compartment holds non-containment
-	 * references while GMF expects the compartment to hold contained references.
-	 * Therefore a DestroyReferenceCommand is returned instead of a DestroyElementCommand.
-	 * @generated NOT
-	 */
-	protected Command getDestroyElementCommand(DestroyElementRequest req) {
-		CompositeTransactionalCommand cmd = new CompositeTransactionalCommand(
-				getEditingDomain(), null);
-		cmd.setTransactionNestingEnabled(false);
-		cmd.add(com.ociweb.gmf.edit.commands.RequestToCommandConverter
-				.destroyElementRequestToDestroyReferenceCommand(req, getHost(),
-						getEditingDomain()));
-		return getGEFWrapper(cmd);
-	}
+    /**
+     * Do not really destroy the element since the compartment holds non-containment
+     * references while GMF expects the compartment to hold contained references.
+     * Therefore a DestroyReferenceCommand is returned instead of a DestroyElementCommand.
+     * @generated NOT
+     */
+    protected Command getDestroyElementCommand(DestroyElementRequest req) {
+        CompositeTransactionalCommand cmd = new CompositeTransactionalCommand(
+                getEditingDomain(), null);
+        cmd.setTransactionNestingEnabled(false);
+        cmd.add(com.ociweb.gmf.edit.commands.RequestToCommandConverter
+                .destroyElementRequestToDestroyReferenceCommand(req, getHost(),
+                        getEditingDomain()));
+        return getGEFWrapper(cmd);
+    }
 
-	/**
-	 * @generated
-	 */
-	private void addDestroyChildNodesCommand(ICompositeCommand cmd) {
-		View view = (View) getHost().getModel();
-		for (Iterator nit = view.getChildren().iterator(); nit.hasNext();) {
-			Node node = (Node) nit.next();
-			switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(node)) {
-			case ReliabilityQosPolicyMax_blocking_time2EditPart.VISUAL_ID:
-				for (Iterator cit = node.getChildren().iterator(); cit
-						.hasNext();) {
-					Node cnode = (Node) cit.next();
-					// For the OpenDDS Modeling SDK, elements behind compartment children may not necessarily be in the same
-					// library as the element behind the compartment's parent (e.g. a DataReader's shared policies).
-					// In this case avoid destroying the child.
-					if (!OpenDDSLibHelper.areElementsInSameLib(view
-							.getElement(), cnode.getElement())) {
-						break;
-					}
-					switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(cnode)) {
-					case Period6EditPart.VISUAL_ID:
-						cmd.add(new DestroyElementCommand(
-								new DestroyElementRequest(getEditingDomain(),
-										cnode.getElement(), false))); // directlyOwned: true
-						// don't need explicit deletion of cnode as parent's view deletion would clean child views as well 
-						// cmd.add(new org.eclipse.gmf.runtime.diagram.core.commands.DeleteCommand(getEditingDomain(), cnode));
-						break;
-					}
-				}
-				break;
-			}
-		}
-	}
+    /**
+     * @generated
+     */
+    private void addDestroyChildNodesCommand(ICompositeCommand cmd) {
+        View view = (View) getHost().getModel();
+        for (Iterator nit = view.getChildren().iterator(); nit.hasNext();) {
+            Node node = (Node) nit.next();
+            switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(node)) {
+            case ReliabilityQosPolicyMax_blocking_time2EditPart.VISUAL_ID:
+                for (Iterator cit = node.getChildren().iterator(); cit
+                        .hasNext();) {
+                    Node cnode = (Node) cit.next();
+                    // For the OpenDDS Modeling SDK, elements behind compartment children may not necessarily be in the same
+                    // library as the element behind the compartment's parent (e.g. a DataReader's shared policies).
+                    // In this case avoid destroying the child.
+                    if (!OpenDDSLibHelper.areElementsInSameLib(view
+                            .getElement(), cnode.getElement())) {
+                        break;
+                    }
+                    switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(cnode)) {
+                    case Period6EditPart.VISUAL_ID:
+                        cmd.add(new DestroyElementCommand(
+                                new DestroyElementRequest(getEditingDomain(),
+                                        cnode.getElement(), false))); // directlyOwned: true
+                        // don't need explicit deletion of cnode as parent's view deletion would clean child views as well 
+                        // cmd.add(new org.eclipse.gmf.runtime.diagram.core.commands.DeleteCommand(getEditingDomain(), cnode));
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
 
 }
