@@ -11,7 +11,10 @@
     -->
 <xsl:include href="common.xsl"/>
 
-<xsl:variable name="policy-refs" select="//*[not(name() = 'datatype')]/@href"/>
+<xsl:variable name="policy-refs" select="//*[not(name() = 'datatype' or 
+                                                 name() = 'type' or
+                                                 name() = 'topic' or
+                                                 name() = 'related_topic')]/@href"/>
 
 <!-- Copy the model element, adding external-refs subelelement -->
 <xsl:template match="opendds:OpenDDSModel">
@@ -250,15 +253,45 @@
             </xsl:for-each>
             <xsl:apply-templates select="node()"/>
           </xsl:copy>
-          <!-- if we just copied a topic, add it to the refs param -->
-          <xsl:variable name="newrefswithspace">
+          <!-- if we just copied a topic, add its types and related topics to the refs param -->
+          <xsl:variable name="model-dirname">
+            <xsl:call-template name="substring-before-last">
+              <xsl:with-param name="value" select="$model"/>
+              <xsl:with-param name="to-find" select="'/'"/>
+            </xsl:call-template>
+          </xsl:variable>
+          <xsl:variable name="internaldatatype">
+            <xsl:if test="name(.) = 'topicDescriptions' and @datatype">
+              <xsl:value-of select="concat($model, '#', @datatype, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="externaldatatype">
+            <xsl:if test="name(.) = 'topicDescriptions' and datatype">
+              <xsl:value-of select="concat($model-dirname, '/', datatype/@href, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="internalreltopic">
+            <xsl:if test="name(.) = 'topicDescriptions' and @related_topic">
+              <xsl:value-of select="concat($model, '#', @related_topic, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="externalreltopic">
+            <xsl:if test="name(.) = 'topicDescriptions' and related_topic">
+              <xsl:value-of select="concat($model-dirname, '/', related_topic/@href, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="newrefswithspace" 
+                      select="concat($internaldatatype, 
+                                     $externaldatatype, 
+                                     $internalreltopic, 
+                                     $externalreltopic)"/>
+            
+          <!--
             <xsl:choose>
               <xsl:when test="name(.) = 'topicDescriptions' and @datatype">
-                <!-- type internal to topic model -->
                 <xsl:value-of select="concat($model, '#', @datatype, ' ')"/>
               </xsl:when>
               <xsl:when test="name(.) = 'topicDescriptions' and datatype">
-                <!-- type external to topic model -->
                 <xsl:variable name="model-dirname">
                   <xsl:call-template name="substring-before-last">
                     <xsl:with-param name="value" select="$model"/>
@@ -269,6 +302,7 @@
               </xsl:when>
             </xsl:choose>
           </xsl:variable>
+            -->
           <xsl:call-template name="process-external-refs">
             <xsl:with-param name="refs" select="concat($newrefswithspace, 
                                                 substring-after($refs, ' '))"/>

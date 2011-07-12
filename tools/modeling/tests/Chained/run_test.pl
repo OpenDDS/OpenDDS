@@ -27,6 +27,9 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 PerlDDS::add_lib_path("./model");
+PerlDDS::add_lib_path("../Chained_Topic/model");
+PerlDDS::add_lib_path("../Chained_Data/model");
+PerlDDS::add_lib_path("../CfTopic/model");
 PerlDDS::add_lib_path("../MessengerMixed/model");
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",

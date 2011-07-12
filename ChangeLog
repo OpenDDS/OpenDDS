@@ -1,3 +1,29 @@
+Tue Jul 12 18:28:04 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          More support for referenced content filtered topics.
+
+        * tools/modeling/tests/CfTopic/CfTopic.codegen:
+        * tools/modeling/tests/CfTopic/CfTopic.mpc:
+        * tools/modeling/tests/CfTopic/CfTopic.mwc:
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+        * tools/modeling/tests/CfTopic/run_test.pl:
+        * tools/modeling/tests/Chained/Chained.mpc:
+        * tools/modeling/tests/Chained/Chained.mwc:
+        * tools/modeling/tests/Chained/publisher.cpp:
+        * tools/modeling/tests/Chained/run_test.pl:
+        * tools/modeling/tests/Chained/subscriber.cpp:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.mwc:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.opendds:
+        * tools/modeling/tests/Chained_Topic/subscriber.cpp:
+
+          Refer to external content filtered topics.
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+        
+          Fix validation error.
+
 Tue Jul 12 16:04:40 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DeadlineQosPolicyCreateCommand.java:
