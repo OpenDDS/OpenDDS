@@ -27,27 +27,23 @@ namespace OpenDDS
   namespace DCPS
   {
 
+    guint8 *
+    Wireshark_Bundle::get_remainder ()
+    {
+      gint remainder = tvb->length - offset;
+      return reinterpret_cast<guint8 *>(ep_tvb_memdup(tvb, offset, remainder));
+    }
+
     Sample_Field::Sample_Field (FixedTypeID id, const char *label)
-      : format_ (label),
-        len_ (0),
+      : label_ (label),
         type_id_ (id),
         nested_ (0),
         next_(0)
     {
     }
 
-    Sample_Field::Sample_Field (const char *f, gint l)
-      : format_(f),
-        len_(l),
-        type_id_ (Undefined),
-        nested_ (0),
-        next_(0)
-    {
-    }
-
-    Sample_Field::Sample_Field (Sample_Dissector *n)
-      : format_(""),
-        len_(0),
+    Sample_Field::Sample_Field (Sample_Dissector *n, const char *label)
+      : label_(label),
         type_id_ (Undefined),
         nested_ (n),
         next_(0)
@@ -71,21 +67,15 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Field::chain (const char *f, gint l)
-    {
-      return chain (new Sample_Field (f,l));
-    }
-
-    Sample_Field *
     Sample_Field::chain (FixedTypeID ti, const char *l)
     {
-      return chain (new Sample_Field (ti,l));
+      return chain (new Sample_Field (ti, l));
     }
 
     Sample_Field *
-    Sample_Field::chain (Sample_Dissector *n)
+    Sample_Field::chain (Sample_Dissector *n, const char *l)
     {
-      return chain (new Sample_Field (n));
+      return chain (new Sample_Field (n, l));
     }
 
     Sample_Field *
@@ -168,10 +158,15 @@ namespace OpenDDS
             len = sizeof(ACE_CDR::LongDouble);
             break;
           }
+        case Enumeration:
+          {
+            len = 4;
+            break;
+          }
         case Undefined:
           {
             len =
-              (nested_ == 0) ? this->len_ : this->nested_->compute_length (data);
+              (nested_ == 0) ? 0 : this->nested_->compute_length (data);
           }
         }
       if (next_ != 0)
@@ -189,81 +184,86 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Field::dissect_i (tvbuff_t *tvb, packet_info* pinfo,
-                             proto_tree *tree,
-                             gint offset, guint8 *data)
+    Sample_Field::dissect_i (Wireshark_Bundle_Field &params)
     {
       size_t len = 0;
-      if (this->type_id_ != Undefined)
+      if (this->nested_ == 0)
         {
           std::stringstream outstream;
-          outstream << this->format_ << ": ";
+          outstream << this->label_;
+          if (params.use_index)
+            outstream << "[" << params.index << "]";
+          outstream << ": ";
           switch (this->type_id_)
             {
             case Char:
               {
-                to_stream<ACE_CDR::Char>(outstream, len, data);
+                to_stream<ACE_CDR::Char>(outstream, len, params.data);
                 break;
               }
             case Bool:
               {
-                to_stream<ACE_CDR::Boolean>(outstream, len, data);
+                to_stream<ACE_CDR::Boolean>(outstream, len, params.data);
                 break;
               }
             case Octet:
               {
-                to_stream<ACE_CDR::Octet>(outstream, len, data);
+                to_stream<ACE_CDR::Octet>(outstream, len, params.data);
                 break;
               }
             case WChar:
               {
-                to_stream<ACE_CDR::WChar>(outstream, len, data);
+                to_stream<ACE_CDR::WChar>(outstream, len, params.data);
                 break;
               }
             case Short:
               {
-                to_stream<ACE_CDR::Short>(outstream, len, data);
+                to_stream<ACE_CDR::Short>(outstream, len, params.data);
                 break;
               }
             case UShort:
               {
-                to_stream<ACE_CDR::UShort>(outstream, len, data);
+                to_stream<ACE_CDR::UShort>(outstream, len, params.data);
                 break;
               }
             case Long:
               {
-                to_stream<ACE_CDR::Long>(outstream, len, data);
+                to_stream<ACE_CDR::Long>(outstream, len, params.data);
                 break;
               }
             case ULong:
               {
-                to_stream<ACE_CDR::ULong>(outstream, len, data);
+                to_stream<ACE_CDR::ULong>(outstream, len, params.data);
                 break;
               }
             case LongLong:
               {
-                to_stream<ACE_CDR::LongLong>(outstream, len, data);
+                to_stream<ACE_CDR::LongLong>(outstream, len, params.data);
                 break;
               }
             case ULongLong:
               {
-                to_stream<ACE_CDR::ULongLong>(outstream, len, data);
+                to_stream<ACE_CDR::ULongLong>(outstream, len, params.data);
                 break;
               }
             case Float:
               {
-                to_stream<ACE_CDR::Float>(outstream, len, data);
+                to_stream<ACE_CDR::Float>(outstream, len, params.data);
                 break;
               }
             case Double:
               {
-                to_stream<ACE_CDR::Double>(outstream, len, data);
+                to_stream<ACE_CDR::Double>(outstream, len, params.data);
                 break;
               }
             case LongDouble:
               {
-                to_stream<ACE_CDR::LongDouble>(outstream, len, data);
+                to_stream<ACE_CDR::LongDouble>(outstream, len, params.data);
                 break;
+              }
+            case Enumeration:
+              {
+                break; // only the label is used, not directly presented
               }
             case Undefined:
               {
@@ -272,22 +272,18 @@ namespace OpenDDS
               }
             }
           std::string buffer = outstream.str();
-          proto_tree_add_text (tree, tvb, offset, len, "%s", buffer.c_str());
-        }
-      else if (nested_ == 0)
-        {
-          proto_tree_add_text (tree, tvb, offset, len_, format_, *(data));
-          len = this->len_;
+          proto_tree_add_text (params.tree, params.tvb, params.offset,
+                               len, "%s", buffer.c_str());
         }
       else
         {
-          len = this->nested_->dissect_i (tvb, pinfo, tree, offset);
+          len = this->nested_->dissect_i (params, this->label_);
         }
 
-      offset += len;
-      data += len;
+      params.offset += len;
+      params.data += len;
       if (next_ != 0)
-        len += next_->dissect_i (tvb, pinfo, tree, offset, data);
+        len += next_->dissect_i (params);
       return len;
     }
 
@@ -295,7 +291,7 @@ namespace OpenDDS
 
     Sample_Dissector::Sample_Dissector ()
       :ett_payload_ (-1),
-       label_ (0),
+       subtree_label_ (0),
        typeId_ (0),
        field_ (0)
     {
@@ -304,6 +300,7 @@ namespace OpenDDS
     Sample_Dissector::~Sample_Dissector ()
     {
       delete [] this->typeId_;
+      delete [] this->subtree_label_;
       delete field_;
     }
 
@@ -315,7 +312,7 @@ namespace OpenDDS
 
     void
     Sample_Dissector::init (const char *type_id,
-                       const char *subtree_label)
+                       const char *subtree)
     {
       size_t len = ACE_OS::strlen(type_id);
       if (len > 0)
@@ -325,11 +322,11 @@ namespace OpenDDS
           Sample_Manager::instance().add (*this);
         }
 
-      len = ACE_OS::strlen(subtree_label);
+      len = ACE_OS::strlen(subtree);
       if (len > 0)
         {
-          this->label_ = new char[len+1];
-          ACE_OS::strcpy (this->label_, subtree_label);
+          this->subtree_label_ = new char[len+1];
+          ACE_OS::strcpy (this->subtree_label_, subtree);
 
           gint *ett[] = {
             &ett_payload_
@@ -353,12 +350,6 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (const char *f, gint l)
-    {
-      return add_field (new Sample_Field (f,l));
-    }
-
-    Sample_Field *
     Sample_Dissector::add_field (Sample_Field::FixedTypeID type_id,
                                  const char *label)
     {
@@ -366,34 +357,57 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (Sample_Dissector *n)
+    Sample_Dissector::add_field (Sample_Dissector *n, const char *label)
     {
-      return add_field (new Sample_Field (n));
+      return add_field (new Sample_Field (n, label));
     }
 
     size_t
-    Sample_Dissector::dissect_i (tvbuff_t *tvb,
-                            packet_info *pinfo,
-                            proto_tree *tree,
-                            gint offset)
+    Sample_Dissector::dissect_i (Wireshark_Bundle_i &params,
+                                 const char *label)
+
     {
       size_t data_pos = 0;
 
-      gint remainder = tvb->length - offset;
-      guint8* data = (guint8*)ep_tvb_memdup(tvb, offset, remainder);
-
+      guint8* data = params.get_remainder();
       guint32 len = field_->compute_length (data);
-
-      if (this->label_ != 0)
+      std::stringstream outstream;
+      bool top_level = true;
+      if (label != 0 && ACE_OS::strlen (label) > 0)
         {
+          top_level = false;
+          outstream << label;
+          if (params.use_index)
+            outstream << "[" << params.index << "]";
+        }
+      proto_tree *subtree = params.tree;
+      if (this->subtree_label_ != 0)
+        {
+          if (top_level)
+            outstream << "Sample Payload: ";
+          else
+            outstream << " : ";
+          outstream << subtree_label_;
+          std::string buffer = outstream.str();
           proto_item *item =
-            proto_tree_add_text (tree, tvb, offset, len,
-                                 "Sample Payload: %s", label_);
-          tree = proto_item_add_subtree (item, ett_payload_);
+            proto_tree_add_text (params.tree, params.tvb, params.offset, len,
+                                 "%s", buffer.c_str());
+          subtree = proto_item_add_subtree (item, ett_payload_);
+          params.use_index = false;
         }
 
       if (field_ != 0)
-        data_pos += field_->dissect_i (tvb, pinfo, tree, offset, data);
+        {
+          Wireshark_Bundle_Field fp;
+          fp.tvb = params.tvb;
+          fp.info = params.info;
+          fp.tree = subtree;
+          fp.offset = params.offset;
+          fp.use_index = params.use_index;
+          fp.index = params.index;
+          fp.data = data;
+          data_pos += field_->dissect_i (fp);
+        }
 
       return data_pos;
     }
@@ -405,42 +419,45 @@ namespace OpenDDS
       return field_->compute_length (data);
     }
 
-    void
-    Sample_Dissector::dissect (tvbuff_t *tvb,
-                          packet_info *pinfo,
-                          proto_tree *tree,
-                          gint &offset)
+    gint
+    Sample_Dissector::dissect (Wireshark_Bundle &params)
     {
-      offset += this->dissect_i (tvb, pinfo, tree, offset);
+      Wireshark_Bundle_i sp;
+      sp.tvb = params.tvb;
+      sp.info = params.info;
+      sp.tree = params.tree;
+      sp.offset = params.offset;
+      sp.use_index = false;
+      sp.index = 0;
+      return params.offset + this->dissect_i (sp, "");
     }
 
     //----------------------------------------------------------------------
 
-    Sample_String::Sample_String (const char *label)
+    Sample_String::Sample_String ()
     {
-      size_t len = label != 0 ? ACE_OS::strlen(label) : 0;
-      this->label_ = new char[len+1];
-      if (len > 0)
-        ACE_OS::strcpy (this->label_, label);
     }
 
     size_t
-    Sample_String::dissect_i (tvbuff_t *tvb,
-                              packet_info *,
-                              proto_tree *tree,
-                              gint offset)
+    Sample_String::dissect_i (Wireshark_Bundle_i &params, const char *label)
     {
-      gint remainder = tvb->length - offset;
-      char * data = (char *)ep_tvb_memdup(tvb, offset, remainder);
+      guint8 *data = params.get_remainder ();
       guint32 len = *(reinterpret_cast< guint32 * >(data));
+      data += 4;
+      guint8 *last = data + len;
 
-      char * clone = new char[len + 1];
-      ACE_OS::memcpy (clone, data+4, len);
-      clone[len] = '\0';
-      proto_tree_add_text (tree, tvb, offset, (len) + 4,
-                           "%s: %s", this->label_, clone);
-      delete [] clone;
+      std::stringstream outstream;
+      outstream << label;
+      if (params.use_index)
+        outstream << "[" << params.index << "]";
+      outstream << ": ";
+      while (data != last)
+        outstream << *(data++);
+      outstream << std::ends;
+      std::string buffer = outstream.str();
 
+      proto_tree_add_text (params.tree, params.tvb, params.offset, len + 4,
+                           "%s", buffer.c_str());
       return len + 4;
     }
 
@@ -453,33 +470,33 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_WString::Sample_WString (const char *label)
+    Sample_WString::Sample_WString ()
     {
-      size_t len = label != 0 ? ACE_OS::strlen(label) : 0;
-      this->label_ = new char[len+1];
-      if (len > 0)
-        ACE_OS::strcpy (this->label_, label);
     }
 
     size_t
-    Sample_WString::dissect_i (tvbuff_t *tvb,
-                               packet_info *,
-                               proto_tree *tree,
-                               gint offset)
+    Sample_WString::dissect_i (Wireshark_Bundle_i &params, const char *label)
     {
-      gint remainder = tvb->length - offset;
-      char * data = (char *)ep_tvb_memdup(tvb, offset, remainder);
+      guint8* data = params.get_remainder();
       guint32 len =
-        *(reinterpret_cast< guint32 * >(data)) * sizeof (ACE_CDR::WChar);
+        *(reinterpret_cast< guint32 * >(data));
+      guint32 width = len * sizeof (ACE_CDR::WChar);
 
-      wchar_t * clone = new wchar_t[len + 1];
-      ACE_OS::memcpy (clone, data+4, len);
-      clone[len] = '\0';
-      proto_tree_add_text (tree, tvb, offset, (len) + 4,
-                           "%s: %ls", this->label_, clone);
+      std::stringstream outstream;
+      outstream << label;
+      if (params.use_index)
+        outstream << "[" << params.index << "]";
+      outstream << ":" << std::ends;
+      std::string buffer = outstream.str();
+
+      ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1];
+      ACE_OS::memcpy (clone, data+4, width);
+      clone[len] = 0;
+      proto_tree_add_text (params.tree, params.tvb, params.offset,
+                           width + 4, "%s %ls", buffer.c_str(), clone);
       delete [] clone;
 
-      return len + 4;
+      return width + 4;
     }
 
     size_t
@@ -488,15 +505,31 @@ namespace OpenDDS
       return 4 + *(reinterpret_cast< guint32 * >(data)) * sizeof (ACE_CDR::WChar);
     }
 
-
-
     //----------------------------------------------------------------------
 
-    Sample_Sequence::Sample_Sequence (const char *label)
+    Sample_Sequence::Sample_Sequence (Sample_Field *f)
       : element_ (0)
     {
-      this->init ("",label);
+      this->init ("","sequence");
       element_ = new Sample_Dissector;
+      if (f)
+        {
+          element_->add_field (f);
+        }
+    }
+
+    Sample_Sequence::Sample_Sequence (Sample_Dissector *sub)
+      : element_ (sub)
+    {
+      this->init ("","sequence");
+    }
+
+    Sample_Sequence::Sample_Sequence (Sample_Field::FixedTypeID type_id)
+      : element_ (0)
+    {
+      this->init ("","sequence");
+      element_ = new Sample_Dissector;
+      element_->add_field (new Sample_Field (type_id, "element"));
     }
 
     Sample_Sequence::~Sample_Sequence ()
@@ -511,28 +544,32 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Sequence::dissect_i (tvbuff_t *tvb,
-                                packet_info *pinfo,
-                                proto_tree *tree,
-                                gint offset)
+    Sample_Sequence::dissect_i (Wireshark_Bundle_i &params, const char *label)
     {
-      gint remainder = tvb->length - offset;
-      guint8 *data = (guint8 *)ep_tvb_memdup(tvb, offset, remainder);
+      guint8 *data = params.get_remainder();
       guint32 len = compute_length (data);
       guint32 count = *(reinterpret_cast< guint32 * >(data));
-      if (this->label_ != 0)
-        {
-          proto_item *item =
-            proto_tree_add_text (tree, tvb, offset, len,
-                                 "%s [%d]", label_, count);
-          tree = proto_item_add_subtree (item, ett_payload_);
-        }
+
+      std::stringstream outstream;
+      outstream << label;
+      if (params.use_index)
+        outstream << "[" << params.index << "]";
+      outstream << " (length = " << count << ")" << std::ends;
+      std::string buffer = outstream.str();
+      proto_item *item =
+        proto_tree_add_text (params.tree, params.tvb, params.offset,
+                             len,"%s", buffer.c_str());
+      proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
       size_t data_pos = 4;
-      for (guint32 i = 0; i < count; i++)
+      Wireshark_Bundle_i sp = params;
+      sp.tree = subtree;
+      sp.use_index = true;
+      for (guint32 ndx = 0; ndx < count; ndx++)
         {
-          data_pos += element_->dissect_i (tvb, pinfo, tree,
-                                           offset + data_pos);
+          sp.index = ndx;
+          sp.offset = params.offset + data_pos;
+          data_pos += element_->dissect_i (sp, label);
         }
       return data_pos;
     }
@@ -555,39 +592,52 @@ namespace OpenDDS
       return len;
     }
 
-
-
     //----------------------------------------------------------------------
 
-    Sample_Array::Sample_Array (const char *label,size_t count)
-      : Sample_Sequence (label),
-        count_(count)
+    Sample_Array::Sample_Array (size_t count, Sample_Field *field)
+      :Sample_Sequence (field),
+       count_(count)
+    {
+    }
+    Sample_Array::Sample_Array (size_t count, Sample_Dissector *sub)
+      : Sample_Sequence (sub),
+        count_ (count)
     {
     }
 
-    size_t
-    Sample_Array::dissect_i (tvbuff_t *tvb,
-                             packet_info *pinfo,
-                             proto_tree *tree,
-                             gint offset)
+    Sample_Array::Sample_Array (size_t count, Sample_Field::FixedTypeID type_id)
+      : Sample_Sequence (type_id),
+        count_ (count)
     {
+    }
 
-      gint remainder = tvb->length - offset;
-      guint8 * data = (guint8 *)ep_tvb_memdup(tvb, offset, remainder);
+
+    size_t
+    Sample_Array::dissect_i (Wireshark_Bundle_i &params, const char *label)
+    {
+      guint8 * data = params.get_remainder();
       size_t len = compute_length (data);
 
-      if (this->label_ != 0)
-        {
-          proto_item *item =
-            proto_tree_add_text (tree, tvb, offset, len, "%s", label_);
-          tree = proto_item_add_subtree (item, ett_payload_);
-        }
+      std::stringstream outstream;
+      outstream << label;
+      if (params.use_index)
+        outstream << "[" << params.index << "]";
+      outstream << " (length = " << count_ << ")" << std::ends;
+      std::string buffer = outstream.str();
+      proto_item *item =
+        proto_tree_add_text (params.tree, params.tvb, params.offset,
+                             len,"%s", buffer.c_str());
+      proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
       size_t data_pos = 0;
-      for (size_t i = 0; i < count_; i++)
+      Wireshark_Bundle_i sp = params;
+      sp.tree = subtree;
+      sp.use_index = true;
+      for (guint32 ndx = 0; ndx < count_; ndx++)
         {
-          data_pos += element_->dissect_i (tvb, pinfo, tree,
-                                           offset + data_pos );
+          sp.index = ndx;
+          sp.offset = params.offset + data_pos;
+          data_pos += element_->dissect_i (sp, label);
         }
       return data_pos;
     }
@@ -608,44 +658,40 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Enum::Sample_Enum (const char *label)
-      : name_ (0)
+    Sample_Enum::Sample_Enum ()
+      : value_ (0)
     {
-      size_t len = ACE_OS::strlen(label);
-      if (len > 0)
-        {
-          this->label_ = new char[len+1];
-          ACE_OS::strcpy (this->label_, label);
-        }
     }
 
     Sample_Enum::~Sample_Enum ()
     {
-      delete name_;
+      delete value_;
     }
 
     Sample_Field *
-    Sample_Enum::add_name (const char *name)
+    Sample_Enum::add_value (const char *name)
     {
-      return (name_ == 0) ?
-        (name_ = new Sample_Field (name, 4)) :
-        name_->chain (new Sample_Field (name, 4));
+      Sample_Field *sf = new Sample_Field (Sample_Field::Enumeration, name);
+      return (value_ == 0) ? (value_ = sf) : value_->chain (sf);
     }
 
     size_t
-    Sample_Enum::dissect_i (tvbuff_t *tvb,
-                            packet_info *,
-                            proto_tree *tree,
-                            gint offset)
+    Sample_Enum::dissect_i (Wireshark_Bundle_i &params, const char *label)
     {
+      guint8 * data = params.get_remainder();
       size_t len = 4;
-      char * data = (char *)ep_tvb_memdup(tvb, offset, len);
       guint32 value = *(reinterpret_cast< guint32 * >(data));
+      Sample_Field *sf = value_->get_link (value);
 
-      Sample_Field *sf = name_->get_link (value);
+      std::stringstream outstream;
+      outstream << label;
+      if (params.use_index)
+        outstream << "[" << params.index << "]";
+      outstream << ": " << sf->label_ << std::ends;
+      std::string buffer = outstream.str();
 
-      proto_tree_add_text (tree, tvb, offset, len,
-                           "%s: %s", label_, sf->format_);
+      proto_tree_add_text (params.tree, params.tvb, params.offset,
+                           len, "%s", buffer.c_str());
       return len;
     }
 
@@ -655,6 +701,61 @@ namespace OpenDDS
       return 4;
     }
 
+    //----------------------------------------------------------------------
+
+    Sample_Union::Sample_Union ()
+      :_d (0),
+       case_ (0)
+    {
+    }
+
+    Sample_Union::~Sample_Union ()
+    {
+      delete _d;
+      delete case_;
+    }
+
+    void
+    Sample_Union::discriminator (Sample_Dissector *d)
+    {
+      this->_d = d;
+    }
+
+    Sample_Field *
+    Sample_Union::add_case (Sample_Field *key, Sample_Field *value)
+    {
+      if (this->case_ == 0)
+        this->case_ = key;
+      else
+        this->case_->chain (key);
+      return key;
+
+    }
+
+    Sample_Field *
+    Sample_Union::add_case_range (Sample_Field *key_low,
+                                  Sample_Field *key_high,
+                                  Sample_Field *value)
+    {
+      return key_low;
+    }
+
+    void
+    Sample_Union::add_default (Sample_Field *value)
+    {
+    }
+
+    size_t
+    Sample_Union::compute_length (guint8 *data)
+    {
+      return 0;
+    }
+
+    size_t
+    Sample_Union::dissect_i (Wireshark_Bundle_i &p, const char *l)
+    {
+      return 0;
+    }
 
   }
 }

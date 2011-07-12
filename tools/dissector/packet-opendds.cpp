@@ -433,7 +433,10 @@ namespace OpenDDS
           offset += header.message_length_; // skip marshaled data
         }
       else
-        data_dissector->dissect (tvb, pinfo, tree, offset);
+        {
+          Wireshark_Bundle params = {tvb, pinfo, tree, offset};
+          offset = data_dissector->dissect (params);
+        }
     }
 
     void

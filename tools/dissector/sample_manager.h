@@ -59,53 +59,29 @@ namespace OpenDDS
       static Sample_Manager instance_;
       SampleDissectorMap dissectors_;
 
-    };
-
     //-------------------------------------------------------
     // Temporary type-specific dissectors for testing
 
-    class dissector_Export LocationInfo_Dissector : public Sample_Dissector
-    {
-    public:
-      LocationInfo_Dissector ();
-    };
+      Sample_Dissector *make_LocationInfo_Dissector ();
+      Sample_Dissector *make_PlanInfo_Dissector ();
+      Sample_Dissector *make_MoreInfo_Dissector ();
+      Sample_Dissector *make_UnrelatedInfo_Dissector ();
+      Sample_Dissector *make_Resulting_Dissector ();
 
-    class dissector_Export PlanInfo_Dissector : public Sample_Dissector
-    {
-    public:
-      PlanInfo_Dissector ();
-    };
+      Sample_Dissector *make_Message_Dissector ();
+      Sample_Dissector *make_Message2_Dissector ();
 
-    class dissector_Export MoreInfo_Dissector : public Sample_Dissector
-    {
-    public:
-      MoreInfo_Dissector ();
-    };
+      Sample_Dissector *make_A_Dissector();
+      Sample_Dissector *make_ShortArray_Dissector();
+      Sample_Dissector *make_ArrayOfShortArray_Dissector();
+      Sample_Dissector *make_StructSeq_Dissector();
+      Sample_Dissector *make_MyEnum_Dissector();
+      Sample_Dissector *make_MyUnion_Dissector();
 
-    class dissector_Export UnrelatedInfo_Dissector : public Sample_Dissector
-    {
-    public:
-      UnrelatedInfo_Dissector ();
-    };
+      Sample_Dissector *make_Source_Dissector();
+      Sample_Dissector *make_Target_Dissector();
 
-    class dissector_Export Resulting_Dissector : public Sample_Dissector
-    {
-    public:
-      Resulting_Dissector ();
     };
-
-    class dissector_Export Message_Dissector : public Sample_Dissector
-    {
-    public:
-      Message_Dissector ();
-    };
-
-    class dissector_Export Message2_Dissector : public Sample_Dissector
-    {
-    public:
-      Message2_Dissector ();
-    };
-
   }
 }
 

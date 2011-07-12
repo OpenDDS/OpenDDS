@@ -1,3 +1,19 @@
+Tue Jul 12 01:23:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Revised field labeling so that no field-specific information is
+          stored as state in the dissectors. This ensures that a single 
+          sample dissector can be used for multiple field instances. Combined
+          the wireshark parameters into a single struct. 
+        
+          Added initial implementation of the Union dissector. Still
+          working out the details for defining a Union.
+        
 Mon Jul 11 19:05:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
