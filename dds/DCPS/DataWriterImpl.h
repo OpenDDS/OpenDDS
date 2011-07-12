@@ -405,7 +405,6 @@ public:
   void send_suspended_data();
 
   void remove_all_associations();
-  void unregister_publication();
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);

@@ -26,7 +26,7 @@ class UdpInst;
 
 class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
 public:
-  UdpTransport(const TransportInst_rch& inst = 0); //TODO: default is only transitional
+  explicit UdpTransport(const TransportInst_rch& inst);
 
 protected:
   virtual DataLink* find_datalink(

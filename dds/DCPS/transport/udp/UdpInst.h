@@ -36,7 +36,6 @@ public:
 
 private:
   friend class UdpType;
-  friend class UdpGenerator; //TODO: transitional
   explicit UdpInst(const std::string& name);
 
   UdpTransport* new_impl(const TransportInst_rch& inst);

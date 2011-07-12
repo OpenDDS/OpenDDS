@@ -296,7 +296,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
     // with the transport, otherwise some callbacks resulted from
     // remove_association may lost.
     dw_servant->remove_all_associations();
-    dw_servant->unregister_publication();
 
     dw_servant->cleanup();
   }

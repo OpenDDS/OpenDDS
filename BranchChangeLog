@@ -1,38 +1,52 @@
+Tue Jul 12 22:27:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+
+          More cleanup of unused code.
+          Make the *Transport class constructors require a corresponding
+          *Inst object as a parameter (used to be optional).
+
 Tue Jul 12 22:15:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
-        * dds/DCPS/DataDurabilityCache.cpp
+        * dds/DCPS/DataDurabilityCache.cpp:
 
           Added error logging to fix an old //TODO comment.
 
-        * dds/DCPS/DataReaderImpl.cpp
-        * dds/DCPS/DataReaderImpl.h
-        * dds/DCPS/DataWriterImpl.cpp
-        * dds/DCPS/DataWriterImpl.h
-        * dds/DCPS/PublisherImpl.cpp
-        * dds/DCPS/SubscriberImpl.cpp
-        * dds/DCPS/transport/framework/DataLink.cpp
-        * dds/DCPS/transport/framework/DataLink.h
-        * dds/DCPS/transport/framework/DataLink.inl
-        * dds/DCPS/transport/framework/SendResponseListener.h
-        * dds/DCPS/transport/framework/TransportClient.cpp
-        * dds/DCPS/transport/framework/TransportClient.h
-        * dds/DCPS/transport/framework/TransportFactory.cpp
-        * dds/DCPS/transport/framework/TransportFactory.h
-        * dds/DCPS/transport/framework/TransportFactory.inl
-        * dds/DCPS/transport/framework/TransportImpl.cpp
-        * dds/DCPS/transport/framework/TransportImpl.h
-        * dds/DCPS/transport/framework/TransportImpl.inl
-        * dds/DCPS/transport/framework/TransportReceiveListener.h
-        * dds/DCPS/transport/framework/TransportRegistry.h
-        * dds/DCPS/transport/framework/TransportSendListener.h
-        * dds/DCPS/transport/framework/TransportType.h
-        * dds/DCPS/transport/multicast/MulticastInst.h
-        * dds/DCPS/transport/multicast/MulticastLoader.cpp
-        * dds/DCPS/transport/multicast/MulticastTransport.cpp
-        * dds/DCPS/transport/multicast/MulticastTransport.h
-        * dds/DCPS/transport/tcp/TcpLoader.cpp
-        * dds/InfoRepo/DCPS_IR_Domain.h
-        * dds/idl/ts_generator.cpp
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkinl:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactoryinl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImplinl:
+        * dds/DCPS/transport/framework/TransportReceiveListener.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportType.h:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/idl/ts_generator.cpp:
 
           Removed classes that are no longer used (see below).
           Added locking and cleanup for TransportClient data structures.
@@ -41,30 +55,30 @@ Tue Jul 12 22:15:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
           instead the Transport*Listener classes are used (based on the
           data structures in the DataLink).
 
-        * dds/DCPS/transport/framework/TransportGenerator.cpp
-        * dds/DCPS/transport/framework/TransportGenerator.h
-        * dds/DCPS/transport/framework/TransportGenerator_rch.h
-        * dds/DCPS/transport/framework/TransportImplFactory.cpp
-        * dds/DCPS/transport/framework/TransportImplFactory.h
-        * dds/DCPS/transport/framework/TransportImplFactory.inl
-        * dds/DCPS/transport/framework/TransportImplFactory_rch.h
-        * dds/DCPS/transport/framework/TransportInterface.cpp
-        * dds/DCPS/transport/framework/TransportInterface.h
-        * dds/DCPS/transport/framework/TransportInterface.inl
-        * dds/DCPS/transport/multicast/MulticastFactory.cpp
-        * dds/DCPS/transport/multicast/MulticastFactory.h
-        * dds/DCPS/transport/multicast/MulticastGenerator.cpp
-        * dds/DCPS/transport/multicast/MulticastGenerator.h
-        * dds/DCPS/transport/tcp/TcpFactory.cpp
-        * dds/DCPS/transport/tcp/TcpFactory.h
-        * dds/DCPS/transport/tcp/TcpFactory.inl
-        * dds/DCPS/transport/tcp/TcpGenerator.cpp
-        * dds/DCPS/transport/tcp/TcpGenerator.h
-        * dds/DCPS/transport/udp/UdpFactory.cpp
-        * dds/DCPS/transport/udp/UdpFactory.h
-        * dds/DCPS/transport/udp/UdpGenerator.cpp
-        * dds/DCPS/transport/udp/UdpGenerator.h
-        * dds/DCPS/transport/udp/UdpLoader.cpp
+        * dds/DCPS/transport/framework/TransportGenerator.cpp:
+        * dds/DCPS/transport/framework/TransportGenerator.h:
+        * dds/DCPS/transport/framework/TransportGenerator_rch.h:
+        * dds/DCPS/transport/framework/TransportImplFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImplFactory.h:
+        * dds/DCPS/transport/framework/TransportImplFactoryinl:
+        * dds/DCPS/transport/framework/TransportImplFactory_rch.h:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterfaceinl:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/tcp/TcpFactory.cpp:
+        * dds/DCPS/transport/tcp/TcpFactory.h:
+        * dds/DCPS/transport/tcp/TcpFactoryinl:
+        * dds/DCPS/transport/tcp/TcpGenerator.cpp:
+        * dds/DCPS/transport/tcp/TcpGenerator.h:
+        * dds/DCPS/transport/udp/UdpFactory.cpp:
+        * dds/DCPS/transport/udp/UdpFactory.h:
+        * dds/DCPS/transport/udp/UdpGenerator.cpp:
+        * dds/DCPS/transport/udp/UdpGenerator.h:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
 
           Removed these files.
 

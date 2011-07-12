@@ -89,7 +89,6 @@ public:
 
 private:
   friend class TcpType;
-  friend class TcpGenerator; //TODO: transitional
   explicit TcpInst(const std::string& name);
   virtual ~TcpInst();
 

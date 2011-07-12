@@ -625,12 +625,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   }
 }
 
-void DataWriterImpl::unregister_publication()
-{
-  DBG_ENTRY_LVL("DataWriterImpl", "unregister_publication", 6);
-  //TODO: AHM will we need this?
-}
-
 void DataWriterImpl::remove_all_associations()
 {
   OpenDDS::DCPS::ReaderIdSeq readers;
