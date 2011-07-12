@@ -22,16 +22,11 @@ extern "C" {
 #include <epan/ipproto.h>
 #include <epan/packet.h>
 #include <epan/dissectors/packet-tcp.h>
-  //#include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/TransportHeader.h"
-#include "ace/Hash_Map_Manager.h"
 
 namespace OpenDDS
 {
@@ -69,13 +64,13 @@ namespace OpenDDS
      * the data buffer
      */
 
-    class Sample_Field
+    class dissector_Export Sample_Field
     {
     public:
 
-      enum FixedTypeID {
+      enum IDLTypeID {
+        Boolean,
         Char,
-        Bool,
         Octet,
         WChar,
         Short,
@@ -87,25 +82,27 @@ namespace OpenDDS
         Float,
         Double,
         LongDouble,
+        String,  // not fixed, but pre-defined in IDL
+        WString,
         Enumeration,
         Undefined
       };
 
       /// @ctor for fixed length fields, supply a type identifier and a label
-      Sample_Field (FixedTypeID type_id, const char *label);
+      Sample_Field (IDLTypeID type_id, const char *label);
 
       /// @ctor for complex fields, supply a nested Sample_Dissector to handle
       /// the dissection. The Sample_Field takes ownership of the nested
       /// sample base value.
       Sample_Field (Sample_Dissector *n, const char *label);
 
-      ~Sample_Field ();
+      virtual ~Sample_Field ();
 
       /// Add a new field to the chain of fields describing the sample.
       /// returns the argument pointer to facilitate iterative construction
       /// of chains
       Sample_Field *chain (Sample_Field *n);
-      Sample_Field *chain (FixedTypeID ti, const char *l);
+      Sample_Field *chain (IDLTypeID ti, const char *l);
       Sample_Field *chain (Sample_Dissector *n, const char *l);
 
       /// Iterate over the list to return the n'th link returns null if n
@@ -115,16 +112,19 @@ namespace OpenDDS
       /// Add the field to the tree, either directly using the configured
       /// format and supplied data pointer, or by handing off to the attached
       /// Sample_Dissector object for further evaluation.
-      size_t dissect_i (Wireshark_Bundle_Field &params);
+      size_t dissect_i (Wireshark_Bundle_Field &params, std::string &alt_label);
 
+      size_t compute_field_length (guint8 *data);
       size_t compute_length (guint8 *data);
+
+      void to_stream (std::stringstream &s, guint8 *data);
 
       /// Fixed length fields supply a label for identifying the field along
       /// with a type identifier. Fields that are members of an array or
       /// sequence will have an index value adjusted as the owning dissector
       /// iterates over the members.
-      const char   *label_;
-      FixedTypeID   type_id_;
+      std::string label_;
+      IDLTypeID   type_id_;
 
       /// Variable length fields use a nested sample base value to do their
       /// dissection. This can be another configured sample_dissector instance,
@@ -151,7 +151,8 @@ namespace OpenDDS
     class dissector_Export Sample_Dissector
     {
     public:
-      Sample_Dissector ();
+      Sample_Dissector (const char *type_id = "",
+                        const char *subtree_label = "");
       virtual ~Sample_Dissector ();
 
       /// Initialize the instance with a type_id used for registration
@@ -171,14 +172,14 @@ namespace OpenDDS
       virtual size_t compute_length (guint8 *data);
 
       /// Accessor to the typeId value. Used for registration.
-      const char *typeId() const;
+      std::string &typeId();
 
       /// Adds a new sample field to the list. The Sample_Dissector instance
       /// takes ownership of this field instance. As a pass-thru to
       /// Sample_Field::chain(), it returns the supplied field pointer
       /// to facilitate simple chain construction.
       Sample_Field *add_field (Sample_Field *field);
-      Sample_Field *add_field (Sample_Field::FixedTypeID, const char *l);
+      Sample_Field *add_field (Sample_Field::IDLTypeID, const char *l);
       Sample_Field *add_field (Sample_Dissector *n, const char *l);
 
       /// The actual dissector metheod. Since a sample can be composed of
@@ -186,59 +187,27 @@ namespace OpenDDS
       /// does not directly modify the supplied offset value, rather it
       /// returns the actual number of octets consumed for this dissection,
       /// however complicated it may be.
-      virtual size_t dissect_i (Wireshark_Bundle_i &p, const char *l);
+      virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
+
+      /// Used primarily for constructing unions, returns the typeid for the
+      /// first field in the list. Returns Undefined if there are not exactly
+      /// one fields in the list.
+      Sample_Field::IDLTypeID get_field_type ();
+
+      std::string stringify (guint8 *data);
 
     protected:
       /// Values used by the wireshark framework for rendering a sub-tree.
       /// These get set in init(), a subtree is defined only if label_ is not
       /// empty.
       gint ett_payload_;
-      char *subtree_label_;
+      std::string subtree_label_;
 
     private:
-      char *typeId_;
+      std::string typeId_;
 
       /// The list of fields defining the sample.
       Sample_Field *field_;
-
-    };
-
-    /*
-     * A specialized sample dissector for rendering strings. Strings are
-     * composed of a 4-byte length followed by that number of characters
-     * and no terminating 0. Sample_String instances should only be used
-     * as a field in some other sample.
-     */
-    class dissector_Export Sample_String : public Sample_Dissector
-    {
-    public:
-      /// *ctor. The supplied label is used as the field identifier in the
-      /// dissector, which uses "%s: %s" as the format for this string. The
-      /// label supplied here will be printed as the first part, and the
-      /// actual data string as the second part.
-      Sample_String ();
-
-      virtual size_t compute_length (guint8 *data);
-
-
-    protected:
-      virtual size_t dissect_i (Wireshark_Bundle_i &p, const char *l);
-
-    };
-
-    class dissector_Export Sample_WString : public Sample_Dissector
-    {
-    public:
-      /// @ctor. The supplied label is used as the field identifier in the
-      /// dissector, which uses "%s: %ls" as the format for this string. The
-      /// label supplied here will be printed as the first part, and the
-      /// actual data string as the second part.
-      Sample_WString ();
-
-      virtual size_t compute_length (guint8 *data);
-
-    protected:
-      virtual size_t dissect_i (Wireshark_Bundle_i &p, const char *l);
 
     };
 
@@ -251,9 +220,9 @@ namespace OpenDDS
     public:
       /// @ctor. Creates an empty base element to be initialized after this
       /// sample sequence holder is created
-      Sample_Sequence (Sample_Field *field = 0);
-      Sample_Sequence (Sample_Dissector *sub);
-      Sample_Sequence (Sample_Field::FixedTypeID type_id);
+      Sample_Sequence (const char *type_id, Sample_Field *field = 0);
+      Sample_Sequence (const char *type_id, Sample_Dissector *sub);
+      Sample_Sequence (const char *type_id, Sample_Field::IDLTypeID field_id);
       ~Sample_Sequence ();
 
       Sample_Dissector *element();
@@ -261,7 +230,7 @@ namespace OpenDDS
       virtual size_t compute_length (guint8 *data);
 
     protected:
-      virtual size_t dissect_i (Wireshark_Bundle_i &p, const char *l);
+      virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
 
       Sample_Dissector *element_;
     };
@@ -276,14 +245,14 @@ namespace OpenDDS
     class dissector_Export Sample_Array : public Sample_Sequence
     {
     public:
-      Sample_Array (size_t count, Sample_Field *field = 0);
-      Sample_Array (size_t count, Sample_Dissector *sub);
-      Sample_Array (size_t count, Sample_Field::FixedTypeID type_id);
+      Sample_Array (const char *type_id, size_t count, Sample_Field *field = 0);
+      Sample_Array (const char *type_id, size_t count, Sample_Dissector *sub);
+      Sample_Array (const char *type_id, size_t count, Sample_Field::IDLTypeID field_id);
 
       virtual size_t compute_length (guint8 *data);
 
     protected:
-      virtual size_t dissect_i (Wireshark_Bundle_i &p, const char *l);
+      virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
       size_t count_;
     };
 
@@ -299,18 +268,53 @@ namespace OpenDDS
     class dissector_Export Sample_Enum : public Sample_Dissector
     {
     public:
-      Sample_Enum ();
+      Sample_Enum (const char *type_id);
       ~Sample_Enum ();
 
       Sample_Field *add_value (const char *val);
 
       virtual size_t compute_length (guint8 *data);
-
+      bool index_of (std::string &value, size_t &result);
 
     protected:
-      virtual size_t dissect_i (Wireshark_Bundle_i &p, const char *l);
+      virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
 
       Sample_Field *value_;
+    };
+
+    /*
+     * Switch Case is used by the union dissector to manage the list of
+     * value selectors. A single switch case may be composed of multiple
+     * discrete values, or ranges. Since the discriminator type is ordinal,
+     * a range is accepted as any value less than or equal to the value
+     *
+     * The field value is owned by the last element in the span, setting or
+     * getting the field value will recurse over the span_ list to ensure
+     * only the last member of the span has the field.
+     *
+     * Multiple case values are chained using the Sample_Field::next_ list.
+     */
+
+    class dissector_Export Switch_Case : public Sample_Field
+    {
+    public:
+      Switch_Case (Sample_Field::IDLTypeID type_id,
+                   const char *label,
+                   Sample_Field *field = 0);
+
+      ~Switch_Case ();
+
+      Switch_Case *add_range (const char *label);
+      Switch_Case *chain (const char *label, Sample_Field *field = 0);
+      Switch_Case *chain (Switch_Case *next);
+
+      Sample_Field *do_switch (std::string &_d, guint8 *data);
+      Sample_Field *get_field ();
+      void set_field (Sample_Field *field);
+
+    protected:
+      Switch_Case *span_;
+      Sample_Field *field_;
     };
 
     /*
@@ -318,30 +322,26 @@ namespace OpenDDS
      * marshaled as discriminator of some type, and a value of some type
      * determined by the discriminator.
      *
-     * TBD: have to figure out how to evaluate the descriminator to select
-     * the appropriate field instance. Since each discriminant field may
-     * itself be complex, they have to be held in separate chains.
      */
+
     class dissector_Export Sample_Union : public Sample_Dissector
     {
     public:
-      Sample_Union ();
+      Sample_Union (const char * type_id);
       ~Sample_Union ();
 
       void discriminator (Sample_Dissector *d);
-      Sample_Field *add_case (Sample_Field *key, Sample_Field *value);
-      Sample_Field *add_case_range (Sample_Field *key_low,
-                                    Sample_Field *key_high,
-                                    Sample_Field *value);
+      Switch_Case *add_case (const char *label, Sample_Field *field = 0);
       void add_default (Sample_Field *value);
 
       virtual size_t compute_length (guint8 *data);
 
     protected:
-      virtual size_t dissect_i (Wireshark_Bundle_i &p, const char *l);
+      virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
 
-      Sample_Dissector *_d;
-      Sample_Field *case_;
+      Sample_Dissector *discriminator_;
+      Switch_Case *cases_;
+      Sample_Field *default_;
     };
 
     /*
@@ -350,6 +350,13 @@ namespace OpenDDS
 
     class dissector_Export Sample_Alias : public Sample_Dissector
     {
+    public:
+      Sample_Alias (const char *type_id, Sample_Dissector *base);
+
+    protected:
+      virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
+
+      Sample_Dissector *base_;
     };
 
   }

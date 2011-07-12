@@ -38,7 +38,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    typedef ACE_Hash_Map_Manager <const char *, Sample_Dissector *, ACE_Null_Mutex> SampleDissectorMap;
+    typedef ACE_Hash_Map_Manager <std::string, Sample_Dissector *, ACE_Null_Mutex> SampleDissectorMap;
 
     /*
      * The Sample_Dessector_Manager is a singleton which contains a hash map
@@ -62,25 +62,31 @@ namespace OpenDDS
     //-------------------------------------------------------
     // Temporary type-specific dissectors for testing
 
-      Sample_Dissector *make_LocationInfo_Dissector ();
-      Sample_Dissector *make_PlanInfo_Dissector ();
-      Sample_Dissector *make_MoreInfo_Dissector ();
-      Sample_Dissector *make_UnrelatedInfo_Dissector ();
-      Sample_Dissector *make_Resulting_Dissector ();
+      void init_base_sequences();
+      void init_for_MultiTopicTest();
+      void init_for_CorbaSeqTest();
+      void init_for_MetaStructTest();
+      void init_for_QueryConditionTest();
+#if 0
+      void make_LocationInfo_Dissector ();
+      void make_PlanInfo_Dissector ();
+      void make_MoreInfo_Dissector ();
+      void make_UnrelatedInfo_Dissector ();
+      void make_Resulting_Dissector ();
 
-      Sample_Dissector *make_Message_Dissector ();
-      Sample_Dissector *make_Message2_Dissector ();
+      void make_Message_Dissector ();
+      void make_Message2_Dissector ();
 
-      Sample_Dissector *make_A_Dissector();
-      Sample_Dissector *make_ShortArray_Dissector();
-      Sample_Dissector *make_ArrayOfShortArray_Dissector();
-      Sample_Dissector *make_StructSeq_Dissector();
-      Sample_Dissector *make_MyEnum_Dissector();
-      Sample_Dissector *make_MyUnion_Dissector();
+      void make_A_Dissector();
+      void make_ShortArray_Dissector();
+      void make_ArrayOfShortArray_Dissector();
+      void make_StructSeq_Dissector();
+      void make_MyEnum_Dissector();
+      void make_MyUnion_Dissector();
 
-      Sample_Dissector *make_Source_Dissector();
-      Sample_Dissector *make_Target_Dissector();
-
+      void make_Source_Dissector();
+      void make_Target_Dissector();
+#endif
     };
   }
 }

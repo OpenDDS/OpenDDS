@@ -34,7 +34,7 @@ namespace OpenDDS
       return reinterpret_cast<guint8 *>(ep_tvb_memdup(tvb, offset, remainder));
     }
 
-    Sample_Field::Sample_Field (FixedTypeID id, const char *label)
+    Sample_Field::Sample_Field (IDLTypeID id, const char *label)
       : label_ (label),
         type_id_ (id),
         nested_ (0),
@@ -67,7 +67,7 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Field::chain (FixedTypeID ti, const char *l)
+    Sample_Field::chain (IDLTypeID ti, const char *l)
     {
       return chain (new Sample_Field (ti, l));
     }
@@ -88,7 +88,7 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Field::compute_length (guint8 *data)
+    Sample_Field::compute_field_length (guint8 *data)
     {
       size_t len = 0;
       switch (this->type_id_)
@@ -98,7 +98,7 @@ namespace OpenDDS
             len = sizeof (ACE_CDR::Char);
             break;
           }
-        case Bool:
+        case Boolean:
           {
             len = sizeof(ACE_CDR::Boolean);
             break;
@@ -158,6 +158,17 @@ namespace OpenDDS
             len = sizeof(ACE_CDR::LongDouble);
             break;
           }
+        case String:
+          {
+            len = 4 + *(reinterpret_cast< guint32 * >(data));
+            break;
+          }
+        case WString:
+          {
+            len = 4 +
+              *(reinterpret_cast< guint32 * >(data)) * sizeof (ACE_CDR::WChar);
+            break;
+          }
         case Enumeration:
           {
             len = 4;
@@ -169,111 +180,154 @@ namespace OpenDDS
               (nested_ == 0) ? 0 : this->nested_->compute_length (data);
           }
         }
+      return len;
+    }
+
+    size_t
+    Sample_Field::compute_length (guint8 *data)
+    {
+      size_t len = this->compute_field_length (data);
       if (next_ != 0)
         len += next_->compute_length (data+len);
       return len;
     }
 
-    template <typename T>
     void
-    to_stream (std::stringstream &outstream, size_t &len, guint8 *data)
+    Sample_Field::to_stream (std::stringstream &s, guint8 *data)
     {
-      len = sizeof (T);
-      T *c = reinterpret_cast <T *>(data);
-      outstream << *c << std::ends;
+      switch (this->type_id_)
+        {
+        case Char:
+          {
+            s << *reinterpret_cast<ACE_CDR::Char *>(data);
+            break;
+          }
+        case Boolean:
+          {
+            if (*reinterpret_cast<ACE_CDR::Boolean *>(data))
+              s << "true";
+            else
+              s << "false";
+            break;
+          }
+        case Octet:
+          {
+            s << *reinterpret_cast<ACE_CDR::Octet *>(data);
+            break;
+          }
+        case WChar:
+          {
+            s << *reinterpret_cast<ACE_CDR::WChar *>(data);
+            break;
+          }
+        case Short:
+          {
+            s << *reinterpret_cast<ACE_CDR::Short *>(data);
+            break;
+          }
+        case UShort:
+          {
+            s << *reinterpret_cast<ACE_CDR::UShort *>(data);
+            break;
+          }
+        case Long:
+          {
+            s << *reinterpret_cast<ACE_CDR::Long *>(data);
+            break;
+          }
+        case ULong:
+          {
+            s << *reinterpret_cast<ACE_CDR::ULong *>(data);
+            break;
+          }
+        case LongLong:
+          {
+            s << *reinterpret_cast<ACE_CDR::LongLong *>(data);
+            break;
+          }
+        case ULongLong:
+          {
+            s << *reinterpret_cast<ACE_CDR::ULongLong *>(data);
+            break;
+          }
+        case Float:
+          {
+            s << *reinterpret_cast<ACE_CDR::Float *>(data);
+            break;
+          }
+        case Double:
+          {
+            s << *reinterpret_cast<ACE_CDR::Double *>(data);
+            break;
+          }
+        case LongDouble:
+          {
+            s << *reinterpret_cast<ACE_CDR::LongDouble *>(data);
+            break;
+          }
+        case String:
+          {
+            guint32 len = *(reinterpret_cast< guint32 * >(data));
+            data += 4;
+            guint8 *last = data + len;
+            while (data != last)
+              s << *(data++);
+            break;
+          }
+        case WString:
+          {
+            break; // handled separately
+          }
+        case Enumeration:
+          {
+            break; // only the label is used, not directly presented
+          }
+        case Undefined:
+          {
+            s << "type undefined";
+          }
+        }
     }
 
     size_t
-    Sample_Field::dissect_i (Wireshark_Bundle_Field &params)
+    Sample_Field::dissect_i (Wireshark_Bundle_Field &params,
+                             std::string &alt_label)
     {
       size_t len = 0;
       if (this->nested_ == 0)
         {
           std::stringstream outstream;
-          outstream << this->label_;
+          if (this->label_.empty())
+            outstream << alt_label;
+          else
+            outstream << this->label_;
           if (params.use_index)
             outstream << "[" << params.index << "]";
           outstream << ": ";
-          switch (this->type_id_)
+          len = compute_field_length (params.data);
+          if (this->type_id_ != WString)
             {
-            case Char:
-              {
-                to_stream<ACE_CDR::Char>(outstream, len, params.data);
-                break;
-              }
-            case Bool:
-              {
-                to_stream<ACE_CDR::Boolean>(outstream, len, params.data);
-                break;
-              }
-            case Octet:
-              {
-                to_stream<ACE_CDR::Octet>(outstream, len, params.data);
-                break;
-              }
-            case WChar:
-              {
-                to_stream<ACE_CDR::WChar>(outstream, len, params.data);
-                break;
-              }
-            case Short:
-              {
-                to_stream<ACE_CDR::Short>(outstream, len, params.data);
-                break;
-              }
-            case UShort:
-              {
-                to_stream<ACE_CDR::UShort>(outstream, len, params.data);
-                break;
-              }
-            case Long:
-              {
-                to_stream<ACE_CDR::Long>(outstream, len, params.data);
-                break;
-              }
-            case ULong:
-              {
-                to_stream<ACE_CDR::ULong>(outstream, len, params.data);
-                break;
-              }
-            case LongLong:
-              {
-                to_stream<ACE_CDR::LongLong>(outstream, len, params.data);
-                break;
-              }
-            case ULongLong:
-              {
-                to_stream<ACE_CDR::ULongLong>(outstream, len, params.data);
-                break;
-              }
-            case Float:
-              {
-                to_stream<ACE_CDR::Float>(outstream, len, params.data);
-                break;
-              }
-            case Double:
-              {
-                to_stream<ACE_CDR::Double>(outstream, len, params.data);
-                break;
-              }
-            case LongDouble:
-              {
-                to_stream<ACE_CDR::LongDouble>(outstream, len, params.data);
-                break;
-              }
-            case Enumeration:
-              {
-                break; // only the label is used, not directly presented
-              }
-            case Undefined:
-              {
-                outstream << "type undefined" << std::ends;
-                len = 1;
-              }
+              this->to_stream (outstream, params.data);
+              outstream << std::ends;
+              std::string buffer = outstream.str();
+              proto_tree_add_text (params.tree, params.tvb, params.offset,
+                                   len, "%s", buffer.c_str());
             }
-          std::string buffer = outstream.str();
-          proto_tree_add_text (params.tree, params.tvb, params.offset,
-                               len, "%s", buffer.c_str());
+          else
+            {
+              guint32 len =
+                *(reinterpret_cast< guint32 * >(params.data));
+              guint32 width = len * sizeof (ACE_CDR::WChar);
+              outstream << std::ends;
+              std::string buffer = outstream.str();
+
+              ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1];
+              ACE_OS::memcpy (clone, params.data+4, width);
+              clone[len] = 0;
+              proto_tree_add_text (params.tree, params.tvb, params.offset,
+                                   width + 4, "%s %ls", buffer.c_str(), clone);
+              delete [] clone;
+            }
         }
       else
         {
@@ -283,50 +337,49 @@ namespace OpenDDS
       params.offset += len;
       params.data += len;
       if (next_ != 0)
-        len += next_->dissect_i (params);
+        len += next_->dissect_i (params, this->label_);
       return len;
     }
 
     //------------------------------------------------------------------------
 
-    Sample_Dissector::Sample_Dissector ()
+    Sample_Dissector::Sample_Dissector (const char *type_id,
+                                        const char *subtree)
       :ett_payload_ (-1),
-       subtree_label_ (0),
-       typeId_ (0),
+       subtree_label_(),
+       typeId_ (),
        field_ (0)
     {
+      if (type_id != 0 || subtree != 0)
+        this->init (type_id, subtree);
     }
 
     Sample_Dissector::~Sample_Dissector ()
     {
-      delete [] this->typeId_;
-      delete [] this->subtree_label_;
       delete field_;
     }
 
-    const char *
-    Sample_Dissector::typeId() const
+    std::string &
+    Sample_Dissector::typeId()
     {
       return this->typeId_;
     }
 
     void
     Sample_Dissector::init (const char *type_id,
-                       const char *subtree)
+                            const char *subtree)
     {
-      size_t len = ACE_OS::strlen(type_id);
+      size_t len = (type_id == 0) ? 0 : ACE_OS::strlen(type_id);
       if (len > 0)
         {
-          this->typeId_ = new char[len+1];
-          ACE_OS::strcpy (this->typeId_, type_id);
+          this->typeId_ = type_id;
           Sample_Manager::instance().add (*this);
         }
 
-      len = ACE_OS::strlen(subtree);
+      len = (subtree == 0) ? 0 : ACE_OS::strlen(subtree);
       if (len > 0)
         {
-          this->subtree_label_ = new char[len+1];
-          ACE_OS::strcpy (this->subtree_label_, subtree);
+          this->subtree_label_ = subtree;
 
           gint *ett[] = {
             &ett_payload_
@@ -350,7 +403,7 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (Sample_Field::FixedTypeID type_id,
+    Sample_Dissector::add_field (Sample_Field::IDLTypeID type_id,
                                  const char *label)
     {
       return add_field (new Sample_Field (type_id, label));
@@ -364,7 +417,7 @@ namespace OpenDDS
 
     size_t
     Sample_Dissector::dissect_i (Wireshark_Bundle_i &params,
-                                 const char *label)
+                                 std::string &label)
 
     {
       size_t data_pos = 0;
@@ -373,7 +426,7 @@ namespace OpenDDS
       guint32 len = field_->compute_length (data);
       std::stringstream outstream;
       bool top_level = true;
-      if (label != 0 && ACE_OS::strlen (label) > 0)
+      if (!label.empty())
         {
           top_level = false;
           outstream << label;
@@ -381,7 +434,7 @@ namespace OpenDDS
             outstream << "[" << params.index << "]";
         }
       proto_tree *subtree = params.tree;
-      if (this->subtree_label_ != 0)
+      if (!this->subtree_label_.empty())
         {
           if (top_level)
             outstream << "Sample Payload: ";
@@ -406,7 +459,7 @@ namespace OpenDDS
           fp.use_index = params.use_index;
           fp.index = params.index;
           fp.data = data;
-          data_pos += field_->dissect_i (fp);
+          data_pos += field_->dissect_i (fp, label);
         }
 
       return data_pos;
@@ -429,88 +482,35 @@ namespace OpenDDS
       sp.offset = params.offset;
       sp.use_index = false;
       sp.index = 0;
-      return params.offset + this->dissect_i (sp, "");
+      std::string label;
+      return params.offset + this->dissect_i (sp, label);
     }
 
-    //----------------------------------------------------------------------
-
-    Sample_String::Sample_String ()
+    Sample_Field::IDLTypeID
+    Sample_Dissector::get_field_type ()
     {
+      if (field_ == 0 || field_->next_ != 0)
+        return Sample_Field::Undefined;
+      return field_->type_id_;
     }
 
-    size_t
-    Sample_String::dissect_i (Wireshark_Bundle_i &params, const char *label)
+    std::string
+    Sample_Dissector::stringify (guint8 *data)
     {
-      guint8 *data = params.get_remainder ();
-      guint32 len = *(reinterpret_cast< guint32 * >(data));
-      data += 4;
-      guint8 *last = data + len;
-
       std::stringstream outstream;
-      outstream << label;
-      if (params.use_index)
-        outstream << "[" << params.index << "]";
-      outstream << ": ";
-      while (data != last)
-        outstream << *(data++);
-      outstream << std::ends;
-      std::string buffer = outstream.str();
-
-      proto_tree_add_text (params.tree, params.tvb, params.offset, len + 4,
-                           "%s", buffer.c_str());
-      return len + 4;
-    }
-
-    size_t
-    Sample_String::compute_length (guint8 *data)
-    {
-      return 4 + *(reinterpret_cast< guint32 * >(data));
-    }
-
-
-    //----------------------------------------------------------------------
-
-    Sample_WString::Sample_WString ()
-    {
-    }
-
-    size_t
-    Sample_WString::dissect_i (Wireshark_Bundle_i &params, const char *label)
-    {
-      guint8* data = params.get_remainder();
-      guint32 len =
-        *(reinterpret_cast< guint32 * >(data));
-      guint32 width = len * sizeof (ACE_CDR::WChar);
-
-      std::stringstream outstream;
-      outstream << label;
-      if (params.use_index)
-        outstream << "[" << params.index << "]";
-      outstream << ":" << std::ends;
-      std::string buffer = outstream.str();
-
-      ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1];
-      ACE_OS::memcpy (clone, data+4, width);
-      clone[len] = 0;
-      proto_tree_add_text (params.tree, params.tvb, params.offset,
-                           width + 4, "%s %ls", buffer.c_str(), clone);
-      delete [] clone;
-
-      return width + 4;
-    }
-
-    size_t
-    Sample_WString::compute_length (guint8 *data)
-    {
-      return 4 + *(reinterpret_cast< guint32 * >(data)) * sizeof (ACE_CDR::WChar);
+      if (field_ != 0)
+        {
+          field_->to_stream (outstream, data);
+        }
+      return outstream.str();
     }
 
     //----------------------------------------------------------------------
 
-    Sample_Sequence::Sample_Sequence (Sample_Field *f)
+    Sample_Sequence::Sample_Sequence (const char *type_id, Sample_Field *f)
       : element_ (0)
     {
-      this->init ("","sequence");
+      this->init (type_id,"sequence");
       element_ = new Sample_Dissector;
       if (f)
         {
@@ -518,18 +518,20 @@ namespace OpenDDS
         }
     }
 
-    Sample_Sequence::Sample_Sequence (Sample_Dissector *sub)
+    Sample_Sequence::Sample_Sequence (const char *type_id,
+                                      Sample_Dissector *sub)
       : element_ (sub)
     {
-      this->init ("","sequence");
+      this->init (type_id, "sequence");
     }
 
-    Sample_Sequence::Sample_Sequence (Sample_Field::FixedTypeID type_id)
+    Sample_Sequence::Sample_Sequence (const char *type_id,
+                                      Sample_Field::IDLTypeID field_id)
       : element_ (0)
     {
-      this->init ("","sequence");
+      this->init (type_id,"sequence");
       element_ = new Sample_Dissector;
-      element_->add_field (new Sample_Field (type_id, "element"));
+      element_->add_field (new Sample_Field (field_id, ""));
     }
 
     Sample_Sequence::~Sample_Sequence ()
@@ -544,7 +546,7 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Sequence::dissect_i (Wireshark_Bundle_i &params, const char *label)
+    Sample_Sequence::dissect_i (Wireshark_Bundle_i &params, std::string &label)
     {
       guint8 *data = params.get_remainder();
       guint32 len = compute_length (data);
@@ -594,26 +596,32 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Array::Sample_Array (size_t count, Sample_Field *field)
-      :Sample_Sequence (field),
+    Sample_Array::Sample_Array (const char *type_id,
+                                size_t count,
+                                Sample_Field *field)
+      :Sample_Sequence (type_id, field),
        count_(count)
     {
     }
-    Sample_Array::Sample_Array (size_t count, Sample_Dissector *sub)
-      : Sample_Sequence (sub),
+    Sample_Array::Sample_Array (const char *type_id,
+                                size_t count,
+                                Sample_Dissector *sub)
+      : Sample_Sequence (type_id, sub),
         count_ (count)
     {
     }
 
-    Sample_Array::Sample_Array (size_t count, Sample_Field::FixedTypeID type_id)
-      : Sample_Sequence (type_id),
+    Sample_Array::Sample_Array (const char *type_id,
+                                size_t count,
+                                Sample_Field::IDLTypeID field_id)
+      : Sample_Sequence (type_id, field_id),
         count_ (count)
     {
     }
 
 
     size_t
-    Sample_Array::dissect_i (Wireshark_Bundle_i &params, const char *label)
+    Sample_Array::dissect_i (Wireshark_Bundle_i &params, std::string &label)
     {
       guint8 * data = params.get_remainder();
       size_t len = compute_length (data);
@@ -658,9 +666,10 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Enum::Sample_Enum ()
+    Sample_Enum::Sample_Enum (const char *type_id)
       : value_ (0)
     {
+      this->init (type_id, "");
     }
 
     Sample_Enum::~Sample_Enum ()
@@ -676,7 +685,7 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Enum::dissect_i (Wireshark_Bundle_i &params, const char *label)
+    Sample_Enum::dissect_i (Wireshark_Bundle_i &params, std::string &label)
     {
       guint8 * data = params.get_remainder();
       size_t len = 4;
@@ -687,7 +696,10 @@ namespace OpenDDS
       outstream << label;
       if (params.use_index)
         outstream << "[" << params.index << "]";
-      outstream << ": " << sf->label_ << std::ends;
+      if (sf == 0)
+        outstream << ": <value out of bounds: " << value << "> " << std::ends;
+      else
+        outstream << ": " << sf->label_ << std::ends;
       std::string buffer = outstream.str();
 
       proto_tree_add_text (params.tree, params.tvb, params.offset,
@@ -695,66 +707,214 @@ namespace OpenDDS
       return len;
     }
 
-     size_t
+    size_t
     Sample_Enum::compute_length (guint8 *)
     {
       return 4;
     }
 
+    bool
+    Sample_Enum::index_of (std::string &value, size_t &result)
+    {
+      result = 0;
+      Sample_Field *iter = value_;
+      while (iter != 0)
+        {
+          if (iter->label_.compare (value) == 0)
+            return true;
+          result++;
+          iter = iter->next_;
+        }
+      return false;
+    }
+
     //----------------------------------------------------------------------
 
-    Sample_Union::Sample_Union ()
-      :_d (0),
-       case_ (0)
+    Switch_Case::Switch_Case (Sample_Field::IDLTypeID type_id,
+                              const char *label,
+                              Sample_Field *field)
+      : Sample_Field (type_id, label),
+        span_(0),
+        field_ (field)
     {
+    }
+
+    Switch_Case::~Switch_Case ()
+    {
+      delete span_;
+      delete field_;
+    }
+
+    Switch_Case *
+    Switch_Case::add_range (const char *label)
+    {
+      Switch_Case *c = new Switch_Case (this->type_id_,
+                                        label);
+      c->field_ = this->field_;
+      this->field_ = 0;
+      if (span_ == 0)
+        span_ = c;
+      else
+        {
+          Switch_Case *last = span_;
+          while (last->span_ != 0)
+            last = last->span_;
+          c->field_ = last->field_;
+          last->field_ = 0;
+          last->span_ = c;
+        }
+      return c;
+    }
+
+    Switch_Case *
+    Switch_Case::chain (Switch_Case *next)
+    {
+      Sample_Field::chain (next);
+      return next;
+    }
+
+    Switch_Case *
+    Switch_Case::chain (const char *label, Sample_Field *field)
+    {
+      return chain (new Switch_Case (this->type_id_,label, field));
+    }
+
+    Sample_Field *
+    Switch_Case::do_switch (std::string &_d, guint8 *data)
+    {
+      // extract the discriminator value pointed to by data,
+      // convert element label and compare. If lower_bound_ is nil,
+      // exactly match label, otherwise match
+      // accept any value between the converted "lower_bound_" and the "label_"
+      Sample_Field *value = 0;
+      if (_d.compare (this->label_) == 0)
+        value = this->get_field();
+
+      if (this->span_ != 0)
+        value = this->span_->do_switch (_d,data);
+
+      Switch_Case *sc = dynamic_cast<Switch_Case *>(this->next_);
+      if ( value == 0 && next_ != 0)
+        return sc->do_switch (_d,data);
+      return value;
+    }
+
+    Sample_Field *
+    Switch_Case::get_field ()
+    {
+      Switch_Case *last = this;
+      while (last->span_ != 0)
+        last = last->span_;
+      return last->field_;
+    }
+
+    void
+    Switch_Case::set_field (Sample_Field *field)
+    {
+      Switch_Case *last = this;
+      while (last->span_ != 0)
+        {
+          delete last->field_;
+          last->field_ = 0;
+
+          last = last->span_;
+        }
+      last->field_ = field;
+    }
+
+    Sample_Union::Sample_Union (const char *type_id)
+      :discriminator_ (0),
+       cases_ (0),
+       default_ (0)
+    {
+      this->init (type_id,"union");
     }
 
     Sample_Union::~Sample_Union ()
     {
-      delete _d;
-      delete case_;
+      delete discriminator_;
+      delete cases_;
+      delete default_;
     }
 
     void
     Sample_Union::discriminator (Sample_Dissector *d)
     {
-      this->_d = d;
+      this->discriminator_ = d;
     }
 
-    Sample_Field *
-    Sample_Union::add_case (Sample_Field *key, Sample_Field *value)
+    Switch_Case *
+    Sample_Union::add_case (const char *label, Sample_Field *field)
     {
-      if (this->case_ == 0)
-        this->case_ = key;
+      Sample_Field::IDLTypeID type_id =
+        discriminator_->get_field_type();
+      Switch_Case *c = new Switch_Case (type_id, label, field);
+      if (this->cases_ == 0)
+        this->cases_ = c;
       else
-        this->case_->chain (key);
-      return key;
-
-    }
-
-    Sample_Field *
-    Sample_Union::add_case_range (Sample_Field *key_low,
-                                  Sample_Field *key_high,
-                                  Sample_Field *value)
-    {
-      return key_low;
+        this->cases_->chain (c);
+      return c;
     }
 
     void
     Sample_Union::add_default (Sample_Field *value)
     {
+      this->default_ = value;
     }
 
     size_t
     Sample_Union::compute_length (guint8 *data)
     {
-      return 0;
+      // length = length of discriminator + length of max field.
+      // Or is it length of specific field?
+      size_t len = this->discriminator_->compute_length(data);
+      std::string _d = this->discriminator_->stringify(data);
+      Sample_Field *value =
+        this->cases_->do_switch (_d, data);
+      if (value == 0)
+        value = this->default_;
+      return value->compute_length (data + len);
     }
 
     size_t
-    Sample_Union::dissect_i (Wireshark_Bundle_i &p, const char *l)
+    Sample_Union::dissect_i (Wireshark_Bundle_i &params, std::string &label)
     {
-      return 0;
+      guint8 * data = params.get_remainder();
+      size_t len = this->discriminator_->compute_length(data);
+      std::string _d = this->discriminator_->stringify(data);
+
+      size_t data_pos = len;
+      Sample_Field *value =
+        this->cases_->do_switch (_d, data);
+      if (value == 0)
+        value = this->default_;
+      len += value->compute_length (data + len);
+
+      std::stringstream outstream;
+      outstream << label;
+      if (params.use_index)
+        outstream << "[" << params.index << "]";
+      outstream << " ( on " << _d << ")" << std::ends;
+
+      std::string buffer = outstream.str();
+      proto_item *item =
+        proto_tree_add_text (params.tree, params.tvb, params.offset,
+                             len,"%s", buffer.c_str());
+      proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
+
+
+      Wireshark_Bundle_Field fp;
+      fp.tvb = params.tvb;
+      fp.info = params.info;
+      fp.tree = subtree;
+      fp.offset = params.offset + data_pos;
+      fp.use_index = false;
+      fp.index = 0;
+      fp.data = data;
+
+      data_pos += value->dissect_i (fp, label);
+
+      return data_pos;
     }
 
   }

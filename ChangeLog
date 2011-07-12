@@ -1,9 +1,24 @@
+Tue Jul 12 22:47:46 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Moved String and WString from a specialized dissector type to a
+          built in type.
+
+          Completed the handling of Unions.
+
+          Simplified the initialization of types to be more able to be
+          data-driven with a small set of type-specific factories.
+
 Tue Jul 12 21:21:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
 
           Copy in referred QOS policies in an external topic.
-          
+
         * tools/modeling/tests/Chained_Topic/Chained_Topic.codegen:
         * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
         * tools/modeling/tests/ReferExternalProj/ReferExternalProj.mwc:
