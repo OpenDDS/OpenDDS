@@ -26,7 +26,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : role_(ROLE_UNKNOWN)
 {}
 
 TransportClient::~TransportClient()
@@ -41,7 +40,6 @@ void
 TransportClient::enable_transport()
 {
   EntityImpl& ent = dynamic_cast<EntityImpl&>(*this);
-  role_ = dynamic_cast<DataWriterImpl*>(&ent) ? ROLE_WRITER : ROLE_READER;
 
   TransportConfig_rch tc = ent.transport_config();
   for (EntityImpl* p = ent.parent(); p && tc.is_nil(); p = p->parent()) {
@@ -114,14 +112,8 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   TransportImpl_rch impl;
   if (associate_i(data, active, impl)) {
-    //TODO: fix FULLY_ASSOCIATED
-    if (role_ == ROLE_WRITER) {
-      const RepoId& id = get_repo_id();
-      AssociationInfo info;
-      info.num_associations_ = 1;
-      info.association_data_ = const_cast<AssociationData*>(&data);
-      impl->add_pending_association(id, info, get_send_listener());
-    }
+    post_associate(data, impl);
+    return true;
   }
   return false;
 }
@@ -131,10 +123,7 @@ TransportClient::associate_i(const AssociationData& data, bool active,
                              TransportImpl_rch& impl)
 {
   const RepoId& id = get_repo_id();
-  const CORBA::Long priority =
-    (role_ == ROLE_READER)
-    ? data.remote_data_.publication_transport_priority
-    : get_priority_value();
+  const CORBA::Long priority = get_priority_value(data);
 
   // Attempt to find an existing DataLink that can be reused
   for (size_t i = 0; i < impls_.size(); ++i) {
@@ -171,8 +160,9 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 
   const RepoId& id = get_repo_id();
 
-  if (role_ == ROLE_READER) {
-    link->make_reservation(peer, id, get_receive_listener());
+  TransportReceiveListener* trl = get_receive_listener();
+  if (trl) {
+    link->make_reservation(peer, id, trl);
     link->fully_associated();
   } else {
     link->make_reservation(peer, id, get_send_listener());

@@ -65,7 +65,9 @@ private:
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
   virtual const RepoId& get_repo_id() const = 0;
-  virtual CORBA::Long get_priority_value() const { return 0; }
+  virtual CORBA::Long get_priority_value(const AssociationData& data) const = 0;
+  virtual void post_associate(const AssociationData& /*data*/,
+                              const TransportImpl_rch& /*impl*/) {}
 
   // transport_detached() is called from TransportImpl when it shuts down
   friend class TransportImpl;
@@ -85,7 +87,6 @@ private:
   DataLinkIndex data_link_index_;
   bool swap_bytes_;
   TransportInterfaceInfo conn_info_;
-  enum ROLE {ROLE_UNKNOWN, ROLE_WRITER, ROLE_READER} role_; //TODO: remove?
   ACE_Thread_Mutex lock_;
 };
 

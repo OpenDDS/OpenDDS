@@ -237,6 +237,9 @@ protected:
   ReservationLockType& reservation_lock();
   const ReservationLockType& reservation_lock() const;
 
+  void create_reactor_task();
+
+public:
   /// Called on publisher side as the last step of the add_associations().
   /// The pending publications are cached to pending_association_sub_map_.
   /// If the transport already received the FULLY_ASSOCIATED acks from
@@ -246,8 +249,6 @@ protected:
   int add_pending_association(RepoId                  local_id,
                               const AssociationInfo&  info,
                               TransportSendListener*  tsl);
-
-  void create_reactor_task();
 
 private:
 

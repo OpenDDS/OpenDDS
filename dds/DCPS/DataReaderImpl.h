@@ -679,6 +679,10 @@ private:
 
   const RepoId& get_repo_id() const { return this->subscription_id_; }
 
+  CORBA::Long get_priority_value(const AssociationData& data) const {
+    return data.remote_data_.publication_transport_priority;
+  }
+
   friend class WriterInfo;
   friend class InstanceState;
 

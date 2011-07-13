@@ -2425,6 +2425,17 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   return true;
 }
 
+void
+DataWriterImpl::post_associate(const AssociationData& data,
+                               const TransportImpl_rch& impl)
+{
+  AssociationInfo info;
+  info.num_associations_ = 1;
+  info.association_data_ = const_cast<AssociationData*>(&data);
+  impl->add_pending_association(this->publication_id_,
+                                info, this /*send listener*/);
+}
+
 bool
 DataWriterImpl::persist_data()
 {

@@ -535,9 +535,12 @@ private:
 
   const RepoId& get_repo_id() const { return this->publication_id_; }
 
-  CORBA::Long get_priority_value() const {
+  CORBA::Long get_priority_value(const AssociationData&) const {
     return this->qos_.transport_priority.value;
   }
+
+  void post_associate(const AssociationData& data,
+                      const TransportImpl_rch& impl);
 
   friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_
 
