@@ -1,3 +1,10 @@
+Wed Jul 13 18:15:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+
+          Sample_Alias's members aren't defined anywhere.  Surrounded the class
+          with an "#if 0" for now so that the library will link.
+
 Wed Jul 13 18:10:39 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:

@@ -347,7 +347,7 @@ namespace OpenDDS
     /*
      * A sample dissector for types that are aliases of other types
      */
-
+#if 0
     class dissector_Export Sample_Alias : public Sample_Dissector
     {
     public:
@@ -358,7 +358,7 @@ namespace OpenDDS
 
       Sample_Dissector *base_;
     };
-
+#endif
   }
 }
 
