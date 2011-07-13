@@ -22,21 +22,10 @@ if (defined $ENV{'ANT_HOME'}) {
   if (!-r $ant) {
     $ant = 'ant';
   }
-  my $status = system("\"$ant\" -l ant.log run.tests");
-  open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
-  my $testclass;
-  while (<LOG>) {
-    chomp;
-    if (/^\s*\[junit\] (Tests|Running) (.*)/) {
-      $2 =~ /^run: \d+, Failures: (\d+), Errors: (\d+), Time elapsed: (\d+)/;
-      my $result = $1 + $2;
-      if ($result) {
-        print "ERROR in JUnit testing of modeling/validation/modelvalidation\n";
-      }
-    }
-    print "$_\n";
+  my $status = system("\"$ant\" run.tests");
+  if ($status > 0) {
+    print "ERROR: ant invocation failed with $status\n";
   }
-  close LOG;
   chdir $cwd;
 }
 else {

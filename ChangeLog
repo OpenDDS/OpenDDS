@@ -1,3 +1,10 @@
+Wed Jul 13 17:58:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Now that ant is not running a JUnit target, no need to parse
+          JUnit's output for errors.
+
 Wed Jul 13 16:29:14 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/giop_base.cpp:
