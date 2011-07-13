@@ -22,7 +22,7 @@ if (defined $ENV{'ANT_HOME'}) {
   if (!-r $ant) {
     $ant = 'ant';
   }
-  my $status = system("\"$ant\" -l ant.log test");
+  my $status = system("\"$ant\" -l ant.log run.tests");
   open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
   my $testclass;
   while (<LOG>) {

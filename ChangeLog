@@ -1,3 +1,13 @@
+Wed Jul 13 15:59:41 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+        * tools/modeling/validation/modelvalidation/build.properties:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+
+          Tweaks to the validation API, and improvements made for running funtional tests as part of nightly build.
+
 Tue Jul 12 22:47:46 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_dissector.h:
