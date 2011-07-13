@@ -1,3 +1,22 @@
+Wed Jul 13 15:11:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Remove call to TheTransportRegistry->release() since
+          it's no longer needed.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Call TheTransportRegistry->release() from shutdown() so that
+          application code doesn't need to.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          In create_datalink(), don't put the new datalink in the map until
+          it has been initialized.  This will prevent the case of a subsequent
+          call to find_datalink() seeing a datalink that has no TcpConnection.
+
 Wed Jul 13 14:24:55 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:

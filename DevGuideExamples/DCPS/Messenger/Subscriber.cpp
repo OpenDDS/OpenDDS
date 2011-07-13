@@ -141,7 +141,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
 
-    TheTransportRegistry->release();
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

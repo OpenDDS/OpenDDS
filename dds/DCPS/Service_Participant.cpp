@@ -215,6 +215,9 @@ void
 Service_Participant::shutdown()
 {
   try {
+
+    TransportRegistry::instance()->release();
+
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
     if (!CORBA::is_nil(orb_.in())) {
