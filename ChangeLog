@@ -1,3 +1,24 @@
+Wed Jul 13 18:45:00 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+        * tools/modeling/validation/modelvalidation:
+
+          Moved tools/modeling/validation/modelvalidation to tools/modeling/plugins/org.opendds.modeling.validation
+          in order to convert modelvalidation project to an eclipse plugin.
+
+Wed Jul 13 18:38:22 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.validation/.project:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
 Wed Jul 13 18:15:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/dissector/sample_dissector.h:
