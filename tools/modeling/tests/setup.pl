@@ -17,7 +17,7 @@ my $test_lst = "$DDS_ROOT/$dir/modeling_tests.lst";
 
 my $cwd = getcwd();
 if (defined $ENV{'ANT_HOME'}) {
-  chdir '../validation/modelvalidation';
+  chdir '../plugins/org.opendds.modeling.validation';
   my $ant = $ENV{'ANT_HOME'} . '/bin/ant';
   if (!-r $ant) {
     $ant = 'ant';
