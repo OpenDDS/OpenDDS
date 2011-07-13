@@ -1,3 +1,17 @@
+Wed Jul 13 14:24:55 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Put the TheTransportRegistry->release() back in to avoid one core.
+
+        * tests/DCPS/BuiltInTopic/common.h:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Rip out all the transport code and let the default config handle it.
+
 Wed Jul 13 13:29:35 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:

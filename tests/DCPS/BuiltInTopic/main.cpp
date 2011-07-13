@@ -20,9 +20,7 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsSubscriptionS.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
 #include "tests/DCPS/common/TestSupport.h"
 
 #if !defined(DDS_HAS_MINIMUM_BIT)
@@ -81,14 +79,6 @@ int init (int argc, ACE_TCHAR *argv[])
     {
       participant_factory = TheParticipantFactoryWithArgs(argc, argv);
 
-      // Initialize the transport
-      if (0 != init_transport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: init_transport failed!\n")),
-          1);
-      }
-
       participant
         = participant_factory->create_participant(TEST_DOMAIN,
                                                   PARTICIPANT_QOS_DEFAULT,
@@ -131,14 +121,6 @@ int init (int argc, ACE_TCHAR *argv[])
       subscriber_servant
         = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in ());
 
-      // Attach the subscriber to transport
-      if (0 != attach_subscriber_transport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: attach_subscriber_transport failed!\n")),
-          -1);
-      }
-
       //SHH make the subscriber participant do this lookup
       ::DDS::TopicDescription_var topicdescription
         = participant->lookup_topicdescription(TEST_TOPIC_TYPE);
@@ -150,14 +132,6 @@ int init (int argc, ACE_TCHAR *argv[])
 
       publisher_servant
         = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in ());
-
-      // Attach the publisher to transport
-      if (0 != attach_publisher_transport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-             ACE_TEXT("(%P|%t) ERROR: attach_publisher_transport failed!\n")),
-             -1);
-      }
 
       // try ignore before the association
       if (ignore_before_association)
@@ -506,10 +480,6 @@ void shutdown ()
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: shutdown: "
       "participant  delete_participant failed\n"));
   }
-
-  cleanup_transport ();
-
-  TheTransportFactory->release();
 
   TheServiceParticipant->shutdown ();
 }

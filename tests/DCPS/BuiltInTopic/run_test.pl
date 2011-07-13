@@ -43,8 +43,8 @@ $client_orb = "";
 
 my $repoDebug;
 my $appDebug;
-# $repoDebug = 10;
-# $appDebug  = 10;
+$repoDebug = 10;
+$appDebug  = 10;
 
 my $repoOpts = "";
 $repoOpts  = "-DCPSDebugLevel $repoDebug "               if $repoDebug;
