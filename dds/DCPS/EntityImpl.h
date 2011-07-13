@@ -64,9 +64,9 @@ public:
   void notify_status_condition();
 
   virtual void transport_config(const TransportConfig_rch& cfg);
-  TransportConfig_rch transport_config();
+  TransportConfig_rch transport_config() const;
 
-  virtual EntityImpl* parent() { return 0; }
+  virtual EntityImpl* parent() const { return 0; }
 
 protected:
   /// The flag indicates the entity is enabled.
@@ -86,7 +86,7 @@ private:
 
   TransportConfig_rch transport_config_;
 
-  ACE_Thread_Mutex lock_;
+  mutable ACE_Thread_Mutex lock_;
 };
 
 } // namespace DCPS

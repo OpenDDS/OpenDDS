@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -108,7 +107,7 @@ EntityImpl::transport_config(const TransportConfig_rch& cfg)
 }
 
 TransportConfig_rch
-EntityImpl::transport_config()
+EntityImpl::transport_config() const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TransportConfig_rch());
   return transport_config_;

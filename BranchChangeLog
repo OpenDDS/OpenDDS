@@ -1,3 +1,10 @@
+Wed Jul 13 17:39:02 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+
+          Making instances accesible through const pointers.
+
 Wed Jul 13 17:13:33 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
