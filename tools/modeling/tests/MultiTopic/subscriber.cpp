@@ -71,9 +71,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     using OpenDDS::Model::MultiTopicLib::Elements;
 
     DDS::TopicDescription_var tdv(model.topic(Elements::Participants::part2,
-                                             Elements::Topics::trades));
+                                             Elements::Topics::MultiTopicLib__trades));
     DDS::TopicDescription_var rdv(model.topic(Elements::Participants::part2,
-                                             Elements::Topics::reference_data));
+                                             Elements::Topics::MultiTopicLib__reference_data));
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
     DDS::DataReaderListener_var listener(new ReaderListener);

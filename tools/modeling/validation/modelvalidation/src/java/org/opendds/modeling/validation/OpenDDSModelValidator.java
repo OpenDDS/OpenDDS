@@ -94,6 +94,10 @@ public class OpenDDSModelValidator {
         }
         int numInvalidFiles = 0;
         for (File file : files) {
+            if (!file.exists()) {
+                logger.warn(file + " does not exist!");
+                continue;
+            }
             if (file.isDirectory()) {
                 numInvalidFiles += validateDir(file);
             } else {
@@ -107,15 +111,18 @@ public class OpenDDSModelValidator {
 	private boolean validateFile(File xml) {
 	    boolean valid = false;
 		try {
+		    logger.debug("xml = " + xml);
 		    String ext = xml.getName().replaceAll(".+(\\..+)", "$1");
 		    String xsdFile = schemas.get(ext);
+		    logger.debug("xsdFile = " + xsdFile);
 		    File xsd = new File(xsdFile);
 		    if (!xsd.exists()) {
+		        logger.debug("working dir = " + System.getProperty("user.dir"));
                 throw new IllegalStateException(xsd + " does not exist");
             }
 			List<SAXParseException> errors = XMLUtil.validate(xsd, xml);
 			if (!errors.isEmpty()) {
-				logger.error("Error: while validating " + xml + " the following errors were found:");
+				logger.error("ERROR: while validating " + xml + " the following errors were found:");
 				for (SAXParseException se : errors) {
 					logger.error("    Line " + se.getLineNumber() + " Column " +
 					        se.getColumnNumber() + ": " + se.getMessage());

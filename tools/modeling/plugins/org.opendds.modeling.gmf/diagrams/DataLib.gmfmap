@@ -887,38 +887,5 @@
         </target>
       </audits>
     </childContainers>
-    <childContainers
-        id="org.opendds.modeling.model.types.validation.warnings"
-        name="DataLib Warnings"
-        description="Detects questionable modeling constructs.">
-      <audits
-          name="No DCPS Data Type Structs defined"
-          description="Typically at least one Struct to use as a DCPS Data Type is defined"
-          id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
-          severity="WARNING"
-          message="There are no Structs with isDcpsDataType = true">
-        <rule
-            body="self.types->select(&#xA;  s | s.oclIsTypeOf(Struct) and&#xA; (s.oclAsType(Struct).isDcpsDataType = true))->notEmpty()"/>
-        <target
-            xsi:type="gmfmap:DomainElementTarget">
-          <element
-              href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib"/>
-        </target>
-      </audits>
-      <audits
-          name="Non DCPS Data Type Struct not used"
-          description="A non DCPS Data Type Struct is not used elsewhere"
-          id="org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"
-          severity="WARNING"
-          message="A Struct with isDcpsDataType = false is not used">
-        <rule
-            body="if isDcpsDataType = false&#xA;then&#xA;  Struct.allInstances().fields&#xA;    ->select(type = self)&#xA;      ->notEmpty()&#xA;else&#xA;  true&#xA;endif&#xA;"/>
-        <target
-            xsi:type="gmfmap:DomainElementTarget">
-          <element
-              href="../../org.opendds.modeling.model/model/Types.ecore#//Struct"/>
-        </target>
-      </audits>
-    </childContainers>
   </audits>
 </gmfmap:Mapping>

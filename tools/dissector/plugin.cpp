@@ -30,7 +30,7 @@ extern "C"
 dissector_Export void
 plugin_register()
 {
-  proto_register_opendds ();
+  OpenDDS::DCPS::DDS_Dissector::instance().init ();
   OpenDDS::DCPS::InfoRepo_Dissector::instance().init ();
   OpenDDS::DCPS::DataWriterRemote_Dissector::instance().init ();
 
@@ -40,7 +40,7 @@ extern "C"
 dissector_Export void
 plugin_reg_handoff()
 {
-  proto_reg_handoff_opendds ();
+  OpenDDS::DCPS::DDS_Dissector::instance().register_handoff ();
   OpenDDS::DCPS::InfoRepo_Dissector::instance().register_handoff ();
   OpenDDS::DCPS::DataWriterRemote_Dissector::instance().register_handoff ();
 }

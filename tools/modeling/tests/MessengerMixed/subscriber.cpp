@@ -27,8 +27,8 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  data2::MessageDataReader_var reader_i =
-    data2::MessageDataReader::_narrow(reader);
+  MTMdata2::MTM_MessageDataReader_var reader_i =
+    MTMdata2::MTM_MessageDataReader::_narrow(reader);
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
@@ -37,7 +37,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  data2::Message msg;
+  MTMdata2::MTM_Message msg;
   DDS::SampleInfo info;
 
   while (true) {
@@ -90,8 +90,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data2::MessageDataReader_var reader_i =
-      data2::MessageDataReader::_narrow(reader);
+    MTMdata2::MTM_MessageDataReader_var reader_i =
+      MTMdata2::MTM_MessageDataReader::_narrow(reader);
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,

@@ -80,6 +80,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     using OpenDDS::Model::Chained_TopicLib::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
+    DDS::DataReader_var cfreader = model.reader( Elements::DataReaders::chained_cfreader);
 
     ACE_SYNCH_MUTEX lock;
     ACE_Condition<ACE_SYNCH_MUTEX> condition(lock);

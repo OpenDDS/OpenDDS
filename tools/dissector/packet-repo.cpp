@@ -227,7 +227,6 @@ namespace OpenDDS
     const char *
     InfoRepo_Dissector::topic_for_pub (const RepoId *pub)
     {
-      ACE_DEBUG ((LM_DEBUG, "topic_for_pub called\n"));
       gulong key = ACE::hash_pjw(reinterpret_cast<const char *>(pub), sizeof (RepoId));
       const RepoId *topicId = 0;
       if (publications_.find (key,topicId) != 0)
@@ -255,8 +254,6 @@ namespace OpenDDS
 
       ACE_OS::strcpy (pt->data_name_, dataName);
 
-      ACE_DEBUG ((LM_DEBUG, "add pending called, data name = \"%s\", conv_id = %d, req_id = %d\n",
-                  pt->data_name_, pt->conv_->index, request_id));
       if (this->pending_ == 0)
         {
           this->pending_ = pt;
@@ -279,8 +276,6 @@ namespace OpenDDS
 
       ACE_OS::memcpy (pt->topic_id_, topic, sizeof(RepoId));
 
-      ACE_DEBUG ((LM_DEBUG, "add pending (repoId) called, conv_id = %d, req_id = %d topic_id_ = %p\n",
-                  pt->conv_->index, request_id, pt->topic_id_));
       if (this->pending_ == 0)
         {
           this->pending_ = pt;
@@ -303,7 +298,6 @@ namespace OpenDDS
           if (pt.conv_->index == node->conv_->index &&
               pt.request_ == node->request_)
             {
-              ACE_DEBUG ((LM_DEBUG,"map_pending found node!\n"));
               gulong hash_rid = ACE::hash_pjw(reinterpret_cast<const char *>(rid), sizeof (RepoId));
               if (node->data_name_ != 0)
                 {
@@ -312,8 +306,6 @@ namespace OpenDDS
                 }
               else
                 {
-                  ACE_DEBUG ((LM_DEBUG, "Map pending, topic_id null? %d \n",
-                              node->topic_id_ == 0));
                   this->publications_.bind (hash_rid, node->topic_id_);
                   node->topic_id_ = 0;
                 }
@@ -388,7 +380,6 @@ namespace OpenDDS
 
               if (instance().pinfo_->fd->flags.visited)
                 {
-                  ACE_DEBUG ((LM_DEBUG,"assert_topic reply, visited = true\n"));
                   return;
                 }
 
@@ -420,7 +411,6 @@ namespace OpenDDS
 //           instance().add_topic_qos (hf_qos, instance().ett_topic_qos_);
           if (instance().pinfo_->fd->flags.visited)
             {
-              ACE_DEBUG ((LM_DEBUG,"assert_topic request, visited = true\n"));
               return;
             }
 
@@ -514,7 +504,6 @@ namespace OpenDDS
       case Reply:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Assert_Topic reply\n"));
           break;
         }
       case Request:
@@ -527,7 +516,7 @@ namespace OpenDDS
         }
       default:
         {
-          ACE_DEBUG ((LM_DEBUG,"Decoding Assert_Topic, msg type = %d\n",
+          ACE_DEBUG ((LM_DEBUG,"Decoding Add_Domain_Participant, msg type = %d\n",
                       header->message_type));
         }
 
@@ -542,13 +531,11 @@ namespace OpenDDS
       case Reply:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Add_Subscription reply\n"));
           break;
         }
       case Request:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Add_Subscription request\n"));
           break;
         }
       default:
@@ -567,13 +554,11 @@ namespace OpenDDS
       case Reply:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Remove_Publication reply\n"));
           break;
         }
       case Request:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Remove_Publication request\n"));
           break;
         }
       default:
@@ -592,13 +577,11 @@ namespace OpenDDS
       case Reply:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Remove_Subscription reply\n"));
           break;
         }
       case Request:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Remove_Subscription request\n"));
           break;
         }
       default:
@@ -617,13 +600,11 @@ namespace OpenDDS
       case Reply:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Remove_Domain_Participant reply\n"));
           break;
         }
       case Request:
         {
           // parse reply
-          ACE_DEBUG ((LM_DEBUG,"Decoding Remove_Domain_Participant request\n"));
           break;
         }
       default:
@@ -646,11 +627,6 @@ namespace OpenDDS
       header->req_id =
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
-#if 0
-      ACE_DEBUG ((LM_DEBUG,
-                  "pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
-                  pinfo->current_proto, header->message_type, header->req_id, ofs));
-#endif
       if (idlname == 0)
         return FALSE;
       instance().setPacket (tvb, pinfo, ptree, offset);
@@ -678,11 +654,6 @@ namespace OpenDDS
       header->req_id =
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
-#if 0
-      ACE_DEBUG ((LM_DEBUG,
-                  "heur pinfo.protocol = %s type = %d,  reqid = %d ofs = %d\n",
-                  pinfo->current_proto, header->message_type, header->req_id, ofs));
-#endif
       return FALSE;
 
     }

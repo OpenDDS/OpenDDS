@@ -3,34 +3,51 @@
  */
 package org.opendds.modeling.diagram.dcpslib.part;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.common.ui.URIEditorInput;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.emf.workspace.util.WorkspaceSynchronizer;
+import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gmf.runtime.common.ui.services.marker.MarkerNavigationService;
 import org.eclipse.gmf.runtime.diagram.core.preferences.PreferencesHint;
 import org.eclipse.gmf.runtime.diagram.ui.actions.ActionIds;
+import org.eclipse.gmf.runtime.diagram.ui.parts.DiagramDropTargetListener;
 import org.eclipse.gmf.runtime.diagram.ui.resources.editor.document.IDiagramDocument;
 import org.eclipse.gmf.runtime.diagram.ui.resources.editor.document.IDocument;
 import org.eclipse.gmf.runtime.diagram.ui.resources.editor.document.IDocumentProvider;
 import org.eclipse.gmf.runtime.diagram.ui.resources.editor.parts.DiagramDocumentEditor;
 import org.eclipse.gmf.runtime.notation.Diagram;
+import org.eclipse.gmf.runtime.notation.View;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorMatchingStrategy;
@@ -296,6 +313,94 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 				this, ID, OpenDDSDcpsLibDiagramEditorPlugin.getInstance());
 		page.addPartListener(listener);
 		// Custom code end
+	}
+
+	/**
+	 * @generated
+	 */
+	protected void initializeGraphicalViewer() {
+		super.initializeGraphicalViewer();
+		getDiagramGraphicalViewer().addDropTargetListener(
+				new DropTargetListener(getDiagramGraphicalViewer(),
+						LocalSelectionTransfer.getTransfer()) {
+
+					protected Object getJavaObject(TransferData data) {
+						return LocalSelectionTransfer.getTransfer()
+								.nativeToJava(data);
+					}
+
+				});
+		getDiagramGraphicalViewer().addDropTargetListener(
+				new DropTargetListener(getDiagramGraphicalViewer(),
+						LocalTransfer.getInstance()) {
+
+					protected Object getJavaObject(TransferData data) {
+						return LocalTransfer.getInstance().nativeToJava(data);
+					}
+
+				});
+	}
+
+	/**
+	 * @generated
+	 */
+	private abstract class DropTargetListener extends DiagramDropTargetListener {
+
+		/**
+		 * @generated
+		 */
+		public DropTargetListener(EditPartViewer viewer, Transfer xfer) {
+			super(viewer, xfer);
+		}
+
+		/**
+		 * @generated
+		 */
+		protected List getObjectsBeingDropped() {
+			TransferData data = getCurrentEvent().currentDataType;
+			Collection uris = new HashSet();
+
+			Object transferedObject = getJavaObject(data);
+			if (transferedObject instanceof IStructuredSelection) {
+				IStructuredSelection selection = (IStructuredSelection) transferedObject;
+				for (Iterator it = selection.iterator(); it.hasNext();) {
+					Object nextSelectedObject = it.next();
+					if (nextSelectedObject instanceof OpenDDSDcpsLibNavigatorItem) {
+						View view = ((OpenDDSDcpsLibNavigatorItem) nextSelectedObject)
+								.getView();
+						nextSelectedObject = view.getElement();
+					} else if (nextSelectedObject instanceof IAdaptable) {
+						IAdaptable adaptable = (IAdaptable) nextSelectedObject;
+						nextSelectedObject = adaptable
+								.getAdapter(EObject.class);
+					}
+
+					if (nextSelectedObject instanceof EObject) {
+						EObject modelElement = (EObject) nextSelectedObject;
+						Resource modelElementResource = modelElement
+								.eResource();
+						uris.add(modelElementResource.getURI().appendFragment(
+								modelElementResource
+										.getURIFragment(modelElement)));
+					}
+				}
+			}
+
+			List result = new ArrayList();
+			for (Iterator it = uris.iterator(); it.hasNext();) {
+				URI nextURI = (URI) it.next();
+				EObject modelObject = getEditingDomain().getResourceSet()
+						.getEObject(nextURI, true);
+				result.add(modelObject);
+			}
+			return result;
+		}
+
+		/**
+		 * @generated
+		 */
+		protected abstract Object getJavaObject(TransferData data);
+
 	}
 
 }

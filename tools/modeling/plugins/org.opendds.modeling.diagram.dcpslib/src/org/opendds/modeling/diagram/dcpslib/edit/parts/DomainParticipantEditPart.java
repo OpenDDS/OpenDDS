@@ -11,6 +11,8 @@ import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.StackLayout;
 import org.eclipse.draw2d.ToolbarLayout;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
@@ -114,16 +116,16 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected boolean addFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantNameEditPart) {
-			((DomainParticipantNameEditPart) childEditPart)
-					.setLabel(getPrimaryShape()
-							.getFigureStereotypedElementNameFigure());
-			return true;
-		}
 		if (childEditPart instanceof DomainParticipantName2EditPart) {
 			((DomainParticipantName2EditPart) childEditPart)
 					.setLabel(getPrimaryShape()
 							.getFigureStereotypedElementStereotypeFigure());
+			return true;
+		}
+		if (childEditPart instanceof DomainParticipantNameEditPart) {
+			((DomainParticipantNameEditPart) childEditPart)
+					.setLabel(getPrimaryShape()
+							.getFigureStereotypedElementNameFigure());
 			return true;
 		}
 		return false;
@@ -133,10 +135,10 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected boolean removeFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantNameEditPart) {
+		if (childEditPart instanceof DomainParticipantName2EditPart) {
 			return true;
 		}
-		if (childEditPart instanceof DomainParticipantName2EditPart) {
+		if (childEditPart instanceof DomainParticipantNameEditPart) {
 			return true;
 		}
 		return false;
@@ -339,6 +341,19 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 			// Custom code end
 		}
 		return super.getTargetEditPart(request);
+	}
+
+	/**
+	 * @generated
+	 */
+	protected void handleNotificationEvent(Notification event) {
+		if (event.getNotifier() == getModel()
+				&& EcorePackage.eINSTANCE.getEModelElement_EAnnotations()
+						.equals(event.getFeature())) {
+			handleMajorSemanticChange();
+		} else {
+			super.handleNotificationEvent(event);
+		}
 	}
 
 	/**

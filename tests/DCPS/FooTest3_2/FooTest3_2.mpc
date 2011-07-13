@@ -4,7 +4,7 @@
 
 project(*Publisher): dcpsexe_with_tcp {
   exename = FooTest3_publisher
-  after       += DcpsFooType3Unbounded
+  after    += DcpsFooType3Unbounded
   libs     +=  DcpsFooType3Unbounded
   libpaths += ../FooType3Unbounded
 
@@ -25,7 +25,7 @@ project(*Publisher): dcpsexe_with_tcp {
 
 project(*Subscriber): dcpsexe_with_tcp {
   exename = FooTest3_subscriber
-  after       += DcpsFooType3Unbounded
+  after    += DcpsFooType3Unbounded *Publisher
   libs     += DcpsFooType3Unbounded
   libpaths += ../FooType3Unbounded
 

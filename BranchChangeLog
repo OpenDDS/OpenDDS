@@ -1,3 +1,7 @@
+Wed Jul 13 18:25:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4639 through r4686.
+
 Wed Jul 13 18:06:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.inl:

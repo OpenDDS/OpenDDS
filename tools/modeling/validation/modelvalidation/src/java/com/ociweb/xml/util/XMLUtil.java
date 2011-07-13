@@ -3,7 +3,9 @@ package com.ociweb.xml.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
@@ -24,19 +26,36 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+/**
+ * Collection of JAXP-based utilities for executing XSL transformations and
+ * XML Schema validations.
+ */
 public class XMLUtil {
 	private static final Logger logger = Logger.getLogger(XMLUtil.class.getName());
 
+	/**
+	 * @param sourceXML the XML file to transform
+	 * @param xslt the XSL stylesheet to use for transformation
+	 * @param targetXML the result of XSL transfomation
+	 * @throws TransformerException if an error occurs configuraing or applying the transformation
+	 */
 	public static void transform(final File sourceXML, final File xslt, final File targetXML) throws TransformerException {
 		logger.debug("sourceXML = " + sourceXML);
 		logger.debug("xslt = " + xslt);
 		logger.debug("targetXML = " + targetXML);
-		Transformer transformer = createTransformer(xslt);
+		Transformer transformer = createTransformer(xslt, Collections.<String,String>emptyMap());
 		Source source = new StreamSource(sourceXML);
 		Result result = new StreamResult(targetXML);
 		transformer.transform(source, result);
 	}
 
+	/**
+	 * @param schemaFile the XML Schema file to use for validation
+	 * @param xmlFile the XML file to validate
+	 * @return a list of SaxParseException objects if validation errors occur
+	 * @throws SAXException if a pasring error occurs
+	 * @throws IOException if a file I/O error occurs
+	 */
 	public static List<SAXParseException> validate(final File schemaFile, final File xmlFile) throws SAXException, IOException {
 		logger.debug("schemaFile = " + schemaFile);
 		logger.debug("xmlFile = " + xmlFile);
@@ -51,6 +70,11 @@ public class XMLUtil {
         return veh.errors;
 	}
 
+	/**
+	 * Error handler for XML schema validation. Errors are treated as validation errors to
+	 * report, fatal errors are unrecoverable problems, and warnings are logged and
+	 * ignored otherwise.
+	 */
 	static class ValidationErrorHandler implements ErrorHandler {
 		final List<SAXParseException> errors = new ArrayList<SAXParseException>();
 		@Override
@@ -71,13 +95,25 @@ public class XMLUtil {
 		}
 	}
 
-	static Transformer createTransformer(final File xsltFile) throws TransformerException {
+    static Transformer createTransformer(final File xsltFile) throws TransformerException {
+        return createTransformer(xsltFile, Collections.<String,String>emptyMap());
+    }
+	/**
+	 * @param xsltFile The XSLT stylesheet file
+	 * @param parms XSL parameters to pass to the stylesheet.
+	 * @return the configured XSLT transformer
+	 * @throws TransformerException if there is a problem configuring the transformer
+	 */
+	static Transformer createTransformer(final File xsltFile, final Map<String,String> parms) throws TransformerException {
 		try {
 			Source xslSource = new StreamSource(xsltFile);
 			TransformerFactory transFact = TransformerFactory.newInstance();
 			transFact.setAttribute("indent-number", 2);
 			Transformer transformer = transFact.newTransformer(xslSource);
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			for (String parm : parms.keySet()) {
+			    transformer.setParameter(parm, parms.get(parm));
+            }
 			return transformer;
 		} catch (TransformerConfigurationException e) {
 			logger.error(e.getMessage());

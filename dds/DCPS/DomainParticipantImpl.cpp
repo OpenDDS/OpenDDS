@@ -1805,6 +1805,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
     OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in(),type_name);
 
   if (0 == type_support) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::create_topic_i, ")
+                 ACE_TEXT("can't create a Topic: type_name \"%C\"")
+                 ACE_TEXT("is not registered.\n"), type_name));
+    }
+
     return DDS::Topic::_nil();
   }
 
@@ -1821,7 +1828,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
                            this),
                  DDS::Topic::_nil());
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1)) {
+  if ((enabled_ == true)
+      && (qos_.entity_factory.autoenable_created_entities == 1)) {
     topic_servant->enable();
   }
 

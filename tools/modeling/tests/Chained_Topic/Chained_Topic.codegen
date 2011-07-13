@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0">
-  <source name="ReferExternalProj.opendds"/>
+  <source name="Chained_Topic.opendds"/>
   <target name="model"/>
   <instances>
     <instance name="default">
@@ -106,7 +106,11 @@
     </searchLocation>
     <searchLocation>
       <variable value="DDS_ROOT"/>
-      <path value="tools/modeling/tests/TopicQos/model"/>
+      <path value="tools/modeling/tests/Chained_Data/model"/>
+    </searchLocation>
+    <searchLocation>
+      <variable value="DDS_ROOT"/>
+      <path value="tools/modeling/tests/CfTopic/model"/>
     </searchLocation>
   </searchPaths>
 </generator:CodeGen>

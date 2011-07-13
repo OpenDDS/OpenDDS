@@ -31,7 +31,7 @@
   <xsl:variable name="dcpslib" select="$model//libs[@xsi:type = 'opendds:DcpsLib']"/>
   <xsl:variable name="model-refs">
     <xsl:call-template name="data-model-ref-names">
-      <xsl:with-param name="model-refs" select="$model//datatype/@href | $model//libs[@xsi:type='types:DataLib']//@href"/>
+      <xsl:with-param name="model-refs" select="$model//datatype/@href | $model//topic/@href | $model//libs[@xsi:type='types:DataLib']//@href"/>
     </xsl:call-template>
   </xsl:variable>
   <xsl:text>project(</xsl:text>
