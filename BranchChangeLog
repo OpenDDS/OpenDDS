@@ -1,3 +1,17 @@
+Wed Jul 13 20:38:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Correct lock order during shutdown (client before impl).
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Real fix for the problem with sharing datalinks -- provide a way
+          for a second thread to wait until the first has completed start().
+
 Wed Jul 13 18:25:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4639 through r4686.

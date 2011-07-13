@@ -76,6 +76,9 @@ OpenDDS::DCPS::TcpTransport::find_datalink(
     // that suits the caller's needs.
 
     if (this->links_.find(key, link) == 0) {
+
+      link->wait_for_start();
+
       TcpConnection_rch con = link->get_connection();
 
       if (con->is_connector() && !con->is_connected()) {

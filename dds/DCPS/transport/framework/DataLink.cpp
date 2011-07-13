@@ -45,6 +45,7 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl,
   : stopped_(false),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
+    strategy_condition_(strategy_lock_),
     send_control_allocator_(0),
     mb_allocator_(0),
     db_allocator_(0),
@@ -114,6 +115,15 @@ OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::DataLink::impl() const
 {
   return impl_;
+}
+
+void
+OpenDDS::DCPS::DataLink::wait_for_start()
+{
+  GuardType guard(this->strategy_lock_);
+  while (this->send_strategy_.is_nil() || this->receive_strategy_.is_nil()) {
+    this->strategy_condition_.wait();
+  }
 }
 
 void

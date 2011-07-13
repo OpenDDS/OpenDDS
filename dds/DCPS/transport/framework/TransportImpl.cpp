@@ -78,6 +78,8 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 
   this->pre_shutdown_i();
 
+  std::set<TransportClient*> local_clients;
+
   {
     GuardType guard(this->lock_);
 
@@ -87,14 +89,14 @@ OpenDDS::DCPS::TransportImpl::shutdown()
       return;
     }
 
-    for (std::set<TransportClient*>::iterator it = clients_.begin();
-         it != clients_.end(); ++it) {
-      (*it)->transport_detached(this);
-    }
-
-    clients_.clear();
+    local_clients.swap(this->clients_);
 
     // We can release our lock_ now.
+  }
+
+  for (std::set<TransportClient*>::iterator it = local_clients.begin();
+       it != local_clients.end(); ++it) {
+    (*it)->transport_detached(this);
   }
 
   // Tell our subclass about the "shutdown event".

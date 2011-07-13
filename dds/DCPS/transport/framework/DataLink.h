@@ -255,6 +255,11 @@ public:
 
   TransportImpl_rch impl() const;
 
+  /// A second thread may try to use this DataLink before the creating thread
+  /// has completed the start() method.  In this case, call wait_for_start()
+  /// to block the current thread until start() completes.
+  void wait_for_start();
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class
@@ -332,12 +337,6 @@ private:
 
   typedef ACE_SYNCH_MUTEX     LockType;
 
-  /// The lock_ protects the pub_map_ and sub_map_ data members.
-  /// We need this becuase this DataLink object could be called from
-  /// more than one TransportInterface (and each could be driven by
-  /// a different thread).
-  //LockType lock_;
-
   /// Convenience function for diagnostic information.
   friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
 
@@ -400,6 +399,7 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
+  ACE_SYNCH_CONDITION strategy_condition_;
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.

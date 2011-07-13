@@ -261,6 +261,8 @@ OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
 
     this->send_strategy_    = ss._retn();
     this->receive_strategy_ = rs._retn();
+
+    this->strategy_condition_.broadcast();
   }
   return 0;
 }
