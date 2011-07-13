@@ -91,6 +91,8 @@
     <viewmap
         xsi:type="gmfgen:FigureViewmap"
         figureQualifiedClassName="org.eclipse.draw2d.FreeformLayer"/>
+    <containsShortcutsTo>.opendds</containsShortcutsTo>
+    <shortcutsProvidedFor>OpenDDS DcpsLib</shortcutsProvidedFor>
     <domainDiagramElement
         href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib"/>
     <childNodes
