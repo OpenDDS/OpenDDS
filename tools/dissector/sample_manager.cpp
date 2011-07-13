@@ -70,7 +70,7 @@ namespace OpenDDS
       std::string &key = d.typeId();
       ACE_DEBUG ((LM_DEBUG,"Adding new dissector for %s\n",key.c_str()));
 
-      dissectors_.bind(key,&d);
+      dissectors_.bind(key.c_str(),&d);
     }
 
     Sample_Dissector *
@@ -88,7 +88,7 @@ namespace OpenDDS
         }
 
       Sample_Dissector *result = 0;
-      dissectors_.find (key, result);
+      dissectors_.find (key.c_str(), result);
       return result;
     }
 

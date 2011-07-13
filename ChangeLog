@@ -1,3 +1,13 @@
+Wed Jul 13 16:29:14 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Fixed some fuzz and compiler errors. Error was due to failure to
+          hash std::string on some platforms, so I reverted to using const
+          char * as the key.
+
 Wed Jul 13 15:59:41 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/tests/setup.pl:

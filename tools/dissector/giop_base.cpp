@@ -96,7 +96,7 @@ namespace OpenDDS
           return func;
         }
       ACE_DEBUG ((LM_DEBUG,
-                  "GIOP_Base::find_giop_decoder: Unknown operation %s\n", 
+                  "GIOP_Base::find_giop_decoder: Unknown operation %s\n",
                   opname));
       return 0;
     }

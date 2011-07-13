@@ -38,7 +38,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    typedef ACE_Hash_Map_Manager <std::string, Sample_Dissector *, ACE_Null_Mutex> SampleDissectorMap;
+    typedef ACE_Hash_Map_Manager <const char *, Sample_Dissector *, ACE_Null_Mutex> SampleDissectorMap;
 
     /*
      * The Sample_Dessector_Manager is a singleton which contains a hash map
