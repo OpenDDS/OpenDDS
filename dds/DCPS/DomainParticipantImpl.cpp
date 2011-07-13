@@ -24,6 +24,8 @@
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include <sstream>
 
@@ -2194,41 +2196,11 @@ DomainParticipantImpl::attach_bit_transport()
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   try {
-    // Attach the Subscriber with the TransportImpl.
+    TransportConfig_rch config = TheServiceParticipant->bit_transport_config();
 
-    TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl(this->domain_id_);
+    TransportRegistry::instance()->bind_config(config, bit_subscriber_.in());
 
-    OpenDDS::DCPS::AttachStatus status = impl->attach(bit_subscriber_);
-
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      // We failed to attach to the transport for some reason.
-      const ACE_TCHAR* status_str = ACE_TEXT("");
-
-      switch (status) {
-      case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-        status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-        break;
-      case OpenDDS::DCPS::ATTACH_ERROR:
-        status_str = ACE_TEXT("ATTACH_ERROR");
-        break;
-      case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-        status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-        break;
-      default:
-        status_str = ACE_TEXT("Unknown Status");
-        break;
-      }
-
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::init_bit_transport, "),
-                        ACE_TEXT("Failed to attach to the transport. ")
-                        ACE_TEXT("AttachStatus == %s\n"), status_str),
-                       DDS::RETCODE_ERROR);
-    }
-
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception(
-      "ERROR: Exception caught in DomainParticipantImpl::init_bit_transport.");
+  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
     return DDS::RETCODE_ERROR;
   }
 

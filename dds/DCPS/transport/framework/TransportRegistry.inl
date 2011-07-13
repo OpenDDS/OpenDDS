@@ -16,6 +16,9 @@ OpenDDS::DCPS::TransportRegistry::TransportRegistry()
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
+  lib_directive_map_["tcp"]       = "dynamic OpenDDS_Tcp Service_Object * OpenDDS_Tcp:_make_TcpLoader()";
+  lib_directive_map_["udp"]       = "dynamic OpenDDS_DCPS_Udp_Service Service_Object * OpenDDS_Udp:_make_UdpLoader()";
+  lib_directive_map_["multicast"] = "dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()";
 }
 
 ACE_INLINE

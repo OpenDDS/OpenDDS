@@ -34,7 +34,6 @@ class TransportInterface;
 class TransportReceiveListener;
 class ThreadSynchStrategy;
 class TransportImplFactory;
-class TransportFactory;
 class DataLink;
 class Monitor;
 
@@ -50,7 +49,7 @@ class Monitor;
 *   2)The concrete transport object owns the datalink objects.
 *   3)Own  a DataLinkCleanup object.
 *   4)Reference to TransportInst object and TransportReactorTask object owned
-*     by TransportFactory.
+*     by TransportRegistry.
 *   5)During transport shutdown, if this object does not have ownership of an object
 *     but has a references via smart pointer then the reference should be freed;
 *     if this object has ownership of task objects then the tasks should be closed.
@@ -197,7 +196,6 @@ private:
   /// of our public interface with internal framework methods.
   friend class TransportInterface;
   friend class TransportImplFactory;
-  friend class TransportFactory;
   friend class TransportInst;
   friend class TransportClient;
   friend class DataLink;
@@ -208,8 +206,8 @@ private:
   /// TransportImpl object.
   int set_reactor(TransportReactorTask* task);
 
-  /// Called by the TransportFactory when this TransportImpl object
-  /// is released while the TransportFactory is handling a release()
+  /// Called by the TransportRegistry when this TransportImpl object
+  /// is released while the TransportRegistry is handling a release()
   /// "event".
   void shutdown();
 

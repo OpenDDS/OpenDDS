@@ -65,7 +65,6 @@ int
 OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
                                    ACE_Configuration_Section_Key& sect)
 {
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("swap_bytes"), this->swap_bytes_, bool)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_messages_per_pool"), this->queue_messages_per_pool_, size_t)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_initial_pools"), this->queue_initial_pools_, size_t)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_packet_size"), this->max_packet_size_, ACE_UINT32)

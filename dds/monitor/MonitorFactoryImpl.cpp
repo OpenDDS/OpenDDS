@@ -25,7 +25,6 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -159,25 +158,22 @@ MonitorFactoryImpl::initialize()
                                   DDS::PublisherListener::_nil(),
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  OpenDDS::DCPS::TransportImpl_rch transport_impl =
-    TheTransportFactory->obtain (MONITOR_TRANSPORT_ID);
-  if (transport_impl.is_nil ())
+  static const std::string config_name = TransportRegistry::DEFAULT_INST_PREFIX
+    + "MonitorBITTransportConfig";
+  OpenDDS::DCPS::TransportConfig_rch config =
+    TheTransportRegistry->get_config (config_name);
+  if (config.is_nil ())
   {
-    transport_impl = TheTransportFactory->create_transport_impl(
-      MONITOR_TRANSPORT_ID,
-      ACE_TEXT("tcp"),
-      OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    config = TransportRegistry::instance()->create_config(config_name);
 
-    OpenDDS::DCPS::TransportInst_rch config
-      = TheTransportFactory->get_or_create_configuration(MONITOR_TRANSPORT_ID, ACE_TEXT("tcp"));
-
-    OpenDDS::DCPS::TcpInst* tcp_config
-      = static_cast <TcpInst*>(config.in());
-
-    transport_impl->configure (tcp_config);
+    std::string inst_name = TransportRegistry::DEFAULT_INST_PREFIX
+      + "FederationBITTCPTransportInst";
+    TransportInst_rch inst =
+      TransportRegistry::instance()->create_inst(inst_name, "tcp");
+    config->instances_.push_back(inst);
   }
 
-  transport_impl->attach(publisher.in());
+  TransportRegistry::instance()->bind_config(config, publisher.in());
 
   DDS::DataWriter_var writer;
   DDS::DataWriterQos dw_qos;

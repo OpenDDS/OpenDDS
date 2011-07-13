@@ -1,3 +1,64 @@
+Wed Jul 13 13:29:35 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Comment out TransportFactory usage.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Switch the BIT code to the new transport code.
+          Remove the -DCPSNewConfig code.  Change to a
+          shared transport for all BIT traffic.
+
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Remove the TransportFactory class.  Add support for
+          auto-loading the transport libraries when the are
+          encountered in a .ini file.  Add swap_bytes as a
+          config-level setting (remove from TransportInst).
+          Remove AUTO_CONFIG and DONT_AUTO_CONFIG constants.
+
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+
+          Remove the code requiring local_address to be set.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Switch to using the new transport code (configs).
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/SPMonitorImpl.cpp:
+
+          Switch to using the new transport and commented out
+          the transport publication code.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Add checks for swap_bytes at the config level, autoloading,
+          and udp/multicast transport insts.
+
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * tests/DCPS/ConfigFile/tcp.conf:
+
+          Removed these files.
+
 Tue Jul 12 22:27:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

@@ -91,6 +91,7 @@ private:
   typedef std::map<std::string, TransportType_rch> TypeMap;
   typedef std::map<std::string, TransportConfig_rch> ConfigMap;
   typedef std::map<std::string, TransportInst_rch> InstMap;
+  typedef std::map<std::string, std::string> LibDirectiveMap;
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -98,6 +99,7 @@ private:
   TypeMap type_map_;
   ConfigMap config_map_;
   InstMap inst_map_;
+  LibDirectiveMap lib_directive_map_;
 
   TransportConfig_rch global_config_;
 

@@ -15,7 +15,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #include "tao/ORB_Core.h"
@@ -166,50 +166,20 @@ ManagerImpl::initialize()
   }
 
   //
-  // Create the transport for the update topic publications.
+  // Create a transport config for use with federation entities.
   //
+  std::string config_name =
+    OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
+    + "FederationBITTransportConfig";
+  OpenDDS::DCPS::TransportConfig_rch config =
+    OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_name);
 
-  OpenDDS::DCPS::TransportImpl_rch transport
-  = TheTransportFactory->create_transport_impl(
-      this->config_.federationDomain(),
-      ACE_TEXT("tcp"),
-      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-  OpenDDS::DCPS::TransportInst_rch transportConfig
-  = TheTransportFactory->create_configuration(
-      this->config_.federationDomain(),
-      ACE_TEXT("tcp"));
-
-  if (transport->configure(transportConfig.in()) != 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-               ACE_TEXT("repository %d failed to initialize subscription transport.\n"),
-               this->id()));
-    throw Incomplete();
-  }
-
-  //
-  // Create the transport for the update topic subscriptions.
-  //
-
-  OpenDDS::DCPS::TransportImpl_rch subscriptionTransport
-  = TheTransportFactory->create_transport_impl(
-      1 + this->config_.federationDomain(),
-      ACE_TEXT("tcp"),
-      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-  OpenDDS::DCPS::TransportInst_rch subscriptionTransportConfig
-  = TheTransportFactory->create_configuration(
-      1 + this->config_.federationDomain(),
-      ACE_TEXT("tcp"));
-
-  if (subscriptionTransport->configure(subscriptionTransportConfig.in()) != 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-               ACE_TEXT("repository %d failed to initialize subscription transport.\n"),
-               this->id()));
-    throw Incomplete();
-  }
+  std::string inst_name = OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
+    + "FederationBITTCPTransportInst";
+  OpenDDS::DCPS::TransportInst_rch inst =
+    OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
+                                                              "tcp");
+  config->instances_.push_back(inst);
 
   //
   // Create the subscriber for the update topics.
@@ -238,24 +208,13 @@ ManagerImpl::initialize()
 
   // Attach the transport to it.
 
-  switch (subscriptionTransport->attach(subscriber)) {
-  case OpenDDS::DCPS::ATTACH_OK:
-
-    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-                 ACE_TEXT("attached transport to federation subscriber.\n")));
-    }
-
-    break;
-
-  case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-  case OpenDDS::DCPS::ATTACH_ERROR:
-  case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-  default:
+  try {
+    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config,
+                                                              subscriber.in());
+  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-               ACE_TEXT("failed to attach transport to federation subscriber.\n")));
+               ACE_TEXT("failed to bind transport config to federation subscriber.\n")));
     throw Incomplete();
   }
 
@@ -286,24 +245,13 @@ ManagerImpl::initialize()
 
   // Attach the transport to it.
 
-  switch (transport->attach(publisher)) {
-  case OpenDDS::DCPS::ATTACH_OK:
-
-    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-                 ACE_TEXT("attached transport to federation publisher.\n")));
-    }
-
-    break;
-
-  case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-  case OpenDDS::DCPS::ATTACH_ERROR:
-  case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-  default:
+  try {
+    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config,
+                                                              publisher.in());
+  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
-               ACE_TEXT("failed to attach transport to federation publisher.\n")));
+               ACE_TEXT("failed to bind transport config to federation publisher.\n")));
     throw Incomplete();
   }
 

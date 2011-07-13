@@ -11,7 +11,12 @@
 #include /**/ "DCPSInfo_i.h"
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportInst.h"
+#include "dds/DCPS/transport/framework/TransportInst_rch.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #include "UpdateManager.h"
 #include "ShutdownInterface.h"
 
@@ -2039,36 +2044,34 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     }
 #endif
 
-    OpenDDS::DCPS::TransportImpl_rch trans_impl
-    = TheTransportFactory->create_transport_impl(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                 ACE_TEXT("tcp"),
-                                                 OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    std::string config_name =
+      OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
+      + "InfoRepoBITTransportConfig";
+    OpenDDS::DCPS::TransportConfig_rch config =
+      OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_name);
 
-    OpenDDS::DCPS::TransportInst_rch config
-    = TheTransportFactory->get_or_create_configuration(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                       ACE_TEXT("tcp"));
+    std::string inst_name =
+      OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
+      + "InfoRepoBITTCPTransportInst";
+    OpenDDS::DCPS::TransportInst_rch inst =
+      OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
+                                                               "tcp");
+    config->instances_.push_back(inst);
 
-    config->datalink_release_delay_ = 0;
+    OpenDDS::DCPS::TcpInst_rch tcp_inst =
+      OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
 
-    OpenDDS::DCPS::TcpInst* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpInst*>(config.in());
+    inst->datalink_release_delay_ = 0;
 
-    tcp_config->conn_retry_attempts_ = 0;
+    tcp_inst->conn_retry_attempts_ = 0;
 
     if (listen_address_given) {
-      tcp_config->local_address_ = ACE_INET_Addr(listen_str);
-      tcp_config->local_address_str_ = listen_str;
-    }
-
-    if (trans_impl->configure(config.in()) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_transport: ")
-                 ACE_TEXT("Failed to configure the transport.\n")));
-      status = 1;
+      tcp_inst->local_address_ = ACE_INET_Addr(listen_str);
+      tcp_inst->local_address_str_ = listen_str;
     }
 
   } catch (...) {
-    // TransportFactory is extremely varied in the exceptions that
+    // TransportRegistry is extremely varied in the exceptions that
     // it throws on failure; do not allow exceptions to bubble up
     // beyond this point.
     status = 1;

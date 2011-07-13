@@ -19,7 +19,7 @@
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #endif
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/ORB_Core.h"
 
@@ -86,6 +86,7 @@ Service_Participant::Service_Participant()
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
     liveliness_factor_(80),
+    bit_transport_port_(0),
     bit_enabled_(
 #ifdef DDS_HAS_MINIMUM_BIT
       false
@@ -95,8 +96,6 @@ Service_Participant::Service_Participant()
     ),
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
     global_transport_config_(""),
-    // TODO: remove
-    new_config_(false),
     monitor_factory_(0),
     monitor_(0),
     federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
@@ -448,14 +447,14 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportPort"))) != 0) {
       /// No need to guard this insertion as we are still single
       /// threaded here.
-      this->bitTransportPortMap_[ DEFAULT_REPO] = ACE_OS::atoi(currentArg);
+      this->bit_transport_port_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_bit_transport_port = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBitTransportIPAddress"))) != 0) {
       /// No need to guard this insertion as we are still single
       /// threaded here.
-      this->bitTransportIpMap_[ DEFAULT_REPO] = currentArg;
+      this->bit_transport_ip_ = currentArg;
       arg_shifter.consume_arg();
       got_bit_transport_ip = true;
 
@@ -505,11 +504,6 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationLivelinessDuration"))) != 0) {
       this->federation_liveliness_ = ACE_OS::atoi(currentArg);
-      arg_shifter.consume_arg();
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSNewConfig"))) != 0) {
-      // TODO: Remove
-      new_config_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
 
     } else {
@@ -1109,96 +1103,59 @@ Service_Participant::get_repository(const DDS::DomainId_t domain)
 }
 
 int
-Service_Participant::bit_transport_port(RepoKey repo) const
+Service_Participant::bit_transport_port() const
 {
-  RepoTransportPortMap::const_iterator where = this->bitTransportPortMap_.find(repo);
-
-  if (where == this->bitTransportPortMap_.end()) {
-    return -1;
-  }
-
-  return where->second;
+  return this->bit_transport_port_;
 }
 
 void
-Service_Participant::bit_transport_port(int port, RepoKey repo)
+Service_Participant::bit_transport_port(int port)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
-  this->bitTransportPortMap_[ repo] = port;
+  this->bit_transport_port_ = port;
   got_bit_transport_port = true;
 }
 
 int
-Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
+Service_Participant::init_bit_transport_config()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  RepoKey repo = DEFAULT_REPO;
-  DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
-
-  if (where != this->domainRepoMap_.end()) {
-    repo = where->second;
-  }
-
-  // Assign BIT transport key values starting from BIT_ALL_TRAFFIC as a base.
-  OpenDDS::DCPS::TransportIdType transportKey = BIT_ALL_TRAFFIC + domain;
-
-  if (false == TheTransportFactory->obtain(transportKey).is_nil()) {
-    // The transport for this repo has already been created/configured.
+  if (this->bit_transport_config_ != 0) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Domain[ %d].transport already loaded.\n"),
-                 domain));
+                 ACE_TEXT("(%P|%t) BIT transport config already loaded.\n")));
     }
 
     return 0;
   }
+  std::string config_name = TransportRegistry::DEFAULT_INST_PREFIX
+    + "BITTransportConfig";
+  this->bit_transport_config_ =
+    TransportRegistry::instance()->create_config(config_name);
 
-  this->bitTransportMap_[ domain]
-  = TheTransportFactory->create_transport_impl(transportKey,
-                                               ACE_TEXT("tcp"),
-                                               DONT_AUTO_CONFIG);
+  std::string inst_name = TransportRegistry::DEFAULT_INST_PREFIX
+    + "BITTCPTransportInst";
+  TransportInst_rch inst =
+    TransportRegistry::instance()->create_inst(inst_name, "tcp");
+  this->bit_transport_config_->instances_.push_back(inst);
 
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) Domain[ %d].transport == %x local_address=%s:%d \n"),
-               domain, this->bitTransportMap_[ domain].in(), bitTransportIpMap_[ repo].c_str(),
-               bitTransportPortMap_[ repo]));
-  }
+  TcpInst_rch tcp_inst = dynamic_rchandle_cast<TcpInst>(inst);
 
-  TransportInst_rch config
-  = TheTransportFactory->get_or_create_configuration(transportKey, ACE_TEXT("tcp"));
-
-  TcpInst* tcp_config = static_cast<TcpInst*>(config.in());
-
-  tcp_config->datalink_release_delay_ = 0;
-
-  if (0 == this->bitTransportIpMap_[ repo].length()) {
-    tcp_config->local_address_.set_port_number(this->bitTransportPortMap_[ repo]);
-
+  tcp_inst->datalink_release_delay_ = 0;
+  if (this->bit_transport_ip_ == "") {
+    tcp_inst->local_address_.set_port_number(this->bit_transport_port_);
   } else {
-    tcp_config->local_address_
-    = ACE_INET_Addr(
-        this->bitTransportPortMap_[ repo],
-        this->bitTransportIpMap_[ repo].c_str());
+    tcp_inst->local_address_ = ACE_INET_Addr(this->bit_transport_port_,
+                                             this->bit_transport_ip_.c_str());
   }
 
   std::stringstream out;
-  out << this->bitTransportPortMap_[ repo];
+  out << this->bit_transport_port_;
 
-  tcp_config->local_address_str_ =
-    ACE_TEXT_ALWAYS_CHAR(this->bitTransportIpMap_[repo].c_str())
-    + ':' + out.str();
+  tcp_inst->local_address_str_ =
+    ACE_TEXT_ALWAYS_CHAR(this->bit_transport_ip_.c_str()) + ':' + out.str();
 
-  if (this->bitTransportMap_[ domain]->configure(config.in()) != 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Service_Participant::init_bit_transport_impl: ")
-               ACE_TEXT("Failed to configure transport for domain %d.\n"),
-               domain));
-    return -1;
-
-  } else {
-    return 0;
-  }
+  return 0;
 
 #else
   ACE_UNUSED_ARG(domain);
@@ -1206,22 +1163,13 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
 #endif // DDS_HAS_MINIMUM_BIT
 }
 
-TransportImpl_rch
-Service_Participant::bit_transport_impl(DDS::DomainId_t domain)
+TransportConfig_rch
+Service_Participant::bit_transport_config()
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_, TransportImpl_rch());
-
-  if (this->bitTransportMap_[ domain].is_nil()) {
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Initializing BIT transport for domain %d\n"),
-                 domain));
-    }
-
-    init_bit_transport_impl(domain);
+  if (this->bit_transport_config_ == 0) {
+    this->init_bit_transport_config();
   }
-
-  return this->bitTransportMap_[ domain];
+  return this->bit_transport_config_;
 }
 
 int
@@ -1329,22 +1277,18 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  if (this->new_config_) {
-    status = TransportRegistry::instance()->load_transport_configuration(config_fname.c_str(), this->cf_);
-    if (this->global_transport_config_ != "") {
-      TransportConfig_rch config =
-        TransportRegistry::instance()->get_config(this->global_transport_config_.c_str());
-      if (config == 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                          ACE_TEXT("Unable to locate specified global transport config: %s\n"),
-                          this->global_transport_config_.c_str()),
-                         -1);
-      }
-      TransportRegistry::instance()->global_config(config);
+  status = TransportRegistry::instance()->load_transport_configuration(config_fname.c_str(), this->cf_);
+  if (this->global_transport_config_ != "") {
+    TransportConfig_rch config =
+      TransportRegistry::instance()->get_config(this->global_transport_config_.c_str());
+    if (config == 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+                        ACE_TEXT("Unable to locate specified global transport config: %s\n"),
+                        this->global_transport_config_.c_str()),
+                       -1);
     }
-  } else {
-    status = TheTransportFactory->load_transport_configuration(this->cf_);
+    TransportRegistry::instance()->global_config(config);
   }
 
   if (status != 0) {
@@ -1411,14 +1355,14 @@ Service_Participant::load_common_configuration()
       ACE_DEBUG((LM_NOTICE,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSBitTransportPort value from command option (overrides value if it's in config file).\n")));
     } else {
-      GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportPort"), this->bitTransportPortMap_[ DEFAULT_REPO], int)
+      GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportPort"), this->bit_transport_port_, int)
     }
 
     if (got_bit_transport_ip) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSBitTransportIPAddress value from command option (overrides value if it's in config file).\n")));
     } else {
-      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bitTransportIpMap_[ DEFAULT_REPO])
+      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bit_transport_ip_)
     }
 
     if (got_liveliness_factor) {
@@ -1658,7 +1602,7 @@ Service_Participant::load_repo_configuration()
                    sectionName.c_str(), bitIp.c_str()));
       }
 
-      this->bitTransportIpMap_[ repoKey]   = bitIp;
+      this->bit_transport_ip_   = bitIp;
 
       ACE_TString portString;
       this->cf_.get_string_value(sectionKey, ACE_TEXT("DCPSBitTransportPort"), portString);
@@ -1671,7 +1615,7 @@ Service_Participant::load_repo_configuration()
                    sectionName.c_str(), bitPort));
       }
 
-      this->bitTransportPortMap_[ repoKey] = bitPort;
+      this->bit_transport_port_ = bitPort;
     }
   }
 

@@ -88,7 +88,8 @@ InfoRepo::finalize()
     return;
   }
 
-  TheTransportFactory->release();
+  // TODO: Do we need this?
+  // TheTransportRegistry->release();
   TheServiceParticipant->shutdown();
 
   if (!CORBA::is_nil(this->orb_)) {

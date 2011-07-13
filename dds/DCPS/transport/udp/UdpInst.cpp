@@ -75,13 +75,6 @@ UdpInst::load(ACE_Configuration_Heap& cf,
   ACE_TString local_address_s;
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                           local_address_s)
-  if (local_address_s.is_empty()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpInst::load: ")
-                      ACE_TEXT("local_address not specified!\n")),
-                     -1);
-  }
   this->local_address_.set(local_address_s.c_str());
 
   return 0;

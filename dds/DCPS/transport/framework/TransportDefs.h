@@ -142,11 +142,6 @@ static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN =
 namespace OpenDDS {
 namespace DCPS {
 
-// Values used in TransportFactory::create_transport_impl () call.
-// ciju: Doesn't add any value. Removing.
-const bool AUTO_CONFIG = 1;
-const bool DONT_AUTO_CONFIG = 0;
-
 /// The TransportImplFactory instance ID type.
 typedef ACE_TString FactoryIdType;
 

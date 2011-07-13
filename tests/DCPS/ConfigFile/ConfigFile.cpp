@@ -41,7 +41,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // tcp_inst->dump(std::cout);
 
   TEST_CHECK(tcp_inst->name() == "mytcp");
-  TEST_CHECK(tcp_inst->swap_bytes_ == true);
   TEST_CHECK(tcp_inst->queue_messages_per_pool_ == 9);
   TEST_CHECK(tcp_inst->queue_initial_pools_ == 2);
   TEST_CHECK(tcp_inst->max_packet_size_ == 2000000000);
@@ -68,6 +67,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(config->instances_.size() == 2);
   TEST_CHECK(config->instances_[0] == inst);
   TEST_CHECK(config->instances_[1] == inst2);
+  TEST_CHECK(config->swap_bytes_ == true);
 
   TransportConfig_rch default_config =
     TransportRegistry::instance()->get_config("test1.ini");
@@ -77,10 +77,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   //  std::cout << "  " << default_config->instances_[i]->name() << std::endl;
   //}
   // Should be in alpa-sorted order
-  TEST_CHECK(default_config->instances_.size() == 9);
+  TEST_CHECK(default_config->instances_.size() == 11);
   TEST_CHECK(default_config->instances_[0] == inst2);  // anothertcp
-  TEST_CHECK(default_config->instances_[1] == inst);   // mytcp
-  TEST_CHECK(default_config->instances_[8]->name() == std::string("tcp7"));
+  TEST_CHECK(default_config->instances_[2] == inst);   // mytcp
+  TEST_CHECK(default_config->instances_[9]->name() == std::string("tcp7"));
+  TEST_CHECK(default_config->swap_bytes_ == false);
 
   TransportConfig_rch global_config =
     TransportRegistry::instance()->global_config();

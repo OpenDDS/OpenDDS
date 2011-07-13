@@ -213,7 +213,7 @@ private:
   DDS::DomainParticipant_var                       bitParticipant_;
   DDS::DomainParticipantListener_var               bitParticipantListener_;
   DDS::Publisher_var                               bitPublisher_;
-  OpenDDS::DCPS::TransportImpl_rch                       transportImpl_;
+  OpenDDS::DCPS::TransportConfig_rch               transportConfig_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   DDS::Topic_var                                   bitParticipantTopic_;

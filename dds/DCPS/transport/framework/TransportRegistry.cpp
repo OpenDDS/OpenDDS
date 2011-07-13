@@ -18,6 +18,7 @@
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
+#include "ace/Service_Config.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportRegistry.inl"
@@ -193,6 +194,17 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
             }
             // Create a TransportInst object and load the transport configuration in
             // ACE_Configuration_Heap to the TransportInst object.
+#if !defined(ACE_AS_STATIC_LIBS)
+            if (this->type_map_.find(transport_type) == this->type_map_.end()) {
+              // Not present, try to load library
+              LibDirectiveMap::iterator lib_iter =
+                this->lib_directive_map_.find(transport_type);
+              if (lib_iter != this->lib_directive_map_.end()) {
+                ACE_TString directive = ACE_TEXT((*lib_iter).second.c_str());
+                ACE_Service_Config::process_directive(directive.c_str());
+              }
+            }
+#endif
             TransportInst_rch inst = this->create_inst(transport_id, transport_type);
             if (inst == 0) {
               ACE_ERROR_RETURN((LM_ERROR,
@@ -276,6 +288,17 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                   configInfo.second.push_back(item);
                 }
                 configInfoVec.push_back(configInfo);
+              } else if (name == "swap_bytes") {
+                std::string value = (*it).second;
+                if ((value == "1") || (value == "true")) {
+                  config->swap_bytes_ = true;
+                } else if ((value != "0") && (value != "false")) {
+                  ACE_ERROR_RETURN((LM_ERROR,
+                                    ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                    ACE_TEXT("Illegal value for swap_bytes (%s) in [config/%s] section.\n"),
+                                    value.c_str(), config_id.c_str()),
+                                   -1);
+                }
               } else {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
