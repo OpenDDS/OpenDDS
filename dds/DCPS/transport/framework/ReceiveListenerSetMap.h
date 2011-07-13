@@ -35,7 +35,7 @@ public:
              RepoId                    subscriber_id,
              TransportReceiveListener* receive_listener);
 
-  ReceiveListenerSet* find(RepoId publisher_id);
+  ReceiveListenerSet* find(RepoId publisher_id) const;
 
   int remove(RepoId publisher_id, RepoId subscriber_id);
 

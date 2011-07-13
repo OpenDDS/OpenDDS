@@ -220,7 +220,6 @@ OpenDDS::DCPS::DataLink::make_reservation(
     GuardType guard(this->pub_map_lock_);
     pub_undo_result = this->pub_map_.remove(publisher_id,
                                             subscriber_id);
-    this->send_listeners_.erase(publisher_id);
   }
 
   // We only get to here when an error occurred somewhere along the way.
@@ -348,8 +347,6 @@ OpenDDS::DCPS::DataLink::make_reservation
     // the sub_map_ and pub_map_ will become inconsistent.
     sub_undo_result = this->sub_map_.remove(subscriber_id,
                                             publisher_id);
-
-    this->recv_listeners_.erase(subscriber_id);
   }
 
   //this->send_strategy_->link_released (false);

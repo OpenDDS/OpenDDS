@@ -1,9 +1,29 @@
+Wed Jul 13 18:06:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Improve management of send and recv listeners in the datalink.
+
+        * dds/DCPS/Util.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+
+          Fix const correctness so DataLink::*_listener_for() can be const.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Revert change from Wed Jul 13 15:11:27.  Need a better solution for
+          sharing datalinks that might not yet be completely initialized.
+
 Wed Jul 13 17:39:02 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * dds/DCPS/EntityImpl.h:
         * dds/DCPS/EntityImpl.cpp:
 
-          Making instances accesible through const pointers.
+          Making instances accessible through const pointers.
 
 Wed Jul 13 17:13:33 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 

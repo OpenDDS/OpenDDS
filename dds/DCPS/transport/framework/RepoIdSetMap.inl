@@ -17,7 +17,7 @@ OpenDDS::DCPS::RepoIdSetMap::RepoIdSetMap()
 }
 
 ACE_INLINE OpenDDS::DCPS::RepoIdSet*
-OpenDDS::DCPS::RepoIdSetMap::find(RepoId key)
+OpenDDS::DCPS::RepoIdSetMap::find(RepoId key) const
 {
   DBG_ENTRY_LVL("RepoIdSetMap","find",6);
   RepoIdSet_rch value;

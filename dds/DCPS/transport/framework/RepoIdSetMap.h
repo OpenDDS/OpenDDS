@@ -32,7 +32,7 @@ public:
   virtual ~RepoIdSetMap();
 
   int        insert(RepoId key, RepoId value);
-  RepoIdSet* find(RepoId key);
+  RepoIdSet* find(RepoId key) const;
 
   int        remove(RepoId key, RepoId value);
   RepoIdSet* remove_set(RepoId key);

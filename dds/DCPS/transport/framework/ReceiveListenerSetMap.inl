@@ -17,7 +17,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::ReceiveListenerSetMap()
 }
 
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet*
-OpenDDS::DCPS::ReceiveListenerSetMap::find(RepoId publisher_id)
+OpenDDS::DCPS::ReceiveListenerSetMap::find(RepoId publisher_id) const
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","find",6);
   ReceiveListenerSet_rch listener_set;

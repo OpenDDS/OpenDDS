@@ -155,6 +155,19 @@ OpenDDS::DCPS::TcpTransport::create_datalink(
 
   PriorityKey key(priority, remote_address, is_loopback, active);
 
+  { // guard scope
+    GuardType guard(this->links_lock_);
+
+    // Attempt to bind the TcpDataLink to our links_ map.
+    if (this->links_.bind(key, link) != 0) {
+      // We failed to bind the new DataLink into our links_ map.
+      // On error, we return a NULL pointer.
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: Unable to bind new TcpDataLink to "
+                        "TcpTransport in links_ map.\n"), 0);
+    }
+  }
+
   // Now we need to attempt to establish a connection for the DataLink.
   int result;
 
@@ -186,18 +199,16 @@ OpenDDS::DCPS::TcpTransport::create_datalink(
     }
   }
 
-  if (result == 0) {
+  if (result != 0) {
     GuardType guard(this->links_lock_);
+    // Make sure that we unbind the link (that failed to establish a
+    // connection) from our links_ map.  We intentionally ignore the
+    // return code from the unbind() call since we know that we just
+    // did the bind() moments ago - and with the links_lock_ acquired
+    // the whole time.
+    this->links_.unbind(key);
 
-    // Attempt to bind the TcpDataLink to our links_ map.
-    if (this->links_.bind(key, link) != 0) {
-      // We failed to bind the new DataLink into our links_ map.
-      // On error, we return a NULL pointer.
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to bind new TcpDataLink to "
-                        "TcpTransport in links_ map.\n"), 0);
-    }
-  } else {
+    // On error, return a NULL pointer.
     return 0;
   }
 
