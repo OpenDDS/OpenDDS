@@ -14,7 +14,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/Tcp.h"

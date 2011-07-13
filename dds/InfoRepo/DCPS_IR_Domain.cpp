@@ -22,7 +22,7 @@
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
-
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 

@@ -32,26 +32,6 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
   return task._retn();
 }
 
-ACE_INLINE int
-OpenDDS::DCPS::TransportImpl::set_reactor(TransportReactorTask* task)
-{
-  DBG_ENTRY_LVL("TransportImpl","set_reactor",6);
-
-  GuardType guard(this->lock_);
-
-  if (!this->reactor_task_.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl already has a reactor.\n"),
-                     -1);
-  }
-
-  // Keep a copy for ourselves.
-  task->_add_ref();
-  this->reactor_task_ = task;
-
-  return 0;
-}
-
 /// The DataLink itself calls this when it has determined that, due
 /// to some remove_associations() call being handled by a TransportInterface
 /// object, the DataLink has lost all of its associations, and is not needed

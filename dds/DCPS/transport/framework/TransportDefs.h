@@ -134,9 +134,6 @@ static const ACE_TCHAR CONFIG_SECTION_NAME[] = ACE_TEXT("config");
 namespace OpenDDS {
 namespace DCPS {
 
-/// The TransportImplFactory instance ID type.
-typedef ACE_TString FactoryIdType;
-
 /// Identifier type for DataLink objects.
 typedef ACE_UINT64  DataLinkIdType;
 

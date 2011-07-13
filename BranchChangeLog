@@ -1,3 +1,37 @@
+Wed Jul 13 21:38:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DRPeriodicMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/DWPeriodicMonitorImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * tools/monitor/MonitorTask.cpp:
+
+          Removing references to TheTransportFactory.h and also to
+          the TransportImplFactory class which no longer exists.
+
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+
+          Removed this file.
+
 Wed Jul 13 20:38:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

@@ -9,7 +9,7 @@
 #include "MulticastLoader.h"
 #include "MulticastInst.h"
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
 
 namespace {

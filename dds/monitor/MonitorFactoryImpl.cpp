@@ -24,7 +24,7 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 namespace OpenDDS {
 namespace DCPS {

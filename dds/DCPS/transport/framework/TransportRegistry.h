@@ -30,6 +30,8 @@ namespace DDS {
   typedef Entity* Entity_ptr;
 }
 
+#define TheTransportRegistry OpenDDS::DCPS::TransportRegistry::instance()
+
 namespace OpenDDS {
 namespace DCPS {
 

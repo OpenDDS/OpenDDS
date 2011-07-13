@@ -10,7 +10,6 @@
 
 #include "TcpLoader.h"
 #include "TcpInst.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"

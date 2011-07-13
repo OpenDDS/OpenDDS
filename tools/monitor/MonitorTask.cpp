@@ -13,7 +13,6 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
@@ -64,7 +63,6 @@ Monitor::MonitorTask::~MonitorTask()
   this->iorKeyMap_.clear();
 
   // Clean up the service resources.
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 

@@ -33,7 +33,6 @@ class TransportClient;
 class TransportInterface;
 class TransportReceiveListener;
 class ThreadSynchStrategy;
-class TransportImplFactory;
 class DataLink;
 class Monitor;
 
@@ -107,8 +106,6 @@ public:
   void dump();
   void dump(ostream& os);
 
-  const FactoryIdType& get_factory_id();
-  void set_factory_id(const FactoryIdType& fid);
   void report();
 
 protected:
@@ -186,17 +183,9 @@ private:
   /// can access our private methods.  We do this to avoid pollution
   /// of our public interface with internal framework methods.
   friend class TransportInterface;
-  friend class TransportImplFactory;
   friend class TransportInst;
   friend class TransportClient;
   friend class DataLink;
-
-  /// Our friend (and creator), the TransportImplFactory, will invoke
-  /// this method in order to provide us with the TransportReactorTask.
-  /// This happens immediately following the creation of this
-  /// TransportImpl object.
-  int set_reactor(TransportReactorTask* task);
-
   /// Called by the TransportRegistry when this TransportImpl object
   /// is released while the TransportRegistry is handling a release()
   /// "event".
@@ -311,9 +300,6 @@ private:
 
   /// Monitor object for this entity
   Monitor* monitor_;
-
-  /// Factory ID for this transport (identifies the transport type)
-  FactoryIdType factory_id_;
 };
 
 } // namespace DCPS

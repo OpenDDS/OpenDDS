@@ -497,18 +497,6 @@ OpenDDS::DCPS::TransportImpl::remove_ack(RepoId pub_id, RepoId sub_id)
   this->acked_sub_map_.remove(pub_id, sub_id);
 }
 
-const OpenDDS::DCPS::FactoryIdType&
-OpenDDS::DCPS::TransportImpl::get_factory_id()
-{
-  return this->factory_id_;
-}
-
-void
-OpenDDS::DCPS::TransportImpl::set_factory_id(const FactoryIdType& fid)
-{
-  this->factory_id_ = fid;
-}
-
 void
 OpenDDS::DCPS::TransportImpl::report()
 {

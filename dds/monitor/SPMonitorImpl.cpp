@@ -13,7 +13,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 namespace OpenDDS {
 namespace DCPS {

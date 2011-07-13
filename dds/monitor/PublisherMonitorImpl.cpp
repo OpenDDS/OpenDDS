@@ -11,7 +11,6 @@
 #include "monitorTypeSupportImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace OpenDDS {
