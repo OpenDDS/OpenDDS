@@ -92,9 +92,6 @@ public:
   /// If the value is 0, the system default value is used.
   size_t rcv_buffer_size_;
 
-  /// TODO: Remove
-  virtual int load(const TransportIdType& id,
-                   ACE_Configuration_Heap& cf);
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 
@@ -106,7 +103,7 @@ private:
   explicit MulticastInst(const std::string& name);
 
   void default_group_address(ACE_INET_Addr& group_address,
-                             const TransportIdType& id);
+                             ACE_UINT32 id);
 
   MulticastTransport* new_impl(const TransportInst_rch& inst);
 };

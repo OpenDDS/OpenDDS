@@ -62,85 +62,13 @@ MulticastInst::MulticastInst(const std::string& name)
     rcv_buffer_size_(0)
 #endif
 {
-  default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
+  default_group_address(this->group_address_, 0xFFFFFF08);
 
   this->syn_interval_.msec(DEFAULT_SYN_INTERVAL);
   this->syn_timeout_.msec(DEFAULT_SYN_TIMEOUT);
 
   this->nak_interval_.msec(DEFAULT_NAK_INTERVAL);
   this->nak_timeout_.msec(DEFAULT_NAK_TIMEOUT);
-}
-
-int
-MulticastInst::load(const TransportIdType& id,
-                    ACE_Configuration_Heap& config)
-{
-  TransportInst::load(id, config); // delegate to parent
-
-  ACE_Configuration_Section_Key transport_key;
-
-  ACE_TString section_name = id_to_section_name(id);
-  if (config.open_section(config.root_section(),
-                          section_name.c_str(),
-                          0,  // create
-                          transport_key) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastInst::load: ")
-                      ACE_TEXT("unable to open section: [%C]!\n"),
-                      section_name.c_str()),
-                     -1);
-  }
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("default_to_ipv6"),
-                   this->default_to_ipv6_, bool)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("port_offset"),
-                   this->port_offset_, u_short)
-
-  ACE_TString group_address_s;
-  GET_CONFIG_STRING_VALUE(config, transport_key, ACE_TEXT("group_address"),
-                          group_address_s)
-  if (group_address_s.is_empty()) {
-    default_group_address(this->group_address_, id);
-  } else {
-    this->group_address_.set(group_address_s.c_str());
-  }
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("reliable"),
-                   this->reliable_, bool)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("syn_backoff"),
-                   this->syn_backoff_, double)
-
-  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("syn_interval"),
-                        this->syn_interval_)
-
-  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("syn_timeout"),
-                        this->syn_timeout_)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_depth"),
-                   this->nak_depth_, size_t)
-
-  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_interval"),
-                        this->nak_interval_)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_delay_intervals"),
-                        this->nak_delay_intervals_, size_t)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_max"),
-                        this->nak_max_, size_t)
-
-  GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
-                        this->nak_timeout_)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("ttl"),
-                   this->ttl_, char)
-
-  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("rcv_buffer_size"),
-                   this->rcv_buffer_size_, size_t)
-
-   return 0;
 }
 
 int
@@ -196,7 +124,7 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
 
 void
 MulticastInst::default_group_address(ACE_INET_Addr& group_address,
-                                     const TransportIdType& id)
+                                     ACE_UINT32 id)
 {
   u_short port_number(this->port_offset_ + id);
 

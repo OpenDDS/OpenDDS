@@ -1,3 +1,53 @@
+Wed Jul 13 17:13:33 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/subscriber.cpp:
+
+          Remove old transport code.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.cpp:
+
+          Cleanup of old transport code:
+            -  Remove old configuration code.
+            -  Remove attach functions from TransportImpl.
+            -  Remove transport id from TransportImpl.
+            -  Remove some constants and typedefs related to
+               the old transport implementation.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Move auto-loading to the create_inst() member function.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Fix some warnings.
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Comment out debug options (committed accidentally).
+
 Wed Jul 13 15:11:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:

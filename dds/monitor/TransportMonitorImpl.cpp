@@ -40,7 +40,8 @@ TransportMonitorImpl::report() {
   TransportReport report;
   report.host = this->hostname_.c_str();
   report.pid  = this->pid_;
-  report.transport_id  = this->transport_->get_transport_id();
+  // TODO: remove/replace
+  report.transport_id  = 0;
   report.transport_type =
     ACE_TEXT_ALWAYS_CHAR(this->transport_->get_factory_id().c_str());
   // ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, queue_lock_);

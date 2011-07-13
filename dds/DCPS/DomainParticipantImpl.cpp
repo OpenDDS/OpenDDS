@@ -2200,7 +2200,7 @@ DomainParticipantImpl::attach_bit_transport()
 
     TransportRegistry::instance()->bind_config(config, bit_subscriber_.in());
 
-  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
     return DDS::RETCODE_ERROR;
   }
 

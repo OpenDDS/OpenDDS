@@ -211,7 +211,7 @@ ManagerImpl::initialize()
   try {
     OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config,
                                                               subscriber.in());
-  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to bind transport config to federation subscriber.\n")));
@@ -248,7 +248,7 @@ ManagerImpl::initialize()
   try {
     OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config,
                                                               publisher.in());
-  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to bind transport config to federation publisher.\n")));

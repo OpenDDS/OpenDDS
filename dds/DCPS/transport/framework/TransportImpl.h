@@ -88,12 +88,6 @@ public:
   /// no transport/DCPS locks held.
   bool release_link_resources(DataLink* link);
 
-  /// Called by the application to attach this transport to a publisher.
-  OpenDDS::DCPS::AttachStatus attach(DDS::Publisher_ptr pub);
-
-  /// Called by the application to attach this transport to a subscriber.
-  OpenDDS::DCPS::AttachStatus attach(DDS::Subscriber_ptr sub);
-
   /// Expose the configuration information so others can see what
   /// we can do.
   TransportInst* config() const;
@@ -113,9 +107,6 @@ public:
   void dump();
   void dump(ostream& os);
 
-  TransportIdType get_transport_id();
-  ACE_TString get_transport_id_description();
-  void set_transport_id(const TransportIdType& tid);
   const FactoryIdType& get_factory_id();
   void set_factory_id(const FactoryIdType& fid);
   void report();
@@ -320,9 +311,6 @@ private:
 
   /// Monitor object for this entity
   Monitor* monitor_;
-
-  /// Transport ID for this transport
-  TransportIdType transport_id_;
 
   /// Factory ID for this transport (identifies the transport type)
   FactoryIdType factory_id_;

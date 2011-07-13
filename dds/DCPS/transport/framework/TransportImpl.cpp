@@ -44,8 +44,7 @@ void clear(Container& c)
 } // namespace
 
 OpenDDS::DCPS::TransportImpl::TransportImpl()
-  : monitor_(0),
-    transport_id_(0)
+  : monitor_(0)
 {
   DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
   if (TheServiceParticipant->monitor_factory_) {
@@ -496,74 +495,6 @@ OpenDDS::DCPS::TransportImpl::remove_ack(RepoId pub_id, RepoId sub_id)
   this->acked_sub_map_.remove(pub_id, sub_id);
 }
 
-OpenDDS::DCPS::AttachStatus
-OpenDDS::DCPS::TransportImpl::attach(DDS::Publisher_ptr pub)
-{
-  OpenDDS::DCPS::PublisherImpl* pub_impl = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(pub);
-
-  if (0 == pub) {
-    return ATTACH_ERROR;
-  }
-
-  return ATTACH_OK; //TODO: this method will be removed     pub_impl->attach_transport(this);
-}
-
-OpenDDS::DCPS::AttachStatus
-OpenDDS::DCPS::TransportImpl::attach(DDS::Subscriber_ptr sub)
-{
-  OpenDDS::DCPS::SubscriberImpl* sub_impl = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub);
-
-  if (0 == sub) {
-    return ATTACH_ERROR;
-  }
-
-  return ATTACH_OK; //TODO: this method will be removed    sub_impl->attach_transport(this);
-}
-
-OpenDDS::DCPS::TransportIdType
-OpenDDS::DCPS::TransportImpl::get_transport_id()
-{
-  return this->transport_id_;
-}
-
-ACE_TString
-OpenDDS::DCPS::TransportImpl::get_transport_id_description()
-{
-  std::basic_ostringstream<ACE_TCHAR> oss;
-
-  oss << std::hex << this->transport_id_ << std::dec;
-  if (this->transport_id_ > BIT_ALL_TRAFFIC && this->transport_id_ < BIT_ALL_TRAFFIC + 10000) {
-    oss << " (BIT Transport Id for domain: " << this->transport_id_ - BIT_ALL_TRAFFIC << ")";
-  } else {
-    switch (this->transport_id_) {
-    case DEFAULT_TCP_ID:
-      oss << " (Default TCP Transport Id)";
-      break;
-    case DEFAULT_DUMMY_TCP_ID:
-      oss << " (Default Dummy TCP Transport Id)";
-      break;
-    case DEFAULT_UDP_ID:
-      oss << " (Default UDP Transport Id)";
-      break;
-    case DEFAULT_MULTICAST_ID:
-      oss << " (Default Multicast Transport Id)";
-      break;
-    case BIT_ALL_TRAFFIC:
-      oss << " (BIT Transport Id)";
-      break;
-    default:
-      ;
-    }
-  }
-  return oss.str().c_str();
-}
-
-void
-OpenDDS::DCPS::TransportImpl::set_transport_id(const TransportIdType& tid)
-{
-  this->transport_id_ = tid;
-}
-
 const OpenDDS::DCPS::FactoryIdType&
 OpenDDS::DCPS::TransportImpl::get_factory_id()
 {
@@ -598,8 +529,8 @@ OpenDDS::DCPS::TransportImpl::dump()
 void
 OpenDDS::DCPS::TransportImpl::dump(ostream& os)
 {
-  os << TransportInst::formatNameForDump("id")
-     << get_transport_id_description();
+  os << TransportInst::formatNameForDump("name")
+     << config()->name();
 
   if (this->config_.is_nil()) {
     os << " (not configured)" << std::endl;

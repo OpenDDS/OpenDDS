@@ -131,41 +131,14 @@ class ACE_Data_Block;
 static const ACE_TCHAR TRANSPORT_SECTION_NAME[] = ACE_TEXT("transport");
 static const ACE_TCHAR CONFIG_SECTION_NAME[] = ACE_TEXT("config");
 
-// TODO: Remove...
-// The transport section name prefix.
-static const ACE_TCHAR  TRANSPORT_SECTION_NAME_PREFIX[] =
-  ACE_TEXT("transport_impl_");
-// The transport section name prefix is "transport_impl_" so the length is 15.
-static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN =
-  ACE_OS::strlen(TRANSPORT_SECTION_NAME_PREFIX);
-
 namespace OpenDDS {
 namespace DCPS {
 
 /// The TransportImplFactory instance ID type.
 typedef ACE_TString FactoryIdType;
 
-// TODO: Remove
-/// The TransportImpl instance ID type.
-typedef ACE_UINT32 TransportIdType;
-typedef std::vector <TransportIdType> TransportIdList;
-
 /// Identifier type for DataLink objects.
 typedef ACE_UINT64  DataLinkIdType;
-
-// Note: The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for transport
-//       DEFAULT_<transport>_ID values. If a new transport is
-//       implemented, the default ID of the new transport must be
-//       defined here.
-const TransportIdType DEFAULT_TCP_ID = 0xFFFFFF00;
-const TransportIdType DEFAULT_DUMMY_TCP_ID = 0xFFFFFF01;
-
-const TransportIdType DEFAULT_UDP_ID = 0xFFFFFF04;
-
-// The default multicast ID forces the group address selection
-// heuristic to resolve port number 49152; this is the minimal
-// port defined in the dynamic/private range [IANA 2009-11-16].
-const TransportIdType DEFAULT_MULTICAST_ID = 0xFFFFFF08;
 
 /// Return code type for send_control() operations.
 enum SendControlStatus {

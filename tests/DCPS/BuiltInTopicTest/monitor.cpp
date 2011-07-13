@@ -12,7 +12,6 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
@@ -590,7 +589,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       dpf->delete_participant(participant.in ());
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
       if (CUR_PART_USER_DATA == PART_USER_DATA)

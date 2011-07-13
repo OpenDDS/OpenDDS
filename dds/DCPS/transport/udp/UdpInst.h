@@ -25,9 +25,6 @@ public:
   /// The default value is: none.
   ACE_INET_Addr local_address_;
 
-  /// TODO: Remove
-  virtual int load(const TransportIdType& id,
-                   ACE_Configuration_Heap& cf);
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 

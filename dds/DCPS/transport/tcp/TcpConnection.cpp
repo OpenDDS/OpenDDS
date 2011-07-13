@@ -619,13 +619,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     if (ret == -1) {
       if (this->tcp_config_->conn_retry_attempts_ > 0) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C:%d.\n",
-                   this->link_->get_transport_impl()->get_transport_id_description().c_str(),
+                   this->link_->get_transport_impl()->config()->name().c_str(),
                    this->remote_address_.get_host_addr(),
                    this->remote_address_.get_port_number()));
 
       } else {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) we did not try to re-establish connection on transport: %C to %C:%d.\n",
-                   this->link_->get_transport_impl()->get_transport_id_description().c_str(),
+                   this->link_->get_transport_impl()->config()->name().c_str(),
                    this->remote_address_.get_host_addr(),
                    this->remote_address_.get_port_number()));
       }
@@ -636,7 +636,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
     } else {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
-                 this->link_->get_transport_impl()->get_transport_id_description().c_str(),
+                 this->link_->get_transport_impl()->config()->name().c_str(),
                  this->remote_address_.get_host_addr(),
                  this->remote_address_.get_port_number()));
       this->reconnect_state_ = RECONNECTED_STATE;

@@ -192,20 +192,11 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                                 transport_id.c_str()),
                                -1);
             }
-            // Create a TransportInst object and load the transport configuration in
-            // ACE_Configuration_Heap to the TransportInst object.
-#if !defined(ACE_AS_STATIC_LIBS)
-            if (this->type_map_.find(transport_type) == this->type_map_.end()) {
-              // Not present, try to load library
-              LibDirectiveMap::iterator lib_iter =
-                this->lib_directive_map_.find(transport_type);
-              if (lib_iter != this->lib_directive_map_.end()) {
-                ACE_TString directive = ACE_TEXT((*lib_iter).second.c_str());
-                ACE_Service_Config::process_directive(directive.c_str());
-              }
-            }
-#endif
-            TransportInst_rch inst = this->create_inst(transport_id, transport_type);
+            // Create the TransportInst object and load the transport
+            // configuration in ACE_Configuration_Heap to the TransportInst
+            // object.
+            TransportInst_rch inst = this->create_inst(transport_id,
+                                                       transport_type);
             if (inst == 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -360,11 +351,30 @@ TransportRegistry::create_inst(const std::string& name,
   TransportType_rch type;
 
   if (find(this->type_map_, transport_type, type) != 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
-               ACE_TEXT("transport_type=%C is not registered.\n"),
-               transport_type.c_str()));
-    return TransportInst_rch();
+#if !defined(ACE_AS_STATIC_LIBS)
+    // Not present, try to load library
+    LibDirectiveMap::iterator lib_iter =
+      this->lib_directive_map_.find(transport_type);
+    if (lib_iter != this->lib_directive_map_.end()) {
+      ACE_TString directive = ACE_TEXT((*lib_iter).second.c_str());
+      // Release the lock, because loading a transport library will
+      // recursively call this function to add its default inst.
+      guard.release();
+      ACE_Service_Config::process_directive(directive.c_str());
+      guard.acquire();
+    }
+
+    // Try to find it again
+    if (find(this->type_map_, transport_type, type) != 0) {
+#endif
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
+                 ACE_TEXT("transport_type=%C is not registered.\n"),
+                 transport_type.c_str()));
+      return TransportInst_rch();
+#if !defined(ACE_AS_STATIC_LIBS)
+    }
+#endif
   }
 
   if (this->inst_map_.count(name)) {
