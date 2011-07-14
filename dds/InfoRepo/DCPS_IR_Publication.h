@@ -43,7 +43,7 @@ public:
                       DCPS_IR_Topic* topic,
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
                       DDS::DataWriterQos qos,
-                      OpenDDS::DCPS::TransportInterfaceInfo info,
+                      const OpenDDS::DCPS::TransportLocatorSeq& info,
                       DDS::PublisherQos publisherQos);
 
   ~DCPS_IR_Publication();
@@ -122,11 +122,7 @@ public:
   /// Update PublisherQos only.
   void set_qos(const DDS::PublisherQos& qos);
 
-  /// get the transport ID of the transport implementation type.
-  OpenDDS::DCPS::TransportInterfaceId   get_transport_id() const;
-
-  /// Returns a copy of the TransportInterfaceInfo object
-  OpenDDS::DCPS::TransportInterfaceInfo get_transportInterfaceInfo() const;
+  OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
 
   /// Return pointer to the incompatible qos status
   /// Publication retains ownership
@@ -185,7 +181,7 @@ private:
   /// the corresponding DataWriterRemote object
   OpenDDS::DCPS::DataWriterRemote_var writer_;
   DDS::DataWriterQos qos_;
-  OpenDDS::DCPS::TransportInterfaceInfo info_;
+  OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::PublisherQos publisherQos_;
 
   DCPS_IR_Subscription_Set associations_;

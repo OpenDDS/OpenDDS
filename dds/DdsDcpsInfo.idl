@@ -20,6 +20,44 @@
 
 module OpenDDS {
   module DCPS {
+
+    // Information returned from call to add_domain_participant()
+    struct AddDomainStatus {
+      RepoId  id;
+      boolean federated;
+    };
+
+    // Status returned by a topic operation
+    enum TopicStatus {
+      CREATED,
+      ENABLED,
+      FOUND,
+      NOT_FOUND,
+      REMOVED,
+      CONFLICTING_TYPENAME,
+      INTERNAL_ERROR
+    };
+
+    // thrown when operation receives an
+    // invalid domain id
+    exception Invalid_Domain {};
+
+    // thrown when operation receives an
+    // invalid domain participant id
+    exception Invalid_Participant {};
+
+    // thrown when operation receives an
+    // invalid publication id
+    exception Invalid_Publication {};
+
+    // thrown when operation receives an
+    // invalid subscription id
+    exception Invalid_Subscription {};
+
+    // thrown when operation receives an
+    // invalid topic id
+    exception Invalid_Topic {};
+
     interface DCPSInfo {
 
       // Attach a DomainParticipant and assert that ownership resides
@@ -78,7 +116,7 @@ module OpenDDS {
                               in RepoId topicId,
                               in DataWriterRemote publication,
                               in ::DDS::DataWriterQos qos,
-                              in TransportInterfaceInfo transInfo,
+                              in TransportLocatorSeq transInfo,
                               in ::DDS::PublisherQos publisherQos)
         raises (Invalid_Domain,
                 Invalid_Participant,
@@ -103,7 +141,7 @@ module OpenDDS {
                                in RepoId topicId,
                                in DataReaderRemote subscription,
                                in ::DDS::DataReaderQos qos,
-                               in TransportInterfaceInfo transInfo,
+                               in TransportLocatorSeq transInfo,
                                in ::DDS::SubscriberQos subscriberQos,
                                in string filterExpression,
                                in ::DDS::StringSeq exprParams)

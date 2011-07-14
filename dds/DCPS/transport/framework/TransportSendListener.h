@@ -64,8 +64,7 @@ public:
     DataSample* /* data */)
   {}
 
-  virtual void fully_associated(size_t /*num_remote_associations*/,
-                                const AssociationData* /*remote_associations*/)
+  virtual void fully_associated(const AssociationData& /* association */)
   {}
 
 protected:

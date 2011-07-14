@@ -62,13 +62,12 @@ protected:
     CORBA::Long             priority,
     bool                    active);
 
-  virtual int configure_i(TransportInst* config);
+  virtual bool configure_i(TransportInst* config);
 
   virtual void shutdown_i();
   virtual void pre_shutdown_i();
 
-  virtual int connection_info_i
-  (TransportInterfaceInfo& local_info) const;
+  virtual bool connection_info_i(TransportLocator& local_info) const;
 
   /// Called by the DataLink to release itself.
   virtual void release_datalink_i(DataLink* link,

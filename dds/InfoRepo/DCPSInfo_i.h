@@ -141,7 +141,7 @@ public:
     const OpenDDS::DCPS::RepoId& topicId,
     OpenDDS::DCPS::DataWriterRemote_ptr publication,
     const DDS::DataWriterQos & qos,
-    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
     const DDS::PublisherQos & publisherQos)
   ACE_THROW_SPEC((CORBA::SystemException
                    , OpenDDS::DCPS::Invalid_Domain
@@ -175,7 +175,7 @@ public:
                        const OpenDDS::DCPS::RepoId& pubId,
                        const char* pub_str,
                        const DDS::DataWriterQos & qos,
-                       const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+                       const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
                        const DDS::PublisherQos & publisherQos,
                        bool associate = false);
 
@@ -194,7 +194,7 @@ public:
     const OpenDDS::DCPS::RepoId& topicId,
     OpenDDS::DCPS::DataReaderRemote_ptr subscription,
     const DDS::DataReaderQos & qos,
-    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
     const DDS::SubscriberQos & subscriberQos,
     const char* filterExpression,
     const DDS::StringSeq& exprParams)
@@ -230,7 +230,7 @@ public:
                         const OpenDDS::DCPS::RepoId& subId,
                         const char* sub_str,
                         const DDS::DataReaderQos & qos,
-                        const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+                        const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
                         const DDS::SubscriberQos & subscriberQos,
                         const char* filterExpression,
                         const DDS::StringSeq& exprParams,

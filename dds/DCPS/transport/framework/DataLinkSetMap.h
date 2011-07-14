@@ -51,9 +51,6 @@ public:
   int insert_link(RepoId id, DataLink* link);
 
   // ciju: Called with TransportImpl Reservation lock held
-  /// Used by the TransportInterface when this map is regarded as
-  /// the "remote map".
-  ///
   /// For each remote_id in the array of remote_ids, this method
   /// will cause the remote_id/local_id DataLink be removed from
   /// remote_id's DataLinkSet if the remote_id/local_id is the
@@ -68,19 +65,16 @@ public:
                             const bool pub_side);
 
   // ciju: Called with TransportImpl Reservation lock held
-  /// Called when the TransportInterface is detaching from the
+  /// Called when the TransportClient is detaching from the
   /// TransportImpl (as opposed to the other way around when the
-  /// TransportImpl is detaching from the TransportInterface).
+  /// TransportImpl is detaching from the TransportClient).
   void release_all_reservations();
 
   // ciju: Called with TransportImpl Reservation lock held
-  /// Used by the TransportInterface when this map is regarded as
-  /// the "local map".
-  ///
   /// The supplied released_locals contains, for each RepoId key,
   /// the set of DataLinks that should be removed from our map_.
   /// These are removed due to a release_reservations call on our
-  /// "reverse" map in the TransportInterface.
+  /// "reverse" map in the TransportClient.
   void remove_released(const DataLinkSetMap& released_locals);
 
   /// Make the map_ empty.

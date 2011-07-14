@@ -64,6 +64,7 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_option
   TypeSupport_Files {
     dcps_ts_flags += -SI
     DdsDcpsGuid.idl
+    DdsDcpsInfoUtils.idl
   }
 
   InstallData_Files {

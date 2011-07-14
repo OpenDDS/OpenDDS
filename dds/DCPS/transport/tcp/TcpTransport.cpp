@@ -22,7 +22,10 @@
 #include "dds/DCPS/debug.h"
 #include <sstream>
 
-OpenDDS::DCPS::TcpTransport::TcpTransport(const TransportInst_rch& inst)
+namespace OpenDDS {
+namespace DCPS {
+
+TcpTransport::TcpTransport(const TransportInst_rch& inst)
   : reverse_reservation_lock_(this->reservation_lock()),
     acceptor_(new TcpAcceptor(this)),
     connections_updated_(this->connections_lock_),
@@ -34,7 +37,7 @@ OpenDDS::DCPS::TcpTransport::TcpTransport(const TransportInst_rch& inst)
   }
 }
 
-OpenDDS::DCPS::TcpTransport::~TcpTransport()
+TcpTransport::~TcpTransport()
 {
   DBG_ENTRY_LVL("TcpTransport","~TcpTransport",6);
   delete acceptor_;
@@ -43,8 +46,8 @@ OpenDDS::DCPS::TcpTransport::~TcpTransport()
   delete con_checker_;
 }
 
-OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::TcpTransport::find_datalink(
+DataLink*
+TcpTransport::find_datalink(
   RepoId                  /*local_id*/,
   const AssociationData&  remote_association,
   CORBA::Long             priority,
@@ -59,7 +62,7 @@ OpenDDS::DCPS::TcpTransport::find_datalink(
   const bool is_loopback = remote_address == this->tcp_config_->local_address_;
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::find_datalink remote addr str "
-            "\"%s\" remote_address \"%C:%d priority %d is_loopback %d\"\n",
+            "\"%C\" remote_address \"%C:%d priority %d is_loopback %d\"\n",
             remote.network_order_address_.addr_.c_str(),
             remote_address.get_host_name(),
             remote_address.get_port_number(),
@@ -80,6 +83,15 @@ OpenDDS::DCPS::TcpTransport::find_datalink(
       link->wait_for_start();
 
       TcpConnection_rch con = link->get_connection();
+
+      if (con.is_nil()) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "(%P|%t) ERROR: Unable to use found datalink for "
+                          "remote %C:%d.\n",
+                          remote_address.get_host_addr(),
+                          remote_address.get_port_number()),
+                         0);
+      }
 
       if (con->is_connector() && !con->is_connected()) {
         bool on_new_association = true;
@@ -136,8 +148,8 @@ OpenDDS::DCPS::TcpTransport::find_datalink(
   return 0;
 }
 
-OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::TcpTransport::create_datalink(
+DataLink*
+TcpTransport::create_datalink(
   RepoId                  /*local_id*/,
   const AssociationData&  remote_association,
   CORBA::Long             priority,
@@ -191,7 +203,7 @@ OpenDDS::DCPS::TcpTransport::create_datalink(
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Failed to make passive connection.\n"));
 
-      if (OpenDDS::DCPS::Transport_debug_level > 0) {
+      if (Transport_debug_level > 0) {
         std::stringstream os;
         dump(os);
 
@@ -203,6 +215,9 @@ OpenDDS::DCPS::TcpTransport::create_datalink(
   }
 
   if (result != 0) {
+
+    link->unblock_wait_for_start();
+
     GuardType guard(this->links_lock_);
     // Make sure that we unbind the link (that failed to establish a
     // connection) from our links_ map.  We intentionally ignore the
@@ -220,8 +235,8 @@ OpenDDS::DCPS::TcpTransport::create_datalink(
   return link._retn();
 }
 
-int
-OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
+bool
+TcpTransport::configure_i(TransportInst* config)
 {
   DBG_ENTRY_LVL("TcpTransport", "configure_i", 6);
 
@@ -234,7 +249,7 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: Failed downcast from TransportInst "
                       "to TcpInst.\n"),
-                     -1);
+                     false);
   }
 
   this->create_reactor_task();
@@ -251,7 +266,7 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: connection checker failed to open : %p\n"),
                       ACE_TEXT("open")),
-                     -1);
+                     false);
   }
 
   // Open our acceptor object so that we can accept passive connections
@@ -269,7 +284,7 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
                       cfg->local_address_.get_host_addr(),
                       cfg->local_address_.get_port_number(),
                       ACE_TEXT("open")),
-                     -1);
+                     false);
   }
 
   // update the port number (incase port zero was given).
@@ -314,11 +329,11 @@ OpenDDS::DCPS::TcpTransport::configure_i(TransportInst* config)
   }
 
   // Ahhh...  The sweet smell of success!
-  return 0;
+  return true;
 }
 
 void
-OpenDDS::DCPS::TcpTransport::pre_shutdown_i()
+TcpTransport::pre_shutdown_i()
 {
   DBG_ENTRY_LVL("TcpTransport","pre_shutdown_i",6);
 
@@ -334,7 +349,7 @@ OpenDDS::DCPS::TcpTransport::pre_shutdown_i()
 }
 
 void
-OpenDDS::DCPS::TcpTransport::shutdown_i()
+TcpTransport::shutdown_i()
 {
   DBG_ENTRY_LVL("TcpTransport","shutdown_i",6);
 
@@ -392,11 +407,10 @@ OpenDDS::DCPS::TcpTransport::shutdown_i()
   this->acceptor_->transport_shutdown();
 }
 
-int
-OpenDDS::DCPS::TcpTransport::connection_info_i
-(TransportInterfaceInfo& local_info) const
+bool
+TcpTransport::connection_info_i(TransportLocator& local_info) const
 {
-  DBG_ENTRY_LVL("TcpTransport","connection_info_i",6);
+  DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport local address str %C\n",
             this->tcp_config_->local_address_str_.c_str()), 2);
@@ -406,23 +420,20 @@ OpenDDS::DCPS::TcpTransport::connection_info_i
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;
-  CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
-  local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.
-  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
-                    (len,
-                     len,
-                     (CORBA::Octet*)(cdr.buffer()));
-
-  return 0;
+  local_info.transport_type = "tcp";
+  local_info.data = TransportBLOB(len, len,
+                                  reinterpret_cast<CORBA::Octet*>(buffer));
+  return true;
 }
 
 void
-OpenDDS::DCPS::TcpTransport::release_datalink_i(DataLink* link,
-                                                      bool release_pending)
+TcpTransport::release_datalink_i(DataLink* link, bool release_pending)
 {
-  DBG_ENTRY_LVL("TcpTransport","release_datalink_i",6);
+  DBG_ENTRY_LVL("TcpTransport", "release_datalink_i", 6);
 
   TcpDataLink* tcp_link = static_cast<TcpDataLink*>(link);
 
@@ -470,8 +481,8 @@ OpenDDS::DCPS::TcpTransport::release_datalink_i(DataLink* link,
   }
 }
 
-OpenDDS::DCPS::TcpInst*
-OpenDDS::DCPS::TcpTransport::get_configuration()
+TcpInst*
+TcpTransport::get_configuration()
 {
   return this->tcp_config_.in();
 }
@@ -483,7 +494,7 @@ OpenDDS::DCPS::TcpTransport::get_configuration()
 /// object needs to be paired with a DataLink object that is (or will be)
 /// expecting this passive connection to be established.
 void
-OpenDDS::DCPS::TcpTransport::passive_connection
+TcpTransport::passive_connection
 (const ACE_INET_Addr& remote_address,
  TcpConnection* connection)
 {
@@ -546,7 +557,7 @@ OpenDDS::DCPS::TcpTransport::passive_connection
 
 /// Actively establish a connection to the remote address.
 int
-OpenDDS::DCPS::TcpTransport::make_active_connection
+TcpTransport::make_active_connection
 (const ACE_INET_Addr& remote_address,
  TcpDataLink*   link)
 {
@@ -579,7 +590,7 @@ OpenDDS::DCPS::TcpTransport::make_active_connection
 }
 
 int
-OpenDDS::DCPS::TcpTransport::make_passive_connection
+TcpTransport::make_passive_connection
 (const ACE_INET_Addr& remote_address,
  TcpDataLink*   link)
 {
@@ -640,7 +651,7 @@ OpenDDS::DCPS::TcpTransport::make_passive_connection
       if (link->is_loopback()) {
         // The reservation lock needs be released at this point so the publisher
         // attached to same transport can make reservation and try to connect to
-        // peer in TransportInterface::add_associations().
+        // peer in.
         ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_reservation_lock_, -1);
         // Now lets wait for an update
         wait_for_connection (abs_timeout);
@@ -660,7 +671,7 @@ OpenDDS::DCPS::TcpTransport::make_passive_connection
 
 
 void
-OpenDDS::DCPS::TcpTransport::wait_for_connection (const ACE_Time_Value& abs_timeout)
+TcpTransport::wait_for_connection (const ACE_Time_Value& abs_timeout)
 {
   // Now lets wait for an update
   if (abs_timeout == ACE_Time_Value::zero) {
@@ -674,7 +685,7 @@ OpenDDS::DCPS::TcpTransport::wait_for_connection (const ACE_Time_Value& abs_time
 
 /// Common code used by make_active_connection() and make_passive_connection().
 int
-OpenDDS::DCPS::TcpTransport::connect_datalink
+TcpTransport::connect_datalink
 (TcpDataLink*   link,
  TcpConnection* connection)
 {
@@ -716,7 +727,7 @@ OpenDDS::DCPS::TcpTransport::connect_datalink
 /// accepted connection is the re-established connection. If it is, then the "old" connection
 /// object in the datalink is replaced by the "new" connection object.
 int
-OpenDDS::DCPS::TcpTransport::fresh_link(TcpConnection_rch connection)
+TcpTransport::fresh_link(TcpConnection_rch connection)
 {
   DBG_ENTRY_LVL("TcpTransport","fresh_link",6);
 
@@ -746,4 +757,7 @@ OpenDDS::DCPS::TcpTransport::fresh_link(TcpConnection_rch connection)
   }
 
   return 0;
+}
+
+}
 }

@@ -41,12 +41,12 @@ protected:
     CORBA::Long priority,
     bool active);
 
-  virtual int configure_i(TransportInst* config);
+  virtual bool configure_i(TransportInst* config);
 
   virtual void shutdown_i();
 
-  virtual int connection_info_i(TransportInterfaceInfo& info) const;
-  ACE_INET_Addr connection_info_i(const TransportInterfaceInfo& info) const;
+  virtual bool connection_info_i(TransportLocator& info) const;
+  ACE_INET_Addr get_connection_addr(const TransportLocator& info) const;
 
   virtual bool acked(RepoId local_id, RepoId remote_id);
   virtual void remove_ack(RepoId local_id, RepoId remote_id);

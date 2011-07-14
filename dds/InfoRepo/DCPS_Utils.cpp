@@ -139,8 +139,6 @@ increment_incompatibility_count(OpenDDS::DCPS::IncompatibleQosStatus* status,
   }
 }
 
-// This is extremely simple now but will get very complex when more
-// QOSes are supported.
 bool
 compatibleQOS(DCPS_IR_Publication  * publication,
               DCPS_IR_Subscription * subscription)
@@ -150,15 +148,6 @@ compatibleQOS(DCPS_IR_Publication  * publication,
   = publication->get_incompatibleQosStatus();
   OpenDDS::DCPS::IncompatibleQosStatus* readerStatus
   = subscription->get_incompatibleQosStatus();
-
-  if (publication->get_transport_id() != subscription->get_transport_id()) {
-    // Transports are not compatible.
-    compatible = false;
-    increment_incompatibility_count(writerStatus,
-                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
-    increment_incompatibility_count(readerStatus,
-                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
-  }
 
   DDS::DataWriterQos const * const writerQos =
     publication->get_datawriter_qos();

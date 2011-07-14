@@ -26,7 +26,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-{}
+  : conn_info_(1) //TODO: temporarily, conn_info_ will just have 1 entry
+{
+  conn_info_.length(1);
+}
 
 TransportClient::~TransportClient()
 {
@@ -66,7 +69,7 @@ TransportClient::enable_transport()
 
   if (!impls_.empty()) {
     //TODO: build conn_info_ from > 1 impl
-    impls_[0]->connection_info(conn_info_);
+    impls_[0]->connection_info(conn_info_[0]);
   }
 }
 

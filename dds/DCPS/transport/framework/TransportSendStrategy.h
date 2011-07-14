@@ -63,19 +63,19 @@ public:
   void stop();
 
   /// Invoked prior to one or more send() invocations from a particular
-  /// TransportInterface.
+  /// TransportClient.
   void send_start();
 
   /// Our DataLink has been requested by some particular
-  /// TransportInterface to send the element.
+  /// TransportClient to send the element.
   void send(TransportQueueElement* element, bool relink = true);
 
   /// Invoked after one or more send() invocations from a particular
-  /// TransportInterface.
+  /// TransportClient.
   void send_stop();
 
   /// Our DataLink has been requested by some particular
-  /// TransportInterface to remove the supplied sample
+  /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
   /// A -1 is returned if some fatal error was encountered while
   /// attempting to remove the sample.  Otherwise, a 0 is returned.
@@ -332,7 +332,7 @@ private:
   /// and decremented once for each call to our send_stop() method.
   /// We only care about the transitions of the start_counter_
   /// value from 0 to 1, and from 1 to 0.  This accomodates the
-  /// case where more than one TransportInterface is sending to
+  /// case where more than one TransportClient is sending to
   /// us at the same time.  We use this counter to enable a
   /// "composite" send_start() and send_stop().
   unsigned start_counter_;

@@ -128,8 +128,8 @@ public:
   virtual void fully_associated();
 
   // ciju: Called by LinkSet with locks held
-  /// Called by the TransportInterface objects that reference this
-  /// DataLink.  Used by the TransportInterface to send a sample,
+  /// Called by the TransportClient objects that reference this
+  /// DataLink.  Used by the TransportClient to send a sample,
   /// or to send a control message. These functions either give the
   /// request to the PerThreadConnectionSendTask when thread_per_connection
   /// configuration is true or just simply delegate to the send strategy.
@@ -259,6 +259,7 @@ public:
   /// has completed the start() method.  In this case, call wait_for_start()
   /// to block the current thread until start() completes.
   void wait_for_start();
+  void unblock_wait_for_start();
 
 protected:
 
@@ -418,6 +419,7 @@ protected:
   bool is_loopback_;
   /// Is pub or sub ?
   bool is_active_;
+  bool start_failed_;
 };
 
 } // namespace DCPS

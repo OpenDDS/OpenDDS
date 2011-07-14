@@ -283,7 +283,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
     // Release pi_lock_ before making call to transport layer to avoid
     // some deadlock situations that threads acquire locks(PublisherImpl
-    // pi_lock_, TransportInterface reservation_lock and TransportImpl
+    // pi_lock_, TransportClient reservation_lock and TransportImpl
     // lock_) in reverse order.
     ACE_GUARD_RETURN(reverse_lock_type, reverse_monitor, this->reverse_pi_lock_,
                      DDS::RETCODE_ERROR);

@@ -33,7 +33,7 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
 }
 
 /// The DataLink itself calls this when it has determined that, due
-/// to some remove_associations() call being handled by a TransportInterface
+/// to some remove_associations() call being handled by a TransportClient
 /// object, the DataLink has lost all of its associations, and is not needed
 /// any longer.
 ACE_INLINE void
@@ -59,25 +59,10 @@ OpenDDS::DCPS::TransportImpl::reservation_lock() const
   return this->reservation_lock_;
 }
 
-/// Note that this will return -1 if the TransportImpl has not been
-/// configure()'d yet.
-ACE_INLINE int
+ACE_INLINE bool
 OpenDDS::DCPS::TransportImpl::connection_info
-(TransportInterfaceInfo& local_info) const
+  (TransportLocator& local_info) const
 {
-  DBG_ENTRY_LVL("TransportImpl","connection_info",6);
-
-  GuardType guard(this->lock_);
-
-  if (this->config_.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl cannot populate "
-                      "connection_info - TransportImpl has not "
-                      "been configure()'d.\n"),
-                     -1);
-  }
-
-  // Delegate to our subclass.
   return this->connection_info_i(local_info);
 }
 

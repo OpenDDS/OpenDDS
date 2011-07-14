@@ -116,10 +116,9 @@ ManagerImpl::create(const Update::URActor& reader)
   sample.topic          = reader.topicId;
   sample.id             = reader.actorId;
   sample.callback       = reader.callback.c_str();
-  sample.transport_id   = reader.transportInterfaceInfo.transport_id;
-  sample.transport_blob = reader.transportInterfaceInfo.data;
   sample.datareader_qos = reader.drdwQos;
   sample.subscriber_qos = reader.pubsubQos;
+  sample.transport_info = reader.transportInterfaceInfo;
   sample.filter_expression = reader.contentSubscriptionProfile.filterExpr;
   sample.expression_params = reader.contentSubscriptionProfile.exprParams;
 
@@ -155,12 +154,9 @@ ManagerImpl::create(const Update::UWActor& writer)
   sample.topic          = writer.topicId;
   sample.id             = writer.actorId;
   sample.callback       = writer.callback.c_str();
-  sample.transport_id   = writer.transportInterfaceInfo.transport_id;
-  sample.transport_blob = writer.transportInterfaceInfo.data;
-  sample.publication_transport_priority
-  = writer.transportInterfaceInfo.publication_transport_priority;
   sample.datawriter_qos = writer.drdwQos;
   sample.publisher_qos  = writer.pubsubQos;
+  sample.transport_info = writer.transportInterfaceInfo;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 9) {
     OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
@@ -627,19 +623,13 @@ ManagerImpl::processCreate(const PublicationUpdate* sample, const DDS::SampleInf
                std::string(pub_converter).c_str()));
   }
 
-  OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
-  transportInfo.transport_id = sample->transport_id;
-  transportInfo.data         = sample->transport_blob;
-  transportInfo.publication_transport_priority
-  = sample->publication_transport_priority;
-
   if (false == this->info_->add_publication(sample->domain,
                                             sample->participant,
                                             sample->topic,
                                             sample->id,
                                             sample->callback,
                                             sample->datawriter_qos,
-                                            transportInfo,
+                                            sample->transport_info,
                                             sample->publisher_qos,
                                             true)) {
     {
@@ -674,18 +664,13 @@ ManagerImpl::processCreate(const SubscriptionUpdate* sample, const DDS::SampleIn
                std::string(sub_converter).c_str()));
   }
 
-  OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
-  transportInfo.transport_id = sample->transport_id;
-  transportInfo.data         = sample->transport_blob;
-  transportInfo.publication_transport_priority = 0;
-
   if (false == this->info_->add_subscription(sample->domain,
                                              sample->participant,
                                              sample->topic,
                                              sample->id,
                                              sample->callback,
                                              sample->datareader_qos,
-                                             transportInfo,
+                                             sample->transport_info,
                                              sample->subscriber_qos,
                                              sample->filter_expression,
                                              sample->expression_params,
@@ -840,11 +825,6 @@ ManagerImpl::processDeferred()
     std::list<PublicationUpdate>::iterator current = this->deferredPublications_.begin();
 
     while (current != this->deferredPublications_.end()) {
-      OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
-      transportInfo.transport_id = current->transport_id;
-      transportInfo.data         = current->transport_blob;
-      transportInfo.publication_transport_priority
-      = current->publication_transport_priority;
 
       if (true == this->info_->add_publication(current->domain,
                                                current->participant,
@@ -852,7 +832,7 @@ ManagerImpl::processDeferred()
                                                current->id,
                                                current->callback,
                                                current->datawriter_qos,
-                                               transportInfo,
+                                               current->transport_info,
                                                current->publisher_qos,
                                                true)) {
         if (OpenDDS::DCPS::DCPS_debug_level > 9) {
@@ -879,10 +859,6 @@ ManagerImpl::processDeferred()
     std::list<SubscriptionUpdate>::iterator current = this->deferredSubscriptions_.begin();
 
     while (current != this->deferredSubscriptions_.end()) {
-      OpenDDS::DCPS::TransportInterfaceInfo transportInfo;
-      transportInfo.transport_id = current->transport_id;
-      transportInfo.data         = current->transport_blob;
-      transportInfo.publication_transport_priority = 0;
 
       if (true == this->info_->add_subscription(current->domain,
                                                 current->participant,
@@ -890,7 +866,7 @@ ManagerImpl::processDeferred()
                                                 current->id,
                                                 current->callback,
                                                 current->datareader_qos,
-                                                transportInfo,
+                                                current->transport_info,
                                                 current->subscriber_qos,
                                                 current->filter_expression,
                                                 current->expression_params,
@@ -1350,12 +1326,9 @@ ManagerImpl::pushState(Manager_ptr peer)
         publicationSample.topic          = p->get_topic_id();
         publicationSample.id             = p->get_id();
         publicationSample.callback       = callback.in();
-        publicationSample.transport_id   = p->get_transportInterfaceInfo().transport_id;
-        publicationSample.transport_blob = p->get_transportInterfaceInfo().data;
-        publicationSample.publication_transport_priority
-        = p->get_transportInterfaceInfo().publication_transport_priority;
         publicationSample.datawriter_qos = *p->get_datawriter_qos();
         publicationSample.publisher_qos  = *p->get_publisher_qos();
+        publicationSample.transport_info = p->get_transportLocatorSeq();
 
         peer->initializePublication(publicationSample);
       }
@@ -1378,10 +1351,9 @@ ManagerImpl::pushState(Manager_ptr peer)
         subscriptionSample.topic          = s->get_topic_id();
         subscriptionSample.id             = s->get_id();
         subscriptionSample.callback       = callback.in();
-        subscriptionSample.transport_id   = s->get_transportInterfaceInfo().transport_id;
-        subscriptionSample.transport_blob = s->get_transportInterfaceInfo().data;
         subscriptionSample.datareader_qos = *s->get_datareader_qos();
         subscriptionSample.subscriber_qos = *s->get_subscriber_qos();
+        subscriptionSample.transport_info = s->get_transportLocatorSeq();
         subscriptionSample.filter_expression = s->get_filter_expression().c_str();
         subscriptionSample.expression_params = s->get_expr_params();
 

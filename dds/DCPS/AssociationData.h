@@ -19,11 +19,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct AssociationData {
-  RepoId                  remote_id_;
-  TransportInterfaceInfo  remote_data_;
+  RepoId               remote_id_;
+  TransportLocator     remote_data_;
   ACE_INET_Addr        remote_addess_;
   NetworkAddress       network_order_address_;
-  ACE_INET_Addr& get_remote_address ()
+  CORBA::Long          publication_transport_priority_;
+
+  ACE_INET_Addr& get_remote_address()
   {
     if (this->remote_addess_ == ACE_INET_Addr()) {
       // Get the remote address from the "blob" in the remote_info struct.
@@ -42,12 +44,7 @@ struct AssociationData {
   }
 };
 
-struct AssociationInfo {
-  size_t            num_associations_;
-  AssociationData*  association_data_;
-};
-
-typedef std::vector<AssociationInfo> AssociationInfoList;
+typedef std::vector<AssociationData> AssociationDataList;
 
 } // namespace DCPS
 } // namespace OpenDDS

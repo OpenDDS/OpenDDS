@@ -184,7 +184,7 @@ OpenDDS::DCPS::DataLinkSetMap::release_all_reservations()
 // are no longer associated with the local id.
 //
 // Also, in this context, *this* DataLinkSetMap is the local_set_map_
-// in some TransportInterface object.  The local_set_map_ contains
+// in some TransportClient object.  The local_set_map_ contains
 // local_id to DataLinkSet elements.
 //
 // Thus this method needs to perform a "set subtraction" operation, removing

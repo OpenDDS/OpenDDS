@@ -188,8 +188,8 @@ public:
   virtual DDS::ReturnCode_t enable()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  void add_associations(RepoId yourId,
-                        const ReaderAssociationSeq& readers);
+  void add_association(const RepoId& yourId,
+                       const ReaderAssociation& reader);
 
   void remove_associations(const ReaderIdSeq & readers,
                            bool callback);
@@ -420,8 +420,7 @@ public:
 
   /// Called by transport after transport received the
   /// FULLY_ASSOCIATED ack from the associated subscriber.
-  void fully_associated(size_t                  num_remote_associations,
-                        const AssociationData*  remote_associations);
+  void fully_associated(const AssociationData& remote_association);
 
   /**
    * This method create a header message block and chain with
@@ -531,7 +530,8 @@ private:
 
   /// Lookup the instance handles by the subscription repo ids
   bool lookup_instance_handles(const ReaderIdSeq& ids,
-                               DDS::InstanceHandleSeq & hdls);
+                               DDS::InstanceHandleSeq& hdls);
+
 
   const RepoId& get_repo_id() const { return this->publication_id_; }
 

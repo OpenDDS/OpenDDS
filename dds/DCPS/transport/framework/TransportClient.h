@@ -43,7 +43,7 @@ protected:
 
   void enable_transport();
   bool swap_bytes() const { return swap_bytes_; }
-  const TransportInterfaceInfo& connection_info() const { return conn_info_; }
+  const TransportLocatorSeq& connection_info() const { return conn_info_; }
 
 
   // Managing associations to remote peers:
@@ -86,7 +86,7 @@ private:
   DataLinkSet links_;
   DataLinkIndex data_link_index_;
   bool swap_bytes_;
-  TransportInterfaceInfo conn_info_;
+  TransportLocatorSeq conn_info_;
   ACE_Thread_Mutex lock_;
 };
 

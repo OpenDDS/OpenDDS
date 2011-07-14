@@ -239,8 +239,8 @@ public:
   virtual DDS::InstanceHandle_t get_instance_handle()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  void add_associations(const RepoId& yourId,
-                        const WriterAssociationSeq& writers);
+  void add_association(const RepoId& yourId,
+                       const WriterAssociation& writer);
 
   void remove_associations(const WriterIdSeq& writers, bool callback);
 
@@ -680,7 +680,7 @@ private:
   const RepoId& get_repo_id() const { return this->subscription_id_; }
 
   CORBA::Long get_priority_value(const AssociationData& data) const {
-    return data.remote_data_.publication_transport_priority;
+    return data.publication_transport_priority_;
   }
 
   friend class WriterInfo;

@@ -17,12 +17,6 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 
-namespace {
-
-const CORBA::Long TRANSPORT_INTERFACE_ID(0x4447524D); // DGRM
-
-} // namespace
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -80,7 +74,7 @@ UdpTransport::find_datalink(
   bool active)
 {
   ACE_INET_Addr remote_address(
-    connection_info_i(remote_association.remote_data_));
+    get_connection_addr(remote_association.remote_data_));
   bool is_loopback = remote_address == this->config_i_->local_address_;
   PriorityKey key(priority, remote_address, is_loopback, active);
 
@@ -104,7 +98,7 @@ UdpTransport::create_datalink(
   bool active)
 {
   ACE_INET_Addr remote_address(
-    connection_info_i(remote_association.remote_data_));
+    get_connection_addr(remote_association.remote_data_));
   bool is_loopback = remote_address == this->config_i_->local_address_;
   PriorityKey key(priority, remote_address, is_loopback, active);
 
@@ -114,7 +108,7 @@ UdpTransport::create_datalink(
   return link._retn();
 }
 
-int
+bool
 UdpTransport::configure_i(TransportInst* config)
 {
   this->config_i_ = dynamic_cast<UdpInst*>(config);
@@ -123,7 +117,7 @@ UdpTransport::configure_i(TransportInst* config)
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
-                     -1);
+                     false);
   }
   this->config_i_->_add_ref();
 
@@ -135,7 +129,7 @@ UdpTransport::configure_i(TransportInst* config)
 
   this->server_link_ = make_datalink(ACE_INET_Addr(), false);
 
-  return 0;
+  return true;
 }
 
 void
@@ -151,33 +145,32 @@ UdpTransport::shutdown_i()
   this->config_i_ = 0;
 }
 
-int
-UdpTransport::connection_info_i(TransportInterfaceInfo& info) const
+bool
+UdpTransport::connection_info_i(TransportLocator& info) const
 {
   NetworkAddress network_address(this->config_i_->local_address_);
 
   ACE_OutputCDR cdr;
   cdr << network_address;
 
-  CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
-  char *buffer = const_cast<char*>(cdr.buffer()); // safe
+  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  info.transport_id = TRANSPORT_INTERFACE_ID;
-  info.data = TransportInterfaceBLOB(len, len,
-    reinterpret_cast<CORBA::Octet*>(buffer));
+  info.transport_type = "udp";
+  info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
 
-  return 0;
+  return true;
 }
 
 ACE_INET_Addr
-UdpTransport::connection_info_i(const TransportInterfaceInfo& info) const
+UdpTransport::get_connection_addr(const TransportLocator& info) const
 {
-  if (info.transport_id != TRANSPORT_INTERFACE_ID) {
+  if (info.transport_type != "udp") {
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: ")
-               ACE_TEXT("UdpTransport::get_connection_info: ")
-               ACE_TEXT("transport interface ID does not match: 0x%x\n"),
-               info.transport_id));
+               ACE_TEXT("UdpTransport::get_connection_addr: ")
+               ACE_TEXT("transport interface ID does not match:%C\n"),
+               info.transport_type.in()));
   }
 
   ACE_INET_Addr local_address;

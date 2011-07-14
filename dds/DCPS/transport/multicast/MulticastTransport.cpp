@@ -20,12 +20,6 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
-namespace {
-
-const CORBA::Long TRANSPORT_INTERFACE_ID(0x4d435354); // MCST
-
-} // namespace
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -178,7 +172,7 @@ MulticastTransport::create_datalink(
   return link._retn();
 }
 
-int
+bool
 MulticastTransport::configure_i(TransportInst* config)
 {
   this->config_i_ = dynamic_cast<MulticastInst*>(config);
@@ -187,13 +181,13 @@ MulticastTransport::configure_i(TransportInst* config)
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
-                     -1);
+                     false);
   }
   this->config_i_->_add_ref();
 
   this->create_reactor_task();
 
-  return 0;
+  return true;
 }
 
 void
@@ -208,29 +202,24 @@ MulticastTransport::shutdown_i()
   this->config_i_ = 0;
 }
 
-int
-MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
+bool
+MulticastTransport::connection_info_i(TransportLocator& info) const
 {
   NetworkAddress network_address(this->config_i_->group_address_);
 
   ACE_OutputCDR cdr;
   cdr << network_address;
 
-  size_t len = cdr.total_length();
-  char *buffer = const_cast<char*>(cdr.buffer()); // safe
+  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
   // Provide connection information for endpoint identification by
   // the DCPSInfoRepo. These values are not used by multicast
   // for DataLink establishment.
-  info.transport_id = TRANSPORT_INTERFACE_ID;
+  info.transport_type = "multicast";
+  info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
 
-  info.data = TransportInterfaceBLOB(ACE_Utils::truncate_cast<CORBA::ULong>(len),
-                                     ACE_Utils::truncate_cast<CORBA::ULong>(len),
-    reinterpret_cast<CORBA::Octet*>(buffer));
-
-  info.publication_transport_priority = 0;
-
-  return 0;
+  return true;
 }
 
 bool

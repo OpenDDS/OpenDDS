@@ -216,21 +216,20 @@ DataWriterImpl::get_next_handle()
 }
 
 void
-DataWriterImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
-                                 const ReaderAssociationSeq& readers)
+DataWriterImpl::add_association(const RepoId& yourId,
+                                const ReaderAssociation& reader)
 {
-  DBG_ENTRY_LVL("DataWriterImpl", "add_associations", 6);
+  DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
 
   if (DCPS_debug_level >= 1) {
     RepoIdConverter writer_converter(yourId);
-    RepoIdConverter reader_converter(readers[0].readerId);
+    RepoIdConverter reader_converter(reader.readerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_associations - ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
                std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str(),
-               readers.length()));
+               std::string(reader_converter).c_str()));
   }
 
   if (entity_deleted_ == true) {
@@ -250,33 +249,29 @@ DataWriterImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     // Add to pending_readers_
 
-    CORBA::ULong len = readers.length();
+    if (OpenDDS::DCPS::insert(pending_readers_, reader.readerId) == -1) {
+      RepoIdConverter converter(reader.readerId);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_associations: ")
+                 ACE_TEXT("failed to mark %C as pending.\n"),
+                 std::string(converter).c_str()));
 
-    for (CORBA::ULong i = 0; i < len; ++i) {
-      if (OpenDDS::DCPS::insert(pending_readers_, readers[i].readerId) == -1) {
-        RepoIdConverter converter(readers[i].readerId);
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_associations: ")
-                   ACE_TEXT("failed to mark %C as pending.\n"),
+    } else {
+      if (DCPS_debug_level > 0) {
+        RepoIdConverter converter(reader.readerId);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
+                   ACE_TEXT("marked %C as pending.\n"),
                    std::string(converter).c_str()));
-
-      } else {
-        if (DCPS_debug_level > 0) {
-          RepoIdConverter converter(readers[i].readerId);
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
-                     ACE_TEXT("marked %C as pending.\n"),
-                     std::string(converter).c_str()));
-        }
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        if (TheServiceParticipant->publisher_content_filter()
-            && readers[i].filterExpression.in()[0]) {
-          reader_info_.insert(std::make_pair(readers[i].readerId,
-            ReaderInfo(readers[i].filterExpression, readers[i].exprParams,
-              participant_servant_)));
-        }
-#endif
       }
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      if (TheServiceParticipant->publisher_content_filter()
+          && reader.filterExpression.in()[0]) {
+        reader_info_.insert(std::make_pair(reader.readerId,
+          ReaderInfo(reader.filterExpression, reader.exprParams,
+            participant_servant_)));
+      }
+#endif
     }
   }
 
@@ -284,26 +279,16 @@ DataWriterImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
     RepoIdConverter converter(get_publication_id());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_associations(): ")
-               ACE_TEXT("adding %d subscriptions to publication %C with priority %d.\n"),
-               readers.length(),
+               ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
                std::string(converter).c_str(),
                qos_.transport_priority.value));
   }
 
-  AssociationInfo info;
-  info.num_associations_ = readers.length();
-
-  // TransportInterface does not take ownership of the associations.
-  // The associations will be deleted when transport inform
-  // datawriter fully associated (in DataWriterImpl::fully_associated()).
-  info.association_data_ = new AssociationData[info.num_associations_];
-
-  for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
-    info.association_data_[i].remote_id_ = readers[i].readerId;
-    info.association_data_[i].remote_data_ = readers[i].readerTransInfo;
-    this->associate(info.association_data_[i], true /*active*/);
-    //TODO: if associate() returns false, inform inforepo and try again as pasv
-  }
+  AssociationData data;
+  data.remote_id_ = reader.readerId;
+  data.remote_data_ = reader.readerTransInfo[0]; //TODO: handle > 1 locator
+  this->associate(data, true /*active*/);
+  //TODO: if associate() returns false, inform inforepo and try again as pasv
 }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -326,107 +311,91 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 void
-DataWriterImpl::fully_associated(size_t num_remote_associations,
-                                 const AssociationData* remote_associations)
+DataWriterImpl::fully_associated(const AssociationData& remote_association)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","fully_associated",6);
+  DBG_ENTRY_LVL("DataWriterImpl", "fully_associated", 6);
 
   if (DCPS_debug_level >= 1) {
     RepoIdConverter writer_converter(this->publication_id_);
-    RepoIdConverter reader_converter(remote_associations[0].remote_id_);
+    RepoIdConverter reader_converter(remote_association.remote_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated - ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
                std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str(),
-               num_remote_associations));
+               std::string(reader_converter).c_str()));
   }
 
-  CORBA::ULong len = 0;
-  ReaderIdSeq rd_ids;
+  RepoId rd_id;
 
   {
     // protect readers_
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-    for (CORBA::ULong i = 0; i < num_remote_associations; ++i) {
-      // If the reader is not in pending association list, which indicates it's already
-      // removed by remove_association. In other words, the remove_association()
-      // is called before fully_associated() call.
-      if (OpenDDS::DCPS::remove(pending_readers_, remote_associations[i].remote_id_) == -1) {
-        RepoIdConverter converter(remote_associations[i].remote_id_);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
-                   ACE_TEXT("reader %C is not in pending list ")
-                   ACE_TEXT("because remove_association is already called.\n"),
-                   std::string(converter).c_str()));
-        continue;
-      }
+    // If the reader is not in pending association list, which indicates it's already
+    // removed by remove_association. In other words, the remove_association()
+    // is called before fully_associated() call.
+    if (OpenDDS::DCPS::remove(pending_readers_, remote_association.remote_id_) == -1) {
+      RepoIdConverter converter(remote_association.remote_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
+                 ACE_TEXT("reader %C is not in pending list ")
+                 ACE_TEXT("because remove_association is already called.\n"),
+                 std::string(converter).c_str()));
+      return;
+    }
 
-      // The reader is in the pending reader, now add it to fully associated reader
-      // list.
-      ++len;
-      rd_ids.length(len);
-      rd_ids[len - 1] = remote_associations[i].remote_id_;
+    // The reader is in the pending reader, now add it to fully associated reader
+    // list.
+    rd_id = remote_association.remote_id_;
 
-      if (OpenDDS::DCPS::insert(readers_, remote_associations[i].remote_id_) == -1) {
-        RepoIdConverter converter(remote_associations[i].remote_id_);
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
-                   ACE_TEXT("insert %C from pending failed.\n"),
-                   std::string(converter).c_str()));
-      }
+    if (OpenDDS::DCPS::insert(readers_, remote_association.remote_id_) == -1) {
+      RepoIdConverter converter(remote_association.remote_id_);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
+                 ACE_TEXT("insert %C from pending failed.\n"),
+                 std::string(converter).c_str()));
     }
   }
-
-  if (len == 0)
-    return;
 
   if (this->monitor_) {
     this->monitor_->report();
   }
 
   if (!is_bit_) {
-    DDS::InstanceHandleSeq handles;
-    // Create the list of readers repo id.
 
-    if (this->lookup_instance_handles(rd_ids, handles) == false)
-      return;
+    DDS::InstanceHandle_t handle =
+      this->participant_servant_->get_handle(rd_id);
 
     {
       // protect publication_match_status_ and status changed flags.
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-      CORBA::ULong rd_len = handles.length();
+      // update the publication_match_status_
+      ++publication_match_status_.total_count;
+      ++publication_match_status_.total_count_change;
+      ++publication_match_status_.current_count;
+      ++publication_match_status_.current_count_change;
 
-      for (CORBA::ULong i = 0; i < rd_len; ++i) {
-        // update the publication_match_status_
-        ++publication_match_status_.total_count;
-        ++publication_match_status_.total_count_change;
-        ++publication_match_status_.current_count;
-        ++publication_match_status_.current_count_change;
+      if (OpenDDS::DCPS::bind(id_to_handle_map_, rd_id, handle) != 0) {
+        RepoIdConverter converter(rd_id);
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
+                   ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
+                   std::string(converter).c_str(),
+                   handle));
+        return;
 
-        if (OpenDDS::DCPS::bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0) {
-          RepoIdConverter converter(rd_ids[i]);
-          ACE_DEBUG((LM_WARNING,
-                     ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
-                     ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
-                     std::string(converter).c_str(),
-                     handles[i]));
-          return;
-
-        } else if (DCPS_debug_level > 4) {
-          RepoIdConverter converter(rd_ids[i]);
-          ACE_DEBUG((LM_WARNING,
-                     ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
-                     ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
-                     std::string(converter).c_str(),
-                     handles[i]));
-        }
-
-        publication_match_status_.last_subscription_handle = handles[i];
+      } else if (DCPS_debug_level > 4) {
+        RepoIdConverter converter(rd_id);
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
+                   ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
+                   std::string(converter).c_str(),
+                   handle));
       }
+
+      publication_match_status_.last_subscription_handle = handle;
 
       set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
     }
@@ -445,15 +414,16 @@ DataWriterImpl::fully_associated(size_t num_remote_associations,
     }
 
     notify_status_condition();
-    delete [] remote_associations;
   }
 
   // Support DURABILITY QoS
   if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
-    this->data_container_->reenqueue_all(rd_ids,
-                                         this->qos_.lifespan);
+    ReaderIdSeq rd_ids(1);
+    rd_ids.length(1);
+    rd_ids[0] = rd_id;
+    this->data_container_->reenqueue_all(rd_ids, this->qos_.lifespan);
 
     // Acquire the data writer container lock to avoid deadlock. The
     // thread calling fully_associated() has to acquire lock in the
@@ -1485,9 +1455,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   try {
     this->enable_transport();
 
-    TransportInterfaceInfo trans_conf_info = connection_info();
-    trans_conf_info.publication_transport_priority =
-      this->qos_.transport_priority.value;
+    const TransportLocatorSeq& trans_conf_info = connection_info();
 
     DDS::PublisherQos pub_qos;
     this->publisher_servant_->get_qos(pub_qos);
@@ -2429,11 +2397,8 @@ void
 DataWriterImpl::post_associate(const AssociationData& data,
                                const TransportImpl_rch& impl)
 {
-  AssociationInfo info;
-  info.num_associations_ = 1;
-  info.association_data_ = const_cast<AssociationData*>(&data);
   impl->add_pending_association(this->publication_id_,
-                                info, this /*send listener*/);
+                                data, this /*send listener*/);
 }
 
 bool

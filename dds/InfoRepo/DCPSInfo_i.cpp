@@ -400,7 +400,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
   const OpenDDS::DCPS::RepoId& topicId,
   OpenDDS::DCPS::DataWriterRemote_ptr publication,
   const DDS::DataWriterQos & qos,
-  const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::PublisherQos & publisherQos)
 ACE_THROW_SPEC((CORBA::SystemException
                  , OpenDDS::DCPS::Invalid_Domain
@@ -465,7 +465,7 @@ ACE_THROW_SPEC((CORBA::SystemException
                           , callback.in()
                           , const_cast<DDS::PublisherQos &>(publisherQos)
                           , const_cast<DDS::DataWriterQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportInterfaceInfo &>
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
                           (transInfo), csi);
     this->um_->create(actor);
 
@@ -490,7 +490,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                                     const OpenDDS::DCPS::RepoId& pubId,
                                     const char* pub_str,
                                     const DDS::DataWriterQos & qos,
-                                    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+                                    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
                                     const DDS::PublisherQos & publisherQos,
                                     bool associate)
 {
@@ -672,7 +672,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
   const OpenDDS::DCPS::RepoId& topicId,
   OpenDDS::DCPS::DataReaderRemote_ptr subscription,
   const DDS::DataReaderQos & qos,
-  const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::SubscriberQos & subscriberQos,
   const char* filterExpression,
   const DDS::StringSeq& exprParams)
@@ -741,7 +741,7 @@ ACE_THROW_SPEC((CORBA::SystemException
                           , callback.in()
                           , const_cast<DDS::SubscriberQos &>(subscriberQos)
                           , const_cast<DDS::DataReaderQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportInterfaceInfo &>
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
                           (transInfo), csi);
 
     this->um_->create(actor);
@@ -769,7 +769,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   const OpenDDS::DCPS::RepoId& subId,
   const char* sub_str,
   const DDS::DataReaderQos & qos,
-  const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::SubscriberQos & subscriberQos,
   const char* filterExpression,
   const DDS::StringSeq& exprParams,

@@ -50,7 +50,8 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl,
     mb_allocator_(0),
     db_allocator_(0),
     is_loopback_(is_loopback),
-    is_active_(is_active)
+    is_active_(is_active),
+    start_failed_(false)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 
@@ -121,7 +122,8 @@ void
 OpenDDS::DCPS::DataLink::wait_for_start()
 {
   GuardType guard(this->strategy_lock_);
-  while (this->send_strategy_.is_nil() || this->receive_strategy_.is_nil()) {
+  while ((this->send_strategy_.is_nil() || this->receive_strategy_.is_nil())
+         && !this->start_failed_) {
     this->strategy_condition_.wait();
   }
 }
@@ -412,10 +414,10 @@ OpenDDS::DCPS::DataLink::make_reservation
   return -1;
 }
 
-/// This gets invoked when a TransportInterface::remove_associations()
+/// This gets invoked when a TransportClient::remove_associations()
 /// call has been made.  Because this DataLink can be shared amongst
-/// different TransportInterface objects, and different threads could
-/// be "managing" the different TransportInterface objects, we need
+/// different TransportClient objects, and different threads could
+/// be "managing" the different TransportClient objects, we need
 /// to make sure that this release_reservations() works in conjunction
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.

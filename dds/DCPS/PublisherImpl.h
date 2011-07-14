@@ -212,8 +212,6 @@ private:
   typedef ACE_Recursive_Thread_Mutex  lock_type;
   typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;
   /// The recursive lock to protect datawriter map and suspend count.
-  /// It also projects the TransportInterface (it must be held when
-  /// calling any TransportInterface method).
   mutable lock_type                   pi_lock_;
   reverse_lock_type                   reverse_pi_lock_;
 

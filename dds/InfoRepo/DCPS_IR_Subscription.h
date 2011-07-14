@@ -43,7 +43,7 @@ public:
                        DCPS_IR_Topic* topic,
                        OpenDDS::DCPS::DataReaderRemote_ptr reader,
                        DDS::DataReaderQos qos,
-                       OpenDDS::DCPS::TransportInterfaceInfo info,
+                       const OpenDDS::DCPS::TransportLocatorSeq& info,
                        DDS::SubscriberQos subscriberQos,
                        const char* filterExpression,
                        const DDS::StringSeq& exprParams);
@@ -140,11 +140,7 @@ public:
   // the new association will be added.
   bool reevaluate_association(DCPS_IR_Publication* publication);
 
-  /// get the transport ID of the transport implementation type.
-  OpenDDS::DCPS::TransportInterfaceId   get_transport_id() const;
-
-  /// Returns a copy of the TransportInterfaceInfo object
-  OpenDDS::DCPS::TransportInterfaceInfo get_transportInterfaceInfo() const;
+  OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
 
   /// Return pointer to the incompatible qos status
   /// Subscription retains ownership
@@ -191,7 +187,7 @@ private:
   /// the corresponding DataReaderRemote object
   OpenDDS::DCPS::DataReaderRemote_var reader_;
   DDS::DataReaderQos qos_;
-  OpenDDS::DCPS::TransportInterfaceInfo info_;
+  OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::SubscriberQos subscriberQos_;
   std::string filterExpression_;
   DDS::StringSeq exprParams_;

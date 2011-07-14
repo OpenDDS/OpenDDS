@@ -222,8 +222,6 @@ private:
   DataCollector<double>::OnFull raw_latency_buffer_type_;
 
   /// this lock protects the data structures in this class.
-  /// It also projects the TransportInterface (it must be held when
-  /// calling any TransportInterface method).
   ACE_Recursive_Thread_Mutex   si_lock_;
 
   /// Monitor object for this entity

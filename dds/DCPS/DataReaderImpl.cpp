@@ -251,22 +251,21 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return this->participant_servant_->get_handle(subscription_id_);
 }
 
-void DataReaderImpl::add_associations(const RepoId& yourId,
-                                      const WriterAssociationSeq& writers)
+void DataReaderImpl::add_association(const RepoId& yourId,
+                                     const WriterAssociation& writer)
 {
   //
   // The following block is for diagnostic purposes only.
   //
   if (DCPS_debug_level >= 1) {
     RepoIdConverter reader_converter(yourId);
-    RepoIdConverter writer_converter(writers[0].writerId);
+    RepoIdConverter writer_converter(writer.writerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataReaderImpl::add_associations - ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
                std::string(reader_converter).c_str(),
-               std::string(writer_converter).c_str(),
-               writers.length()));
+               std::string(writer_converter).c_str()));
   }
 
   //
@@ -292,9 +291,6 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
     subscription_id_ = yourId;
   }
 
-  CORBA::ULong wr_len = writers.length();
-  WriterInfo ** infos = new WriterInfo*[wr_len];
-
   //
   // We do the following while holding the publication_handle_lock_.
   //
@@ -309,45 +305,39 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
     {
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
-      for (CORBA::ULong i = 0; i < wr_len; i++) {
-        PublicationId writer_id = writers[i].writerId;
-        infos[i] = new WriterInfo(this, writer_id, writers[i].writerQos);
-        std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
-          // This insertion is idempotent.
-          WriterMapType::value_type(
-            writer_id,
-            infos[i]));
-        this->statistics_.insert(
-          StatsMapType::value_type(
-            writer_id,
-            WriterStats(
-              this->raw_latency_buffer_size_,
-              this->raw_latency_buffer_type_)));
+      const PublicationId& writer_id = writer.writerId;
+      WriterInfo* info = new WriterInfo(this, writer_id, writer.writerQos);
+      std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
+        // This insertion is idempotent.
+        WriterMapType::value_type(
+          writer_id,
+          info));
+      this->statistics_.insert(
+        StatsMapType::value_type(
+          writer_id,
+          WriterStats(
+            this->raw_latency_buffer_size_,
+            this->raw_latency_buffer_type_)));
 
-        if (DCPS_debug_level > 4) {
-          RepoIdConverter converter(writer_id);
+      if (DCPS_debug_level > 4) {
+        RepoIdConverter converter(writer_id);
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) DataReaderImpl::add_associations: "
+                   "inserted writer %C.return %d \n",
+                   std::string(converter).c_str(), bpair.second));
+
+        WriterMapType::iterator iter = writers_.find(writer_id);
+        if (iter != writers_.end()) {
+          // This may not be an error since it could happen that the sample
+          // is delivered to the datareader after the write is dis-associated
+          // with this datareader.
+          RepoIdConverter reader_converter(subscription_id_);
+          RepoIdConverter writer_converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DataReaderImpl::add_associations: "
-                     "inserted writer %C.return %d \n",
-                     std::string(converter).c_str(), bpair.second));
-
-          WriterMapType::iterator iter = writers_.find(writer_id);
-          if (iter != writers_.end()) {
-          if (DCPS_debug_level > 4) {
-            // This may not be an error since it could happen that the sample
-            // is delivered to the datareader after the write is dis-associated
-            // with this datareader.
-            RepoIdConverter reader_converter(subscription_id_);
-            RepoIdConverter writer_converter(writer_id);
-            ACE_DEBUG((LM_DEBUG,
-                      ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-                      ACE_TEXT("reader %C is associated with writer %C.\n"),
-                      std::string(reader_converter).c_str(),
-                      std::string(writer_converter).c_str()));
-          }
-          }
-
-
+                    ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+                    ACE_TEXT("reader %C is associated with writer %C.\n"),
+                    std::string(reader_converter).c_str(),
+                    std::string(writer_converter).c_str()));
         }
       }
     }
@@ -358,45 +348,30 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
     // usage of an existing connection or initiate creation of a new
     // connection if no suitable connection is available.
     //
-    AssociationInfo info;
-    info.num_associations_ = writers.length();
+    AssociationData data;
+    data.remote_id_ = writer.writerId;
+    data.remote_data_ = writer.writerTransInfo[0]; //TODO: handle > 1 locator
+    data.publication_transport_priority_ =
+      writer.writerQos.transport_priority.value;
 
-    // TransportInterface does not take ownership of the associations.
-    // The associations will be deleted when safe_associations falls
-    // out of scope.
-    info.association_data_ = new AssociationData[info.num_associations_];
-    ACE_Auto_Array_Ptr<AssociationData> safe_associations(info.association_data_);
-
-    for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
-      info.association_data_[i].remote_id_ = writers[i].writerId;
-      info.association_data_[i].remote_data_ = writers[i].writerTransInfo;
-      this->associate(info.association_data_[i], false /*passive*/);
-    }
+    this->associate(data, false /*passive*/);
 
     // Check if any publications have already sent a REQUEST_ACK message.
     {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-      for (unsigned int index = 0; index < wr_len; ++index) {
-        WriterMapType::iterator where
-        = this->writers_.find(writers[ index].writerId);
+      WriterMapType::iterator where = this->writers_.find(writer.writerId);
 
-        if (where != this->writers_.end()) {
-          ACE_Time_Value now = ACE_OS::gettimeofday();
+      if (where != this->writers_.end()) {
+        const ACE_Time_Value now = ACE_OS::gettimeofday();
 
-          ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-          if (where->second->should_ack(now)) {
-            SequenceNumber sequence = where->second->ack_sequence();
-            DDS::Time_t timenow = time_value_to_time(now);
-            bool result = this->send_sample_ack(
-                            writers[ index].writerId,
-                            sequence,
-                            timenow);
-
-            if (result) {
-              where->second->clear_acks(sequence);
-            }
+        if (where->second->should_ack(now)) {
+          const SequenceNumber sequence = where->second->ack_sequence();
+          const DDS::Time_t timenow = time_value_to_time(now);
+          if (this->send_sample_ack(writer.writerId, sequence, timenow)) {
+            where->second->clear_acks(sequence);
           }
         }
       }
@@ -405,9 +380,9 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
     //
     // LIVELINESS policy timers are managed here.
     //
-    if (liveliness_lease_duration_  != ACE_Time_Value::zero) {
+    if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
       // this call will start the timer if it is not already set
-      ACE_Time_Value now = ACE_OS::gettimeofday();
+      const ACE_Time_Value now = ACE_OS::gettimeofday();
 
       if (DCPS_debug_level >= 5) {
         RepoIdConverter converter(subscription_id_);
@@ -432,26 +407,9 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
   // readers of Builtin Topics.
   //
   if (!is_bit_) {
-    //
-    // We derive a list of writer Id values corresponding to the writer
-    // argument list.
-    //
-    WriterIdSeq wr_ids;
-    wr_ids.length(wr_len);
 
-    for (CORBA::ULong i = 0; i < wr_len; ++i) {
-      wr_ids[i] = writers[i].writerId;
-    }
-
-    //
-    // Here we convert the list of writer Id values to local handle
-    // values.
-    //
-    DDS::InstanceHandleSeq handles;
-
-    if (this->lookup_instance_handles(wr_ids, handles) == false
-        || handles.length() != wr_len)
-      return;
+    DDS::InstanceHandle_t handle =
+      this->participant_servant_->get_handle(writer.writerId);
 
     //
     // We acquire the publication_handle_lock_ for the remainder of our
@@ -460,19 +418,17 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
-      for (unsigned int index = 0; index < wr_len; ++index) {
-        // This insertion is idempotent.
-        this->id_to_handle_map_.insert(
-          RepoIdToHandleMap::value_type(wr_ids[ index], handles[ index]));
+      // This insertion is idempotent.
+      this->id_to_handle_map_.insert(
+        RepoIdToHandleMap::value_type(writer.writerId, handle));
 
-        if (DCPS_debug_level > 4) {
-          RepoIdConverter converter(wr_ids[index]);
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-                     ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-                     std::string(converter).c_str(),
-                     handles[index]));
-        }
+      if (DCPS_debug_level > 4) {
+        RepoIdConverter converter(writer.writerId);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+                   ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
+                   std::string(converter).c_str(),
+                   handle));
       }
 
       // We need to adjust these after the insertions have all completed
@@ -486,8 +442,7 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
       ++this->subscription_match_status_.total_count;
       ++this->subscription_match_status_.total_count_change;
 
-      this->subscription_match_status_.last_publication_handle
-      = handles[ wr_len - 1];
+      this->subscription_match_status_.last_publication_handle = handle;
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
@@ -513,17 +468,13 @@ void DataReaderImpl::add_associations(const RepoId& yourId,
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-      for (unsigned int index = 0; index < wr_len; ++index) {
-        infos[index]->handle_ = handles[index];
-      }
+      this->writers_[writer.writerId]->handle_ = handle;
     }
   }
 
   if (this->monitor_) {
     this->monitor_->report();
   }
-
-  delete []infos;
 }
 
 void
@@ -1197,8 +1148,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     try {
       this->enable_transport();
 
-      TransportInterfaceInfo trans_conf_info = this->connection_info();
-      trans_conf_info.publication_transport_priority = 0;
+      const TransportLocatorSeq& trans_conf_info = this->connection_info();
 
       CORBA::String_var filterExpression = "";
       DDS::StringSeq exprParams;

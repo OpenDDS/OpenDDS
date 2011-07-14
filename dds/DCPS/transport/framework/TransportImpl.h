@@ -30,7 +30,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TransportClient;
-class TransportInterface;
 class TransportReceiveListener;
 class ThreadSynchStrategy;
 class DataLink;
@@ -57,12 +56,6 @@ class OpenDDS_Dcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
   virtual ~TransportImpl();
-
-  /// Called by the client application some time soon after this
-  /// TransportImpl has been created.  This *must* be called
-  /// prior to attempting to attach this TransportImpl to a
-  /// TransportInterface object.
-  int configure(TransportInst* config);
 
   /// Called when the receive strategy received the FULLY_ASSOCIATED
   /// message.
@@ -94,7 +87,7 @@ public:
   /// Accessor for the "swap bytes" flag that was supplied to this
   /// TransportImpl via the TransportInst object supplied
   /// to our configure() method.
-  int swap_bytes() const;
+  bool swap_bytes() const;
 
   /// This method is called when the FULLY_ASSOCIATED ack of the pending
   /// associations is received. If the datawriter is registered, the
@@ -111,30 +104,7 @@ public:
 protected:
   TransportImpl();
 
-  /// If active is equal to true, then this find_or_create_datalink()
-  /// call is being made on behalf of a local publisher id association
-  /// with a remote subscriber id.  If active is equal to false, then
-  /// this find_or_create_datalink() call is being made on behalf of a
-  /// local subscriber id association with a remote publisher id.
-  /// Note that this "flag" is only used if the find operation fails,
-  /// and a new DataLink must created and go through connection
-  /// establishment.  This allows the connection establishment logic
-  /// to determine whether an active or passive connection needs to
-  /// be made.  If the find operation works, then we don't need to
-  /// establish a connection since the existing DataLink is already
-  /// connected.
-  DataLink* find_or_create_datalink(
-    RepoId                  local_id,
-    const AssociationData*  remote_association,
-    CORBA::Long             priority,
-    bool                    active)
-  {
-    DataLink* link =
-      find_datalink(local_id, *remote_association, priority, active);
-    if (link) return link;
-
-    return create_datalink(local_id, *remote_association, priority, active);
-  }
+  bool configure(TransportInst* config);
 
   virtual DataLink* find_datalink(
     RepoId                  local_id,
@@ -151,7 +121,7 @@ protected:
   /// Concrete subclass gets a shot at the config object.  The subclass
   /// will likely downcast the TransportInst object to a
   /// subclass type that it expects/requires.
-  virtual int configure_i(TransportInst* config) = 0;
+  virtual bool configure_i(TransportInst* config) = 0;
 
   /// Called during the shutdown() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when
@@ -166,7 +136,7 @@ protected:
   /// TransportImpl subclass to do the dirty work since it really
   /// is the one that knows how to populate the supplied
   /// TransportInterfaceInfo object.
-  virtual int connection_info_i(TransportInterfaceInfo& local_info) const = 0;
+  virtual bool connection_info_i(TransportLocator& local_info) const = 0;
 
   /// Called by our release_datalink() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when
@@ -182,7 +152,6 @@ private:
   /// We have a few friends in the transport framework so that they
   /// can access our private methods.  We do this to avoid pollution
   /// of our public interface with internal framework methods.
-  friend class TransportInterface;
   friend class TransportInst;
   friend class TransportClient;
   friend class DataLink;
@@ -194,8 +163,8 @@ private:
   /// The DataLink itself calls this method when it thinks it is
   /// no longer used for any associations.  This occurs during
   /// a "remove associations" operation being performed by some
-  /// TransportInterface that uses this TransportImpl.  The
-  /// TransportInterface is known to have acquired our reservation_lock_,
+  /// TransportClient that uses this TransportImpl.  The
+  /// TransportClient is known to have acquired our reservation_lock_ [TODO],
   /// so there won't be any reserve_datalink() calls being made from
   /// any other threads while we perform this release.
   /// Since there are some delay of the datalink release, the release_pending
@@ -205,30 +174,12 @@ private:
   void attach_client(TransportClient* client);
   void detach_client(TransportClient* client);
 
-  /// Called by our friend, the TransportInterface, to reserve
-  /// a DataLink for a remote subscription association
-  /// (a local "publisher" to a remote "subscriber" association).
-  DataLink* reserve_datalink(
-    RepoId                  local_id,
-    const AssociationData*  remote_association,
-    CORBA::Long             priority,
-    TransportSendListener*  send_listener);
-
-  /// Called by our friend, the TransportInterface, to reserve
-  /// a DataLink for a remote publication association
-  /// (a local "subscriber" to a remote "publisher" association).
-  DataLink* reserve_datalink(
-    RepoId                    local_id,
-    const AssociationData*    remote_association,
-    CORBA::Long               priority,
-    TransportReceiveListener* receive_listener);
-
 protected:
   typedef ACE_SYNCH_MUTEX                ReservationLockType;
   typedef ACE_Guard<ReservationLockType> ReservationGuardType;
-  /// Called by our friends, the TransportInterface, and the DataLink.
-  /// Since this TransportImpl can be attached to many TransportInterface
-  /// objects, and each TransportInterface object could be "running" in
+  /// Called by our friends, the TransportClient, and the DataLink.
+  /// Since this TransportImpl can be attached to many TransportClient
+  /// objects, and each TransportClient object could be "running" in
   /// a separate thread, we need to protect all of the "reservation"
   /// methods with a lock.  The protocol is that a client of ours
   /// must "acquire" our reservation_lock() before it can proceed to
@@ -246,27 +197,25 @@ public:
   /// subscribers then the transport will notify the datawriter fully
   /// association and the associations will be
   /// removed from the pending associations cache.
-  int add_pending_association(RepoId                  local_id,
-                              const AssociationInfo&  info,
-                              TransportSendListener*  tsl);
+  bool add_pending_association(RepoId local_id,
+                               const AssociationData& data,
+                               TransportSendListener* tsl);
 
 private:
 
-  void check_fully_association(const RepoId pub_id);
-  bool check_fully_association(const RepoId pub_id,
-                               AssociationInfo& associations);
+  void check_fully_association(const RepoId& pub_id);
+  bool check_fully_association(const RepoId& pub_id,
+                               const AssociationData& association);
 
-  /// Called by our friend, the TransportInterface.
+  /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference
   /// to a TransportInterfaceInfo object that will be "populated"
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
-  int connection_info(TransportInterfaceInfo& local_info) const;
+  bool connection_info(TransportLocator& local_info) const;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
-
-  typedef std::map<RepoId, AssociationInfoList*, GUID_tKeyLessThan> PendingAssociationsMap;
 
   /// Our reservation lock.
   ReservationLockType reservation_lock_;
@@ -285,6 +234,9 @@ private:
   TransportReactorTask_rch reactor_task_;
 
   /// These are used by the publisher side.
+
+  typedef std::map<RepoId, AssociationDataList, GUID_tKeyLessThan>
+    PendingAssociationsMap;
 
   /// pubid -> pending associations (remote sub id, association data,
   /// association status) map.

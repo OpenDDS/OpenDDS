@@ -268,6 +268,15 @@ OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
 }
 
 ACE_INLINE
+void
+OpenDDS::DCPS::DataLink::unblock_wait_for_start()
+{
+  GuardType guard(this->strategy_lock_);
+  this->start_failed_ = true;
+  this->strategy_condition_.broadcast();
+}
+
+ACE_INLINE
 const char*
 OpenDDS::DCPS::DataLink::connection_notice_as_str(ConnectionNotice notice)
 {

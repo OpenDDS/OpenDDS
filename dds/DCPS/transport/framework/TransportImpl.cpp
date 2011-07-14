@@ -26,48 +26,27 @@
 #include "TransportImpl.inl"
 #endif /* __ACE_INLINE__ */
 
-namespace {
+namespace OpenDDS {
+namespace DCPS {
 
-template <typename Container>
-void clear(Container& c)
-{
-  Container copy;
-  copy.swap(c);
-
-  for (typename Container::iterator itr = copy.begin();
-       itr != copy.end();
-       ++itr) {
-    itr->second->_remove_ref();
-  }
-}
-
-} // namespace
-
-OpenDDS::DCPS::TransportImpl::TransportImpl()
+TransportImpl::TransportImpl()
   : monitor_(0)
 {
-  DBG_ENTRY_LVL("TransportImpl","TransportImpl",6);
+  DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
     monitor_ = TheServiceParticipant->monitor_factory_->create_transport_monitor(this);
   }
 }
 
-OpenDDS::DCPS::TransportImpl::~TransportImpl()
+TransportImpl::~TransportImpl()
 {
-  DBG_ENTRY_LVL("TransportImpl","~TransportImpl",6);
-  PendingAssociationsMap::iterator penditer =
-    pending_association_sub_map_.begin();
-
-  while (penditer != pending_association_sub_map_.end()) {
-    delete penditer->second;
-    ++penditer;
-  }
+  DBG_ENTRY_LVL("TransportImpl", "~TransportImpl", 6);
 }
 
 void
-OpenDDS::DCPS::TransportImpl::shutdown()
+TransportImpl::shutdown()
 {
-  DBG_ENTRY_LVL("TransportImpl","shutdown",6);
+  DBG_ENTRY_LVL("TransportImpl", "shutdown", 6);
 
   // Stop datalink clean task.
   this->dl_clean_task_.close(1);
@@ -113,8 +92,8 @@ OpenDDS::DCPS::TransportImpl::shutdown()
   }
 }
 
-int
-OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
+bool
+TransportImpl::configure(TransportInst* config)
 {
   DBG_ENTRY_LVL("TransportImpl","configure",6);
 
@@ -123,7 +102,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
   if (config == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: invalid configuration.\n"),
-                     -1);
+                     false);
   }
 
   if (!this->config_.is_nil()) {
@@ -131,15 +110,15 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
     // TransportImpl object has already been configured.
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportImpl already configured.\n"),
-                     -1);
+                     false);
   }
 
   config->_add_ref();
   this->config_ = config;
 
   // Let our subclass take a shot at the configuration object.
-  if (this->configure_i(config) == -1) {
-    if (OpenDDS::DCPS::Transport_debug_level > 0) {
+  if (this->configure_i(config) == false) {
+    if (Transport_debug_level > 0) {
       dump();
     }
 
@@ -148,7 +127,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
     // The subclass rejected the configuration attempt.
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
-                     -1);
+                     false);
   }
 
   // Open the DL Cleanup task
@@ -157,7 +136,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
   if (this->dl_clean_task_.open()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
-                      ACE_TEXT("open")), -1);
+                      ACE_TEXT("open")), false);
   }
 
   // Success.
@@ -165,7 +144,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
     this->monitor_->report();
   }
 
-  if (OpenDDS::DCPS::Transport_debug_level > 0) {
+  if (Transport_debug_level > 0) {
     std::stringstream os;
     dump(os);
 
@@ -174,11 +153,11 @@ OpenDDS::DCPS::TransportImpl::configure(TransportInst* config)
                os.str().c_str()));
   }
 
-  return 0;
+  return true;
 }
 
 void
-OpenDDS::DCPS::TransportImpl::create_reactor_task()
+TransportImpl::create_reactor_task()
 {
   if (this->reactor_task_.in()) {
     return;
@@ -190,99 +169,8 @@ OpenDDS::DCPS::TransportImpl::create_reactor_task()
   }
 }
 
-OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::TransportImpl::reserve_datalink(
-  RepoId                  local_id,
-  const AssociationData*  remote_association,
-  CORBA::Long             priority,
-  TransportSendListener*  send_listener)
-{
-  DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
-
-  // Ask our concrete subclass to find or create a (concrete) DataLink
-  // that matches the supplied criterea.
-
-  // Note that we pass-in true as the third argument.  This means that
-  // if a new DataLink needs to be created (ie, the find operation fails),
-  // then the connection establishment logic will treat the local endpoint
-  // as the publisher.  This knowledge dictates whether a passive or active
-  // connection establishment procedure should be followed.
-  DataLink_rch link =
-    this->find_or_create_datalink(local_id,
-                                  remote_association,
-                                  priority,
-                                  true);
-
-  if (link.is_nil()) {
-    OpenDDS::DCPS::RepoIdConverter pub_converter(local_id);
-    OpenDDS::DCPS::RepoIdConverter sub_converter(remote_association->remote_id_);
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: TransportImpl::reserve_datalink: ")
-                      ACE_TEXT("subclass was unable to find ")
-                      ACE_TEXT("or create a DataLink for local publisher_id %C ")
-                      ACE_TEXT("to remote subscriber_id %C.\n"),
-                      std::string(pub_converter).c_str(),
-                      std::string(sub_converter).c_str()),0);
-  }
-
-  link->make_reservation(remote_association->remote_id_,  // subscription_id
-                         local_id,                        // publication_id
-                         send_listener);
-
-  return link._retn();
-}
-
-OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::TransportImpl::reserve_datalink(
-  RepoId                    local_id,
-  const AssociationData*    remote_association,
-  CORBA::Long               priority,
-  TransportReceiveListener* receive_listener)
-{
-  DBG_ENTRY_LVL("TransportImpl","reserve_datalink",6);
-
-  // Ask our concrete subclass to find or create a DataLink (actually, a
-  // concrete subclass of DataLink) that matches the supplied criterea.
-  // Since find_or_create() is pure virtual, the concrete subclass must
-  // provide an implementation for us to use.
-
-  // Note that we pass-in false as the third argument.  This means that
-  // if a new DataLink needs to be created (ie, the find operation fails),
-  // then the connection establishment logic will treat the local endpoint
-  // as a subscriber.  This knowledge dictates whether a passive or active
-  // connection establishment procedure should be followed.
-  DataLink_rch link =
-    this->find_or_create_datalink(local_id,
-                                  remote_association,
-                                  priority,
-                                  false);
-
-  if (link.is_nil()) {
-    OpenDDS::DCPS::RepoIdConverter pub_converter(remote_association->remote_id_);
-    OpenDDS::DCPS::RepoIdConverter sub_converter(local_id);
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: TransportImpl::reserve_datalink: ")
-                      ACE_TEXT("subclass was unable to find ")
-                      ACE_TEXT("or create a DataLink for local subscriber_id %C ")
-                      ACE_TEXT("to remote publisher_id %C.\n"),
-                      std::string(sub_converter).c_str(),
-                      std::string(pub_converter).c_str()),0);
-  }
-
-  link->make_reservation(remote_association->remote_id_,  // publication_id
-                         local_id,                        // subscription_id
-                         receive_listener);
-
-  // This is called on the subscriber side to let the concrete
-  // datalink to do some necessary work such as Tcp will
-  // send the FULLY_ASSOCIATED ack to the publisher.
-  link->fully_associated();
-
-  return link._retn();
-}
-
 void
-OpenDDS::DCPS::TransportImpl::attach_client(TransportClient* client)
+TransportImpl::attach_client(TransportClient* client)
 {
   DBG_ENTRY_LVL("TransportImpl", "attach_client", 6);
 
@@ -291,7 +179,7 @@ OpenDDS::DCPS::TransportImpl::attach_client(TransportClient* client)
 }
 
 void
-OpenDDS::DCPS::TransportImpl::detach_client(TransportClient* client)
+TransportImpl::detach_client(TransportClient* client)
 {
   DBG_ENTRY_LVL("TransportImpl", "attach_client", 6);
 
@@ -299,37 +187,28 @@ OpenDDS::DCPS::TransportImpl::detach_client(TransportClient* client)
   clients_.erase(client);
 }
 
-int
-OpenDDS::DCPS::TransportImpl::add_pending_association(
+bool
+TransportImpl::add_pending_association(
   RepoId                  local_id,
-  const AssociationInfo&  info,
+  const AssociationData&  data,
   TransportSendListener*  tsl)
 {
-  DBG_ENTRY_LVL("TransportImpl","add_pending_association",6);
+  DBG_ENTRY_LVL("TransportImpl", "add_pending_association", 6);
 
   GuardType guard(this->lock_);
 
   // Cache the Association data so it can be used for the callback
   // to notify datawriter on_publication_matched.
 
-  PendingAssociationsMap::iterator iter = pending_association_sub_map_.find(local_id);
+  PendingAssociationsMap::iterator iter =
+    pending_association_sub_map_.find(local_id);
 
-  if (iter != pending_association_sub_map_.end())
-    iter->second->push_back(info);
+  if (iter != pending_association_sub_map_.end()) {
+    iter->second.push_back(data);
 
-  else {
-    AssociationInfoList* infos = new AssociationInfoList;
-    infos->push_back(info);
-
+  } else {
     association_listeners_[local_id] = tsl;
-
-    if (OpenDDS::DCPS::bind(pending_association_sub_map_, local_id, infos) == -1) {
-      OpenDDS::DCPS::RepoIdConverter converter(local_id);
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: TransportImpl::add_pending_association: ")
-                        ACE_TEXT("failed to add pending associations for pub %C\n"),
-                        std::string(converter).c_str()),-1);
-    }
+    pending_association_sub_map_[local_id].push_back(data);
   }
 
   // Acks for this new pending association may arrive at this time.
@@ -340,11 +219,11 @@ OpenDDS::DCPS::TransportImpl::add_pending_association(
   // after calling fully_associated.
   check_fully_association(local_id);
 
-  return 0;
+  return true;
 }
 
 int
-OpenDDS::DCPS::TransportImpl::demarshal_acks(ACE_Message_Block* acks, bool byte_order)
+TransportImpl::demarshal_acks(ACE_Message_Block* acks, bool byte_order)
 {
   DBG_ENTRY_LVL("TransportImpl","demarshal_acks",6);
 
@@ -363,13 +242,14 @@ OpenDDS::DCPS::TransportImpl::demarshal_acks(ACE_Message_Block* acks, bool byte_
   return 0;
 }
 
-void OpenDDS::DCPS::TransportImpl::check_fully_association()
+void
+TransportImpl::check_fully_association()
 {
-  DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
+  DBG_ENTRY_LVL("TransportImpl", "check_fully_association", 6);
 
   GuardType guard(this->lock_);
 
-  if (OpenDDS::DCPS::Transport_debug_level > 8) {
+  if (Transport_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ack dump: \n")));
 
@@ -381,23 +261,24 @@ void OpenDDS::DCPS::TransportImpl::check_fully_association()
 
   while (penditer != pending_association_sub_map_.end()) {
     PendingAssociationsMap::iterator cur = penditer;
-    ++ penditer;
+    ++penditer;
 
     check_fully_association(cur->first);
   }
 }
 
-void OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id)
+void
+TransportImpl::check_fully_association(const RepoId& pub_id)
 {
-  DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
+  DBG_ENTRY_LVL("TransportImpl", "check_fully_association", 6);
 
   PendingAssociationsMap::iterator penditer =
     pending_association_sub_map_.find(pub_id);
 
   if (penditer != pending_association_sub_map_.end()) {
-    AssociationInfoList& associations = *(penditer->second);
+    AssociationDataList& associations = penditer->second;
 
-    AssociationInfoList::iterator iter = associations.begin();
+    AssociationDataList::iterator iter = associations.begin();
 
     while (iter != associations.end()) {
       if (check_fully_association(penditer->first, *iter)) {
@@ -405,59 +286,52 @@ void OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id)
         association_listeners_.erase(pub_id);
 
       } else {
-        ++ iter;
+        ++iter;
       }
     }
 
     if (associations.size() == 0) {
-      delete penditer->second;
       pending_association_sub_map_.erase(penditer);
     }
   }
 }
 
-bool OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id,
-                                                           AssociationInfo& associations)
+bool
+TransportImpl::check_fully_association(const RepoId& pub_id,
+                                       const AssociationData& association)
 {
-  DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
+  DBG_ENTRY_LVL("TransportImpl", "check_fully_association", 6);
 
-  size_t num_acked = 0;
 
   TransportSendListener* tsl = association_listeners_[pub_id];
 
-  for (size_t i = 0; i < associations.num_associations_; ++i) {
-    RepoId sub_id = associations.association_data_[i].remote_id_;
+  const RepoId& sub_id = association.remote_id_;
 
-    if (this->acked(pub_id, sub_id) && tsl) {
-      ++num_acked;
-    }
+  bool acked = false;
+  if (this->acked(pub_id, sub_id) && tsl) {
+    acked = true;
   }
 
-  bool ret = (num_acked == associations.num_associations_);
+  if (acked && tsl) {
+    this->remove_ack(pub_id, sub_id);
 
-  if (ret && tsl) {
-    for (size_t i = 0; i < associations.num_associations_; ++i) {
-      RepoId sub_id = associations.association_data_[i].remote_id_;
-      this->remove_ack(pub_id, sub_id);
-    }
-
-    tsl->fully_associated(associations.num_associations_,
-                          associations.association_data_);
+    tsl->fully_associated(association);
 
     return true;
 
-  } else if (ret && OpenDDS::DCPS::Transport_debug_level > 8) {
+  } else if (acked && Transport_debug_level > 8) {
     std::stringstream buffer;
-    buffer << " pub " << pub_id << " - sub " << associations.association_data_->remote_id_;
+    buffer << " pub " << pub_id << " - sub " << sub_id;
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) acked but DW is not registered:  %C \n"), buffer.str().c_str()));
+               ACE_TEXT("(%P|%t) acked but DW is not registered: %C \n"),
+               buffer.str().c_str()));
   }
 
   return false;
 }
 
 bool
-OpenDDS::DCPS::TransportImpl::acked(RepoId pub_id, RepoId sub_id)
+TransportImpl::acked(RepoId pub_id, RepoId sub_id)
 {
   int ret = false;
   RepoIdSet_rch set = this->acked_sub_map_.find(pub_id);
@@ -467,7 +341,7 @@ OpenDDS::DCPS::TransportImpl::acked(RepoId pub_id, RepoId sub_id)
     ret = set->exist(sub_id, last);
   }
 
-  if (OpenDDS::DCPS::Transport_debug_level > 8) {
+  if (Transport_debug_level > 8) {
     std::stringstream buffer;
     buffer << " pub " << pub_id << " - sub " << sub_id;
     ACE_DEBUG((LM_DEBUG,
@@ -479,7 +353,7 @@ OpenDDS::DCPS::TransportImpl::acked(RepoId pub_id, RepoId sub_id)
 }
 
 bool
-OpenDDS::DCPS::TransportImpl::release_link_resources(DataLink* link)
+TransportImpl::release_link_resources(DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
@@ -492,13 +366,13 @@ OpenDDS::DCPS::TransportImpl::release_link_resources(DataLink* link)
 }
 
 void
-OpenDDS::DCPS::TransportImpl::remove_ack(RepoId pub_id, RepoId sub_id)
+TransportImpl::remove_ack(RepoId pub_id, RepoId sub_id)
 {
   this->acked_sub_map_.remove(pub_id, sub_id);
 }
 
 void
-OpenDDS::DCPS::TransportImpl::report()
+TransportImpl::report()
 {
   if (this->monitor_) {
     this->monitor_->report();
@@ -506,7 +380,7 @@ OpenDDS::DCPS::TransportImpl::report()
 }
 
 void
-OpenDDS::DCPS::TransportImpl::dump()
+TransportImpl::dump()
 {
   std::stringstream os;
   dump(os);
@@ -517,7 +391,7 @@ OpenDDS::DCPS::TransportImpl::dump()
 }
 
 void
-OpenDDS::DCPS::TransportImpl::dump(ostream& os)
+TransportImpl::dump(ostream& os)
 {
   os << TransportInst::formatNameForDump("name")
      << config()->name();
@@ -531,21 +405,12 @@ OpenDDS::DCPS::TransportImpl::dump(ostream& os)
 }
 
 
-/// Note that this will return -1 if the TransportImpl has not been
-/// configure()'d yet.
-int
-OpenDDS::DCPS::TransportImpl::swap_bytes() const
+bool
+TransportImpl::swap_bytes() const
 {
-  DBG_ENTRY_LVL("TransportImpl","swap_bytes",6);
-
-  GuardType guard(this->lock_);
-
-  if (this->config_.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl cannot return swap_bytes "
-                      "value - TransportImpl has not been configure()'d.\n"),
-                     -1);
-  }
-
+  DBG_ENTRY_LVL("TransportImpl", "swap_bytes", 6);
   return this->config_->swap_bytes_;
+}
+
+}
 }
