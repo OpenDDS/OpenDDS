@@ -72,9 +72,6 @@ public:
 
   const std::string transport_type_;
 
-  /// Flag used to marshall/demarshall bytes sent/received.
-  bool swap_bytes_;
-
   /// Number of pre-created link (list) objects per pool for the
   /// "send queue" of each DataLink.
   size_t queue_messages_per_pool_;

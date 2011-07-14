@@ -1,3 +1,30 @@
+Thu Jul 14 21:15:59 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          swap_bytes is no longer supported on the per-transport level.
+          It is now supported for each TransportClient, which is in charge
+          of marsahling payload data.  Removing it from the transport impl
+          means that all control messages and transport headers will be
+          marshaled in the sending host's native order.  We do not expect this
+          to have much performance impact on mixed-endian scenarios because the
+          bulk of the data transferred still has the swap_bytes option.
+
+        * tools/dissector/giop_base.h:
+
+          Fixed an #include to work with the re-arranged .idl from last commit.
+
 Thu Jul 14 20:20:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcps.mpc:

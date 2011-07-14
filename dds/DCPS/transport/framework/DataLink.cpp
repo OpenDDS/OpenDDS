@@ -568,8 +568,7 @@ OpenDDS::DCPS::DataLink::create_control(char submessage_id,
 
   DataSampleHeader header;
 
-  header.byte_order_ = this->impl_->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER
-                                                 : TAO_ENCAP_BYTE_ORDER;
+  header.byte_order_ = TAO_ENCAP_BYTE_ORDER;
   header.message_id_ = TRANSPORT_CONTROL;
   header.submessage_id_ = submessage_id;
   header.message_length_ = static_cast<ACE_UINT32>(data->total_length());
@@ -1050,16 +1049,16 @@ OpenDDS::DCPS::DataLink::pre_stop_i()
 }
 
 ACE_Message_Block*
-OpenDDS::DCPS::DataLink::marshal_acks(bool byte_order)
+OpenDDS::DCPS::DataLink::marshal_acks()
 {
-  DBG_ENTRY_LVL("DataLink","marshal_acks",6);
-  return this->sub_map_.marshal(byte_order);
+  DBG_ENTRY_LVL("DataLink", "marshal_acks", 6);
+  return this->sub_map_.marshal();
 }
 
 bool
 OpenDDS::DCPS::DataLink::release_resources()
 {
-  DBG_ENTRY_LVL("DataLink", "release_resources",6);
+  DBG_ENTRY_LVL("DataLink", "release_resources", 6);
 
   this->prepare_release();
 

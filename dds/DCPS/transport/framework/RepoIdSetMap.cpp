@@ -182,7 +182,7 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
 }
 
 ACE_Message_Block*
-OpenDDS::DCPS::RepoIdSetMap::marshal(bool byte_order)
+OpenDDS::DCPS::RepoIdSetMap::marshal()
 {
   DBG_ENTRY_LVL("RepoIdSetMap","marshal",6);
   ACE_Message_Block* data = 0;
@@ -201,7 +201,7 @@ OpenDDS::DCPS::RepoIdSetMap::marshal(bool byte_order)
                                    0),
                  0);
 
-  Serializer writer(data, byte_order);
+  Serializer writer(data);
   CORBA::ULong sz = static_cast<CORBA::ULong>(this->size());
   writer << sz;
 

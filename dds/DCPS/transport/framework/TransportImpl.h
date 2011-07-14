@@ -84,11 +84,6 @@ public:
   /// we can do.
   TransportInst* config() const;
 
-  /// Accessor for the "swap bytes" flag that was supplied to this
-  /// TransportImpl via the TransportInst object supplied
-  /// to our configure() method.
-  bool swap_bytes() const;
-
   /// This method is called when the FULLY_ASSOCIATED ack of the pending
   /// associations is received. If the datawriter is registered, the
   /// datawriter will be notified, otherwise the status of the pending

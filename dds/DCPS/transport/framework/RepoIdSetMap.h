@@ -50,7 +50,7 @@ public:
 
   /// Serialize this map. The data in the stream:
   /// size of this map, list of key(repoid)-value(RepoIdSet).
-  ACE_Message_Block* marshal(bool byte_order);
+  ACE_Message_Block* marshal();
 
   /// Demarshal the serialized data of a RepoIdSetMap.
   int demarshal(ACE_Message_Block* acks, bool byte_order);

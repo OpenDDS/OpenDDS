@@ -404,13 +404,5 @@ TransportImpl::dump(ostream& os)
   }
 }
 
-
-bool
-TransportImpl::swap_bytes() const
-{
-  DBG_ENTRY_LVL("TransportImpl", "swap_bytes", 6);
-  return this->config_->swap_bytes_;
-}
-
 }
 }

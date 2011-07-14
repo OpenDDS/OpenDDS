@@ -30,7 +30,7 @@ bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 {
   DBG_ENTRY_LVL("TransportHeader", "operator<<" ,6);
 
-  OpenDDS::DCPS::Serializer writer(&buffer, value.swap_bytes());
+  Serializer writer(&buffer);
 
   writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
 

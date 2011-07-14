@@ -218,8 +218,7 @@ ReliableSession::send_syn()
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  Serializer serializer(
-    data, this->link_->transport()->swap_bytes());
+  Serializer serializer(data);
 
   serializer << this->remote_peer_;
 
@@ -282,8 +281,7 @@ ReliableSession::send_synack()
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  Serializer serializer(
-    data, this->link_->transport()->swap_bytes());
+  Serializer serializer(data);
 
   serializer << this->remote_peer_;
 
@@ -528,7 +526,7 @@ ReliableSession::send_naks(DisjointSequence& received)
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  Serializer serializer(data, this->link_->transport()->swap_bytes());
+  Serializer serializer(data);
 
   serializer << this->remote_peer_;
   serializer << size;
@@ -594,8 +592,7 @@ ReliableSession::send_nakack(SequenceNumber low)
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  Serializer serializer(
-    data, this->link_->transport()->swap_bytes());
+  Serializer serializer(data);
 
   serializer << low;
 

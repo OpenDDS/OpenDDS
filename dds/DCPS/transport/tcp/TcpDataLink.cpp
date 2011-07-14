@@ -285,7 +285,6 @@ OpenDDS::DCPS::TcpDataLink::fully_associated()
   }
 
   this->resume_send();
-  bool swap_byte = this->transport_->get_configuration()->swap_bytes_;
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
   header_data.message_id_ = FULLY_ASSOCIATED;
@@ -293,8 +292,7 @@ OpenDDS::DCPS::TcpDataLink::fully_associated()
   // Other data in the DataSampleHeader are not necessary set. The bogus values
   // can be used.
 
-  header_data.byte_order_
-  = swap_byte ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
+  header_data.byte_order_ = TAO_ENCAP_BYTE_ORDER;
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //DDS::Time_t source_timestamp
@@ -307,7 +305,7 @@ OpenDDS::DCPS::TcpDataLink::fully_associated()
   ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size();
 
-  ACE_Message_Block* data = this->marshal_acks(swap_byte);
+  ACE_Message_Block* data = this->marshal_acks();
 
   header_data.message_length_ = static_cast<ACE_UINT32>(data->length());
 
