@@ -1,3 +1,25 @@
+Fri Jul 15 21:43:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Messenger/pub.ini:
+        * tests/DCPS/Messenger/pub_ipv6.ini:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+        * tests/DCPS/Messenger/run_ns_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/sub.ini:
+        * tests/DCPS/Messenger/sub_ipv6.ini:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+
+          Updated scripts and config files for the Messenger test.
+          It is now ready to use with the new transport API and file format.
+
+        * tests/DCPS/Messenger/multicast.conf:
+        * tests/DCPS/Messenger/tcp.conf:
+        * tests/DCPS/Messenger/udp.conf:
+        * tests/DCPS/ReadCondition/dcps.ini:
+
+          Removed these files.
+
 Fri Jul 15 20:23:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

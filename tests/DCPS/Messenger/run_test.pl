@@ -58,12 +58,14 @@ elsif ($ARGV[0] eq 'stack') {
     $stack_based = 1;
 }
 elsif ($ARGV[0] eq 'all') {
-    shift;
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
-    for my $test ('', qw/udp multicast default_tcp default_udp default_multicast
-                         nobits ipv6 stack/) {
+    my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
+                        nobits stack/);
+    push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
+    for my $test (@tests) {
         $status += system($^X, $0, @original_ARGV, $test);
     }
+    exit $status;
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
