@@ -15,6 +15,9 @@
 
 #include <vector>
 
+// Forward definition of a test-friendly class in the global name space
+class DDS_TEST;
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -79,6 +82,10 @@ private:
                    TransportImpl_rch& impl);
   TransportSendListener* get_send_listener();
   TransportReceiveListener* get_receive_listener();
+
+  // A class, normally provided by an unit test, who needs access to a client's
+  // privates.
+  friend class ::DDS_TEST;
 
   typedef std::map<RepoId, DataLink_rch, GUID_tKeyLessThan> DataLinkIndex;
 

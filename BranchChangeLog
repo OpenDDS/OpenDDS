@@ -1,3 +1,33 @@
+Thu Jul 14 21:46:59 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Introducing a friend: DDS_TEST to provide tests with access to private members.
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/ConfigTransports.mwc:
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/DataReaderListener.h:
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.h:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ConfigTransports/README:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+        * tests/DCPS/ConfigTransports/transports.ini:
+
+          A configuration file with various named transport configurations.
+
+        * tests/DCPS/ConfigTransports:
+
+          Adding a test for the various use cases/configuration scenarios.
+
 Thu Jul 14 21:15:59 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
