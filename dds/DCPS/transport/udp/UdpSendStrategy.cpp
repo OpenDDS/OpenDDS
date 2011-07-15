@@ -9,6 +9,7 @@
 #include "UdpSendStrategy.h"
 #include "UdpDataLink.h"
 #include "UdpInst.h"
+#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -16,7 +17,8 @@ namespace DCPS {
 UdpSendStrategy::UdpSendStrategy(UdpDataLink* link)
   : TransportSendStrategy(link->config(),
                           0,  // synch_resource
-                          link->transport_priority()),
+                          link->transport_priority(),
+                          new NullSynchStrategy),
     link_(link)
 {
 }

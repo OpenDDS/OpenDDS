@@ -7,14 +7,12 @@
  */
 
 #include "TransportDefs.h"
-#include "PerConnectionSynchStrategy.h"
 #include "EntryExit.h"
 
 
 ACE_INLINE
 OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
-                                            const std::string& name,
-                                            ThreadSynchStrategy* send_strategy)
+                                            const std::string& name)
   : transport_type_(type),
     queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),
@@ -24,28 +22,10 @@ OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
     thread_per_connection_(0),
     datalink_release_delay_(10000),
     datalink_control_chunks_(32),
-    name_(name),
-    send_thread_strategy_(send_strategy)
+    name_(name)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
   this->adjust_config_value();
-}
-
-ACE_INLINE
-void
-OpenDDS::DCPS::TransportInst::send_thread_strategy
-(const ThreadSynchStrategy_rch& strategy)
-{
-  DBG_ENTRY_LVL("TransportInst","send_thread_strategy",6);
-  this->send_thread_strategy_ = strategy;
-}
-
-ACE_INLINE
-OpenDDS::DCPS::ThreadSynchStrategy_rch
-OpenDDS::DCPS::TransportInst::send_thread_strategy() const
-{
-  DBG_ENTRY_LVL("TransportInst","send_thread_strategy",6);
-  return this->send_thread_strategy_;
 }
 
 ACE_INLINE

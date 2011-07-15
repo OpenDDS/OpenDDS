@@ -1,3 +1,27 @@
+Fri Jul 15 16:43:42 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+
+          Remove the Sync Strategy from the TransportInst (and
+          derived classes).  The TransportSendStrategy constructor
+          will now be passed this object from the transport-specific
+          derived classes.  I also added an error message when
+          configuration sections of the old format are encountered
+          ([transport_*]).
+
 Fri Jul 15 16:00:49 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/DDSTEST.h:

@@ -10,7 +10,6 @@
 #include "MulticastLoader.h"
 #include "MulticastTransport.h"
 
-#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/Configuration.h"
@@ -46,7 +45,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastInst::MulticastInst(const std::string& name)
-  : TransportInst("multicast", name, new NullSynchStrategy),
+  : TransportInst("multicast", name),
     default_to_ipv6_(DEFAULT_TO_IPV6),
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),

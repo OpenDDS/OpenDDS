@@ -19,6 +19,7 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportInst_rch.h"
+#include "ThreadSynchStrategy_rch.h"
 
 #include "ace/Synch.h"
 
@@ -134,9 +135,10 @@ public:
 
 protected:
 
-  TransportSendStrategy(TransportInst* config,
+  TransportSendStrategy(TransportInst*          transport_inst,
                         ThreadSynchResource*    synch_resource,
-                        CORBA::Long             priority);
+                        CORBA::Long             priority,
+                        ThreadSynchStrategy_rch thread_sync_strategy);
 
   // Only our subclass knows how to do this.
   // Third arg is the "back-pressure" flag.  If send_bytes() returns
@@ -373,7 +375,7 @@ private:
   /// is created in start if the transport needs it.
   TransportRetainedElementAllocator* retained_element_allocator_;
 
-  TransportInst_rch config_;
+  TransportInst_rch transport_inst_;
 
   bool graceful_disconnecting_;
 

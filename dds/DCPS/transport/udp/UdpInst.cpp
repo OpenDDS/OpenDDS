@@ -9,7 +9,6 @@
 #include "UdpInst.h"
 #include "UdpLoader.h"
 
-#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/Configuration.h"
@@ -20,7 +19,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 UdpInst::UdpInst(const std::string& name)
-  : TransportInst("udp", name, new NullSynchStrategy)
+  : TransportInst("udp", name)
 {
 }
 

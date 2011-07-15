@@ -27,6 +27,8 @@
 #include <sstream>
 
 namespace {
+  const ACE_TString OLD_TRANSPORT_PREFIX = "transport_";
+
   /// Helper types and functions for config file parsing
   typedef std::map<std::string, std::string> ValueMap;
   typedef std::pair<std::string, ACE_Configuration_Section_Key> SubsectionPair;
@@ -311,6 +313,13 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
           }
         }
       }
+    } else if (ACE_OS::strncmp(sect_name.c_str(), OLD_TRANSPORT_PREFIX.c_str(),
+                               OLD_TRANSPORT_PREFIX.length()) == 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                        ACE_TEXT("Obsolete transport configuration found (%s).\n"),
+                        sect_name.c_str()),
+                       -1);
     }
   }
 

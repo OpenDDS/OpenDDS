@@ -8,7 +8,6 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportInst.h"
-#include "ThreadSynchStrategy.h"
 #include "TransportImpl.h"
 #include "EntryExit.h"
 

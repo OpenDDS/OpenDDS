@@ -16,10 +16,8 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportDefs.h"
-#include "ThreadSynchStrategy_rch.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
-#include "PerConnectionSynchStrategy.h"
 #include "dds/DCPS/RcObject_T.h"
 
 #include "ace/Synch.h"
@@ -52,10 +50,6 @@ class OpenDDS_Dcps_Export TransportInst : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
   std::string name() const { return name_; }
-
-  void send_thread_strategy(const ThreadSynchStrategy_rch& strategy);
-
-  ThreadSynchStrategy_rch send_thread_strategy() const;
 
   /// Overwrite the default configurations with the configuration from the
   /// given section in the ACE_Configuration_Heap object.
@@ -104,9 +98,7 @@ public:
 protected:
 
   TransportInst(const char* type,
-                const std::string& name,
-                ThreadSynchStrategy* send_strategy
-                  = new PerConnectionSynchStrategy);
+                const std::string& name);
 
   virtual ~TransportInst();
 
@@ -124,10 +116,6 @@ private:
   virtual TransportImpl* new_impl(const RcHandle<TransportInst>& inst) = 0;
 
   const std::string name_;
-
-  /// Thread strategy used for sending data samples (and incomplete
-  /// packets) when a DataLink has encountered "backpressure".
-  ThreadSynchStrategy_rch send_thread_strategy_;
 
   TransportImpl_rch impl_;
   ACE_SYNCH_MUTEX lock_;

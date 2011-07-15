@@ -14,6 +14,7 @@
 #include "TcpSynchResource.h"
 #include "TcpDataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   TcpDataLink*      link,
@@ -22,7 +23,8 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   TcpSynchResource* synch_resource,
   TransportReactorTask*   task,
   CORBA::Long             priority)
-  : TransportSendStrategy(config, synch_resource, priority)
+  : TransportSendStrategy(config, synch_resource, priority, 
+                          new PerConnectionSynchStrategy)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","TcpSendStrategy",6);
 
