@@ -1,3 +1,14 @@
+Fri Jul 15 15:36:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Need mpb inherited to pick up rules.dds.GNU.
+
+        * rules.dds.GNU:
+
+          Set exceptions ?= 1 in case the user has a version
+          of ACE that doesn't do this already.
+
 Fri Jul 15 14:02:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/CfTopic/CfTopic.opendds:
