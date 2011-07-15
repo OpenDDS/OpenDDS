@@ -21,8 +21,9 @@ $sub_time = $pub_time;
 $sub_addr = "localhost:16701";
 #$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 $use_svc_conf = false;
-$svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
-$repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
+$svc_conf = "-ORBDebugLevel 0 -DCPSBIT 0 " . ($use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '');
+$repo_bit_conf = "-ORBDebugLevel 0 -NOBITS " . ($use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '');
+#                             . "-NOBITS "
 
 $dcpsrepo_ior = "repo.ior";
 
@@ -74,7 +75,7 @@ $qos = {
     collocation   => none,
     configuration => none,
     protocol      => _OPENDDS_0500_TCP,
-    compatibility => true,
+    compatibility => false,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -84,7 +85,7 @@ $qos = {
     collocation   => none,
     configuration => none,
     protocol      => _OPENDDS_0500_TCP,
-    compatibility => true,
+    compatibility => false,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -94,7 +95,7 @@ $qos = {
     collocation   => none,
     configuration => none,
     protocol      => _OPENDDS_0500_TCP,
-    compatibility => true,
+    compatibility => false,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -103,7 +104,7 @@ $qos = {
 
 
 # Returns an array of publisher command lines
-sub parse($) {
+sub pub_parse($) {
 
   my ($s) = @_;
 
@@ -118,17 +119,6 @@ sub parse($) {
   my $pub_liveliness_kind = $$s{publisher}{liveliness} || $$s{liveliness};
   my $pub_lease_time = $$s{publisher}{lease_time} || $$s{lease_time};
   my $pub_reliability_kind = $$s{publisher}{reliability} || $$s{reliability};
-
-  my $sub_protocol = $$s{subscriber}{protocol} || $$s{protocol};
-  my $sub_entity = $$s{subscriber}{entity} || $$s{entity};
-  my $sub_collocation = $$s{subscriber}{collocation} || $$s{collocation};
-  my $sub_configuration = $$s{subscriber}{configuration} || $$s{configuration};
-
-  my $sub_entity = $$s{subscriber}{entity} || $$s{entity};
-  my $sub_durability_kind = $$s{subscriber}{durability} || $$s{durability};
-  my $sub_liveliness_kind = $$s{subscriber}{liveliness} || $$s{liveliness};
-  my $sub_lease_time = $$s{subscriber}{lease_time} || $$s{lease_time};
-  my $sub_reliability_kind = $$s{subscriber}{reliability} || $$s{reliability};
 
   my $level = "-ORBDebugLevel " . $$s{verbosity} if $$s{verbosity};
 #  my $common = "$svc_conf -DCPSBIT 0 $level -DCPSConfigFile transports.ini -c $compatibility";
@@ -146,6 +136,31 @@ sub parse($) {
                       . " -x " . $pub_time
                       ;
 
+  return $pub_parameters;
+}
+
+# Returns an array of subscriber command lines
+sub sub_parse($) {
+
+  my ($s) = @_;
+
+  my $compatibility = $$s{compatibility};
+
+  my $sub_protocol = $$s{subscriber}{protocol} || $$s{protocol};
+  my $sub_entity = $$s{subscriber}{entity} || $$s{entity};
+  my $sub_collocation = $$s{subscriber}{collocation} || $$s{collocation};
+  my $sub_configuration = $$s{subscriber}{configuration} || $$s{configuration};
+
+  my $sub_entity = $$s{subscriber}{entity} || $$s{entity};
+  my $sub_durability_kind = $$s{subscriber}{durability} || $$s{durability};
+  my $sub_liveliness_kind = $$s{subscriber}{liveliness} || $$s{liveliness};
+  my $sub_lease_time = $$s{subscriber}{lease_time} || $$s{lease_time};
+  my $sub_reliability_kind = $$s{subscriber}{reliability} || $$s{reliability};
+
+  my $level = "-ORBDebugLevel " . $$s{verbosity} if $$s{verbosity};
+#  my $common = "$svc_conf -DCPSBIT 0 $level -DCPSConfigFile transports.ini -c $compatibility";
+  my $common = "$svc_conf $level -DCPSConfigFile transports.ini -c $compatibility";
+
   my $sub_parameters = $common
                       . " -e " . $sub_entity
                       . " -a " . $sub_collocation
@@ -158,17 +173,14 @@ sub parse($) {
                       . " -x " . $sub_time
                       ;
 
-  return ($pub_parameters, $sub_parameters);
+  return $sub_parameters;
 }
-
 
 sub initialize() {
   unlink $dcpsrepo_ior;
 
   my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                                          "$repo_bit_conf "
-#                             . "-ORBDebugLevel 1 "
-#                             . "-NOBITS "
                                                    . "-o $dcpsrepo_ior ");
   print $DCPSREPO->CommandLine() . "\n";
   $DCPSREPO->Spawn ();
@@ -241,7 +253,8 @@ my $DCPSREPO = initialize();
 my $status = 0;
 
 for my $i (@scenario) {
-    ($pub_parameters, $sub_parameters) = parse(\%$i);
+    $pub_parameters = pub_parse(\%$i);
+    $sub_parameters = sub_parse(\%$i);
     $status += run($pub_parameters, $sub_parameters);
     print "\n";
 }
@@ -257,22 +270,3 @@ else {
 
 exit $status;
 
-
-
-#my $DCPSREPO = initialize();
-
-#run_scenario("true", "transient_local", "automatic", "5", "reliable", "transient_local", "automatic", "5", "reliable");
-#run_scenario("true", "transient_local", "automatic", "6", "reliable", "volatile", "automatic", "7", "best_effort");
-#run_scenario("true", "transient_local", "automatic", "5", "reliable", "volatile", "automatic", "infinite", "best_effort");
-#run_scenario("true", "transient_local", "automatic", "infinite", "reliable", "volatile", "automatic", "infinite", "best_effort");
-#
-#run_scenario("false", "transient_local", "automatic", "6", "reliable", "transient_local", "automatic", "5", "reliable");
-#run_scenario("false", "transient_local", "automatic", "infinite", "reliable", "transient_local", "automatic", "5", "reliable");
-#run_scenario("false", "transient_local", "automatic", "6", "reliable", "transient_local", "automatic", "5", "reliable");
-#run_scenario("false", "transient_local", "automatic", "5", "best_effort", "transient_local", "automatic", "5", "reliable");
-#run_scenario("false", "volatile", "automatic", "5", "reliable", "transient_local", "automatic", "5", "reliable");
-## there are more to test later, but they are currently treated as invalid
-## since there are not supported in the code
-#
-#my $status = finalize($DCPSREPO);
-#exit $status;

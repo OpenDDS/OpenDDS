@@ -1,3 +1,10 @@
+Fri Jul 15 18:17:53 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Silenced a plethora of mesages due to mismatched
+          auto-negotiation for built-in topics.
+        
 Fri Jul 15 16:43:42 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportInst.h:
@@ -32,7 +39,7 @@ Fri Jul 15 16:00:49 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
         * tests/DCPS/ConfigTransports/subscriber.cpp:
 
           Fixing stray includes and test scenarios
-        
+
 Fri Jul 15 14:25:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/AssociationData.h:
