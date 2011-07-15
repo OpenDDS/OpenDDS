@@ -11,7 +11,7 @@
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_j6pGgS2LEeCFILu-MgN-Wg"/>
         <readers xmi:id="cf_rUKHwPDwEd-I4rwicuuPOw" name="chained_cfreader" copyFromTopicQos="true">
-          <topic href="../CfTopic/CfTopic.opendds#ext_j6pGgS2LEeCFILu-MgN-Wg"/>
+          <topic xsi:type="opendds:topic" href="../CfTopic/CfTopic.opendds#ext_j6pGgS2LEeCFILu-MgN-Wg"/>
         </readers>
       </subscribers>
     </participants>

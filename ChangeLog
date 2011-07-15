@@ -1,3 +1,11 @@
+Fri Jul 15 14:02:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.opendds:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+
+          Validation errors.
+
 Thu Jul 14 19:55:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_dissector.h:
