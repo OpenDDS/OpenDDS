@@ -1,8 +1,22 @@
+Thu Jul 14 19:55:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+        * tools/dissector/README.txt:
+
+          Added support for processing *.ini files. The format of the
+          configuration file is described in README.txt. I anticipate that
+          the DDS IDL compiler will generate these configuration files at
+          some point.
+
 Wed Jul 13 19:00:13 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/tests/setup.pl:
 
-          Fixed path that was broken as a result of moving validation project to plugins.
+          Fixed path that was broken as a result of moving validation
+          project to plugins.
 
 Wed Jul 13 18:45:00 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 

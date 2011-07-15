@@ -32,13 +32,30 @@ extern "C" {
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "ace/Hash_Map_Manager.h"
+
 #include "sample_dissector.h"
+
+
+class ACE_Configuration;
+class ACE_Configuration_Section_Key;
 
 namespace OpenDDS
 {
   namespace DCPS
   {
+
+    class ModuleName
+    {
+    public:
+      ACE_TString name_;
+      ModuleName *parent_;
+    };
+
     typedef ACE_Hash_Map_Manager <const char *, Sample_Dissector *, ACE_Null_Mutex> SampleDissectorMap;
+
+    typedef ACE_Hash_Map_Manager <const char *, Sample_Field::IDLTypeID, ACE_Null_Mutex> BuiltinTypeMap;
+
+    typedef ACE_Hash_Map_Manager <const char *, ModuleName *, ACE_Null_Mutex> ModuleTreeMap;
 
     /*
      * The Sample_Dessector_Manager is a singleton which contains a hash map
@@ -56,37 +73,36 @@ namespace OpenDDS
       Sample_Dissector *find (const char *data_name);
 
     private:
+
       static Sample_Manager instance_;
       SampleDissectorMap dissectors_;
+      BuiltinTypeMap builtin_types_;
+      ModuleTreeMap module_tree_;
 
-    //-------------------------------------------------------
-    // Temporary type-specific dissectors for testing
+      void build_type (ACE_TString &name, ACE_Configuration &config);
+      void init_from_file (const ACE_TCHAR *filename);
 
-      void init_base_sequences();
-      void init_for_MultiTopicTest();
-      void init_for_CorbaSeqTest();
-      void init_for_MetaStructTest();
-      void init_for_QueryConditionTest();
-#if 0
-      void make_LocationInfo_Dissector ();
-      void make_PlanInfo_Dissector ();
-      void make_MoreInfo_Dissector ();
-      void make_UnrelatedInfo_Dissector ();
-      void make_Resulting_Dissector ();
+      struct ConfigInfo {
+        ACE_Configuration *config_;
+        ACE_Configuration_Section_Key *key_;
+        ACE_TString name_;
+        ACE_TString version_;
+        ACE_TString module_;
+        ACE_TString kind_;
+        ACE_TString type_id_;
+      };
 
-      void make_Message_Dissector ();
-      void make_Message2_Dissector ();
+      Sample_Dissector * fqfind (ACE_TString &parent, ACE_TString &name);
+      Sample_Dissector * fqfind_i (ModuleName *top_level_mn, ACE_TString &name);
 
-      void make_A_Dissector();
-      void make_ShortArray_Dissector();
-      void make_ArrayOfShortArray_Dissector();
-      void make_StructSeq_Dissector();
-      void make_MyEnum_Dissector();
-      void make_MyUnion_Dissector();
-
-      void make_Source_Dissector();
-      void make_Target_Dissector();
-#endif
+      void build_fqname (ConfigInfo &info);
+      void build_module (ConfigInfo &info);
+      void build_struct (ConfigInfo &info);
+      void build_sequence (ConfigInfo &info);
+      void build_array  (ConfigInfo &info);
+      void build_enum   (ConfigInfo &info);
+      void build_union  (ConfigInfo &info);
+      void build_alias  (ConfigInfo &info);
     };
   }
 }
