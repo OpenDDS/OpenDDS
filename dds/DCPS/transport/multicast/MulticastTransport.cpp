@@ -18,6 +18,7 @@
 #include "ace/Truncate.h"
 
 #include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 namespace OpenDDS {

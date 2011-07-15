@@ -20,7 +20,6 @@
 #include "DataSampleList.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
-#include "AssociationData.h"
 #include "Qos_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
@@ -51,6 +50,7 @@ class PublisherImpl;
 class DomainParticipantImpl;
 class OfferedDeadlineWatchdog;
 class Monitor;
+struct AssociationData;
 
 /**
 * @class DataWriterImpl
@@ -420,7 +420,7 @@ public:
 
   /// Called by transport after transport received the
   /// FULLY_ASSOCIATED ack from the associated subscriber.
-  void fully_associated(const AssociationData& remote_association);
+  void fully_associated(const RepoId& remote_association);
 
   /**
    * This method create a header message block and chain with
@@ -539,7 +539,7 @@ private:
     return this->qos_.transport_priority.value;
   }
 
-  void post_associate(const AssociationData& data,
+  void post_associate(const RepoId& remote_id,
                       const TransportImpl_rch& impl);
 
   friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_

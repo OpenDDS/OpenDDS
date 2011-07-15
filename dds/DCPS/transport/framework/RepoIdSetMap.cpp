@@ -216,11 +216,11 @@ OpenDDS::DCPS::RepoIdSetMap::marshal()
 }
 
 int
-OpenDDS::DCPS::RepoIdSetMap::demarshal(ACE_Message_Block* acks, bool byte_order)
+OpenDDS::DCPS::RepoIdSetMap::demarshal(ACE_Message_Block* acks, bool swap_bytes)
 {
   DBG_ENTRY_LVL("RepoIdSetMap","demarshal",6);
 
-  Serializer reader(acks, byte_order);
+  Serializer reader(acks, swap_bytes);
 
   CORBA::ULong num_subs = 0;
   reader >> num_subs;

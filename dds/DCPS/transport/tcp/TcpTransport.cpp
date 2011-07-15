@@ -19,6 +19,7 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/debug.h"
 #include <sstream>
 

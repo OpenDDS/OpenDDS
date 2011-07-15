@@ -53,7 +53,7 @@ public:
   ACE_Message_Block* marshal();
 
   /// Demarshal the serialized data of a RepoIdSetMap.
-  int demarshal(ACE_Message_Block* acks, bool byte_order);
+  int demarshal(ACE_Message_Block* acks, bool swap_bytes);
 
   /// List the key of this map.
   void get_keys(RepoIdSet& keys) const;

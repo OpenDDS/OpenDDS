@@ -10,6 +10,8 @@
 #include "UdpTransport.h"
 #include "UdpInst.h"
 
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 

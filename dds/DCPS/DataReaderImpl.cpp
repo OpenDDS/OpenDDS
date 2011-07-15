@@ -350,7 +350,7 @@ void DataReaderImpl::add_association(const RepoId& yourId,
     //
     AssociationData data;
     data.remote_id_ = writer.writerId;
-    data.remote_data_ = writer.writerTransInfo[0]; //TODO: handle > 1 locator
+    data.remote_data_ = writer.writerTransInfo;
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
 

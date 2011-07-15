@@ -16,6 +16,7 @@
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
+#include "dds/DCPS/AssociationData.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -74,7 +75,9 @@ UdpTransport::find_datalink(
   bool active)
 {
   ACE_INET_Addr remote_address(
-    get_connection_addr(remote_association.remote_data_));
+    get_connection_addr(remote_association.remote_data_[0]));
+        //TODO: [0] on the prev line is just temporary
+
   bool is_loopback = remote_address == this->config_i_->local_address_;
   PriorityKey key(priority, remote_address, is_loopback, active);
 
@@ -98,7 +101,9 @@ UdpTransport::create_datalink(
   bool active)
 {
   ACE_INET_Addr remote_address(
-    get_connection_addr(remote_association.remote_data_));
+    get_connection_addr(remote_association.remote_data_[0]));
+        //TODO: [0] on the prev line is just temporary
+
   bool is_loopback = remote_address == this->config_i_->local_address_;
   PriorityKey key(priority, remote_address, is_loopback, active);
 

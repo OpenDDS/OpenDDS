@@ -30,6 +30,7 @@
 #include "ContentFilteredTopicImpl.h"
 #include "GroupRakeData.h"
 #include "CoherentChangeControl.h"
+#include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "ace/String_Base.h"

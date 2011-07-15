@@ -21,7 +21,6 @@
 #include "TopicDescriptionImpl.h"
 #include "Marked_Default_Qos.h"
 #include "DataSampleList.h"
-#include "AssociationData.h"
 #include "Transient_Kludge.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"

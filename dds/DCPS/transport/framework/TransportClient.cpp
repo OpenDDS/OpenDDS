@@ -21,14 +21,13 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/AssociationData.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : conn_info_(1) //TODO: temporarily, conn_info_ will just have 1 entry
 {
-  conn_info_.length(1);
 }
 
 TransportClient::~TransportClient()
@@ -64,12 +63,10 @@ TransportClient::enable_transport()
       TransportImpl_rch impl = inst->impl();
       impl->attach_client(this);
       impls_.push_back(impl);
+      const CORBA::ULong len = conn_info_.length();
+      conn_info_.length(len + 1);
+      impl->connection_info(conn_info_[len]);
     }
-  }
-
-  if (!impls_.empty()) {
-    //TODO: build conn_info_ from > 1 impl
-    impls_[0]->connection_info(conn_info_[0]);
   }
 }
 
@@ -115,7 +112,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   TransportImpl_rch impl;
   if (associate_i(data, active, impl)) {
-    post_associate(data, impl);
+    post_associate(data.remote_id_, impl);
     return true;
   }
   return false;

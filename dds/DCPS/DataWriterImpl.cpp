@@ -21,6 +21,7 @@
 #include "MonitorFactory.h"
 #include "CoherentChangeControl.h"
 #include "DataWriterRemoteImpl.h"
+#include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -286,7 +287,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
 
   AssociationData data;
   data.remote_id_ = reader.readerId;
-  data.remote_data_ = reader.readerTransInfo[0]; //TODO: handle > 1 locator
+  data.remote_data_ = reader.readerTransInfo;
   this->associate(data, true /*active*/);
   //TODO: if associate() returns false, inform inforepo and try again as pasv
 }
@@ -311,13 +312,13 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 void
-DataWriterImpl::fully_associated(const AssociationData& remote_association)
+DataWriterImpl::fully_associated(const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "fully_associated", 6);
 
   if (DCPS_debug_level >= 1) {
     RepoIdConverter writer_converter(this->publication_id_);
-    RepoIdConverter reader_converter(remote_association.remote_id_);
+    RepoIdConverter reader_converter(remote_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
@@ -326,8 +327,6 @@ DataWriterImpl::fully_associated(const AssociationData& remote_association)
                std::string(reader_converter).c_str()));
   }
 
-  RepoId rd_id;
-
   {
     // protect readers_
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -335,8 +334,8 @@ DataWriterImpl::fully_associated(const AssociationData& remote_association)
     // If the reader is not in pending association list, which indicates it's already
     // removed by remove_association. In other words, the remove_association()
     // is called before fully_associated() call.
-    if (OpenDDS::DCPS::remove(pending_readers_, remote_association.remote_id_) == -1) {
-      RepoIdConverter converter(remote_association.remote_id_);
+    if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
+      RepoIdConverter converter(remote_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
                  ACE_TEXT("reader %C is not in pending list ")
@@ -347,10 +346,9 @@ DataWriterImpl::fully_associated(const AssociationData& remote_association)
 
     // The reader is in the pending reader, now add it to fully associated reader
     // list.
-    rd_id = remote_association.remote_id_;
 
-    if (OpenDDS::DCPS::insert(readers_, remote_association.remote_id_) == -1) {
-      RepoIdConverter converter(remote_association.remote_id_);
+    if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
+      RepoIdConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
@@ -365,7 +363,7 @@ DataWriterImpl::fully_associated(const AssociationData& remote_association)
   if (!is_bit_) {
 
     DDS::InstanceHandle_t handle =
-      this->participant_servant_->get_handle(rd_id);
+      this->participant_servant_->get_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
@@ -377,8 +375,8 @@ DataWriterImpl::fully_associated(const AssociationData& remote_association)
       ++publication_match_status_.current_count;
       ++publication_match_status_.current_count_change;
 
-      if (OpenDDS::DCPS::bind(id_to_handle_map_, rd_id, handle) != 0) {
-        RepoIdConverter converter(rd_id);
+      if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
+        RepoIdConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
@@ -387,7 +385,7 @@ DataWriterImpl::fully_associated(const AssociationData& remote_association)
         return;
 
       } else if (DCPS_debug_level > 4) {
-        RepoIdConverter converter(rd_id);
+        RepoIdConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) DataWriterImpl::fully_associated: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
@@ -422,7 +420,7 @@ DataWriterImpl::fully_associated(const AssociationData& remote_association)
     // samples.
     ReaderIdSeq rd_ids(1);
     rd_ids.length(1);
-    rd_ids[0] = rd_id;
+    rd_ids[0] = remote_id;
     this->data_container_->reenqueue_all(rd_ids, this->qos_.lifespan);
 
     // Acquire the data writer container lock to avoid deadlock. The
@@ -2394,11 +2392,11 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
 }
 
 void
-DataWriterImpl::post_associate(const AssociationData& data,
+DataWriterImpl::post_associate(const RepoId& remote_id,
                                const TransportImpl_rch& impl)
 {
-  impl->add_pending_association(this->publication_id_,
-                                data, this /*send listener*/);
+  impl->add_pending_association(this->publication_id_, remote_id,
+                                this /*send listener*/);
 }
 
 bool

@@ -12,7 +12,6 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/AssociationData.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "TransportDefs.h"
@@ -34,6 +33,7 @@ class TransportReceiveListener;
 class ThreadSynchStrategy;
 class DataLink;
 class Monitor;
+struct AssociationData;
 
 /** The TransportImpl class includes the abstract methods that must be implemented
 *   by any implementation to provide data delivery service to the DCPS implementation.
@@ -59,7 +59,7 @@ public:
 
   /// Called when the receive strategy received the FULLY_ASSOCIATED
   /// message.
-  int demarshal_acks(ACE_Message_Block* acks, bool byte_order);
+  bool demarshal_acks(ACE_Message_Block* acks, bool swap_bytes);
 
   /// Return true if the subscriptions to a datawriter is
   /// acknowledged, otherwise return false.
@@ -192,15 +192,14 @@ public:
   /// subscribers then the transport will notify the datawriter fully
   /// association and the associations will be
   /// removed from the pending associations cache.
-  bool add_pending_association(RepoId local_id,
-                               const AssociationData& data,
+  bool add_pending_association(const RepoId& local_id,
+                               const RepoId& remote_id,
                                TransportSendListener* tsl);
 
 private:
 
   void check_fully_association(const RepoId& pub_id);
-  bool check_fully_association(const RepoId& pub_id,
-                               const AssociationData& association);
+  bool check_fully_association(const RepoId& pub_id, const RepoId& sub_id);
 
   /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference
@@ -230,11 +229,10 @@ private:
 
   /// These are used by the publisher side.
 
-  typedef std::map<RepoId, AssociationDataList, GUID_tKeyLessThan>
+  typedef std::map<RepoId, std::vector<RepoId>, GUID_tKeyLessThan>
     PendingAssociationsMap;
 
-  /// pubid -> pending associations (remote sub id, association data,
-  /// association status) map.
+  /// pubid -> remote sub ids map.
   PendingAssociationsMap pending_association_sub_map_;
 
   std::map<PublicationId, TransportSendListener*, GUID_tKeyLessThan>

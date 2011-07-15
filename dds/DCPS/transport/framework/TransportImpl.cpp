@@ -188,10 +188,9 @@ TransportImpl::detach_client(TransportClient* client)
 }
 
 bool
-TransportImpl::add_pending_association(
-  RepoId                  local_id,
-  const AssociationData&  data,
-  TransportSendListener*  tsl)
+TransportImpl::add_pending_association(const RepoId& local_id,
+                                       const RepoId& remote_id,
+                                       TransportSendListener* tsl)
 {
   DBG_ENTRY_LVL("TransportImpl", "add_pending_association", 6);
 
@@ -204,11 +203,11 @@ TransportImpl::add_pending_association(
     pending_association_sub_map_.find(local_id);
 
   if (iter != pending_association_sub_map_.end()) {
-    iter->second.push_back(data);
+    iter->second.push_back(remote_id);
 
   } else {
     association_listeners_[local_id] = tsl;
-    pending_association_sub_map_[local_id].push_back(data);
+    pending_association_sub_map_[local_id].push_back(remote_id);
   }
 
   // Acks for this new pending association may arrive at this time.
@@ -222,24 +221,25 @@ TransportImpl::add_pending_association(
   return true;
 }
 
-int
-TransportImpl::demarshal_acks(ACE_Message_Block* acks, bool byte_order)
+bool
+TransportImpl::demarshal_acks(ACE_Message_Block* acks, bool swap_bytes)
 {
   DBG_ENTRY_LVL("TransportImpl","demarshal_acks",6);
 
   {
-  GuardType guard(this->lock_);
+    GuardType guard(this->lock_);
 
-  int status = this->acked_sub_map_.demarshal(acks, byte_order);
+    int status = this->acked_sub_map_.demarshal(acks, swap_bytes);
 
-  if (status == -1)
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl::demarshal_acks failed\n"),
-                     -1);
+    if (status == -1) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: TransportImpl::demarshal_acks failed\n"),
+                       false);
+    }
   }
 
   check_fully_association();
-  return 0;
+  return true;
 }
 
 void
@@ -275,10 +275,11 @@ TransportImpl::check_fully_association(const RepoId& pub_id)
   PendingAssociationsMap::iterator penditer =
     pending_association_sub_map_.find(pub_id);
 
+  typedef std::vector<RepoId> RepoIdList;
   if (penditer != pending_association_sub_map_.end()) {
-    AssociationDataList& associations = penditer->second;
+    RepoIdList& associations = penditer->second;
 
-    AssociationDataList::iterator iter = associations.begin();
+    RepoIdList::iterator iter = associations.begin();
 
     while (iter != associations.end()) {
       if (check_fully_association(penditer->first, *iter)) {
@@ -298,14 +299,12 @@ TransportImpl::check_fully_association(const RepoId& pub_id)
 
 bool
 TransportImpl::check_fully_association(const RepoId& pub_id,
-                                       const AssociationData& association)
+                                       const RepoId& sub_id)
 {
   DBG_ENTRY_LVL("TransportImpl", "check_fully_association", 6);
 
 
   TransportSendListener* tsl = association_listeners_[pub_id];
-
-  const RepoId& sub_id = association.remote_id_;
 
   bool acked = false;
   if (this->acked(pub_id, sub_id) && tsl) {
@@ -315,7 +314,7 @@ TransportImpl::check_fully_association(const RepoId& pub_id,
   if (acked && tsl) {
     this->remove_ack(pub_id, sub_id);
 
-    tsl->fully_associated(association);
+    tsl->fully_associated(sub_id);
 
     return true;
 

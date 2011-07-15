@@ -26,7 +26,6 @@ class DataLinkSet;
 typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
 class ReaderIdSeq;
-struct AssociationData;
 
 class OpenDDS_Dcps_Export TransportSendListener {
 public:
@@ -64,7 +63,7 @@ public:
     DataSample* /* data */)
   {}
 
-  virtual void fully_associated(const AssociationData& /* association */)
+  virtual void fully_associated(const RepoId& /* remote_id */)
   {}
 
 protected:

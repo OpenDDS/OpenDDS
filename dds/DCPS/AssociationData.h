@@ -20,7 +20,7 @@ namespace DCPS {
 
 struct AssociationData {
   RepoId               remote_id_;
-  TransportLocator     remote_data_;
+  TransportLocatorSeq  remote_data_;
   ACE_INET_Addr        remote_addess_;
   NetworkAddress       network_order_address_;
   CORBA::Long          publication_transport_priority_;
@@ -29,7 +29,9 @@ struct AssociationData {
   {
     if (this->remote_addess_ == ACE_INET_Addr()) {
       // Get the remote address from the "blob" in the remote_info struct.
-      ACE_InputCDR cdr((const char*)remote_data_.data.get_buffer(), remote_data_.data.length());
+      //TODO: [0] on the next line is just temporary
+      ACE_InputCDR cdr((const char*)remote_data_[0].data.get_buffer(),
+                                    remote_data_[0].data.length());
 
       if (cdr >> this->network_order_address_ == 0) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: AssociationData::get_remote_address failed "
@@ -43,8 +45,6 @@ struct AssociationData {
     return this->remote_addess_;
   }
 };
-
-typedef std::vector<AssociationData> AssociationDataList;
 
 } // namespace DCPS
 } // namespace OpenDDS
