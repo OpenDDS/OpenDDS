@@ -1,3 +1,9 @@
+Fri Jul 15 22:27:38 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+
+          Scoreboard cleanup.
+
 Fri Jul 15 15:36:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
