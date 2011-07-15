@@ -578,7 +578,7 @@ public:
   // Set the instance related writers to reevaluate the owner.
   void reset_ownership (::DDS::InstanceHandle_t instance);
 
-  virtual EntityImpl* parent();
+  virtual EntityImpl* parent() const;
 
 protected:
 

@@ -165,7 +165,7 @@ public:
 
   bool is_suspended() const;
 
-  virtual EntityImpl* parent();
+  virtual EntityImpl* parent() const;
 
 private:
   typedef std::multimap<std::string, DataWriterImpl*> DataWriterMap;

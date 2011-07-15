@@ -1,10 +1,55 @@
+Fri Jul 15 20:23:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fixed bug due to parent() method signature changed in EntityImpl
+          but not updated in all derived classes.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed built-in topic local address string and wchar compat.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Added handling of the "fallback" option of loading Tcp if nothing
+          else is present in the global config when the transport layer is
+          about to be used by DCPS.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Updated comments and compatibility check.
+
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/pub.ini:
+        * tests/DCPS/Messenger/pub_udp.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/sub.ini:
+        * tests/DCPS/Messenger/sub_udp.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/ReadCondition/run_test.pl:
+
+          Updated for new transport API.  Messenger test is not done yet.
+
 Fri Jul 15 18:17:53 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/run_test.pl:
 
           Silenced a plethora of mesages due to mismatched
           auto-negotiation for built-in topics.
-        
+
 Fri Jul 15 16:43:42 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportInst.h:

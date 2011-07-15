@@ -214,9 +214,6 @@ MulticastTransport::connection_info_i(TransportLocator& info) const
   const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
   char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  // Provide connection information for endpoint identification by
-  // the DCPSInfoRepo. These values are not used by multicast
-  // for DataLink establishment.
   info.transport_type = "multicast";
   info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
 

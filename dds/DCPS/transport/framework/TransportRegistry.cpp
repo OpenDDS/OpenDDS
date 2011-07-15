@@ -111,6 +111,9 @@ namespace {
     }
     return 0;
   }
+
+  // transport type to try loading if none are loaded when DCPS attempts to use
+  const char FALLBACK_TYPE[] = "tcp";
 }
 
 namespace OpenDDS {
@@ -375,7 +378,7 @@ TransportRegistry::create_inst(const std::string& name,
     LibDirectiveMap::iterator lib_iter =
       this->lib_directive_map_.find(transport_type);
     if (lib_iter != this->lib_directive_map_.end()) {
-      ACE_TString directive = ACE_TEXT((*lib_iter).second.c_str());
+      ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
       // Release the lock, because loading a transport library will
       // recursively call this function to add its default inst.
       guard.release();
@@ -465,6 +468,29 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
     throw Transport::MiscProblem();
   }
   ei->transport_config(cfg);
+}
+
+
+TransportConfig_rch 
+TransportRegistry::fix_empty_default()
+{
+  DBG_ENTRY_LVL("TransportRegistry", "fix_empty_default", 6);
+  GuardType guard(lock_);
+  if (global_config_.is_nil()
+      || !global_config_->instances_.empty()
+      || global_config_->name() != DEFAULT_CONFIG_NAME) {
+    return global_config_;
+  }
+  TransportConfig_rch global_config = global_config_;
+#if !defined(ACE_AS_STATIC_LIBS)
+  const ACE_TString directive =
+    ACE_TEXT_CHAR_TO_TCHAR(lib_directive_map_[FALLBACK_TYPE].c_str());
+  // Release the lock, because loading a transport library will
+  // attempt to acquire the lock in create_inst()
+  guard.release();
+  ACE_Service_Config::process_directive(directive.c_str());
+#endif
+  return global_config;
 }
 
 

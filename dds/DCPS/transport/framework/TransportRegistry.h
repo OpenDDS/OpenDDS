@@ -84,6 +84,11 @@ public:
   int load_transport_configuration(const std::string& file_name,
                                    ACE_Configuration_Heap& cf);
 
+  /// For internal use by OpenDDS DCPS layer:
+  /// If the default config is empty when it's about to be used, allow the
+  /// TransportRegistry to attempt to load a fallback option.
+  TransportConfig_rch fix_empty_default();
+
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 

@@ -451,7 +451,7 @@ public:
    */
   DDS::InstanceHandle_t get_next_handle();
   
-  virtual EntityImpl* parent();
+  virtual EntityImpl* parent() const;
 
 protected:
 

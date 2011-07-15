@@ -170,7 +170,7 @@ UdpTransport::connection_info_i(TransportLocator& info) const
 ACE_INET_Addr
 UdpTransport::get_connection_addr(const TransportLocator& info) const
 {
-  if (info.transport_type != "udp") {
+  if (info.transport_type.in() != std::string("udp")) {
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: ")
                ACE_TEXT("UdpTransport::get_connection_addr: ")

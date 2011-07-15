@@ -5,113 +5,116 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+my @original_ARGV = @ARGV;
+
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+my $status = 0;
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
+my $pub_opts = "-ORBDebugLevel 10 -ORBLogFile pub.log -DCPSDebugLevel 10";
+my $sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSDebugLevel 10";
+my $repo_bit_opt = "";
+my $stack_based = 0;
 
-$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
-$sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
+unlink qw/DCPSInfoRepo.log pub.log sub.log/;
 
 if ($ARGV[0] eq 'udp') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '') . "-t udp";
-    $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
+    $pub_opts .= " -DCPSConfigFile pub_udp.ini";
+    $sub_opts .= " -DCPSConfigFile sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '') . "-t multicast";
-    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
+    $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
+    $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
-    $opts .= " -t default_tcp";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
+    $pub_opts .= " -t tcp";
+    $sub_opts .= " -t tcp";
 }
 elsif ($ARGV[0] eq 'default_udp') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '')
-        . " -t default_udp";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
+    $pub_opts .= " -t udp";
+    $sub_opts .= " -t udp";
 }
 elsif ($ARGV[0] eq 'default_multicast') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '')
-        . "-t default_multicast";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
+    $pub_opts .= " -t multicast";
+    $sub_opts .= " -t multicast";
 }
 elsif ($ARGV[0] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';
-    $pub_opts .= ' -DCPSBit 0';
-    $sub_opts .= ' -DCPSBit 0';
+    $pub_opts .= ' -DCPSConfigFile pub.ini -DCPSBit 0';
+    $sub_opts .= ' -DCPSConfigFile sub.ini -DCPSBit 0';
 }
 elsif ($ARGV[0] eq 'ipv6') {
-    $pub_opts = "$opts -DCPSConfigFile pub_ipv6.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_ipv6.ini";
+    $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
+    $sub_opts .= " -DCPSConfigFile sub_ipv6.ini";
 }
 elsif ($ARGV[0] eq 'stack') {
-    $opts .= " -t default_tcp";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
+    $pub_opts .= " -t tcp";
+    $sub_opts .= " -t tcp";
     $stack_based = 1;
+}
+elsif ($ARGV[0] eq 'all') {
+    shift;
+    @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
+    for my $test ('', qw/udp multicast default_tcp default_udp default_multicast
+                         nobits ipv6 stack/) {
+        $status += system($^X, $0, @original_ARGV, $test);
+    }
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;
 }
+else {
+    $pub_opts .= ' -DCPSConfigFile pub.ini';
+    $sub_opts .= ' -DCPSConfigFile sub.ini';
+}
 
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
+my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                   "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log " .
+                   "$repo_bit_opt -o $dcpsrepo_ior");
 
-if($stack_based == 0) {
-  #create
-  $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-}
-else {
-  $Subscriber = PerlDDS::create_process ("stack_subscriber", " $sub_opts");
-}
+my $Subscriber = PerlDDS::create_process(($stack_based ? 'stack_' : '') .
+                                         "subscriber", $sub_opts);
 
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
 
 print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
+$DCPSREPO->Spawn();
+if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-    $DCPSREPO->Kill ();
+    $DCPSREPO->Kill();
     exit 1;
 }
 
 print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn ();
+$Publisher->Spawn();
 
 print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn ();
+$Subscriber->Spawn();
 
 
-$PublisherResult = $Publisher->WaitKill (300);
+my $PublisherResult = $Publisher->WaitKill(300);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
 }
 
-$SubscriberResult = $Subscriber->WaitKill (15);
+my $SubscriberResult = $Subscriber->WaitKill(15);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
 }
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
+my $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;

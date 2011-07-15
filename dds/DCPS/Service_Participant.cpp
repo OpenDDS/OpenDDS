@@ -1156,7 +1156,8 @@ Service_Participant::init_bit_transport_config()
   out << this->bit_transport_port_;
 
   tcp_inst->local_address_str_ =
-    ACE_TEXT_ALWAYS_CHAR(this->bit_transport_ip_.c_str()) + ':' + out.str();
+    ACE_TEXT_ALWAYS_CHAR(this->bit_transport_ip_.c_str());
+  tcp_inst->local_address_str_ += ':' + out.str();
 
   return 0;
 
@@ -1387,7 +1388,7 @@ Service_Participant::load_common_configuration()
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSGlobalTransportConfig value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSGlobalTransportConfig"), this->global_transport_config_);
-      if (this->global_transport_config_ == "$file") {
+      if (this->global_transport_config_ == ACE_TEXT("$file")) {
         // When the special string of "$file" is used, substitute the file name
         this->global_transport_config_ = config_fname;
       }

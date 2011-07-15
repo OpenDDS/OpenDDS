@@ -48,7 +48,12 @@ TransportClient::enable_transport()
     tc = p->transport_config();
   }
   if (tc.is_nil()) {
-    tc = TransportRegistry::instance()->global_config();
+    TransportRegistry* reg = TransportRegistry::instance();
+    tc = reg->global_config();
+    if (!tc.is_nil() && tc->instances_.empty()
+        && tc->name() == TransportRegistry::DEFAULT_CONFIG_NAME) {
+      tc = reg->fix_empty_default();
+    }
   }
   if (tc.is_nil()) {
     throw Transport::NotConfigured();

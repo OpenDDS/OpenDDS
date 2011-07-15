@@ -424,7 +424,6 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
   const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
   char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_type = "tcp";
   local_info.data = TransportBLOB(len, len,
                                   reinterpret_cast<CORBA::Octet*>(buffer));

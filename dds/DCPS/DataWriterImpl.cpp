@@ -2013,7 +2013,7 @@ DataWriterImpl::deliver_ack(
 }
 
 EntityImpl*
-DataWriterImpl::parent()
+DataWriterImpl::parent() const
 {
   return this->publisher_servant_;
 }

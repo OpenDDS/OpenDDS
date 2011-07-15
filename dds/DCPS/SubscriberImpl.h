@@ -177,7 +177,7 @@ public:
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);
 
-  virtual EntityImpl* parent();
+  virtual EntityImpl* parent() const;
 
 private:
 

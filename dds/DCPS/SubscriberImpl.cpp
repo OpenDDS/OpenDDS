@@ -1038,7 +1038,7 @@ SubscriberImpl::coherent_change_received (RepoId& publisher_id,
 }
 
 EntityImpl*
-SubscriberImpl::parent()
+SubscriberImpl::parent() const
 {
   return this->participant_;
 }

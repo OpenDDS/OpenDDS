@@ -948,7 +948,7 @@ PublisherImpl::get_publication_ids(PublicationIdVec& pubs)
 }
 
 EntityImpl*
-PublisherImpl::parent()
+PublisherImpl::parent() const
 {
   return this->participant_;
 }

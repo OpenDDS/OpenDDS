@@ -1594,7 +1594,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 }
 
 EntityImpl*
-DataReaderImpl::parent()
+DataReaderImpl::parent() const
 {
   return this->subscriber_servant_;
 }
