@@ -62,7 +62,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dp->get_default_topic_qos (topic_qos);
 
       DDS::Topic_var topic =
-              dp->create_topic (MY_TOPIC,
+              dp->create_topic (MY_SAME_TOPIC,
                                 MY_TYPE,
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil (),
@@ -70,7 +70,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       TEST_CHECK (!CORBA::is_nil (topic.in ()))
 
       DDS::TopicDescription_var description =
-              dp->lookup_topicdescription (MY_TOPIC);
+              dp->lookup_topicdescription (MY_SAME_TOPIC);
       TEST_CHECK (!CORBA::is_nil (description.in ()));
 
       // Create the publisher
@@ -139,13 +139,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Assert effective configuration properties
       ACE_ERROR ((LM_INFO,
-                  ACE_TEXT ("(%P|%t) Validating if the entity '%C' effective protocol %C '%C'\n"),
+                  ACE_TEXT ("(%P|%t) Validating if the entity '%C' effective protocol is '%C'\n"),
                   entity_str.c_str (),
-                  (compatible ? "is" : "is not"),
                   protocol_str.c_str ()));
 
-      bool supported = (::DDS_TEST::supports (dw.in (), protocol_str) != 0);
-      TEST_CHECK (compatible == supported);
+      TEST_CHECK (::DDS_TEST::supports (dw.in (), protocol_str) != 0);
 
       // Clean up publisher objects
       pub->delete_contained_entities ();
@@ -162,7 +160,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               dynamic_cast<DataWriterListenerImpl*> (dwl.in ());
 
       // check to see if the publisher worked
-      if (dwl_servant->publication_matched () != compatible)
+      if (compatible && !dwl_servant->publication_matched ())
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT ("(%P|%t) Expected publication_matched to be %C, but it wasn't.")

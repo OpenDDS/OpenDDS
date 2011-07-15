@@ -6,6 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "dds/DCPS/dcps_export.h"
 
 #include "DDSTEST.h"
 

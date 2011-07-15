@@ -39,9 +39,9 @@ $qos = {
   {
     entity        => none,
     collocation   => none,
-    configuration => Any,
-    protocol      => _OPENDDS_0300_UDP,     
-    compatibility => true,
+    configuration => Udp_Only,
+    protocol      => _OPENDDS_0300_UDP,
+    compatibility => false,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -49,21 +49,11 @@ $qos = {
 #); @scenario_other = (
 
   {
-    entity        => none,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => _OPENDDS_0300_UDP,     
-    compatibility => true,
-    publisher     => $qos,
-    subscriber    => $qos
-  },
-
-  {
     entity        => pubsub,
     collocation   => none,
     configuration => Udp_Only,
-    protocol      => _OPENDDS_0300_UDP,     
-    compatibility => true,
+    protocol      => _OPENDDS_0300_UDP,
+    compatibility => false,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -72,19 +62,18 @@ $qos = {
     entity        => participant,
     collocation   => none,
     configuration => Udp_Only,
-    protocol      => _OPENDDS_0300_UDP,     
-    compatibility => true,
+    protocol      => _OPENDDS_0300_UDP,
+    compatibility => false,
     publisher     => $qos,
     subscriber    => $qos
   },
-
 
 # No transport configuration file
   {
     entity        => none,
     collocation   => none,
     configuration => none,
-    protocol      => _OPENDDS_0500_TCP,     
+    protocol      => _OPENDDS_0500_TCP,
     compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
@@ -94,7 +83,7 @@ $qos = {
     entity        => pubsub,
     collocation   => none,
     configuration => none,
-    protocol      => _OPENDDS_0500_TCP,     
+    protocol      => _OPENDDS_0500_TCP,
     compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
@@ -104,14 +93,16 @@ $qos = {
     entity        => participant,
     collocation   => none,
     configuration => none,
-    protocol      => _OPENDDS_0500_TCP,     
+    protocol      => _OPENDDS_0500_TCP,
     compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
   },
+
 );
 
 
+# Returns an array of publisher command lines
 sub parse($) {
 
   my ($s) = @_;
@@ -122,7 +113,7 @@ sub parse($) {
   my $pub_entity = $$s{publisher}{entity} || $$s{entity};
   my $pub_collocation = $$s{publisher}{collocation} || $$s{collocation};
   my $pub_configuration = $$s{publisher}{configuration} || $$s{configuration};
-  
+
   my $pub_durability_kind = $$s{publisher}{durability} || $$s{durability};
   my $pub_liveliness_kind = $$s{publisher}{liveliness} || $$s{liveliness};
   my $pub_lease_time = $$s{publisher}{lease_time} || $$s{lease_time};
@@ -132,7 +123,7 @@ sub parse($) {
   my $sub_entity = $$s{subscriber}{entity} || $$s{entity};
   my $sub_collocation = $$s{subscriber}{collocation} || $$s{collocation};
   my $sub_configuration = $$s{subscriber}{configuration} || $$s{configuration};
-  
+
   my $sub_entity = $$s{subscriber}{entity} || $$s{entity};
   my $sub_durability_kind = $$s{subscriber}{durability} || $$s{durability};
   my $sub_liveliness_kind = $$s{subscriber}{liveliness} || $$s{liveliness};
@@ -143,30 +134,28 @@ sub parse($) {
 #  my $common = "$svc_conf -DCPSBIT 0 $level -DCPSConfigFile transports.ini -c $compatibility";
   my $common = "$svc_conf $level -DCPSConfigFile transports.ini -c $compatibility";
 
-  my $pub_parameters = $common 
-                      . " -e " . $pub_entity 
-                      . " -a " . $pub_collocation 
-                      . " -s " . $pub_configuration 
-                      . " -t " . $pub_protocol 
-                      . " -d " . $pub_durability_kind 
-                      . " -k " . $pub_liveliness_kind  
-                      . " -r " . $pub_reliability_kind 
-                      . " -l " . $pub_lease_time 
-                      . " -x " . $pub_time 
-#                      . " -p " . $pub_addr . $port
+  my $pub_parameters = $common
+                      . " -e " . $pub_entity
+                      . " -a " . $pub_collocation
+                      . " -s " . $pub_configuration
+                      . " -t " . $pub_protocol
+                      . " -d " . $pub_durability_kind
+                      . " -k " . $pub_liveliness_kind
+                      . " -r " . $pub_reliability_kind
+                      . " -l " . $pub_lease_time
+                      . " -x " . $pub_time
                       ;
-  
-  my $sub_parameters = $common 
-                      . " -e " . $sub_entity 
-                      . " -a " . $sub_collocation 
-                      . " -s " . $sub_configuration 
-                      . " -t " . $sub_protocol 
-                      . " -d " . $sub_durability_kind 
-                      . " -k " . $sub_liveliness_kind  
-                      . " -r " . $sub_reliability_kind 
-                      . " -l " . $sub_lease_time 
-                      . " -x " . $sub_time 
-#                      . " -p " . $sub_addr
+
+  my $sub_parameters = $common
+                      . " -e " . $sub_entity
+                      . " -a " . $sub_collocation
+                      . " -s " . $sub_configuration
+                      . " -t " . $sub_protocol
+                      . " -d " . $sub_durability_kind
+                      . " -k " . $sub_liveliness_kind
+                      . " -r " . $sub_reliability_kind
+                      . " -l " . $sub_lease_time
+                      . " -x " . $sub_time
                       ;
 
   return ($pub_parameters, $sub_parameters);
@@ -216,7 +205,7 @@ sub run($$) {
   my $status = 0;
 
   print $Subscriber->CommandLine() . "\n";
-  
+
   my $SubscriberResult = $Subscriber->Spawn();
   print "Subscriber PID: " . $Subscriber->{PROCESS} . "\n" if $Subscriber->{PROCESS};
 
@@ -228,7 +217,7 @@ sub run($$) {
   sleep 3;
 
   print $Publisher->CommandLine() . "\n";
-  
+
   my $PublisherResult = $Publisher->SpawnWaitKill ($pub_time + 20);
   print "Publisher PID: " . $Publisher->{PROCESS} . "\n" if $Publisher->{PROCESS};
 
@@ -252,9 +241,9 @@ my $DCPSREPO = initialize();
 my $status = 0;
 
 for my $i (@scenario) {
-  ($pub_parameters, $sub_parameters) = parse(\%$i);
-  $status += run($pub_parameters, $sub_parameters);
-  print "\n";
+    ($pub_parameters, $sub_parameters) = parse(\%$i);
+    $status += run($pub_parameters, $sub_parameters);
+    print "\n";
 }
 
 $status += finalize($DCPSREPO);

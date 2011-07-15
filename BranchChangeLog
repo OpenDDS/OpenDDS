@@ -1,3 +1,14 @@
+Fri Jul 15 16:00:49 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fixing stray includes and test scenarios
+        
 Fri Jul 15 14:25:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/AssociationData.h:
