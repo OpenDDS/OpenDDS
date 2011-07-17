@@ -373,7 +373,6 @@ namespace OpenDDS
       if (len > 0)
         {
           this->typeId_ = type_id;
-          Sample_Manager::instance().add (*this);
         }
 
       len = (subtree == 0) ? 0 : ACE_OS::strlen(subtree);

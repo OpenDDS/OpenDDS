@@ -30,6 +30,56 @@ namespace OpenDDS
   namespace DCPS
   {
 
+
+    EntityBase::EntityBase(std::string &n, EntityContext *p)
+      : name_ (n),
+        fqname_ (),
+        idl_name_ (),
+        parent_ (p)
+    {
+      if (p->name_ == "")
+        {
+          fqname_ = name_;
+          idl_name_ = name_;
+        }
+      else
+        {
+          fqname_ = parent_->fqname_ + '\\' + name_;
+          idl_name_ = parent_->idl_name_ + "::" + name_;
+        }
+    }
+
+    EntityBase *
+    EntityContext::node_at (std::string &path)
+    {
+      EntityBase *node = 0;
+      size_t seppos = path.find ('\\');
+      EntityMap::iterator iter;
+      if (seppos == std::string::npos)
+        {
+          iter = this->children_.find(path);
+          if (iter != this->children_.end())
+            node = iter->second;
+        }
+      else
+        {
+          std::string basepath = path.substr (0,seppos);
+          iter = this->children_.find (basepath);
+          if (iter != this->children_.end())
+            {
+              node = iter->second;
+              EntityContext *ctx = dynamic_cast<EntityContext *>(node);
+              if (ctx != 0)
+                {
+                  std::string remainder = path.substr (seppos + 1);
+                  return ctx->node_at (remainder);
+                }
+            }
+        }
+      return node;
+    }
+
+    //--------------------------------------------------------------------
     Sample_Manager
     Sample_Manager::instance_;
 
@@ -40,44 +90,113 @@ namespace OpenDDS
     }
 
     void
-    Sample_Manager::init_from_file (const ACE_TCHAR *filename)
+    Sample_Manager::find_config_sections (ACE_Configuration *config,
+                                          const ACE_Configuration_Section_Key &base,
+                                          EntityContext *parent)
     {
-      ACE_Configuration_Heap config;
-      ACE_Ini_ImpExp imp(config);
-
-      config.open();
-
-      imp.import_config (filename);
-      //ACE_Configuration::VALUETYPE vtype;
       ACE_TString section;
       for (int ndx = 0;
-           config.enumerate_sections (config.root_section(), ndx, section) == 0;
+           config->enumerate_sections (base, ndx, section) == 0;
            ndx ++)
         {
-          ACE_DEBUG ((LM_DEBUG,"at %d got section '%s'\n", ndx, section.c_str()));
-          build_type (section, config);
-        }
+          ACE_DEBUG ((LM_DEBUG,"at %d got section '%s'\n",
+                      ndx, section.c_str()));
 
+          ACE_Configuration_Section_Key key;
+          int status =
+            config->open_section (base, section.c_str(), 0, key);
+
+          if (status != 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, "could not open section %s\n",
+                          section.c_str()));
+              continue;
+            }
+
+          std::string name(section.c_str());
+          if (config->enumerate_sections (key, 0, section) != 0)
+            {
+              ACE_DEBUG ((LM_DEBUG, "found leaf %s\n", name.c_str()));
+              EntityBase *leaf  = new EntityNode (name,parent, config);
+              parent->children_[name] = leaf;
+            }
+          else
+            {
+              ACE_DEBUG ((LM_DEBUG, "found context %s\n", name.c_str()));
+              EntityBase *base = parent->node_at(name);
+              EntityContext *ctx;
+              if (base == 0)
+                {
+                  ctx = new EntityContext (name, parent);
+                  parent->children_[name] = ctx;
+                }
+              else
+                {
+                  ctx = dynamic_cast<EntityContext *>(base);
+                }
+              find_config_sections (config, key, ctx);
+            }
+        }
+    }
+
+    void
+    Sample_Manager::load_entities (EntityContext *entities)
+    {
+      for (EntityMap::iterator iter = entities->children_.begin();
+           iter != entities->children_.end();
+           iter++)
+        {
+          EntityBase *base = iter->second;
+          EntityContext *ctx = dynamic_cast<EntityContext *>(base);
+          if (ctx != 0)
+            {
+              this->load_entities (ctx);
+            }
+          else
+            {
+              EntityNode *node = dynamic_cast<EntityNode *>(base);
+              if (node->dissector_ == 0)
+                this->build_type (node);
+            }
+        }
+    }
+
+    void
+    Sample_Manager::init_from_file (const ACE_TCHAR *filename)
+    {
+      ACE_Configuration_Heap *heap = new ACE_Configuration_Heap;
+      ACE_Ini_ImpExp imp(*heap);
+
+      heap->open();
+      imp.import_config (filename);
+
+      ACE_Configuration *config = heap;
+
+      this->find_config_sections (config,
+                                  config->root_section(),
+                                  this->entities_);
     }
 
     void
     Sample_Manager::init ()
     {
-      builtin_types_.bind ("boolean", Sample_Field::Boolean);
-      builtin_types_.bind ("char", Sample_Field::Char);
-      builtin_types_.bind ("octet", Sample_Field::Octet);
-      builtin_types_.bind ("wchar", Sample_Field::WChar);
-      builtin_types_.bind ("short", Sample_Field::Short);
-      builtin_types_.bind ("unsigned short", Sample_Field::UShort);
-      builtin_types_.bind ("long", Sample_Field::Long);
-      builtin_types_.bind ("unsigned long", Sample_Field::ULong);
-      builtin_types_.bind ("long long", Sample_Field::LongLong);
-      builtin_types_.bind ("unsigned long long", Sample_Field::ULongLong);
-      builtin_types_.bind ("float", Sample_Field::Float);
-      builtin_types_.bind ("double", Sample_Field::Double);
-      builtin_types_.bind ("long double", Sample_Field::LongDouble);
-      builtin_types_.bind ("string", Sample_Field::String);
-      builtin_types_.bind ("wstring", Sample_Field::WString);
+      this->builtin_types_["boolean"] = Sample_Field::Boolean;
+      this->builtin_types_["char"] = Sample_Field::Char;
+      this->builtin_types_["octet"] = Sample_Field::Octet;
+      this->builtin_types_["wchar"] = Sample_Field::WChar;
+      this->builtin_types_["short"] = Sample_Field::Short;
+      this->builtin_types_["unsigned short"] = Sample_Field::UShort;
+      this->builtin_types_["long"] = Sample_Field::Long;
+      this->builtin_types_["unsigned long"] = Sample_Field::ULong;
+      this->builtin_types_["long long"] = Sample_Field::LongLong;
+      this->builtin_types_["unsigned long long"] = Sample_Field::ULongLong;
+      this->builtin_types_["float"] = Sample_Field::Float;
+      this->builtin_types_["double"] = Sample_Field::Double;
+      this->builtin_types_["long double"] = Sample_Field::LongDouble;
+      this->builtin_types_["string"] = Sample_Field::String;
+      this->builtin_types_["wstring"] = Sample_Field::WString;
+
+      this->entities_ = new EntityContext;
 
       // - from env get directory for config files use "." by default
       // - use dirent to iterate over all *.ini files in config dir
@@ -89,6 +208,7 @@ namespace OpenDDS
       const ACE_TCHAR *ini_dir = ACE_OS::getenv ("OPENDDS_DISSECTORS");
       if (ini_dir == 0 || ACE_OS::strlen (ini_dir) == 0)
         ini_dir = ".";
+      ACE_DEBUG ((LM_DEBUG,"reading files from %s\n", ini_dir));
 
       ACE_Dirent directory (ini_dir);
       for (ACE_DIRENT *entry = directory.read();
@@ -105,247 +225,192 @@ namespace OpenDDS
           size_t pos = (ext_pos - name);
           if (pos < len - 4)
             continue;
-          init_from_file (name);
+          std::string path = std::string (ini_dir) + ACE_DIRECTORY_SEPARATOR_CHAR + name;
+          this->init_from_file (path.c_str());
         }
-    };
 
-    void
-    Sample_Manager::add (Sample_Dissector &d)
-    {
-      std::string &key = d.typeId();
-      ACE_DEBUG ((LM_DEBUG,"Adding new dissector for %s\n",key.c_str()));
-      dissectors_.bind(key.c_str(),&d);
+      this->load_entities (this->entities_);
     }
 
     Sample_Dissector *
-    Sample_Manager::find (const char *data_name)
+    Sample_Manager::find (const char *repo_id)
     {
-      std::string key(data_name);
+      std::string key(repo_id);
+      // some requests come in for the "TypeSupport" helper object,
+      // If this is a type suppor tobject, pull that off as well as the
+      // version identifier
       std::string typesupport ("TypeSupport");
-      size_t ts = key.find (typesupport);
-      if (ts != std::string::npos)
+      size_t pos = key.find (typesupport);
+      if (pos == std::string::npos)
         {
-          std::string version = key.substr (ts + typesupport.length());
-          key = key.substr (0,ts);
-          key.append (version);
+          pos = key.rfind (':');
         }
+      key = key.substr (0,pos);
 
-      Sample_Dissector *result = 0;
-      dissectors_.find (key.c_str(), result);
-      return result;
+      if (key.substr(0,4).compare ("IDL:") == 0)
+        {
+          key = key.substr (4);
+        }
+      pos = 0;
+      while ((pos = key.find ('/',pos)) != std::string::npos)
+        {
+          key[pos++] = '\\';
+        }
+      ACE_DEBUG ((LM_DEBUG,"find: repo_id = %s, key = %s\n", repo_id, key.c_str()));
+      Sample_Dissector *d = this->fqfind (key, entities_);
+      return d;
     }
-
 
     //----------------------------------------------------------------------
 
     void
-    Sample_Manager::build_type (ACE_TString &name, ACE_Configuration &config)
+    Sample_Manager::build_type (EntityNode *node)
     {
-      ConfigInfo info;
       ACE_Configuration_Section_Key key;
-      info.config_ = &config;
-      info.key_ = &key;
-      info.name_ = name;
-
       int status =
-        config.open_section (config.root_section(),name.c_str(),0, key);
+        node->config_->open_section (node->config_->root_section(),
+                                     node->fqname_.c_str(),
+                                     0,
+                                     key);
       if (status != 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "build_type could not open section %s\n",
-                      name.c_str()));
+          ACE_DEBUG ((LM_DEBUG,
+                      "build_type could not open section for node %s\n",
+                      node->fqname_.c_str()));
           return;
         }
-      ACE_TString label = name + ".kind";
-      status = config.get_string_value (key,label.c_str(),info.kind_);
+
+      std::string label = node->name_ + ".kind";
+      ACE_TString kind;
+      status =
+        node->config_->get_string_value (key,label.c_str(), kind);
       if (status != 0)
         {
           ACE_DEBUG ((LM_DEBUG, "section %s does not have a kind value\n",
-                      name.c_str()));
+                      node->name_.c_str()));
           return;
         }
 
-      if (info.kind_.compare ("module") == 0)
-        {
-          ACE_DEBUG ((LM_DEBUG, "calling build_module for %s\n",
-                      info.name_.c_str()));
-          build_module (info);
-          return;
-        }
-
-      label = name + ".typeid";
-      status = config.get_string_value (key,label.c_str(),info.type_id_);
+      label = node->name_ + ".repoid";
+      ACE_TString tid;
+      status =
+        node->config_->get_string_value (key,label.c_str(), tid);
       if (status != 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s does not have a typeid value\n",
-                      name.c_str()));
+          ACE_DEBUG ((LM_DEBUG, "section %s does not have a repoid value\n",
+                      node->name_.c_str()));
           return;
         }
+      node->type_id_ = tid.c_str();
 
-      label = name + ".module";
-
-      if (status != 0)
+      if (kind.compare ("struct") == 0)
         {
-          info.module_ = "";
-        }
-      else
-        {
-          build_fqname (info);
-        }
-
-      Sample_Dissector *sample = this->find (info.type_id_.c_str());
-      if (sample != 0)
-        {
-          ACE_DEBUG ((LM_DEBUG, "Already configured a type with id %s\n",
-                      info.type_id_.c_str()));
-        }
-
-      if (info.kind_.compare ("struct") == 0)
-        {
-          build_struct (info);
+          ACE_DEBUG ((LM_DEBUG, "section %s is a struct\n",
+                      node->name_.c_str()));
+          build_struct (node, key);
           return;
         }
-      else if (info.kind_.compare ("sequence") == 0)
+      else if (kind.compare ("sequence") == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is a sequence\n", name.c_str()));
+          ACE_DEBUG ((LM_DEBUG, "section %s is a sequence\n",
+                      node->name_.c_str()));
+          build_sequence (node, key);
           return;
         }
-      else if (info.kind_.compare ("array") == 0)
+      else if (kind.compare ("array") == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is an array\n", name.c_str()));
+          ACE_DEBUG ((LM_DEBUG, "section %s is an array\n",
+                      node->name_.c_str()));
+          build_array (node, key);
           return;
         }
-      else if (info.kind_.compare ("enum") == 0)
+      else if (kind.compare ("enum") == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is an enum\n", name.c_str()));
+          ACE_DEBUG ((LM_DEBUG, "section %s is an enum\n",
+                      node->name_.c_str()));
+          build_enum (node, key);
           return;
         }
-      else if (info.kind_.compare ("union") == 0)
+      else if (kind.compare ("union") == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is a union\n", name.c_str()));
+          ACE_DEBUG ((LM_DEBUG, "section %s is a union\n",
+                      node->name_.c_str()));
+          build_union (node, key);
           return;
         }
-      else if (info.kind_.compare ("alias") == 0)
+      else if (kind.compare ("alias") == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is an alias\n", name.c_str()));
+          ACE_DEBUG ((LM_DEBUG, "section %s is an alias\n",
+                      node->name_.c_str()));
+          build_alias (node, key);
           return;
         }
       else
         {
           ACE_DEBUG ((LM_DEBUG, "section %s is unknown kind %s\n",
-                      name.c_str(),info.kind_.c_str()));
+                      node->name_.c_str(),kind.c_str()));
           return;
         }
     }
 
     Sample_Dissector *
-    Sample_Manager::fqfind_i (ModuleName *top_level_mn, ACE_TString &name)
+    Sample_Manager::fqfind (std::string idlname, EntityContext *context)
     {
-      ACE_TString fqname = name;
-      for (ModuleName *mn = top_level_mn; mn != 0; mn = mn->parent_)
+      EntityContext *ctx = context;
+      size_t pos = idlname.find ("::");
+      if (pos == 0)
         {
-          fqname =  mn->name_ + "/" + fqname;
+          ctx = this->entities_;
+          idlname = idlname.substr(2);
+          pos = idlname.find ("::");
         }
-      fqname = "IDL:" + fqname + ":1.0";
-      Sample_Dissector *sample = find (fqname.c_str());
-      if (sample == 0)
+      std::string path;
+      bool addsep = false;
+      while (pos != std::string::npos)
         {
-          if (top_level_mn != 0)
-            return fqfind_i (top_level_mn->parent_, name);
+          if (addsep)
+            path += '\\';
+          path += idlname.substr (0,pos);
+          idlname = idlname.substr (pos + 2);
+          addsep = true;
+          pos = idlname.find ("::");
         }
-      return sample;
-    }
+      if (addsep)
+        path += '\\';
+      path += idlname;
 
-    Sample_Dissector *
-    Sample_Manager::fqfind (ACE_TString& parent, ACE_TString &name)
-    {
-      ModuleName *top_level_mn = 0;
-      size_t modsep = name.rfind (';');
-      if  (modsep == ACE_TString::npos)
+      // find the node associated with the name
+      //
+      EntityBase *base = 0;
+      while (base == 0 && ctx != 0)
         {
-          module_tree_.find(parent.c_str(), top_level_mn);
-          return fqfind_i (top_level_mn, name);
+          base = ctx->node_at(path);
+          ctx = ctx->parent_;
         }
-      ACE_TString lname = name.substr (modsep);
-      if (modsep == 1)
+      if (base == 0)
         {
-          return fqfind_i (0,lname);
+          ACE_DEBUG ((LM_DEBUG,"could not find node for %s\n", path.c_str()));
+          return 0;
         }
-      ACE_TString lmod = name.substr (0,modsep-1);
-      modsep = lmod.rfind (':');
-      if (modsep != ACE_TString::npos)
+      EntityNode *node = dynamic_cast<EntityNode *>(base);
+      if (node->dissector_ == 0)
         {
-          module_tree_.find(lmod.substr(modsep).c_str(), top_level_mn);
+          build_type (node);
         }
-      else
-        {
-          module_tree_.find(lmod.c_str(), top_level_mn);
-        }
-      return fqfind_i (top_level_mn, lname);
-    }
-
-    void
-    Sample_Manager::build_fqname (ConfigInfo &info)
-    {
-      ModuleName *mn = 0;
-      if (!info.module_.empty() &&
-          module_tree_.find(info.module_.c_str(), mn) != 0)
-        {
-          this->build_type(info.module_, *info.config_);
-          if (module_tree_.find (info.module_.c_str(), mn) != 0)
-            {
-              ACE_DEBUG ((LM_DEBUG, "build_fqname: Unable to build module tree, "
-                          "parent %s of %s missing\n",
-                          info.module_.c_str(), info.name_.c_str()));
-              return;
-            }
-        }
-      while (mn != 0)
-        {
-          info.name_ =  mn->name_ + "::" + info.name_;
-          mn = mn->parent_;
-        }
+      return node->dissector_;
     }
 
     void
-    Sample_Manager::build_module (ConfigInfo &info)
+    Sample_Manager::build_struct (EntityNode *node,
+                                  const ACE_Configuration_Section_Key &key)
     {
-
-      ACE_TString label = info.name_ + ".module";
-      ACE_TString parent;
-      ModuleName *mn = 0;
-      if (info.config_->get_string_value (*info.key_,label.c_str(),parent) == 0)
-        {
-          if (module_tree_.find(parent.c_str(), mn) != 0)
-            {
-              this->build_type(parent, *info.config_);
-              int result = module_tree_.find (parent.c_str(), mn);
-              if (result != 0)
-                {
-                  ACE_DEBUG ((LM_DEBUG, "build_module: Unable to build module tree, "
-                              "parent %s of %s missing, result = %d\n",
-                              parent.c_str(), info.name_.c_str(), result));
-                  return;
-                }
-            }
-        }
-
-      ModuleName *mod = new ModuleName;
-      mod->name_ = info.name_;
-      mod->parent_ = mn;
-      module_tree_.bind (mod->name_.c_str(), mod);
-    }
-
-    void
-    Sample_Manager::build_struct (ConfigInfo &info)
-    {
-      Sample_Dissector *sample =
-        new Sample_Dissector (info.type_id_.c_str(), info.name_.c_str());
+      node->dissector_ = new Sample_Dissector (node->type_id_.c_str(),
+                                               node->name_.c_str());
       Sample_Field *f = 0;
 
-
-      ACE_TString label = info.name_ + ".order";
+      std::string label = node->name_ + ".order";
       ACE_TString order;
-      if (info.config_->get_string_value (*info.key_,label.c_str(),order))
+      if (node->config_->get_string_value (key,label.c_str(),order))
         return;
 
       ACE_Tokenizer_T<ACE_TCHAR> tok (order.rep());
@@ -353,88 +418,119 @@ namespace OpenDDS
       for (ACE_TCHAR *p = tok.next(); p; p = tok.next())
         {
           ACE_TString type_str;
-          info.config_->get_string_value (*info.key_, p, type_str);
-          ACE_DEBUG ((LM_DEBUG, "field = %s is kind %s\n",
-                      p, type_str.c_str()));
-          Sample_Field::IDLTypeID field_type = Sample_Field::Undefined;
-          if (builtin_types_.find(type_str.c_str(), field_type) == 0)
-            f = sample->add_field (field_type, p);
+          node->config_->get_string_value (key, p, type_str);
+          std::string kind(type_str.c_str());
+
+          BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
+          if (iter != builtin_types_.end())
+            f = node->dissector_->add_field (iter->second, p);
           else
             {
-              Sample_Dissector *value = fqfind (info.module_, type_str);
-              if (value == 0)
-                {
-                  build_type (type_str, *info.config_);
-                  value = fqfind (info.module_, type_str);
-                }
+              Sample_Dissector *value = this->fqfind (kind, node->parent_);
               if (value != 0)
-                f = sample->add_field (value, p);
+                f = node->dissector_->add_field (value, p);
             }
         }
+
     }
 
     void
-    Sample_Manager::build_sequence (ConfigInfo &info)
+    Sample_Manager::build_sequence (EntityNode *node,
+                                    const ACE_Configuration_Section_Key &key)
     {
-      ACE_TString label = info.name_ + ".element";
+      std::string label = node->name_ + ".element";
       ACE_TString type_str;
-      if (info.config_->get_string_value (*info.key_,label.c_str(),type_str))
+      if (node->config_->get_string_value (key,label.c_str(),type_str))
         return;
-      Sample_Field::IDLTypeID type_id = Sample_Field::Undefined;
-      if (builtin_types_.find(type_str.c_str(), type_id) == 0)
+
+      Sample_Dissector *sequence = 0;
+      std::string kind(type_str.c_str());
+      BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
+      if (iter != builtin_types_.end())
         {
-          new Sample_Sequence (info.type_id_.c_str(), type_id);
-          return;
+          sequence = new Sample_Sequence (node->type_id_.c_str(), iter->second);
         }
-      Sample_Dissector *value = fqfind (info.module_, type_str);
-      if (value == 0)
+      else
         {
-          build_type (type_str, *info.config_);
-          value = fqfind (info.module_, type_str);
+          Sample_Dissector *value = this->fqfind (kind, node->parent_);
+          if (value != 0)
+            sequence = new Sample_Sequence (node->type_id_.c_str(), value);
         }
-      if (value != 0)
-        new Sample_Sequence (info.type_id_.c_str(), value);
+      node->dissector_ = sequence;
     }
 
+
     void
-    Sample_Manager::build_array (ConfigInfo &info)
+    Sample_Manager::build_alias (EntityNode *node,
+                                 const ACE_Configuration_Section_Key &key)
     {
-      ACE_TString label = info.name_ + ".size";
+      std::string label = node->name_ + ".base";
+      ACE_TString type_str;
+      if (node->config_->get_string_value (key, label.c_str(),type_str))
+        return;
+
+      Sample_Dissector *alias = 0;
+      std::string kind(type_str.c_str());
+      BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
+      if (iter != builtin_types_.end())
+        {
+          alias = new Sample_Alias (node->type_id_.c_str(), iter->second);
+        }
+      else
+        {
+          Sample_Dissector *value = this->fqfind (kind, node->parent_);
+          if (value != 0)
+            alias = new Sample_Alias (node->type_id_.c_str(), value);
+        }
+      node->dissector_ = alias;
+    }
+
+
+    void
+    Sample_Manager::build_array (EntityNode *node,
+                                 const ACE_Configuration_Section_Key &key)
+    {
+      std::string label = node->name_ + ".size";
       u_int size = 0;
-      if (info.config_->get_integer_value (*info.key_,label.c_str(),size))
+      if (node->config_->get_integer_value (key,label.c_str(),size))
         return;
 
-      label = info.name_ + ".element";
+      label = node->name_ + ".element";
       ACE_TString type_str;
-      if (info.config_->get_string_value (*info.key_,label.c_str(),type_str))
+      if (node->config_->get_string_value (key,label.c_str(),type_str))
         return;
 
-      Sample_Field::IDLTypeID type_id = Sample_Field::Undefined;
-      if (builtin_types_.find(type_str.c_str(), type_id) == 0)
+      Sample_Dissector *array = 0;
+      std::string kind(type_str.c_str());
+      BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
+      if (iter != builtin_types_.end())
         {
-          new Sample_Array (info.type_id_.c_str(), (size_t)size, type_id);
-          return;
+          array = new Sample_Array (node->type_id_.c_str(),
+                                    (size_t)size,
+                                    iter->second);
         }
-      Sample_Dissector *value = fqfind (info.module_, type_str);
-      if (value == 0)
+      else
         {
-          build_type (type_str, *info.config_);
-          value = fqfind (info.module_, type_str);
+          Sample_Dissector *value = this->fqfind (kind, node->parent_);
+          if (value != 0)
+            array = new Sample_Array (node->type_id_.c_str(),
+                                      (size_t)size,
+                                      value);
         }
-      if (value != 0)
-        new Sample_Array (info.type_id_.c_str(), size, value);
+      node->dissector_ = array;
     }
 
     void
-    Sample_Manager::build_enum (ConfigInfo &info)
+    Sample_Manager::build_enum (EntityNode *node,
+                                const ACE_Configuration_Section_Key &key)
     {
-      ACE_TString label = info.name_ + ".order";
+      std::string label = node->name_ + ".order";
       ACE_TString order;
-      if (info.config_->get_string_value (*info.key_,label.c_str(),order))
+      if (node->config_->get_string_value (key,label.c_str(),order))
         return;
 
       Sample_Enum *sample =
-        new Sample_Enum (info.type_id_.c_str());
+        new Sample_Enum (node->type_id_.c_str());
 
       ACE_Tokenizer_T<ACE_TCHAR> tok (order.rep());
       tok.delimiter_replace (' ', 0);
@@ -442,56 +538,52 @@ namespace OpenDDS
         {
           sample->add_value (p);
         }
+
+      node->dissector_ = sample;
     }
 
     void
-    Sample_Manager::build_union (ConfigInfo &info)
+    Sample_Manager::build_union (EntityNode *node,
+                                 const ACE_Configuration_Section_Key &key)
     {
-      ACE_TString label = info.name_ + ".order";
+      std::string label = node->name_ + ".order";
       ACE_TString order;
       ACE_TString case_name;
       ACE_TString case_type;
 
       Sample_Field *f = 0;
 
-      if (info.config_->get_string_value (*info.key_,label.c_str(),order))
+      if (node->config_->get_string_value (key,label.c_str(),order))
         return;
 
-      label = info.name_ + ".discriminator";
-      if (info.config_->get_string_value (*info.key_,label.c_str(),case_type))
+      label = node->name_ + ".discriminator";
+      if (node->config_->get_string_value (key,label.c_str(),case_type))
         return;
 
-      Sample_Union *s_union = new Sample_Union (info.type_id_.c_str());
+      Sample_Union *s_union = new Sample_Union (node->type_id_.c_str());
 
-      Sample_Field::IDLTypeID type_id = Sample_Field::Undefined;
-      if (builtin_types_.find(case_type.c_str(), type_id) == 0)
+      BuiltinTypeMap::iterator iter =
+        builtin_types_.find(std::string(case_type.c_str()));
+      if (iter != builtin_types_.end())
         {
-          s_union->discriminator (type_id);
+          s_union->discriminator (iter->second);
         }
-      Sample_Dissector *value = fqfind (info.module_, case_type);
-      if (value == 0)
-        {
-          build_type (case_type, *info.config_);
-          value = fqfind (info.module_, case_type);
-        }
+      Sample_Dissector *value = fqfind (std::string(case_type.c_str()), node->parent_);
       if (value != 0)
         s_union->discriminator (value);
 
       label = "default.type";
-      if (info.config_->get_string_value (*info.key_,label.c_str(),case_type) == 0)
+      if (node->config_->get_string_value (key,label.c_str(),case_type) == 0)
         {
           label = "default.name";
-          info.config_->get_string_value (*info.key_, label.c_str(), case_name);
-          if (builtin_types_.find(case_type.c_str(), type_id) == 0)
-            f = new Sample_Field (type_id, case_name.c_str());
+          node->config_->get_string_value (key, label.c_str(), case_name);
+
+          iter = builtin_types_.find(std::string(case_type.c_str()));
+          if (iter != builtin_types_.end())
+            f = new Sample_Field (iter->second, case_name.c_str());
           else
             {
-              Sample_Dissector *value = fqfind (info.module_, case_type);
-              if (value == 0)
-                {
-                  build_type (case_type, *info.config_);
-                  value = fqfind (info.module_, case_type);
-                }
+              Sample_Dissector *value = fqfind (std::string(case_type.c_str()), node->parent_);
               if (value != 0)
                 f = new Sample_Field (value, case_name.c_str());
             }
@@ -504,33 +596,29 @@ namespace OpenDDS
       bool ranged = false;
       for (ACE_TCHAR *p = tok.next(); p; p = tok.next())
         {
-          label = ACE_TString(p) + ".type";
+          label = std::string(p) + ".type";
           bool new_range =
-            (info.config_->get_string_value (*info.key_,
-                                             label.c_str(),
-                                             case_type) != 0);
+            (node->config_->get_string_value (key,
+                                              label.c_str(),
+                                              case_type) != 0);
           if (!new_range)
             {
-              label = ACE_TString(p) + ".name";
-              info.config_->get_string_value (*info.key_,
-                                              label.c_str(),
-                                              case_name);
+              label = std::string(p) + ".name";
+              node->config_->get_string_value (key,
+                                               label.c_str(),
+                                               case_name);
             }
 
-          type_id = Sample_Field::Undefined;
+
           f = 0;
           if (!new_range)
             {
-              if (builtin_types_.find(case_type.c_str(), type_id) == 0)
-                f = new Sample_Field (type_id, case_name.c_str());
+              iter = builtin_types_.find(std::string(case_type.c_str()));
+              if (iter != builtin_types_.end())
+                f = new Sample_Field (iter->second, case_name.c_str());
               else
                 {
-                  Sample_Dissector *value = fqfind (info.module_, case_type);
-                  if (value == 0)
-                    {
-                      build_type (case_type, *info.config_);
-                      value = fqfind (info.module_, case_type);
-                    }
+                  Sample_Dissector *value = fqfind (std::string(case_type.c_str()), node->parent_);
                   if (value != 0)
                     f = new Sample_Field (value, case_name.c_str());
                 }
@@ -545,30 +633,9 @@ namespace OpenDDS
             }
           ranged = new_range;
         }
+
+      node->dissector_ = s_union;
     }
 
-    void
-    Sample_Manager::build_alias (ConfigInfo &info)
-    {
-      ACE_TString label = info.name_ + ".base";
-      ACE_TString type_str;
-      if (info.config_->get_string_value (*info.key_,label.c_str(),type_str))
-        return;
-      Sample_Field::IDLTypeID type_id = Sample_Field::Undefined;
-      if (builtin_types_.find(type_str.c_str(), type_id) == 0)
-        {
-          new Sample_Alias (info.type_id_.c_str(), type_id);
-          return;
-        }
-      Sample_Dissector *value = fqfind (info.module_, type_str);
-      if (value == 0)
-        {
-          build_type (type_str, *info.config_);
-          value = fqfind (info.module_, type_str);
-        }
-      if (value != 0)
-        new Sample_Alias (info.type_id_.c_str(), value);
-
-    }
   }
 }

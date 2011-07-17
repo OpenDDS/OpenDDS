@@ -22,7 +22,6 @@ extern "C" {
 #include <epan/ipproto.h>
 #include <epan/packet.h>
 #include <epan/dissectors/packet-tcp.h>
-  //#include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
@@ -31,10 +30,13 @@ extern "C" {
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
-#include "ace/Hash_Map_Manager.h"
 
 #include "sample_dissector.h"
 
+//#include <memory>
+//#include <boost/smart_ptr/shared_ptr.hpp>
+#include <string>
+#include <map>
 
 class ACE_Configuration;
 class ACE_Configuration_Section_Key;
@@ -44,18 +46,72 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    class ModuleName
+    class EntityBase;
+    class EntityContext;
+    class EntityNode;
+
+    typedef std::map<std::string, EntityBase *> EntityMap;
+
+    class EntityBase
     {
     public:
-      ACE_TString name_;
-      ModuleName *parent_;
+      virtual ~EntityBase() {}
+
+      std::string name_;   // just the leaf name
+      std::string fqname_; // fully qualified name [module/]name
+      std::string idl_name_; // [module::]name
+
+      EntityContext *parent_;
+
+    protected:
+      EntityBase ()
+        : name_ (""),
+          fqname_ (""),
+          idl_name_ (""),
+          parent_ (0)
+      {}
+
+      EntityBase (std::string &n, EntityContext *p);
+
     };
 
-    typedef ACE_Hash_Map_Manager <const char *, Sample_Dissector *, ACE_Null_Mutex> SampleDissectorMap;
+    class EntityNode : public EntityBase
+    {
+    public:
+      EntityNode (std::string &n, EntityContext *p, ACE_Configuration *cfg)
+        : EntityBase (n, p),
+          dissector_(0),
+          type_id_ (),
+          config_ (cfg)
+      {}
+      virtual ~EntityNode() {}
 
-    typedef ACE_Hash_Map_Manager <const char *, Sample_Field::IDLTypeID, ACE_Null_Mutex> BuiltinTypeMap;
+      Sample_Dissector  *dissector_;
+      std::string        type_id_;
+      ACE_Configuration *config_;
+    };
 
-    typedef ACE_Hash_Map_Manager <const char *, ModuleName *, ACE_Null_Mutex> ModuleTreeMap;
+    class EntityContext : public EntityBase
+    {
+    public:
+      EntityContext ()
+        :EntityBase(),
+         children_()
+      {}
+      EntityContext (std::string &n, EntityContext *p)
+        : EntityBase (n, p),
+          children_ ()
+      {}
+
+      virtual ~EntityContext() {}
+
+      EntityBase *node_at (std::string &fqname);
+
+      EntityMap children_;
+    };
+
+
+    typedef std::map <std::string, Sample_Field::IDLTypeID> BuiltinTypeMap;
 
     /*
      * The Sample_Dessector_Manager is a singleton which contains a hash map
@@ -69,40 +125,38 @@ namespace OpenDDS
       static Sample_Manager &instance();
       void init ();
 
-      void add (Sample_Dissector &dissector);
-      Sample_Dissector *find (const char *data_name);
+      Sample_Dissector *find (const char *repo_id);
 
     private:
 
       static Sample_Manager instance_;
-      SampleDissectorMap dissectors_;
-      BuiltinTypeMap builtin_types_;
-      ModuleTreeMap module_tree_;
+      BuiltinTypeMap        builtin_types_;
+      EntityContext        *entities_;
 
-      void build_type (ACE_TString &name, ACE_Configuration &config);
       void init_from_file (const ACE_TCHAR *filename);
 
-      struct ConfigInfo {
-        ACE_Configuration *config_;
-        ACE_Configuration_Section_Key *key_;
-        ACE_TString name_;
-        ACE_TString version_;
-        ACE_TString module_;
-        ACE_TString kind_;
-        ACE_TString type_id_;
-      };
+      void load_entities (EntityContext *entities);
 
-      Sample_Dissector * fqfind (ACE_TString &parent, ACE_TString &name);
-      Sample_Dissector * fqfind_i (ModuleName *top_level_mn, ACE_TString &name);
+      void find_config_sections (ACE_Configuration *config,
+                                 const ACE_Configuration_Section_Key &base,
+                                 EntityContext *parent);
 
-      void build_fqname (ConfigInfo &info);
-      void build_module (ConfigInfo &info);
-      void build_struct (ConfigInfo &info);
-      void build_sequence (ConfigInfo &info);
-      void build_array  (ConfigInfo &info);
-      void build_enum   (ConfigInfo &info);
-      void build_union  (ConfigInfo &info);
-      void build_alias  (ConfigInfo &info);
+      void build_type (EntityNode *node);
+
+      Sample_Dissector *fqfind (std::string idl_name, EntityContext *ctx);
+
+      void build_struct (EntityNode *node,
+                        const ACE_Configuration_Section_Key &);
+      void build_sequence (EntityNode *node,
+                        const ACE_Configuration_Section_Key &);
+      void build_array  (EntityNode *node,
+                        const ACE_Configuration_Section_Key &);
+      void build_enum   (EntityNode *node,
+                        const ACE_Configuration_Section_Key &);
+      void build_union  (EntityNode *node,
+                        const ACE_Configuration_Section_Key &);
+      void build_alias  (EntityNode *node,
+                        const ACE_Configuration_Section_Key &);
     };
   }
 }
