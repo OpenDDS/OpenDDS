@@ -1142,7 +1142,8 @@ Service_Participant::init_bit_transport_config()
     TransportRegistry::instance()->create_inst(inst_name, "tcp");
   this->bit_transport_config_->instances_.push_back(inst);
 
-  TcpInst_rch tcp_inst = dynamic_rchandle_cast<TcpInst>(inst);
+  // Use a static cast to avoid dependency on the Tcp library
+  TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
 
   tcp_inst->datalink_release_delay_ = 0;
   if (this->bit_transport_ip_ == "") {

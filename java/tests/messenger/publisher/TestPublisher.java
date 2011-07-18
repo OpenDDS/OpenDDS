@@ -8,7 +8,6 @@
 
 import DDS.*;
 import OpenDDS.DCPS.*;
-import OpenDDS.DCPS.transport.*;
 import org.omg.CORBA.StringSeqHolder;
 import Messenger.*;
 
@@ -54,20 +53,7 @@ public class TestPublisher {
             return;
         }
 
-        //OpenDDS-specific attachment of transport to publisher
-        TransportImpl transport_impl =
-            TheTransportFactory.create_transport_impl(1,
-                TheTransportFactory.AUTO_CONFIG);
-        if (transport_impl == null) {
-            System.err.println("ERROR: Transport creation failed");
-            return;
-        }
-
-        AttachStatus stat = transport_impl.attach_to_publisher(pub);
-        if(stat != AttachStatus.ATTACH_OK) {
-            System.err.println("ERROR: Couldn't attach transport.");
-            System.exit(1);
-        }
+        // Use the default transport configuration (do nothing)
 
         DataWriter dw = pub.create_datawriter(top,
                                               DATAWRITER_QOS_DEFAULT.get(),
@@ -137,7 +123,6 @@ public class TestPublisher {
         // Clean up
         dp.delete_contained_entities();
         dpf.delete_participant(dp);
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
 }

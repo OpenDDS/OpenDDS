@@ -44,8 +44,6 @@ import OpenDDS.DCPS.BuiltinTopicUtils;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.TheServiceParticipant;
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
 
 import org.omg.CORBA.StringSeqHolder;
 
@@ -136,11 +134,6 @@ public class BuiltinTopicsTest {
         Subscriber subscriber =
             participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, 0);
 
-        TransportImpl transport =
-            TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
-
-        transport.attach_to_subscriber(subscriber);
-
         subscriber.create_datareader(topic, DATAREADER_QOS_DEFAULT.get(), null, 0);
 
         Thread.sleep(2500); // Wait for repo to settle
@@ -171,11 +164,6 @@ public class BuiltinTopicsTest {
 
         Publisher publisher =
             participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, 0);
-
-        TransportImpl transport =
-            TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
-
-        transport.attach_to_publisher(publisher);
 
         publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(), null, 0);
 
@@ -218,7 +206,6 @@ public class BuiltinTopicsTest {
         participant.delete_contained_entities();
         dpf.delete_participant(participant);
 
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
 }

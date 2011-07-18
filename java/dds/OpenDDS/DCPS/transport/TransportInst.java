@@ -12,71 +12,43 @@ import java.io.Serializable;
 
 public abstract class TransportInst implements Serializable {
 
-    private int id;
+    private long _jni_pointer;
 
-    TransportInst(int id_param) {
-        id = id_param;
+    TransportInst(long ptr) {
+        _jni_pointer = ptr;
     }
 
-    abstract void saveSpecificConfig(long cfg);
-    abstract void loadSpecificConfig(long cfg);
+    private native void _jni_fini();
 
-    public static enum ThreadSynchStrategy {
-        PER_CONNECTION_SYNCH, //default
-        POOL_SYNCH,
-        NULL_SYNCH
+    protected void finalize() {
+        _jni_fini();
     }
-
-    public int getId() { return id; }
 
     public abstract String getType();
 
-    private ThreadSynchStrategy sendThreadStrategy;
-    public ThreadSynchStrategy getSendThreadStrategy() {
-        return sendThreadStrategy;
-    }
-    public void setSendThreadStrategy(ThreadSynchStrategy sts) {
-        sendThreadStrategy = sts;
-    }
+    public native String getName();
 
-    private boolean swapBytes;
-    public boolean isSwapBytes() { return swapBytes; }
-    public void setSwapBytes(boolean swap) { swapBytes = swap; }
+    public native int getQueueMessagesPerPool();
+    public native void setQueueMessagesPerPool(int qmpp);
 
-    private int queueMessagesPerPool;
-    public int getQueueMessagesPerPool() { return queueMessagesPerPool; }
-    public void setQueueMessagesPerPool(int qmpp) {
-        queueMessagesPerPool = qmpp;
-    }
+    public native int getQueueInitialPools();
+    public native void setQueueInitialPools(int qip);
 
-    private int queueInitialPools;
-    public int getQueueInitialPools() { return queueInitialPools; }
-    public void setQueueInitialPools(int qip) { queueInitialPools = qip; }
+    public native int getMaxPacketSize();
+    public native void setMaxPacketSize(int mps);
 
-    private int maxPacketSize;
-    public int getMaxPacketSize() { return maxPacketSize; }
-    public void setMaxPacketSize(int mps) { maxPacketSize = mps; }
+    public native int getMaxSamplesPerPacket();
+    public native void setMaxSamplesPerPacket(int mspp);
 
-    private int maxSamplesPerPacket;
-    public int getMaxSamplesPerPacket() { return maxSamplesPerPacket; }
-    public void setMaxSamplesPerPacket(int mspp) {
-        maxSamplesPerPacket = mspp;
-    }
+    public native int getOptimumPacketSize();
+    public native void setOptimumPacketSize(int ops);
 
-    private int optimumPacketSize;
-    public int getOptimumPacketSize() { return optimumPacketSize; }
-    public void setOptimumPacketSize(int ops) { optimumPacketSize = ops; }
+    public native boolean isThreadPerConnection();
+    public native void setThreadPerConnection(boolean tpc);
 
-    private boolean threadPerConnection;
-    public boolean isTreadPerConnection() { return threadPerConnection; }
-    public void getThreadPerConnection(boolean tpc) {
-        threadPerConnection = tpc;
-    }
+    public native int getDatalinkReleaseDelay();
+    public native void setDatalinkReleaseDelay(int drd);
 
-    private int datalinkReleaseDelay;
-    public int getDatalinkReleaseDelay() { return datalinkReleaseDelay; }
-    public void setDatalinkReleaseDelay(int drd) {
-        datalinkReleaseDelay = drd;
-    }
-
+    public native int getDatalinkControlChunks();
+    public native void setDatalinkControlChunks(int dcc);
 }

@@ -1,3 +1,82 @@
+Mon Jul 18 13:35:36 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Change from a dynamic cast to a static cast to avoid link
+          dependencies on the Tcp library.
+
+        * dds/DCPS/transport/multicast/MulticastInst_rch.h:
+        * dds/DCPS/transport/udp/UdpInst_rch.h:
+
+          Add these _rch types for consistency's sake.
+
+        * java/dds/OpenDDS/DCPS/transport/MulticastInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TcpInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportRegistry.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportConfig.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS/DCPS/transport/UdpInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+
+          Rework the java interface to support the new transport
+          configuration API.  TheTransportRegistry class replaces
+          TheTransportFactory class and the various Inst classes
+          replace the Configuration classes of the previous design.
+          These classes are now referenced-based and each operation
+          passes through to the corresponding C++ object (the old
+          Configuration classes were value-based).  The Config
+          class is all new and is reference-based as well.
+
+          TODO: The jms code has not been modified.
+
+        * java/tests/builtintopics/BuiltinTopicsTest.java:
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/complex_idl/run_test.pl:
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/both/run_test.pl:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/publisher/pub_multicast.ini:
+        * java/tests/messenger/publisher/pub_tcp.ini:
+        * java/tests/messenger/publisher/pub_udp.ini:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/publisher/sub_multicast.ini:
+        * java/tests/messenger/publisher/sub_tcp.ini:
+        * java/tests/messenger/publisher/sub_udp.ini:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * java/tests/messenger/subscriber/pub_multicast.ini:
+        * java/tests/messenger/subscriber/pub_tcp.ini:
+        * java/tests/messenger/subscriber/pub_udp.ini:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * java/tests/messenger/subscriber/sub_multicast.ini:
+        * java/tests/messenger/subscriber/sub_tcp.ini:
+        * java/tests/messenger/subscriber/sub_udp.ini:
+        * java/tests/multirepo/MultiRepoBase.java:
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/multirepo/run_test.pl:
+        * java/tests/transport_config/TransportConfigTest.java:
+        * java/tests/transport_config/dcps.ini:
+
+          Update the various java tests to use the new transport
+          config code.  Most of the tests simply use the config
+          file (or even the basic defaults).  The transport_config
+          and multirepo tests each exercise the transport config
+          API.  TODO: The multirepo test fails inconsistently and
+          the udp variant of messenger/publisher/run_test.pl has
+          a termination issue.
+
+        * java/dds/OpenDDS/DCPS/transport/AttachStatus.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportImpl.java:
+        * java/tests/builtintopics/builtintopics.ini:
+        * java/tests/complex_idl/complex_idl.ini:
+        * java/tests/messenger/both/opendds_tcp.ini:
+        * java/tests/multirepo/multirepo.ini:
+
+          Removed these files.
+
 Fri Jul 15 21:43:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Messenger/pub.ini:

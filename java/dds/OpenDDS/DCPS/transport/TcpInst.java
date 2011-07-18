@@ -10,60 +10,33 @@ package OpenDDS.DCPS.transport;
 
 public class TcpInst extends TransportInst {
 
-    TcpInst(int id) {
-        super(id);
+    TcpInst(long ptr) {
+        super(ptr);
     }
-
-    native void saveSpecificConfig(long cfg);
-    native void loadSpecificConfig(long cfg);
 
     public String getType() { return "Tcp"; }
 
-    private String localAddress;
-    public String getLocalAddress() { return localAddress; }
-    public void setLocalAddress(String la) { localAddress = la; }
+    public native String getLocalAddress();
+    public native void setLocalAddress(String la);
 
-    private boolean enableNagleAlgorithm;
-    public boolean isEnableNagleAlgorithm() { return enableNagleAlgorithm; }
-    public void setEnableNagleAlgorithm(boolean ena) {
-        enableNagleAlgorithm = ena;
-    }
+    public native boolean isEnableNagleAlgorithm();
+    public native void setEnableNagleAlgorithm(boolean ena);
 
-    private int connRetryInitialDelay;
-    public int getConnRetryInitialDelay() { return connRetryInitialDelay; }
-    public void setConnRetryInitialDelay(int crid) {
-        connRetryInitialDelay = crid;
-    }
+    public native int getConnRetryInitialDelay();
+    public native void setConnRetryInitialDelay(int crid);
 
-    private double connRetryBackoffMultiplier;
-    public double getConnRetryBackoffMultiplier() {
-        return connRetryBackoffMultiplier;
-    }
-    public void setConnRetryBackoffMultiplier(double crbm) {
-        connRetryBackoffMultiplier = crbm;
-    }
+    public native double getConnRetryBackoffMultiplier();
+    public native void setConnRetryBackoffMultiplier(double crbm);
 
-    private int connRetryAttempts;
-    public int getConnRetryAttempts() { return connRetryAttempts; }
-    public void setConnRetryAttempts(int cra) { connRetryAttempts = cra; }
+    public native int getConnRetryAttempts();
+    public native void setConnRetryAttempts(int cra);
 
-    private int maxOutputPausePeriod;
-    public int getMaxOutputPausePeriod() { return maxOutputPausePeriod; }
-    public void setMaxOutputPausePeriod(int mopp) {
-        maxOutputPausePeriod = mopp;
-    }
+    public native int getMaxOutputPausePeriod();
+    public native void setMaxOutputPausePeriod(int mopp);
 
-    private int passiveReconnectDuration;
-    public int getPassiveReconnectDuration() {
-        return passiveReconnectDuration;
-    }
-    public void setPassiveReconnectDuration(int prd) {
-        passiveReconnectDuration = prd;
-    }
+    public native int getPassiveReconnectDuration();
+    public native void setPassiveReconnectDuration(int prd);
 
-    private int passiveConnectDuration;
-    public int getPassiveConnectDuration() { return passiveConnectDuration; }
-    public void setPassiveConnectDuration(int pcd) {
-        passiveConnectDuration = pcd;
-    }
+    public native int getPassiveConnectDuration();
+    public native void setPassiveConnectDuration(int pcd);
 }

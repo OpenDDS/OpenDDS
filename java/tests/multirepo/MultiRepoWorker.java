@@ -33,9 +33,6 @@ import DDS.Topic;
 import DDS._DataReaderListenerLocalBase;
 import DDS._DataWriterListenerLocalBase;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
-import OpenDDS.DCPS.transport.AttachStatus;
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
 
 import MultiRepo.Message;
 import MultiRepo.MessageDataReader;
@@ -51,12 +48,9 @@ import MultiRepo.MessageTypeSupportImpl;
  * @version $Revision$
  */
 public class MultiRepoWorker {
-    private static volatile int transportId;
-
     private DomainParticipant participant;
 
     private Topic topic;
-    private TransportImpl transport;
 
     private boolean read;
 
@@ -73,10 +67,7 @@ public class MultiRepoWorker {
         topic = participant.create_topic("MultiRepo::Topic", typeSupport.get_type_name(),
                                          TOPIC_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
-        transport = TheTransportFactory.create_transport_impl(++transportId, TheTransportFactory.AUTO_CONFIG);
-
         assert (topic != null);
-        assert (transport != null);
     }
 
     public DomainParticipant getParticipant() {
@@ -88,11 +79,6 @@ public class MultiRepoWorker {
             participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
         assert (publisher != null);
-
-        AttachStatus status = transport.attach_to_publisher(publisher);
-        if(status.value() != AttachStatus._ATTACH_OK) {
-            throw new IllegalStateException("Unable to attach publisher to transport!");
-        }
 
         publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(),
             new _DataWriterListenerLocalBase() {
@@ -128,11 +114,6 @@ public class MultiRepoWorker {
             participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
         assert (subscriber != null);
-
-        AttachStatus status = transport.attach_to_subscriber(subscriber);
-        if (status.value() != AttachStatus._ATTACH_OK) {
-            throw new IllegalStateException("Unable to attach subscriber to transport!");
-        }
 
         subscriber.create_datareader(topic, DATAREADER_QOS_DEFAULT.get(),
             new _DataReaderListenerLocalBase () {

@@ -56,9 +56,7 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     DDS/DATAREADER_QOS_USE_TOPIC_QOS.java << DDS/DataReaderQos.java
     DDS/WaitSet.java << DDS/_WaitSetInterfTAOPeer.java
     DDS/GuardCondition.java << DDS/_GuardConditionInterfTAOPeer.java
-    OpenDDS/DCPS/transport/TransportImpl.java << DDS/Publisher.java DDS/Subscriber.java
-    OpenDDS/DCPS/transport/TheTransportFactory.java << DDS/Publisher.java DDS/Subscriber.java
-    OpenDDS/DCPS/transport/AttachStatus.java
+    OpenDDS/DCPS/transport/TheTransportRegistry.java << DDS/Entity.java
     OpenDDS/DCPS/transport/ConfigurationConflictException.java
     OpenDDS/DCPS/transport/DuplicateException.java
     OpenDDS/DCPS/transport/MiscProblemException.java
@@ -68,6 +66,7 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     OpenDDS/DCPS/transport/UdpInst.java
     OpenDDS/DCPS/transport/MulticastInst.java
     OpenDDS/DCPS/transport/TransportInst.java
+    OpenDDS/DCPS/transport/TransportConfig.java
     OpenDDS/DCPS/transport/TransportException.java
     OpenDDS/DCPS/transport/UnableToCreateException.java
   }
@@ -87,10 +86,11 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     classes/DDS/DATAREADER_QOS_USE_TOPIC_QOS.class
     classes/DDS/WaitSet.class
     classes/DDS/GuardCondition.class
-    classes/OpenDDS/DCPS/transport/TheTransportFactory.class
-    classes/OpenDDS/DCPS/transport/TransportImpl.class << classes/OpenDDS/DCPS/transport/TheTransportFactory.class
+    classes/OpenDDS/DCPS/transport/TheTransportRegistry.class
     classes/OpenDDS/DCPS/transport/TcpInst.class
     classes/OpenDDS/DCPS/transport/UdpInst.class
+    classes/OpenDDS/DCPS/transport/TransportInst.class
+    classes/OpenDDS/DCPS/transport/TransportConfig.class
     classes/OpenDDS/DCPS/transport/MulticastInst.class
   }
 

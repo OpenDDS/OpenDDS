@@ -20,12 +20,10 @@ foreach my $i (@ARGV) {
     }
 }
 
-my $transport = 'tcp';
-
-my $opts = "-ORBSvcConf $DDS_ROOT/tests/DCPS/Messenger/$transport.conf -DCPSBit 0";
+my $opts = "-DCPSBit 0";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
-my $pub_opts = "$opts $debug_opt -ORBLogFile pub.log -DCPSConfigFile opendds_$transport.ini";
+my $pub_opts = "$opts $debug_opt -ORBLogFile pub.log";
 
 my $dcpsrepo_ior = "repo.ior";
 

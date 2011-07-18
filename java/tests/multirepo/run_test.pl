@@ -20,12 +20,12 @@ foreach my $i (@ARGV) {
     }
 }
 
-my $opts = "-ORBSvcConf $DDS_ROOT/tests/DCPS/Messenger/tcp.conf";
+my $opts = "";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
 my $master_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
-    "-ORBLogFile master.log -DCPSConfigFile multirepo.ini";
+    "-ORBLogFile master.log";
 
 my $slave_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12347 $debug_opt ".
     "-ORBLogFile slave.log -DCPSConfigFile multirepo.ini";

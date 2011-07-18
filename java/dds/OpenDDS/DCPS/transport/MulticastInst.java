@@ -10,52 +10,51 @@ package OpenDDS.DCPS.transport;
 
 public class MulticastInst extends TransportInst {
 
-    MulticastInst(int id) {
-        super(id);
+    MulticastInst(long ptr) {
+        super(ptr);
     }
-
-    native void saveSpecificConfig(long cfg);
-    native void loadSpecificConfig(long cfg);
 
     public String getType() { return "multicast"; }
 
-    private boolean defaultToIPv6;
-    public boolean getDefaultToIPv6() { return defaultToIPv6; }
-    public void setDefaultToIPv6(boolean dtip6) { defaultToIPv6 = dtip6; }
+    public native boolean getDefaultToIPv6();
+    public native void setDefaultToIPv6(boolean dtip6);
 
-    private short portOffset;
-    public short getPortOffset() { return portOffset; }
-    public void setPortOffset(short po) { portOffset = po; }
+    public native short getPortOffset();
+    public native void setPortOffset(short po);
 
-    private String groupAddress;
-    public String getGroupAddress() { return groupAddress; }
-    public void setGroupAddress(String ga) { groupAddress = ga; }
+    public native String getGroupAddress();
+    public native void setGroupAddress(String ga);
 
-    private boolean reliable;
-    public boolean getReliable() { return reliable; }
-    public void setReliable(boolean r) { reliable = r; }
+    public native boolean getReliable();
+    public native void setReliable(boolean r);
 
-    private double synBackoff;
-    public double getSynBackoff() { return synBackoff; }
-    public void setSynBackoff(double sb) { synBackoff = sb; }
+    public native double getSynBackoff();
+    public native void setSynBackoff(double sb);
 
-    private long synInterval;
-    public long getSynInterval() { return synInterval; }
-    public void setSynInterval(long si) { synInterval = si; }
+    public native long getSynInterval();
+    public native void setSynInterval(long si);
 
-    private long synTimeout;
-    public long getSynTimeout() { return synTimeout; }
-    public void setSynTimeout(long st) { synTimeout = st; }
+    public native long getSynTimeout();
+    public native void setSynTimeout(long st);
 
-    private int nakDepth;
-    public int getNakDepth() { return nakDepth; }
-    public void setNakDepth(int nd) { nakDepth = nd; }
+    public native int getNakDepth();
+    public native void setNakDepth(int nd);
 
-    private long nakInterval;
-    public long getNakInterval() { return nakInterval; }
-    public void setNakInterval(long ni) { nakInterval = ni; }
+    public native long getNakInterval();
+    public native void setNakInterval(long ni);
 
-    private long nakTimeout;
-    public long getNakTimeout() { return nakTimeout; }
-    public void setNakTimeout(long nt) { nakTimeout = nt; }
+    public native int getNakDelayInterval();
+    public native void setNakDelayInterval(int ndi);
+
+    public native int getNakMax();
+    public native void setNakMax(int nm);
+
+    public native long getNakTimeout();
+    public native void setNakTimeout(long nt);
+
+    public native int getTimeToLive();
+    public native void setTimeToLive(int ttl);
+
+    public native int getRcvBufferSize();
+    public native void setRcvBufferSize(int rbs);
 }

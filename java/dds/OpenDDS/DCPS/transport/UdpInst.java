@@ -10,16 +10,12 @@ package OpenDDS.DCPS.transport;
 
 public class UdpInst extends TransportInst {
 
-    UdpInst(int id) {
-        super(id);
+    UdpInst(long ptr) {
+        super(ptr);
     }
-
-    native void saveSpecificConfig(long cfg);
-    native void loadSpecificConfig(long cfg);
 
     public String getType() { return "udp"; }
 
-    private String localAddress;
-    public String getLocalAddress() { return localAddress; }
-    public void setLocalAddress(String la) { localAddress = la; }
+    public native String getLocalAddress();
+    public native void setLocalAddress(String la);
 }

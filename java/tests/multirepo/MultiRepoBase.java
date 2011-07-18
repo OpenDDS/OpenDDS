@@ -16,7 +16,6 @@ import DDS.PARTICIPANT_QOS_DEFAULT;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.DCPS.TheServiceParticipant;
-import OpenDDS.DCPS.transport.TheTransportFactory;
 
 /**
  * @author  Steven Stallion
@@ -59,7 +58,6 @@ public class MultiRepoBase {
             dpf.delete_participant(participant);
         }
 
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
 }
