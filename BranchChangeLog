@@ -1,3 +1,48 @@
+Mon Jul 18 21:26:18 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DestinationOrder/run_test.pl:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/all.ini:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/LargeSample/pub.ini:
+        * tests/DCPS/LargeSample/pub_multicast.ini:
+        * tests/DCPS/LargeSample/pub_udp.ini:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/sub.ini:
+        * tests/DCPS/LargeSample/sub_multicast.ini:
+        * tests/DCPS/LargeSample/sub_udp.ini:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/common.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/tcp.ini:
+        * tests/DCPS/LivelinessTest/udp.ini:
+        * tests/DCPS/SharedTransport/TestCase.h:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/SharedTransport/multicast.ini:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/SharedTransport/tcp.ini:
+        * tests/DCPS/SharedTransport/udp.ini:
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+
+          Adapted tests to compile with the new transport API.
+
+        * tests/DCPS/DestinationOrder/tcp.conf:
+        * tests/DCPS/LargeSample/multicast.conf:
+        * tests/DCPS/LargeSample/tcp.conf:
+        * tests/DCPS/LargeSample/udp.conf:
+        * tests/DCPS/SharedTransport/svc.conf:
+        * tests/DCPS/SharedTransport/test.ini:
+
+          Removed these files.
+
 Mon Jul 18 21:05:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:

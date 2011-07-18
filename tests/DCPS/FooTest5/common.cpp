@@ -11,10 +11,6 @@ const char* MY_TOPIC_FOR_MULTICAST = "foomulticast";
 const char* MY_TYPE     = "Foo";
 const char* MY_TYPE_FOR_UDP = "FooUdp";
 const char* MY_TYPE_FOR_MULTICAST = "FooMulticast";
-const ACE_TCHAR* reader_address_str = ACE_TEXT("localhost:0");
-const ACE_TCHAR* writer_address_str = ACE_TEXT("localhost:0");
-int reader_address_given = 0;
-int writer_address_given = 0;
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 

@@ -14,9 +14,7 @@
 class TestCase : public virtual TestPair<TestMessageDataReader,
                                          TestMessageDataWriter> {
 public:
-  virtual DDS::ReturnCode_t init_transport(
-    OpenDDS::DCPS::TransportIdType& transport_id,
-    ACE_TString& transport_type);
+  DDS::ReturnCode_t init_transport(const std::string& transport_type);
 
   virtual int test();
 };

@@ -28,7 +28,6 @@ DataReaderListenerImpl::DataReaderListenerImpl (void) :
       ));
     ACE_UNUSED_ARG(max_samples_per_instance);
     ACE_UNUSED_ARG(history_depth);
-    ACE_UNUSED_ARG(using_udp);
 
   }
 

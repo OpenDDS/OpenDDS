@@ -13,36 +13,20 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $status = 0;
-my $use_svc_config = !new PerlACE::ConfigList->check_config('STATIC');
-
-my $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
 
 my $logging = "-ORBDebugLevel 1 -ORBVerboseLogging 1 " .
     "-DCPSTransportDebugLevel 6";
-my $pub_opts = "$opts $logging -ORBLogFile pub.log ";
-my $sub_opts = "$opts $logging -ORBLogFile sub.log ";
+my $pub_opts = "$logging -ORBLogFile pub.log ";
+my $sub_opts = "$logging -ORBLogFile sub.log ";
 my $repo_bit_opt = '';
 
 if ($ARGV[0] eq 'udp') {
-    my $udp_opts = ($use_svc_config ? " -ORBSvcConf udp.conf " : '') . "-t udp";
-    $pub_opts .= "$udp_opts -DCPSConfigFile pub_udp.ini";
-    $sub_opts .= "$udp_opts -DCPSConfigFile sub_udp.ini";
+    $pub_opts .= "-DCPSConfigFile pub_udp.ini";
+    $sub_opts .= "-DCPSConfigFile sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
-    my $mc_opts = ($use_svc_config ? " -ORBSvcConf multicast.conf " : '')
-        . "-t multicast";
-    $pub_opts .= "$mc_opts -DCPSConfigFile pub_multicast.ini";
-    $sub_opts .= "$mc_opts -DCPSConfigFile sub_multicast.ini";
-}
-elsif ($ARGV[0] eq 'default_tcp') {
-    $pub_opts .= " -t default_tcp";
-    $sub_opts .= " -t default_tcp";
-}
-elsif ($ARGV[0] eq 'default_multicast') {
-    my $dm_opts = ($use_svc_config ? " -ORBSvcConf multicast.conf " : '')
-        . "-t default_multicast";
-    $pub_opts .= $dm_opts;
-    $sub_opts .= $dm_opts;
+    $pub_opts .= "-DCPSConfigFile pub_multicast.ini";
+    $sub_opts .= "-DCPSConfigFile sub_multicast.ini";
 }
 elsif ($ARGV[0] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';

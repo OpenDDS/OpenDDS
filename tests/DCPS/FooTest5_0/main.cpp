@@ -18,10 +18,10 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/Arg_Shifter.h"
 
@@ -30,10 +30,6 @@
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
-ACE_TString reader_address_str = ACE_TEXT("localhost:0");
-ACE_TString writer_address_str = ACE_TEXT("localhost:0");
-int reader_address_given = 0;
-int writer_address_given = 0;
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
@@ -46,27 +42,6 @@ bool support_client_side_BIT = false;
 // default to using TCP
 int sub_using_udp = 0;
 int pub_using_udp = 0;
-OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
-OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-
-enum TransportTypeId
-{
-  SIMPLE_TCP,
-  SIMPLE_UDP
-};
-
-enum TransportInstanceId
-{
-  SUB_TRAFFIC,
-  PUB_TRAFFIC
-};
-
-
-
-int init_tranport()
-{
-  return 0;
-}
 
 
 int wait_for_data (::DDS::Subscriber_ptr sub,
@@ -95,11 +70,6 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  reader_address_str = ACE_LOCALHOST;
-  reader_address_str += ACE_TEXT(":16701");
-  writer_address_str = ACE_LOCALHOST;
-  writer_address_str += ACE_TEXT(":29803");
-
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
@@ -111,8 +81,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -m multiple_instances?1:0   defaults to 0
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
-    //  -s sub transport address    defaults to localhost:16701
-    //  -p pub transport address    defaults to localhost:29803
     //  -z                          verbose transport debug
     //  -b                          enable client side Built-In topic support
     //  -us                         Subscriber using UDP transport
@@ -138,18 +106,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
-    {
-      reader_address_str = currentArg;
-      reader_address_given = 1;
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
-    {
-      writer_address_str = currentArg;
-      writer_address_given = 1;
       arg_shifter.consume_arg ();
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
@@ -283,6 +239,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           1);
       }
 
+      // Attach the subscriber to the transport.
+      if (sub_using_udp) {
+        TheTransportRegistry->bind_config("udp", sub.in());
+      } else {
+        TheTransportRegistry->bind_config("tcp", sub.in());
+      }
+
+      // Attach the publisher to the transport.
+      if (pub_using_udp) {
+        TheTransportRegistry->bind_config("udp", pub.in());
+      } else {
+        TheTransportRegistry->bind_config("tcp", pub.in());
+      }
+
       // Create the datawriter
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
@@ -364,6 +334,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           1);
       }
 
+      // TODO: Make this test work (incompatible transports) with the
+      //       new transport scheme.
       int incompatible_transport_found = 0;
       for (CORBA::ULong ii =0; ii < incomp.policies.length (); ii++)
         {
@@ -496,9 +468,6 @@ cleanup:
       // clean up common objects
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
-
-      reader_transport_impl = 0;
-      writer_transport_impl = 0;
 
       TheServiceParticipant->shutdown ();
 

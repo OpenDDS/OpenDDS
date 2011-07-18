@@ -82,12 +82,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
-    {
-      writer_address_str = currentArg;
-      writer_address_given = 1;
-      arg_shifter.consume_arg ();
-    }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
     {
       using_udp = ACE_OS::atoi (currentArg);

@@ -33,17 +33,14 @@ $num_unlively_periods=3;
 $num_readers=1;
 $use_take = 0;
 $use_udp = 0;
-$sub_addr = "localhost:16701";
-$pub_addr = "localhost:29803";
-$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
-$svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $arg_idx = 0;
 
+$config_file = "tcp.ini";
+
 if ($ARGV[0] eq 'udp') {
-  $use_udp = 1;
+    $config_file = "udp.ini";
   $arg_idx = 1;
-  $svc_conf = $use_svc_conf ? " -ORBSvcConf udp.conf " : '';
   $app_bit_conf = " -DCPSBit 0 "
 }
 
@@ -60,25 +57,24 @@ else {
 }
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                             "$repo_bit_conf "
-#                           . "-ORBDebugLevel 1 "
-                           . "-o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior "
+#                                    . "-ORBDebugLevel 1 "
+                                     );
 
 
 print $DCPSREPO->CommandLine(), "\n";
-$common_parameters = "-u $use_udp $app_bit_conf"
+$common_parameters = "-DCPSConfigFile $config_file $app_bit_conf"
               . " -w $num_readers -m $multiple_instance"
               . " -l $num_unlively_periods -i $num_samples_per_reader " ;
 
 # test multiple cases
-$sub_parameters = "$svc_conf $common_parameters -s $sub_addr -t $use_take ";
+$sub_parameters = "$common_parameters -t $use_take ";
 
-$pub_parameters = "$svc_conf $common_parameters -p $pub_addr" ;
+$pub_parameters = "$common_parameters " ;
 
 $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";

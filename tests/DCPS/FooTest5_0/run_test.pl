@@ -22,28 +22,21 @@ $num_readers=1;
 $use_take=0;
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_conf = "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
-# -ORBDebugLevel 1 -ORBSvcConf ../../tcp.conf
-
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_conf -o $dcpsrepo_ior ");
+                                     " -o $dcpsrepo_ior ");
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
-$parameters = "$svc_config -r $num_readers -t $use_take"
+$parameters = "-DCPSConfigFile all.ini -r $num_readers -t $use_take"
               . " -m $multiple_instance -i $num_samples_per_reader " ;
 
 if ($ARGV[0] eq 'udp') {
-  $parameters .= " -ORBSvcConf udp.conf -us -s localhost:16701 -up -p localhost:29803";
-}
-if ($ARGV[0] eq 'give_addrs') {
-  $parameters .= " -s localhost:16701 -p localhost:29803";
+  $parameters .= " -us -up ";
 }
 elsif ($ARGV[0] eq 'diff_trans') {
-  $parameters .= " -ORBSvcConf udp.conf -up -p localhost:29803";
+  $parameters .= " -up ";
 }
 
 $FooTest5 = PerlDDS::create_process ("main", $parameters);

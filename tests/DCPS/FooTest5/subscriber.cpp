@@ -50,7 +50,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -r num_datareaders          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
-    //  -s sub transport address    defaults to localhost:23456
     //  -u using_udp                defaults to 0 - using TCP
     //  -c using_multicast          defaults to 0 - using TCP
     //  -m num_instances_per_writer defaults to 1
@@ -85,12 +84,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
-    {
-      reader_address_str = currentArg;
-      reader_address_given = 1;
       arg_shifter.consume_arg ();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)

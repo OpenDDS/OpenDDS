@@ -21,48 +21,9 @@
 
 namespace {
 
-OpenDDS::DCPS::TransportIdType local_transport_id(1);
-ACE_TString local_transport_type(ACE_TEXT("tcp"));
 const int num_messages = 100;
 
-void
-parse_args(int& argc, ACE_TCHAR** argv)
-{
-  ACE_Arg_Shifter shifter(argc, argv);
-
-  while (shifter.is_anything_left()) {
-    if (shifter.cur_arg_strncasecmp(ACE_TEXT("udp")) == 0) {
-      local_transport_id = 2;
-      local_transport_type = ACE_TEXT("udp");
-
-      shifter.consume_arg();
-
-    } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("multicast")) == 0) {
-      local_transport_id = 3;
-      local_transport_type = ACE_TEXT("multicast");
-
-      shifter.consume_arg();
-
-    } else {
-      shifter.ignore_arg();
-    }
-  }
-}
-
 } // namespace
-
-DDS::ReturnCode_t
-TestCase::init_transport(OpenDDS::DCPS::TransportIdType& transport_id,
-                         ACE_TString& transport_type)
-{
-  // Ensure the same tranpsort ID is used for both publishers and
-  // subscribers; this will force an association across the same
-  // TransportImpl instance:
-  transport_id = local_transport_id;
-  transport_type = local_transport_type;
-
-  return DDS::RETCODE_OK;
-}
 
 
 int
@@ -72,9 +33,7 @@ TestCase::test()
 
   // As there are no fully assoication establishment between pub and sub for UDP
   // transport, a delay is required for the test to receive all messages.
-  if (local_transport_type == ACE_TEXT("udp")) {
-    ACE_OS::sleep (2);
-  }
+  ACE_OS::sleep (2);
 
   // Write test data to exercise the data paths:
   for (int i = 0; i < num_messages; ++i) {
@@ -135,8 +94,6 @@ TestCase::test()
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  parse_args(argc, argv);
-
   TestCase test;
   return test.run(argc, argv);
 }
