@@ -24,18 +24,18 @@ void TAO_DDS_DCPSDataReader_i::add_association (
   ))
   {
 
-    OpenDDS::DCPS::RepoIdConverter converter(yourId);
+    OpenDDS::DCPS::RepoIdConverter converterY(yourId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("\nTAO_DDS_DCPSDataReader_i::add_associations () :\n")
       ACE_TEXT("\tReader %C Adding association to writer:\n"),
-      std::string(converter).c_str()
+      std::string(converterY).c_str()
     ));
 
-    OpenDDS::DCPS::RepoIdConverter converter(writer.writerId);
+    OpenDDS::DCPS::RepoIdConverter converterW(writer.writerId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("\t writer id - %C\n")
       ACE_TEXT("\t transport_id - %C\n\n"),
-      std::string(converter).c_str(),
+      std::string(converterW).c_str(),
       writer.writerTransInfo[0].transport_type.in()
     ));
 
