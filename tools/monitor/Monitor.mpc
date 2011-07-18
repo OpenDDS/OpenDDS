@@ -4,9 +4,16 @@ project(*App) : dcpsexe_with_tcp, dcps_monitor, qt4_gui {
   exeout  = $(DDS_ROOT)/bin
   requires += built_in_topics
 
+  // for graphviz 
+  includes += /usr/include/graphviz
+  libpaths += /usr/lib/graphviz
+  libs += gvplugin_dot_layout
+
   MOC_Files {
     MonitorDataModel.h
     RepoSelect.h
+    GvOptions.h
+    NodeOptions.h
     Viewer.h
   }
 
@@ -20,11 +27,18 @@ project(*App) : dcpsexe_with_tcp, dcps_monitor, qt4_gui {
     MonitorData.h
     MonitorDataModel.h
     MonitorDataStorage.h
+    Node.h
+    NodeGenerator.h
     QosFormatter.h
     TreeNode.h
+    GraphGenerator.h
     RepoSelect.h
     ui_RepoDialog.h
     Viewer.h
+    GvOptions.h
+    NodeOptions.h
+    ui_GvOptions.h
+    ui_NodeOptions.h
     ui_Monitor.h
   }
   // I would have thought that the 'automatic' setting of UIC meant that
@@ -38,12 +52,19 @@ project(*App) : dcpsexe_with_tcp, dcps_monitor, qt4_gui {
     MonitorDataModel.cpp
     MonitorDataModel_moc.cpp
     MonitorDataStorage.cpp
+    Node.cpp
+    NodeGenerator.cpp
     QosFormatter.cpp
     Monitor_main.cpp
     RepoSelect.cpp
     RepoSelect_moc.cpp
+    GraphGenerator.cpp
     Viewer.cpp
     Viewer_moc.cpp
+    GvOptions.cpp
+    NodeOptions.cpp
+    GvOptions_moc.cpp
+    NodeOptions_moc.cpp
   }
 }
 

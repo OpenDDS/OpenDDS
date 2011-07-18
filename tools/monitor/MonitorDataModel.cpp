@@ -12,6 +12,8 @@
 #include <QtCore/QStringList>
 #include <QtGui/QTreeView>
 
+#include <stdio.h>
+
 namespace Monitor {
 
 MonitorDataModel::MonitorDataModel( QObject* parent)
@@ -46,12 +48,8 @@ MonitorDataModel::updated(
 {
   QModelIndex topLeft     = this->index( left,  lcol);
   QModelIndex bottomRight = this->index( right, rcol);
+  
   emit dataChanged( topLeft, bottomRight);
-
-  QTreeView* viewer = static_cast<QTreeView*>(this->QObject::parent());
-  for( int column = lcol; column <= rcol; ++column) {
-    viewer->resizeColumnToContents( column);
-  }
 }
 
 void
@@ -59,9 +57,6 @@ MonitorDataModel::updated( TreeNode* node, int column)
 {
   QModelIndex index = this->index( node, column);
   emit dataChanged( index, index);
-
-  QTreeView* viewer = static_cast<QTreeView*>(this->QObject::parent());
-  viewer->resizeColumnToContents( column);
 }
 
 void
@@ -86,7 +81,7 @@ MonitorDataModel::index( TreeNode* node, int column) const
   // Form the index of the tree root to start from.  Use the topmost
   // non-null node that we found as the root.
   QModelIndex index = this->QAbstractItemModel::createIndex( 0, column, node);
-
+  
   // Now we can form index values all the way back to the node of
   // interest.
   while( !list.isEmpty()) {
@@ -122,7 +117,7 @@ MonitorDataModel::index(
   TreeNode* childNode  = (*parentNode)[ row];
   if( childNode) {
     return this->QAbstractItemModel::createIndex( row, column, childNode);
-
+    
   } else {
     return QModelIndex();
   }
@@ -156,6 +151,9 @@ MonitorDataModel::data( const QModelIndex& index, int role) const
     case Qt::DisplayRole:
       return this->getNode( index)->column( index.column());
 
+    // for checkboxes in tree view
+    // case Qt::CheckStateRole:
+    //   return Qt::Checked;
     case Qt::ToolTipRole:
     case Qt::StatusTipRole:
     case Qt::WhatsThisRole:
@@ -177,17 +175,18 @@ MonitorDataModel::data( const QModelIndex& index, int role) const
 Qt::ItemFlags
 MonitorDataModel::flags( const QModelIndex& index) const
 {
-  if( false == index.isValid()) {
+	if( false == index.isValid()) {
     return 0;
   }
 
-  return this->QAbstractItemModel::flags( index)
-         | Qt::ItemIsEnabled
-         | Qt::ItemIsSelectable
+  return this->QAbstractItemModel::flags( index) 
+       | Qt::ItemIsEnabled
+       | Qt::ItemIsSelectable
+  //     | Qt::ItemIsUserCheckable  // checkboxes in tree view
   //     | Qt::ItemIsEditable
   //     | Qt::ItemIsDragEnabled
   //     | Qt::ItemIsDropEnabled
-         ;
+  ;      
 }
 
 QVariant
@@ -269,7 +268,8 @@ MonitorDataModel::setHeaderData(
     default: return false;
   }
 
-  emit dataChanged( QModelIndex(), QModelIndex());
+  emit
+  dataChanged( QModelIndex(), QModelIndex());
   return true;
 }
 
@@ -289,6 +289,7 @@ MonitorDataModel::insertRows(
               this->root_->width()
             );
   endInsertRows();
+
   emit layoutChanged();
 
   return success;

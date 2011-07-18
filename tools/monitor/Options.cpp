@@ -1,6 +1,12 @@
 // -*- C++ -*-
 //
-// $Id$
+/*
+* $Id$
+*
+*
+* Distributed under the OpenDDS License.
+* See: http://www.opendds.org/license.html
+*/
 
 #include "dds/DCPS/debug.h"
 #include "dds/monitor/monitorC.h"
