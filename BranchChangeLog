@@ -1,3 +1,11 @@
+Mon Jul 18 18:50:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Update to use new transport config approach.
+
 Mon Jul 18 18:10:15 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/FooTest5/all.ini:
