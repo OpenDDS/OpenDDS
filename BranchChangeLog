@@ -1,3 +1,12 @@
+Mon Jul 18 18:58:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Remove old transport API code from TestFramework.
+          We may eventually want to add new transport API, unless
+          all tests using this will just use config-file based configuration.
+
 Mon Jul 18 18:50:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5_0/main.cpp:
