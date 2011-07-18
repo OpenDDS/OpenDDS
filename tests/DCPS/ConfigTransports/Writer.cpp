@@ -2,22 +2,24 @@
 //
 // $Id$
 #include "Writer.h"
-#include "ace/Task.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+
 #include "../common/TestException.h"
 #include "../common/TestSupport.h"
-#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
+
+#include "ace/Task.h"
 #include "ace/OS_NS_unistd.h"
 
 const int default_key = 101010;
 
 
-Writer::Writer(::DDS::DataWriter_ptr writer)
-: writer_ (::DDS::DataWriter::_duplicate (writer))
+Worker::Worker(::DDS::Entity_ptr writer)
+: writer_ (::DDS::Entity::_duplicate (writer))
 {
 }
 
 int
-Writer::run_test (const ACE_Time_Value& duration)
+Worker::run_test (const ACE_Time_Value& duration)
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));

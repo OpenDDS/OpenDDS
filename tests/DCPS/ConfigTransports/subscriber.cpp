@@ -81,7 +81,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       TEST_CHECK (!CORBA::is_nil (sub.in ()));
 
-      // Initialize the transport configuration for the appropriate Entity (except TreansportClients)
+      // If there is a ini file-based configuration name initialize
+      // the transport configuration for the corresponding Entity
       TEST_CHECK (!configuration_str.empty ());
       if (configuration_str == "none")
         {

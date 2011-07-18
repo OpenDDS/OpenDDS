@@ -7,11 +7,11 @@
 #include "dds/DdsDcpsPublicationC.h"
 
 
-class Writer
+class Worker
 {
 public:
 
-  Writer (::DDS::DataWriter_ptr writer);
+  Worker (::DDS::Entity_ptr writer);
 
   void start ();
 
@@ -21,7 +21,7 @@ public:
 
 private:
 
-  ::DDS::DataWriter_var writer_;
+  ::DDS::Entity_var writer_;
 };
 
 #endif /* WRITER_H */

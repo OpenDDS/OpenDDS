@@ -18,11 +18,6 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportConfig.h"
 
-//#include "dds/DCPS/DomainParticipantImpl.h"
-//#include "dds/DCPS/transport/framework/TransportImpl.h"
-//#include "dds/DCPS/transport/framework/TransportInst.h"
-//#include "dds/DCPS/transport/framework/DataLinkSet.h"
-
 #include <vector>
 
 //namespace {
