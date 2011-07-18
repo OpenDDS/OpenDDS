@@ -1,3 +1,19 @@
+Mon Jul 18 19:51:49 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Domain.ecore:
+
+	  Added transportConfig attribute to DomainEntity.
+	  Note: The changes on the GMF side are not included yet until
+	  versioning issues get resolved.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/DomainEntity.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/impl/DomainEntityImpl.java:
+
+	  EMF generated changes to account for addition of transportConfig.
+
 Mon Jul 18 18:58:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/TestFramework/TestFramework.h:

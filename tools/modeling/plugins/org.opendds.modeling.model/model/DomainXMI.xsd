@@ -9,7 +9,9 @@
   <xsd:element name="QosProperty" type="domain:QosProperty"/>
   <xsd:complexType name="DomainEntity">
     <xsd:complexContent>
-      <xsd:extension base="core:Entity"/>
+      <xsd:extension base="core:Entity">
+        <xsd:attribute name="transportConfig" type="xsd:string"/>
+      </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="DomainEntity" type="domain:DomainEntity"/>
