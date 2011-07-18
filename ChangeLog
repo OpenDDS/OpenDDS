@@ -1,8 +1,14 @@
+Mon Jul 18 15:32:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+
+          Fix validation error.
+
 Mon Jul 18 14:09:52 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_manager.cpp:
-        
-          Remove the use of ACE_Tokenizer, it is not consistent between 
+
+          Remove the use of ACE_Tokenizer, it is not consistent between
           TAO 1.5a, 1.6a and DOC implementations.
 
 Sun Jul 17 17:52:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>

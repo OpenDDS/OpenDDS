@@ -13,7 +13,7 @@
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_j6pGgS2LEeCFILu-MgN-Wg"/>
-        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="extreader" copyFromTopicQos="true" topic="ext_j6pGgS2LEeCFILu-MgN-Wg"/>
+        <readers xmi:id="_extrUKHwPDwEd-I4rwicuuPOw" name="extreader" copyFromTopicQos="true" topic="ext_j6pGgS2LEeCFILu-MgN-Wg"/>
       </subscribers>
     </participants>
     <topicDescriptions xsi:type="topics:ContentFilteredTopic" xmi:id="_j6pGgS2LEeCFILu-MgN-Wg" name="MiddleTopics" filter_expression="count BETWEEN 2 AND 7" related_topic="_lgOkQC2LEeCFILu-MgN-Wg"/>
