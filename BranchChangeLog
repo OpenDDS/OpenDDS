@@ -1,3 +1,15 @@
+Mon Jul 18 18:10:15 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/FooTest5/all.ini:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Update to use new transport config approach.
+
 Mon Jul 18 13:35:36 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

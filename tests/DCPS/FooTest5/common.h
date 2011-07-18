@@ -5,7 +5,6 @@
 #define COMMON_H
 
 #include  "InstanceDataMap.h"
-#include  "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include  "ace/Time_Value.h"
 #include  "ace/SString.h"
 #include  "ace/Atomic_Op.h"
@@ -43,13 +42,6 @@ extern long blocking_ms;
 extern int mixed_trans;
 extern int test_bit;
 
-extern OpenDDS::DCPS::TransportImpl_rch reader_tcp_impl;
-extern OpenDDS::DCPS::TransportImpl_rch reader_udp_impl;
-extern OpenDDS::DCPS::TransportImpl_rch reader_multicast_impl;
-extern OpenDDS::DCPS::TransportImpl_rch writer_tcp_impl;
-extern OpenDDS::DCPS::TransportImpl_rch writer_udp_impl;
-extern OpenDDS::DCPS::TransportImpl_rch writer_multicast_impl;
-
 extern ACE_TString synch_file_dir;
 // These files need to be unlinked in the run test script before and
 // after running.
@@ -76,10 +68,6 @@ enum TransportInstanceId
   PUB_TRAFFIC_UDP,
   PUB_TRAFFIC_MULTICAST
 };
-
-
-int init_reader_transport ();
-int init_writer_transport ();
 
 
 #endif /* COMMON_H */
