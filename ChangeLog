@@ -1,10 +1,17 @@
+Mon Jul 18 14:09:52 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+        
+          Remove the use of ACE_Tokenizer, it is not consistent between 
+          TAO 1.5a, 1.6a and DOC implementations.
+
 Sun Jul 17 17:52:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/README:
         * tools/dissector/sample_dissector.cpp:
         * tools/dissector/sample_manager.h:
         * tools/dissector/sample_manager.cpp:
-        
+
           Reimplemented the initialization so that a namespace tree for
           modules can be properly initialized. Previously, the
           initialization structure was flat, with module membership being

@@ -16,7 +16,6 @@
 #include <ace/Dirent.h>
 #include <ace/Configuration.h>
 #include <ace/Configuration_Import_Export.h>
-#include <ace/Tokenizer_T.h>
 
 #include <cstring>
 
@@ -413,22 +412,37 @@ namespace OpenDDS
       if (node->config_->get_string_value (key,label.c_str(),order))
         return;
 
-      ACE_Tokenizer_T<ACE_TCHAR> tok (order.rep());
-      tok.delimiter_replace (' ', 0);
-      for (ACE_TCHAR *p = tok.next(); p; p = tok.next())
+      std::string tokenizer = order.c_str();
+      size_t pos = tokenizer.find (' ');
+      std::string p =
+        (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
+      while (!p.empty())
         {
+
           ACE_TString type_str;
-          node->config_->get_string_value (key, p, type_str);
+          node->config_->get_string_value (key, p.c_str(), type_str);
           std::string kind(type_str.c_str());
 
           BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
           if (iter != builtin_types_.end())
-            f = node->dissector_->add_field (iter->second, p);
+            f = node->dissector_->add_field (iter->second, p.c_str());
           else
             {
               Sample_Dissector *value = this->fqfind (kind, node->parent_);
               if (value != 0)
-                f = node->dissector_->add_field (value, p);
+                f = node->dissector_->add_field (value, p.c_str());
+            }
+
+
+          if (pos == std::string::npos)
+            p.clear();
+          else
+            {
+              tokenizer = tokenizer.substr (pos+1);
+              pos = tokenizer.find(' ');
+              p = (pos == std::string::npos) ?
+                tokenizer :
+                tokenizer.substr (0,pos);
             }
         }
 
@@ -532,13 +546,24 @@ namespace OpenDDS
       Sample_Enum *sample =
         new Sample_Enum (node->type_id_.c_str());
 
-      ACE_Tokenizer_T<ACE_TCHAR> tok (order.rep());
-      tok.delimiter_replace (' ', 0);
-      for (ACE_TCHAR *p = tok.next(); p; p = tok.next())
+      std::string tokenizer = order.c_str();
+      size_t pos = tokenizer.find (' ');
+      std::string p =
+        (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
+      while (!p.empty())
         {
-          sample->add_value (p);
+          sample->add_value (p.c_str());
+          if (pos == std::string::npos)
+            p.clear();
+          else
+            {
+              tokenizer = tokenizer.substr (pos+1);
+              pos = tokenizer.find(' ');
+              p = (pos == std::string::npos) ?
+                tokenizer :
+                tokenizer.substr (0,pos);
+            }
         }
-
       node->dissector_ = sample;
     }
 
@@ -550,7 +575,7 @@ namespace OpenDDS
       ACE_TString order;
       ACE_TString case_name;
       ACE_TString case_type;
-
+      Sample_Dissector *value = 0;
       Sample_Field *f = 0;
 
       if (node->config_->get_string_value (key,label.c_str(),order))
@@ -568,7 +593,7 @@ namespace OpenDDS
         {
           s_union->discriminator (iter->second);
         }
-      Sample_Dissector *value = fqfind (std::string(case_type.c_str()), node->parent_);
+      value = fqfind (std::string(case_type.c_str()), node->parent_);
       if (value != 0)
         s_union->discriminator (value);
 
@@ -583,27 +608,29 @@ namespace OpenDDS
             f = new Sample_Field (iter->second, case_name.c_str());
           else
             {
-              Sample_Dissector *value = fqfind (std::string(case_type.c_str()), node->parent_);
+              value = fqfind (std::string(case_type.c_str()), node->parent_);
               if (value != 0)
                 f = new Sample_Field (value, case_name.c_str());
             }
           s_union->add_default (f);
         }
 
-      ACE_Tokenizer_T<ACE_TCHAR> tok (order.rep());
-      tok.delimiter_replace (' ', 0);
       Switch_Case *sc = 0;
       bool ranged = false;
-      for (ACE_TCHAR *p = tok.next(); p; p = tok.next())
+      std::string tokenizer = order.c_str();
+      size_t pos = tokenizer.find (' ');
+      std::string p =
+        (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
+      while (!p.empty())
         {
-          label = std::string(p) + ".type";
+          label = p + ".type";
           bool new_range =
             (node->config_->get_string_value (key,
                                               label.c_str(),
                                               case_type) != 0);
           if (!new_range)
             {
-              label = std::string(p) + ".name";
+              label = p + ".name";
               node->config_->get_string_value (key,
                                                label.c_str(),
                                                case_name);
@@ -618,20 +645,32 @@ namespace OpenDDS
                 f = new Sample_Field (iter->second, case_name.c_str());
               else
                 {
-                  Sample_Dissector *value = fqfind (std::string(case_type.c_str()), node->parent_);
+                 value = fqfind (std::string(case_type.c_str()), node->parent_);
                   if (value != 0)
                     f = new Sample_Field (value, case_name.c_str());
                 }
             }
           if (ranged)
             {
-              sc = sc->add_range (p, f);
+              sc = sc->add_range (p.c_str(), f);
             }
           else
             {
-              sc = sc == 0 ? s_union->add_case (p, f) : sc->chain (p, f);
+              sc = sc == 0 ?
+                s_union->add_case (p.c_str(), f) :
+                sc->chain (p.c_str(), f);
             }
           ranged = new_range;
+          if (pos == std::string::npos)
+            p.clear();
+          else
+            {
+              tokenizer = tokenizer.substr (pos+1);
+              pos = tokenizer.find(' ');
+              p = (pos == std::string::npos) ?
+                tokenizer :
+                tokenizer.substr (0,pos);
+            }
         }
 
       node->dissector_ = s_union;
