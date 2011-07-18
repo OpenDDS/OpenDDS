@@ -13,7 +13,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
@@ -41,7 +40,6 @@ Publisher::~Publisher()
     this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 

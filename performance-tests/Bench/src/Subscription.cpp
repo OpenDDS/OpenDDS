@@ -11,7 +11,6 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #include <iostream>

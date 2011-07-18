@@ -87,7 +87,7 @@ public:
   /// This method is called when the FULLY_ASSOCIATED ack of the pending
   /// associations is received. If the datawriter is registered, the
   /// datawriter will be notified, otherwise the status of the pending
-  /// associations will be marked as FULLTY_ASSOCIATED.
+  /// associations will be marked as FULLY_ASSOCIATED.
   void check_fully_association();
 
   /// Diagnostic aid.

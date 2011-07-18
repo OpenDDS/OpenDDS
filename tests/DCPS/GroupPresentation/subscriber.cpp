@@ -16,7 +16,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
@@ -28,8 +27,6 @@
 
 unsigned int num_messages = 5;
 int acess_scope = ::DDS::GROUP_PRESENTATION_QOS;
-
-OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 int
 parse_args(int argc, ACE_TCHAR *argv[])
@@ -130,19 +127,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
     }
 
-    // Initialize Transport
-    OpenDDS::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create_transport_impl(transport_impl_id,
-                                                 OpenDDS::DCPS::AUTO_CONFIG);
-
-    OpenDDS::DCPS::AttachStatus status = transport_impl->attach(sub.in());
-
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach() failed!\n")), -1);
-    }
-
     // Create DataReader
     DataReaderListenerImpl* listener_svt1 = new DataReaderListenerImpl("DataReader1");
     DataReaderListenerImpl* listener_svt2 = new DataReaderListenerImpl("DataReader2");
@@ -238,7 +222,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
 
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

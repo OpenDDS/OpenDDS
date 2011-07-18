@@ -5,7 +5,7 @@
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/RepoIdBuilder.h"
@@ -250,7 +250,7 @@ SubDriver::run()
   this->subscriber_.remove_associations(1, writers.get_buffer(), this->sub_id_);
 
   // Tear-down the entire Transport Framework.
-  TheTransportFactory->release();
+  TheTransportRegistry->release();
   TheServiceParticipant->shutdown();
 }
 

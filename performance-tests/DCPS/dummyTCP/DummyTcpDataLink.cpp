@@ -280,7 +280,7 @@ OpenDDS::DCPS::DummyTcpDataLink::fully_associated ()
     ACE_OS::sleep (tv);
   }
   this->resume_send ();
-  bool swap_byte = this->transport_->get_configuration()->swap_bytes_;
+  bool swap_byte = false;
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
   header_data.message_id_ = FULLY_ASSOCIATED;
@@ -302,7 +302,7 @@ OpenDDS::DCPS::DummyTcpDataLink::fully_associated ()
   ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size ();
 
-  ACE_Message_Block* data = this->marshal_acks (swap_byte);
+  ACE_Message_Block* data = this->marshal_acks();
 
   header_data.message_length_ = data->length ();
 

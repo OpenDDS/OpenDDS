@@ -15,7 +15,6 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -29,7 +28,6 @@
 
 using namespace Messenger;
 
-OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
   try
@@ -69,47 +67,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         exit(1);
       }
 
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-        TheTransportFactory->create_transport_impl (transport_impl_id,
-                                                    ::OpenDDS::DCPS::AUTO_CONFIG);
-
       DDS::Publisher_var pub =
         participant->create_publisher(PUBLISHER_QOS_DEFAULT,
         DDS::PublisherListener::_nil(),
         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (pub.in ())) {
         cerr << "create_publisher failed." << endl;
-        exit(1);
-      }
-
-      // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* const pub_impl =
-        dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in());
-      if (pub_impl == 0) {
-        cerr << "Failed to obtain publisher servant" << endl;
-        exit(1);
-      }
-
-      OpenDDS::DCPS::AttachStatus const status =
-        pub_impl->attach_transport(tcp_impl.in());
-      if (status != OpenDDS::DCPS::ATTACH_OK) {
-        std::string status_str;
-        switch (status) {
-        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-          status_str = "ATTACH_BAD_TRANSPORT";
-          break;
-        case OpenDDS::DCPS::ATTACH_ERROR:
-          status_str = "ATTACH_ERROR";
-          break;
-        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-          status_str = "ATTACH_INCOMPATIBLE_QOS";
-          break;
-        default:
-          status_str = "Unknown Status";
-          break;
-        }
-        cerr << "Failed to attach to the transport. Status == "
-          << status_str.c_str() << endl;
         exit(1);
       }
 
@@ -222,7 +185,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
   }
   catch (CORBA::Exception& e)

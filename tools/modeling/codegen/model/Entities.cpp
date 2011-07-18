@@ -5,7 +5,6 @@
 #include "EntityProfiles.h"
 #include "Entities.h"
 #include "dds/DCPS/debug.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_stdlib.h"

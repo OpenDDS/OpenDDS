@@ -20,56 +20,9 @@ OpenDDS::DCPS::DummyTcpInst::~DummyTcpInst()
 }
 
 int
-OpenDDS::DCPS::DummyTcpInst::load (const TransportIdType& id,
-                                         ACE_Configuration_Heap& cf)
+OpenDDS::DCPS::DummyTcpInst::load(ACE_Configuration_Heap&,
+                                  ACE_Configuration_Section_Key&)
 {
-  // The default transport can not be configured by user.
-  if (id == DEFAULT_DUMMY_TCP_ID)
-    {
-      ACE_ERROR ((LM_ERROR, "(%P|%t) You can not configure the default DummyTcp transport(id=%u) !!! \n",
-        id));
-      return -1;
-    }
-
-  TransportInst::load (id, cf);
-
-  ACE_TString sect_name = id_to_section_name(id);
-  const ACE_Configuration_Section_Key &root = cf.root_section ();
-  ACE_Configuration_Section_Key trans_sect;
-  if (cf.open_section (root, sect_name.c_str(), 0, trans_sect) != 0)
-    ACE_ERROR_RETURN ((LM_ERROR,
-                       ACE_TEXT ("Failed to open section \"%s\" \n"),
-                       sect_name.c_str()), -1);
-
-  std::string local_address;
-  GET_CONFIG_STRING_VALUE (cf, trans_sect, ACE_TEXT ("local_address"), local_address);
-  if (local_address != ACE_TEXT (""))
-  {
-    this->local_address_.set (local_address.c_str ());
-    this->local_address_str_ = local_address;
-  }
-
-  GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT ("enable_nagle_algorithm"),
-    this->enable_nagle_algorithm_, bool)
-
-  GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT ("conn_retry_initial_delay"),
-    this->conn_retry_initial_delay_, int)
-
-  GET_CONFIG_DOUBLE_VALUE (cf, trans_sect, ACE_TEXT ("conn_retry_backoff_multiplier"),
-    this->conn_retry_backoff_multiplier_)
-
-  GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT ("conn_retry_attempts"),
-    this->conn_retry_attempts_, int)
-
-  GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT ("passive_reconnect_duration"),
-    this->passive_reconnect_duration_, int)
-
-    GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT ("passive_connect_duration"),
-          this->passive_connect_duration_, unsigned int)
-
-  GET_CONFIG_VALUE (cf, trans_sect, ACE_TEXT ("max_output_pause_period"),
-    this->max_output_pause_period_, int)
-
   return 0;
 }
 

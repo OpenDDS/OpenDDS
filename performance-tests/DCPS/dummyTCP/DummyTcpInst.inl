@@ -5,8 +5,8 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-OpenDDS::DCPS::DummyTcpInst::DummyTcpInst()
-  : TransportInst("DummyTcp", "dummy"),
+OpenDDS::DCPS::DummyTcpInst::DummyTcpInst(const std::string& name)
+  : TransportInst("dummy_tcp", name),
     enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),
     conn_retry_backoff_multiplier_(2.0),

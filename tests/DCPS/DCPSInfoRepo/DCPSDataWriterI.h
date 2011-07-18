@@ -51,9 +51,9 @@ public:
 
 
 
-  virtual void add_associations (
+  virtual void add_association (
       const ::OpenDDS::DCPS::RepoId& yourId,
-      const OpenDDS::DCPS::ReaderAssociationSeq & readers
+      const OpenDDS::DCPS::ReaderAssociation& reader
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException

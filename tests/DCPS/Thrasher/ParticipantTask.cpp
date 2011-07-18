@@ -13,17 +13,10 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/framework/TransportDefs.h>
 
 #include "ParticipantTask.h"
 #include "ProgressIndicator.h"
 #include "FooTypeTypeSupportImpl.h"
-
-namespace
-{
-  ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds(0);
-} // namespace
 
 ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
   : samples_per_thread_(samples_per_thread)
@@ -62,30 +55,6 @@ ParticipantTask::svc()
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" create_publisher failed!\n")), 1);
 
-    // Attach Transport
-    OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
-
-    OpenDDS::DCPS::TransportInst_rch config =
-      TheTransportFactory->get_or_create_configuration(transportId, ACE_TEXT("tcp"));
-
-    OpenDDS::DCPS::TransportImpl_rch transport =
-      TheTransportFactory->create_transport_impl(transportId);
-
-    OpenDDS::DCPS::PublisherImpl* publisher_i =
-      dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in());
-
-    if (publisher_i == 0)
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: svc()")
-                        ACE_TEXT(" dynamic_cast failed!\n")), 1);
-
-    OpenDDS::DCPS::AttachStatus status =
-      publisher_i->attach_transport(transport.in());
-
-    if (status != OpenDDS::DCPS::ATTACH_OK)
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: svc()")
-                        ACE_TEXT(" attach_transport failed!\n")), 1);
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;

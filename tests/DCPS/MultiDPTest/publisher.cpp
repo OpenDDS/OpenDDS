@@ -19,7 +19,6 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 
 #include "ace/Arg_Shifter.h"
@@ -136,32 +135,6 @@ void init ()
       throw TestException ();
     }
 
-  writer_impl
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
-                                                  ACE_TEXT("tcp"),
-                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-  OpenDDS::DCPS::TransportInst_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("tcp"));
-
-  OpenDDS::DCPS::TcpInst* writer_tcp_config
-    = static_cast <OpenDDS::DCPS::TcpInst*> (writer_config.in ());
-
-  if (writer_address_given)
-    {
-      ACE_INET_Addr writer_address (writer_address_str.c_str ());
-      writer_tcp_config->local_address_ = writer_address;
-      writer_tcp_config->local_address_str_ = writer_address_str.c_str ();
-    }
-    // else use default address - OS assigned.
-
-  if (writer_impl->configure(writer_config.in()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) init_writer_tranport: pub TCP")
-                ACE_TEXT(" Failed to configure the transport.\n")));
-      throw TestException ();
-    }
 
   // Create the default publisher
   publisher = participant->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -171,50 +144,6 @@ void init ()
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) create_publisher failed.\n")));
-      throw TestException ();
-    }
-
-  // Attach the publisher to the transport.
-  OpenDDS::DCPS::PublisherImpl* pub_impl
-    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>
-    (publisher.in ());
-
-  if (0 == pub_impl)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) Failed to obtain publisher servant \n")));
-      throw TestException ();
-    }
-
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
-  OpenDDS::DCPS::AttachStatus attach_status
-    = pub_impl->attach_transport(writer_impl.in());
-
-  if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-    {
-      // We failed to attach to the transport for some reason.
-      ACE_TString status_str;
-
-      switch (attach_status)
-        {
-          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-            break;
-          case OpenDDS::DCPS::ATTACH_ERROR:
-            status_str = ACE_TEXT("ATTACH_ERROR");
-            break;
-          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-            break;
-          default:
-            status_str = ACE_TEXT("Unknown Status");
-            break;
-        }
-
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
-                  ACE_TEXT("AttachStatus == %s\n"),
-                  status_str.c_str()));
       throw TestException ();
     }
 
@@ -250,7 +179,6 @@ void init ()
 
 void shutdown ()
 {
-  TheTransportFactory->release();
   dpf = ::DDS::DomainParticipantFactory::_nil ();
   participant = ::DDS::DomainParticipant::_nil ();
   topic[0] = ::DDS::Topic::_nil ();

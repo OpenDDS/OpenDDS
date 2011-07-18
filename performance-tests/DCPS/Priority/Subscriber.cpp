@@ -14,7 +14,6 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
@@ -37,7 +36,6 @@ Subscriber::~Subscriber()
     this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 

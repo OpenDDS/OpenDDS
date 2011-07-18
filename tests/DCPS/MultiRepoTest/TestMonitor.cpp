@@ -7,7 +7,6 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "ace/SString.h"
@@ -235,54 +234,6 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.publisherDomain( index)));
   }
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating transports for repositories.\n")));
-  ACE_UINT32 transportKey = 0;
-  for( std::set< OpenDDS::DCPS::Service_Participant::RepoKey>::const_iterator current
-         = keylist.begin();
-       current != keylist.end();
-       ++current, ++transportKey) {
-
-    // Only create transports that need to be.
-    if( false == TheTransportFactory->obtain( transportKey).is_nil()) {
-      continue;
-    }
-
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T INFO: creating a SimpleTCP transport for repository: %d.\n"),
-      *current
-    ));
-    this->transport_[ *current]
-      = TheTransportFactory->create_transport_impl(
-          transportKey,
-          ACE_TEXT("tcp"),
-          OpenDDS::DCPS::DONT_AUTO_CONFIG
-        );
-
-    OpenDDS::DCPS::TransportInst_rch reader_config
-      = TheTransportFactory->create_configuration(
-          transportKey,
-          ACE_TEXT("tcp")
-        );
-
-//  OpenDDS::DCPS::TcpInst* reader_tcp_config
-//    = static_cast <OpenDDS::DCPS::TcpInst*>( reader_config.in() );
-//
-//  if( this->config_.transportAddressName().length() > 0)
-//  {
-//    ACE_INET_Addr reader_address( this->config_.transportAddressName().c_str());
-//    reader_tcp_config->local_address_ = reader_address;
-//    reader_tcp_config->local_address_str_ = this->config_.transportAddressName();
-//  }
-    // else use default address - OS assigned.
-
-    if( this->transport_[ *current]->configure( reader_config.in()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) %T ERROR: TCP ")
-        ACE_TEXT("failed to configure the transport.\n")));
-      throw BadTransportException ();
-    }
-  }
 
   //
   // Establish the listeners.
@@ -420,61 +371,6 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
         throw BadSubscriberException ();
       }
 
-    // Attach the subscriber to the transport.
-    OpenDDS::DCPS::SubscriberImpl* sub_impl
-      = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(
-          this->subscriber_[ index].in ()
-        );
-
-    if (0 == sub_impl)
-      {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) %T ERROR: Failed to obtain subscriber servant[ %d]\n"),
-          index
-        ));
-        throw BadSubscriberException ();
-      }
-
-    OpenDDS::DCPS::AttachStatus attach_status;
-
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T INFO: attaching subscriber[ %d] to transport \n"),
-      index
-    ));
-    attach_status
-      = sub_impl->attach_transport(
-          this->transport_[
-            TheServiceParticipant->domain_to_repo( this->config_.subscriberDomain( index))
-          ].in()
-        );
-
-    if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-      {
-        // We failed to attach to the transport for some reason.
-        ACE_TString status_str;
-
-        switch (attach_status)
-          {
-            case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-              status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-              break;
-            case OpenDDS::DCPS::ATTACH_ERROR:
-              status_str = ACE_TEXT("ATTACH_ERROR");
-              break;
-            case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-              status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-              break;
-            default:
-              status_str = ACE_TEXT("Unknown Status");
-              break;
-          }
-
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) %T ERROR: Failed to attach to the transport. ")
-                    ACE_TEXT("AttachStatus == %s\n"),
-                    status_str.c_str()));
-        throw BadTransportException ();
-      }
   }
 
   //
@@ -499,61 +395,6 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
         throw BadSubscriberException ();
       }
 
-    // Attach the publisher to the transport.
-    OpenDDS::DCPS::PublisherImpl* pub_impl
-      = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(
-          this->publisher_[ index].in ()
-        );
-
-    if (0 == pub_impl)
-      {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) %T ERROR: Failed to obtain publisher servant[ %d]\n"),
-          index
-        ));
-        throw BadSubscriberException ();
-      }
-
-    OpenDDS::DCPS::AttachStatus attach_status;
-
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T INFO: attaching publisher[ %d] to transport \n"),
-      index
-    ));
-    attach_status
-      = pub_impl->attach_transport(
-          this->transport_[
-            TheServiceParticipant->domain_to_repo( this->config_.publisherDomain( index))
-          ].in()
-        );
-
-    if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-      {
-        // We failed to attach to the transport for some reason.
-        ACE_TString status_str;
-
-        switch (attach_status)
-          {
-            case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-              status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-              break;
-            case OpenDDS::DCPS::ATTACH_ERROR:
-              status_str = ACE_TEXT("ATTACH_ERROR");
-              break;
-            case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-              status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-              break;
-            default:
-              status_str = ACE_TEXT("Unknown Status");
-              break;
-          }
-
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) %T ERROR: Failed to attach to the transport. ")
-                    ACE_TEXT("AttachStatus == %s\n"),
-                    status_str.c_str()));
-        throw BadTransportException ();
-      }
   }
 
   //
@@ -681,7 +522,6 @@ TestMonitor::~TestMonitor()
 
   // Release all the transport resources.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing transport.\n")));
-  TheTransportFactory->release();
 
   // Release any remaining resources held for the service.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing DCPS service.\n")));

@@ -6,7 +6,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 
 #include "FileInfoTypeSupportImpl.h"
@@ -19,9 +18,6 @@ class ApplicationLevel;
 /** Variables that will be consistent across all the nodes in the same
     DDS Domain. **/
 
-/// Ids of the transports DDS will use.
-const OpenDDS::DCPS::TransportIdType TCP_IMPL_PUB_ID = 10;
-const OpenDDS::DCPS::TransportIdType TCP_IMPL_SUB_ID = 11;
 /// Id of the DDS domain that all the transactions will take place in.
 /// This id needs to be in the domain_ids file that is given to the DCPSInfoRepo application
 const int DOMAINID = 411;

@@ -12,7 +12,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
@@ -43,7 +42,6 @@ Publisher::~Publisher()
     this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 
@@ -135,42 +133,6 @@ Publisher::Publisher( const Options& options)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
       ACE_TEXT("created publisher.\n")
-    ));
-  }
-
-  // Create the transport.
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->create_transport_impl(
-        this->options_.transportKey(),
-        OpenDDS::DCPS::AUTO_CONFIG
-      );
-  if( transport.is_nil()) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
-      ACE_TEXT("failed to create transport.\n")
-    ));
-    throw BadTransportException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created transport.\n")
-    ));
-  }
-
-  // Attach the transport to the publisher.
-  if( ::OpenDDS::DCPS::ATTACH_OK
-   != transport->attach(this->publisher_.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
-      ACE_TEXT("failed to attach publisher to transport.\n")
-    ));
-    throw BadAttachException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("attached publisher to transport.\n")
     ));
   }
 

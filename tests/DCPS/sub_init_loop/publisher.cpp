@@ -14,7 +14,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 #ifdef ACE_AS_STATIC_LIBS
@@ -24,8 +23,6 @@
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
 #include "ace/OS_NS_sys_stat.h"
-
-const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* pub_finished_filename = "publisher_finished.txt";
@@ -45,7 +42,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     switch (c)
       {
       case 'v':
-  verbose = true;
+        verbose = true;
         break;
       case 'i':
         write_delay_ms = ACE_OS::atoi (get_opts.opt_arg ());
@@ -85,8 +82,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
-    Messenger::MessageTypeSupportImpl* servant =
-      new Messenger::MessageTypeSupportImpl;
+      Messenger::MessageTypeSupportImpl* servant =
+        new Messenger::MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -108,10 +105,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-        TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                    ::OpenDDS::DCPS::AUTO_CONFIG);
-
       DDS::Publisher_var pub =
         participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                       DDS::PublisherListener::_nil(),
@@ -120,16 +113,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "create_publisher failed." << endl;
         exit(1);
       }
-
-      // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl =
-        dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
-      if (0 == pub_impl) {
-        cerr << "Failed to obtain publisher servant" << endl;
-        exit(1);
-      }
-
-      pub_impl->attach_transport(tcp_impl.in());
 
       // Create the datawriter
       DDS::DataWriterQos dw_qos;
@@ -173,9 +156,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       writer.wait ();
 
       participant->delete_contained_entities();
-      dpf->delete_participant(participant.in ());
-      TheTransportFactory->release();
-      TheServiceParticipant->shutdown ();
+      dpf->delete_participant(participant);
+      TheServiceParticipant->shutdown();
     }
   catch (CORBA::Exception& e)
     {

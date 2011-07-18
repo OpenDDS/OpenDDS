@@ -6,7 +6,7 @@
 
 #include "SimpleDataWriter.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/Definitions.h"
 
 

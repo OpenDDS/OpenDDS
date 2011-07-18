@@ -11,7 +11,6 @@
 
 
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 const long  TEST_DOMAIN   = 411;
 const char* TEST_TOPIC    = "McastListenerPerfTest";

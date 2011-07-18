@@ -13,7 +13,6 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
 

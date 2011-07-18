@@ -10,7 +10,6 @@
 #include "Subscription.h"
 #include "TestTypeSupportImpl.h"
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include <iostream>
 #include <fstream>
@@ -37,7 +36,6 @@ Process::~Process()
   }
 
   // Clean up the rest of the service resources.
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 
   // Close the output files.

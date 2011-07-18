@@ -16,7 +16,6 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/SubscriptionInstance.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 
 #include "FooTypeTypeSupportImpl.h"
@@ -27,8 +26,6 @@
 
 namespace
 {
-static OpenDDS::DCPS::TransportIdType transportId = 0;
-
 static DDS::Duration_t minimum_separation = { 5, 0 };
 
 static const size_t EXPECTED_SAMPLES = 2;
@@ -112,66 +109,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_publisher failed!\n")), -1);
-    }
-
-    // Attach Publisher Transport
-    ++transportId;
-
-    OpenDDS::DCPS::TransportInst_rch pub_config =
-      TheTransportFactory->get_or_create_configuration(transportId,
-                                                       ACE_TEXT("tcp"));
-
-    OpenDDS::DCPS::TransportImpl_rch pub_transport =
-      TheTransportFactory->create_transport_impl(transportId);
-
-    OpenDDS::DCPS::PublisherImpl* publisher_i =
-      dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in());
-
-    if (publisher_i == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: dynamic_cast failed!\n")), -1);
-    }
-
-    OpenDDS::DCPS::AttachStatus pub_status =
-      publisher_i->attach_transport(pub_transport.in());
-
-    if (pub_status != OpenDDS::DCPS::ATTACH_OK)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach_transport failed!\n")), -1);
-    }
-
-    // Attach Subscriber Transport
-    ++transportId;
-
-    OpenDDS::DCPS::TransportInst_rch sub_config =
-      TheTransportFactory->get_or_create_configuration(transportId,
-                                                       ACE_TEXT("tcp"));
-
-    OpenDDS::DCPS::TransportImpl_rch sub_transport =
-      TheTransportFactory->create_transport_impl(transportId);
-
-    OpenDDS::DCPS::SubscriberImpl* subscriber_i =
-      dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in());
-
-    if (subscriber_i == 0)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: dynamic_cast failed!\n")), -1);
-    }
-
-    OpenDDS::DCPS::AttachStatus sub_status =
-      subscriber_i->attach_transport(sub_transport.in());
-
-    if (sub_status != OpenDDS::DCPS::ATTACH_OK)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach_transport failed!\n")), -1);
     }
 
     // Register Type (FooType)
@@ -351,7 +288,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e)

@@ -5,7 +5,6 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "ace/SString.h"
@@ -65,41 +64,6 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
   // Establish debug level.
   if( this->config_.verbose()) {
     TURN_ON_VERBOSE_DEBUG;
-  }
-
-  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) INFO: creating a SimpleTCP transport.\n")));
-  }
-  this->transport_
-    = TheTransportFactory->create_transport_impl(
-        0,
-        ACE_TEXT("tcp"),
-        OpenDDS::DCPS::DONT_AUTO_CONFIG
-      );
-
-  OpenDDS::DCPS::TransportInst_rch transport_config
-    = TheTransportFactory->create_configuration(
-        0,
-        ACE_TEXT("tcp")
-      );
-
-#if 0
-  OpenDDS::DCPS::TcpInst* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpInst*>( transport_config.in() );
-
-  std::string address;
-  if( address.length() > 0) {
-    ACE_INET_Addr reader_address( address.c_str());
-    tcp_config->local_address_ = reader_address;
-  }
-#endif
-
-  if( this->transport_->configure( transport_config.in()) != 0) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: TCP ")
-      ACE_TEXT("failed to configure the transport.\n")
-    ));
-    throw BadTransportException ();
   }
 
   //
@@ -181,45 +145,6 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
     throw BadSubscriberException ();
   }
 
-  // Attach the subscriber to the transport.
-  OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>( this->subscriber_.in());
-  if( 0 == sub_impl) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to obtain subscriber servant\n")));
-    throw BadSubscriberException ();
-  }
-
-  OpenDDS::DCPS::AttachStatus attach_status;
-
-  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) INFO: attaching subscriber to transport \n")));
-  }
-  attach_status = sub_impl->attach_transport( this->transport_.in());
-
-  if (attach_status != OpenDDS::DCPS::ATTACH_OK) {
-    // We failed to attach to the transport for some reason.
-    ACE_TString status_str;
-
-    switch (attach_status) {
-      case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-        status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-        break;
-      case OpenDDS::DCPS::ATTACH_ERROR:
-        status_str = ACE_TEXT("ATTACH_ERROR");
-        break;
-      case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-        status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-        break;
-      default:
-        status_str = ACE_TEXT("Unknown Status");
-        break;
-    }
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: Failed to attach to the transport. ")
-                ACE_TEXT("AttachStatus == %s\n"),
-                status_str.c_str()));
-    throw BadTransportException ();
-  }
 
   //
   // Establish and install the DataReader
@@ -272,12 +197,6 @@ Subscriber::~Subscriber()
       ));
     }
   }
-
-  // Release all the transport resources.
-  if( OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) INFO: finalizing transport.\n")));
-  }
-  TheTransportFactory->release();
 
   // Release any remaining resources held for the service.
   if( OpenDDS::DCPS::DCPS_debug_level > 0) {

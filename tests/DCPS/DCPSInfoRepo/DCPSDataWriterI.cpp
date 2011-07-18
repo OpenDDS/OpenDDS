@@ -15,35 +15,26 @@ TAO_DDS_DCPSDataWriter_i::~TAO_DDS_DCPSDataWriter_i (void)
   {
   }
 
-void TAO_DDS_DCPSDataWriter_i::add_associations (
+void TAO_DDS_DCPSDataWriter_i::add_association (
     const ::OpenDDS::DCPS::RepoId& yourId,
-    const OpenDDS::DCPS::ReaderAssociationSeq & readers
+    const OpenDDS::DCPS::ReaderAssociation& reader
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
   {
 
-    CORBA::ULong length = readers.length();
-
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("\nTAO_DDS_DCPSDataWriter_i::add_associations () :\n")
-               ACE_TEXT("\tWriter %d Adding association to %d readers:\n"),
-               yourId,
-               length
-               ));
+               ACE_TEXT("\tWriter %d Adding association to a reader:\n"),
+               yourId));
 
-    for (CORBA::ULong cnt = 0; cnt < length; ++cnt)
-      {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("\tAssociation - %d\n")
-                   ACE_TEXT("\t reader id - %d\n")
-                   ACE_TEXT("\t transport_id - %d\n"),
-                   cnt,
-                   readers[cnt].readerId,
-                   readers[cnt].readerTransInfo.transport_id
-               ));
-      }
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("\t reader id - %d\n")
+               ACE_TEXT("\t transport_id - %C\n"),
+               reader.readerId,
+               reader.readerTransInfo[0].transport_type.in()
+           ));
   }
 
 

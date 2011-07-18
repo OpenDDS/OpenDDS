@@ -14,7 +14,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 #ifdef ACE_AS_STATIC_LIBS
@@ -27,7 +26,6 @@
 
 using namespace Messenger;
 
-const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* sub_ready_filename    = "subscriber_ready.txt";
 const char* sub_finished_filename = "subscriber_finished.txt";
@@ -87,7 +85,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                           , -1);
       }
 
-    MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl();
+      MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                         "")) {
@@ -111,10 +109,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                            "(%P|%t) Failed to create_topic.\n")
                           , -1);
       }
-
-      // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-        TheTransportFactory->create_transport_impl (TCP_IMPL_ID, ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Indicate that the subscriber is about to become ready
       FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, ACE_TEXT("w"));
@@ -150,41 +144,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                "(%P|%t) Failed to create_subscriber.\n")
                               , -1);
           }
-
-          // Attach the subscriber to the transport.
-          OpenDDS::DCPS::SubscriberImpl* sub_impl =
-            dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
-          if (0 == sub_impl) {
-            ACE_ERROR_RETURN ((LM_ERROR,
-                               "(%P|%t) Failed to obtain subscriber servant.\n")
-                              , -1);
-          }
-
-          OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
-          if (status != OpenDDS::DCPS::ATTACH_OK)
-            {
-              ACE_TString status_str;
-              switch (status)
-                {
-                case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                  status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-                  break;
-                case OpenDDS::DCPS::ATTACH_ERROR:
-                  status_str = ACE_TEXT("ATTACH_ERROR");
-                  break;
-                case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                  status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-                  break;
-                default:
-                  status_str = ACE_TEXT("Unknown Status");
-                  break;
-                }
-              ACE_ERROR_RETURN ((LM_ERROR,
-                                 "(%P|%t) Failed to attach to the transport. "
-                                 "Status == %s.\n"
-                                 , status_str.c_str())
-                                , -1);
-            }
 
           // Create the Datareaders
           DDS::DataReaderQos dr_qos;
@@ -237,7 +196,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (!CORBA::is_nil (dpf.in ())) {
         dpf->delete_participant(participant.in ());
       }
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
       // Indicate that the subscriber is done

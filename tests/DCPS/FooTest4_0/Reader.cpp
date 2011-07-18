@@ -15,8 +15,6 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-extern ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds;
-
 Reader::Reader(::DDS::DomainParticipant_ptr dp,
                int history_depth,
                int max_samples_per_instance)
@@ -33,25 +31,6 @@ Reader::Reader(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  // Initialize the transport
-  if (0 != init_transport() )
-  {
-    ACE_ERROR ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) init_transport failed!\n")));
-    throw TestException() ;
-  }
-
-  // Attach the subscriber to the transport.
-  OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub_.in ());
-
-  if (0 == sub_impl)
-  {
-    ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")));
-    throw TestException() ;
-  }
-  sub_impl->attach_transport(reader_transport_impl.in());
 
   ::DDS::TopicDescription_var description =
       dp->lookup_topicdescription(MY_TOPIC);
@@ -216,25 +195,7 @@ Reader::read (const SampleInfoMap& si_map,
 
 int Reader::init_transport ()
 {
-  int status = 0;
-
-  OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
-
-  OpenDDS::DCPS::TransportInst_rch reader_config
-    = TheTransportFactory->get_or_create_configuration (transportId, ACE_TEXT("tcp"));
-
-  reader_transport_impl
-    = TheTransportFactory->create_transport_impl(transportId, 0);
-
-  if (reader_transport_impl->configure(reader_config.in()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ::init_reader_tranport: ")
-                 ACE_TEXT("Failed to configure the transport.\n")));
-      status = 1;
-    }
-
-  return status;
+  return 0;
 }
 
 

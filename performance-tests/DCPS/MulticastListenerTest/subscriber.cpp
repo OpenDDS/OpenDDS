@@ -346,7 +346,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dp->delete_contained_entities();
       dpf->delete_participant(dp.in ());
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
 

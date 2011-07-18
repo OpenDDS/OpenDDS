@@ -15,7 +15,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 #include <performance-tests/DCPS/dummyTCP/DummyTcpInst.h>
 #include <performance-tests/DCPS/dummyTCP/PerformanceTest.h>
@@ -201,7 +200,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
       ACE_OS::sleep(2);
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

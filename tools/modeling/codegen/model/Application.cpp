@@ -1,7 +1,6 @@
 
 #include "Application.h"
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
@@ -16,7 +15,6 @@ OpenDDS::Model::Application::Application(int& argc, ACE_TCHAR *argv[])
 OpenDDS::Model::Application::~Application()
 {
   CORBA::release(factory_);
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 

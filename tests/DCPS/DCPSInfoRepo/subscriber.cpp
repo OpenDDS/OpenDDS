@@ -122,7 +122,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::DataReaderQos_var drq = new ::DDS::DataReaderQos;
       drq->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       ::DDS::SubscriberQos_var sQos = new ::DDS::SubscriberQos;
-      OpenDDS::DCPS::TransportInterfaceInfo_var tii = new OpenDDS::DCPS::TransportInterfaceInfo;
+      OpenDDS::DCPS::TransportLocatorSeq_var tii = new OpenDDS::DCPS::TransportLocatorSeq;
 
       OpenDDS::DCPS::RepoId subId = info->add_subscription(domainId,
                                                  dpId,

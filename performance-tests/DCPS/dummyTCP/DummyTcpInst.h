@@ -20,10 +20,10 @@ namespace OpenDDS
     {
       public:
 
-        DummyTcpInst();
+        explicit DummyTcpInst(const std::string& name);
         virtual ~DummyTcpInst();
-        virtual int load (const TransportIdType& id,
-                          ACE_Configuration_Heap& cf);
+        virtual int load(ACE_Configuration_Heap& cf,
+                         ACE_Configuration_Section_Key& sect);
 
         /// Diagnostic aid.
         virtual void dump(std::ostream& os);

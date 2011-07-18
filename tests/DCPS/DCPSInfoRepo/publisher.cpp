@@ -132,7 +132,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::DataWriterQos_var dwq = new ::DDS::DataWriterQos;
       dwq->reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
-      OpenDDS::DCPS::TransportInterfaceInfo_var tii = new OpenDDS::DCPS::TransportInterfaceInfo;
+      OpenDDS::DCPS::TransportLocatorSeq_var tii = new OpenDDS::DCPS::TransportLocatorSeq;
       ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
 
       OpenDDS::DCPS::RepoId pubId = info->add_publication(domainId,

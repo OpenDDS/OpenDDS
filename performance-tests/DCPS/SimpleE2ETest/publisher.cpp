@@ -351,7 +351,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       reader_transport_impl = 0;
       writer_transport_impl = 0;
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

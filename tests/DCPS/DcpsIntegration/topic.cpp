@@ -7,7 +7,6 @@
 
 #include "tests/DCPS/FooType/FooTypeTypeSupportImpl.h"
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -368,7 +367,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             9);
         }
 
-      TheTransportFactory->release();
 
       TheServiceParticipant->shutdown();
 

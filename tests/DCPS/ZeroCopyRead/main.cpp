@@ -21,7 +21,6 @@
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
@@ -209,45 +208,6 @@ private:
     int num_allocs_;
     int num_frees_;
 };
-
-
-int init_tranport ()
-{
-  int status = 0;
-
-      reader_transport_impl
-        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      ACE_TEXT("tcp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportInst_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("tcp"));
-
-      if (reader_transport_impl->configure(reader_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub TCP ")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-
-      writer_transport_impl
-        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      ACE_TEXT("tcp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-      OpenDDS::DCPS::TransportInst_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("tcp"));
-
-      if (writer_transport_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub TCP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-
-  return status;
-}
 
 
 int wait_for_data (::DDS::Subscriber_ptr sub,
@@ -523,41 +483,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("(%P|%t) create_publisher failed.\n")),
                           1);
       }
-
-      // Initialize the transport
-      if (0 != ::init_tranport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) init_transport failed!\n")),
-                           1);
-      }
-
-      // Attach the subscriber to the transport.
-      OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in());
-
-      if (0 == sub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
-                          1);
-      }
-
-      sub_impl->attach_transport(reader_transport_impl.in());
-
-
-      // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl
-        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
-
-      if (0 == pub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
-                          1);
-      }
-
-      pub_impl->attach_transport(writer_transport_impl.in());
 
       // Create the datawriter
       ::DDS::DataWriterQos dw_qos;
@@ -1773,7 +1698,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       }
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     } //xxx dp::Entity::Object::muxtex_refcount_ = 1

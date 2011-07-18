@@ -3,7 +3,7 @@
 // $Id$
 #include "SimplePublisher.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "TestException.h"
 #include <string>
 

@@ -14,7 +14,6 @@
 #include "dds/DCPS/transport/tcp/TcpTransport.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
 

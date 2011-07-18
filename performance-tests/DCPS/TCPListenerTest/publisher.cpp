@@ -369,7 +369,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dp->delete_topic(topic.in());
       dpf->delete_participant(dp.in());
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
       writer_transport_impl = 0;

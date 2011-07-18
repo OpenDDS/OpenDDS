@@ -8,7 +8,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 
 class SimpleSubscriber : public OpenDDS::DCPS::TransportInterface

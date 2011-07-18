@@ -6,7 +6,6 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
@@ -198,17 +197,9 @@ int run_test(int argc, ACE_TCHAR* argv[])
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                            DEFAULT_STATUS_MASK);
-  TransportImpl_rch pub_tport =
-    TheTransportFactory->create_transport_impl(1, AUTO_CONFIG);
-  PublisherImpl* pub_impl = dynamic_cast<PublisherImpl*>(pub.in());
-  pub_impl->attach_transport(pub_tport.in());
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
-  TransportImpl_rch sub_tport =
-    TheTransportFactory->create_transport_impl(2, AUTO_CONFIG);
-  SubscriberImpl* sub_impl = dynamic_cast<SubscriberImpl*>(sub.in());
-  sub_impl->attach_transport(sub_tport.in());
 
   bool passed = run_multitopic_test(dp, pub, sub);
 
@@ -229,7 +220,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } catch (...) {
     std::cout << "ERROR: unknown exception in main" << std::endl;
   }
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();
   return ret;

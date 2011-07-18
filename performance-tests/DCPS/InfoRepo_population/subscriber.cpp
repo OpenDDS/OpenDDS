@@ -16,7 +16,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
@@ -376,7 +375,6 @@ Subscriber::run (void)
         }
       //ACE_OS::sleep(2);
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

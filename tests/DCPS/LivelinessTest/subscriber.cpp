@@ -444,7 +444,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // may reference some resouces that already released.
       reader_transport_impl = 0;
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

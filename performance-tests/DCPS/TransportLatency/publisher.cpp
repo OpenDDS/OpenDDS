@@ -14,7 +14,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <performance-tests/DCPS/dummyTCP/DummyTcpInst.h>
 #include <performance-tests/DCPS/dummyTCP/PerformanceTest.h>
 
@@ -188,7 +187,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       delete writer;
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
   }
   catch (CORBA::Exception& e)

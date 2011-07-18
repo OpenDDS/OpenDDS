@@ -46,16 +46,6 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
     return false;
   }
 
-  // Initialize the transports (uses Tcp transport)
-  // The code in this section would need to be changed if the system needs to
-  //  use another transport type.
-  pub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_PUB_ID,
-                                                              ACE_TEXT("tcp"),
-                                                              ::OpenDDS::DCPS::AUTO_CONFIG);
-  sub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_SUB_ID,
-                                                              ACE_TEXT("tcp"),
-                                                              ::OpenDDS::DCPS::AUTO_CONFIG);
-
   // Create publisher
   pub_ = dp_->create_publisher (PUBLISHER_QOS_DEFAULT,
                                 DDS::PublisherListener::_nil (),
@@ -65,12 +55,6 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
       ACE_TEXT("ERROR - Create publisher failed.\n") ));
     return false;
   }
-
-
-  // Attach the transport protocol with the publishing entity
-  OpenDDS::DCPS::PublisherImpl* p_impl =
-    dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
-  p_impl->attach_transport (pub_tcp_impl_.in ());
 
 
   // Create topic for datawriter and datareader
@@ -99,13 +83,6 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
       ACE_TEXT("ERROR - Create subscriber failed.\n") ));
     return false;
   }
-
-
-  // Attach the transport protocol with the subscribing entity
-  OpenDDS::DCPS::SubscriberImpl* sub_impl =
-    dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub_.in ());
-  sub_impl->attach_transport(sub_tcp_impl_.in());
-
 
   // Create the listener for datareader
   listener_ = new FileInfoListener(this);
@@ -214,7 +191,6 @@ AbstractionLayer::shutdown_DDS()
   dpf_->delete_participant (dp_.in ());
 
   // Clean up the transport
-  TheTransportFactory->release ();
 
   // Clean up DDS
   TheServiceParticipant->shutdown ();

@@ -51,9 +51,9 @@ public:
         )) { return ::DDS::RETCODE_OK;};
 
 
-  virtual void add_associations (
+  virtual void add_association (
       const ::OpenDDS::DCPS::RepoId& yourId,
-      const OpenDDS::DCPS::WriterAssociationSeq & writers
+      const OpenDDS::DCPS::WriterAssociation& writer
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException

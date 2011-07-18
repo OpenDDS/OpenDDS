@@ -10,6 +10,7 @@
 #include "DummyTcpSynchResource.h"
 #include "DummyTcpDataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 #include "PerformanceTest.h"
 
 OpenDDS::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
@@ -19,7 +20,8 @@ OpenDDS::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
                                       DummyTcpSynchResource* synch_resource,
                                       TransportReactorTask* task,
                                       CORBA::Long            priority)
-  : TransportSendStrategy(config, synch_resource, priority)
+  : TransportSendStrategy(config, synch_resource, priority,
+                          new OpenDDS::DCPS::PerConnectionSynchStrategy)
 {
   DBG_ENTRY_LVL("DummyTcpSendStrategy","DummyTcpSendStrategy",5);
 

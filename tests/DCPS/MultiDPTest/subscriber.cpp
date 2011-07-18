@@ -19,7 +19,6 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 // Add the TransportImpl.h before TransportImpl_rch.h is included to
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
@@ -37,7 +36,6 @@
 OpenDDS::DCPS::TransportImpl_rch reader_impl[2];
 ::DDS::DataReaderListener_var listener[2];
 ::DDS::DataReader_var datareader[2];
-OpenDDS::DCPS::TransportIdType transport_id[2] = {SUB_TRAFFIC_TCP_1, SUB_TRAFFIC_TCP_2};
 ACE_TString reader_address_str[2];
 
 /// parse the command line arguments
@@ -149,33 +147,6 @@ void init_dcps_objects (int i)
       throw TestException ();
     }
 
-  reader_impl[i]
-    = TheTransportFactory->create_transport_impl (transport_id[i],
-                                                  ACE_TEXT("tcp"),
-                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-  OpenDDS::DCPS::TransportInst_rch reader_config
-    = TheTransportFactory->create_configuration (transport_id[i], ACE_TEXT("tcp"));
-
-  OpenDDS::DCPS::TcpInst* reader_tcp_config
-    = static_cast <OpenDDS::DCPS::TcpInst*> (reader_config.in ());
-
-  if (reader_address_str[i] != ACE_TEXT(""))
-  {
-    ACE_INET_Addr reader_address (reader_address_str[i].c_str());
-    reader_tcp_config->local_address_ = reader_address;
-    reader_tcp_config->local_address_str_ = reader_address_str[i].c_str();
-  }
-  // else use default address - OS assigned.
-
-  if (reader_impl[i]->configure(reader_config.in()) != 0)
-  {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) init_reader_tranport: subscriber TCP ")
-      ACE_TEXT(" Failed to configure the transport.\n")));
-    throw TestException ();
-  }
-
   subscriber[i] = participant[i]->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                           ::DDS::SubscriberListener::_nil(),
                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -186,68 +157,24 @@ void init_dcps_objects (int i)
       throw TestException ();
     }
 
-  // Attach the subscriber to the transport.
-  OpenDDS::DCPS::SubscriberImpl* sub_impl
-    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber[i].in ());
+  // Create the Datareaders
+  ::DDS::DataReaderQos dr_qos;
+  subscriber[i]->get_default_datareader_qos (dr_qos);
 
-  if (0 == sub_impl)
+  ::DDS::TopicDescription_var description
+    = participant[i]->lookup_topicdescription(topic_name[i]);
+  // create the datareader.
+  datareader[i] = subscriber[i]->create_datareader(description.in (),
+                                            dr_qos,
+                                            listener[i].in (),
+                                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (CORBA::is_nil (datareader[i].in ()))
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) Failed to obtain subscriber servant\n")));
+                  ACE_TEXT("(%P|%t) create_datareader failed.\n")));
       throw TestException ();
     }
-
-  OpenDDS::DCPS::AttachStatus attach_status;
-
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
-  attach_status = sub_impl->attach_transport(reader_impl[i].in());
-
-  if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-    {
-      // We failed to attach to the transport for some reason.
-      ACE_TString status_str;
-
-      switch (attach_status)
-        {
-          case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-            status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-            break;
-          case OpenDDS::DCPS::ATTACH_ERROR:
-            status_str = ACE_TEXT("ATTACH_ERROR");
-            break;
-          case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-            status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-            break;
-          default:
-            status_str = ACE_TEXT("Unknown Status");
-            break;
-        }
-
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
-                  ACE_TEXT("AttachStatus == %s\n"),
-                  status_str.c_str()));
-      throw TestException ();
-    }
-
-        // Create the Datareaders
-    ::DDS::DataReaderQos dr_qos;
-    subscriber[i]->get_default_datareader_qos (dr_qos);
-
-    ::DDS::TopicDescription_var description
-      = participant[i]->lookup_topicdescription(topic_name[i]);
-    // create the datareader.
-    datareader[i] = subscriber[i]->create_datareader(description.in (),
-                                              dr_qos,
-                                              listener[i].in (),
-                                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil (datareader[i].in ()))
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) create_datareader failed.\n")));
-        throw TestException ();
-      }
 }
 
 
@@ -267,7 +194,6 @@ void init_listener()
 
 void shutdown ()
 {
-  TheTransportFactory->release();
 
   dpf = 0;
   participant[0] = 0;

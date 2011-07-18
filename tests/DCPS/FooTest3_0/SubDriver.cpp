@@ -4,7 +4,6 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
@@ -453,7 +452,6 @@ SubDriver::run()
   this->subscriber_.remove_associations(num_publications, writers.get_buffer(), this->sub_id_);
 
   // Tear-down the entire Transport Framework.
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 

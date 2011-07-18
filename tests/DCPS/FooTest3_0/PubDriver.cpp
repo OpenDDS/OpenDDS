@@ -1,7 +1,6 @@
 #include "PubDriver.h"
 #include "TestException.h"
 #include "tests/DCPS/FooType3/FooDefC.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
@@ -456,9 +455,6 @@ PubDriver::end()
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(participant_.in ());
-
-  // Tear-down the entire Transport Framework.
-  TheTransportFactory->release();
 
   TheServiceParticipant->shutdown ();
 }
@@ -1194,10 +1190,9 @@ void PubDriver::add_subscription (
     const ACE_TCHAR* sub_addr
     )
 {
-  ::OpenDDS::DCPS::ReaderAssociationSeq associations;
-  associations.length (1);
-  associations[0].readerTransInfo.transport_id = 1; // TBD - not right
-  associations[0].readerTransInfo.publication_transport_priority = 0;
+  ::OpenDDS::DCPS::ReaderAssociation association;
+  association.readerTransInfo.length(1);
+  association.readerTransInfo[0].transport_type = "tcp";
 
   OpenDDS::DCPS::NetworkAddress network_order_address(sub_addr);
 
@@ -1205,70 +1200,22 @@ void PubDriver::add_subscription (
   cdr << network_order_address;
   size_t len = cdr.total_length ();
 
-  associations[0].readerTransInfo.data
-    = OpenDDS::DCPS::TransportInterfaceBLOB
+  association.readerTransInfo[0].data
+    = OpenDDS::DCPS::TransportBLOB
     (len,
     len,
     (CORBA::Octet*)(cdr.buffer ()));
 
 
-  associations[0].readerId = reader_id;
-  associations[0].subQos = TheServiceParticipant->initial_SubscriberQos ();
-  associations[0].readerQos = TheServiceParticipant->initial_DataReaderQos ();
+  association.readerId = reader_id;
+  association.subQos = TheServiceParticipant->initial_SubscriberQos ();
+  association.readerQos = TheServiceParticipant->initial_DataReaderQos ();
 
   OpenDDS::DCPS::RepoId pub_id = foo_datawriter_servant_->get_publication_id();
-  datawriter_servant_->add_associations (pub_id, associations);
+  datawriter_servant_->add_association(pub_id, association);
 }
 
 
 void PubDriver::attach_to_transport ()
 {
-  OpenDDS::DCPS::TransportImpl_rch transport_impl
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("tcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-  OpenDDS::DCPS::TransportInst_rch config
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
-
-  OpenDDS::DCPS::TcpInst* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpInst*> (config.in ());
-
-  tcp_config->local_address_ = this->pub_addr_;
-  tcp_config->local_address_str_ = this->pub_addr_str_.c_str();
-
-  if (transport_impl->configure(config.in ()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) Failed to configure the transport impl\n"));
-      throw TestException();
-    }
-
-  OpenDDS::DCPS::AttachStatus status
-    = publisher_servant_->attach_transport(transport_impl.in());
-
-  if (status != OpenDDS::DCPS::ATTACH_OK)
-  {
-    // We failed to attach to the transport for some reason.
-    std::string status_str;
-
-    switch (status)
-      {
-        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-          status_str = "ATTACH_BAD_TRANSPORT";
-          break;
-        case OpenDDS::DCPS::ATTACH_ERROR:
-          status_str = "ATTACH_ERROR";
-          break;
-        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-          status_str = "ATTACH_INCOMPATIBLE_QOS";
-          break;
-        default:
-          status_str = "Unknown Status";
-          break;
-      }
-
-    ACE_ERROR((LM_ERROR,
-                "(%P|%t) Failed to attach to the transport. "
-                "AttachStatus == %C\n", status_str.c_str()));
-    throw TestException();
-  }
 }

@@ -10,7 +10,7 @@
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include <ace/Arg_Shifter.h>
 #include <string>
 
@@ -159,7 +159,7 @@ PubDriver::run()
   // TransportImplFactory objects (references) to be dropped, and
   // all TransportImpl objects (references) to be shutdown() and then
   // dropped.
-  TheTransportFactory->release();
+  TheTransportRegistry->release();
 }
 
 

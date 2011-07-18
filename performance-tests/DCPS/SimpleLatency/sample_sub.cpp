@@ -14,7 +14,6 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <dds/DCPS/transport/udp/UdpInst.h>
 #include <ace/streams.h>
@@ -240,7 +239,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        /* Shut down domain entities */
        dp->delete_contained_entities ();
        dpf->delete_participant (dp.in ());
-       TheTransportFactory->release ();
        TheServiceParticipant->shutdown ();
 
        return(0);

@@ -14,7 +14,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <ace/streams.h>
 
@@ -23,8 +22,6 @@
 #endif
 
 using namespace Messenger;
-
-const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try {
@@ -62,10 +59,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       exit(1);
     }
 
-    OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                  ::OpenDDS::DCPS::AUTO_CONFIG);
-
     DDS::Publisher_var pub =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                     DDS::PublisherListener::_nil(),
@@ -74,37 +67,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       cerr << "create_publisher failed." << endl;
       exit(1);
     }
-
-    // Attach the publisher to the transport.
-    OpenDDS::DCPS::PublisherImpl* pub_impl =
-      dynamic_cast< OpenDDS::DCPS::PublisherImpl*>(pub.in ());
-    if (0 == pub_impl) {
-      cerr << "Failed to obtain publisher servant" << endl;
-      exit(1);
-    }
-
-    OpenDDS::DCPS::AttachStatus status = pub_impl->attach_transport(tcp_impl.in());
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      std::string status_str;
-      switch (status) {
-        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-          status_str = "ATTACH_BAD_TRANSPORT";
-          break;
-        case OpenDDS::DCPS::ATTACH_ERROR:
-          status_str = "ATTACH_ERROR";
-          break;
-        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-          status_str = "ATTACH_INCOMPATIBLE_QOS";
-          break;
-        default:
-          status_str = "Unknown Status";
-          break;
-      }
-      cerr << "Failed to attach to the transport. Status == "
-           << status_str.c_str() << endl;
-      exit(1);
-    }
-
     // Create the datawriter
     DDS::DataWriterQos dw_qos;
     pub->get_default_datawriter_qos (dw_qos);
@@ -126,12 +88,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     }
 
     // Cleanup
-    writer->end ();
+    writer->end();
     delete writer;
     participant->delete_contained_entities();
-    dpf->delete_participant(participant.in ());
-    TheTransportFactory->release();
-    TheServiceParticipant->shutdown ();
+    dpf->delete_participant(participant);
+    TheServiceParticipant->shutdown();
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in main.cpp:" << endl
          << e << endl;
