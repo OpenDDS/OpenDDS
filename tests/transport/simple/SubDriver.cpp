@@ -237,6 +237,8 @@ SubDriver::run()
     ACE_OS::sleep(1);
   }
 
+  this->reader_.print_time();
+
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "The SimpleSubscriber object has received what it expected.  "
              "Release TheTransportFactory - causing all TransportImpl "

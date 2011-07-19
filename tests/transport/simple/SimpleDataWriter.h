@@ -21,7 +21,7 @@ class SimpleDataWriter
     virtual ~SimpleDataWriter();
 
     void init(const OpenDDS::DCPS::AssociationData& subscription);
-    int run(int num_msgs);
+    int run(int num_msgs, int msg_size);
 
     // This means that the TransportImpl has been shutdown, making the
     // transport_interface sent to the run() method no longer valid.

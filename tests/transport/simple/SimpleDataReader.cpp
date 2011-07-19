@@ -4,7 +4,9 @@
 #include "SimpleDataReader.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/GuidBuilder.h"
+
 #include "ace/Log_Msg.h"
+#include "ace/OS_NS_sys_time.h"
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
@@ -51,8 +53,19 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   DBG_ENTRY("SimpleDataReader","data_received");
 
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", sample.sample_->rd_ptr()));
+  if (sample.sample_->length() < 25) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", sample.sample_->rd_ptr()));
+  }
+
+  if (0 == num_messages_received_) {
+    begin_recvd_ = ACE_OS::gettimeofday();
+  }
+
   ++this->num_messages_received_;
+
+  if (this->num_messages_received_ == this->num_messages_expected_) {
+    finished_recvd_ = ACE_OS::gettimeofday();
+  }
 }
 
 
@@ -70,4 +83,14 @@ int
 SimpleDataReader::received_test_message() const
 {
   return (this->num_messages_received_ == this->num_messages_expected_) ? 1 : 0;
+}
+
+void
+SimpleDataReader::print_time()
+{
+  ACE_Time_Value total = finished_recvd_ - begin_recvd_;
+  ACE_DEBUG((LM_INFO,
+    "(%P|%t) Total time required is %d.%d seconds.\n",
+             total.sec(),
+             total.usec() % 1000000));
 }

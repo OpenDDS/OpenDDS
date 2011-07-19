@@ -37,6 +37,7 @@ class PubDriver
     SimpleDataWriter writer_;
 
     int num_msgs_;
+    int msg_size_;
 };
 
 #endif

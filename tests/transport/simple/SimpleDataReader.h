@@ -43,6 +43,8 @@ class SimpleDataReader
     /// the TransportReceiveListeners have been told of the data_received().
     int received_test_message() const;
 
+    void print_time();
+
     using OpenDDS::DCPS::TransportClient::enable_transport;
     using OpenDDS::DCPS::TransportClient::disassociate;
 
@@ -51,6 +53,8 @@ class SimpleDataReader
     const OpenDDS::DCPS::RepoId& sub_id_;
     int num_messages_expected_;
     int num_messages_received_;
+    ACE_Time_Value begin_recvd_;
+    ACE_Time_Value finished_recvd_;
 };
 
 #endif  /* SIMPLEDATAREADER_H */

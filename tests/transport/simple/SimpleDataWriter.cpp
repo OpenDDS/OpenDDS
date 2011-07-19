@@ -7,9 +7,10 @@
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/GuidBuilder.h"
-
 #include "dds/DCPS/transport/framework/EntryExit.h"
+
 #include "ace/SString.h"
+#include "ace/OS_NS_sys_time.h"
 
 #include "TestException.h"
 
@@ -48,7 +49,7 @@ SimpleDataWriter::init(const OpenDDS::DCPS::AssociationData& subscription)
 
 
 int
-SimpleDataWriter::run(int num_messages)
+SimpleDataWriter::run(int num_messages, int msg_size)
 {
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Build the DataSampleElementList\n"));
@@ -77,12 +78,19 @@ SimpleDataWriter::run(int num_messages)
 
   std::string data = "Hello World!";
 
+  if (msg_size) {
+    data.clear();
+    for (int j = 1; j <= msg_size; ++j) {
+      data += char(1 + (j % 255));
+    }
+  }
+
   for (int i = 1; i <= num_messages; ++i) {
     // This is what goes in the "Data Block".
     std::ostringstream ostr;
     ostr << data << " [" << i << "]";
 
-    std::string data_str = ostr.str();
+    std::string data_str = msg_size ? data : ostr.str();
 
     ssize_t num_data_bytes = data_str.length() + 1;
 
@@ -122,10 +130,22 @@ SimpleDataWriter::run(int num_messages)
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Send the DataSampleList (samples).\n"));
 
-  send(samples);
+  ACE_Time_Value start = ACE_OS::gettimeofday();
+  this->send(samples);
+  ACE_Time_Value finished = ACE_OS::gettimeofday();
+
+  ACE_Time_Value total = finished - start;
+  ACE_DEBUG((LM_INFO,
+    "(%P|%t) Publisher total time required was %d.%d seconds.\n",
+             total.sec(),
+             total.usec() % 1000000));
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "The Publisher has finished sending the samples.\n"));
+
+  if (msg_size) {
+    ACE_OS::sleep(15);
+  }
 
   return 0;
 }

@@ -1,3 +1,84 @@
+Tue Jul 19 20:59:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple/sub_main.cpp:
+
+          simple_bp was a copy of simple_n with very few changes.  Instead of
+          maintaining two tests, folded-in the simple_bp behavior and allowed
+          it to be enabled by passing a command line argument to run_test.pl.
+
+          simple_bp_rm on the other hand, seems to be written to test the
+          TransportInterface (now TransportClient) method remove_sample(), but
+          that never gets called.  This test case will be dropped (see below).
+
+          dds_comparative looks like an incomplete test with no run_test.pl or
+          README file, and no way to see what it's supposed to be testing.
+          This test case will also be dropped.
+
+        * tests/transport/dds_comparative/Pub.h:
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/PubDriver.h:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/PubWriter.h:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/dds_comparative/Sub.h:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/dds_comparative/SubDriver.h:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/dds_comparative/SubReader.h:
+        * tests/transport/dds_comparative/SubReader.cpp:
+        * tests/transport/dds_comparative/TestException.h:
+        * tests/transport/dds_comparative/dds_transport_comparative.mpc:
+        * tests/transport/dds_comparative/pub_main.cpp:
+        * tests/transport/dds_comparative/sub_main.cpp:
+        * tests/transport/simple_bp/DDS_transport_simple_bp.mpc:
+        * tests/transport/simple_bp/PubDriver.h:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/README:
+        * tests/transport/simple_bp/SimpleDataReader.h:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.h:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimplePublisher.h:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.h:
+        * tests/transport/simple_bp/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp/SubDriver.h:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp/TestException.h:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/DDS_transport_simple_bp_rm.mpc:
+        * tests/transport/simple_bp_rm/PubDriver.h:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/README:
+        * tests/transport/simple_bp_rm/SimpleDataReader.h:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.h:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.h:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.h:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.h:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/TestException.h:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+
+          Removed these files.
+
 Tue Jul 19 20:41:39 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

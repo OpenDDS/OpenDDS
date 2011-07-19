@@ -20,6 +20,7 @@ PubDriver::PubDriver()
   , sub_id_(OpenDDS::DCPS::GuidBuilder::create())
   , writer_(pub_id_)
   , num_msgs_(1)
+  , msg_size_(0)
 {
   DBG_ENTRY("PubDriver","PubDriver");
 }
@@ -55,12 +56,14 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
   // -p <pub_id:pub_port>
   // -s <sub_id:sub_host:sub_port>
   // -n num_messages
+  // -c message_size
   //
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
   bool got_n = false;
   bool got_p = false;
   bool got_s = false;
+  bool got_c = false;
 
   const ACE_TCHAR* current_arg = 0;
 
@@ -122,6 +125,27 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       }
 
       this->num_msgs_ = value;
+
+      got_n = true;
+    }
+    // The '-c' option
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-c")))) {
+      if (got_c) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) Only one -c allowed on command-line.\n"));
+        throw TestException();
+      }
+
+      int value = ACE_OS::atoi(current_arg);
+      arg_shifter.consume_arg();
+
+      if (value <= 0) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) Value following -c option must be > 0.\n"));
+        throw TestException();
+      }
+
+      this->msg_size_ = value;
 
       got_n = true;
     }
@@ -221,7 +245,7 @@ PubDriver::run()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Run our SimplePublisher object.\n"));
 
-  this->writer_.run(this->num_msgs_);
+  this->writer_.run(this->num_msgs_, this->msg_size_);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Ask the SimplePublisher object if it is done running. "
