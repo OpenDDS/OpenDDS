@@ -22,22 +22,19 @@ namespace Monitor {
 class Node : public QGraphicsTextItem
 {
 public:
-	Node (QString& text, qreal x, qreal y, TreeNode *t, QGraphicsItem * parent = 0);
-		
-	// override
-	void paint(QPainter *painter,const QStyleOptionGraphicsItem *option,QWidget *widget);
+  Node (QString& text, qreal x, qreal y, TreeNode *t, QGraphicsItem * parent = 0);
 
-protected:	
-  virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
-	
+  // override
+  void paint(QPainter *painter,const QStyleOptionGraphicsItem *option,QWidget *widget);
+
 private:
-	// connection info
-	std::vector<Node *>parents_;
-	std::vector<Node *>children_;
-	
-	// the model
-  TreeNode* treeNode_;  
-  
+  // connection info
+  std::vector<Node *>parents_;
+  std::vector<Node *>children_;
+
+  // the model
+  TreeNode* treeNode_;
+
 };
 
 };

@@ -1,22 +1,49 @@
+Tue Jul 19 17:03:35 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * tools/monitor/GraphGenerator.h:
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/QosFormatter.h:
+        * tools/monitor/QosFormatter.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.h:
+        * tools/monitor/Viewer.cpp:
+
+          Fixed fuzz, compiler warnings and errors and disabled
+          NodeView context menus.
+
 Tue Jul 19 16:26:49 UTC 2011  Chip Jones  <jonesc@ociweb.com>
 
-        * tools/monitor/MonitorData.h
-        * tools/monitor/MonitorDataModel.h
-        * tools/monitor/MonitorDataModel.cpp
-        * tools/monitor/MonitorDataStorage.h
-        * tools/monitor/MonitorDataStorage.cpp
-        * tools/monitor/Monitor.mpc
-        * tools/monitor/MonitorTask.h
-        * tools/monitor/MonitorTask.cpp
-        * tools/monitor/Monitor.ui
-        * tools/monitor/Options.h
-        * tools/monitor/Options.cpp
-        * tools/monitor/QosFormatter.h
-        * tools/monitor/QosFormatter.cpp
-        * tools/monitor/RepoSelect.h
-        * tools/monitor/TreeNode.h
-        * tools/monitor/Viewer.h
-        * tools/monitor/Viewer.cpp
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/Monitor.mpc:
+        * tools/monitor/MonitorTask.h:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Monitor.ui:
+        * tools/monitor/Options.h:
+        * tools/monitor/Options.cpp:
+        * tools/monitor/QosFormatter.h:
+        * tools/monitor/QosFormatter.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.h:
+        * tools/monitor/Viewer.cpp:
 
           Preliminary changes to the monitor tool to support generation
           of Graphviz images. Also includes partial support for Qt-based
@@ -24,18 +51,18 @@ Tue Jul 19 16:26:49 UTC 2011  Chip Jones  <jonesc@ociweb.com>
           GraphvizView panels as well asGraphviz options and Node
           options windows. These changes are r4718.
 
-        * tools/monitor/GraphGenerator.h
-        * tools/monitor/GraphGenerator.cpp
-        * tools/monitor/GvOptions.h
-        * tools/monitor/GvOptions.cpp
-        * tools/monitor/GvOptions.ui
-        * tools/monitor/Node.h
-        * tools/monitor/Node.cpp
-        * tools/monitor/NodeGenerator.h
-        * tools/monitor/NodeGenerator.cpp
-        * tools/monitor/NodeOptions.h
-        * tools/monitor/NodeOptions.cpp
-        * tools/monitor/NodeOptions.ui
+        * tools/monitor/GraphGenerator.h:
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/GvOptions.ui:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/NodeOptions.ui:
 
           These files were added.
 

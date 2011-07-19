@@ -18,11 +18,11 @@ NodeOptionsDialog::NodeOptionsDialog( QWidget* parent)
 
 }
 
-void 
+void
 NodeOptionsDialog::dialogAction(QWidget *parent, NodeOptionsData &nodeOpt, bool* status)
 {
   NodeOptionsDialog dialog( parent);
-  
+
   // set current gvOptions
   dialog.ui.abbrGUIDs->setChecked(nodeOpt.abbrGUIDs_);
   dialog.ui.ignoreBuiltinTopics->setChecked(nodeOpt.ignoreBuiltinTopics_);
@@ -33,9 +33,7 @@ NodeOptionsDialog::dialogAction(QWidget *parent, NodeOptionsData &nodeOpt, bool*
   dialog.ui.ignoreSubs->setChecked(nodeOpt.ignoreSubs_);
   dialog.ui.ignoreTransports->setChecked(nodeOpt.ignoreTransports_);
   dialog.ui.ignoreQos->setChecked(nodeOpt.ignoreQos_);
-  
-  
-  
+
   switch( dialog.exec()) {
     case Accepted:
       nodeOpt.abbrGUIDs_ = dialog.ui.abbrGUIDs->isChecked();
@@ -45,10 +43,10 @@ NodeOptionsDialog::dialogAction(QWidget *parent, NodeOptionsData &nodeOpt, bool*
       nodeOpt.ignoreProcs_ = dialog.ui.ignoreProcs->isChecked();
       nodeOpt.ignorePubs_ = dialog.ui.ignorePubs->isChecked();
       nodeOpt.ignoreSubs_ = dialog.ui.ignoreSubs->isChecked();
-    	nodeOpt.ignoreTransports_ = dialog.ui.ignoreTransports->isChecked();
-    	nodeOpt.ignoreQos_ = dialog.ui.ignoreQos->isChecked();
-    	
-    	*status = true;
+      nodeOpt.ignoreTransports_ = dialog.ui.ignoreTransports->isChecked();
+      nodeOpt.ignoreQos_ = dialog.ui.ignoreQos->isChecked();
+
+      *status = true;
       break;
 
     case Rejected:
@@ -56,23 +54,23 @@ NodeOptionsDialog::dialogAction(QWidget *parent, NodeOptionsData &nodeOpt, bool*
       *status = false;
       break;
   }
-	
+
 }
 
 void
 NodeOptionsDialog::getNodeData(QWidget *parent, NodeOptionsData &nodeOpt)
 {
   NodeOptionsDialog dialog( parent);
-  
+
   nodeOpt.abbrGUIDs_ = dialog.ui.abbrGUIDs->isChecked();
   nodeOpt.ignoreBuiltinTopics_ = dialog.ui.ignoreBuiltinTopics->isChecked();
   nodeOpt.hideTopics_ = dialog.ui.hideTopics->isChecked();
-  
+
   nodeOpt.ignoreHosts_ = dialog.ui.ignoreHosts->isChecked();
   nodeOpt.ignoreProcs_ = dialog.ui.ignoreProcs->isChecked();
   nodeOpt.ignorePubs_ = dialog.ui.ignorePubs->isChecked();
   nodeOpt.ignoreSubs_ = dialog.ui.ignoreSubs->isChecked();
-  
+
 }
 
 NodeOptionsData::NodeOptionsData() : abbrGUIDs_(false)

@@ -597,7 +597,7 @@ Monitor::MonitorTask::createSubscription(
 
   // Track the type by handle and process any initial data.
   this->handleTypeMap_[ reader->get_instance_handle()] = type;
-  
+
   status = reader->get_statuscondition();
   status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
   this->waiter_->attach_condition( status.in());
@@ -626,7 +626,7 @@ Monitor::MonitorTask::createBuiltinSubscription(
 
   // Track the type by handle and process any initial data.
   this->handleTypeMap_[ reader->get_instance_handle()] = type;
- 
+
   DDS::StatusCondition_var status = reader->get_statuscondition();
   status->set_enabled_statuses( DDS::DATA_AVAILABLE_STATUS);
   this->waiter_->attach_condition( status.in());

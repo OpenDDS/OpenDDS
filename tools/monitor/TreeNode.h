@@ -5,7 +5,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
- 
+
 #ifndef TREENODE_H
 #define TREENODE_H
 
@@ -16,7 +16,7 @@
 #include <QtGui/QCheckBox>
 
 namespace Monitor {
-  
+
 /**
  * @class TreeNode
  *
@@ -144,12 +144,12 @@ class TreeNode {
     /// Access the source node for our data, if different from us.
     TreeNode*  valueSource() const;
     TreeNode*& valueSource();
-    
+
     /// Display accessors
     void setDisplay(const bool flag = false);
     void resetDisplays();
     bool display() const;
-    
+
   private:
 
     /// Container of children of this element.
@@ -169,10 +169,10 @@ class TreeNode {
 
     /// Data source if this is a reference value.
     TreeNode* valueSource_;
-    
+
     /// display for graphviz / qt
     bool display_;
-    
+
 };
 
 } // End of namespace Monitor
@@ -473,24 +473,24 @@ Monitor::TreeNode::valueSource()
 
 inline
 void Monitor::TreeNode::setDisplay(const bool flag)
-{ 
-	this->display_ = flag;
+{
+  this->display_ = flag;
 }
 
 inline
 void Monitor::TreeNode::resetDisplays()
 {
-	this->display_ = false;
-	
-	for (int i = 0; i < this->children_.size(); ++i) {
+  this->display_ = false;
+
+  for (int i = 0; i < this->children_.size(); ++i) {
     (this->children_.at(i))->resetDisplays();
   }
 }
 
 inline
-bool Monitor::TreeNode::display() const 
-{ 
-	return this->display_;
+bool Monitor::TreeNode::display() const
+{
+  return this->display_;
 }
 
 #endif /* TREENODE_H */

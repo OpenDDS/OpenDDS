@@ -5,7 +5,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
- 
+
 #ifndef MONITORDATASTORAGE_H
 #define MONITORDATASTORAGE_H
 
@@ -431,7 +431,7 @@ class MonitorDataStorage {
 
     /// Active repository IOR.
     std::string activeIor_;
-    
+
     // for testing
     static bool b1;
     static bool b2;

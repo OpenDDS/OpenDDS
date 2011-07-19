@@ -13,7 +13,6 @@
 
 #include "TreeNode.h"
 #include "NodeOptions.h"
-#include "gvc.h"
 #include "iostream"
 #include "fstream"
 #include "stack"
@@ -24,15 +23,15 @@ namespace Monitor {
 class NodeGenerator {
 
  public:
- 	 
- 	// calculate the layout based on options and number of nodes
+
+  // calculate the layout based on options and number of nodes
   void calcLayout(TreeNode *, int w, int h);
   int getSceneWidth() { return sceneWidth_; }
   int getSceneHeight() { return sceneHeight_; }
-  
+
   // generate the new graph
   void draw(QGraphicsScene *);
-  
+
   NodeGenerator (TreeNode *, NodeOptionsData, bool honorDisplayFlag = false);
 
  private:
@@ -42,20 +41,20 @@ class NodeGenerator {
   int sceneHeight_;
   bool honorDisplayFlag_; // if true only graph treeNodes that have display flag set
 
-  
+
   // find readers and writers
   // recursive so it need the TreeNode arg
   void connectNodes();
-  
+
   void generate(TreeNode *, QGraphicsScene *, int w, int h);
-  
+
   std::string abbr(const std::string &);
 
-  std::ofstream fout; 
+  std::ofstream fout;
 
   // these are used for finding connections in the graphs
-  std::map<std::string, std::string> rMap_;  
-  std::map<std::string, std::string> wMap_;  
+  std::map<std::string, std::string> rMap_;
+  std::map<std::string, std::string> wMap_;
 
 };
 

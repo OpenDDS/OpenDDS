@@ -5,7 +5,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
- 
+
 #ifndef MONITORDATAMODEL_H
 #define MONITORDATAMODEL_H
 

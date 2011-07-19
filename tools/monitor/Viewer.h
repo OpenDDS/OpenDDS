@@ -5,7 +5,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
- 
+
 #ifndef VIEWER_H
 #define VIEWER_H
 
@@ -51,24 +51,24 @@ class Viewer : public QMainWindow {
   private slots:
     /// Translate index to column to signal the view to resize the column.
     void itemExpanded( const QModelIndex& item);
-    
+
     /// Data has changed. Moved from MonitorDataModel to avoid calling
-    /// outside of GUI thread. This fixes the "QPixmap: It is not safe to 
+    /// outside of GUI thread. This fixes the "QPixmap: It is not safe to
     /// use pixmaps outside the GUI thread" warnings.
-    void resizeColumnsOnDataChange(const QModelIndex & start, 
-    	                             const QModelIndex & end);
+    void resizeColumnsOnDataChange(const QModelIndex & start,
+                                   const QModelIndex & end);
 
     void addRepo();
     void removeRepo();
     void scaleImage();
     void newRepo( const QString& ior);
     void doSort( int index);
-    
+
     // context menu slots
     void treeContextMenu(const QPoint&);
     void nodeContextMenu(const QPoint&);
     void graphContextMenu(const QPoint&);
-    
+
     // methods called from context menus
     void showGraphOptions();
     void updateGraphView(bool honorDisplayFlag = false);
@@ -76,7 +76,7 @@ class Viewer : public QMainWindow {
     void updateNodeView(bool honorDisplayFlag = false);
     void expand(bool flag = false);
     void saveImage(const QPixmap *p);
-    
+
   protected:
     /// Close action.
     void closeEvent( QCloseEvent* event = 0);
@@ -86,23 +86,23 @@ class Viewer : public QMainWindow {
     const Options&       options_;
     MonitorData*         dataSource_;
     MonitorDataModel*    model_;
-    
+
     GvOptionsData gvOpt;  // the authority for gvoptions ie the gvdialog may
-                          // not have the correct options if it's hidden. 
-                          
+                          // not have the correct options if it's hidden.
+
     NodeOptionsData nodeOpt;
 
     // these items are not created with the designer tool
     // they belong to the viewer not the ui.
     QLabel* graphView;
     QImage* image;
-    
+
     // rt-click context menu popups for tree, node and graph view options
     QMenu treeMenu;
     QMenu nodeViewMenu; // node view options
     QMenu nodeMenu; // individual node options
     QMenu graphMenu;
-    
+
     QGraphicsScene *nodeScene;
 };
 

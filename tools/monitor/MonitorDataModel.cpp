@@ -48,7 +48,7 @@ MonitorDataModel::updated(
 {
   QModelIndex topLeft     = this->index( left,  lcol);
   QModelIndex bottomRight = this->index( right, rcol);
-  
+
   emit dataChanged( topLeft, bottomRight);
 }
 
@@ -81,7 +81,7 @@ MonitorDataModel::index( TreeNode* node, int column) const
   // Form the index of the tree root to start from.  Use the topmost
   // non-null node that we found as the root.
   QModelIndex index = this->QAbstractItemModel::createIndex( 0, column, node);
-  
+
   // Now we can form index values all the way back to the node of
   // interest.
   while( !list.isEmpty()) {
@@ -117,7 +117,7 @@ MonitorDataModel::index(
   TreeNode* childNode  = (*parentNode)[ row];
   if( childNode) {
     return this->QAbstractItemModel::createIndex( row, column, childNode);
-    
+
   } else {
     return QModelIndex();
   }
@@ -175,18 +175,18 @@ MonitorDataModel::data( const QModelIndex& index, int role) const
 Qt::ItemFlags
 MonitorDataModel::flags( const QModelIndex& index) const
 {
-	if( false == index.isValid()) {
+  if( false == index.isValid()) {
     return 0;
   }
 
-  return this->QAbstractItemModel::flags( index) 
+  return this->QAbstractItemModel::flags( index)
        | Qt::ItemIsEnabled
        | Qt::ItemIsSelectable
   //     | Qt::ItemIsUserCheckable  // checkboxes in tree view
   //     | Qt::ItemIsEditable
   //     | Qt::ItemIsDragEnabled
   //     | Qt::ItemIsDropEnabled
-  ;      
+  ;
 }
 
 QVariant
