@@ -37,6 +37,68 @@
 
 #include "DDSTEST.h"
 
+DDS::Publisher_ptr
+create_configured_publisher (DDS::DomainParticipant_ptr dp)
+{
+
+  // Create the publisher
+  DDS::Publisher_var pub = dp->create_publisher (PUBLISHER_QOS_DEFAULT,
+                                                 DDS::PublisherListener::_nil (),
+                                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TEST_CHECK (!CORBA::is_nil (pub.in ()));
+
+  // If there is a ini file-based configuration name initialize
+  // the transport configuration for the corresponding Entity
+  TEST_CHECK (!configuration_str.empty ());
+  if (configuration_str != "none" && entity_str == "pubsub")
+    {
+      OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, pub.in ());
+    }
+
+  return pub._retn ();
+}
+
+DDS::DataWriter_ptr
+create_configured_writer (DDS::Publisher_ptr pub, DDS::Topic_ptr topic, DDS::DataWriterListener_ptr dwl)
+{
+  // Create the data writer
+  DDS::DataWriterQos dw_qos;
+  pub->get_default_datawriter_qos (dw_qos);
+
+  dw_qos.durability.kind = durability_kind;
+  dw_qos.liveliness.kind = liveliness_kind;
+  dw_qos.liveliness.lease_duration = LEASE_DURATION;
+  dw_qos.reliability.kind = reliability_kind;
+
+  DDS::DataWriter_var dw = pub->create_datawriter (topic,
+                                                   dw_qos,
+                                                   dwl,
+                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  // Initialize the transport configuration for the appropriate entity
+  TEST_CHECK (!configuration_str.empty ());
+
+  if (configuration_str != "none" && entity_str == "rw")
+    {
+      OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str,
+                                                                  dw.in ());
+    }
+
+  return dw._retn ();
+}
+
+bool
+assert_publication_matched (DDS::DataWriterListener_ptr dwl)
+{
+  // Assert if pub/sub made a match ...
+  DataWriterListenerImpl* dwl_servant =
+          dynamic_cast<DataWriterListenerImpl*> (dwl);
+
+  // check to see if the publisher worked
+  return !compatible || dwl_servant->publication_matched ();
+
+}
+
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
@@ -49,90 +111,18 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // and then get application specific parameters.
       ::parse_args (argc, argv);
 
-      DDS::DomainParticipant_var dp = dpf->create_participant (MY_DOMAIN,
-                                                               PARTICIPANT_QOS_DEFAULT,
-                                                               DDS::DomainParticipantListener::_nil (),
-                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::DomainParticipant_var dp (create_configured_participant (dpf.in ()));
       TEST_CHECK (!CORBA::is_nil (dp.in ()));
 
-      Xyz::FooTypeSupport_var fts (new Xyz::FooTypeSupportImpl);
-      TEST_CHECK (DDS::RETCODE_OK == fts->register_type (dp.in (), MY_TYPE));
+      DDS::Topic_var topic (create_configured_topic (dp.in ()));
+      TEST_CHECK (!CORBA::is_nil (topic.in ()));
 
-      DDS::TopicQos topic_qos;
-      dp->get_default_topic_qos (topic_qos);
-
-      DDS::Topic_var topic =
-              dp->create_topic (MY_SAME_TOPIC,
-                                MY_TYPE,
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil (),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      TEST_CHECK (!CORBA::is_nil (topic.in ()))
-
-      DDS::TopicDescription_var description =
-              dp->lookup_topicdescription (MY_SAME_TOPIC);
-      TEST_CHECK (!CORBA::is_nil (description.in ()));
-
-      // Create the publisher
-      DDS::Publisher_var pub = dp->create_publisher (PUBLISHER_QOS_DEFAULT,
-                                                     DDS::PublisherListener::_nil (),
-                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      TEST_CHECK (!CORBA::is_nil (pub.in ()))
-
-      // Initialize the transport configuration for the appropriate Entity (except TreansportClients)
-      TEST_CHECK (!configuration_str.empty ());
-      if (configuration_str == "none")
-        {
-          TEST_CHECK (!entity_str.empty ());
-        }
-      else
-        {
-          TEST_CHECK (!configuration_str.empty ());
-
-          if (entity_str == "pubsub")
-            {
-              OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, pub.in ());
-            }
-          else if (entity_str == "participant")
-            {
-              OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, dp.in ());
-            }
-          else
-            {
-              TEST_CHECK (entity_str == "none");
-            }
-        }
-
-      // Create the data writer
-      DDS::DataWriterQos dw_qos;
-      pub->get_default_datawriter_qos (dw_qos);
-
-      dw_qos.durability.kind = durability_kind;
-      dw_qos.liveliness.kind = liveliness_kind;
-      dw_qos.liveliness.lease_duration = LEASE_DURATION;
-      dw_qos.reliability.kind = reliability_kind;
+      DDS::Publisher_var pub (create_configured_publisher (dp.in ()));
+      TEST_CHECK (!CORBA::is_nil (pub.in ()));
 
       DDS::DataWriterListener_var dwl (new DataWriterListenerImpl);
-      DDS::DataWriter_var dw = pub->create_datawriter (topic.in (),
-                                                       dw_qos,
-                                                       dwl.in (),
-                                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::DataWriter_var dw (create_configured_writer (pub.in (), topic.in (), dwl.in ()));
       TEST_CHECK (!CORBA::is_nil (dw.in ()));
-
-      // Initialize the transport configuration for the appropriate entity
-      TEST_CHECK (!configuration_str.empty ());
-      if (configuration_str == "none")
-        {
-          TEST_CHECK (!entity_str.empty ());
-        }
-      else
-        {
-          if (entity_str == "rw")
-            {
-              OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str,
-                                                                          dw.in ());
-            }
-        }
 
       // Wait for things to settle ?!
       ACE_OS::sleep (test_duration);
@@ -147,20 +137,13 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Clean up publisher objects
       pub->delete_contained_entities ();
-
       dp->delete_publisher (pub.in ());
-
       dp->delete_topic (topic.in ());
       dpf->delete_participant (dp.in ());
 
       TheServiceParticipant->shutdown ();
 
-      // Assert if pub/sub made a match ...
-      DataWriterListenerImpl* dwl_servant =
-              dynamic_cast<DataWriterListenerImpl*> (dwl.in ());
-
-      // check to see if the publisher worked
-      if (compatible && !dwl_servant->publication_matched ())
+      if (!assert_publication_matched (dwl.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT ("(%P|%t) Expected publication_matched to be %C, but it wasn't.")

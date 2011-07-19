@@ -10,7 +10,13 @@
 // ============================================================================
 
 
-#include "dds/DdsDcpsInfrastructureC.h"
+#include "common.h"
+#include "../common/TestSupport.h"
+
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/SString.h"
 #include "ace/Arg_Shifter.h"
@@ -244,4 +250,46 @@ int parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
+
+DDS::DomainParticipant_ptr
+create_configured_participant (DDS::DomainParticipantFactory_ptr dpf)
+{
+  DDS::DomainParticipant_var dp =
+          dpf->create_participant (MY_DOMAIN,
+                                   PARTICIPANT_QOS_DEFAULT,
+                                   DDS::DomainParticipantListener::_nil (),
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  // If there is a ini file-based configuration name initialize
+  // the transport configuration for the corresponding Entity
+  TEST_CHECK (!configuration_str.empty ());
+  if (configuration_str != "none" && entity_str == "participant")
+    {
+      OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, dp.in ());
+    }
+
+
+  Xyz::FooTypeSupport_var fts (new Xyz::FooTypeSupportImpl);
+  TEST_CHECK (DDS::RETCODE_OK == fts->register_type (dp.in (), MY_TYPE));
+
+  return dp._retn ();
+
+}
+DDS::Topic_ptr
+create_configured_topic (DDS::DomainParticipant_ptr dp)
+{
+  // When collocation doesn't matter we choose a topic name that will not match
+  // the publisher's topic name
+  std::string topicname ((collocation_str == "none") ? MY_OTHER_TOPIC : MY_SAME_TOPIC);
+
+
+  DDS::TopicQos topic_qos;
+  dp->get_default_topic_qos (topic_qos);
+
+  return dp->create_topic (topicname.c_str (),
+                           MY_TYPE,
+                           TOPIC_QOS_DEFAULT,
+                           DDS::TopicListener::_nil (),
+                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+}
 

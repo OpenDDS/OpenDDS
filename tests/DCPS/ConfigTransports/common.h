@@ -10,6 +10,10 @@
 // ============================================================================
 
 
+#include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 
 #include "ace/SString.h"
@@ -71,3 +75,11 @@ const ACE_TString& get_entity_kind(const ACE_TString& argument);
 ::DDS::Duration_t get_lease_duration(const ACE_TString& argument);
 
 int parse_args (int argc, ACE_TCHAR *argv[]);
+
+DDS::DomainParticipant_ptr
+create_configured_participant (DDS::DomainParticipantFactory_ptr dpf);
+
+DDS::Topic_ptr
+create_configured_topic (DDS::DomainParticipant_ptr dp);
+
+

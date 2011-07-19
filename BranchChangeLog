@@ -1,3 +1,13 @@
+Tue Jul 19 14:04:07 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Refactored common code to help introducing of new collocation
+          scenarios (same participant, same publisher, etc.)
+
 Mon Jul 18 22:16:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:

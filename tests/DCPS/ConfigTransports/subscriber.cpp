@@ -20,18 +20,89 @@
 #include "../common/TestSupport.h"
 #include "../common/TestException.h"
 
+#include "dds/DdsDcpsSubscriptionC.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
+
+
+DDS::Subscriber_ptr
+create_configured_subscriber (DDS::DomainParticipant_ptr dp)
+{
+
+  // Create the subscriber
+  DDS::Subscriber_var sub =
+          dp->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
+                                 DDS::SubscriberListener::_nil (),
+                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TEST_CHECK (!CORBA::is_nil (sub.in ()));
+
+  // If there is a ini file-based configuration name initialize
+  // the transport configuration for the corresponding Entity
+  TEST_CHECK (!configuration_str.empty ());
+  if (configuration_str != "none" && entity_str == "pubsub")
+    {
+      OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, sub.in ());
+    }
+
+  return sub._retn ();
+}
+
+DDS::DataReader_ptr
+create_configured_reader (DDS::Subscriber_ptr sub, DDS::DataReaderListener_ptr drl)
+{
+  // Create the data readers
+  DDS::DataReaderQos dr_qos;
+  sub->get_default_datareader_qos (dr_qos);
+
+  dr_qos.durability.kind = durability_kind;
+  dr_qos.liveliness.kind = liveliness_kind;
+  dr_qos.liveliness.lease_duration = LEASE_DURATION;
+  dr_qos.reliability.kind = reliability_kind;
+
+  // When collocation doesn't matter we choose a topic name that will not match
+  // the publisher's topic name
+  std::string topicname ((collocation_str == "none") ? MY_OTHER_TOPIC : MY_SAME_TOPIC);
+
+  DDS::TopicDescription_var description =
+          sub->get_participant ()->lookup_topicdescription (topicname.c_str ());
+  TEST_CHECK (!CORBA::is_nil (description.in ()));
+
+  DDS::DataReader_var rd (sub->create_datareader (description.in (),
+                                                  dr_qos,
+                                                  drl,
+                                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK));
+
+  // Initialize the transport configuration for the appropriate entity
+  TEST_CHECK (!configuration_str.empty ());
+  if (configuration_str != "none" && entity_str == "rw")
+    {
+      OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str,
+                                                                  rd.in ());
+    }
+
+  return rd._retn ();
+}
+
+bool
+assert_subscription_matched (DDS::DataReaderListener_ptr drl)
+{
+  // Assert if pub/sub made a match ...
+  DataReaderListenerImpl* drl_servant =
+          dynamic_cast<DataReaderListenerImpl*> (drl);
+
+  // there is an error if we matched when not compatible (or vice-versa)
+  return !compatible || drl_servant->subscription_matched ();
+}
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
@@ -44,96 +115,19 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // and then get application specific parameters.
       ::parse_args (argc, argv);
 
-      DDS::DomainParticipant_var dp =
-              dpf->create_participant (MY_DOMAIN,
-                                       PARTICIPANT_QOS_DEFAULT,
-                                       DDS::DomainParticipantListener::_nil (),
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::DomainParticipant_var dp (create_configured_participant (dpf.in()));
       TEST_CHECK (!CORBA::is_nil (dp.in ()));
 
-      Xyz::FooTypeSupport_var fts (new Xyz::FooTypeSupportImpl);
-      TEST_CHECK (DDS::RETCODE_OK == fts->register_type (dp.in (), MY_TYPE));
-
-
-      DDS::TopicQos topic_qos;
-      dp->get_default_topic_qos (topic_qos);
-
-      // When collocation doesn't matter we choose a topic name that will not match
-      // the publisher's topic name
-      std::string topicname((collocation_str == "none") ? MY_OTHER_TOPIC : MY_SAME_TOPIC);
-
-      DDS::Topic_var topic =
-              dp->create_topic (topicname.c_str (),
-                                MY_TYPE,
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil (),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::Topic_var topic (create_configured_topic (dp.in ()));
       TEST_CHECK (!CORBA::is_nil (topic.in ()));
 
-      DDS::TopicDescription_var description =
-              dp->lookup_topicdescription (topicname.c_str ());
-      TEST_CHECK (!CORBA::is_nil (description.in ()));
-
       // Create the subscriber
-      DDS::Subscriber_var sub =
-              dp->create_subscriber (SUBSCRIBER_QOS_DEFAULT,
-                                     DDS::SubscriberListener::_nil (),
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      DDS::Subscriber_var sub (create_configured_subscriber (dp.in ()));
       TEST_CHECK (!CORBA::is_nil (sub.in ()));
 
-      // If there is a ini file-based configuration name initialize
-      // the transport configuration for the corresponding Entity
-      TEST_CHECK (!configuration_str.empty ());
-      if (configuration_str == "none")
-        {
-          TEST_CHECK (!entity_str.empty ());
-        }
-      else
-        {
-          if (entity_str == "pubsub")
-            {
-              OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, sub.in ());
-            }
-          else if (entity_str == "participant")
-            {
-              OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, dp.in ());
-            }
-          else
-            {
-              TEST_CHECK (entity_str == "none");
-            }
-        }
-
-      // Create the data readers
-      DDS::DataReaderQos dr_qos;
-      sub->get_default_datareader_qos (dr_qos);
-
-      dr_qos.durability.kind = durability_kind;
-      dr_qos.liveliness.kind = liveliness_kind;
-      dr_qos.liveliness.lease_duration = LEASE_DURATION;
-      dr_qos.reliability.kind = reliability_kind;
-
-      DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
-      DDS::DataReader_var dr (sub->create_datareader (description.in (),
-                                                      dr_qos,
-                                                      drl.in (),
-                                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK));
+      DDS::DataReaderListener_var drl (new DataReaderListenerImpl ());
+      DDS::DataReader_var dr (create_configured_reader (sub.in (), drl.in ()));
       TEST_CHECK (!CORBA::is_nil (dr.in ()));
-
-      // Initialize the transport configuration for the appropriate entity
-      TEST_CHECK (!configuration_str.empty ());
-      if (configuration_str == "none")
-        {
-          TEST_CHECK (!entity_str.empty ());
-        }
-      else
-        {
-          if (entity_str == "rw")
-            {
-              OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str,
-                                                                          dr.in ());
-            }
-        }
 
       // Wait for things to settle ?!
       ACE_OS::sleep (test_duration);
@@ -154,12 +148,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       TheServiceParticipant->shutdown ();
 
-      // Assert if pub/sub made a match ...
-      DataReaderListenerImpl* drl_servant =
-              dynamic_cast<DataReaderListenerImpl*> (drl.in ());
-
       // there is an error if we matched when not compatible (or vice-versa)
-      if (compatible && !drl_servant->subscription_matched ())
+      if (!assert_subscription_matched (drl.in ()))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT ("(%P|%t) Expected subscription_matched to be %C, but it wasn't.")
