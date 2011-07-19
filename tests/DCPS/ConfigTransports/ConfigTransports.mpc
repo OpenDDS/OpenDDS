@@ -11,6 +11,7 @@ project(*Publisher): dcpsexe_with_tcp {
     Writer.cpp
     DDSTEST.cpp
     DataWriterListenerImpl.cpp
+    DataReaderListener.cpp
   }
 }
 
@@ -26,6 +27,7 @@ project(*Subscriber): dcpsexe_with_tcp {
     common.cpp
     subscriber.cpp
     DDSTEST.cpp
+    DataWriterListenerImpl.cpp
     DataReaderListener.cpp
   }
 }

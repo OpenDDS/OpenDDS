@@ -28,79 +28,104 @@ $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 $dcpsrepo_ior = "repo.ior";
 
 $qos = {
+    autoenable    => undef,
     durability => transient_local,
     liveliness => automatic,
     lease_time => 5,
-    reliability => reliable
+    reliability => reliable,
+#    reliability => best_effort,
 };
+
+
+my @explicit_configuration = (
+
+  {
+    entity        => none,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
+    compatibility => false,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    entity        => participant,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => false,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    entity        => pubsub,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => false,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    # Note that without disabling the 'autoenable' policy, the new RW will kick off the
+    # transport negotiation and a transport will be selected *before* one has the chance
+    # to specify which transport configuration must be used.
+    autoenable    => false,
+    entity        => rw,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => false,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+);
+
+my @configuration_file_unused = (
+
+  # The effective default configuration contains a transport of the same type,
+  # for each transport that was mentioned in the file. The names of the transports
+  # are not taken from the configuration file. Any other entity value will cause
+  # the test to fail because assigning non-existent configuration to an entity
+  # is wrong.
+  {
+    entity        => none,
+    collocation   => none,
+    configuration => whatever_just_to_ensure_there_is_a_config_file_on_the_command_line,
+    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+);
+
+my @without_configuration_file = (
+
+  # The effective default configuration in the absence of configuration files
+  # contains just the TCP. Any other entity value will have the same effect,
+  # because there is no configuration to assign anyway..
+  {
+    entity        => none,
+    collocation   => none,
+    configuration => undef,
+    protocol      => [_OPENDDS_0500_TCP],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+);
+
 
 @scenario = (
 
-# A transport configuration file and using the Udp_Only
-# configuration.
-  {
-    entity        => none,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => _OPENDDS_0300_UDP,
-    compatibility => false,
-    publisher     => $qos,
-    subscriber    => $qos
-  },
 
-#); @scenario_other = (
-
-  {
-    entity        => pubsub,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => _OPENDDS_0300_UDP,
-    compatibility => false,
-    publisher     => $qos,
-    subscriber    => $qos
-  },
-
-  {
-    entity        => participant,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => _OPENDDS_0300_UDP,
-    compatibility => false,
-    publisher     => $qos,
-    subscriber    => $qos
-  },
-
-# No transport configuration is specified
-# The defaults (TCP) will be used
-  {
-    entity        => none,
-    collocation   => none,
-    configuration => undef,
-    protocol      => _OPENDDS_0500_TCP,
-    compatibility => false,
-    publisher     => $qos,
-    subscriber    => $qos
-  },
-
-  {
-    entity        => pubsub,
-    collocation   => none,
-    configuration => undef,
-    protocol      => _OPENDDS_0500_TCP,
-    compatibility => false,
-    publisher     => $qos,
-    subscriber    => $qos
-  },
-
-  {
-    entity        => participant,
-    collocation   => none,
-    configuration => undef,
-    protocol      => _OPENDDS_0500_TCP,
-    compatibility => false,
-    publisher     => $qos,
-    subscriber    => $qos
-  },
+  @without_configuration_file,
+  @configuration_file_unused,
+  @explicit_configuration,
 
 );
 
@@ -111,6 +136,7 @@ sub parse($$$) {
   my ($pubsub, $hasbuiltins, $s) = @_;
 
   my $compatibility = $$s{compatibility};
+  my $pub_autoenable = $$s{autoenable} ? " -n " . $$s{autoenable} : "" ;
 
   my $pub_protocol = $$s{$pubsub}{protocol} || $$s{protocol};
   my $pub_entity = $$s{$pubsub}{entity} || $$s{entity};
@@ -128,12 +154,13 @@ sub parse($$$) {
   my $config = "-DCPSConfigFile transports.ini" if $pub_configuration;
 
   $pub_configuration = $pub_configuration || 'none';
-  my $result = "$svc_conf $pub_builtins $level $config" 
+  my $result = "$svc_conf $pub_builtins $level $config"
          . " -c " . $compatibility
-         . " -e " . $pub_entity
+         . " -e " . join (' -e ', $pub_entity)
+         . $pub_autoenable
          . " -a " . $pub_collocation
          . " -s " . $pub_configuration
-         . " -t " . $pub_protocol
+         . " -t " . join (' -t ', @$pub_protocol)
          . " -d " . $pub_durability_kind
          . " -k " . $pub_liveliness_kind
          . " -r " . $pub_reliability_kind
@@ -232,11 +259,11 @@ for my $hasbuiltins (undef, true) {
 
     for my $i (@scenario) {
 
-	$pub_parameters = parse('publisher', $hasbuiltins, \%$i);
-	$sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
+        $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
+        $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
 
-	$status += run($pub_parameters, $sub_parameters);
-	print "\n";
+        $status += run($pub_parameters, $sub_parameters);
+        print "\n";
     }
 
     $status += finalize($DCPSREPO);

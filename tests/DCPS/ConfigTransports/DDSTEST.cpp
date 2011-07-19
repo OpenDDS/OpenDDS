@@ -20,48 +20,33 @@
 
 #include <vector>
 
-//namespace {
-int
+bool
 ::DDS_TEST::supports (const DDS::DataReader* dr, const std::string& protocol_name)
 {
-  ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("(%P|%t) Validating data reader\n")));
-
   return supports (dynamic_cast<const OpenDDS::DCPS::TransportClient*> (dr), protocol_name);
 }
 
-int
+bool
 ::DDS_TEST::supports (const DDS::DataWriter* dw, const std::string& protocol_name)
 {
-  ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("(%P|%t) Validating data writer\n")));
-
   return supports (dynamic_cast<const OpenDDS::DCPS::TransportClient*> (dw), protocol_name);
 }
 
-int
+bool
 ::DDS_TEST::supports (const DDS::Entity* pub, const std::string& protocol_name)
 {
-  ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("(%P|%t) Validating entity\n")));
-
   return supports (dynamic_cast<const OpenDDS::DCPS::EntityImpl*> (pub), protocol_name);
 }
 
-int
+bool
 ::DDS_TEST::supports (const DDS::DomainParticipant* pa, const std::string& protocol_name)
 {
-  ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("(%P|%t) Validating participant\n")));
   return supports (dynamic_cast<const OpenDDS::DCPS::EntityImpl*> (pa), protocol_name);
 }
 
-int
+bool
 ::DDS_TEST::supports (const OpenDDS::DCPS::EntityImpl* entity, const std::string& protocol_name)
 {
-
-  ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("(%P|%t) Validating entity: %@\n"), entity));
 
   const OpenDDS::DCPS::TransportConfig_rch tc = entity->transport_config ();
 
@@ -84,17 +69,17 @@ int
         {
           ACE_ERROR_RETURN ((LM_INFO,
                              ACE_TEXT ("(%P|%t) Found transport '%C'\n."), protocol_name.c_str ()),
-                            1);
+                            true);
         }
     }
 
   ACE_ERROR_RETURN ((LM_INFO,
                      ACE_TEXT ("(%P|%t) Unable to find transport %C.\n"),
                      protocol_name.c_str ()),
-                    0);
+                    false);
 }
 
-int
+bool
 ::DDS_TEST::supports (const OpenDDS::DCPS::TransportClient* tc, const std::string& name)
 {
   if (tc == 0)
@@ -127,4 +112,3 @@ int
                     0);
 }
 
-//};

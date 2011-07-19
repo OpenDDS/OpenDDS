@@ -10,94 +10,15 @@
 // ============================================================================
 
 
-#include "DataWriterListenerImpl.h"
+#include "common.h"
+#include "DDSTEST.h"
+
+#include "../common/TestSupport.h"
 
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Qos_Helper.h"
-
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportInst.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
-
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
-
-#include "ace/Arg_Shifter.h"
-#include "ace/Reactor.h"
-#include "tao/ORB_Core.h"
-
-#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
-
-#include "common.h"
-#include "../common/TestSupport.h"
-#include "../common/TestException.h"
-
-#include "DDSTEST.h"
-
-DDS::Publisher_ptr
-create_configured_publisher (DDS::DomainParticipant_ptr dp)
-{
-
-  // Create the publisher
-  DDS::Publisher_var pub = dp->create_publisher (PUBLISHER_QOS_DEFAULT,
-                                                 DDS::PublisherListener::_nil (),
-                                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  TEST_CHECK (!CORBA::is_nil (pub.in ()));
-
-  // If there is a ini file-based configuration name initialize
-  // the transport configuration for the corresponding Entity
-  TEST_CHECK (!configuration_str.empty ());
-  if (configuration_str != "none" && entity_str == "pubsub")
-    {
-      OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str, pub.in ());
-    }
-
-  return pub._retn ();
-}
-
-DDS::DataWriter_ptr
-create_configured_writer (DDS::Publisher_ptr pub, DDS::Topic_ptr topic, DDS::DataWriterListener_ptr dwl)
-{
-  // Create the data writer
-  DDS::DataWriterQos dw_qos;
-  pub->get_default_datawriter_qos (dw_qos);
-
-  dw_qos.durability.kind = durability_kind;
-  dw_qos.liveliness.kind = liveliness_kind;
-  dw_qos.liveliness.lease_duration = LEASE_DURATION;
-  dw_qos.reliability.kind = reliability_kind;
-
-  DDS::DataWriter_var dw = pub->create_datawriter (topic,
-                                                   dw_qos,
-                                                   dwl,
-                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  // Initialize the transport configuration for the appropriate entity
-  TEST_CHECK (!configuration_str.empty ());
-
-  if (configuration_str != "none" && entity_str == "rw")
-    {
-      OpenDDS::DCPS::TransportRegistry::instance ()->bind_config (configuration_str,
-                                                                  dw.in ());
-    }
-
-  return dw._retn ();
-}
-
-bool
-assert_publication_matched (DDS::DataWriterListener_ptr dwl)
-{
-  // Assert if pub/sub made a match ...
-  DataWriterListenerImpl* dwl_servant =
-          dynamic_cast<DataWriterListenerImpl*> (dwl);
-
-  // check to see if the publisher worked
-  return !compatible || dwl_servant->publication_matched ();
-
-}
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
@@ -127,13 +48,23 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Wait for things to settle ?!
       ACE_OS::sleep (test_duration);
 
-      // Assert effective configuration properties
-      ACE_ERROR ((LM_INFO,
-                  ACE_TEXT ("(%P|%t) Validating if the entity '%C' effective protocol is '%C'\n"),
-                  entity_str.c_str (),
-                  protocol_str.c_str ()));
+      // Assert effective transport protocols
+      int long left = protocol_str.size ();
+      for (std::vector < std::string>::const_iterator proto = protocol_str.begin ();
+              proto < protocol_str.end (); proto++)
+        {
+          bool issupported = ::DDS_TEST::supports (dw.in (), *proto);
+          ACE_ERROR ((LM_INFO,
+                      ACE_TEXT ("(%P|%t) Validating that '%C' entity supports protocol '%C': %C\n"),
+                      entity_str.c_str (),
+                      proto->c_str (),
+                      issupported ? "true" : "false"));
 
-      TEST_CHECK (::DDS_TEST::supports (dw.in (), protocol_str) != 0);
+          if (issupported) left--;
+        }
+
+      // All required protocols must have been found
+      TEST_CHECK (left == 0);
 
       // Clean up publisher objects
       pub->delete_contained_entities ();
@@ -157,15 +88,15 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             1);
         }
     }
-  catch (const TestException&)
-    {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT ("(%P|%t) TestException caught in main.cpp. ")), 1);
-    }
   catch (const CORBA::Exception& ex)
     {
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
+    }
+  catch (...)
+    {
+      ACE_ERROR_RETURN ((LM_ERROR,
+                         ACE_TEXT ("(%P|%t) runtime exception caught in main.cpp. ")), 1);
     }
 
   ACE_ERROR_RETURN ((LM_INFO,

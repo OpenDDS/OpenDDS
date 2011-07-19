@@ -32,13 +32,13 @@ class DomainParticipant;
  */
 class DDS_TEST {
 public:
-    static int supports(const DDS::DataReader* pub, const std::string& name);
-    static int supports(const DDS::Entity* pub, const std::string& name);
-    static int supports(const DDS::DataWriter* pub, const std::string& name);
-    static int supports(const DDS::DomainParticipant* tc, const std::string& name);
+    static bool supports(const DDS::DataReader* pub, const std::string& name);
+    static bool supports(const DDS::Entity* pub, const std::string& name);
+    static bool supports(const DDS::DataWriter* pub, const std::string& name);
+    static bool supports(const DDS::DomainParticipant* tc, const std::string& name);
 
-    static int supports(const OpenDDS::DCPS::TransportClient* tc, const std::string& name);
-    static int supports(const OpenDDS::DCPS::EntityImpl* entity, const std::string& protocol_name);
+    static bool supports(const OpenDDS::DCPS::TransportClient* tc, const std::string& name);
+    static bool supports(const OpenDDS::DCPS::EntityImpl* entity, const std::string& protocol_name);
 
 protected:
 
