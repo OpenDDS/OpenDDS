@@ -1,3 +1,32 @@
+Tue Jul 19 21:07:36 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/README:
+        * performance-tests/DCPS/TransportLatency/dummy_tcp.conf:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Updated for new transport scheme.  TransportLatency is
+          still a work in progress.  Only run_test.pl is modified
+          and not the other two scripts.  run_test.pl is still
+          not running.
+
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/tcp.conf:
+        * performance-tests/DCPS/TransportLatency/multicast.conf:
+        * performance-tests/DCPS/TransportLatency/tcp.conf:
+        * performance-tests/DCPS/TransportLatency/udp.conf:
+
+          Removed these files.
+
 Tue Jul 19 20:59:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

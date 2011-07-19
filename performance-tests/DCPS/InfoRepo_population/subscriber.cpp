@@ -16,7 +16,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
@@ -25,6 +24,8 @@
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/High_Res_Timer.h"
+
+#include <sstream>
 
 class Subscriber
 {
@@ -45,8 +46,6 @@ private:
   std::string control_file_;
   size_t publisher_count_;
 
-  int transport_impl_id_;
-
   std::string sync_server_;
 
   DDS::DomainParticipantFactory_var dpf_;
@@ -54,8 +53,6 @@ private:
   std::vector<DDS::Topic_var> topic_;
   std::vector<DDS::Subscriber_var> subs_;
   std::vector<DDS::DataReader_var> dr_;
-
-  std::vector< OpenDDS::DCPS::TransportImpl_rch> transports_;
 
   std::auto_ptr<SyncClientExt_i> sync_client_;
 };
@@ -69,7 +66,7 @@ Subscriber::parse_args (int argc, ACE_TCHAR *argv[])
   std::string usage = " -t <topic count>\n"
     " -n <participant count>\n -p <publisher count>\n"
     " -c <control file>\n -s <subscriber count>\n"
-    " -i <transport Id>\n -y <SyncServer ior>";
+    " -y <SyncServer ior>";
 
   while ((c = get_opts ()) != -1)
   {
@@ -90,9 +87,6 @@ Subscriber::parse_args (int argc, ACE_TCHAR *argv[])
       case 's':
         reader_count_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
-      case 'i':
-        transport_impl_id_ = ACE_OS::atoi (get_opts.opt_arg ());
-        break;
       case 'y':
         sync_server_ = ACE_TEXT_ALWAYS_CHAR (get_opts.opt_arg ());
         break;
@@ -112,7 +106,6 @@ Subscriber::parse_args (int argc, ACE_TCHAR *argv[])
 Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (Subscriber::InitError)
   : topic_count_ (1), participant_count_ (1), reader_count_(1)
   , control_file_ ("barrier_file"), publisher_count_ (1)
-  , transport_impl_id_ (1)
 {
   try
     {
@@ -147,7 +140,6 @@ Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (Subscriber::InitErro
   topic_.resize (topic_count_);
   subs_.resize (reader_count_);
   dr_.resize (reader_count_);
-  this->transports_.resize( this->reader_count_);
 }
 
 bool
@@ -232,44 +224,11 @@ Subscriber::run (void)
         }
       topic_timer.stop();
 
-      // Initialize the transports
-      for( size_t count = 0; count < reader_count_; ++count) {
-        this->transports_[ count]
-          = TheTransportFactory->obtain( this->transport_impl_id_ + count);
-
-        if( false == this->transports_[ count].is_nil()) {
-          // Only create transports that need to be.
-          continue;
-        }
-
-        this->transports_[ count]
-          = TheTransportFactory->create_transport_impl(
-              this->transport_impl_id_ + count,
-              ACE_TEXT("tcp"),
-              ::OpenDDS::DCPS::DONT_AUTO_CONFIG
-            );
-
-        OpenDDS::DCPS::TransportInst_rch config
-          = TheTransportFactory->create_configuration(
-              this->transport_impl_id_ + count,
-              ACE_TEXT("tcp")
-            );
-
-        if( this->transports_[ count]->configure( config.in()) != 0) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) %T ERROR: TCP ")
-            ACE_TEXT("failed to configure the transport.\n")
-          ));
-          return false;
-        }
-      }
-
       ACE_High_Res_Timer sub_timer;
       sub_timer.start();
       for (size_t count = 0; count < reader_count_; count++)
         {
-          // Create the subscriber and attach to the corresponding
-          // transport.
+          // Create the subscriber
           subs_[count] =
             participant_[count]->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                                    DDS::SubscriberListener::_nil(),
@@ -278,40 +237,6 @@ Subscriber::run (void)
             cerr << "Failed to create_subscriber." << endl;
             return false;
           }
-
-          OpenDDS::DCPS::SubscriberImpl* sub_impl =
-            dynamic_cast< OpenDDS::DCPS::SubscriberImpl*> (subs_[count].in ());
-          if (0 == sub_impl) {
-            cerr << "Failed to obtain subscriber servant\n" << endl;
-            return false;
-          }
-
-          // Attach the subscriber to the transport.
-          OpenDDS::DCPS::AttachStatus status
-            = sub_impl->attach_transport(
-                this->transports_[ count].in()
-              );
-          if (status != OpenDDS::DCPS::ATTACH_OK)
-            {
-              std::string status_str;
-              switch (status) {
-              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = "ATTACH_BAD_TRANSPORT";
-                break;
-              case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = "ATTACH_ERROR";
-                break;
-              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = "ATTACH_INCOMPATIBLE_QOS";
-                break;
-              default:
-                status_str = "Unknown Status";
-                break;
-              }
-              cerr << "Failed to attach to the transport. Status == "
-                   << status_str.c_str() << endl;
-              exit(1);
-            }
         }
 
       // Create the Datareaders

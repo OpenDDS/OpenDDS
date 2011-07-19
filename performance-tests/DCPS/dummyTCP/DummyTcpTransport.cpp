@@ -59,7 +59,7 @@ OpenDDS::DCPS::DummyTcpTransport::find_datalink(
   RepoId                  /*local_id*/,
   const AssociationData&  remote_association,
   CORBA::Long             /*priority*/,
-  bool                    active)
+  bool                    /*active*/)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","find_datalink",5);
 
@@ -222,12 +222,17 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportInst* config)
 
   if (this->reactor_task_.is_nil())
     {
-      // It looks like our base class has either been shutdown, or it has
-      // erroneously never been supplied with the reactor task.
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: DummyTcpTransport requires a reactor in "
-                        "order to open its acceptor_.\n"),
-                       false);
+      this->create_reactor_task();
+      this->reactor_task_ = reactor_task();
+      if (this->reactor_task_.is_nil())
+        {
+          // It looks like our base class has either been shutdown, or it has
+          // erroneously never been supplied with the reactor task.
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "(%P|%t) ERROR: DummyTcpTransport requires a reactor in "
+                            "order to open its acceptor_.\n"),
+                           false);
+        }
     }
 
   // Make a "copy" of the reference for ourselves.
