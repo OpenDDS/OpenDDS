@@ -284,7 +284,6 @@ TransportImpl::check_fully_association(const RepoId& pub_id)
     while (iter != associations.end()) {
       if (check_fully_association(penditer->first, *iter)) {
         iter = associations.erase(iter);
-        association_listeners_.erase(pub_id);
 
       } else {
         ++iter;
@@ -293,6 +292,7 @@ TransportImpl::check_fully_association(const RepoId& pub_id)
 
     if (associations.size() == 0) {
       pending_association_sub_map_.erase(penditer);
+      association_listeners_.erase(pub_id);
     }
   }
 }
