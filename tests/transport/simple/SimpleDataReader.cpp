@@ -11,8 +11,9 @@
 #include "TestException.h"
 
 SimpleDataReader::SimpleDataReader(const OpenDDS::DCPS::RepoId& sub_id)
-  : sub_id_(sub_id),
-    received_test_message_(0)
+  : sub_id_(sub_id)
+  , num_messages_expected_(0)
+  , num_messages_received_(0)
 {
   DBG_ENTRY("SimpleDataReader","SimpleDataReader");
 }
@@ -25,9 +26,12 @@ SimpleDataReader::~SimpleDataReader()
 
 
 void
-SimpleDataReader::init(const OpenDDS::DCPS::AssociationData& publication)
+SimpleDataReader::init(const OpenDDS::DCPS::AssociationData& publication,
+                       int num_msgs)
 {
   DBG_ENTRY("SimpleDataReader","init");
+  this->num_messages_expected_ = num_msgs;
+  this->num_messages_received_ = 0;
 
   // Add the association between the local sub_id and the remote pub_id
   // to the transport via the TransportInterface.
@@ -48,7 +52,7 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", sample.sample_->rd_ptr()));
-  this->received_test_message_ = 1;
+  ++this->num_messages_received_;
 }
 
 
@@ -65,5 +69,5 @@ SimpleDataReader::transport_lost()
 int
 SimpleDataReader::received_test_message() const
 {
-  return this->received_test_message_;
+  return (this->num_messages_received_ == this->num_messages_expected_) ? 1 : 0;
 }

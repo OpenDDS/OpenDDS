@@ -34,6 +34,8 @@ class SubDriver
     ACE_TString       sub_addr_str_;
 
     SimpleDataReader reader_;
+
+    int num_msgs_;
 };
 
 #endif

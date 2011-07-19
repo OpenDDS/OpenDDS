@@ -35,6 +35,8 @@ class PubDriver
     ACE_TString       sub_addr_str_;
 
     SimpleDataWriter writer_;
+
+    int num_msgs_;
 };
 
 #endif

@@ -109,7 +109,7 @@ tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
 
 tests/transport/simple_bp_rm/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple_bp/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
-tests/transport/simple_n/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/simple/run_test.pl n: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA

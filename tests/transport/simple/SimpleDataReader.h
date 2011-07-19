@@ -18,7 +18,7 @@ class SimpleDataReader
     explicit SimpleDataReader(const OpenDDS::DCPS::RepoId& sub_id);
     virtual ~SimpleDataReader();
 
-    void init(const OpenDDS::DCPS::AssociationData& publication);
+    void init(const OpenDDS::DCPS::AssociationData& publication, int num_msgs);
 
     // Implementing TransportReceiveListener
     void data_received(const OpenDDS::DCPS::ReceivedDataSample& sample);
@@ -49,7 +49,8 @@ class SimpleDataReader
   private:
 
     const OpenDDS::DCPS::RepoId& sub_id_;
-    int received_test_message_;
+    int num_messages_expected_;
+    int num_messages_received_;
 };
 
 #endif  /* SIMPLEDATAREADER_H */

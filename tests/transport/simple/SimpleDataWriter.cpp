@@ -13,9 +13,12 @@
 
 #include "TestException.h"
 
+#include <sstream>
+
 SimpleDataWriter::SimpleDataWriter(const OpenDDS::DCPS::RepoId& pub_id)
   : pub_id_(pub_id)
-  , delivered_test_message_(0)
+  , num_messages_sent_(0)
+  , num_messages_delivered_(0)
 {
   DBG_ENTRY("SimpleDataWriter","SimpleDataWriter");
 }
@@ -45,60 +48,79 @@ SimpleDataWriter::init(const OpenDDS::DCPS::AssociationData& subscription)
 
 
 int
-SimpleDataWriter::run()
+SimpleDataWriter::run(int num_messages)
 {
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Build the DataSampleElementList to contain one element - "
-             "our 'Hello World' string.\n"));
+             "Build the DataSampleElementList\n"));
 
-  // We just send one message.
+  this->num_messages_delivered_ = 0;
+  this->num_messages_sent_      = num_messages;
 
-  // This is what goes in the "Data Block".
-  ACE_CString data = "Hello World!";
+  // Set up the DataSampleList
+  OpenDDS::DCPS::DataSampleList samples;
+
+  samples.head_ = 0;
+  samples.tail_ = 0;
+  samples.size_ = num_messages;
 
   // Now we can create the DataSampleHeader struct and set its fields.
   OpenDDS::DCPS::DataSampleHeader header;
 
   // The +1 makes the null terminator ('\0') get placed into the block.
-  header.message_length_ = static_cast<ACE_UINT32>(data.length()) + 1;
   header.message_id_ = 1;
-  // TMB - Compiler no longer likes the next line...  source_timestamp_ is gone.
-  //header.source_timestamp_ = ACE_OS::gettimeofday().msec();
   header.publication_id_ = this->pub_id_;
 
-  // The DataSampleHeader is what goes in the "Header Block".
-  ACE_Message_Block* header_block = new ACE_Message_Block
-                                                (header.max_marshaled_size());
-  *header_block << header;
+  OpenDDS::DCPS::DataSampleListElement* prev_element = 0;
 
-  // The +1 makes the null terminator ('\0') get placed into the block.
-  ACE_Message_Block* data_block = new ACE_Message_Block(data.length() + 1);
-  data_block->copy(data.c_str());
+  OpenDDS::DCPS::DataSampleListElementAllocator allocator(num_messages);
+  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (OpenDDS::DCPS::TransportSendElement));
 
-  // Chain the "Data Block" to the "Header Block"
-  header_block->cont(data_block);
+  std::string data = "Hello World!";
 
-  // Create the DataSampleListElement now.
-  OpenDDS::DCPS::DataSampleListElementAllocator allocator(3);
-  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(3, sizeof (OpenDDS::DCPS::TransportSendElement));
-  OpenDDS::DCPS::DataSampleListElement* element;
+  for (int i = 1; i <= num_messages; ++i) {
+    // This is what goes in the "Data Block".
+    std::ostringstream ostr;
+    ostr << data << " [" << i << "]";
 
-  ACE_NEW_MALLOC_RETURN(element,
-    static_cast<OpenDDS::DCPS::DataSampleListElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
-    OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator, 0), 1);
+    std::string data_str = ostr.str();
 
-  // The Sample Element will hold on to the chain of blocks (header + data).
-  element->sample_ = header_block;
+    ssize_t num_data_bytes = data_str.length() + 1;
 
-  // Set up the DataSampleList
-  OpenDDS::DCPS::DataSampleList samples;
+    header.message_length_ = static_cast<ACE_UINT32>(num_data_bytes);
+    header.sequence_ = i;
 
-  samples.head_ = element;
-  samples.tail_ = element;
-  samples.size_ = 1;
+    // The DataSampleHeader is what goes in the "Header Block".
+    ACE_Message_Block* header_block =
+      new ACE_Message_Block(header.max_marshaled_size());
+    *header_block << header;
+
+    ACE_Message_Block* data_block = new ACE_Message_Block(num_data_bytes);
+    data_block->copy(data_str.c_str());
+
+    // Chain the "Data Block" to the "Header Block"
+    header_block->cont(data_block);
+
+    // Create the DataSampleListElement now.
+    OpenDDS::DCPS::DataSampleListElement* element;
+
+    ACE_NEW_MALLOC_RETURN(element,
+      static_cast<OpenDDS::DCPS::DataSampleListElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
+      OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator, 0), 1);
+
+    // The Sample Element will hold on to the chain of blocks (header + data).
+    element->sample_ = header_block;
+    if (prev_element == 0) {
+      samples.head_ = element;
+    } else {
+      prev_element->next_send_sample_ = element;
+    }
+
+    prev_element = element;
+    samples.tail_ = element;
+  }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Ask the publisher to send the DataSampleList (samples).\n"));
+             "Send the DataSampleList (samples).\n"));
 
   send(samples);
 
@@ -137,7 +159,7 @@ SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sam
   // Delete the element
   //delete sample;
 
-  this->delivered_test_message_ = 1;
+  ++this->num_messages_delivered_;
 }
 
 
@@ -161,12 +183,12 @@ SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleListElement* sampl
   // Delete the element
   //delete sample;
 
-  this->delivered_test_message_ = 1;
+  ++this->num_messages_delivered_;
 }
 
 
 int
 SimpleDataWriter::delivered_test_message()
 {
-  return this->delivered_test_message_;
+  return (this->num_messages_delivered_ == this->num_messages_sent_) ? 1 : 0;
 }

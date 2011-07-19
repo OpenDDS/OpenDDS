@@ -23,6 +23,7 @@ SubDriver::SubDriver()
   : pub_id_(OpenDDS::DCPS::GuidBuilder::create())
   , sub_id_(OpenDDS::DCPS::GuidBuilder::create())
   , reader_(sub_id_)
+  , num_msgs_(1)
 {
   DBG_ENTRY("SubDriver","SubDriver");
 }
@@ -57,9 +58,11 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
   //
   // -p <pub_id:pub_host:pub_port>
   // -s <sub_id:sub_port>
+  // -n <num_messages>
   //
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
+  bool got_n = false;
   bool got_p = false;
   bool got_s = false;
 
@@ -104,6 +107,27 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       }
 
       got_s = true;
+    }
+    // The '-n' option
+    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-n")))) {
+      if (got_n) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) Only one -n allowed on command-line.\n"));
+        throw TestException();
+      }
+
+      int value = ACE_OS::atoi(current_arg);
+      arg_shifter.consume_arg();
+
+      if (value <= 0) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) Value following -n option must be > 0.\n"));
+        throw TestException();
+      }
+
+      this->num_msgs_ = value;
+
+      got_n = true;
     }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
@@ -199,7 +223,7 @@ SubDriver::run()
   ACE_OS::fprintf (file, "Ready\n");
   ACE_OS::fclose (file);
 
-  this->reader_.init(publication);
+  this->reader_.init(publication, this->num_msgs_);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Ask the SimpleSubscriber object if it has received what, "

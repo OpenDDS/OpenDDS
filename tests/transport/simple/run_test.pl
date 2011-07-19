@@ -16,6 +16,11 @@ use strict;
 # Test parameters.
 #
 my $testTime = 60;
+my $n_samples = 0;
+
+if ($ARGV[0] eq 'n') {
+  $n_samples = 400;
+}
 
 #
 # Publisher parameters.
@@ -50,6 +55,11 @@ my $publisherArgs = "-p $publisherId:$publisherHost:$publisherPort "
 my $debug = '-DCPSDebugLevel 10 -DCPSTransportDebugLevel 10';
 #$subscriberArgs .= " $debug";
 #$publisherArgs .= " $debug";
+
+if ($n_samples) {
+  $subscriberArgs .= " -n $n_samples";
+  $publisherArgs .= " -n $n_samples";
+}
 
 #
 # Create the test objects.
