@@ -229,7 +229,8 @@ private:
 
   /// These are used by the publisher side.
 
-  typedef std::map<RepoId, std::vector<RepoId>, GUID_tKeyLessThan>
+  typedef std::map<PublicationId, std::vector<SubscriptionId>,
+                   GUID_tKeyLessThan>
     PendingAssociationsMap;
 
   /// pubid -> remote sub ids map.

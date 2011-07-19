@@ -1,3 +1,11 @@
+Tue Jul 19 20:00:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Use PublicationId/SubscriptionId typedefs instead of just RepoId.
+
 Tue Jul 19 19:43:46 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
@@ -10,8 +18,8 @@ Tue Jul 19 19:43:46 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
         * tests/DCPS/ConfigTransports/subscriber.cpp:
 
           Improving the test framework to account for 'autoenabling' (or not)
-          readers and writers. Added support for testing ('and') multiple 
-          required transports using the '-t' command-line option. Introduced 
+          readers and writers. Added support for testing ('and') multiple
+          required transports using the '-t' command-line option. Introduced
           a better categorization of the test cases in the driver script.
 
 Tue Jul 19 19:09:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>

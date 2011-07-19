@@ -51,6 +51,7 @@ namespace DCPS {
 
 typedef ACE_UINT16 CoherencyGroup;
 typedef RepoId PublicationId;
+typedef RepoId SubscriptionId;
 
 /// Sequence number abstraction.  Only allows positive 64 bit values.
 class OpenDDS_Dcps_Export SequenceNumber {

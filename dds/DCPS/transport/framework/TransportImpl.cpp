@@ -275,11 +275,11 @@ TransportImpl::check_fully_association(const RepoId& pub_id)
   PendingAssociationsMap::iterator penditer =
     pending_association_sub_map_.find(pub_id);
 
-  typedef std::vector<RepoId> RepoIdList;
+  typedef std::vector<SubscriptionId> SubscriptionIdList;
   if (penditer != pending_association_sub_map_.end()) {
-    RepoIdList& associations = penditer->second;
+    SubscriptionIdList& associations = penditer->second;
 
-    RepoIdList::iterator iter = associations.begin();
+    SubscriptionIdList::iterator iter = associations.begin();
 
     while (iter != associations.end()) {
       if (check_fully_association(penditer->first, *iter)) {
