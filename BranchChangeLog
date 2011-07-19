@@ -1,3 +1,41 @@
+Tue Jul 19 18:04:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Allow for classes which do not derive from EntityImpl (such as
+          those in the tests/transport/simple directory) to derive from
+          TransportClient.
+
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+
+          Removed unused variable.
+
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple/sub_main.cpp:
+
+          Refactored this test to work with the new TransportClient instead
+          of the old TransportInterface class.
+
+        * tests/transport/simple/SimplePublisher.h:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.h:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+
+          Removed these files.
+
 Tue Jul 19 14:04:07 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/common.h:

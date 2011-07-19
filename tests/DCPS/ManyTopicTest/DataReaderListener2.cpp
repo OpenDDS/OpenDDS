@@ -14,7 +14,6 @@
   {
     ACE_UNUSED_ARG(max_samples_per_instance);
     ACE_UNUSED_ARG(history_depth);
-    ACE_UNUSED_ARG(using_udp);
 
     ::T2::Foo2DataReader_var foo_dr =
         ::T2::Foo2DataReader::_narrow(reader);

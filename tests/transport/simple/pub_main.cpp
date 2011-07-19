@@ -9,11 +9,6 @@
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
-  // Need call the ORB_init to dynamically load the transport libs.
-  CORBA::ORB_var orb = CORBA::ORB_init (argc,
-                                        argv,
-                                        "DDS_DCPS");
-
   DBG_ENTRY("pub_main.cpp","main");
 
   ACE_LOG_MSG->priority_mask(LM_TRACE     |

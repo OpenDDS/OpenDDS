@@ -3,7 +3,6 @@
 // $Id$
 
 #include "SimpleDataWriter.h"
-#include "SimplePublisher.h"
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -12,10 +11,11 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "ace/SString.h"
 
+#include "TestException.h"
 
-SimpleDataWriter::SimpleDataWriter()
-: pub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
-  delivered_test_message_(0)
+SimpleDataWriter::SimpleDataWriter(const OpenDDS::DCPS::RepoId& pub_id)
+  : pub_id_(pub_id)
+  , delivered_test_message_(0)
 {
   DBG_ENTRY("SimpleDataWriter","SimpleDataWriter");
 }
@@ -28,19 +28,25 @@ SimpleDataWriter::~SimpleDataWriter()
 
 
 void
-SimpleDataWriter::init(OpenDDS::DCPS::RepoId pub_id)
+SimpleDataWriter::init(const OpenDDS::DCPS::AssociationData& subscription)
 {
   DBG_ENTRY("SimpleDataWriter","init");
 
-  this->pub_id_ = pub_id;
+  // Add the association between the local sub_id and the remote pub_id
+  // to the transport via the TransportInterface.
+  bool result = this->associate(subscription, true /* active */);
+
+  if (!result) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) SimpleDataWriter::init() Failed to associate.\n"));
+    throw TestException();
+  }
 }
 
 
 int
-SimpleDataWriter::run(SimplePublisher* publisher)
+SimpleDataWriter::run()
 {
-  DBG_ENTRY("SimpleDataWriter","run");
-
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Build the DataSampleElementList to contain one element - "
              "our 'Hello World' string.\n"));
@@ -53,8 +59,8 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // Now we can create the DataSampleHeader struct and set its fields.
   OpenDDS::DCPS::DataSampleHeader header;
 
-  // The +1 makes the null terminator ('/0') get placed into the block.
-  header.message_length_ = data.length() + 1;
+  // The +1 makes the null terminator ('\0') get placed into the block.
+  header.message_length_ = static_cast<ACE_UINT32>(data.length()) + 1;
   header.message_id_ = 1;
   // TMB - Compiler no longer likes the next line...  source_timestamp_ is gone.
   //header.source_timestamp_ = ACE_OS::gettimeofday().msec();
@@ -65,7 +71,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
                                                 (header.max_marshaled_size());
   *header_block << header;
 
-  // The +1 makes the null terminator ('/0') get placed into the block.
+  // The +1 makes the null terminator ('\0') get placed into the block.
   ACE_Message_Block* data_block = new ACE_Message_Block(data.length() + 1);
   data_block->copy(data.c_str());
 
@@ -78,10 +84,8 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   OpenDDS::DCPS::DataSampleListElement* element;
 
   ACE_NEW_MALLOC_RETURN(element,
-           static_cast<OpenDDS::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
-           OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator, 0),
-           1);
-
+    static_cast<OpenDDS::DCPS::DataSampleListElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
+    OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator, 0), 1);
 
   // The Sample Element will hold on to the chain of blocks (header + data).
   element->sample_ = header_block;
@@ -96,7 +100,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Ask the publisher to send the DataSampleList (samples).\n"));
 
-  publisher->send_samples(samples);
+  send(samples);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "The Publisher has finished sending the samples.\n"));

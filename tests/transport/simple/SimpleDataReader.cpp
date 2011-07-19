@@ -8,9 +8,10 @@
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+#include "TestException.h"
 
-SimpleDataReader::SimpleDataReader()
-  : sub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
+SimpleDataReader::SimpleDataReader(const OpenDDS::DCPS::RepoId& sub_id)
+  : sub_id_(sub_id),
     received_test_message_(0)
 {
   DBG_ENTRY("SimpleDataReader","SimpleDataReader");
@@ -24,11 +25,19 @@ SimpleDataReader::~SimpleDataReader()
 
 
 void
-SimpleDataReader::init(OpenDDS::DCPS::RepoId sub_id)
+SimpleDataReader::init(const OpenDDS::DCPS::AssociationData& publication)
 {
   DBG_ENTRY("SimpleDataReader","init");
 
-  this->sub_id_ = sub_id;
+  // Add the association between the local sub_id and the remote pub_id
+  // to the transport via the TransportInterface.
+  bool result = this->associate(publication, false /* active */);
+
+  if (!result) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) SimpleDataReader::init() Failed to associate.\n"));
+    throw TestException();
+  }
 }
 
 

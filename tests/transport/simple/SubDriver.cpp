@@ -12,15 +12,17 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "SimpleSubscriber.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
+
 #include <ace/Arg_Shifter.h>
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 
 SubDriver::SubDriver()
-: pub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
-  sub_id_ (OpenDDS::DCPS::GuidBuilder::create ())
+  : pub_id_(OpenDDS::DCPS::GuidBuilder::create())
+  , sub_id_(OpenDDS::DCPS::GuidBuilder::create())
+  , reader_(sub_id_)
 {
   DBG_ENTRY("SubDriver","SubDriver");
 }
@@ -37,13 +39,8 @@ SubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
   DBG_ENTRY_LVL("SubDriver","run",6);
 
-  CORBA::ORB_var orb = CORBA::ORB_init (argc,
-                                        argv,
-                                        OpenDDS::DCPS::DEFAULT_ORB_NAME);
-
-  TheServiceParticipant->set_ORB (orb.in());
-  DDS::DomainParticipantFactory_var dpf;
-  dpf = TheParticipantFactoryWithArgs(argc, argv);
+  DDS::DomainParticipantFactory_var dpf =
+    TheParticipantFactoryWithArgs(argc, argv);
 
   parse_args(argc, argv);
   init();
@@ -144,78 +141,44 @@ SubDriver::init()
 {
   DBG_ENTRY("SubDriver","init");
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Use TheTransportFactory to create a TransportImpl object "
-             "of Tcp with the ALL_TRAFFIC transport_id (%d).\n",
-             ALL_TRAFFIC));
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   Create a new TcpInst object.\n"));
 
-  // Now we can ask TheTransportFactory to create a TransportImpl object
-  // using the "Tcp" factory.  We also supply an identifier for this
-  // particular TransportImpl object that will be created.  This is known
-  // as the "impl_id", or "the TransportImpl's instance id".  The point is
-  // that we assign the impl_id, and TheTransportFactory caches a reference
-  // to the newly created TransportImpl object using the impl_id (ALL_TRAFFIC
-  // in our case) as a key to the cache map.  Other parts of this client
-  // application code will be able use the obtain() method on
-  // TheTransportFactory, provide the impl_id (ALL_TRAFFIC in our case), and
-  // a reference to the cached TransportImpl will be returned.
-  OpenDDS::DCPS::TransportImpl_rch transport_impl
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
-                                                  ACE_TEXT("tcp"),
-                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
+  OpenDDS::DCPS::TransportInst_rch inst =
+    TheTransportRegistry->create_inst("tcp1", "tcp");
+
+  OpenDDS::DCPS::TcpInst_rch tcp_inst =
+    OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Create a new TcpInst object.\n"));
+             "Set the tcp_inst->local_address_ to our (local) sub_addr_.\n"));
 
-  // Get the existing or create a new TcpInst object.  It just has one field
-  // to set - the local_address_ field.  This is the address that will be
-  // used to open an acceptor object to listen for passive connection
-  // requests.  This is the TransportImpl object's (local) "endpoint" address.
-  // See comments in the $TAO_ROOT/orbsvcs/tests/DDS/transport/simple/
-  // PubDriver.cpp (in the PubDriver::init() method) that describes the
-  // other configuration options available.
-  OpenDDS::DCPS::TransportInst_rch config
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
+  tcp_inst->local_address_ = this->sub_addr_;
+  tcp_inst->local_address_str_ =
+    ACE_TEXT_ALWAYS_CHAR(this->sub_addr_str_.c_str());
 
-  OpenDDS::DCPS::TcpInst* tcp_config
-    = static_cast <OpenDDS::DCPS::TcpInst*> (config.in ());
+  OpenDDS::DCPS::TransportConfig_rch cfg =
+    TheTransportRegistry->create_config("cfg");
+  cfg->instances_.push_back(inst);
+
+  TheTransportRegistry->global_config(cfg);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Set the config->local_address_ to our (local) sub_addr_.\n"));
-
-  tcp_config->local_address_ = this->sub_addr_;
-  tcp_config->local_address_str_ =this->sub_addr_str_.c_str();
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Configure the (ALL_TRAFFIC) TransportImpl object.\n"));
-
-  // Supply the config object to the TranportImpl object via its configure()
-  // method.
-  if (transport_impl->configure(config.in()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) Failed to configure the transport impl\n"));
-      throw TestException();
-    }
-
-  // And we are done with the init().
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "The TransportImpl object has been successfully configured.\n"));
+             "The Transport has been successfully configured.\n"));
 }
 
 
 void
 SubDriver::run()
 {
-  DBG_ENTRY_LVL("SubDriver","run",6);
+  DBG_ENTRY_LVL("SubDriver", "run", 6);
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Create the 'publications' (array of AssociationData).\n"));
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   Create the 'publications'.\n"));
 
-  // Set up the publications.
-  OpenDDS::DCPS::AssociationData publications[1];
-  publications[0].remote_id_                = this->pub_id_;
-  publications[0].remote_data_.transport_id = ALL_TRAFFIC; // TBD later - wrong
-  publications[0].remote_data_.publication_transport_priority = 0;
+  // Set up the publication.
+  OpenDDS::DCPS::AssociationData publication;
+  publication.remote_id_ = this->pub_id_;
+  publication.remote_data_.length(1);
+  publication.remote_data_[0].transport_type = "tcp";
 
   OpenDDS::DCPS::NetworkAddress network_order_address(this->pub_addr_str_.c_str());
 
@@ -223,24 +186,20 @@ SubDriver::run()
   cdr << network_order_address;
   CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
 
-  publications[0].remote_data_.data
-    = OpenDDS::DCPS::TransportInterfaceBLOB
-    (len,
-    len,
-    (CORBA::Octet*)(cdr.buffer ()));
+  publication.remote_data_[0].data =
+    OpenDDS::DCPS::TransportBLOB(len, len, (CORBA::Octet*)(cdr.buffer()));
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimpleSubscriber object.\n"));
+
+  this->reader_.enable_transport();
 
   // Write a file so that test script knows we're ready
   FILE * file = ACE_OS::fopen ("subready.txt", ACE_TEXT("w"));
   ACE_OS::fprintf (file, "Ready\n");
   ACE_OS::fclose (file);
 
-  this->subscriber_.init(ALL_TRAFFIC,
-                         this->sub_id_,
-                         1,               /* size of publications array */
-                         publications);
+  this->reader_.init(publication);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Ask the SimpleSubscriber object if it has received what, "
@@ -250,24 +209,17 @@ SubDriver::run()
   // publisher.  For this test, we should wait until we receive the
   // "Hello World!" message that we expect.  Then this program
   // can just shutdown.
-  while (this->subscriber_.received_test_message() == 0)
-    {
-      ACE_OS::sleep(1);
-    }
+  while (this->reader_.received_test_message() == 0) {
+    ACE_OS::sleep(1);
+  }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "The SimpleSubscriber object has received what it expected.  "
              "Release TheTransportFactory - causing all TransportImpl "
              "objects to be shutdown().\n"));
 
-  OpenDDS::DCPS::WriterIdSeq writers;
-  writers.length(1);
-  writers[0] = this->pub_id_;
+  this->reader_.disassociate(this->pub_id_);
 
-  this->subscriber_.remove_associations(1, writers.get_buffer(), this->sub_id_);
-
-  // Tear-down the entire Transport Framework.
-  TheTransportRegistry->release();
   TheServiceParticipant->shutdown();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "

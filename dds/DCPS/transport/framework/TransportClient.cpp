@@ -41,10 +41,11 @@ TransportClient::~TransportClient()
 void
 TransportClient::enable_transport()
 {
-  EntityImpl& ent = dynamic_cast<EntityImpl&>(*this);
+  EntityImpl* ent = dynamic_cast<EntityImpl*>(this);
 
-  TransportConfig_rch tc = ent.transport_config();
-  for (EntityImpl* p = ent.parent(); p && tc.is_nil(); p = p->parent()) {
+  TransportConfig_rch tc = ent ? ent->transport_config() : 0;
+  for (EntityImpl* p = ent ? ent->parent() : 0;
+       p && tc.is_nil(); p = p->parent()) {
     tc = p->transport_config();
   }
   if (tc.is_nil()) {

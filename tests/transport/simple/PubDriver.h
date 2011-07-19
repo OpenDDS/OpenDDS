@@ -1,7 +1,7 @@
 #ifndef PUBDRIVER_H
 #define PUBDRIVER_H
 
-#include "SimplePublisher.h"
+#include "SimpleDataWriter.h"
 #include "dds/DCPS/Definitions.h"
 #include "ace/INET_Addr.h"
 #include <string>
@@ -18,16 +18,6 @@ class PubDriver
 
   private:
 
-    enum TransportTypeId
-    {
-      SIMPLE_TCP
-    };
-
-    enum TransportInstanceId
-    {
-      ALL_TRAFFIC
-    };
-
     void parse_args(int& argc, ACE_TCHAR* argv[]);
     void init();
     void run();
@@ -36,8 +26,6 @@ class PubDriver
     int parse_sub_arg(const ACE_TString& arg);
 
 
-    SimplePublisher publisher_;
-
     OpenDDS::DCPS::RepoId pub_id_;
     ACE_INET_Addr     pub_addr_;
     ACE_TString       pub_addr_str_;
@@ -45,6 +33,8 @@ class PubDriver
     OpenDDS::DCPS::RepoId sub_id_;
     ACE_INET_Addr     sub_addr_;
     ACE_TString       sub_addr_str_;
+
+    SimpleDataWriter writer_;
 };
 
 #endif
