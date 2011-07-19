@@ -1,3 +1,9 @@
+Tue Jul 19 22:30:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/simple/DDS_transport_simple.mpc:
+
+          Update mpc file to remove references to deleted .cpp files.
+
 Tue Jul 19 21:07:36 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/pub.ini:

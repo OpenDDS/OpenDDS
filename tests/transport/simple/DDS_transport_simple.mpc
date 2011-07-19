@@ -9,7 +9,6 @@ project(*Publisher): dcpsexe_with_tcp {
     pub_main.cpp
     PubDriver.cpp
     SimpleDataWriter.cpp
-    SimplePublisher.cpp
   }
 }
 
@@ -20,6 +19,5 @@ project(*Subscriber): dcpsexe_with_tcp {
     sub_main.cpp
     SubDriver.cpp
     SimpleDataReader.cpp
-    SimpleSubscriber.cpp
   }
 }
