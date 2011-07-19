@@ -1,3 +1,9 @@
+Tue Jul 19 23:12:43 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Fix wide-char build compatibility issues.
+
 Tue Jul 19 17:03:35 UTC 2011  Chip Jones  <jonesc@ociweb.com>
 
         * tools/monitor/GraphGenerator.h:

@@ -98,30 +98,23 @@ namespace OpenDDS
            config->enumerate_sections (base, ndx, section) == 0;
            ndx ++)
         {
-          ACE_DEBUG ((LM_DEBUG,"at %d got section '%s'\n",
-                      ndx, section.c_str()));
-
           ACE_Configuration_Section_Key key;
           int status =
             config->open_section (base, section.c_str(), 0, key);
 
           if (status != 0)
             {
-              ACE_DEBUG ((LM_DEBUG, "could not open section %s\n",
-                          section.c_str()));
               continue;
             }
 
-          std::string name(section.c_str());
+          std::string name(ACE_TEXT_ALWAYS_CHAR (section.c_str()));
           if (config->enumerate_sections (key, 0, section) != 0)
             {
-              ACE_DEBUG ((LM_DEBUG, "found leaf %s\n", name.c_str()));
               EntityBase *leaf  = new EntityNode (name,parent, config);
               parent->children_[name] = leaf;
             }
           else
             {
-              ACE_DEBUG ((LM_DEBUG, "found context %s\n", name.c_str()));
               EntityBase *base = parent->node_at(name);
               EntityContext *ctx;
               if (base == 0)
@@ -204,28 +197,27 @@ namespace OpenDDS
       //   - "kind" is ("struct", "seq", "array", "enum", "union", "alias")
       //   -
 
-      const ACE_TCHAR *ini_dir = ACE_OS::getenv ("OPENDDS_DISSECTORS");
+      const ACE_TCHAR *ini_dir = ACE_OS::getenv (ACE_TEXT("OPENDDS_DISSECTORS"));
       if (ini_dir == 0 || ACE_OS::strlen (ini_dir) == 0)
-        ini_dir = ".";
-      ACE_DEBUG ((LM_DEBUG,"reading files from %s\n", ini_dir));
+        ini_dir = ACE_TEXT(".");
 
       ACE_Dirent directory (ini_dir);
       for (ACE_DIRENT *entry = directory.read();
            entry != 0;
            entry = directory.read())
         {
-          const char *name = entry->d_name;
+          const ACE_TCHAR *name = entry->d_name;
           size_t len = ACE_OS::strlen (name);
           if (len < 5) // must be at least "x.ini"
             continue;
-          const char *ext_pos = ACE_OS::strstr (name, ".ini");
+          const char *ext_pos = ACE_OS::strstr (name, ACE_TEXT(".ini"));
           if (ext_pos == 0)
             continue;
           size_t pos = (ext_pos - name);
           if (pos < len - 4)
             continue;
-          std::string path = std::string (ini_dir) + ACE_DIRECTORY_SEPARATOR_CHAR + name;
-          this->init_from_file (path.c_str());
+          std::string path = std::string (ACE_TEXT_ALWAYS_CHAR (ini_dir)) + ACE_DIRECTORY_SEPARATOR_CHAR + ACE_TEXT_ALWAYS_CHAR (name);
+          this->init_from_file (ACE_TEXT_CHAR_TO_TCHAR (path.c_str()));
         }
 
       this->load_entities (this->entities_);
@@ -255,7 +247,6 @@ namespace OpenDDS
         {
           key[pos++] = '\\';
         }
-      ACE_DEBUG ((LM_DEBUG,"find: repo_id = %s, key = %s\n", repo_id, key.c_str()));
       Sample_Dissector *d = this->fqfind (key, entities_);
       return d;
     }
@@ -268,13 +259,13 @@ namespace OpenDDS
       ACE_Configuration_Section_Key key;
       int status =
         node->config_->open_section (node->config_->root_section(),
-                                     node->fqname_.c_str(),
+                                     ACE_TEXT_CHAR_TO_TCHAR(node->fqname_.c_str()),
                                      0,
                                      key);
       if (status != 0)
         {
           ACE_DEBUG ((LM_DEBUG,
-                      "build_type could not open section for node %s\n",
+                      ACE_TEXT("build_type could not open section for node %s\n"),
                       node->fqname_.c_str()));
           return;
         }
@@ -282,10 +273,10 @@ namespace OpenDDS
       std::string label = node->name_ + ".kind";
       ACE_TString kind;
       status =
-        node->config_->get_string_value (key,label.c_str(), kind);
+        node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()), kind);
       if (status != 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s does not have a kind value\n",
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("section %s does not have a kind value\n"),
                       node->name_.c_str()));
           return;
         }
@@ -293,60 +284,48 @@ namespace OpenDDS
       label = node->name_ + ".repoid";
       ACE_TString tid;
       status =
-        node->config_->get_string_value (key,label.c_str(), tid);
+        node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()), tid);
       if (status != 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s does not have a repoid value\n",
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("section %s does not have a repoid value\n"),
                       node->name_.c_str()));
           return;
         }
-      node->type_id_ = tid.c_str();
+      node->type_id_ = ACE_TEXT_ALWAYS_CHAR (tid.c_str());
 
-      if (kind.compare ("struct") == 0)
+      if (kind.compare (ACE_TEXT("struct")) == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is a struct\n",
-                      node->name_.c_str()));
           build_struct (node, key);
           return;
         }
-      else if (kind.compare ("sequence") == 0)
+      else if (kind.compare (ACE_TEXT("sequence")) == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is a sequence\n",
-                      node->name_.c_str()));
           build_sequence (node, key);
           return;
         }
-      else if (kind.compare ("array") == 0)
+      else if (kind.compare (ACE_TEXT("array")) == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is an array\n",
-                      node->name_.c_str()));
           build_array (node, key);
           return;
         }
-      else if (kind.compare ("enum") == 0)
+      else if (kind.compare (ACE_TEXT("enum")) == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is an enum\n",
-                      node->name_.c_str()));
           build_enum (node, key);
           return;
         }
-      else if (kind.compare ("union") == 0)
+      else if (kind.compare (ACE_TEXT("union")) == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is a union\n",
-                      node->name_.c_str()));
           build_union (node, key);
           return;
         }
-      else if (kind.compare ("alias") == 0)
+      else if (kind.compare (ACE_TEXT("alias")) == 0)
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is an alias\n",
-                      node->name_.c_str()));
           build_alias (node, key);
           return;
         }
       else
         {
-          ACE_DEBUG ((LM_DEBUG, "section %s is unknown kind %s\n",
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("section %s is unknown kind %s\n"),
                       node->name_.c_str(),kind.c_str()));
           return;
         }
@@ -409,7 +388,7 @@ namespace OpenDDS
 
       std::string label = node->name_ + ".order";
       ACE_TString order;
-      if (node->config_->get_string_value (key,label.c_str(),order))
+      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),order))
         return;
 
       std::string tokenizer = order.c_str();
@@ -420,8 +399,8 @@ namespace OpenDDS
         {
 
           ACE_TString type_str;
-          node->config_->get_string_value (key, p.c_str(), type_str);
-          std::string kind(type_str.c_str());
+          node->config_->get_string_value (key, ACE_TEXT_CHAR_TO_TCHAR(p.c_str()), type_str);
+          std::string kind(ACE_TEXT_ALWAYS_CHAR (type_str.c_str()));
 
           BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
           if (iter != builtin_types_.end())
@@ -454,11 +433,11 @@ namespace OpenDDS
     {
       std::string label = node->name_ + ".element";
       ACE_TString type_str;
-      if (node->config_->get_string_value (key,label.c_str(),type_str))
+      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),type_str))
         return;
 
       Sample_Dissector *sequence = 0;
-      std::string kind(type_str.c_str());
+      std::string kind(ACE_TEXT_ALWAYS_CHAR(type_str.c_str()));
       BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
       if (iter != builtin_types_.end())
         {
@@ -480,11 +459,11 @@ namespace OpenDDS
     {
       std::string label = node->name_ + ".base";
       ACE_TString type_str;
-      if (node->config_->get_string_value (key, label.c_str(),type_str))
+      if (node->config_->get_string_value (key, ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),type_str))
         return;
 
       Sample_Dissector *alias = 0;
-      std::string kind(type_str.c_str());
+      std::string kind(ACE_TEXT_ALWAYS_CHAR(type_str.c_str()));
       BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
       if (iter != builtin_types_.end())
         {
@@ -506,16 +485,16 @@ namespace OpenDDS
     {
       std::string label = node->name_ + ".size";
       u_int size = 0;
-      if (node->config_->get_integer_value (key,label.c_str(),size))
+      if (node->config_->get_integer_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),size))
         return;
 
       label = node->name_ + ".element";
       ACE_TString type_str;
-      if (node->config_->get_string_value (key,label.c_str(),type_str))
+      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),type_str))
         return;
 
       Sample_Dissector *array = 0;
-      std::string kind(type_str.c_str());
+      std::string kind(ACE_TEXT_ALWAYS_CHAR(type_str.c_str()));
       BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
       if (iter != builtin_types_.end())
         {
@@ -540,13 +519,13 @@ namespace OpenDDS
     {
       std::string label = node->name_ + ".order";
       ACE_TString order;
-      if (node->config_->get_string_value (key,label.c_str(),order))
+      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),order))
         return;
 
       Sample_Enum *sample =
         new Sample_Enum (node->type_id_.c_str());
 
-      std::string tokenizer = order.c_str();
+      std::string tokenizer = ACE_TEXT_ALWAYS_CHAR (order.c_str());
       size_t pos = tokenizer.find (' ');
       std::string p =
         (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
@@ -578,37 +557,37 @@ namespace OpenDDS
       Sample_Dissector *value = 0;
       Sample_Field *f = 0;
 
-      if (node->config_->get_string_value (key,label.c_str(),order))
+      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),order))
         return;
 
       label = node->name_ + ".discriminator";
-      if (node->config_->get_string_value (key,label.c_str(),case_type))
+      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),case_type))
         return;
 
       Sample_Union *s_union = new Sample_Union (node->type_id_.c_str());
 
       BuiltinTypeMap::iterator iter =
-        builtin_types_.find(std::string(case_type.c_str()));
+        builtin_types_.find(std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())));
       if (iter != builtin_types_.end())
         {
           s_union->discriminator (iter->second);
         }
-      value = fqfind (std::string(case_type.c_str()), node->parent_);
+      value = fqfind (std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())), node->parent_);
       if (value != 0)
         s_union->discriminator (value);
 
       label = "default.type";
-      if (node->config_->get_string_value (key,label.c_str(),case_type) == 0)
+      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),case_type) == 0)
         {
           label = "default.name";
-          node->config_->get_string_value (key, label.c_str(), case_name);
+          node->config_->get_string_value (key, ACE_TEXT_CHAR_TO_TCHAR(label.c_str()), case_name);
 
-          iter = builtin_types_.find(std::string(case_type.c_str()));
+          iter = builtin_types_.find(std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())));
           if (iter != builtin_types_.end())
-            f = new Sample_Field (iter->second, case_name.c_str());
+            f = new Sample_Field (iter->second, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
           else
             {
-              value = fqfind (std::string(case_type.c_str()), node->parent_);
+              value = fqfind (std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())), node->parent_);
               if (value != 0)
                 f = new Sample_Field (value, case_name.c_str());
             }
@@ -626,13 +605,13 @@ namespace OpenDDS
           label = p + ".type";
           bool new_range =
             (node->config_->get_string_value (key,
-                                              label.c_str(),
+                                              ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),
                                               case_type) != 0);
           if (!new_range)
             {
               label = p + ".name";
               node->config_->get_string_value (key,
-                                               label.c_str(),
+                                               ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),
                                                case_name);
             }
 
@@ -640,14 +619,14 @@ namespace OpenDDS
           f = 0;
           if (!new_range)
             {
-              iter = builtin_types_.find(std::string(case_type.c_str()));
+              iter = builtin_types_.find(std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())));
               if (iter != builtin_types_.end())
-                f = new Sample_Field (iter->second, case_name.c_str());
+                f = new Sample_Field (iter->second, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
               else
                 {
-                 value = fqfind (std::string(case_type.c_str()), node->parent_);
+                  value = fqfind (std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())), node->parent_);
                   if (value != 0)
-                    f = new Sample_Field (value, case_name.c_str());
+                    f = new Sample_Field (value, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
                 }
             }
           if (ranged)
