@@ -1,3 +1,44 @@
+Tue Jul 19 16:26:49 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * tools/monitor/MonitorData.h
+        * tools/monitor/MonitorDataModel.h
+        * tools/monitor/MonitorDataModel.cpp
+        * tools/monitor/MonitorDataStorage.h
+        * tools/monitor/MonitorDataStorage.cpp
+        * tools/monitor/Monitor.mpc
+        * tools/monitor/MonitorTask.h
+        * tools/monitor/MonitorTask.cpp
+        * tools/monitor/Monitor.ui
+        * tools/monitor/Options.h
+        * tools/monitor/Options.cpp
+        * tools/monitor/QosFormatter.h
+        * tools/monitor/QosFormatter.cpp
+        * tools/monitor/RepoSelect.h
+        * tools/monitor/TreeNode.h
+        * tools/monitor/Viewer.h
+        * tools/monitor/Viewer.cpp
+
+          Preliminary changes to the monitor tool to support generation
+          of Graphviz images. Also includes partial support for Qt-based
+          graphs. The Viewer app now includes TreeView, NodeView and
+          GraphvizView panels as well asGraphviz options and Node
+          options windows. These changes are r4718.
+
+        * tools/monitor/GraphGenerator.h
+        * tools/monitor/GraphGenerator.cpp
+        * tools/monitor/GvOptions.h
+        * tools/monitor/GvOptions.cpp
+        * tools/monitor/GvOptions.ui
+        * tools/monitor/Node.h
+        * tools/monitor/Node.cpp
+        * tools/monitor/NodeGenerator.h
+        * tools/monitor/NodeGenerator.cpp
+        * tools/monitor/NodeOptions.h
+        * tools/monitor/NodeOptions.cpp
+        * tools/monitor/NodeOptions.ui
+
+          These files were added.
+
 Mon Jul 18 15:32:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/CfTopic/CfTopic.opendds:
