@@ -438,7 +438,7 @@ Monitor::GraphGenerator::htmlEncode(std::string &s) {
   char c[] = "\"<>&";
 
   for (unsigned int i = 0; i < strlen (c); ++i) {
-    unsigned int pos = s.find(c[i]);
+    size_t pos = s.find(c[i]);
 
     while ( pos != std::string::npos )
     {

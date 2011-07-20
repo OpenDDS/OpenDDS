@@ -4,11 +4,6 @@ project(*App) : dcpsexe_with_tcp, dcps_monitor, qt4_gui {
   exeout  = $(DDS_ROOT)/bin
   requires += built_in_topics
 
-  // for graphviz 
-  includes += /usr/include/graphviz
-  libpaths += /usr/lib/graphviz
-  libs += gvplugin_dot_layout
-
   MOC_Files {
     MonitorDataModel.h
     RepoSelect.h
