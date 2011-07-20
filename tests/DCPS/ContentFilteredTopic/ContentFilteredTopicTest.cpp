@@ -4,9 +4,12 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
+
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
+
 #include "MessengerTypeSupportImpl.h"
 
 #include <cstdlib>
@@ -215,11 +218,17 @@ int run_test(int argc, ACE_TCHAR *argv[])
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                            DEFAULT_STATUS_MASK);
 
+  TransportRegistry::instance()->bind_config("c1", pub);
+
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
 
+  TransportRegistry::instance()->bind_config("c2", sub);
+
   Subscriber_var sub2 = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                               DEFAULT_STATUS_MASK);
+
+  TransportRegistry::instance()->bind_config("c3", sub2);
 
   bool passed = run_filtering_test(dp, ts, pub, sub, sub2);
 

@@ -259,7 +259,7 @@ TransportClient::send(const DataSampleList& samples)
       ? links_.select_links(cur->subscription_ids_, cur->num_subs_)
       : DataLinkSet_rch(&links_, false);
 
-    if (pub_links.is_nil()) {
+    if (pub_links.is_nil() || pub_links->empty()) {
       // NOTE: This is the "local publisher id is not currently
       //       associated with any remote subscriber ids" case.
 

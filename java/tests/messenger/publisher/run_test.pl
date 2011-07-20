@@ -27,20 +27,23 @@ if ($transport eq "") {
 
 my $opts = "-DCPSBit 0";
 my $debug_opt = ($debug eq '0') ? ''
-    : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
-my $pub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
+    : "-ORBDebugLevel $debug -DCPSDebugLevel $debug " .
+      "-DCPSTransportDebugLevel $debug";
+
+my $pub_opts = "$opts $debug_opt ".
     "-ORBLogFile pub.log -DCPSConfigFile pub_$transport.ini";
-my $sub_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12347 $debug_opt ".
+my $sub_opts = "$opts $debug_opt ".
     "-ORBLogFile sub.log -DCPSConfigFile sub_$transport.ini";
 
 my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
+unlink qw/pub.log sub.log DCPSInfoRepo.log/;
 
 my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
                "-NOBITS".
-               "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 ".
-               "-ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
+               "-ORBDebugLevel $debug ".
+               "-ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior");
 
 my $SUB = PerlDDS::create_process ("$DDS_ROOT/tests/DCPS/Messenger".
                                    "/subscriber", "$sub_opts");

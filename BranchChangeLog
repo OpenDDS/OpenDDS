@@ -1,3 +1,48 @@
+Wed Jul 20 23:00:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Make the data_delivered() callback even when there are no subscribers
+          currently associated.
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/dcps.ini:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/GroupPresentation/pub.ini:
+        * tests/DCPS/GroupPresentation/sub.ini:
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+        * tests/DCPS/MultiTopic/run_test.pl:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Ownership/pub.ini:
+        * tests/DCPS/Ownership/sub.ini:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/DCPS/QueryCondition/dcps.ini:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        * tests/DCPS/StatusCondition/run_test.pl:
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+        * tests/DCPS/WaitForAck/run_test.pl:
+
+          Updated to use new config file format and transport API.
+
+        * tests/DCPS/MultiTopic/dcps.ini:
+        * tests/DCPS/StatusCondition/dcps.ini:
+        * tests/DCPS/WaitForAck/transport.ini:
+
+          Removed these files.
+
 Wed Jul 20 20:16:51 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/FooTest3_0/DataReaderListener.h:
@@ -10,7 +55,7 @@ Wed Jul 20 20:16:51 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
         * tests/DCPS/FooTest3_0/SubDriver.cpp:
         * tests/DCPS/FooTest3_0/run_test.pl:
 
-          Update for the new transport config scheme.  I have 
+          Update for the new transport config scheme.  I have
           rewritten the subscriber side to use the normal DCPS
           APIs (as opposed to directly using the transport).  I
           have also ripped out a lot of endpoint configuration

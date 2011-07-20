@@ -73,7 +73,6 @@ my $repo_ior  = PerlACE::LocalFile("repo.ior");
 my $debugFile;
    $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
 my $confFile  = PerlACE::LocalFile( "tcp.conf");
-my $iniFile   = PerlACE::LocalFile( "transport.ini");
 
 # Clean out leftovers.
 unlink $repo_ior;
@@ -82,7 +81,7 @@ unlink $debugFile if $debugFile;
 my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf $confFile";
 
-my $common_opts = "-DCPSConfigFile $iniFile ";
+my $common_opts;
 $common_opts .= "-v " if $verbose;
 
 # Perocess variables.
