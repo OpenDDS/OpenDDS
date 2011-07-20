@@ -119,6 +119,7 @@ my $Publisher = PerlDDS::create_process
        , "-a $num_writes_before_crash"
        . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
        . " -d $expected_deleted_connections -DCPSConfigFile opendds.ini");
+#       . " -DCPSDebugLevel 10 -DCPSTransportDebugLevel 10");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();

@@ -122,6 +122,11 @@ public:
                             RepoId          local_id,
                             DataLinkSetMap& released_locals);
 
+  /// Either send or receive listener for this local_id should be
+  /// removed from internal DataLink structures so it no longer
+  /// receives events.
+  void remove_listener(const RepoId& local_id);
+
   /// A hook for the concrete transport to do something special on
   /// subscriber side after both add_associations is received and
   /// the connection is established.

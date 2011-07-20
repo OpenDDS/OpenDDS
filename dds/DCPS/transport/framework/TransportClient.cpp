@@ -32,6 +32,18 @@ TransportClient::TransportClient()
 
 TransportClient::~TransportClient()
 {
+  if (OpenDDS::DCPS::Transport_debug_level > 5) {
+    RepoIdConverter converter(repo_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
+               std::string(converter).c_str()));
+  }
+
+  for (DataLinkSet::MapType::iterator iter = links_.map().begin();
+       iter != links_.map().end();) {
+    iter->second->remove_listener(repo_id_);
+  }
+
   for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
     (*it)->detach_client(this);
@@ -95,6 +107,7 @@ TransportClient::transport_detached(TransportImpl* which)
           ++it2;
         }
       }
+      iter->second->remove_listener(repo_id_);
       links_.map().erase(iter++);
     } else {
       ++iter;
@@ -115,7 +128,7 @@ bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
-
+  repo_id_ = get_repo_id();
   TransportImpl_rch impl;
   if (associate_i(data, active, impl)) {
     post_associate(data.remote_id_, impl);
@@ -128,14 +141,13 @@ bool
 TransportClient::associate_i(const AssociationData& data, bool active,
                              TransportImpl_rch& impl)
 {
-  const RepoId& id = get_repo_id();
   const CORBA::Long priority = get_priority_value(data);
 
   // Attempt to find an existing DataLink that can be reused
   for (size_t i = 0; i < impls_.size(); ++i) {
 
-    DataLink_rch link = impls_[i]->find_datalink(id, data, priority, active);
-
+    DataLink_rch link = impls_[i]->find_datalink(repo_id_,
+                                                 data, priority, active);
     if (!link.is_nil()) {
       add_link(link, data.remote_id_);
       impl = impls_[i];
@@ -146,8 +158,8 @@ TransportClient::associate_i(const AssociationData& data, bool active,
   // Create a new DataLink
   for (size_t i = 0; i < impls_.size(); ++i) {
 
-    DataLink_rch link = impls_[i]->create_datalink(id, data, priority, active);
-
+    DataLink_rch link = impls_[i]->create_datalink(repo_id_,
+                                                   data, priority, active);
     if (!link.is_nil()) {
       add_link(link, data.remote_id_);
       impl = impls_[i];
@@ -164,14 +176,12 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
   links_.insert_link(link.in());
   data_link_index_[peer] = link;
 
-  const RepoId& id = get_repo_id();
-
   TransportReceiveListener* trl = get_receive_listener();
   if (trl) {
-    link->make_reservation(peer, id, trl);
+    link->make_reservation(peer, repo_id_, trl);
     link->fully_associated();
   } else {
-    link->make_reservation(peer, id, get_send_listener());
+    link->make_reservation(peer, repo_id_, get_send_listener());
   }
 }
 
@@ -194,13 +204,14 @@ TransportClient::disassociate(const RepoId& peerId)
 
   DataLink_rch link = found->second;
   DataLinkSetMap released;
-  link->release_reservations(peerId, get_repo_id(), released);
+  link->release_reservations(peerId, repo_id_, released);
 
-  data_link_index_.erase(found);
-
-  DataLinkSet singular;
-  singular.insert_link(link.in());
-  links_.remove_links(&singular);
+  if (!released.empty()) {
+    // Datalink is no longer used for any remote peer
+    link->remove_listener(repo_id_);
+    data_link_index_.erase(found);
+    links_.remove_link(link);
+  }
 }
 
 bool
@@ -355,7 +366,7 @@ TransportClient::send_control(ACE_Message_Block* msg, void* extra /* = 0*/)
     return listener->send_control_customized(pub_links, msg, extra);
 
   } else {
-    return links_.send_control(get_repo_id(), listener, msg);
+    return links_.send_control(repo_id_, listener, msg);
   }
 }
 
@@ -369,7 +380,7 @@ TransportClient::remove_sample(const DataSampleListElement* sample)
 bool
 TransportClient::remove_all_msgs()
 {
-  const int ret = links_.remove_all_msgs(get_repo_id());
+  const int ret = links_.remove_all_msgs(repo_id_);
   return ret == 0;
 }
 

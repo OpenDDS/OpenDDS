@@ -95,6 +95,7 @@ private:
   bool swap_bytes_;
   TransportLocatorSeq conn_info_;
   ACE_Thread_Mutex lock_;
+  RepoId repo_id_;
 };
 
 }

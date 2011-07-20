@@ -1339,7 +1339,9 @@ Service_Participant::load_common_configuration()
     } else {
       ACE_TString value;
       GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSInfoRepo"), value)
-      this->set_repo_ior(value.c_str(), DEFAULT_REPO);
+      if (!value.empty()) {
+        this->set_repo_ior(value.c_str(), DEFAULT_REPO);
+      }
     }
 
     if (got_chunks) {

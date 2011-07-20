@@ -88,6 +88,22 @@ OpenDDS::DCPS::DataLinkSet::remove_links(DataLinkSet* released_set)
   return map_.size();
 }
 
+void
+OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
+{
+  DBG_ENTRY_LVL("DataLinkSet", "remove_link", 6);
+
+  GuardType guard1(this->lock_);
+
+  if (unbind(map_, link->id()) != 0) {
+    // Just report to the log that we tried.
+    VDBG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataLinkSet::remove_links: ")
+          ACE_TEXT("link_id %d not found in map.\n"),
+          link->id()));
+  }
+}
+
 //void
 //OpenDDS::DCPS::DataLinkSet::release_reservations(RepoId          remote_id,
 //                                            DataLinkSetMap& released_locals)

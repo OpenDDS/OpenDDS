@@ -1,3 +1,56 @@
+Wed Jul 20 19:33:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed a bug where a config file with a [common] section but no
+          entry for DCPSInfoRepo would set the inforepo IOR to the empty string.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fixed a few issues with managing the DataLink <=> TransportClient
+          relationship (including the Transport{Send,Receive}Listeners).
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+
+          Corrected logging statements to use RepoIdConverter when needed.
+
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/Deadline/pub.ini:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/Lifespan/sub.ini:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/Partition/sub.ini:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/PersistentDurability/sub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/sub.ini:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/DCPS/TransientLocalTest/sub.ini:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Updated scripts and config files to use the new transport API.
+
 Wed Jul 20 16:32:15 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/ConfigTransports.mpc:

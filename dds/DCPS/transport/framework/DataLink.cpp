@@ -998,6 +998,14 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
 {
   GuardType guard(this->released_local_lock_);
 
+  if (OpenDDS::DCPS::Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
+               ACE_TEXT("pmap %d smap %d\n"),
+               released_local_pubs_.map().size(),
+               released_local_subs_.map().size()));
+  }
+
   RepoIdSet::MapType& pmap = released_local_pubs_.map();
 
   for (RepoIdSet::MapType::iterator itr = pmap.begin();

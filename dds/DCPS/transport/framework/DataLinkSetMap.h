@@ -77,6 +77,8 @@ public:
   /// "reverse" map in the TransportClient.
   void remove_released(const DataLinkSetMap& released_locals);
 
+  bool empty() const;
+
   /// Make the map_ empty.
   void clear();
 
@@ -90,7 +92,7 @@ private:
 
   typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan>      MapType;
 
-  LockType map_lock_; // This lock is explicitly for this->map_ protection
+  mutable LockType map_lock_; // This lock is explicitly for this->map_ protection
   MapType  map_;
 };
 

@@ -24,15 +24,17 @@ void TAO_DDS_DCPSDataWriter_i::add_association (
   ))
   {
 
+    OpenDDS::DCPS::RepoIdConverter converterY(yourId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("\nTAO_DDS_DCPSDataWriter_i::add_associations () :\n")
-               ACE_TEXT("\tWriter %d Adding association to a reader:\n"),
-               yourId));
+               ACE_TEXT("\tWriter %C Adding association to a reader:\n"),
+               std::string(converterY).c_str()));
 
+    OpenDDS::DCPS::RepoIdConverter converterR(reader.readerId);
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("\t reader id - %d\n")
+               ACE_TEXT("\t reader id - %C\n")
                ACE_TEXT("\t transport_id - %C\n"),
-               reader.readerId,
+               std::string(converterR).c_str(),
                reader.readerTransInfo[0].transport_type.in()
            ));
   }
@@ -57,11 +59,12 @@ void TAO_DDS_DCPSDataWriter_i::remove_associations (
 
     for (CORBA::ULong cnt = 0; cnt < length; ++cnt)
       {
+        OpenDDS::DCPS::RepoIdConverter converter(readers[cnt]);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("\tAssociation - %d\n")
-                   ACE_TEXT("\t InstanceHandle_t - %d\n"),
+                   ACE_TEXT("\t RepoId - %C\n"),
                    cnt,
-                   readers[cnt]
+                   std::string(converter).c_str()
                ));
       }
   }

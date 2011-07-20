@@ -303,15 +303,25 @@ OpenDDS::DCPS::DataLink::terminate_send()
 }
 
 ACE_INLINE
+void
+OpenDDS::DCPS::DataLink::remove_listener(const OpenDDS::DCPS::RepoId& local_id)
+{
+  {
+    GuardType guard(this->pub_map_lock_);
+    if (this->send_listeners_.erase(local_id)) {
+      return;
+    }
+  }
+  GuardType guard(this->sub_map_lock_);
+  this->recv_listeners_.erase(local_id);
+}
+
+ACE_INLINE
 OpenDDS::DCPS::TransportSendListener*
 OpenDDS::DCPS::DataLink::send_listener_for(const RepoId& pub_id) const
 {
   // pub_map_ (and send_listeners_) are already locked when entering this
-  // private method.  Need to check pub_map_ to make sure the local writer
-  // is still active.
-  if (!this->pub_map_.find(pub_id)) {
-    return 0;
-  }
+  // private method.
   IdToSendListenerMap::const_iterator found =
     this->send_listeners_.find(pub_id);
   if (found == this->send_listeners_.end()) {
@@ -325,11 +335,7 @@ OpenDDS::DCPS::TransportReceiveListener*
 OpenDDS::DCPS::DataLink::recv_listener_for(const RepoId& sub_id) const
 {
   // sub_map_ (and recv_listeners_) are already locked when entering this
-  // private method.  Need to check sub_map_ to make sure the local reader
-  // is still active.
-  if (!this->sub_map_.find(sub_id)) {
-    return 0;
-  }
+  // private method.
   IdToRecvListenerMap::const_iterator found =
     this->recv_listeners_.find(sub_id);
   if (found == this->recv_listeners_.end()) {

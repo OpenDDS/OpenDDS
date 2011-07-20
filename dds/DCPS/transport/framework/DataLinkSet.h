@@ -43,6 +43,8 @@ public:
   /// Returns the num elems in the set after attempting the operation.
   ssize_t remove_links(DataLinkSet* released_set);
 
+  void remove_link(const DataLink_rch& link);
+
   // ciju: Called with lock held in DataLinkSetMap
   /// Remove all reservations involving the remote_id from each
   /// DataLink in this set.  The supplied 'released' map will be

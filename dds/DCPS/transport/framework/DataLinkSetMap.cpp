@@ -260,3 +260,11 @@ OpenDDS::DCPS::DataLinkSetMap::clear()
   GuardType guard(this->map_lock_);
   this->map_.clear();
 }
+
+bool
+OpenDDS::DCPS::DataLinkSetMap::empty() const
+{
+  DBG_ENTRY_LVL("DataLinkSetMap", "empty", 6);
+  GuardType guard(this->map_lock_);
+  return this->map_.empty();
+}

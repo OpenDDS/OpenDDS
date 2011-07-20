@@ -84,7 +84,6 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
-unlink $data_file;
 
 if ($status == 0) {
   print "test PASSED.\n";
