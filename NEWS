@@ -60,6 +60,15 @@ Version 2.4 of OpenDDS.
   the actual value and not the value from the previous element
   displayed.                                              [Modeling SDK 1.0.1]
 
+- The monitor tool, an instrumentation viewer application for OpenDDS,
+  has new options for generating and viewing directed graphs. The tool
+  generates Graphviz-readable .dot files, manages converting the files to
+  representative .png files and displays the generated .png files in its
+  gui. Monitor executes Graphviz command-line tools in a separate process.
+  There are no compile-time or run-time dependencies on Graphviz. The
+  monitor tool will run on systems without Graphviz installed but will
+  not be able to generate .png files.
+
 ========================================================================
 
 Version 2.3 of OpenDDS.
@@ -67,7 +76,7 @@ Version 2.3 of OpenDDS.
 - First release of the OpenDDS Modeling SDK, a modeling tool that can be
   used by the application developer to define the required middleware
   components and data structures as a UML model and then generate the
-  code to implement the model using OpenDDS.  The generated code can 
+  code to implement the model using OpenDDS.  The generated code can
   then be compiled and linked with the application to provide seamless
   middleware support to the application.  UML models are manipulated using
   a graphical editor based on Eclipse.  See the OpenDDS Developer's Guide

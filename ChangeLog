@@ -1,3 +1,15 @@
+Wed Jul 20 19:08:51 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * NEWS:
+
+          Updated NEWS file with section on Monitor tool's 
+          new graph features. 
+
+        * tools/monitor/README:
+
+          Minor update.
+
+
 Wed Jul 20 15:12:27 UTC 2011  Chip Jones <jonesc@ociweb.com>
 
         * tools/monitor/GraphGenerator.cpp:
