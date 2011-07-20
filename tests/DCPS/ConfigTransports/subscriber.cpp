@@ -10,101 +10,89 @@
 // ============================================================================
 
 #include "common.h"
-#include "DDSTEST.h"
+
+#include "Reader.h"
+#include "Writer.h"
 
 #include "../common/TestSupport.h"
-
 #include "dds/DCPS/Service_Participant.h"
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#endif
-
+#include "tao/Object.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
+
 
 int
-ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try
     {
-      DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs (argc, argv);
+      DDS::DomainParticipantFactory_var dpf1 = TheParticipantFactoryWithArgs(argc, argv);
+      TEST_ASSERT(dpf1.in() != 0);
+
+      DDS::DomainParticipantFactory_var dpf2 = TheParticipantFactoryWithArgs(argc, argv);
+      TEST_ASSERT(dpf2.in() != 0);
+
+      DDS::DataWriterListener_var dwl1(new DataWriterListenerImpl);
+
+      DDS::DataReaderListener_var drl2(new DataReaderListenerImpl);
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
-      ::parse_args (argc, argv);
+      ::parse_args(argc, argv);
 
-      DDS::DomainParticipant_var dp (create_configured_participant (dpf.in ()));
-      TEST_CHECK (!CORBA::is_nil (dp.in ()));
 
-      DDS::Topic_var topic (create_configured_topic (dp.in ()));
-      TEST_CHECK (!CORBA::is_nil (topic.in ()));
-
-      // Create the subscriber
-      DDS::Subscriber_var sub (create_configured_subscriber (dp.in ()));
-      TEST_CHECK (!CORBA::is_nil (sub.in ()));
-
-      DDS::DataReaderListener_var drl (new DataReaderListenerImpl ());
-      DDS::DataReader_var dr (create_configured_reader (sub.in (), topic.in (), drl.in ()));
-      TEST_CHECK (!CORBA::is_nil (dr.in ()));
-
-      // Wait for things to settle ?!
-      ACE_OS::sleep (test_duration);
-
-      // Assert effective transport protocols
-      int long left = protocol_str.size ();
-      for (std::vector < std::string>::const_iterator proto = protocol_str.begin ();
-              proto < protocol_str.end (); proto++)
+      if (collocation_str == "none")
         {
-          bool issupported = ::DDS_TEST::supports (dr.in (), *proto);
-          ACE_ERROR ((LM_INFO,
-                      ACE_TEXT ("(%P|%t) Validating that '%C' entity supports protocol '%C': %C\n"),
-                      entity_str.c_str (),
-                      proto->c_str (),
-                      issupported ? "true" : "false"));
+          Reader r(dpf1.in(), drl2.in());
+          TEST_ASSERT(r.verify_transport());
+        }
+      else if (collocation_str == "process")
+        {
+          Reader r(dpf2.in(), drl2.in());
+          TEST_ASSERT(r.verify_transport());
 
-          if (issupported) left--;
+          Writer w(dpf1.in(), dwl1.in());
+          TEST_ASSERT(w.verify_transport());
+        }
+      else if (collocation_str == "participant")
+        {
+          DDS::DomainParticipant_var participant(create_configured_participant(dpf1.in()));
+
+          Reader r(dpf2.in(), participant.in(), drl2.in());
+          TEST_ASSERT(r.verify_transport());
+
+          Writer w(dpf1.in(), participant.in(), dwl1.in());
+          TEST_ASSERT(w.verify_transport());
         }
 
-      // All required protocols must have been found
-      TEST_CHECK (left == 0);
+      TheServiceParticipant->shutdown();
 
-      // Clean up subscriber objects
-      sub->delete_contained_entities ();
-      dp->delete_subscriber (sub.in ());
-      dp->delete_topic (topic.in ());
-      dpf->delete_participant (dp.in ());
-
-      TheServiceParticipant->shutdown ();
-
-      // there is an error if we matched when not compatible (or vice-versa)
-      if (!assert_subscription_matched (drl.in ()))
+      if (collocation_str == "none")
         {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT ("(%P|%t) Expected subscription_matched to be %C, but it wasn't.")
-                             ACE_TEXT ("durability_kind=%s, liveliness_kind=%s, liveliness_duration=%s, ")
-                             ACE_TEXT ("reliability_kind=%s\n"),
-                             (compatible) ? "true" : "false",
-                             durability_kind_str.c_str (),
-                             liveliness_kind_str.c_str (),
-                             LEASE_DURATION_STR.c_str (),
-                             reliability_kind_str.c_str ()),
-                            1);
+          TEST_ASSERT(assert_subscription_matched(drl2.in()));
         }
-
+      else if (collocation_str == "process")
+        {
+          TEST_ASSERT(assert_subscription_matched(drl2.in()) && assert_publication_matched(dwl1.in()));
+        }
+      else if (collocation_str == "participant")
+        {
+          TEST_ASSERT(assert_subscription_matched(drl2.in()) && assert_publication_matched(dwl1.in()));
+        }
     }
   catch (const CORBA::Exception &ex)
     {
-      ex._tao_print_exception ("Exception caught in main.cpp:");
+      ex._tao_print_exception("Exception caught in main.cpp:");
       return 1;
     }
   catch (...)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT ("(%P|%t) runtime exception caught in main.cpp. ")), 1);
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) runtime exception caught in main.cpp.\n")), 1);
     }
 
-  ACE_ERROR_RETURN ((LM_INFO,
-                     ACE_TEXT ("(%P|%t) done.\n")), 0);
+  ACE_ERROR_RETURN((LM_INFO,
+                    ACE_TEXT("(%P|%t) done.\n")), 0);
 }

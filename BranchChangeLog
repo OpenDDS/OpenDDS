@@ -1,3 +1,26 @@
+Wed Jul 20 16:32:15 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Reader.cpp:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Added support for colocating readers and writers in the same process,
+          in the same domain participant, or in the same publisher/subscriber.
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Added a TEST_ASSERT macro which throws instead of calling abort() and
+          ignoring the exit status.
+
 Wed Jul 20 02:09:49 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -8,7 +31,7 @@ Wed Jul 20 02:09:49 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
         * performance-tests/DCPS/TCPListenerTest/run_test.pl:
         * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
 
-          Rework for new transport scheme.  Consolidate all 
+          Rework for new transport scheme.  Consolidate all
           capabilities into a single run_test.pl script.
 
         * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:

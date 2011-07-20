@@ -11,6 +11,8 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
+use Data::Dumper;
+
 PerlDDS::add_lib_path('../FooType4');
 PerlDDS::add_lib_path('../common');
 # single reader with single instances test
@@ -36,6 +38,46 @@ $qos = {
 #    reliability => best_effort,
 };
 
+## Entity: [none, participant, pubsub, rw] Determines the level at which
+##                  transport configuration is applied.
+##          none        - no transport configuration is bound to an entity;
+##          participant - the named configuration is bound to domain participant;
+##          pubsub      - the named configuration is bound to publisher/sunscriber;
+##          rw          - the named configuration is bound to reader/writer. Note
+##                      that for this to really take effect, autoenable QoS must be
+##                      set to 'false'.
+## Configuration: [undef, NAME] Determines which configuration should be applied,
+##                  if any.
+##          undef       - no transport configuration (*.ini) file is used. Transports
+##                      would be expected to have their default names;
+##          NAME        - the ./transports.ini will have a [config/NAME]section listing
+##                      the allowed transports;
+## Collocation: [none, process, participant, in-pubsub] Determines the mutual
+##                  distribution of the reader/writer entities.
+##          none        - a single reader/writer entity is created by each
+##                      subscriber/publisher executable;
+##          process     - a reader and a writer is created per executable, using
+##                      independent domain participant instances;
+##          participant - a reader and a writer entity is created per executable,
+##                      using the same domain participant instance, but separate
+##                      subscriber/publisher;
+##          pubsub      - two readers and two writers are created per executable,
+##                      using the same subscriber/publisher instance (same domain
+##                      participant instance). The configuration (if any) and the
+##                      effective transport assertions are applied to the first
+##                      entity instance, only. The second one is asserted to have
+##                      the same effective set of transports as its parent (if any,
+##                      otherwise - the defaults);
+## Protocol:        A list of transport names for the reader/writer entities,
+##                  for which the test asserts are being supported. By default,
+##                  OpenDDS ships with _OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE,
+##                  _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP.
+## Compatibility: [true, false] - Whether to assert that the reader and the writer
+##           have had their publications matched (via the info repo)
+## QoS:             A set of quality of service options. Each executable can get
+##                  its own map. QoSes are set before creating the corresponding
+##                  entity and before asserting anything about the transports.
+
 
 my @explicit_configuration = (
 
@@ -44,7 +86,7 @@ my @explicit_configuration = (
     collocation   => none,
     configuration => Udp_Only,
     protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
-    compatibility => false,
+    compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -54,7 +96,7 @@ my @explicit_configuration = (
     collocation   => none,
     configuration => Udp_Only,
     protocol      => [udp1],
-    compatibility => false,
+    compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -64,7 +106,7 @@ my @explicit_configuration = (
     collocation   => none,
     configuration => Udp_Only,
     protocol      => [udp1],
-    compatibility => false,
+    compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -78,7 +120,7 @@ my @explicit_configuration = (
     collocation   => none,
     configuration => Udp_Only,
     protocol      => [udp1],
-    compatibility => false,
+    compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -119,13 +161,62 @@ my @without_configuration_file = (
   },
 );
 
+my @explicit_configuration_collocated = (
+
+  {
+    entity        => none,
+    collocation   => process,
+    configuration => Udp_Only,
+    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    entity        => participant,
+    collocation   => process,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    entity        => pubsub,
+    collocation   => process,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    # Note that without disabling the 'autoenable' policy, the new RW will kick off the
+    # transport negotiation and a transport will be selected *before* one has the chance
+    # to specify which transport configuration must be used.
+    autoenable    => false,
+    entity        => rw,
+    collocation   => process,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+);
+
+
 
 @scenario = (
 
-
-  @without_configuration_file,
-  @configuration_file_unused,
-  @explicit_configuration,
+  @explicit_configuration_collocated,
+#  @without_configuration_file,
+#  @configuration_file_unused,
+#  @explicit_configuration,
 
 );
 
@@ -264,6 +355,12 @@ for my $hasbuiltins (undef, true) {
 
         $status += run($pub_parameters, $sub_parameters);
         print "\n";
+
+        if ($status != 0) {
+            $Data::Dumper::Terse = 1;
+            print "FAILED " . Dumper(\%$i) . "\n";
+        }
+
     }
 
     $status += finalize($DCPSREPO);

@@ -12,18 +12,11 @@
 #include <string>
 
 namespace OpenDDS {
-namespace DCPS {
- class TransportClient;
- class EntityImpl;
+    namespace DCPS {
+        class TransportClient;
+        class EntityImpl;
 
-};
-};
-
-namespace DDS {
-class DataReader;
-class DataWriter;
-class Entity;
-class DomainParticipant;
+    };
 };
 
 /**
@@ -32,10 +25,6 @@ class DomainParticipant;
  */
 class DDS_TEST {
 public:
-    static bool supports(const DDS::DataReader* pub, const std::string& name);
-    static bool supports(const DDS::Entity* pub, const std::string& name);
-    static bool supports(const DDS::DataWriter* pub, const std::string& name);
-    static bool supports(const DDS::DomainParticipant* tc, const std::string& name);
 
     static bool supports(const OpenDDS::DCPS::TransportClient* tc, const std::string& name);
     static bool supports(const OpenDDS::DCPS::EntityImpl* entity, const std::string& protocol_name);
