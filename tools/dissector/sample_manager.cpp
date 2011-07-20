@@ -217,7 +217,7 @@ namespace OpenDDS
           if (pos < len - 4)
             continue;
           std::string path = std::string (ACE_TEXT_ALWAYS_CHAR (ini_dir));
-          path += ACE_TEXT_ALWAYS_CHAR (ACE_DIRECTORY_SEPARATOR_CHAR);
+          path += ACE_DIRECTORY_SEPARATOR_STR_A;
           path += ACE_TEXT_ALWAYS_CHAR (name);
           this->init_from_file (ACE_TEXT_CHAR_TO_TCHAR (path.c_str()));
         }
