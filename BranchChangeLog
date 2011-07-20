@@ -1,3 +1,29 @@
+Wed Jul 20 20:16:51 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/README:
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Update for the new transport config scheme.  I have 
+          rewritten the subscriber side to use the normal DCPS
+          APIs (as opposed to directly using the transport).  I
+          have also ripped out a lot of endpoint configuration
+          and synchronization code.
+
+        * tests/DCPS/FooTest3_0/SimpleDataReader.h:
+        * tests/DCPS/FooTest3_0/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_0/Test.idl:
+
+          Removed these files.
+
 Wed Jul 20 19:33:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

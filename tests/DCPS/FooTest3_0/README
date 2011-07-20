@@ -1,5 +1,5 @@
 This test tests the publisher and datawriter's basic functionalities with the
-SimpleTCPTransport available.
+tcp transport.
 
 Author: Yan Dai
 Reference: Ciju John
@@ -86,10 +86,3 @@ Auto run test:
 
    liveliness test
       run_test.pl liveliness
-
-   reenqueue_all test
-      run_test.pl reenqueue_all
-
-      This test lauches two datareaders. The first datareader starts register test
-      and the second datareader makes the datawriter reenqueue_all and send all data
-      samples previously sent to first reader to second datareader.
