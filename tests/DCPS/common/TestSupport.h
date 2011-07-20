@@ -7,4 +7,12 @@
       ACE_ERROR((LM_ERROR,"(%N:%l) FAILED on TEST_CHECK(%C)%a\n",\
         #COND , -1));
 
+// if COND fails then log error and throw.
+#define TEST_ASSERT(COND) \
+  if (!( COND )) \
+      do { ACE_ERROR((LM_ERROR,"(%N:%l) FAILED on TEST_CHECK(%C).\n",\
+        #COND)); \
+        throw #COND; } \
+      while (0);
+
 #endif /* TEST_SUPPORT_H */
