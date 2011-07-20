@@ -1,9 +1,15 @@
+Wed Jul 20 21:54:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Fix more wide-char build compatibility issues.
+
 Wed Jul 20 19:08:51 UTC 2011  Chip Jones  <jonesc@ociweb.com>
 
         * NEWS:
 
-          Updated NEWS file with section on Monitor tool's 
-          new graph features. 
+          Updated NEWS file with section on Monitor tool's
+          new graph features.
 
         * tools/monitor/README:
 

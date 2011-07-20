@@ -210,13 +210,15 @@ namespace OpenDDS
           size_t len = ACE_OS::strlen (name);
           if (len < 5) // must be at least "x.ini"
             continue;
-          const char *ext_pos = ACE_OS::strstr (name, ACE_TEXT(".ini"));
+          const ACE_TCHAR *ext_pos = ACE_OS::strstr (name, ACE_TEXT(".ini"));
           if (ext_pos == 0)
             continue;
           size_t pos = (ext_pos - name);
           if (pos < len - 4)
             continue;
-          std::string path = std::string (ACE_TEXT_ALWAYS_CHAR (ini_dir)) + ACE_DIRECTORY_SEPARATOR_CHAR + ACE_TEXT_ALWAYS_CHAR (name);
+          std::string path = std::string (ACE_TEXT_ALWAYS_CHAR (ini_dir));
+          path += ACE_TEXT_ALWAYS_CHAR (ACE_DIRECTORY_SEPARATOR_CHAR);
+          path += ACE_TEXT_ALWAYS_CHAR (name);
           this->init_from_file (ACE_TEXT_CHAR_TO_TCHAR (path.c_str()));
         }
 
@@ -391,7 +393,7 @@ namespace OpenDDS
       if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),order))
         return;
 
-      std::string tokenizer = order.c_str();
+      std::string tokenizer = ACE_TEXT_ALWAYS_CHAR (order.c_str());
       size_t pos = tokenizer.find (' ');
       std::string p =
         (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
@@ -589,14 +591,14 @@ namespace OpenDDS
             {
               value = fqfind (std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())), node->parent_);
               if (value != 0)
-                f = new Sample_Field (value, case_name.c_str());
+                f = new Sample_Field (value, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
             }
           s_union->add_default (f);
         }
 
       Switch_Case *sc = 0;
       bool ranged = false;
-      std::string tokenizer = order.c_str();
+      std::string tokenizer = ACE_TEXT_ALWAYS_CHAR(order.c_str());
       size_t pos = tokenizer.find (' ');
       std::string p =
         (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
