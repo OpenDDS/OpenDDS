@@ -1,3 +1,23 @@
+Wed Jul 20 02:09:49 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/conf.ini:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+          Rework for new transport scheme.  Consolidate all 
+          capabilities into a single run_test.pl script.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+
+          Removed these files.
+
 Tue Jul 19 22:30:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/simple/DDS_transport_simple.mpc:
