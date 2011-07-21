@@ -1,3 +1,50 @@
+Thu Jul 21 20:33:37 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Clean up some STL map issues.
+
+        * tests/DCPS/FooTest3_0/README:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/README:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.h:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/DataReaderListener.h:
+        * tests/DCPS/FooTest3_2/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/README:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.h:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Adapt to new transport scheme.
+
+        * tests/DCPS/FooTest3_1/SimpleDataReader.h:
+        * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_1/Test.idl:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.h:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_2/Test.idl:
+
+          Removed these files.
+
 Thu Jul 21 16:14:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/publisher.cpp:

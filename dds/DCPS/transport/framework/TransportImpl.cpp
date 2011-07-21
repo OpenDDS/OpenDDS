@@ -304,7 +304,12 @@ TransportImpl::check_fully_association(const RepoId& pub_id,
   DBG_ENTRY_LVL("TransportImpl", "check_fully_association", 6);
 
 
-  TransportSendListener* tsl = association_listeners_[pub_id];
+  TransportSendListener* tsl = 0;
+  std::map<PublicationId, TransportSendListener*, GUID_tKeyLessThan>::iterator iter
+    = association_listeners_.find(pub_id);
+  if (iter != association_listeners_.end()) {
+    tsl = iter->second;
+  }
 
   bool acked = false;
   if (this->acked(pub_id, sub_id) && tsl) {

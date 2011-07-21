@@ -34,7 +34,8 @@ Writer::Writer(PubDriver*            pubdriver,
   has_key_ (have_key),
   write_delay_msec_ (write_delay_msec),
   check_data_dropped_ (check_data_dropped),
-  pubdriver_ (pubdriver)
+  pubdriver_ (pubdriver),
+  finished_(false)
 {
   writer_servant_
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer_.in());
@@ -64,7 +65,6 @@ Writer::end ()
 {
   wait ();
 
-
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Writer::end \n")));
 }
@@ -75,6 +75,16 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc \n")));
+
+  // Wait for the subscriber to be ready...
+  ::DDS::InstanceHandleSeq handles;
+  while (1) {
+    writer_->get_matched_subscriptions(handles);
+    if (handles.length() != 0)
+      break;
+    else
+      ACE_OS::sleep(ACE_Time_Value(0,200000));
+  }
 
   try
   {
@@ -149,12 +159,10 @@ Writer::svc ()
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Writer::svc data_delivered_count=%d data_dropped_count=%d\n"),
       writer_servant_->data_delivered_count_, writer_servant_->data_dropped_count_));
-
-    if (writer_servant_->data_dropped_count_ > 0)
-    {
-      pubdriver_->shutdown_ = 1;
-    }
   }
+
+  finished_ = true;
+
   return 0;
 }
 

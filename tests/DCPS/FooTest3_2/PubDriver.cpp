@@ -6,16 +6,12 @@
 #include "tests/DCPS/FooType3Unbounded/FooDefTypeSupportImpl.h"
 #include "tests/DCPS/FooType3Unbounded/FooDefC.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "tests/DCPS/common/TestSupport.h"
 
 #include <ace/Arg_Shifter.h>
-
 #include <sstream>
 
 const long  MY_DOMAIN   = 411;
@@ -28,8 +24,6 @@ PubDriver::PubDriver()
   publisher_ (::DDS::Publisher::_nil ()),
   datawriters_ (0),
   writers_ (0),
-  pub_id_fname_ (ACE_TEXT("pub_id.txt")),
-  sub_id_ ( OpenDDS::DCPS::GUID_UNKNOWN),
   block_on_write_ (0),
   num_threads_to_write_ (0),
   multiple_instances_ (0),
@@ -39,10 +33,7 @@ PubDriver::PubDriver()
   history_depth_ (1),
   has_key_ (1),
   write_delay_msec_ (0),
-  check_data_dropped_ (0),
-  pub_driver_ior_ ("pubdriver.ior"),
-  shutdown_ (false),
-  sub_ready_filename_(ACE_TEXT("sub_ready.txt"))
+  check_data_dropped_ (0)
 {
 }
 
@@ -67,11 +58,6 @@ PubDriver::run(int& argc, ACE_TCHAR* argv[])
 
   run();
 
-  while (shutdown_ == false)
-  {
-    ACE_OS::sleep (1);
-  }
-
   end();
 }
 
@@ -80,9 +66,6 @@ void
 PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 {
   // Command-line arguments:
-  //
-  //  -p <pub_id_fname:pub_host:pub_port>
-  //  -s <sub_id:sub_host:sub_port>
   //
   //  -b <block/non-block waiting>
   //  -t num_threads_to_write    defaults to 1
@@ -96,52 +79,11 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
   //  -r data_dropped            defaults to 0
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  bool got_p = false;
-  bool got_s = false;
-
   const ACE_TCHAR* current_arg = 0;
 
   while (arg_shifter.is_anything_left())
   {
-    // The '-p' option
-    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-p")))) {
-      if (got_p) {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) Only one -p allowed on command-line.\n"));
-        throw TestException();
-      }
-
-      int result = parse_pub_arg(current_arg);
-      arg_shifter.consume_arg();
-
-      if (result != 0) {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) Failed to parse -p command-line arg.\n"));
-        throw TestException();
-      }
-
-      got_p = true;
-    }
-    // A '-s' option
-    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-s")))) {
-      if (got_s) {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) Only one -s allowed on command-line.\n"));
-        throw TestException();
-      }
-
-      int result = parse_sub_arg(current_arg);
-      arg_shifter.consume_arg();
-
-      if (result != 0) {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) Failed to parse -s command-line arg.\n"));
-        throw TestException();
-      }
-
-      got_s = true;
-    }
-    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-b"))) != 0)
+    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-b"))) != 0)
     {
       block_on_write_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
@@ -186,11 +128,6 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       has_key_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-v"))) != 0)
-    {
-      pub_driver_ior_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
-      arg_shifter.consume_arg ();
-    }
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
     {
       write_delay_msec_ = ACE_OS::atoi (current_arg);
@@ -201,16 +138,10 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       check_data_dropped_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
-    {
-      sub_ready_filename_ = current_arg;
-      arg_shifter.consume_arg ();
-    }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
-                 "usage: %s "
-                 "-p pub_id:pub_host:pub_port -s sub_id:sub_host:sub_port\n",
+                 "usage: %s\n",
                  argv[0]));
 
       arg_shifter.consume_arg();
@@ -221,19 +152,6 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       arg_shifter.ignore_arg();
     }
   }
-
-  // Make sure we got the required arguments:
-  if (!got_p) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) -p command-line option not specified (required).\n"));
-    throw TestException();
-  }
-
-  if (!got_s) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) -s command-line option not specified (required).\n"));
-    throw TestException();
-  }
 }
 
 
@@ -242,28 +160,6 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
 {
   // Create DomainParticipant and then publisher, topic and datawriter.
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-
-  // Activate the PubDriver servant and write its ior to a file.
-  PortableServer::POA_var poa = TheServiceParticipant->the_poa ();
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
-
-  PortableServer::ObjectId_var id = poa->activate_object(this);
-
-  CORBA::Object_var object = poa->id_to_reference(id.in());
-
-  CORBA::String_var ior_string = orb->object_to_string (object.in ());
-
-  //
-  // Write the IOR to a file.
-  //
-  FILE *output_file= ACE_OS::fopen (pub_driver_ior_.c_str (), ACE_TEXT("w"));
-  if (output_file == 0)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("Cannot open output file for writing IOR\n")));
-  }
-  ACE_OS::fprintf (output_file, "%s", ior_string.in ());
-  ACE_OS::fclose (output_file);
 
   datawriters_ = new ::DDS::DataWriter_var[num_datawriters_];
   writers_ = new Writer* [num_datawriters_];
@@ -311,8 +207,6 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
                           ::DDS::PublisherListener::_nil(),
                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
-
-  attach_to_transport ();
 
   ::DDS::DataWriterQos datawriter_qos;
   publisher_->get_default_datawriter_qos (datawriter_qos);
@@ -369,109 +263,20 @@ PubDriver::end()
     publisher_->delete_datawriter(datawriters_[i].in ());
   }
 
-  // clean up the service objects
-  participant_->delete_publisher(publisher_.in ());
-
-  participant_->delete_topic(topic_.in ());
-
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-  dpf->delete_participant(participant_.in ());
-
-  // Tear-down the entire Transport Framework.
-
-  TheServiceParticipant->shutdown ();
+  participant_->delete_contained_entities();
+  dpf->delete_participant(participant_.in());
+  TheServiceParticipant->shutdown();
 }
 
 void
 PubDriver::run()
 {
-  FILE* fp = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_TEXT("w"));
-  if (fp == 0)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("Unable to open %s for writing:(%u) %p\n"),
-                pub_id_fname_.c_str (),
-                ACE_TEXT("PubDriver::run")));
-    return;
-  }
-
-  for (int i = 0; i < num_datawriters_; i ++)
-  {
-    ::Xyz::FooDataWriterImpl* datawriter_servant
-      = dynamic_cast< ::Xyz::FooDataWriterImpl*>
-      (datawriters_[i].in ());
-    OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
-    std::stringstream buffer;
-    buffer << pub_id;
-
-    // Write the publication id to a file.
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT("(%P|%t) PubDriver::run, ")
-                ACE_TEXT(" Write to %s: pub_id=%C. \n"),
-                pub_id_fname_.c_str (),
-                buffer.str().c_str()));
-
-    ACE_OS::fprintf (fp, "%s\n", buffer.str().c_str());
-  }
-
-  fclose (fp);
-
-  // Wait for the subscriber to be ready to accept connection.
-  FILE* readers_ready = 0;
-  do
-    {
-      ACE_Time_Value small_time(0,250000);
-      ACE_OS::sleep (small_time);
-      readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("r"));
-    } while (0 == readers_ready);
-
-  ACE_OS::fclose(readers_ready);
-
-  // Set up the subscriptions.
-  ::OpenDDS::DCPS::ReaderAssociation association;
-  association.readerTransInfo.length(1);
-  association.readerTransInfo[0].transport_type = "tcp";
-
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_.c_str());
-
-  ACE_OutputCDR cdr;
-  cdr << network_order_address;
-  size_t len = cdr.total_length ();
-
-  association.readerTransInfo[0].data
-    = OpenDDS::DCPS::TransportBLOB
-    (len,
-    len,
-    (CORBA::Octet*)(cdr.buffer ()));
-
-  association.readerId = this->sub_id_;
-  association.subQos = TheServiceParticipant->initial_SubscriberQos ();
-  association.readerQos = TheServiceParticipant->initial_DataReaderQos ();
-
-  for (int i = 0; i < num_datawriters_; i ++)
-  {
-
-    ::Xyz::FooDataWriterImpl* datawriter_servant
-      = dynamic_cast< ::Xyz::FooDataWriterImpl*>
-      (datawriters_[i].in ());
-    OpenDDS::DCPS::PublicationId pub_id = datawriter_servant->get_publication_id ();
-    ::OpenDDS::DCPS::DataWriterRemote_var dw_remote =
-        DDS_TEST::getRemoteInterface(*datawriter_servant);
-
-    dw_remote->add_association(pub_id, association);
-  }
-
-  // Let the subscriber catch up before we broadcast.
-  ACE_OS::sleep (2);
-
-  { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
-
   // Each Writer/DataWriter launch threads to write samples
   // to the same instance or multiple instances.
   // When writing to multiple instances, the instance key
   // identifies instances is the thread id.
-  for (int i = 0; i < num_datawriters_; i ++)
-  {
+  for (int i = 0; i < num_datawriters_; i ++) {
     writers_[i] = new Writer(this,
                              datawriters_[i].in (),
                              num_threads_to_write_,
@@ -483,105 +288,16 @@ PubDriver::run()
                              check_data_dropped_);
     writers_[i]->start ();
   }
+
+  bool finished = false;
+  while (!finished) {
+    finished = true;
+    for (int i = 0; i < num_datawriters_; i ++) {
+      if (!writers_[i]->finished()) {
+        finished = false;
+        break;
+      }
+    }
+    ACE_OS::sleep(ACE_Time_Value(0,200000));
   }
-}
-
-int
-PubDriver::parse_pub_arg(const ACE_TString& arg)
-{
-  size_t pos;
-
-  // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = std::find(arg.c_str(), arg.c_str() + arg.length(), ACE_TEXT(':')) - arg.c_str()) == arg.length()) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad -p command-line value (%s). Missing ':' char.\n",
-               arg.c_str()));
-    return -1;
-  }
-
-  if (pos == 0) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad -p command-line value (%s). "
-               "':' char cannot be first char.\n",
-               arg.c_str()));
-    return -1;
-  }
-
-  if (pos == (arg.length() - 1)) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad -p command-line value  (%s) - "
-               "':' char cannot be last char.\n",
-               arg.c_str()));
-    return -1;
-  }
-
-  // Parse the pub_id from left of ':' char, and remainder to right of ':'.
-  ACE_TString pub_id_str(arg.c_str() ,pos);
-  this->pub_addr_str_ = arg.c_str() + pos + 1;
-
-  this->pub_id_fname_ = pub_id_str.c_str();
-  this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
-
-  return 0;
-}
-
-int
-PubDriver::parse_sub_arg(const ACE_TString& arg)
-{
-  size_t pos;
-
-  // Find the first ':' character, and make sure it is in a legal spot.
-  if ((pos = std::find(arg.c_str(), arg.c_str() + arg.length(), ACE_TEXT(':')) - arg.c_str()) == arg.length()) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad -s command-line value (%s). Missing ':' char.\n",
-               arg.c_str()));
-    return -1;
-  }
-
-  if (pos == 0) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad -s command-line value (%s). "
-               "':' char cannot be first char.\n",
-               arg.c_str()));
-    return -1;
-  }
-
-  if (pos == (arg.length() - 1)) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) Bad -s command-line value  (%s) - "
-               "':' char cannot be last char.\n",
-               arg.c_str()));
-    return -1;
-  }
-
-  // Parse the sub_id from left of ':' char, and remainder to right of ':'.
-  ACE_TString sub_id_str(arg.c_str() ,pos);
-  this->sub_addr_str_ = arg.c_str () + pos + 1;
-
-  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
-  // generated here are for the sole purpose of verifying internal behavior.
-  OpenDDS::DCPS::RepoIdBuilder builder(sub_id_);
-
-  builder.participantId(1);
-  builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
-  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-
-  // Use the remainder as the "stringified" ACE_INET_Addr.
-  this->sub_addr_ = ACE_INET_Addr(this->sub_addr_str_.c_str());
-
-  return 0;
-}
-
-void PubDriver::shutdown (
-  )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
-{
-  shutdown_ = true;
-}
-
-
-void PubDriver::attach_to_transport ()
-{
 }
