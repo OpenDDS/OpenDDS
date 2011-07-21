@@ -2,8 +2,8 @@ Version 2.4 of OpenDDS.
 
 * This will be the final release of OpenDDS that will build with the current
   patch level of TAO 1.5a.  This release is compatible with (the current patch
-  levels of) TAO 1.5a, and 1.6a, as well as the current DOC Group release.  
-  Future releases will be compatible with TAO 1.6a and the DOC group -- see 
+  levels of) TAO 1.5a, and 1.6a, as well as the current DOC Group release.
+  Future releases will be compatible with TAO 1.6a and the DOC group -- see
   the README file for details on TAO versions.
 
 - The implementation of ContentFilteredTopics now defaults to evaluating
@@ -74,6 +74,14 @@ Version 2.4 of OpenDDS.
   There are no compile-time or run-time dependencies on Graphviz. The
   monitor tool will run on systems without Graphviz installed but will
   not be able to generate .png files.
+
+- Enhanced the Wireshark packet dissector to inspect SAMPLE_DATA message
+  contents. This requires a data model expressed in an .ini file (documented
+  in tools/dissector/README.) In order to associate a SAMPLE_DATA message
+  with a type, the publication ID is harvested from InfoRepo GIOP messages.
+  In order to detect InfoRepo GIOP messages, the IOR for the InfoRepo must
+  be written in a file called "IOR.txt" in the current working directory when
+  wireshark is invoked.
 
 ========================================================================
 
