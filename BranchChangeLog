@@ -1,3 +1,10 @@
+Thu Jul 21 16:14:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Add an entry to the transport interface info sequence.
+
 Wed Jul 20 23:00:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:

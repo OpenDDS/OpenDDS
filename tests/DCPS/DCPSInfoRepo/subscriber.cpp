@@ -123,6 +123,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       drq->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       ::DDS::SubscriberQos_var sQos = new ::DDS::SubscriberQos;
       OpenDDS::DCPS::TransportLocatorSeq_var tii = new OpenDDS::DCPS::TransportLocatorSeq;
+      tii->length(1);
+      tii[0].transport_type = "fake transport for test";
 
       OpenDDS::DCPS::RepoId subId = info->add_subscription(domainId,
                                                  dpId,
