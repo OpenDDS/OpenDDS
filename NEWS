@@ -1,5 +1,11 @@
 Version 2.4 of OpenDDS.
 
+* This will be the final release of OpenDDS that will build with the current
+  patch level of TAO 1.5a.  This release is compatible with (the current patch
+  levels of) TAO 1.5a, and 1.6a, as well as the current DOC Group release.  
+  Future releases will be compatible with TAO 1.6a and the DOC group -- see 
+  the README file for details on TAO versions.
+
 - The implementation of ContentFilteredTopics now defaults to evaluating
   the filter expression at the publisher so that data samples which would
   be ignored by the subscriber can be dropped before getting to the transport.
@@ -25,7 +31,7 @@ Version 2.4 of OpenDDS.
     * The property sheet now includes a tab for viewing and editing
       comments related to the selected figure. These comments are
       included in the generated C++ code.
-    * In some cases, when attempting to adding a figure to a Package
+    * In some cases, when attempting to add a figure to a Package
       on the main diagram, the figure would unknowingly be placed as a
       peer of the Package on the canvas. A fix was made so the figure
       could be added to any portion of the Package to be treated as a

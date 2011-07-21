@@ -1,3 +1,9 @@
+Thu Jul 21 18:16:19 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * NEWS:
+
+          Added a note about end of support for TAO 1.5a.
+
 Wed Jul 20 21:54:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_manager.cpp:
