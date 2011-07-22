@@ -119,7 +119,6 @@ my $Publisher = PerlDDS::create_process
        , "-a $num_writes_before_crash"
        . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
        . " -d $expected_deleted_connections -DCPSConfigFile opendds.ini");
-#       . " -DCPSDebugLevel 10 -DCPSTransportDebugLevel 10");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();
@@ -144,6 +143,8 @@ if ($kill_subscriber > 0)
 print $Publisher->CommandLine () . "\n";
 $Publisher->Spawn ();
 
+my($PublisherResult, $SubscriberResult);
+
 # The subscriber crashes and we need restart the subscriber.
 if ($num_reads_before_crash > 0)
 {
@@ -160,7 +161,7 @@ if ($num_reads_before_crash > 0)
   #get time at crash
   my $crash_at = time();
 
-  my $SubscriberResult = $Subscriber->WaitKill (60);
+  $SubscriberResult = $Subscriber->WaitKill (60);
 
   # We will not check the status returned from WaitKill() since it returns
   # different status on windows and linux.
@@ -176,7 +177,7 @@ if ($num_reads_before_crash > 0)
   my $num_expected_reads_restart_sub
     = $num_writes - $num_reads_before_crash - $num_lost_messages_estimate;
 
-  my $Subscriber = PerlDDS::create_process
+  $Subscriber = PerlDDS::create_process
         ("subscriber"
          , "-n $num_expected_reads_restart_sub"
          . " -r $num_reads_deviation -DCPSConfigFile opendds.ini");
@@ -188,13 +189,13 @@ if ($num_reads_before_crash > 0)
 
 # The publisher crashes and we need restart the publisher.
 if ($num_writes_before_crash > 0) {
-  my $PublisherResult = $Publisher->WaitKill (60);
+  $PublisherResult = $Publisher->WaitKill (60);
 
   # We will not check the status returned from WaitKill() since it returns
   # different status on windows and linux.
   print "Publisher crashed and returned $PublisherResult. \n";
 
-  my $Publisher = PerlDDS::create_process
+  $Publisher = PerlDDS::create_process
         ("publisher"
          , "-DCPSConfigFile opendds.ini -n $num_writes");
 
@@ -214,7 +215,7 @@ if ($kill_subscriber == 0)
     }
 }
 
-my $PublisherResult = $Publisher->WaitKill (60);
+$PublisherResult = $Publisher->WaitKill (60);
 if ($kill_subscriber != 0 && $PublisherResult == 0) {
     # writing out to STDOUT as these tests redirect STDERR to a log file.
     # The nightly script parses STDERR to detect test failures.

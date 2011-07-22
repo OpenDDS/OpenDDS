@@ -103,6 +103,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     if( parse_args(argc, argv) != 0)
       return 1;
 
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) subscriber.cpp main()\n"));
+
     participant =
       dpf->create_participant(411,
                               PARTICIPANT_QOS_DEFAULT,

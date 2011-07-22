@@ -33,6 +33,7 @@ import DDS.Topic;
 import DDS._DataReaderListenerLocalBase;
 import DDS._DataWriterListenerLocalBase;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
+import OpenDDS.DCPS.transport.TheTransportRegistry;
 
 import MultiRepo.Message;
 import MultiRepo.MessageDataReader;
@@ -48,9 +49,13 @@ import MultiRepo.MessageTypeSupportImpl;
  * @version $Revision$
  */
 public class MultiRepoWorker {
+    private static volatile int transportId;
+
     private DomainParticipant participant;
 
     private Topic topic;
+
+    private String transportConfig;
 
     private boolean read;
 
@@ -67,6 +72,8 @@ public class MultiRepoWorker {
         topic = participant.create_topic("MultiRepo::Topic", typeSupport.get_type_name(),
                                          TOPIC_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
+        transportConfig = "" + ++transportId;
+
         assert (topic != null);
     }
 
@@ -79,6 +86,8 @@ public class MultiRepoWorker {
             participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
         assert (publisher != null);
+
+        TheTransportRegistry.bind_config(transportConfig, publisher);
 
         publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(),
             new _DataWriterListenerLocalBase() {
@@ -114,6 +123,8 @@ public class MultiRepoWorker {
             participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
         assert (subscriber != null);
+
+        TheTransportRegistry.bind_config(transportConfig, subscriber);
 
         subscriber.create_datareader(topic, DATAREADER_QOS_DEFAULT.get(),
             new _DataReaderListenerLocalBase () {

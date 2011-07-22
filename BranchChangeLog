@@ -1,3 +1,27 @@
+Fri Jul 22 14:22:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/multirepo/run_test.pl:
+
+          This test needs to bind different transports to the various
+          publishers and subscribers.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          sleep is in the ACE_OS namespace.
+
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+
+          Fixed newly introduced bugs in perl script.
+          Added logging to pub and sub .cpp.
+
+        * java/tests/multirepo/domain1_ids:
+        * java/tests/multirepo/domain2_ids:
+
+          Removed these files.
+
 Fri Jul 22 01:41:16 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/dcps_tests.lst:

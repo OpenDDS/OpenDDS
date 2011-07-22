@@ -19,6 +19,8 @@
 #include "tests/DCPS/common/TestSupport.h"
 
 #include <ace/Arg_Shifter.h>
+#include <ace/OS_NS_unistd.h>
+
 #include <string>
 #include <sstream>
 
@@ -790,7 +792,7 @@ PubDriver::listener_test ()
 
   // Need a little sleep here to let the samples from register_test
   // to get through before we do the remove_associations().
-  sleep(2);
+  ACE_OS::sleep(2);
 
   //Test remove_associations
 

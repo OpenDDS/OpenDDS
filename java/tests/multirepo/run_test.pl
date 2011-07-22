@@ -20,68 +20,55 @@ foreach my $i (@ARGV) {
     }
 }
 
-my $opts = "";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
-my $master_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
-    "-ORBLogFile master.log";
+my $master_opts = "$debug_opt -ORBLogFile master.log -DCPSConfigFile multirepo.ini";
 
-my $slave_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12347 $debug_opt ".
-    "-ORBLogFile slave.log -DCPSConfigFile multirepo.ini";
+my $slave_opts = "$debug_opt -ORBLogFile slave.log -DCPSConfigFile multirepo.ini";
 
 my $dcpsrepo1_ior = "repo1.ior";
 my $dcpsrepo2_ior = "repo2.ior";
 
-my $domains1_file = "domain1_ids";
-my $domains2_file = "domain2_ids";
-
 unlink $dcpsrepo1_ior;
 unlink $dcpsrepo2_ior;
+unlink qw/DCPSInfoRepo1.log DCPSInfoRepo2.log master.log slave.log/;
 
-my $DCPSREPO1 = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
-               "-DCPSDebugLevel 10 ".
-               "-ORBListenEndpoints iiop://127.0.0.1:1111 -ORBDebugLevel 10 ".
-               "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo1_ior ".
-               "-d $domains1_file");
+my $DCPSREPO1 = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
+                  "$debug_opt -ORBLogFile DCPSInfoRepo1.log -o $dcpsrepo1_ior");
 
-my $DCPSREPO2 = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo",
-               "-DCPSDebugLevel 10 ".
-               "-ORBListenEndpoints iiop://127.0.0.1:1112 -ORBDebugLevel 10 ".
-               "-ORBLogFile DCPSInfoRepo.log $opts -o $dcpsrepo2_ior ".
-               "-d $domains2_file");
+my $DCPSREPO2 = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
+                  "$debug_opt -ORBLogFile DCPSInfoRepo2.log -o $dcpsrepo2_ior");
 
-PerlACE::add_lib_path ("$DDS_ROOT/java/tests/multirepo");
+my $MASTER = new PerlDDS::Process_Java("MultiRepoMaster", $master_opts);
+my $SLAVE = new PerlDDS::Process_Java("MultiRepoSlave", $slave_opts);
 
-my $MASTER = new PerlDDS::Process_Java ("MultiRepoMaster", $master_opts);
-my $SLAVE = new PerlDDS::Process_Java ("MultiRepoSlave", $slave_opts);
-
-$DCPSREPO1->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo1_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-    $DCPSREPO1->Kill ();
+$DCPSREPO1->Spawn();
+if (PerlACE::waitforfile_timed($dcpsrepo1_ior, 30) == -1) {
+    print STDERR "ERROR: waiting for DCPSInfoRepo #1 IOR file\n";
+    $DCPSREPO1->Kill();
     exit 1;
 }
 
-$DCPSREPO2->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo2_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-    $DCPSREPO2->Kill ();
+$DCPSREPO2->Spawn();
+if (PerlACE::waitforfile_timed($dcpsrepo2_ior, 30) == -1) {
+    print STDERR "ERROR: waiting for DCPSInfoRepo #2 IOR file\n";
+    $DCPSREPO2->Kill();
     exit 1;
 }
 
-$MASTER->Spawn ();
-$SLAVE->Spawn ();
+$MASTER->Spawn();
+$SLAVE->Spawn();
 
-my $MasterResult = $MASTER->WaitKill (300);
+my $MasterResult = $MASTER->WaitKill(300);
 if ($MasterResult != 0) {
-    print STDERR "ERROR: master returned $MasterResult \n";
+    print STDERR "ERROR: master returned $MasterResult\n";
     $status = 1;
 }
 
-my $SlaveResult = $SLAVE->WaitKill (300);
+my $SlaveResult = $SLAVE->WaitKill(300);
 if ($SlaveResult != 0) {
-    print STDERR "ERROR: slave returned $SlaveResult \n";
+    print STDERR "ERROR: slave returned $SlaveResult\n";
     $status = 1;
 }
 
