@@ -8,7 +8,6 @@ project(*Publisher): dcpsexe_with_tcp {
   Source_Files {
     common.cpp
     publisher.cpp
-    Reader.cpp
     Writer.cpp
     DDSTEST.cpp
     DataWriterListenerImpl.cpp
@@ -28,7 +27,6 @@ project(*Subscriber): dcpsexe_with_tcp {
     common.cpp
     subscriber.cpp
     Reader.cpp
-    Writer.cpp
     DDSTEST.cpp
     DataWriterListenerImpl.cpp
     DataReaderListener.cpp

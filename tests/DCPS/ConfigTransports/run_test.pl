@@ -10,26 +10,33 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
-
+use Getopt::Std;
 use Data::Dumper;
+
+use vars qw/ $opt_d /;
+getopts('d:');
+my $debug = 1 if $opt_d;
+
+
 
 PerlDDS::add_lib_path('../FooType4');
 PerlDDS::add_lib_path('../common');
-# single reader with single instances test
-$pub_time = 5;
-$pub_addr = "localhost:";
-$port=29804;
-$sub_time = $pub_time;
-$sub_addr = "localhost:16701";
-#$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
-$use_svc_conf = undef;
-$svc_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf " : '';
-$repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
+my $pub_time = 5;
+my $pub_addr = "localhost:";
+my $port=29804;
 
-$dcpsrepo_ior = "repo.ior";
+my $sub_time = $pub_time;
+my $sub_addr = "localhost:16701";
+#my $use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
+my $use_svc_conf = undef;
 
-$qos = {
+my $svc_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf " : '';
+my $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
+
+my $dcpsrepo_ior = "repo.ior";
+
+my $qos = {
     autoenable    => undef,
     durability => transient_local,
     liveliness => automatic,
@@ -157,7 +164,7 @@ my @without_configuration_file = (
     protocol      => [_OPENDDS_0500_TCP],
     compatibility => true,
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
   },
 );
 
@@ -213,10 +220,19 @@ my @explicit_configuration_collocated = (
 
 @scenario = (
 
+#  {
+#    entity        => participant,
+#    collocation   => process,
+#    configuration => Udp_Only,
+#    protocol      => [udp1],
+#    compatibility => true,
+#    publisher     => $qos,
+#    subscriber    => $qos
+#  },
   @explicit_configuration_collocated,
-#  @without_configuration_file,
-#  @configuration_file_unused,
-#  @explicit_configuration,
+  @without_configuration_file,
+  @configuration_file_unused,
+  @explicit_configuration,
 
 );
 
@@ -256,7 +272,6 @@ sub parse($$$) {
          . " -k " . $pub_liveliness_kind
          . " -r " . $pub_reliability_kind
          . " -l " . $pub_lease_time
-         . " -x " . $pub_time
          ;
 
   return $result;
@@ -301,12 +316,11 @@ sub finalize($) {
   return 0;
 }
 
-sub run($$) {
+sub run($$$$) {
 
-  my ($pub_parameters, $sub_parameters) = @_;
+  my ($Publisher, $pub_time, $Subscriber, $sub_time) = @_;
 
-  my $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
-  my $Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
+  my $count = 0;
   my $status = 0;
 
   print $Subscriber->CommandLine() . "\n";
@@ -341,21 +355,62 @@ sub run($$) {
   return $status;
 }
 
-
 my $status = 0;
 
 for my $hasbuiltins (undef, true) {
+#for my $hasbuiltins (undef) {
 
     my $DCPSREPO = initialize($hasbuiltins);
 
     for my $i (@scenario) {
 
-        $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
-        $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
+        my $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
+        my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
+        my $pub_process = 'publisher';
+        my $sub_process = 'subscriber';
 
-        $status += run($pub_parameters, $sub_parameters);
+        if (!$debug) {
+          $pub_parameters = $pub_parameters . " -x " . $pub_time;
+          $sub_parameters = $sub_parameters . " -x " . $sub_time;
+        }
+
+        if ($debug) {
+
+          # You've got an hour ...
+          $pub_time = $sub_time = 3600;
+          $pub_parameters .= " -x " . $pub_time;
+          $sub_parameters .= " -x " . $sub_time;
+          
+
+          open(FF1, '>/tmp/publisher.gdb');
+          print FF1 <<EOF;
+break main
+run $pub_parameters
+EOF
+          close(FF1);
+          $pub_process = '/usr/bin/xterm';
+#          $pub_process = '/usr/bin/gnome-terminal';
+          $pub_parameters = '-T publisher -e gdb -x /tmp/publisher.gdb publisher';
+
+          open(FF2, '>/tmp/subscriber.gdb');
+          print FF2 <<EOF;
+break main
+run $sub_parameters
+EOF
+          close(FF2);
+          $sub_process = '/usr/bin/xterm';
+#          $sub_process = '/usr/bin/gnome-terminal';
+          $sub_parameters = '-T subscriber -e gdb -x /tmp/subscriber.gdb subscriber';
+        }
+
+        my $Subscriber = PerlDDS::create_process ($sub_process, $sub_parameters);
+        my $Publisher = PerlDDS::create_process ($pub_process, $pub_parameters);
+
+        $status += run($Publisher, $pub_time, $Subscriber, $sub_time);
+        $count++;
         print "\n";
 
+        # Which test failed, exactly?
         if ($status != 0) {
             $Data::Dumper::Terse = 1;
             print "FAILED " . Dumper(\%$i) . "\n";
@@ -368,7 +423,7 @@ for my $hasbuiltins (undef, true) {
 
 
 if ($status == 0) {
-  print "test PASSED\n";
+  print "test PASSED: $count\n";
 }
 else {
   print STDERR "test FAILED: $status\n";

@@ -9,46 +9,163 @@
  */
 // ============================================================================
 
-#include "DDSTEST.h"
 #include "common.h"
+#include "DDSTEST.h"
+#include "DataWriterListenerImpl.h"
+#include "DataReaderListener.h"
+
 #include "../common/TestSupport.h"
 
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
+#include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/SString.h"
 #include "ace/Arg_Shifter.h"
+#include "tests/DCPS/CompatibilityTest/common.h"
 
 #include <stdexcept>
 #include <string>
 
+Options::Options() :
+        test_duration(40),
+        test_duration_str(ACE_TEXT("40")),
+        LEASE_DURATION_STR(ACE_TEXT("infinite")),
+        reliability_kind(::DDS::RELIABLE_RELIABILITY_QOS),
+        reliability_kind_str(ACE_TEXT("reliable")),
+        durability_kind(::DDS::TRANSIENT_LOCAL_DURABILITY_QOS),
+        durability_kind_str(ACE_TEXT("transient_local")),
+        liveliness_kind(::DDS::AUTOMATIC_LIVELINESS_QOS),
+        liveliness_kind_str(ACE_TEXT("automatic")),
+        compatible(false),
+        entity_autoenable(true),
+        entity_str(ACE_TEXT("none")),
+        collocation_str(ACE_TEXT("none")),
+        configuration_str(ACE_TEXT("none"))
+{
+  LEASE_DURATION.sec = ::DDS::DURATION_INFINITE_SEC;
+  LEASE_DURATION.nanosec = ::DDS::DURATION_INFINITE_NSEC;
+}
 
+/// parse the command line arguments
+/// Options:
+///  -e entity                   defaults to none. may be used multiple times
+///  -a collocation              defaults to none
+///  -s transport configuration  defaults to none
+///  -p effective transport protocol     defaults to none
 
+///  -c expect compatibility     defaults to false
+///  -t effective transport protocol     defaults to none. may be used multiple times
+///  -d durability kind          defaults to TRANSIENT_LOCAL_DURABILITY_QOS
+///  -k liveliness kind          defaults to AUTOMATIC_LIVELINESS_QOS
+///  -r reliability kind         defaults to BEST_EFFORT_RELIABILITY_QOS
+///  -l lease duration           no default
+///  -x test duration in sec     defaults to 40
 
-DDS::Duration_t LEASE_DURATION;
+Options::Options(int argc, ACE_TCHAR *argv[]) :
+        test_duration(40),
+        test_duration_str(ACE_TEXT("40")),
+        reliability_kind(::DDS::RELIABLE_RELIABILITY_QOS),
+        reliability_kind_str(ACE_TEXT("reliable")),
+        durability_kind(::DDS::TRANSIENT_LOCAL_DURABILITY_QOS),
+        durability_kind_str(ACE_TEXT("transient_local")),
+        liveliness_kind(::DDS::AUTOMATIC_LIVELINESS_QOS),
+        liveliness_kind_str(ACE_TEXT("automatic")),
+        compatible(false),
+        entity_autoenable(true),
+        entity_str(ACE_TEXT("none")),
+        collocation_str(ACE_TEXT("none")),
+        configuration_str(ACE_TEXT("none"))
+{
+  u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
+  ACE_Arg_Shifter arg_shifter(argc, argv);
 
-int test_duration = 40;
-::DDS::ReliabilityQosPolicyKind reliability_kind = ::DDS::RELIABLE_RELIABILITY_QOS;
-::DDS::DurabilityQosPolicyKind durability_kind = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-::DDS::LivelinessQosPolicyKind liveliness_kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
-bool compatible = false;
+  // Swallow the executable name
+  arg_shifter.consume_arg();
 
-ACE_TString LEASE_DURATION_STR;
-std::string entity_str;
-bool entity_autoenable = true;
-std::string collocation_str;
-ACE_TString source_str;
-std::string configuration_str(ACE_TEXT("none"));
-std::string test_duration_str;
-ACE_TString reliability_kind_str;
-ACE_TString durability_kind_str;
-ACE_TString liveliness_kind_str;
-std::vector<std::string> protocol_str;
+  LEASE_DURATION.sec = ::DDS::DURATION_INFINITE_SEC;
+  LEASE_DURATION.nanosec = ::DDS::DURATION_INFINITE_NSEC;
+
+  while (arg_shifter.is_anything_left())
+    {
+      const ACE_TCHAR *currentArg = 0;
+
+      if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
+        {
+          this->protocol_str.push_back(currentArg);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
+        {
+          this->entity_autoenable = this->get_entity_autoenable_kind(currentArg);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-e"))) != 0)
+        {
+          this->entity_str = this->get_entity_kind(currentArg);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
+        {
+          this->collocation_str = this->get_collocation_kind(currentArg);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
+        {
+          this->configuration_str = currentArg;
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
+        {
+          this->compatible = (ACE_TString(currentArg) == ACE_TEXT("true"));
+          arg_shifter.consume_arg();
+        }
+      else if (0 == arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-d")))
+        {
+
+          this->durability_kind_str = arg_shifter.get_the_parameter(ACE_TEXT("-d"));
+          this->durability_kind = this->get_durability_kind(this->durability_kind_str);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0)
+        {
+          this->liveliness_kind_str = currentArg;
+          this->liveliness_kind = this->get_liveliness_kind(this->liveliness_kind_str);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
+        {
+          this->LEASE_DURATION_STR = currentArg;
+          this->LEASE_DURATION = this->get_lease_duration(this->LEASE_DURATION_STR);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
+        {
+          this->reliability_kind_str = currentArg;
+          this->reliability_kind = this->get_reliability_kind(this->reliability_kind_str);
+          arg_shifter.consume_arg();
+        }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
+        {
+          this->test_duration = ACE_OS::atoi(currentArg);
+          arg_shifter.consume_arg();
+        }
+      else
+        {
+          ACE_ERROR((LM_WARNING,
+                     ACE_TEXT("(%P|%t) Ignoring command line argument: %C\n"), arg_shifter.get_current()));
+          arg_shifter.ignore_arg();
+        }
+    }
+}
+
+Options::~Options() { }
 
 const std::string&
-get_collocation_kind(const std::string& argument)
+Options::get_collocation_kind(const std::string& argument)
 {
   if (argument == ACE_TEXT("none"))
     {
@@ -70,7 +187,7 @@ get_collocation_kind(const std::string& argument)
 }
 
 const std::string&
-get_entity_kind(const std::string& argument)
+Options::get_entity_kind(const std::string& argument)
 {
   if (argument == ACE_TEXT("none"))
     {
@@ -92,10 +209,8 @@ get_entity_kind(const std::string& argument)
 }
 
 bool
-get_entity_autoenable_kind(const std::string& argument)
+Options::get_entity_autoenable_kind(const std::string& argument)
 {
-  ACE_ERROR((LM_WARNING,
-             ACE_TEXT("(%P|%t) autoenable: %C\n"), argument.c_str()));
   if (argument == ACE_TEXT("yes"))
     {
       return true;
@@ -116,7 +231,7 @@ get_entity_autoenable_kind(const std::string& argument)
 }
 
 ::DDS::LivelinessQosPolicyKind
-get_liveliness_kind(const ACE_TString& argument)
+Options::get_liveliness_kind(const std::string& argument)
 {
   if (argument == ACE_TEXT("automatic"))
     {
@@ -134,7 +249,7 @@ get_liveliness_kind(const ACE_TString& argument)
 }
 
 ::DDS::DurabilityQosPolicyKind
-get_durability_kind(const ACE_TString& argument)
+Options::get_durability_kind(const std::string& argument)
 {
   if (argument == ACE_TEXT("volatile"))
     {
@@ -158,7 +273,7 @@ get_durability_kind(const ACE_TString& argument)
 }
 
 ::DDS::ReliabilityQosPolicyKind
-get_reliability_kind(const ACE_TString& argument)
+Options::get_reliability_kind(const std::string& argument)
 {
   if (argument == ACE_TEXT("best_effort"))
     {
@@ -172,7 +287,7 @@ get_reliability_kind(const ACE_TString& argument)
 }
 
 ::DDS::Duration_t
-get_lease_duration(const ACE_TString& argument)
+Options::get_lease_duration(const std::string& argument)
 {
   ::DDS::Duration_t lease;
   if (argument == ACE_TEXT("infinite"))
@@ -188,109 +303,28 @@ get_lease_duration(const ACE_TString& argument)
   return lease;
 }
 
-/// parse the command line arguments
-/// Options:
-///  -e entity                   defaults to none. may be used multiple times
-///  -a collocation              defaults to none
-///  -s transport configuration  defaults to none
-///  -p effective transport protocol     defaults to none
-
-///  -c expect compatibility     defaults to false
-///  -t effective transport protocol     defaults to none. may be used multiple times
-///  -d durability kind          defaults to TRANSIENT_LOCAL_DURABILITY_QOS
-///  -k liveliness kind          defaults to AUTOMATIC_LIVELINESS_QOS
-///  -r reliability kind         defaults to BEST_EFFORT_RELIABILITY_QOS
-///  -l lease duration           no default
-///  -x test duration in sec     defaults to 40
-
-int
-parse_args(int argc, ACE_TCHAR *argv[])
+DDS::DomainParticipant_ptr
+create_plain_participant(DDS::DomainParticipantFactory_ptr dpf)
 {
-  u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
-  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
-  ACE_Arg_Shifter arg_shifter(argc, argv);
+  DDS::DomainParticipant_var dp =
+          dpf->create_participant(MY_DOMAIN,
+                                  PARTICIPANT_QOS_DEFAULT,
+                                  DDS::DomainParticipantListener::_nil(),
+                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  // Swallow the executable name
-  arg_shifter.consume_arg();
+  Xyz::FooTypeSupport_var fts(new Xyz::FooTypeSupportImpl);
+  TEST_ASSERT(DDS::RETCODE_OK == fts->register_type(dp.in(), MY_TYPE));
 
-  while (arg_shifter.is_anything_left())
-    {
-      const ACE_TCHAR *currentArg = 0;
+  return dp._retn();
 
-      if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
-        {
-          protocol_str.push_back(currentArg);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
-        {
-          entity_autoenable = ::get_entity_autoenable_kind(currentArg);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-e"))) != 0)
-        {
-          entity_str = ::get_entity_kind(currentArg);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
-        {
-          collocation_str = ::get_collocation_kind(currentArg);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
-        {
-          configuration_str = currentArg;
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
-        {
-          compatible = (ACE_TString(currentArg) == ACE_TEXT("true"));
-          arg_shifter.consume_arg();
-        }
-      else if (0 == arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-d")))
-        {
-
-          durability_kind_str = arg_shifter.get_the_parameter(ACE_TEXT("-d"));
-          durability_kind = ::get_durability_kind(durability_kind_str);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0)
-        {
-          liveliness_kind_str = currentArg;
-          liveliness_kind = ::get_liveliness_kind(liveliness_kind_str);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
-        {
-          LEASE_DURATION_STR = currentArg;
-          LEASE_DURATION = ::get_lease_duration(LEASE_DURATION_STR);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
-        {
-          reliability_kind_str = currentArg;
-          reliability_kind = ::get_reliability_kind(reliability_kind_str);
-          arg_shifter.consume_arg();
-        }
-      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
-        {
-          test_duration = ACE_OS::atoi(currentArg);
-          arg_shifter.consume_arg();
-        }
-      else
-        {
-          ACE_ERROR((LM_WARNING,
-                     ACE_TEXT("(%P|%t) Ignoring command line argument: %C\n"), arg_shifter.get_current()));
-          arg_shifter.ignore_arg();
-        }
-    }
-
-  // Indicates successful parsing of the command line
-  return 0;
 }
 
+Factory::Factory(const Options& opts) : opts_(opts) { }
+
+Factory::~Factory() { }
+
 DDS::DomainParticipant_ptr
-create_configured_participant(DDS::DomainParticipantFactory_ptr dpf)
+Factory::participant(DDS::DomainParticipantFactory_ptr dpf) const
 {
   DDS::DomainParticipant_var dp =
           dpf->create_participant(MY_DOMAIN,
@@ -300,10 +334,9 @@ create_configured_participant(DDS::DomainParticipantFactory_ptr dpf)
 
   // If there is a ini file-based configuration name initialize
   // the transport configuration for the corresponding Entity
-  TEST_ASSERT(!configuration_str.empty());
-  if (configuration_str != "none" && entity_str == "participant")
+  if (opts_.configuration_str != "none" && opts_.entity_str == "participant")
     {
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(configuration_str, dp.in());
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(opts_.configuration_str, dp.in());
     }
 
 
@@ -315,32 +348,36 @@ create_configured_participant(DDS::DomainParticipantFactory_ptr dpf)
 }
 
 DDS::Topic_ptr
-create_configured_topic(DDS::DomainParticipant_ptr dp)
+Factory::topic(DDS::DomainParticipant_ptr dp) const
 {
+  TEST_CHECK(dp != 0);
+
   // When collocation doesn't matter we choose a topic name that will not match
   // the publisher's topic name
-  std::string topicname((collocation_str == "none") ? MY_OTHER_TOPIC : MY_SAME_TOPIC);
+  std::string topicname((opts_.collocation_str == "none") ? MY_OTHER_TOPIC : MY_SAME_TOPIC);
 
 
   DDS::TopicQos topic_qos;
-  dp->get_default_topic_qos(topic_qos);
+  TEST_CHECK(DDS::RETCODE_OK == dp->get_default_topic_qos(topic_qos));
 
-  return dp->create_topic(topicname.c_str(),
-                          MY_TYPE,
-                          TOPIC_QOS_DEFAULT,
-                          DDS::TopicListener::_nil(),
-                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::Topic_var p(dp->create_topic(topicname.c_str(),
+                                    MY_TYPE,
+                                    TOPIC_QOS_DEFAULT,
+                                    DDS::TopicListener::_nil(),
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK));
+  TEST_CHECK(!CORBA::is_nil(p.in()));
+  return p._retn();
 }
 
 DDS::Publisher_ptr
-create_configured_publisher(DDS::DomainParticipant_ptr dp)
+Factory::publisher(DDS::DomainParticipant_ptr dp) const
 {
 
   DDS::PublisherQos pub_qos;
   dp->get_default_publisher_qos(pub_qos);
-  if (entity_str == "rw")
+  if (opts_.entity_str == "rw")
     {
-      pub_qos.entity_factory.autoenable_created_entities = entity_autoenable;
+      pub_qos.entity_factory.autoenable_created_entities = opts_.entity_autoenable;
     }
 
   // Create the publisher
@@ -351,24 +388,23 @@ create_configured_publisher(DDS::DomainParticipant_ptr dp)
 
   // If there is a ini file-based configuration name initialize
   // the transport configuration for the corresponding Entity
-  TEST_ASSERT(!configuration_str.empty());
-  if (configuration_str != "none" && entity_str == "pubsub")
+  if (opts_.configuration_str != "none" && opts_.entity_str == "pubsub")
     {
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(configuration_str, pub.in());
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(opts_.configuration_str, pub.in());
     }
 
   return pub._retn();
 }
 
 DDS::Subscriber_ptr
-create_configured_subscriber(DDS::DomainParticipant_ptr dp)
+Factory::subscriber(DDS::DomainParticipant_ptr dp) const
 {
 
   DDS::SubscriberQos sub_qos;
   dp->get_default_subscriber_qos(sub_qos);
-  if (entity_str == "rw")
+  if (opts_.entity_str == "rw")
     {
-      sub_qos.entity_factory.autoenable_created_entities = entity_autoenable;
+      sub_qos.entity_factory.autoenable_created_entities = opts_.entity_autoenable;
     }
 
   // Create the subscriber
@@ -380,25 +416,25 @@ create_configured_subscriber(DDS::DomainParticipant_ptr dp)
 
   // If there is a ini file-based configuration name initialize
   // the transport configuration for the corresponding Entity
-  if (configuration_str != "none" && entity_str == "pubsub")
+  if (opts_.configuration_str != "none" && opts_.entity_str == "pubsub")
     {
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(configuration_str, sub.in());
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(opts_.configuration_str, sub.in());
     }
 
   return sub._retn();
 }
 
 DDS::DataWriter_ptr
-create_configured_writer(DDS::Publisher_ptr pub, DDS::Topic_ptr topic, DDS::DataWriterListener_ptr dwl)
+Factory::writer(DDS::Publisher_ptr pub, DDS::Topic_ptr topic, DDS::DataWriterListener_ptr dwl) const
 {
   // Create the data writer
   DDS::DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
 
-  dw_qos.durability.kind = durability_kind;
-  dw_qos.liveliness.kind = liveliness_kind;
-  dw_qos.liveliness.lease_duration = LEASE_DURATION;
-  dw_qos.reliability.kind = reliability_kind;
+  dw_qos.durability.kind = opts_.durability_kind;
+  dw_qos.liveliness.kind = opts_.liveliness_kind;
+  dw_qos.liveliness.lease_duration = opts_.LEASE_DURATION;
+  dw_qos.reliability.kind = opts_.reliability_kind;
 
   DDS::DataWriter_var dw = pub->create_datawriter(topic,
                                                   dw_qos,
@@ -406,14 +442,12 @@ create_configured_writer(DDS::Publisher_ptr pub, DDS::Topic_ptr topic, DDS::Data
                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   // Initialize the transport configuration for the appropriate entity
-  TEST_ASSERT(!configuration_str.empty());
-
-  if (configuration_str != "none" && entity_str == "rw")
+  if (opts_.configuration_str != "none" && opts_.entity_str == "rw")
     {
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(configuration_str,
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(opts_.configuration_str,
                                                                 dw.in());
 
-      if (!entity_autoenable)
+      if (!opts_.entity_autoenable)
         {
           TEST_ASSERT(DDS::RETCODE_OK == dw->enable());
         }
@@ -424,16 +458,16 @@ create_configured_writer(DDS::Publisher_ptr pub, DDS::Topic_ptr topic, DDS::Data
 }
 
 DDS::DataReader_ptr
-create_configured_reader(DDS::Subscriber_ptr sub, DDS::Topic_ptr topic, DDS::DataReaderListener_ptr drl)
+Factory::reader(DDS::Subscriber_ptr sub, DDS::Topic_ptr topic, DDS::DataReaderListener_ptr drl) const
 {
   // Create the data readers
   DDS::DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
 
-  dr_qos.durability.kind = durability_kind;
-  dr_qos.liveliness.kind = liveliness_kind;
-  dr_qos.liveliness.lease_duration = LEASE_DURATION;
-  dr_qos.reliability.kind = reliability_kind;
+  dr_qos.durability.kind = opts_.durability_kind;
+  dr_qos.liveliness.kind = opts_.liveliness_kind;
+  dr_qos.liveliness.lease_duration = opts_.LEASE_DURATION;
+  dr_qos.reliability.kind = opts_.reliability_kind;
 
   DDS::TopicDescription_var description =
           sub->get_participant()->lookup_topicdescription(topic->get_name());
@@ -445,13 +479,13 @@ create_configured_reader(DDS::Subscriber_ptr sub, DDS::Topic_ptr topic, DDS::Dat
                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK));
 
   // Initialize the transport configuration for the appropriate entity
-  TEST_ASSERT(!configuration_str.empty());
-  if (configuration_str != "none" && entity_str == "rw")
+  TEST_ASSERT(!opts_.configuration_str.empty());
+  if (opts_.configuration_str != "none" && opts_.entity_str == "rw")
     {
 
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(configuration_str,
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(opts_.configuration_str,
                                                                 rd.in());
-      if (!entity_autoenable)
+      if (!opts_.entity_autoenable)
         {
           TEST_ASSERT(DDS::RETCODE_OK == rd->enable());
         }
@@ -461,7 +495,7 @@ create_configured_reader(DDS::Subscriber_ptr sub, DDS::Topic_ptr topic, DDS::Dat
 }
 
 bool
-assert_subscription_matched(DDS::DataReaderListener_ptr drl)
+assert_subscription_matched(const Options& opts, DDS::DataReaderListener_ptr drl)
 {
   // Assert if pub/sub made a match ...
 
@@ -469,18 +503,18 @@ assert_subscription_matched(DDS::DataReaderListener_ptr drl)
           dynamic_cast<DataReaderListenerImpl*> (drl);
 
   // there is an error if we matched when not compatible (or vice-versa)
-  if (compatible != drl_servant->subscription_matched())
+  if (opts.compatible != drl_servant->subscription_matched())
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) Expected publication_matched to be %C, but it was %C [")
                         ACE_TEXT(" durability_kind=%s, liveliness_kind=%s, liveliness_duration=%s, ")
                         ACE_TEXT("reliability_kind=%s]\n"),
-                        (compatible) ? "true" : "false",
+                        (opts.compatible) ? "true" : "false",
                         (drl_servant->subscription_matched()) ? "true" : "false",
-                        durability_kind_str.c_str(),
-                        liveliness_kind_str.c_str(),
-                        LEASE_DURATION_STR.c_str(),
-                        reliability_kind_str.c_str()),
+                        opts.durability_kind_str.c_str(),
+                        opts.liveliness_kind_str.c_str(),
+                        opts.LEASE_DURATION_STR.c_str(),
+                        opts.reliability_kind_str.c_str()),
                        false);
     }
 
@@ -488,25 +522,25 @@ assert_subscription_matched(DDS::DataReaderListener_ptr drl)
 }
 
 bool
-assert_publication_matched(DDS::DataWriterListener_ptr dwl)
+assert_publication_matched(const Options& opts, DDS::DataWriterListener_ptr dwl)
 {
   // Assert if pub/sub made a match ...
   DataWriterListenerImpl* dwl_servant =
           dynamic_cast<DataWriterListenerImpl*> (dwl);
 
   // check to see if the publisher worked
-  if (compatible != dwl_servant->publication_matched())
+  if (opts.compatible != dwl_servant->publication_matched())
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) Expected publication_matched to be %C, but it was %C [")
                         ACE_TEXT(" durability_kind=%s, liveliness_kind=%s, liveliness_duration=%s, ")
                         ACE_TEXT("reliability_kind=%s]\n"),
-                        (compatible) ? "true" : "false",
+                        (opts.compatible) ? "true" : "false",
                         (dwl_servant->publication_matched()) ? "true" : "false",
-                        durability_kind_str.c_str(),
-                        liveliness_kind_str.c_str(),
-                        LEASE_DURATION_STR.c_str(),
-                        reliability_kind_str.c_str()),
+                        opts.durability_kind_str.c_str(),
+                        opts.liveliness_kind_str.c_str(),
+                        opts.LEASE_DURATION_STR.c_str(),
+                        opts.reliability_kind_str.c_str()),
                        false);
     }
 
@@ -514,20 +548,21 @@ assert_publication_matched(DDS::DataWriterListener_ptr dwl)
 }
 
 bool
-assert_supports_all(const DDS::DataReader_ptr dr, const std::vector<std::string>& transporti)
+assert_supports_all(const Options& f, const DDS::Entity_ptr e)
 {
-  return assert_supports_all(dynamic_cast<const OpenDDS::DCPS::TransportClient*> (dr), transporti);
+  TEST_ASSERT(e != 0);
+
+  const OpenDDS::DCPS::TransportClient* tc = dynamic_cast<const OpenDDS::DCPS::TransportClient*> (e);
+  TEST_ASSERT(tc != 0);
+
+  return assert_supports_all(f, tc, f.protocol_str);
 }
 
 bool
-assert_supports_all(const DDS::DataWriter_ptr dw, const std::vector<std::string>& transporti)
+assert_supports_all(const Options& opts, const OpenDDS::DCPS::TransportClient* tc, const std::vector<std::string>& transporti)
 {
-  return assert_supports_all(dynamic_cast<const OpenDDS::DCPS::TransportClient*> (dw), transporti);
-}
+  TEST_ASSERT(tc != 0);
 
-bool
-assert_supports_all(const OpenDDS::DCPS::TransportClient* tc, const std::vector<std::string>& transporti)
-{
   // Assert effective transport protocols
   int long left = transporti.size();
   for (std::vector < std::string>::const_iterator proto = transporti.begin();
@@ -536,7 +571,7 @@ assert_supports_all(const OpenDDS::DCPS::TransportClient* tc, const std::vector<
       bool issupported = ::DDS_TEST::supports(tc, *proto);
       ACE_ERROR((LM_INFO,
                  ACE_TEXT("(%P|%t) Validating that '%C' entity supports protocol '%C': %C\n"),
-                 entity_str.c_str(),
+                 opts.entity_str.c_str(),
                  proto->c_str(),
                  issupported ? "true" : "false"));
 
@@ -545,3 +580,56 @@ assert_supports_all(const OpenDDS::DCPS::TransportClient* tc, const std::vector<
 
   return (0 == left);
 }
+
+bool
+wait_publication_matched_status(const Options& opts, const DDS::Entity_ptr writer_)
+{
+
+  int duration = opts.test_duration;
+
+  ACE_OS::sleep(duration);
+  return true;
+
+
+  // To check the match status?
+  //          DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
+  //          TEST_ASSERT((r.reader_->get_subscription_matched_status(matches) == ::DDS::RETCODE_OK));
+  //          TEST_ASSERT(matches.current_count > 0);
+  //
+  //          DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
+  //          TEST_ASSERT((w.writer_->get_publication_matched_status(matches) == ::DDS::RETCODE_OK));
+  //          TEST_ASSERT(matches.current_count > 0);
+
+
+  //  // Block until Subscriber is available
+  //  DDS::StatusCondition_var condition = writer_->get_statuscondition();
+  //  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS
+  //                                  | DDS::SUBSCRIPTION_MATCHED_STATUS
+  //                                  //                                  | DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS
+  //                                  //                                  | DDS::OFFERED_INCOMPATIBLE_QOS_STATUS
+  //                                  );
+  //
+  //  DDS::WaitSet_var ws = new DDS::WaitSet;
+  //  ws->attach_condition(condition);
+  //
+  //  DDS::Duration_t timeout = {
+  //    (duration < 0) ? DDS::DURATION_INFINITE_SEC : duration,
+  //    DDS::DURATION_INFINITE_NSEC
+  //  };
+  //
+  //  DDS::ConditionSeq conditions;
+  //
+  //  int status = ws->wait(conditions, timeout);
+  //  ws->detach_condition(condition);
+  //
+  //  if (status != DDS::RETCODE_OK)
+  //    {
+  //      ACE_ERROR_RETURN((LM_ERROR,
+  //                        ACE_TEXT("(%P|$t)")
+  //                        ACE_TEXT(" ERROR: wait failed at %N:%l\n")), false);
+  //    }
+  //
+  //  return true;
+}
+
+

@@ -1,44 +1,34 @@
 // -*- C++ -*-
 //
 // $Id$
+
 #include "Writer.h"
+#include "common.h"
 #include "../common/TestSupport.h"
 
-Writer::Writer(DDS::DomainParticipantFactory_ptr factory, DDS::DataWriterListener_ptr listener) :
-dpf(DDS::DomainParticipantFactory::_duplicate(factory)),
-dp(create_configured_participant(dpf.in())),
-topic(create_configured_topic(dp.in())),
-pub(create_configured_publisher(dp.in())),
-dw(create_configured_writer(pub.in(), topic.in(), listener)) { }
 
-Writer::Writer(DDS::DomainParticipantFactory_ptr factory, DDS::DomainParticipant_ptr participant, DDS::DataWriterListener_ptr listener) :
-dpf(DDS::DomainParticipantFactory::_duplicate(factory)),
-dp(DDS::DomainParticipant::_duplicate(participant)),
-topic(create_configured_topic(dp.in())),
-pub(create_configured_publisher(dp.in())),
-dw(create_configured_writer(pub.in(), topic.in(), listener)) { }
+Writer::Writer(const Factory& f, DDS::DomainParticipantFactory_ptr factory, DDS::DomainParticipant_ptr participant, DDS::DataWriterListener_ptr listener) :
+        dpf(DDS::DomainParticipantFactory::_duplicate(factory)),
+        dp(DDS::DomainParticipant::_duplicate(participant)),
+        pub(f.publisher(dp.in())),
+        topic(f.topic(dp.in())),
+        writer_(f.writer(pub.in(), topic.in(), listener)) { }
+
+Writer::Writer(const Factory& f, DDS::DomainParticipantFactory_ptr factory, DDS::DomainParticipant_ptr participant, DDS::Publisher_ptr publisher, DDS::DataWriterListener_ptr listener) :
+        dpf(DDS::DomainParticipantFactory::_duplicate(factory)),
+        dp(DDS::DomainParticipant::_duplicate(participant)),
+        pub(DDS::Publisher::_duplicate(publisher)),
+        topic(f.topic(dp.in())),
+        writer_(f.writer(pub.in(), topic.in(), listener)) { }
 
 Writer::~Writer()
-  {
-    // Clean up subscriber objects
-    pub->delete_contained_entities();
-    dp->delete_publisher(pub.in());
-    dp->delete_topic(topic.in());
-    dpf->delete_participant(dp.in());
-  }
-
-bool
-Writer::verify_transport()
-  {
-    TEST_ASSERT(!CORBA::is_nil(dw.in()));
-
-    // Wait for things to settle ?!
-    ACE_OS::sleep(test_duration);
-
-    // All required protocols must have been found
-    return assert_supports_all(dw.in(), protocol_str);
-  }
-
+{
+  // Clean up subscriber objects
+  pub->delete_contained_entities();
+  dp->delete_publisher(pub.in());
+  dp->delete_topic(topic.in());
+  dpf->delete_participant(dp.in());
+}
 
 
 //const int default_key = 101010;

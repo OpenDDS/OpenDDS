@@ -1,3 +1,24 @@
+Fri Jul 22 20:42:54 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Reader.cpp:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Improved support for tesing with entities, collocated in-process, 
+          in-domain (participant), in-publisher (in-subscriber)
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Making those messages look like any other ACE messages
+
 Fri Jul 22 14:22:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/multirepo/MultiRepoWorker.java:
