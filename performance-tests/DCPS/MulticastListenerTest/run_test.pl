@@ -24,20 +24,21 @@ sub usage {
     print STDERR "run_test.pl [-b] [-p n] [-s n] [-c]\n" .
         "    -b   enable Built In Topics (BIT)\n" .
         "    -p n start n publisher processes\n" .
-        "    -s n start n subscriber processes\n" .
-        "    -c   enable zero copy reads\n";
+        "    -s n start n subscriber processes\n";
     exit 1;
 }
+
 
 # single reader with single instances test
 my $num_messages=500;
 my $data_size=13;
 my $num_writers=2;
 my $num_readers=3;
-my $num_msgs_btwn_rec=20;
+my $num_msgs_btwn_rec=1;
 my $pub_writer_id=0;
-my $copy_sample=0;
-my $conf_file="conf.ini";
+my $write_throttle=300000*$num_writers;
+my $conf_file="multicast.ini";
+my $debug="";
 
 # default bit to off
 my $repo_bit_conf = "-NOBITS ";
@@ -48,9 +49,6 @@ while ($arg_ind <= $#ARGV) {
     if ($ARGV[$arg_ind] eq '-b') {
         $repo_bit_conf = "";
         $app_bit_conf = "";
-    }
-    elsif ($ARGV[$arg_ind] eq '-c') {
-        $copy_sample = 1;
     }
     elsif ($ARGV[$arg_ind] eq '-p') {
         $arg_ind++;
@@ -66,17 +64,16 @@ while ($arg_ind <= $#ARGV) {
         }
         $num_readers = $ARGV[$arg_ind];
     }
+    elsif ($ARGV[$arg_ind] eq '-debug') {
+        $arg_ind++;
+        $debug="-DCPSDebugLevel 6"
+    }
     else {
         usage("Invalid parameter $ARGV[$arg_ind]");
     }
     $arg_ind++;
 }
 
-
-
-# need $num_msgs_btwn_rec unread samples plus 20 for good measure
-# (possibly allocated by not yet queue by the transport because of greedy read).
-my $num_samples=$num_msgs_btwn_rec + 20;
 
 my $dcpsrepo_ior = "repo.ior";
 
@@ -88,12 +85,11 @@ my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 print $DCPSREPO->CommandLine(), "\n";
 
 my $sub_parameters = "$app_bit_conf -DCPSConfigFile $conf_file"
-#              . " -DCPSDebugLevel 6"
+              . " $debug"
               . " -p $num_writers"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
-              . " -msi $num_samples -mxs $num_samples"
-              . " -c $copy_sample";
+              . " -msi $num_messages -mxs $num_messages";
 #use -msi $num_messages to avoid rejected samples
 #use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
@@ -105,13 +101,12 @@ for ($i = 0; $i < $num_readers; $i++) {
     print $subs[$i]->CommandLine(), "\n";
 }
 
-#NOTE: above 1000 queue samples does not give any better performance.
 my $pub_parameters = "$app_bit_conf -DCPSConfigFile $conf_file"
-#              . " -DCPSDebugLevel 6"
+              . " $debug"
               . " -p 1"
               . " -r $num_readers"
               . " -n $num_messages -d $data_size"
-              . " -msi 1000 -mxs 1000";
+              . " -msi 1000 -mxs 1000 -h $write_throttle";
 
 my @pubs;
 for ($i = 0; $i < $num_writers; $i++) {
@@ -130,6 +125,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
+
 for ($i = 0; $i < $num_readers; $i++) {
     $subs[$i]->Spawn ();
 }
@@ -138,7 +134,7 @@ for ($i = 0; $i < $num_writers; $i++) {
     $pubs[$i]->Spawn ();
 }
 
-my $wait_to_kill = 200;
+my $wait_to_kill = 1200;
 for ($i = 0; $i < $num_writers; $i++) {
     my $PubResult = $pubs[$i]->WaitKill ($wait_to_kill);
     if ($PubResult != 0) {

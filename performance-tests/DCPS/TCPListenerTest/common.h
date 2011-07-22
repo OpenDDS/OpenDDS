@@ -16,8 +16,6 @@
 const long  TEST_DOMAIN   = 411;
 const char* TEST_TOPIC    = "PerfTest";
 const char* TEST_TYPE     = "PerfTestType";
-const ACE_TCHAR* reader_address_str = ACE_TEXT("default");
-const ACE_TCHAR* writer_address_str = ACE_TEXT("default");
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 

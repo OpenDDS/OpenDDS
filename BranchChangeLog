@@ -1,3 +1,33 @@
+Fri Jul 22 01:41:16 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * performance-tests/DCPS/MulticastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/common.h:
+        * performance-tests/DCPS/MulticastListenerTest/multicast.ini:
+        * performance-tests/DCPS/MulticastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+        * performance-tests/DCPS/MulticastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Updates for new transport config scheme.
+          The MulticastListenerTest is still having problems.
+          When run as 'run_test.pl -p 1 -s 1' there is a reference
+          counting problem at exit.  When run as 'run_test.pl'
+          there is a problem during association.  Both problems
+          appear to be multicast-specific as when I switch to tcp
+          they pass.
+
+        * performance-tests/DCPS/MulticastListenerTest/multicast.conf:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-16p4s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-4p1s.pl:
+
+          Removed these files.
+
 Thu Jul 21 20:33:37 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
