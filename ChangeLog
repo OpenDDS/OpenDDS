@@ -1,3 +1,11 @@
+Fri Jul 22 15:12:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+	  Extended to include usage of shared Topic.
+
 Fri Jul 22 03:34:40 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * AUTHORS:
