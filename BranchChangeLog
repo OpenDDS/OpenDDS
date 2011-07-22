@@ -1,3 +1,9 @@
+Fri Jul 22 22:22:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add newly-developed tests to the list.
+
 Fri Jul 22 20:42:54 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
@@ -12,7 +18,7 @@ Fri Jul 22 20:42:54 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
         * tests/DCPS/ConfigTransports/run_test.pl:
         * tests/DCPS/ConfigTransports/subscriber.cpp:
 
-          Improved support for tesing with entities, collocated in-process, 
+          Improved support for tesing with entities, collocated in-process,
           in-domain (participant), in-publisher (in-subscriber)
 
         * tests/DCPS/common/TestSupport.h:
