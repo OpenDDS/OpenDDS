@@ -1,9 +1,23 @@
+Fri Jul 22 18:47:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:
+
+          Added missing file.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/connecting_figures.html:
+
+          Removed empty anchor causing empty box in Eclipse HTML rendering.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/index.html:
+
+          Fixed invalid link to styles.css.
+
 Fri Jul 22 17:05:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcpslib_topic_shared.png:
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/topics_usage.html:
 
-	  Added discussion about using shared Topics.
+          Added discussion about using shared Topics.
 
 Fri Jul 22 15:12:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
