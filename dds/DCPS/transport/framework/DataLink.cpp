@@ -1060,6 +1060,7 @@ ACE_Message_Block*
 OpenDDS::DCPS::DataLink::marshal_acks()
 {
   DBG_ENTRY_LVL("DataLink", "marshal_acks", 6);
+  GuardType guard(this->sub_map_lock_);
   return this->sub_map_.marshal();
 }
 
