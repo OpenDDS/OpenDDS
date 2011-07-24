@@ -1,3 +1,9 @@
+Sun Jul 24 14:01:03 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * NEWS:
+
+          Added description of changes to the OpenDDS Modeling SDK.
+
 Fri Jul 22 18:47:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:

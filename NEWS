@@ -1,6 +1,6 @@
 Version 2.4 of OpenDDS.
 
-* This will be the final release of OpenDDS that will build with the current
+- This will be the final release of OpenDDS that will build with the current
   patch level of TAO 1.5a.  This release is compatible with (the current patch
   levels of) TAO 1.5a, and 1.6a, as well as the current DOC Group release.
   Future releases will be compatible with TAO 1.6a and the DOC group -- see
@@ -26,8 +26,24 @@ Version 2.4 of OpenDDS.
   to transmit only the key fields for the instance-control messages (register,
   unregister, dispose).
 
-- Various enhancements and fixes were made to the diagram modeling portion
-  of the OpenDDS Modeling SDK. These include:             [Modeling SDK 1.0.1]
+- The monitor tool, an instrumentation viewer application for OpenDDS,
+  has new options for generating and viewing directed graphs. The tool
+  generates Graphviz-readable .dot files, manages converting the files to
+  representative .png files and displays the generated .png files in its
+  gui. Monitor executes Graphviz command-line tools in a separate process.
+  There are no compile-time or run-time dependencies on Graphviz. The
+  monitor tool will run on systems without Graphviz installed but will
+  not be able to generate .png files.
+
+- Enhanced the Wireshark packet dissector to inspect SAMPLE_DATA message
+  contents. This requires a data model expressed in an .ini file (documented
+  in tools/dissector/README.) In order to associate a SAMPLE_DATA message
+  with a type, the publication ID is harvested from InfoRepo GIOP messages.
+  In order to detect InfoRepo GIOP messages, the IOR for the InfoRepo must
+  be written in a file called "IOR.txt" in the current working directory when
+  wireshark is invoked.
+
+- Enhancements and fixes of OpenDDS Modeling SDK. New version: 1.1.0.
     * The property sheet now includes a tab for viewing and editing
       comments related to the selected figure. These comments are
       included in the generated C++ code.
@@ -59,29 +75,37 @@ Version 2.4 of OpenDDS.
       get to these definitions during modeling.
     * The modeling help content was broken out into subsections to
       make it easier to navigate.
-
-- On the code generation portion of the OpenDDS Modeling SDK, a fix was
-  made so that when creating a new element value in the Model
-  Customization tab property sheet, the value shown for the element is
-  the actual value and not the value from the previous element
-  displayed.                                              [Modeling SDK 1.0.1]
-
-- The monitor tool, an instrumentation viewer application for OpenDDS,
-  has new options for generating and viewing directed graphs. The tool
-  generates Graphviz-readable .dot files, manages converting the files to
-  representative .png files and displays the generated .png files in its
-  gui. Monitor executes Graphviz command-line tools in a separate process.
-  There are no compile-time or run-time dependencies on Graphviz. The
-  monitor tool will run on systems without Graphviz installed but will
-  not be able to generate .png files.
-
-- Enhanced the Wireshark packet dissector to inspect SAMPLE_DATA message
-  contents. This requires a data model expressed in an .ini file (documented
-  in tools/dissector/README.) In order to associate a SAMPLE_DATA message
-  with a type, the publication ID is harvested from InfoRepo GIOP messages.
-  In order to detect InfoRepo GIOP messages, the IOR for the InfoRepo must
-  be written in a file called "IOR.txt" in the current working directory when
-  wireshark is invoked.
+    * On the code generation portion of the OpenDDS Modeling SDK, a
+      fix was made so that when creating a new element value in the
+      Model Customization tab property sheet, the value shown for the
+      element is the actual value and not the value from the previous
+      element displayed.
+    * Topic types from a DcpsLib shown in Project Explorer can be
+      dragged to diagram for another DcpsLib. This allows the same
+      Topic to be used in multiple DcpsLibs.
+    * For QoS policy Periods, symbol "Infinity" can be used for the
+      second and nanosecond fields.
+    * In the main diagram, when a lib (or package) on the canvas is
+      dragged inside a parent package, visual feedback will occur that
+      the parent package has a new child. Previously, unless dragging
+      to the top portion of the parent, the child was merely moved to
+      a new location on the canvas.
+    * Added validation warning if Pub/Sub's transportID not explicitly
+      set.
+    * Fixed so that when removing a Topic or MultiTopic's data type
+      reference the Struct referred to by the data type is not also
+      removed.
+    * Fixed "Decorator refresh failure" that occurred when doing
+      validation in one sub-diagram that is the same type as another
+      another opened sub-diagram (e.g. two PolicyLib diagrams). This
+      problem was causing subsequent attempts to validate to fail in
+      either sub-diagram.
+    * Disabled cut, copy, and paste menu items to prevent model
+      corruption that could occur in some cases.
+    * Added QoS policy validation checks consistent with checks done
+      in OpenDDS C++ code.
+    * Fixed so that Ecore packages do no show up multiple times when
+      navigating model contents in Project Explorer.
 
 ========================================================================
 
