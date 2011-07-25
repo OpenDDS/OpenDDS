@@ -1,3 +1,11 @@
+Mon Jul 25 23:05:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Changed from sequence_var to just sequence since some GCC
+          versions didn't like the sequence_var subscript.
+
 Mon Jul 25 14:26:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/multirepo/multirepo.ini:

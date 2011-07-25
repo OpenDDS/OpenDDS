@@ -122,8 +122,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::DataReaderQos_var drq = new ::DDS::DataReaderQos;
       drq->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       ::DDS::SubscriberQos_var sQos = new ::DDS::SubscriberQos;
-      OpenDDS::DCPS::TransportLocatorSeq_var tii = new OpenDDS::DCPS::TransportLocatorSeq;
-      tii->length(1);
+      OpenDDS::DCPS::TransportLocatorSeq tii;
+      tii.length(1);
       tii[0].transport_type = "fake transport for test";
 
       OpenDDS::DCPS::RepoId subId = info->add_subscription(domainId,
@@ -131,7 +131,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                  topicId,
                                                  dr.in(),
                                                  drq.in(),
-                                                 tii.in(),
+                                                 tii,
                                                  sQos.in(),
                                                  "", DDS::StringSeq());
       if( OpenDDS::DCPS::GUID_UNKNOWN == subId)
