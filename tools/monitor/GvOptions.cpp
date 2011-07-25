@@ -9,6 +9,9 @@
 #include <QtGui/QtGui>
 #include "GvOptions.h"
 
+// Note calls to QObject::toStdString() have been replaced with QObject::toLocal8Bit().constData()
+// to avoid QString-related aborts under windows.
+
 namespace Monitor {
 
 GvOptionsDialog::GvOptionsDialog( QWidget* parent)
@@ -43,9 +46,9 @@ GvOptionsDialog::dialogAction(QWidget *parent, GvOptionsData &gvOpt, bool* statu
 
   switch( dialog.exec()) {
     case Accepted:
-      gvOpt.dotFile_ = dialog.ui.dotLocEdit->displayText().toStdString();
-      gvOpt.pngFile_ = dialog.ui.pngLocEdit->displayText().toStdString();
-      gvOpt.graphvizBin_ = dialog.ui.gvLocEdit->displayText().toStdString();
+      gvOpt.dotFile_ = dialog.ui.dotLocEdit->displayText().toLocal8Bit().constData();
+      gvOpt.pngFile_ = dialog.ui.pngLocEdit->displayText().toLocal8Bit().constData();
+      gvOpt.graphvizBin_ = dialog.ui.gvLocEdit->displayText().toLocal8Bit().constData();
 
       gvOpt.lrLayout_ = dialog.ui.lrLayout->isChecked();
       gvOpt.abbrGUIDs_ = dialog.ui.abbrGUIDs->isChecked();
@@ -74,9 +77,9 @@ GvOptionsDialog::getGvData(QWidget *parent, GvOptionsData &gvOpt)
 {
   GvOptionsDialog dialog( parent);
 
-  gvOpt.dotFile_ = dialog.ui.dotLocEdit->displayText().toStdString();
-  gvOpt.pngFile_ = dialog.ui.pngLocEdit->displayText().toStdString();
-  gvOpt.graphvizBin_ = dialog.ui.gvLocEdit->displayText().toStdString();
+  gvOpt.dotFile_ = dialog.ui.dotLocEdit->displayText().toLocal8Bit().constData();
+  gvOpt.pngFile_ = dialog.ui.pngLocEdit->displayText().toLocal8Bit().constData();
+  gvOpt.graphvizBin_ = dialog.ui.gvLocEdit->displayText().toLocal8Bit().constData();
 
   gvOpt.lrLayout_ = dialog.ui.lrLayout->isChecked();
   gvOpt.abbrGUIDs_ = dialog.ui.abbrGUIDs->isChecked();

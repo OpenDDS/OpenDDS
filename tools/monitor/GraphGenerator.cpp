@@ -13,6 +13,9 @@
 #include <exception>
 #include <cstring>
 
+// Note calls to QObject::toStdString() have been replaced with QObject::toLocal8Bit().constData()
+// to avoid QString-related aborts under windows.
+
 /// Constructor
 Monitor::GraphGenerator::GraphGenerator(TreeNode *root, GvOptionsData gvOpt,
     bool honorDisplayFlag) :
@@ -112,8 +115,8 @@ Monitor::GraphGenerator::generate(TreeNode *t)
   // skip the root and make sure we have a key AND a value
   if (t != root_ && t->width() >= 2) {
     if (!honorDisplayFlag_ || (honorDisplayFlag_ && t->display())) {
-    std::string key = t->column(0).toString().toStdString();
-    std::string val = t->column(1).toString().toStdString();
+    std::string key = t->column(0).toString().toLocal8Bit().constData();
+    std::string val = t->column(1).toString().toLocal8Bit().constData();
     htmlEncode(key);
     htmlEncode(val);
     QColor kc = (t->color(0)).value<QColor>();
@@ -170,9 +173,9 @@ Monitor::GraphGenerator::generate(TreeNode *t)
       TreeNode *q = 0; // qos
       for (int i = 0; i < t->size(); ++i) {
         c = t->operator[](i);
-        tmp = c->column(0).toString().toStdString();
+        tmp = c->column(0).toString().toLocal8Bit().constData();
         if (tmp == "Topic Name") {
-          name = c->column(1).toString().toStdString();
+          name = c->column(1).toString().toLocal8Bit().constData();
           htmlEncode(name);
           nameColor = c->color(1).value<QColor>();
         }
@@ -180,7 +183,7 @@ Monitor::GraphGenerator::generate(TreeNode *t)
           q = c;
         }
         else if (tmp == "Data Type") {
-          dType = c->column(1).toString().toStdString();
+          dType = c->column(1).toString().toLocal8Bit().constData();
           htmlEncode(dType);
           dTypeColor = c->color(1).value<QColor>();
         }
@@ -220,8 +223,8 @@ Monitor::GraphGenerator::generate(TreeNode *t)
           for (int i = 0; i < q->size(); ++i) {
             c = q->operator[](i);
             if (c->width() >= 2) {
-              key = c->column(0).toString().toStdString();
-              val = c->column(1).toString().toStdString();
+              key = c->column(0).toString().toLocal8Bit().constData();
+              val = c->column(1).toString().toLocal8Bit().constData();
               htmlEncode(key);
               htmlEncode(val);
               kc = (c->color(0)).value<QColor>();
@@ -261,8 +264,8 @@ Monitor::GraphGenerator::generate(TreeNode *t)
       for (int i = 0; i < t->size(); ++i) {
         c = t->operator[](i);
         if (c->width() >= 2) {
-          key = c->column(0).toString().toStdString();
-          val = c->column(1).toString().toStdString();
+          key = c->column(0).toString().toLocal8Bit().constData();
+          val = c->column(1).toString().toLocal8Bit().constData();
           htmlEncode(key);
           htmlEncode(val);
           kc = (c->color(0)).value<QColor>();
@@ -304,9 +307,9 @@ Monitor::GraphGenerator::generate(TreeNode *t)
       TreeNode *q = 0; // qos
       for (int i = 0; i < t->size(); ++i) {
         c = t->operator[](i);
-        tmp = c->column(0).toString().toStdString();
+        tmp = c->column(0).toString().toLocal8Bit().constData();
         if (tmp == "Topic Name") {
-          name = c->column(1).toString().toStdString();
+          name = c->column(1).toString().toLocal8Bit().constData();
           htmlEncode(name);
           nameColor = c->color(1).value<QColor>();
         }
@@ -317,10 +320,10 @@ Monitor::GraphGenerator::generate(TreeNode *t)
           connLabel = tmp;
           htmlEncode(connLabel);
           if (gvOpt_.abbrGUIDs()) {
-            conn = abbr(c->column(1).toString().toStdString());
+            conn = abbr(c->column(1).toString().toLocal8Bit().constData());
           }
           else {
-            conn = c->column(1).toString().toStdString();
+            conn = c->column(1).toString().toLocal8Bit().constData();
             connColor = c->color(1).value<QColor>();
           }
           htmlEncode(conn);
@@ -360,8 +363,8 @@ Monitor::GraphGenerator::generate(TreeNode *t)
           for (int i = 0; i < q->size(); ++i) {
             c = q->operator[](i);
             if (c->width() >= 2) {
-              key = c->column(0).toString().toStdString();
-              val = c->column(1).toString().toStdString();
+              key = c->column(0).toString().toLocal8Bit().constData();
+              val = c->column(1).toString().toLocal8Bit().constData();
               htmlEncode(key);
               htmlEncode(val);
               kc = (c->color(0)).value<QColor>();

@@ -12,6 +12,9 @@
 #include "Node.h"
 #include "TreeNode.h"
 
+// Note calls to QObject::toStdString() have been replaced with QObject::toLocal8Bit().constData()
+// to avoid QString-related aborts under windows.
+
 /// Constructor
 Monitor::NodeGenerator::NodeGenerator(TreeNode *root, NodeOptionsData nodeOpt,
   bool honorDisplayFlag) :
@@ -77,8 +80,8 @@ Monitor::NodeGenerator::generate(TreeNode *t, QGraphicsScene *nodeScene, int w, 
   // draw this node
   if (t != root_ && t->width() >= 2) {
     if (!honorDisplayFlag_ || (honorDisplayFlag_ && t->display())) {
-    std::string key = t->column(0).toString().toStdString();
-    std::string val = t->column(1).toString().toStdString();
+    std::string key = t->column(0).toString().toLocal8Bit().constData();
+    std::string val = t->column(1).toString().toLocal8Bit().constData();
 
     // host and process nodes
     // TODO: this is terribly ugly
@@ -111,8 +114,8 @@ Monitor::NodeGenerator::generate(TreeNode *t, QGraphicsScene *nodeScene, int w, 
       std::ostringstream ttip;
       for (int i = 0; i < t->size(); ++i) {
         c = t->operator[](i);
-        std::string k = c->column(0).toString().toStdString();
-        std::string v = c->column(1).toString().toStdString();
+        std::string k = c->column(0).toString().toLocal8Bit().constData();
+        std::string v = c->column(1).toString().toLocal8Bit().constData();
 
         ttip << k << " : " << v << std::endl;
       }

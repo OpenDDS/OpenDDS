@@ -1,3 +1,12 @@
+Mon Jul 25 17:08:11 UTC 2011  Don Hudson  <Don Hudson@ociweb.com>
+
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/NodeGenerator.cpp:
+
+          Replaced calls to QObject::toStdString() with toLocal8Bit().constData()
+          to avoid QString-related aborts under windows.
+
 Mon Jul 25 14:57:45 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * NEWS:
