@@ -23,7 +23,7 @@ public class OpenDDSValidationUtilTest {
 	private static final Logger logger = Logger.getLogger(OpenDDSValidationUtilTest.class);
 
 
-	static final String baseDir = "../../../modeling/";
+	static final String baseDir = "../../";
 	static String xsdDir = baseDir + "plugins/org.opendds.modeling.model/model/";
 	static String testsDir = baseDir + "tests/";
 	static String testDataDir = baseDir + "testdata/";

@@ -1,3 +1,321 @@
+Mon Jul 25 20:36:28 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * OpenDDS version 2.4 released.
+
+Mon Jul 25 20:25:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+          Updated Modeling SDK version number to 1.1.0.
+
+Mon Jul 25 19:22:29 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Reformatting the notes for readability.
+
+Mon Jul 25 18:52:35 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * NEWS:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Moved the content related to the Modeling SDK into the online help.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/styles.css:
+
+          Added a style entry for the release notes.
+
+Mon Jul 25 17:39:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updates for forthcoming OpenDDS 2.4 release.
+
+Mon Jul 25 17:08:11 UTC 2011  Don Hudson  <Don Hudson@ociweb.com>
+
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/NodeGenerator.cpp:
+
+          Replaced calls to QObject::toStdString() with toLocal8Bit().constData()
+          to avoid QString-related aborts under windows.
+
+Mon Jul 25 14:57:45 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * NEWS:
+
+          Added description of changes to the OpenDDS Modeling SDK.
+
+Fri Jul 22 18:47:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:
+
+          Added missing file.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/connecting_figures.html:
+
+          Removed empty anchor causing empty box in Eclipse HTML rendering.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/index.html:
+
+          Fixed invalid link to styles.css.
+
+Fri Jul 22 17:05:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcpslib_topic_shared.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/topics_usage.html:
+
+          Added discussion about using shared Topics.
+
+Fri Jul 22 15:12:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+          Extended to include usage of shared Topic.
+
+Fri Jul 22 03:34:40 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * AUTHORS:
+
+          Updated with the names of the new contributors (since 2.3).
+
+Thu Jul 21 22:33:20 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * NEWS:
+
+          Added a note about the dissector enhancements.
+
+Thu Jul 21 18:16:19 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * NEWS:
+
+          Added a note about end of support for TAO 1.5a.
+
+Wed Jul 20 21:54:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Fix more wide-char build compatibility issues.
+
+Wed Jul 20 19:08:51 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * NEWS:
+
+          Updated NEWS file with section on Monitor tool's
+          new graph features.
+
+        * tools/monitor/README:
+
+          Minor update.
+
+
+Wed Jul 20 15:12:27 UTC 2011  Chip Jones <jonesc@ociweb.com>
+
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/Monitor.mpc:
+
+          Fixed data type size warning on 64-bit systems.
+          Removed Graphviz library dependency from MPC file.
+
+Tue Jul 19 23:12:43 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Fix wide-char build compatibility issues.
+
+Tue Jul 19 17:03:35 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * tools/monitor/GraphGenerator.h:
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/QosFormatter.h:
+        * tools/monitor/QosFormatter.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.h:
+        * tools/monitor/Viewer.cpp:
+
+          Fixed fuzz, compiler warnings and errors and disabled
+          NodeView context menus.
+
+Tue Jul 19 16:26:49 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/Monitor.mpc:
+        * tools/monitor/MonitorTask.h:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Monitor.ui:
+        * tools/monitor/Options.h:
+        * tools/monitor/Options.cpp:
+        * tools/monitor/QosFormatter.h:
+        * tools/monitor/QosFormatter.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.h:
+        * tools/monitor/Viewer.cpp:
+
+          Preliminary changes to the monitor tool to support generation
+          of Graphviz images. Also includes partial support for Qt-based
+          graphs. The Viewer app now includes TreeView, NodeView and
+          GraphvizView panels as well asGraphviz options and Node
+          options windows. These changes are r4718.
+
+        * tools/monitor/GraphGenerator.h:
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/GvOptions.ui:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/NodeOptions.ui:
+
+          These files were added.
+
+Mon Jul 18 15:32:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+
+          Fix validation error.
+
+Mon Jul 18 14:09:52 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Remove the use of ACE_Tokenizer, it is not consistent between
+          TAO 1.5a, 1.6a and DOC implementations.
+
+Sun Jul 17 17:52:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/README:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Reimplemented the initialization so that a namespace tree for
+          modules can be properly initialized. Previously, the
+          initialization structure was flat, with module membership being
+          as separate state. Now a module namespace is constructed to
+          ensure identifier uniqueness.
+
+        * tools/dissector/README.txt:
+
+          Removed this file. This file was a sloppy addition. Moved the
+          configuration instructions to a new section of the existing
+          README file.
+
+Fri Jul 15 22:27:38 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+
+          Scoreboard cleanup.
+
+Fri Jul 15 15:36:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Need mpb inherited to pick up rules.dds.GNU.
+
+        * rules.dds.GNU:
+
+          Set exceptions ?= 1 in case the user has a version
+          of ACE that doesn't do this already.
+
+Fri Jul 15 14:02:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.opendds:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+
+          Validation errors.
+
+Thu Jul 14 19:55:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+        * tools/dissector/README.txt:
+
+          Added support for processing *.ini files. The format of the
+          configuration file is described in README.txt. I anticipate that
+          the DDS IDL compiler will generate these configuration files at
+          some point.
+
+Wed Jul 13 19:00:13 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Fixed path that was broken as a result of moving validation
+          project to plugins.
+
+Wed Jul 13 18:45:00 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+        * tools/modeling/validation/modelvalidation:
+
+          Moved tools/modeling/validation/modelvalidation to tools/modeling/plugins/org.opendds.modeling.validation
+          in order to convert modelvalidation project to an eclipse plugin.
+
+Wed Jul 13 18:38:22 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.validation/.project:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
 Wed Jul 13 18:15:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/dissector/sample_dissector.h:

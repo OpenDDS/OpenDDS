@@ -1,6 +1,13 @@
 // -*- C++ -*-
 //
-// $Id$
+
+/*
+* $Id$
+*
+*
+* Distributed under the OpenDDS License.
+* See: http://www.opendds.org/license.html
+*/
 
 #include "MonitorTask.h"
 #include "MonitorDataStorage.h"

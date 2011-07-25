@@ -1,3 +1,7 @@
+Mon Jul 25 23:23:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4687 through r4767.
+
 Mon Jul 25 23:05:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/publisher.cpp:

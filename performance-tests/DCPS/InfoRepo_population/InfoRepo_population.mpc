@@ -10,7 +10,7 @@ project(*idl) : taoidldefaults, dcps_ts_defaults {
 }
 
 
-project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional {
+project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_macros {
   exename   = syncServer
   includes += ../Sync
   libs     += SyncServer

@@ -24,6 +24,8 @@ extern "C" {
 #include <epan/dissectors/packet-tcp.h>
 } // extern "C"
 
+#include <string>
+
 #include "tools/dissector/dissector_export.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
@@ -233,6 +235,7 @@ namespace OpenDDS
       virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
 
       Sample_Dissector *element_;
+      bool own_element_;
     };
 
     /*
@@ -304,7 +307,7 @@ namespace OpenDDS
 
       ~Switch_Case ();
 
-      Switch_Case *add_range (const char *label);
+      Switch_Case *add_range (const char *label, Sample_Field *field = 0);
       Switch_Case *chain (const char *label, Sample_Field *field = 0);
       Switch_Case *chain (Switch_Case *next);
 
@@ -331,6 +334,7 @@ namespace OpenDDS
       ~Sample_Union ();
 
       void discriminator (Sample_Dissector *d);
+      void discriminator (Sample_Field::IDLTypeID fid);
       Switch_Case *add_case (const char *label, Sample_Field *field = 0);
       void add_default (Sample_Field *value);
 
@@ -340,6 +344,7 @@ namespace OpenDDS
       virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
 
       Sample_Dissector *discriminator_;
+      bool own_discriminator_;
       Switch_Case *cases_;
       Sample_Field *default_;
     };
@@ -347,18 +352,21 @@ namespace OpenDDS
     /*
      * A sample dissector for types that are aliases of other types
      */
-#if 0
+
     class dissector_Export Sample_Alias : public Sample_Dissector
     {
     public:
       Sample_Alias (const char *type_id, Sample_Dissector *base);
+      Sample_Alias (const char *type_id, Sample_Field::IDLTypeID fid);
+      ~Sample_Alias ();
 
     protected:
       virtual size_t dissect_i (Wireshark_Bundle_i &p, std::string &l);
 
       Sample_Dissector *base_;
+      bool own_base_;
     };
-#endif
+
   }
 }
 

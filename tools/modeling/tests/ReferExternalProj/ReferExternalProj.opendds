@@ -26,7 +26,7 @@
           <topic xsi:type="opendds:topic" href="../MessengerMixed/MessengerMixed.opendds#_mcVnwPDxEd-I4rwicuuPOw"/>
         </readers>
         <readers xsi:type="opendds:dataReader" xmi:id="_zzztrDqPsQJOcEeC1BqwI_GQPmw" name="extqos_reader" copyFromTopicQos="true">
-          <topic href="../TopicQos/TopQos.opendds#_qosmcVnwPDxEd-I4rwicuuPOw"/>
+          <topic xsi:type="opendds:topic" href="../TopicQos/TopQos.opendds#_qosmcVnwPDxEd-I4rwicuuPOw"/>
         </readers>
       </subscribers>
     </participants>

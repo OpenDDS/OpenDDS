@@ -311,7 +311,7 @@ namespace OpenDDS
               outstream << std::ends;
               std::string buffer = outstream.str();
               proto_tree_add_text (params.tree, params.tvb, params.offset,
-                                   len, "%s", buffer.c_str());
+                                   (gint)len, "%s", buffer.c_str());
             }
           else
             {
@@ -334,7 +334,7 @@ namespace OpenDDS
           len = this->nested_->dissect_i (params, this->label_);
         }
 
-      params.offset += len;
+      params.offset += (gint)len;
       params.data += len;
       if (next_ != 0)
         len += next_->dissect_i (params, this->label_);
@@ -373,7 +373,6 @@ namespace OpenDDS
       if (len > 0)
         {
           this->typeId_ = type_id;
-          Sample_Manager::instance().add (*this);
         }
 
       len = (subtree == 0) ? 0 : ACE_OS::strlen(subtree);
@@ -423,7 +422,7 @@ namespace OpenDDS
       size_t data_pos = 0;
 
       guint8* data = params.get_remainder();
-      guint32 len = field_->compute_length (data);
+      guint32 len = (guint32)field_->compute_length (data);
       std::stringstream outstream;
       bool top_level = true;
       if (!label.empty())
@@ -483,7 +482,7 @@ namespace OpenDDS
       sp.use_index = false;
       sp.index = 0;
       std::string label;
-      return params.offset + this->dissect_i (sp, label);
+      return params.offset + (gint)this->dissect_i (sp, label);
     }
 
     Sample_Field::IDLTypeID
@@ -508,7 +507,8 @@ namespace OpenDDS
     //----------------------------------------------------------------------
 
     Sample_Sequence::Sample_Sequence (const char *type_id, Sample_Field *f)
-      : element_ (0)
+      : element_ (0),
+        own_element_ (true)
     {
       this->init (type_id,"sequence");
       element_ = new Sample_Dissector;
@@ -520,14 +520,16 @@ namespace OpenDDS
 
     Sample_Sequence::Sample_Sequence (const char *type_id,
                                       Sample_Dissector *sub)
-      : element_ (sub)
+      : element_ (sub),
+        own_element_ (false)
     {
       this->init (type_id, "sequence");
     }
 
     Sample_Sequence::Sample_Sequence (const char *type_id,
                                       Sample_Field::IDLTypeID field_id)
-      : element_ (0)
+      : element_ (0),
+        own_element_ (true)
     {
       this->init (type_id,"sequence");
       element_ = new Sample_Dissector;
@@ -536,7 +538,8 @@ namespace OpenDDS
 
     Sample_Sequence::~Sample_Sequence ()
     {
-      delete element_;
+      if (own_element_)
+        delete element_;
     }
 
     Sample_Dissector *
@@ -549,7 +552,7 @@ namespace OpenDDS
     Sample_Sequence::dissect_i (Wireshark_Bundle_i &params, std::string &label)
     {
       guint8 *data = params.get_remainder();
-      guint32 len = compute_length (data);
+      guint32 len = (guint32)compute_length (data);
       guint32 count = *(reinterpret_cast< guint32 * >(data));
 
       std::stringstream outstream;
@@ -570,7 +573,7 @@ namespace OpenDDS
       for (guint32 ndx = 0; ndx < count; ndx++)
         {
           sp.index = ndx;
-          sp.offset = params.offset + data_pos;
+          sp.offset = params.offset + (gint)data_pos;
           data_pos += element_->dissect_i (sp, label);
         }
       return data_pos;
@@ -634,7 +637,7 @@ namespace OpenDDS
       std::string buffer = outstream.str();
       proto_item *item =
         proto_tree_add_text (params.tree, params.tvb, params.offset,
-                             len,"%s", buffer.c_str());
+                             (gint)len,"%s", buffer.c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
       size_t data_pos = 0;
@@ -644,7 +647,7 @@ namespace OpenDDS
       for (guint32 ndx = 0; ndx < count_; ndx++)
         {
           sp.index = ndx;
-          sp.offset = params.offset + data_pos;
+          sp.offset = params.offset + (gint)data_pos;
           data_pos += element_->dissect_i (sp, label);
         }
       return data_pos;
@@ -703,7 +706,7 @@ namespace OpenDDS
       std::string buffer = outstream.str();
 
       proto_tree_add_text (params.tree, params.tvb, params.offset,
-                           len, "%s", buffer.c_str());
+                           (gint)len, "%s", buffer.c_str());
       return len;
     }
 
@@ -746,11 +749,11 @@ namespace OpenDDS
     }
 
     Switch_Case *
-    Switch_Case::add_range (const char *label)
+    Switch_Case::add_range (const char *label, Sample_Field *field)
     {
-      Switch_Case *c = new Switch_Case (this->type_id_,
-                                        label);
-      c->field_ = this->field_;
+      Switch_Case *c = new Switch_Case (this->type_id_, label);
+
+      c->field_ = (field != 0) ? field : this->field_;
       this->field_ = 0;
       if (span_ == 0)
         span_ = c;
@@ -759,7 +762,8 @@ namespace OpenDDS
           Switch_Case *last = span_;
           while (last->span_ != 0)
             last = last->span_;
-          c->field_ = last->field_;
+
+          c->field_ = (field != 0) ? field : last->field_;
           last->field_ = 0;
           last->span_ = c;
         }
@@ -824,6 +828,7 @@ namespace OpenDDS
 
     Sample_Union::Sample_Union (const char *type_id)
       :discriminator_ (0),
+       own_discriminator_(false),
        cases_ (0),
        default_ (0)
     {
@@ -832,7 +837,8 @@ namespace OpenDDS
 
     Sample_Union::~Sample_Union ()
     {
-      delete discriminator_;
+      if (own_discriminator_)
+        delete discriminator_;
       delete cases_;
       delete default_;
     }
@@ -841,6 +847,14 @@ namespace OpenDDS
     Sample_Union::discriminator (Sample_Dissector *d)
     {
       this->discriminator_ = d;
+    }
+
+    void
+    Sample_Union::discriminator (Sample_Field::IDLTypeID fid)
+    {
+      this->own_discriminator_ = true;
+      this->discriminator_ = new Sample_Dissector ();
+      this->discriminator_->add_field (new Sample_Field (fid,""));
     }
 
     Switch_Case *
@@ -899,7 +913,7 @@ namespace OpenDDS
       std::string buffer = outstream.str();
       proto_item *item =
         proto_tree_add_text (params.tree, params.tvb, params.offset,
-                             len,"%s", buffer.c_str());
+                             (gint)len,"%s", buffer.c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
 
@@ -907,7 +921,7 @@ namespace OpenDDS
       fp.tvb = params.tvb;
       fp.info = params.info;
       fp.tree = subtree;
-      fp.offset = params.offset + data_pos;
+      fp.offset = params.offset + (gint)data_pos;
       fp.use_index = false;
       fp.index = 0;
       fp.data = data;
@@ -915,6 +929,37 @@ namespace OpenDDS
       data_pos += value->dissect_i (fp, label);
 
       return data_pos;
+    }
+
+    //-----------------------------------------------------------------------
+
+    Sample_Alias::Sample_Alias (const char *type_id, Sample_Dissector *base)
+      :base_(base),
+       own_base_ (false)
+    {
+      this->init (type_id, "alias");
+    }
+
+    Sample_Alias::Sample_Alias (const char *type_id,
+                                Sample_Field::IDLTypeID fid)
+      :base_(0),
+       own_base_ (true)
+    {
+      this->init (type_id, "alias");
+      base_ = new Sample_Dissector ();
+      base_->add_field (new Sample_Field (fid, ""));
+    }
+
+    Sample_Alias::~Sample_Alias ()
+    {
+      if (own_base_)
+        delete base_;
+    }
+
+    size_t
+    Sample_Alias::dissect_i (Wireshark_Bundle_i &p, std::string &l)
+    {
+      return base_->dissect_i (p, l);
     }
 
   }

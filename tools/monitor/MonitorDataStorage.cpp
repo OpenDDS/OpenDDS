@@ -1482,3 +1482,11 @@ Monitor::MonitorDataStorage::manageSubscriptionQos(
   }
 }
 
+//testing -- there's a qos problem. after several update calls
+//readbuiltintopics returns false which leads to qos not being populated. these
+//statics ensure qos stays if it was once valid. this is a NOT a fix!!!
+bool Monitor::MonitorDataStorage::b1 = false;
+bool Monitor::MonitorDataStorage::b2 = false;
+bool Monitor::MonitorDataStorage::b3 = false;
+bool Monitor::MonitorDataStorage::b4 = false;
+
