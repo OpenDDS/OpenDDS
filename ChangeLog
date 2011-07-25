@@ -1,3 +1,10 @@
+Mon Jul 25 17:39:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updates for forthcoming OpenDDS 2.4 release.
+
 Mon Jul 25 17:08:11 UTC 2011  Don Hudson  <Don Hudson@ociweb.com>
 
         * tools/monitor/GraphGenerator.cpp:
