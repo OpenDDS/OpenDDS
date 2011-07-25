@@ -1,3 +1,9 @@
+Mon Jul 25 14:26:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/multirepo/multirepo.ini:
+
+          Forgot to add this file in the change from Fri Jul 22 14:22:24.
+
 Fri Jul 22 23:00:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
