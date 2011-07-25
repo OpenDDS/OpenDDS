@@ -95,6 +95,12 @@ Version 2.4 of OpenDDS.
     * Fixed so that when removing a Topic or MultiTopic's data type
       reference the Struct referred to by the data type is not also
       removed.
+    * Added support for models referencing Topics in external models.
+      NOTE: External multitopics may need types to be registered manually.
+    * Generated IDL now protected from multiple inclusion.
+    * Modeling SDL executables no longer require -ORBSvcConfig command line
+      arguments to load transport shared libraries.
+    * Fixed support for generation of IDL with cycles in its definitions.
     * Fixed "Decorator refresh failure" that occurred when doing
       validation in one sub-diagram that is the same type as another
       another opened sub-diagram (e.g. two PolicyLib diagrams). This
