@@ -1,3 +1,14 @@
+Mon Jul 25 18:52:35 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * NEWS:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Moved the content related to the Modeling SDK into the online help. 
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/styles.css:
+
+          Added a style entry for the release notes.
+
 Mon Jul 25 17:39:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
