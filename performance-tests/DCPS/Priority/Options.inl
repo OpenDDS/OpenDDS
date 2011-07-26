@@ -59,14 +59,14 @@ Test::Options::transportType()
 }
 
 ACE_INLINE
-unsigned int
+std::string
 Test::Options::transportKey() const
 {
   return this->transportKey_;
 }
 
 ACE_INLINE
-unsigned int&
+std::string&
 Test::Options::transportKey()
 {
   return this->transportKey_;

@@ -58,9 +58,6 @@ class Subscriber {
     /// Test options.
     const Options& options_;
 
-    /// Test transport.
-    OpenDDS::DCPS::TransportImpl_rch transport_;
-
     /// DomainParticipant.
     DDS::DomainParticipant_var participant_;
 

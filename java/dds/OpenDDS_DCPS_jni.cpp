@@ -440,7 +440,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getInstance
 {
   OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
                                             false); // Don't take ownership
-  if (index < config->instances_.size()) {
+  if (index < static_cast<jlong>(config->instances_.size())) {
     OpenDDS::DCPS::TransportInst_rch inst = config->instances_[index];
     return constructTransportInst(jni, inst);
   }
@@ -493,7 +493,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueMessagesPerPool
 {
   OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->queue_messages_per_pool_;
+  return static_cast<jint>(inst->queue_messages_per_pool_);
 }
 
 // TransportInst::setQueueMessagesPerPool
@@ -511,7 +511,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueInitialPools
 {
   OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->queue_initial_pools_;
+  return static_cast<jint>(inst->queue_initial_pools_);
 }
 
 // TransportInst::setQueueInitialPools
@@ -547,7 +547,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getMaxSamplesPerPacket
 {
   OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->max_samples_per_packet_;
+  return static_cast<jint>(inst->max_samples_per_packet_);
 }
 
 // TransportInst::setMaxSamplesPerPacket
@@ -619,7 +619,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getDatalinkControlChunks
 {
   OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->datalink_control_chunks_;
+  return static_cast<jint>(inst->datalink_control_chunks_);
 }
 
 // TransportInst::setDatalinkControlChunks
@@ -944,7 +944,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakDepth
 {
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->nak_depth_;
+  return static_cast<jint>(inst->nak_depth_);
 }
 
 // MulticastInst::setNakDepth
@@ -980,7 +980,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakDelayInterval
 {
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->nak_delay_intervals_;
+  return static_cast<jint>(inst->nak_delay_intervals_);
 }
 
 // MulticastInst::setNakDelayInterval
@@ -998,7 +998,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakMax
 {
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->nak_max_;
+  return static_cast<jint>(inst->nak_max_);
 }
 
 // MulticastInst::setNakMax
@@ -1043,7 +1043,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setTimeToLive
 {
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
                                         false); // Don't take ownership
-  inst->ttl_ = val;
+  inst->ttl_ = static_cast<char>(val);
 }
 
 // MulticastInst::getRcvBufferSize
@@ -1052,7 +1052,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getRcvBufferSize
 {
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
                                         false); // Don't take ownership
-  return inst->rcv_buffer_size_;
+  return static_cast<jint>(inst->rcv_buffer_size_);
 }
 
 // MulticastInst::setRcvBufferSize

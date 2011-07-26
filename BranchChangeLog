@@ -1,3 +1,59 @@
+Tue Jul 26 17:42:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Eliminate warnings due to differently-sized jint and size_t.
+
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Options.inl:
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * performance-tests/DCPS/Priority/Publisher.h:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/run_test.pl:
+        * performance-tests/DCPS/Priority/transport.ini:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/conf.ini:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/conf.ini:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+
+          Updated to use new config file format and transport API.
+
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/TCPProfilingTest/conf.ini:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/udp.conf:
+        * performance-tests/DCPS/UDPNoKeyTest/udp.conf:
+
+          Removed these files.
+
 Tue Jul 26 16:04:42 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.h:
@@ -6,7 +62,7 @@ Tue Jul 26 16:04:42 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/codegen/model/Entities.cpp:
 
           Use transport names, rather than IDs.
-          Allow for transport name to be specified at the reader, writer, 
+          Allow for transport name to be specified at the reader, writer,
             publisher, subscriber, and participant levels.
           Allow for empty transport names.
           For readers/writers within autoenabled publishers/subscribers

@@ -14,8 +14,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
-#include <dds/DCPS/transport/udp/UdpInst.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <ace/streams.h>
 
 
@@ -56,13 +55,6 @@ void set_rt()
   }
 #endif
 }
-
-
-/* Global Variables */
-
-
-const OpenDDS::DCPS::TransportIdType UDP_IMPL_ID = 10;
-const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 20;
 
 
 CORBA::Long size = 4;
@@ -134,33 +126,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
        /* Initialize the transports for publisher*/
-       OpenDDS::DCPS::TransportImpl_rch pub_tcp_impl;
+       OpenDDS::DCPS::TransportConfig_rch transport =
+         TheTransportRegistry->create_config("t1");
        if (useTCP) {
-         pub_tcp_impl = TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                     ACE_TEXT("tcp"),
-                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
-        } else {
-         pub_tcp_impl = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
-                                                     ACE_TEXT("udp"),
-                                                     OpenDDS::DCPS::DONT_AUTO_CONFIG);
-         OpenDDS::DCPS::TransportInst_rch config
-           = TheTransportFactory->create_configuration (UDP_IMPL_ID, ACE_TEXT("udp"));
-
-         OpenDDS::DCPS::UdpInst* udp_config
-           = static_cast <OpenDDS::DCPS::UdpInst*> (config.in ());
-
-         ACE_TString addrStr(ACE_LOCALHOST);
-         addrStr += ACE_TEXT(":12345");
-         udp_config->local_address_.set(addrStr.c_str());
-         pub_tcp_impl->configure (config.in ());
+         transport->instances_.push_back(
+           TheTransportRegistry->create_inst("tcp", "tcp"));
+       } else {
+         transport->instances_.push_back(
+           TheTransportRegistry->create_inst("udp", "udp"));
        }
 
-
        /* Attach the transport protocol with the publishing entity */
-       OpenDDS::DCPS::PublisherImpl* p_impl =
-         dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (p.in ());
-       p_impl->attach_transport (pub_tcp_impl.in ());
-
+       TheTransportRegistry->bind_config(transport, p);
 
 
        /* Create topic for datawriter */
@@ -188,38 +165,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                DDS::SubscriberListener::_nil(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-
-       /* Initialize the transport for subscriber */
-       OpenDDS::DCPS::TransportImpl_rch sub_tcp_impl;
-       if (useTCP) {
-         sub_tcp_impl
-           = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1,
-                                                         ACE_TEXT("tcp"),
-                                                         ::OpenDDS::DCPS::AUTO_CONFIG);
-       } else {
-         sub_tcp_impl
-           = TheTransportFactory->create_transport_impl(UDP_IMPL_ID+1,
-                                                        ACE_TEXT("udp"),
-                                                        OpenDDS::DCPS::DONT_AUTO_CONFIG);
-         OpenDDS::DCPS::TransportInst_rch config
-           = TheTransportFactory->create_configuration (UDP_IMPL_ID+1, ACE_TEXT("udp"));
-
-         OpenDDS::DCPS::UdpInst* udp_config
-           = static_cast <OpenDDS::DCPS::UdpInst*> (config.in ());
-
-         ACE_TString addrStr(ACE_LOCALHOST);
-         addrStr += ACE_TEXT(":12356");
-
-         udp_config->local_address_.set(addrStr.c_str ());
-         sub_tcp_impl->configure(config.in());
-       }
-
-
        /* Attach the transport protocol with the subscribing entity */
-       OpenDDS::DCPS::SubscriberImpl* sub_impl =
-         dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (s.in ());
-       sub_impl->attach_transport(sub_tcp_impl.in());
-
+       TheTransportRegistry->bind_config(transport, s);
 
        /* Create topic for datareader */
        AckMessageTypeSupportImpl* ackmessage_dt = new AckMessageTypeSupportImpl;

@@ -133,8 +133,8 @@ class Options  {
     public:    TransportType  transportType() const;
 
     /// Transport Key value, translated from the type.
-    protected: unsigned int& transportKey();
-    public:    unsigned int  transportKey() const;
+    protected: std::string& transportKey();
+    public:    std::string  transportKey() const;
 
     /// Test topic name.
     protected: std::string& topicName();
@@ -175,7 +175,7 @@ class Options  {
     TransportType transportType_;
 
     /// Transport Key value.
-    unsigned int transportKey_;
+    std::string transportKey_;
 
     /// Topic name for test.
     std::string topicName_;

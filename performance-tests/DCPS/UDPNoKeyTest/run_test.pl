@@ -36,7 +36,7 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 
 print $DCPSREPO->CommandLine(), "\n";
-$sub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $sub_addr -p $num_writers"
+$sub_parameters = "-DCPSConfigFile conf.ini $app_bit_conf -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size"
               . " -msi $num_messages -mxs $num_messages";
@@ -47,7 +47,7 @@ $sub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $sub_addr -p $num_write
 $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
 
-$pub_parameters = "-ORBSvcConf udp.conf $app_bit_conf -a $pub_addr -p $num_writers"
+$pub_parameters = "-DCPSConfigFile conf.ini $app_bit_conf -p $num_writers"
 #              . " -DCPSDebugLevel 6"
               . " -n $num_messages -d $data_size"
               . " -msi 1000 -mxs 1000  -h 2000";
