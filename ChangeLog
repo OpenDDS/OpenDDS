@@ -1,3 +1,9 @@
+Tue Jul 26 18:09:31 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+        
+          Restored workbook open macro that was erroneously removed.
+
 Tue Jul 26 17:35:08 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/excelRTD/IRTDServer.idl:
