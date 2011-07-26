@@ -220,15 +220,6 @@ my @explicit_configuration_collocated = (
 
 @scenario = (
 
-#  {
-#    entity        => participant,
-#    collocation   => process,
-#    configuration => Udp_Only,
-#    protocol      => [udp1],
-#    compatibility => true,
-#    publisher     => $qos,
-#    subscriber    => $qos
-#  },
   @explicit_configuration_collocated,
   @without_configuration_file,
   @configuration_file_unused,
@@ -320,7 +311,6 @@ sub run($$$$) {
 
   my ($Publisher, $pub_time, $Subscriber, $sub_time) = @_;
 
-  my $count = 0;
   my $status = 0;
 
   print $Subscriber->CommandLine() . "\n";
@@ -355,79 +345,80 @@ sub run($$$$) {
   return $status;
 }
 
-my $status = 0;
+sub command($$$) {
+
+  my ($pub_process, $pub_parameters, $debug) = @_; 
+
+  if ($debug != 0) {
+    open(FF1, '>/tmp/$pub_process.gdb');
+    print FF1 <<EOF;
+break main
+run $pub_parameters
+EOF
+    close(FF1);
+
+    return ('/usr/bin/xterm', '-T $pub_process -e gdb -x /tmp/$pub_process.gdb $pub_process');
+  }
+
+    return ($pub_process, $pub_parameters);
+}
+
+
+
+my $count = 0;
+my $failed = 0;
 
 for my $hasbuiltins (undef, true) {
 #for my $hasbuiltins (undef) {
+#for my $hasbuiltins (true) {
 
     my $DCPSREPO = initialize($hasbuiltins);
 
     for my $i (@scenario) {
 
-        my $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
-        my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
-        my $pub_process = 'publisher';
-        my $sub_process = 'subscriber';
-
-        if (!$debug) {
-          $pub_parameters = $pub_parameters . " -x " . $pub_time;
-          $sub_parameters = $sub_parameters . " -x " . $sub_time;
-        }
-
         if ($debug) {
-
           # You've got an hour ...
           $pub_time = $sub_time = 3600;
-          $pub_parameters .= " -x " . $pub_time;
-          $sub_parameters .= " -x " . $sub_time;
-          
-
-          open(FF1, '>/tmp/publisher.gdb');
-          print FF1 <<EOF;
-break main
-run $pub_parameters
-EOF
-          close(FF1);
-          $pub_process = '/usr/bin/xterm';
-#          $pub_process = '/usr/bin/gnome-terminal';
-          $pub_parameters = '-T publisher -e gdb -x /tmp/publisher.gdb publisher';
-
-          open(FF2, '>/tmp/subscriber.gdb');
-          print FF2 <<EOF;
-break main
-run $sub_parameters
-EOF
-          close(FF2);
-          $sub_process = '/usr/bin/xterm';
-#          $sub_process = '/usr/bin/gnome-terminal';
-          $sub_parameters = '-T subscriber -e gdb -x /tmp/subscriber.gdb subscriber';
         }
 
-        my $Subscriber = PerlDDS::create_process ($sub_process, $sub_parameters);
-        my $Publisher = PerlDDS::create_process ($pub_process, $pub_parameters);
+        my $status = 0;
 
-        $status += run($Publisher, $pub_time, $Subscriber, $sub_time);
+        my $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
+        my ($process, $parameters) = command('publisher', $pub_parameters, $debug);
+        my $S = PerlDDS::create_process ($process, '-x ' . $pub_time . ' ' . $parameters);
+
+        my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
+        my ($process, $parameters) = command('subscriber', $sub_parameters, $debug);
+        my $P = PerlDDS::create_process ($process, '-x ' . $pub_time . ' ' . $parameters);
+
+        if (0 != run($P, $pub_time, $S, $sub_time)) {
+          $status++;
+        }
+
         $count++;
-        print "\n";
+        print "count->$count\nstatus->$status\nfailed->$failed\n";
 
         # Which test failed, exactly?
-        if ($status != 0) {
+        if (0 != $status) {
+            $failed++;
             $Data::Dumper::Terse = 1;
-            print "FAILED " . Dumper(\%$i) . "\n";
+            print "Test FAILED " . Dumper(\%$i) . "\n";
         }
 
     }
 
-    $status += finalize($DCPSREPO);
+    if (0 != finalize($DCPSREPO)) {
+      $failed++; 
+    }
 }
 
 
-if ($status == 0) {
-  print "test PASSED: $count\n";
+if ($failed != 0) {
+  print STDERR "FAILED: $failed of $count\n";
 }
 else {
-  print STDERR "test FAILED: $status\n";
+  print "PASSED: $count\n";
 }
 
-exit $status;
+exit $failed;
 

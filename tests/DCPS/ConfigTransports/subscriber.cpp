@@ -52,9 +52,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           Reader r1(fconfig, dpf.in(), participant1.in(), drl1.in());
           TEST_ASSERT(wait_publication_matched_status(configopt, r1.reader_.in()));
 
-          DDS::DomainParticipant_var participant2(fconfig.participant(dpf.in()));
+          DDS::DomainParticipant_var participant2(fplain.participant(dpf.in()));
           Reader r2(fplain, dpf.in(), participant2.in(), drl2.in());
           TEST_ASSERT(wait_publication_matched_status(configopt, r2.reader_.in()));
+
+          TEST_ASSERT (participant1.in() != participant2.in());
+
 
           // Wait for things to settle ?!
           ACE_OS::sleep(configopt.test_duration);

@@ -1,3 +1,10 @@
+Tue Jul 26 20:58:13 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fixing a failing test.
+
 Mon Jul 25 20:36:28 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * OpenDDS version 2.4 released.
