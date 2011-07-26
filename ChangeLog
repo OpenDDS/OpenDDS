@@ -1,3 +1,14 @@
+Tue Jul 26 21:30:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          Whitespace fix only.
+
+        * tools/excelRTD:
+        * tools/monitor:
+
+          Set svn:ignore for generated files.
+
 Tue Jul 26 19:06:14 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/idl/be_global.h:

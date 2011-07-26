@@ -1062,7 +1062,7 @@ namespace {
     return e.replace(colon + 2, string::npos, label);
   }
 
-  void generateBranchLabels(AST_UnionBranch* branch,AST_Type* discriminator,
+  void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
                             size_t& n_labels, bool& has_default)
   {
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
