@@ -30,9 +30,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       buffer << options.transportType();
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) subscriber_main() - ")
-        ACE_TEXT("started with transport %C(%d).\n"),
+        ACE_TEXT("started with transport %C(%C).\n"),
         buffer.str().c_str(),
-        options.transportKey()
+        options.transportKey().c_str()
       ));
     }
 

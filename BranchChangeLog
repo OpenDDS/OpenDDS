@@ -1,3 +1,15 @@
+Tue Jul 26 21:42:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Removed references to svc.conf which is no longer.
+
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+
+          transportKey is now a string, updated ACE logging formatters.
+
 Tue Jul 26 20:58:13 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/run_test.pl:
