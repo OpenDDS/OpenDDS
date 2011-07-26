@@ -92,7 +92,7 @@ OpenDDS::DCPS::TransportConfiguration::dump(std::ostream& os)
   os << formatNameForDump(ACE_TEXT("queue_messages_per_pool")) << this->queue_messages_per_pool_ << std::endl;
   os << formatNameForDump(ACE_TEXT("queue_initial_pools"))     << this->queue_initial_pools_ << std::endl;
   os << formatNameForDump(ACE_TEXT("max_packet_size"))         << this->max_packet_size_ << std::endl;
-  os << formatNameForDump(ACE_TEXT("max_samples_per_packet:")) << this->max_samples_per_packet_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("max_samples_per_packet"))  << this->max_samples_per_packet_ << std::endl;
   os << formatNameForDump(ACE_TEXT("optimum_packet_size"))     << this->optimum_packet_size_ << std::endl;
   os << formatNameForDump(ACE_TEXT("thread_per_connection"))   << (this->thread_per_connection_ ? "true" : "false") << std::endl;
   os << formatNameForDump(ACE_TEXT("datalink_release_delay"))  << this->datalink_release_delay_ << std::endl;

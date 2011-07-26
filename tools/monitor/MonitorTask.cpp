@@ -44,7 +44,8 @@ namespace { // Anonymous namespace for file scope.
 
 Monitor::MonitorTask::MonitorTask(
   MonitorDataStorage* data,
-  const Options&      options
+  const Options&      options,
+  bool                mapExistingIORKeys
 ) : opened_( false),
     done_( false),
     options_( options),
@@ -56,11 +57,13 @@ Monitor::MonitorTask::MonitorTask(
     lastKey_( 0)
 {
   // Find and map the current IOR strings to their IOR key values.
-  for( OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
-       location = TheServiceParticipant->keyIorMap().begin();
-       location != TheServiceParticipant->keyIorMap().end();
-       ++location) {
-    this->iorKeyMap_[ location->second] = location->first;
+  if (mapExistingIORKeys) {
+    for( OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
+         location = TheServiceParticipant->keyIorMap().begin();
+         location != TheServiceParticipant->keyIorMap().end();
+         ++location) {
+      this->iorKeyMap_[ location->second] = location->first;
+    }
   }
 }
 
@@ -69,10 +72,6 @@ Monitor::MonitorTask::~MonitorTask()
   // Terminate processing cleanly.
   this->stop();
   this->iorKeyMap_.clear();
-
-  // Clean up the service resources.
-  TheTransportFactory->release();
-  TheServiceParticipant->shutdown();
 }
 
 const Monitor::MonitorTask::IorKeyMap&
@@ -309,7 +308,7 @@ Monitor::MonitorTask::svc()
             condition->get_entity()->get_instance_handle()
           ));
         }
-        // Its a CommunicationStatus, process inbound data.
+        // It's a CommunicationStatus, process inbound data.
         DDS::DataReader_var reader
           = DDS::DataReader::_narrow( condition->get_entity());
         if( !CORBA::is_nil( reader.in())) {

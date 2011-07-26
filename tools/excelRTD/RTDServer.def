@@ -1,0 +1,9 @@
+; RTDServer.def : Declares the module parameters for the DLL.
+; Not setting LIBRARY argument so it will be set by /OUT linker option.
+
+EXPORTS
+    ; Explicit exports can go here
+    DllRegisterServer   PRIVATE
+    DllUnregisterServer PRIVATE
+    DllCanUnloadNow     PRIVATE
+    DllGetClassObject   PRIVATE

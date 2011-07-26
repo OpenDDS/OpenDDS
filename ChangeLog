@@ -1,3 +1,69 @@
+Tue Jul 26 15:45:01 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Removed ":" following max_samples_per_packet dump heading to match other
+          parameter dump headings.
+
+        * tools/excelRTD/ExcelRTD.mpc:
+        * tools/excelRTD/IRTDServer.idl:
+        * tools/excelRTD/README:
+        * tools/excelRTD/RTDDataThread.h:
+        * tools/excelRTD/RTDDataThread.cpp:
+        * tools/excelRTD/RTDMonitor.h:
+        * tools/excelRTD/RTDMonitor.cpp:
+        * tools/excelRTD/RTDServer.h:
+        * tools/excelRTD/RTDServer.def:
+        * tools/excelRTD/RTDServer.cpp:
+        * tools/excelRTD/RTDServerDLL.h:
+        * tools/excelRTD/RTDServerDLL.cpp:
+        * tools/excelRTD/Script.rc:
+        * tools/excelRTD/resource.h:
+
+          Excel Real-Time Data (RTD) Server for OpenDDS. 
+          Initial support is for repository monitor tree data that is supplied
+          to stand-alone monitor application.  The RTD server uses many of the same
+          files as the stand-alone monitor application.
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Excel Add-in for OpenDDS.  Initial support is for repository monitor 
+          tree view that mirrors the stand-alone repository monitor application, but 
+          with support for:
+
+            + Monitoring multiple repositories (will also allow for filtered views in future)
+            + Automatically restarting monitoring when a previously saved workbook that 
+              contains monitors is opened.
+            + Snapshoting of a monitor tree either in-place or to another location in the workbook. 
+
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorData.cpp:
+        * tools/monitor/MonitorTask.h:
+        * tools/monitor/MonitorTask.cpp: 
+
+          Added optional constructor parameter so existing IOR keys aren't loaded.
+          This is to support running multiple instances of MonitorTask by the OpenDDS Excel RTD Server.
+
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+
+          Added optional parameter to getNode(index) to control whether the root node or null is returned if the
+          node is invalid.
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Corrected typo in comment.
+
+        * tools/monitor/TreeNode.h:
+
+          Added accessor method to get children.
+
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Viewer.cpp:
+
+          Moved clean up of OpenDDS service resources to Viewer because the OpenDDS Excel RTD Server
+          can launch multiple MonitorTasks.
+
 Tue Jul 26 14:59:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
