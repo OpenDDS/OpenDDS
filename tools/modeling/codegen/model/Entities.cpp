@@ -24,14 +24,16 @@ OpenDDS::Model::Entities::~Entities()
 }
 
 void
-OpenDDS::Model::Entities::registerTypes( const std::string& participant)
+OpenDDS::Model::Entities::registerTypes( const std::string& participant,
+                                         const std::string& transportConfig)
 {
   std::queue<DDS::TypeSupport_ptr>& queue = this->typeSupport_[ participant];
   if( queue.empty()) {
     return;
   }
 
-  DDS::DomainParticipant_var p = this->participant( participant);
+  DDS::DomainParticipant_var p = this->participant(participant, 
+                                                   transportConfig);
   if( !p) {
     return;
   }
@@ -51,7 +53,10 @@ OpenDDS::Model::Entities::registerTypes( const std::string& participant)
 }
 
 DDS::DomainParticipant_var
-OpenDDS::Model::Entities::participant( const std::string& name)
+OpenDDS::Model::Entities::participant(
+  const std::string& name,
+  const std::string& transportConfig
+)
 {
   // See if its already here.
   StringToParticipantMap::const_iterator which
@@ -85,7 +90,8 @@ OpenDDS::Model::Entities::participant( const std::string& name)
     = this->delegate_.createParticipant(
         profile->domainId,
         profile->qos,
-        OpenDDS::DCPS::DEFAULT_STATUS_MASK
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK,
+        transportConfig
       );
   return DDS::DomainParticipant::_duplicate(
     this->participantByString_[ name]
@@ -95,7 +101,8 @@ OpenDDS::Model::Entities::participant( const std::string& name)
 DDS::Topic_var
 OpenDDS::Model::Entities::topic(
   const std::string& name,
-  const std::string& participant
+  const std::string& participant,
+  const std::string& transportConfig
 )
 {
   // See if its already here.
@@ -120,7 +127,8 @@ OpenDDS::Model::Entities::topic(
   TopicProfile* profile = where->second;
 
   // Find the containing participant.
-  DDS::DomainParticipant_var p = this->participant( participant);
+  DDS::DomainParticipant_var p = this->participant(participant, 
+                                                   transportConfig);
   if( !p) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::topic() - ")
@@ -132,7 +140,7 @@ OpenDDS::Model::Entities::topic(
 
   // Ensure that we have all available types registered for this
   // participant.
-  this->registerTypes( participant);
+  this->registerTypes(participant, transportConfig);
 
   // Create it.
   if( OpenDDS::DCPS::DCPS_debug_level>1) {
@@ -158,7 +166,9 @@ OpenDDS::Model::Entities::topic(
 }
 
 DDS::Publisher_var
-OpenDDS::Model::Entities::publisher( const std::string& name)
+OpenDDS::Model::Entities::publisher(
+  const std::string& name,
+  const std::string& transportConfig)
 {
   StringToPublisherMap::const_iterator which
     = this->publisherByString_.find( name);
@@ -182,7 +192,7 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
 
   // Find the containing participant.
   DDS::DomainParticipant_var participant
-    = this->participant( profile->participant);
+    = this->participant( profile->participant, transportConfig);
   if( !participant) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::publisher() - ")
@@ -192,7 +202,7 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
     return 0;
   }
 
-  OpenDDS::DCPS::TransportImpl_rch transport
+  /*OpenDDS::DCPS::TransportImpl_rch transport
     = this->transport( profile->transport);
   if( transport.is_nil()) {
     ACE_ERROR((LM_ERROR,
@@ -201,7 +211,7 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
       profile->transport, name.c_str()
     ));
     return 0;
-  }
+  }*/
 
   if( OpenDDS::DCPS::DCPS_debug_level>1) {
     ACE_DEBUG((LM_DEBUG,
@@ -216,14 +226,16 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
         participant,
         profile->qos,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK,
-        profile->transport //TODO: test with transpot changes
+        transportConfig
       );
 
   return this->publisherByString_[ name];
 }
 
 DDS::Subscriber_var
-OpenDDS::Model::Entities::subscriber( const std::string& name)
+OpenDDS::Model::Entities::subscriber(
+  const std::string& name,
+  const std::string& transportConfig)
 {
   StringToSubscriberMap::const_iterator which
     = this->subscriberByString_.find( name);
@@ -247,7 +259,7 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
 
   // Find the containing participant.
   DDS::DomainParticipant_var participant
-    = this->participant( profile->participant);
+    = this->participant( profile->participant, transportConfig);
   if( !participant) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::subscriber() - ")
@@ -257,7 +269,7 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
     return 0;
   }
 
-  OpenDDS::DCPS::TransportImpl_rch transport
+  /*OpenDDS::DCPS::TransportImpl_rch transport
     = this->transport( profile->transport);
   if( transport.is_nil()) {
     ACE_ERROR((LM_ERROR,
@@ -266,7 +278,7 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
       profile->transport, name.c_str()
     ));
     return 0;
-  }
+  }*/
 
   if( OpenDDS::DCPS::DCPS_debug_level>1) {
     ACE_DEBUG((LM_DEBUG,
@@ -281,14 +293,16 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
         participant,
         profile->qos,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK,
-        profile->transport //TODO: test with transpot changes
+        transportConfig
       );
 
   return this->subscriberByString_[ name];
 }
 
 DDS::DataWriter_var
-OpenDDS::Model::Entities::writer( const std::string& name)
+OpenDDS::Model::Entities::writer(
+  const std::string& name,
+  const std::string& transportConfig)
 {
   StringToDataWriterMap::const_iterator which
     = this->writerByString_.find( name);
@@ -311,7 +325,8 @@ OpenDDS::Model::Entities::writer( const std::string& name)
   WriterProfile* profile = where->second;
 
   // Find the containing Publisher.
-  DDS::Publisher_var publisher = this->publisher( profile->publisher);
+  DDS::Publisher_var publisher = this->publisher(profile->publisher, 
+                                                 transportConfig);
   if( !publisher) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::writer() - ")
@@ -340,7 +355,9 @@ OpenDDS::Model::Entities::writer( const std::string& name)
 
   // Find the Topic.
   DDS::Topic_var topic
-    = this->topic( profile->topic, publisherProfile->participant);
+    = this->topic( profile->topic, 
+                   publisherProfile->participant,
+                   transportConfig);
   if( !topic) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::writer() - ")
@@ -374,14 +391,17 @@ OpenDDS::Model::Entities::writer( const std::string& name)
         publisher,
         topic,
         writerQos,
-        OpenDDS::DCPS::DEFAULT_STATUS_MASK
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK,
+        transportConfig
       );
 
   return this->writerByString_[ name];
 }
 
 DDS::DataReader_var
-OpenDDS::Model::Entities::reader( const std::string& name)
+OpenDDS::Model::Entities::reader(
+  const std::string& name,
+  const std::string& transportConfig)
 {
   StringToDataReaderMap::const_iterator which
     = this->readerByString_.find( name);
@@ -404,7 +424,8 @@ OpenDDS::Model::Entities::reader( const std::string& name)
   ReaderProfile* profile = where->second;
 
   // Find the containing Subscriber.
-  DDS::Subscriber_var subscriber = this->subscriber( profile->subscriber);
+  DDS::Subscriber_var subscriber = this->subscriber(profile->subscriber,
+                                                    transportConfig);
   if( !subscriber) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::reader() - ")
@@ -433,7 +454,9 @@ OpenDDS::Model::Entities::reader( const std::string& name)
 
   // Find the Topic.
   DDS::Topic_var topic
-    = this->topic( profile->topic, subscriberProfile->participant);
+    = this->topic(profile->topic, 
+                  subscriberProfile->participant,
+                  transportConfig);
   if( !topic) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::reader() - ")
@@ -467,12 +490,14 @@ OpenDDS::Model::Entities::reader( const std::string& name)
         subscriber,
         topic,
         readerQos,
-        OpenDDS::DCPS::DEFAULT_STATUS_MASK
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK,
+        transportConfig
       );
 
   return this->readerByString_[ name];
 }
 
+/*
 OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::Model::Entities::transport( OpenDDS::DCPS::TransportIdType key)
 {
@@ -489,4 +514,4 @@ OpenDDS::Model::Entities::transport( OpenDDS::DCPS::TransportIdType key)
            OpenDDS::DCPS::AUTO_CONFIG
          );
 }
-
+*/

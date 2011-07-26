@@ -75,13 +75,19 @@ class OpenDDS_Model_Export Entities  {
 
     /// @name DDS API Entity accessors.
     /// @{
-    DDS::DomainParticipant_var participant( const std::string& name);
+    DDS::DomainParticipant_var participant( const std::string& name,
+                                            const std::string& transportConfig);
     DDS::Topic_var             topic(       const std::string& name,
-                                            const std::string& participant);
-    DDS::Publisher_var         publisher(   const std::string& name);
-    DDS::Subscriber_var        subscriber(  const std::string& name);
-    DDS::DataWriter_var        writer(      const std::string& name);
-    DDS::DataReader_var        reader(      const std::string& name);
+                                            const std::string& participant,
+                                            const std::string& transportConfig);
+    DDS::Publisher_var         publisher(   const std::string& name,
+                                            const std::string& transportConfig);
+    DDS::Subscriber_var        subscriber(  const std::string& name,
+                                            const std::string& transportConfig);
+    DDS::DataWriter_var        writer(      const std::string& name,
+                                            const std::string& transportConfig);
+    DDS::DataReader_var        reader(      const std::string& name,
+                                            const std::string& transportConfig);
     /// @}
 
     /// @name Add user created Entities to the storage.
@@ -106,11 +112,12 @@ class OpenDDS_Model_Export Entities  {
     Delegate delegate_;
 
   private:
-    OpenDDS::DCPS::TransportImpl_rch
-    transport( OpenDDS::DCPS::TransportIdType key);
+    //OpenDDS::DCPS::TransportImpl_rch
+    //transport( OpenDDS::DCPS::TransportIdType key);
 
     /// Deferred registration of type support for a participant.
-    void registerTypes( const std::string& participant);
+    void registerTypes(const std::string& participant,
+                       const std::string& transportConfig);
 
     /// The command line and file configuration information.
     Config config_;

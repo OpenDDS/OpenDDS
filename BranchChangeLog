@@ -1,3 +1,17 @@
+Tue Jul 26 16:04:42 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Use transport names, rather than IDs.
+          Allow for transport name to be specified at the reader, writer, 
+            publisher, subscriber, and participant levels.
+          Allow for empty transport names.
+          For readers/writers within autoenabled publishers/subscribers
+            with specified transport names, temporarily override autoenable.
+
 Mon Jul 25 23:23:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4687 through r4767.

@@ -1,6 +1,8 @@
 
 #include "Delegate.h"
 
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
@@ -22,7 +24,8 @@ DDS::DomainParticipant*
 OpenDDS::Model::Delegate::createParticipant(
   unsigned long             domain,
   DDS::DomainParticipantQos participantQos,
-  DDS::StatusMask           mask
+  DDS::StatusMask           mask,
+  const std::string&        transportConfig
 )
 {
   DDS::DomainParticipantFactory_var pfact = TheParticipantFactory;
@@ -33,6 +36,15 @@ OpenDDS::Model::Delegate::createParticipant(
         DDS::DomainParticipantListener::_nil(),
         mask
       );
+  // If the modeler specified a transport config, bind to it
+  if (!transportConfig.empty()) {
+    try {
+      TheTransportRegistry->bind_config(transportConfig, participant);
+    } catch (OpenDDS::DCPS::Transport::Exception&) {
+      pfact->delete_participant(participant);
+      return 0;
+    }
+  }
   return participant;
 }
 
@@ -61,7 +73,7 @@ OpenDDS::Model::Delegate::createPublisher(
   DDS::DomainParticipant*       participant,
   DDS::PublisherQos             publisherQos,
   DDS::StatusMask               mask,
-  OpenDDS::DCPS::TransportIdType transport_id
+  const std::string&            transportConfig
 )
 {
   DDS::Publisher* publisher
@@ -74,12 +86,14 @@ OpenDDS::Model::Delegate::createPublisher(
     return 0;
   }
 
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->obtain(transport_id);
-
-  if( OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher)) {
-    participant->delete_publisher( publisher);
-    return 0;
+  // If the modeler specified a transport config, bind to it
+  if (!transportConfig.empty()) {
+    try {
+      TheTransportRegistry->bind_config(transportConfig, publisher);
+    } catch (OpenDDS::DCPS::Transport::Exception&) {
+      participant->delete_publisher(publisher);
+      return 0;
+    }
   }
 
   return publisher;
@@ -90,7 +104,7 @@ OpenDDS::Model::Delegate::createSubscriber(
   DDS::DomainParticipant*       participant,
   DDS::SubscriberQos            subscriberQos,
   DDS::StatusMask               mask,
-  OpenDDS::DCPS::TransportIdType transport_id
+  const std::string&            transportConfig
 )
 {
   DDS::Subscriber* subscriber
@@ -103,12 +117,14 @@ OpenDDS::Model::Delegate::createSubscriber(
     return 0;
   }
 
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->obtain(transport_id);
-
-  if( OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber)) {
-    participant->delete_subscriber( subscriber);
-    return 0;
+  // If the modeler specified a transport config, bind to it
+  if (!transportConfig.empty()) {
+    try {
+      TheTransportRegistry->bind_config(transportConfig, subscriber);
+    } catch (OpenDDS::DCPS::Transport::Exception&) {
+      participant->delete_subscriber(subscriber);
+      return 0;
+    }
   }
 
   return subscriber;
@@ -121,6 +137,7 @@ OpenDDS::Model::Delegate::createPublication(
   DDS::Topic*        topic,
   DDS::DataWriterQos writerQos,
   DDS::StatusMask    mask,
+  const std::string& transportConfig,
   bool               copyQosFromTopic
 )
 {
@@ -140,7 +157,8 @@ OpenDDS::Model::Delegate::createPublication(
            publisher,
            topic,
            writerQos,
-           mask
+           mask,
+           transportConfig
          );
 }
 
@@ -149,15 +167,37 @@ OpenDDS::Model::Delegate::createWriter(
   DDS::Publisher*    publisher,
   DDS::Topic*        topic,
   DDS::DataWriterQos writerQos,
-  DDS::StatusMask    mask
+  DDS::StatusMask    mask,
+  const std::string& transportConfig
 )
 {
-  return publisher->create_datawriter(
+  // If we specify a transport and have autoenable modeled, 
+  // temporarily turn off autoenabling
+  bool overridden = false;
+  bool transportSpecified = !transportConfig.empty();
+
+  // If transport config was specified
+  if (transportSpecified) {
+    overridden = override_autoenabled_qos(publisher);
+  }
+
+  DDS::DataWriter_ptr dataWriter = publisher->create_datawriter(
            topic,
            writerQos,
            DDS::DataWriterListener::_nil(),
            mask
          );
+
+  if (transportSpecified) {
+    // Restore autoenabling if necessary
+    if (overridden) {
+      restore_autoenabled_qos(publisher);
+    }
+    // bind to specified transport
+    TheTransportRegistry->bind_config(transportConfig, dataWriter);
+  }
+
+  return dataWriter;
 }
 
 DDS::DataReader*
@@ -167,6 +207,7 @@ OpenDDS::Model::Delegate::createSubscription(
   DDS::TopicDescription* topic,
   DDS::DataReaderQos     readerQos,
   DDS::StatusMask        mask,
+  const std::string&     transportConfig,
   bool                   copyQosFromTopic
 )
 {
@@ -199,7 +240,8 @@ OpenDDS::Model::Delegate::createSubscription(
            subscriber,
            topic,
            readerQos,
-           mask
+           mask,
+           transportConfig
          );
 }
 
@@ -208,14 +250,90 @@ OpenDDS::Model::Delegate::createReader(
   DDS::Subscriber*       subscriber,
   DDS::TopicDescription* topic,
   DDS::DataReaderQos     readerQos,
-  DDS::StatusMask        mask
+  DDS::StatusMask        mask,
+  const std::string&     transportConfig
 )
 {
-  return subscriber->create_datareader(
+  // If we specify a transport and have autoenable modeled, 
+  // temporarily turn off autoenabling
+  bool overridden = false;
+  bool transportSpecified = !transportConfig.empty();
+
+  // If transport config was specified
+  if (transportSpecified) {
+    overridden = override_autoenabled_qos(subscriber);
+  }
+
+  DDS::DataReader_ptr dataReader = subscriber->create_datareader(
            topic,
            readerQos,
            DDS::DataReaderListener::_nil(),
            mask
          );
+
+  if (transportSpecified) {
+    // Restore autoenabling if necessary
+    if (overridden) {
+      restore_autoenabled_qos(subscriber);
+    }
+    // bind to specified transport
+    TheTransportRegistry->bind_config(transportConfig, dataReader);
+  }
+  return dataReader;
 }
 
+bool
+OpenDDS::Model::Delegate::override_autoenabled_qos(
+  DDS::Publisher* publisher
+)
+{
+  DDS::PublisherQos pub_qos;
+  publisher->get_qos(pub_qos);
+
+  // Save value
+  bool should_restore = pub_qos.entity_factory.autoenable_created_entities;
+
+  // Disable
+  pub_qos.entity_factory.autoenable_created_entities = false;
+
+  return should_restore;
+}
+
+bool
+OpenDDS::Model::Delegate::override_autoenabled_qos(
+  DDS::Subscriber* subscriber
+)
+{
+  DDS::SubscriberQos sub_qos;
+  subscriber->get_qos(sub_qos);
+
+  // Save value
+  bool should_restore = sub_qos.entity_factory.autoenable_created_entities;
+
+  // Disable
+  sub_qos.entity_factory.autoenable_created_entities = false;
+
+  return should_restore;
+}
+
+void
+OpenDDS::Model::Delegate::restore_autoenabled_qos(
+  DDS::Publisher* publisher
+)
+{
+  DDS::PublisherQos pub_qos;
+  publisher->get_qos(pub_qos);
+  pub_qos.entity_factory.autoenable_created_entities = true;
+  publisher->set_qos(pub_qos);
+}
+
+void
+OpenDDS::Model::Delegate::restore_autoenabled_qos(
+  DDS::Subscriber* subscriber
+)
+{
+  DDS::SubscriberQos sub_qos;
+  subscriber->get_qos(sub_qos);
+  sub_qos.entity_factory.autoenable_created_entities = true;
+  subscriber->set_qos(sub_qos);
+}
