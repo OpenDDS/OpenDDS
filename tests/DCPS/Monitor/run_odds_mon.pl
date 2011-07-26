@@ -10,27 +10,29 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+my $status = 0;
+my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
+my $opts = $use_svc_config ? "-ORBSvcConf monitor.conf" : '';
+my $repo_bit_opt = $opts;
 
-$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
-$sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
-$mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSDebugLevel 10 -DCPSConfigFile sub.ini";
+my $pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
+my $sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
+my $mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSDebugLevel 10 -DCPSConfigFile sub.ini";
 
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
+unlink qw/pub.log sub.log mon.log DCPSInfoRepo.log/;
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "-DCPSDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
 
-$Monitor    = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/monitor", " $mon_opts");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher  = PerlDDS::create_process ("publisher",  " $pub_opts");
+my $Monitor    = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/monitor", " $mon_opts");
+my $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+my $Publisher  = PerlDDS::create_process ("publisher",  " $pub_opts");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
@@ -52,25 +54,25 @@ print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
 
 
-$PublisherResult = $Publisher->WaitKill (300);
+my $PublisherResult = $Publisher->WaitKill (300);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
 }
 
-$SubscriberResult = $Subscriber->WaitKill (15);
+my $SubscriberResult = $Subscriber->WaitKill (15);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
 }
 
-$MonitorResult = $Monitor->WaitKill(100000);
+my $MonitorResult = $Monitor->WaitKill(100000);
 if ($MonitorResult != 0) {
     print STDERR "ERROR: Monitor returned $MonitorResult\n";
     $status = 1;
 }
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
+my $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;

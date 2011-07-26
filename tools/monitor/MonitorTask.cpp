@@ -186,12 +186,6 @@ Monitor::MonitorTask::stopInstrumentation()
   }
 
   this->participant_ = DDS::DomainParticipant::_nil();
-
-  // Extract a transport index for this subscription.
-  OpenDDS::DCPS::TransportIdType transportKey
-    = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
-
-  TheTransportFactory->release (transportKey);
 }
 
 Monitor::MonitorTask::RepoKey
@@ -412,44 +406,6 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
       ACE_TEXT("created subscriber.\n")
-    ));
-  }
-
-  // Extract a transport index for this subscription.
-  OpenDDS::DCPS::TransportIdType transportKey
-    = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
-
-  // Grab the transport itself.
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->obtain( transportKey);
-  if( transport.is_nil()) {
-    transport = TheTransportFactory->create_transport_impl(
-                  transportKey,
-                  ACE_TEXT("tcp"),
-                  OpenDDS::DCPS::AUTO_CONFIG
-                );
-    if( transport.is_nil()) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
-        ACE_TEXT("failed to create transport.\n")
-      ));
-      return false;
-    }
-  }
-
-  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
-      ACE_TEXT("failed to attach transport to subscriber.\n")
-    ));
-    return false;
-  }
-
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
-      ACE_TEXT("attached to transport with index %d.\n"),
-      transportKey
     ));
   }
 

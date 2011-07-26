@@ -11,6 +11,7 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #include <iostream>
@@ -133,75 +134,51 @@ Subscription::enable(
     }
   }
 
-  // Try and obtain the transport first
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->obtain(
-        this->profile_->transport
-      );
-  if( transport.is_nil()) {
-    // Create the transport
-    transport = TheTransportFactory->create_transport_impl(
-          this->profile_->transport,
-          ::OpenDDS::DCPS::AUTO_CONFIG
-        );
-    if( transport.is_nil()) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
-        ACE_TEXT("failed to create transport with index %d.\n"),
-        this->name_.c_str(),
-        this->profile_->transport
-      ));
-      throw BadTransportException();
-
-    } else if( this->verbose_) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
-        ACE_TEXT("created transport.\n"),
-        this->name_.c_str()
-      ));
-    }
+  OpenDDS::DCPS::TransportConfig_rch transport =
+    TheTransportRegistry->get_config(this->profile_->transportConfig);
+  if (transport.is_nil() || transport->instances_.empty()) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) Subscription::enable() - publication %C: ")
+      ACE_TEXT("failed to get_config() OR got empty config with name %C.\n"),
+      this->name_.c_str(),
+      this->profile_->transportConfig.c_str()
+    ));
+    throw BadTransportException();
   }
-  if( this->verbose_) {
+  if (this->verbose_) {
     OpenDDS::DCPS::MulticastInst* mcconfig
       = dynamic_cast<OpenDDS::DCPS::MulticastInst*>(
-          transport->config()
+          transport->instances_[0].in()
         );
     bool isMcast    = false;
     bool isReliable = false;
-    if( mcconfig != 0) {
+    if (mcconfig != 0) {
       isMcast = true;
       isReliable = mcconfig->reliable_;
     }
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
-      ACE_TEXT("%C %C transport with index %d.\n"),
+      ACE_TEXT("(%P|%t) Subscription::enable() - publication %C: ")
+      ACE_TEXT("%C %C transport with config %C.\n"),
       this->name_.c_str(),
       (!isMcast? "obtained":
                  (isReliable? "obtained reliable":
                               "obtained best effort"
       )),
-      transport->get_factory_id().c_str(),
-      this->profile_->transport
+      transport->instances_[0]->transport_type_.c_str(),
+      this->profile_->transportConfig.c_str()
     ));
   }
 
   // Attach the transport
-  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
-      ACE_TEXT("failed to attach transport with index %d to subscriber.\n"),
-      this->name_.c_str(),
-      this->profile_->transport
-    ));
-    throw BadAttachException();
+  TheTransportRegistry->bind_config(transport, subscriber); 
 
-  } else if( this->verbose_) {
+  if (this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
-      ACE_TEXT("attached transport with index %d to subscriber.\n"),
+      ACE_TEXT("attached transport with config %C to subscriber.\n"),
       this->name_.c_str(),
-      this->profile_->transport
+      this->profile_->transportConfig.c_str()
     ));
   }
 

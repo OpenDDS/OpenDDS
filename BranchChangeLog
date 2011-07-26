@@ -1,3 +1,155 @@
+Tue Jul 26 20:12:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/doc/userguide.html:
+        * performance-tests/Bench/etc/transport-multi-be.ini:
+        * performance-tests/Bench/etc/transport-multi-rel.ini:
+        * performance-tests/Bench/etc/transport-tcp.ini:
+        * performance-tests/Bench/etc/transport-udp.ini:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/Bench/tests/latency/p1-100.ini:
+        * performance-tests/Bench/tests/latency/p1-1000.ini:
+        * performance-tests/Bench/tests/latency/p1-16000.ini:
+        * performance-tests/Bench/tests/latency/p1-250.ini:
+        * performance-tests/Bench/tests/latency/p1-2500.ini:
+        * performance-tests/Bench/tests/latency/p1-32000.ini:
+        * performance-tests/Bench/tests/latency/p1-50.ini:
+        * performance-tests/Bench/tests/latency/p1-500.ini:
+        * performance-tests/Bench/tests/latency/p1-5000.ini:
+        * performance-tests/Bench/tests/latency/p1-8000.ini:
+        * performance-tests/Bench/tests/latency/p1-template.ini:
+        * performance-tests/Bench/tests/latency/p2.ini:
+        * performance-tests/Bench/tests/scaling/pub-1.ini:
+        * performance-tests/Bench/tests/scaling/pub-2.ini:
+        * performance-tests/Bench/tests/scaling/pub-3.ini:
+        * performance-tests/Bench/tests/scaling/pub-4.ini:
+        * performance-tests/Bench/tests/scaling/pub-5.ini:
+        * performance-tests/Bench/tests/scaling/pub-6.ini:
+        * performance-tests/Bench/tests/scaling/pub-7.ini:
+        * performance-tests/Bench/tests/scaling/pub-8.ini:
+        * performance-tests/Bench/tests/scaling/sub.ini:
+        * performance-tests/Bench/tests/scenarios/s1-p1.ini:
+        * performance-tests/Bench/tests/scenarios/s1-p2.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p1.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p2.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p3.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p4.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p5.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p6.ini:
+        * performance-tests/Bench/tests/scenarios/s3-p1.ini:
+        * performance-tests/Bench/tests/scenarios/s3-p2.ini:
+        * performance-tests/Bench/tests/scenarios/s3-p3.ini:
+        * performance-tests/Bench/tests/spray/pub-1.ini:
+        * performance-tests/Bench/tests/spray/pub-2.ini:
+        * performance-tests/Bench/tests/spray/pub-3.ini:
+        * performance-tests/Bench/tests/spray/pub-4.ini:
+        * performance-tests/Bench/tests/spray/sub.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-1280.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-160r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-160s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-2000.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-240r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-240s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-320.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-320r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-320s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-400r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-400s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-720.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-80.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-1280.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-160r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-160s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-2000.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-240r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-240s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-320.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-320r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-320s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-400r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-400s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-720.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-80.ini:
+        * performance-tests/Bench/tests/thru/bidir-remote-be.ini:
+        * performance-tests/Bench/tests/thru/bidir-remote-rel.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-160.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-320.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-720.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-80.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-80r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-160.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-320.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-720.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-80.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-80r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-160.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-160r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-320.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-320r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-720.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-80.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-160.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-160r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-320.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-320r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-720.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-80.ini:
+        * performance-tests/Bench/tests/thru/sub-be.ini:
+        * performance-tests/Bench/tests/thru/sub-rel.ini:
+
+          Updated Bench to use TransportConfig instead of TransportIndex in
+          its configuration files.
+
+        * tests/DCPS/Monitor/monitor.conf:
+        * tests/DCPS/Monitor/pub.ini:
+        * tests/DCPS/Monitor/run_odds_mon.pl:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/Monitor/sub.ini:
+
+          Modified test to work with new Transport API and config file format.
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Removed code that explicilty creates and attaches transports.
+          With the new transport API the defaults should work fine.
+
+        * performance-tests/Bench/etc/svc.conf:
+        * tests/DCPS/Monitor/tcp.conf:
+
+          Removed these files.
+
 Tue Jul 26 17:42:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/dds/OpenDDS_DCPS_jni.cpp:
