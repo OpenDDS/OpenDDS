@@ -1,3 +1,10 @@
+Tue Jul 26 22:31:46 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+
+          Corrected generation directory of moc file and moved midl file to
+          Source_Files so MPC doesn't confuse it with a TAO IDL file.
+
 Tue Jul 26 21:30:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/marshal_generator.cpp:

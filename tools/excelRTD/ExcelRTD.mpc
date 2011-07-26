@@ -10,11 +10,8 @@ project (ExcelRTD): taolib, dcps, dcps_tcp, dcps_monitor, qt4_gui {
   dllout  = $(DDS_ROOT)/lib
   libs  += OpenDDS_monitor 
 
-  Modify_Custom(MOC) {
-    pre_dirname = ./
-  }
-
   MOC_Files {
+    gendir = .
     ../monitor/MonitorDataModel.h
   }
 
@@ -35,6 +32,8 @@ project (ExcelRTD): taolib, dcps, dcps_tcp, dcps_monitor, qt4_gui {
   }
 
   Source_Files {
+    IRTDServer.idl
+
     RTDMonitor.cpp
     IRTDServer_i.c
     RTDDataThread.cpp
@@ -50,14 +49,6 @@ project (ExcelRTD): taolib, dcps, dcps_tcp, dcps_monitor, qt4_gui {
     ../monitor/MonitorDataModel.cpp
     ../monitor/MonitorDataStorage.cpp
     ../monitor/QosFormatter.cpp
-  }
-
-  Define_Custom(MIDL) {
-    inputext = .idl
-  }
-
-  MIDL_Files {
-    IRTDServer.idl  
   }
 
   IDL_Files {
