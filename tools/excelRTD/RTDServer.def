@@ -1,3 +1,7 @@
+; $Id$
+;
+; Derived from sample code included in Microsoft Knowledge Base Article 327215.
+
 ; RTDServer.def : Declares the module parameters for the DLL.
 ; Not setting LIBRARY argument so it will be set by /OUT linker option.
 

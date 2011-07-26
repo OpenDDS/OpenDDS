@@ -1,3 +1,8 @@
+/*
+ * $Id$
+ *
+ * From sample code included in Microsoft Knowledge Base Article 327215.
+ */
 import "unknwn.idl";
 import "wtypes.idl";
 import "objidl.idl";

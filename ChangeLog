@@ -1,3 +1,10 @@
+Tue Jul 26 17:35:08 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/IRTDServer.idl:
+        * tools/excelRTD/RTDServer.def:
+
+          Added comments to top of files.
+
 Tue Jul 26 15:45:01 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.cpp:
@@ -20,26 +27,26 @@ Tue Jul 26 15:45:01 UTC 2011  Don Hudson  <hudsond@ociweb.com>
         * tools/excelRTD/Script.rc:
         * tools/excelRTD/resource.h:
 
-          Excel Real-Time Data (RTD) Server for OpenDDS. 
+          Excel Real-Time Data (RTD) Server for OpenDDS.
           Initial support is for repository monitor tree data that is supplied
           to stand-alone monitor application.  The RTD server uses many of the same
           files as the stand-alone monitor application.
 
         * tools/excelRTD/OpenDDS.xlam:
 
-          Excel Add-in for OpenDDS.  Initial support is for repository monitor 
-          tree view that mirrors the stand-alone repository monitor application, but 
+          Excel Add-in for OpenDDS.  Initial support is for repository monitor
+          tree view that mirrors the stand-alone repository monitor application, but
           with support for:
 
             + Monitoring multiple repositories (will also allow for filtered views in future)
-            + Automatically restarting monitoring when a previously saved workbook that 
+            + Automatically restarting monitoring when a previously saved workbook that
               contains monitors is opened.
-            + Snapshoting of a monitor tree either in-place or to another location in the workbook. 
+            + Snapshoting of a monitor tree either in-place or to another location in the workbook.
 
         * tools/monitor/MonitorData.h:
         * tools/monitor/MonitorData.cpp:
         * tools/monitor/MonitorTask.h:
-        * tools/monitor/MonitorTask.cpp: 
+        * tools/monitor/MonitorTask.cpp:
 
           Added optional constructor parameter so existing IOR keys aren't loaded.
           This is to support running multiple instances of MonitorTask by the OpenDDS Excel RTD Server.
