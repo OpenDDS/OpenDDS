@@ -137,13 +137,23 @@ namespace OpenDDS
 
       void load_entities (EntityContext *entities);
 
+      int get_string_value (ACE_Configuration *config,
+                            const ACE_Configuration_Section_Key &base,
+                            const std::string &label,
+                            std::string &value);
+
+      int get_int_value (ACE_Configuration *config,
+                         const ACE_Configuration_Section_Key &base,
+                         const std::string &label,
+                         u_int &value);
+
       void find_config_sections (ACE_Configuration *config,
                                  const ACE_Configuration_Section_Key &base,
                                  EntityContext *parent);
 
       void build_type (EntityNode *node);
 
-      Sample_Dissector *fqfind (std::string idl_name, EntityContext *ctx);
+      Sample_Dissector *fqfind (const std::string &name, EntityContext *ctx);
 
       void build_struct (EntityNode *node,
                         const ACE_Configuration_Section_Key &);

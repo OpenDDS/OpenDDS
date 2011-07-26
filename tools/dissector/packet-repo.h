@@ -74,33 +74,33 @@ namespace OpenDDS
       virtual void init ();
       void register_handoff ();
 
-      static void assert_topic            (::MessageHeader *);
-      static void add_publication         (::MessageHeader *);
-      static void add_domain_participant  (::MessageHeader *);
-      static void add_subscription        (::MessageHeader *);
-      static void remove_publication      (::MessageHeader *);
-      static void remove_subscription     (::MessageHeader *);
-      static void remove_domain_participant (::MessageHeader *);
+      static bool assert_topic            (::MessageHeader *);
+      static bool add_publication         (::MessageHeader *);
+      static bool add_domain_participant  (::MessageHeader *);
+      static bool add_subscription        (::MessageHeader *);
+      static bool remove_publication      (::MessageHeader *);
+      static bool remove_subscription     (::MessageHeader *);
+      static bool remove_domain_participant (::MessageHeader *);
 
 #if 0
-      static void attach_participant             (::MessageHeader *);
-      static void find_topic                     (::MessageHeader *);
-      static void remove_topic                   (::MessageHeader *);
-      static void enable_topic                   (::MessageHeader *);
-      static void remove_domain_participant      (::MessageHeader *);
-      static void disassociate_participant       (::MessageHeader *);
-      static void disassociate_subscription      (::MessageHeader *);
-      static void disassociate_publication       (::MessageHeader *);
-      static void ignore_domain_participant      (::MessageHeader *);
-      static void ignore_topic                   (::MessageHeader *);
-      static void ignore_subscription            (::MessageHeader *);
-      static void ignore_publication             (::MessageHeader *);
-      static void update_domain_participant_qos  (::MessageHeader *);
-      static void update_topic_qos               (::MessageHeader *);
-      static void update_publication_qos         (::MessageHeader *);
-      static void update_subscription_qos        (::MessageHeader *);
-      static void update_subscription_params     (::MessageHeader *);
-      static void shutdown                       (::MessageHeader *);
+      static bool attach_participant             (::MessageHeader *);
+      static bool find_topic                     (::MessageHeader *);
+      static bool remove_topic                   (::MessageHeader *);
+      static bool enable_topic                   (::MessageHeader *);
+      static bool remove_domain_participant      (::MessageHeader *);
+      static bool disassociate_participant       (::MessageHeader *);
+      static bool disassociate_subscription      (::MessageHeader *);
+      static bool disassociate_publication       (::MessageHeader *);
+      static bool ignore_domain_participant      (::MessageHeader *);
+      static bool ignore_topic                   (::MessageHeader *);
+      static bool ignore_subscription            (::MessageHeader *);
+      static bool ignore_publication             (::MessageHeader *);
+      static bool update_domain_participant_qos  (::MessageHeader *);
+      static bool update_topic_qos               (::MessageHeader *);
+      static bool update_publication_qos         (::MessageHeader *);
+      static bool update_subscription_qos        (::MessageHeader *);
+      static bool update_subscription_params     (::MessageHeader *);
+      static bool shutdown                       (::MessageHeader *);
 #endif
     private:
       void add_pending (int request_id, const char *dataName);

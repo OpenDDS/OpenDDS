@@ -51,12 +51,12 @@ namespace OpenDDS
       virtual void init ();
       void register_handoff ();
 
-      static void add_associations      (::MessageHeader *);
+      static bool add_associations      (::MessageHeader *);
 
 #if 0
-      static void remove_associations   (::MessageHeader *);
-      static void update_incompatible_qos (::MessageHeader *);
-      static void update_subscription_params (::MessageHeader *);
+      static bool remove_associations   (::MessageHeader *);
+      static bool update_incompatible_qos (::MessageHeader *);
+      static bool update_subscription_params (::MessageHeader *);
 #endif
     private:
       static DataWriterRemote_Dissector instance_;

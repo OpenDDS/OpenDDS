@@ -77,7 +77,7 @@ namespace OpenDDS
       return instance_;
     }
 
-    void
+    bool
     DataWriterRemote_Dissector::add_associations (::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -100,6 +100,8 @@ namespace OpenDDS
           //            header->message_type));
         }
       }
+
+      return true;
 
     }
 
@@ -157,20 +159,14 @@ namespace OpenDDS
      proto_tree *ptree, int *offset,
      ::MessageHeader *header, gchar *operation, gchar *)
     {
-      ACE_UNUSED_ARG (tvb);
-      ACE_UNUSED_ARG (pinfo);
-      ACE_UNUSED_ARG (ptree);
-      ACE_UNUSED_ARG (offset);
-      ACE_UNUSED_ARG (header);
-      ACE_UNUSED_ARG (operation);
-
       int ofs = 0;
       header->req_id =
         ::get_CDR_ulong(tvb, &ofs,
                         instance().is_big_endian_, GIOP_HEADER_SIZE);
 
-      return FALSE;
+      instance().setPacket (tvb, pinfo, ptree, offset);
 
+      return instance().dissect_heur (header, operation);
     }
 
     void

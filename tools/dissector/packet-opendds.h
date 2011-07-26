@@ -57,12 +57,12 @@ namespace OpenDDS
     {
     public:
       Dissector_Base ()
-        :tvb(0), pinfo (0), tree (0)
+        :tvb_(0), pinfo_(0), tree_(0)
           {}
 
       void setPacket (tvbuff_t* buf, packet_info* pi, proto_tree* pt)
       {
-        tvb = buf; pinfo = pi; tree = pt;
+        tvb_ = buf; pinfo_ = pi; tree_ = pt;
       }
 
       virtual void dissect () = 0;
@@ -70,11 +70,18 @@ namespace OpenDDS
       virtual bool dissect_heur () = 0;
 
     protected:
-      tvbuff_t *tvb;
-      packet_info *pinfo;
-      proto_tree *tree;
+      tvbuff_t *tvb_;
+      packet_info *pinfo_;
+      proto_tree *tree_;
     };
 
+
+    extern "C" {
+      guint get_pdu_len (packet_info *, tvbuff_t *, int);
+      void dissect_common (tvbuff_t*, packet_info*, proto_tree*);
+      void dissect_dds (tvbuff_t*, packet_info*, proto_tree*);
+      gboolean dissect_dds_heur (tvbuff_t*, packet_info*, proto_tree*);
+    }
 
 
     class dissector_Export DDS_Dissector : public Dissector_Base
@@ -84,11 +91,6 @@ namespace OpenDDS
 
       void dissect ();
       bool dissect_heur ();
-
-      static guint get_pdu_len (packet_info *, tvbuff_t *, int);
-      static void dissect_common (tvbuff_t*, packet_info*, proto_tree*);
-      static void dissect_dds (tvbuff_t*, packet_info*, proto_tree*);
-      static gboolean dissect_dds_heur (tvbuff_t*, packet_info*, proto_tree*);
 
       virtual void init ();
       void register_handoff ();

@@ -1,7 +1,47 @@
+Tue Jul 26 19:06:14 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/wireshark_generator.h:
+        * dds/idl/wireshark_generator.cpp:
+
+          Added generator of wireshark dissector configuration files. To
+          run, add "-Gws" to the opendds_idl command line. Running on
+          <filename>.idl yields <filename>_ws.ini in the local directory.
+          This *_ws.ini file can then be used by the wireshark dissector
+          to process sample data messages.
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fixed a couple of compiler warnings. Added decomposition of
+          content filter ID values, enabled the parsing of inforepo
+          messages without first storing the inforepo ior in "IOR.txt" for
+          wireshark.
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Added "CORBA::<typename>" as an alternative basic type id for
+          parsing. The idl compiler emits C++ mapped types rather than the
+          original CORBA IDL type name for predefined types. User
+          specified types are used as-is. Also, translations between string
+          types were simplified, favoring std::string where ever posible.
+
 Tue Jul 26 18:09:31 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/excelRTD/OpenDDS.xlam:
-        
+
           Restored workbook open macro that was erroneously removed.
 
 Tue Jul 26 17:35:08 UTC 2011  Don Hudson  <hudsond@ociweb.com>
