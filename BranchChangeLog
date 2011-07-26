@@ -1,3 +1,10 @@
+Tue Jul 26 20:58:13 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fixing a failing test.
+
 Tue Jul 26 20:12:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/Bench/doc/datamodel.txt:
