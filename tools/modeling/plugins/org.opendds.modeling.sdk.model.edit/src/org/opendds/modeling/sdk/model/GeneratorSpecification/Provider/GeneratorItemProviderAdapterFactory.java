@@ -1149,6 +1149,122 @@ public class GeneratorItemProviderAdapterFactory extends
 	}
 
 	/**
+	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TransportConfig} instances.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected TransportConfigItemProvider transportConfigItemProvider;
+
+	/**
+	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TransportConfig}.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Adapter createTransportConfigAdapter() {
+		if (transportConfigItemProvider == null) {
+			transportConfigItemProvider = new TransportConfigItemProvider(this);
+		}
+
+		return transportConfigItemProvider;
+	}
+
+	/**
+	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.UdpTransport} instances.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected UdpTransportItemProvider udpTransportItemProvider;
+
+	/**
+	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.UdpTransport}.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Adapter createUdpTransportAdapter() {
+		if (udpTransportItemProvider == null) {
+			udpTransportItemProvider = new UdpTransportItemProvider(this);
+		}
+
+		return udpTransportItemProvider;
+	}
+
+	/**
+	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TcpTransport} instances.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected TcpTransportItemProvider tcpTransportItemProvider;
+
+	/**
+	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TcpTransport}.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Adapter createTcpTransportAdapter() {
+		if (tcpTransportItemProvider == null) {
+			tcpTransportItemProvider = new TcpTransportItemProvider(this);
+		}
+
+		return tcpTransportItemProvider;
+	}
+
+	/**
+	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.MulticastTransport} instances.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected MulticastTransportItemProvider multicastTransportItemProvider;
+
+	/**
+	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.MulticastTransport}.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Adapter createMulticastTransportAdapter() {
+		if (multicastTransportItemProvider == null) {
+			multicastTransportItemProvider = new MulticastTransportItemProvider(
+					this);
+		}
+
+		return multicastTransportItemProvider;
+	}
+
+	/**
+	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.Transports} instances.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected TransportsItemProvider transportsItemProvider;
+
+	/**
+	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.Transports}.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Adapter createTransportsAdapter() {
+		if (transportsItemProvider == null) {
+			transportsItemProvider = new TransportsItemProvider(this);
+		}
+
+		return transportsItemProvider;
+	}
+
+	/**
 	 * This returns the root adapter factory that contains this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1369,6 +1485,16 @@ public class GeneratorItemProviderAdapterFactory extends
 			rcvBufferSIzeItemProvider.dispose();
 		if (udpConfigItemProvider != null)
 			udpConfigItemProvider.dispose();
+		if (transportConfigItemProvider != null)
+			transportConfigItemProvider.dispose();
+		if (udpTransportItemProvider != null)
+			udpTransportItemProvider.dispose();
+		if (tcpTransportItemProvider != null)
+			tcpTransportItemProvider.dispose();
+		if (multicastTransportItemProvider != null)
+			multicastTransportItemProvider.dispose();
+		if (transportsItemProvider != null)
+			transportsItemProvider.dispose();
 	}
 
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0">
+<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0">
   <source name="Messenger.opendds"/>
   <target name="model"/>
   <instances>
@@ -97,7 +97,16 @@
           <rcv_buffer_size value="0"/>
         </MulticastTransport>
       </transport>
+      <configs instances="//@transports/@transport.0 //@transports/@transport.1" name="tcp first"/>
+      <configs instances="//@transports/@transport.1 //@transports/@transport.0" name="udp first"/>
     </instance>
   </instances>
   <searchPaths/>
+  <transports>
+    <transport xsi:type="generator:TcpTransport"/>
+    <transport xsi:type="generator:UdpTransport"/>
+    <transport xsi:type="generator:MulticastTransport">
+      <nak_depth value="32"/>
+    </transport>
+  </transports>
 </generator:CodeGen>

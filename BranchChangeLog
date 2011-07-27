@@ -1,3 +1,26 @@
+Wed Jul 27 18:28:31 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore_diagram:
+
+          Transport Additions for the new transports.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/Plugin.java:
+
+          Add mappings for new types.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+
+          Generated mods for latest model changes.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+
+          Added transportConfigs and transportInsts.
+          Added transport config properties.
+
 Wed Jul 27 16:15:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/.classpath:
