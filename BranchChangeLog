@@ -1,3 +1,14 @@
+Wed Jul 27 22:18:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          pub_id needs to be used before the penditer is erased,
+          since pub_id is a reference to the data in penditer.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Re-generated from the ecore, and applied our specific settings.
+
 Wed Jul 27 21:39:26 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/common/TestSupport.h:

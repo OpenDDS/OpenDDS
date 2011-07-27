@@ -291,8 +291,8 @@ TransportImpl::check_fully_association(const RepoId& pub_id)
     }
 
     if (associations.size() == 0) {
-      pending_association_sub_map_.erase(penditer);
       association_listeners_.erase(pub_id);
+      pending_association_sub_map_.erase(penditer);
     }
   }
 }
