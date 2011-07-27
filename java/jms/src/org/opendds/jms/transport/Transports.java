@@ -29,7 +29,7 @@ public class Transports {
     public static Logger getLogger(TransportInst configuration) {
         assert configuration != null;
 
-        return Logger.getLogger(configuration.getType(), configuration.getId());
+        return Logger.getLogger(configuration.getType(), configuration.getName());
     }
 
     public static SvcConfDirective getDirective(String transportType) {

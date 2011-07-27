@@ -1,3 +1,23 @@
+Wed Jul 27 16:15:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/.classpath:
+        * java/jms/README:
+        * java/jms/compat/build.xml:
+        * java/jms/src/META-INF/services/org.opendds.jms.common.beans.spi.Type:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * java/jms/src/org/opendds/jms/transport/TransportManager.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+
+          Updated JMS Provider code to work with new Transport API.
+
+        * java/jms/src/org/opendds/jms/common/beans/spi/ThreadSynchStrategyType.java:
+
+          Removed this file.
+
 Tue Jul 26 21:42:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:

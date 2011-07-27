@@ -10,4 +10,3 @@ org.opendds.jms.common.beans.spi.FloatType
 org.opendds.jms.common.beans.spi.IntegerType
 org.opendds.jms.common.beans.spi.LongType
 org.opendds.jms.common.beans.spi.StringType
-org.opendds.jms.common.beans.spi.ThreadSynchStrategyType

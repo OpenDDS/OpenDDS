@@ -96,7 +96,7 @@ The following JMX MBeans are provided:
     JMS clients.  The Destination MBean requires 'destination' and 'type'
     key properties for identification.
 
-    This compontent supports the following attributes:
+    This component supports the following attributes:
 
       JndiName (required)
         The JNDI name the resulting Destination is bound to.
@@ -114,7 +114,7 @@ The following JMX MBeans are provided:
 
 
  3. org.opendds.jms.management.HibernatePersistenceService (optional)
-    This component is responsible for persisting state inbetween JMS provider
+    This component is responsible for persisting state in between JMS provider
     shutdowns.  This component is required if durable subscriptions are used
     by JMS client code.
 

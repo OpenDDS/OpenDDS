@@ -18,8 +18,8 @@ import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 import org.opendds.jms.common.util.Serial;
 
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
+import OpenDDS.DCPS.transport.TheTransportRegistry;
+import OpenDDS.DCPS.transport.TransportConfig;
 import OpenDDS.DCPS.transport.TransportInst;
 
 /**
@@ -51,7 +51,7 @@ public class TransportFactory {
             if (serial.overflowed()) {
                 throw new JMSException("Insufficient Transport IDs available");
             }
-            configuration = TheTransportFactory.get_or_create_configuration(serial.next(), type);
+            configuration = TheTransportRegistry.create_inst("" + serial.next(), type);
         }
 
         Logger logger = Transports.getLogger(configuration);
@@ -67,14 +67,13 @@ public class TransportFactory {
         return configuration;
     }
 
-    public TransportImpl createTransport() throws JMSException {
+    public TransportConfig createTransport() throws JMSException {
     	TransportInst configuration = createConfiguration();
 
-        TransportImpl transport = TheTransportFactory.create_transport_impl(configuration.getId(), false);
+    	TransportConfig transport = TheTransportRegistry.create_config(configuration.getName());
         if (transport == null) {
             throw new JMSException("Unable to create Transport; please check logs");
         }
-        transport.configure(configuration);
 
         Logger logger = Transports.getLogger(configuration);
         logger.debug("Created %s", transport);

@@ -13,13 +13,6 @@ import java.util.Arrays;
 import javax.jms.JMSException;
 import javax.resource.ResourceException;
 
-import DDS.DomainParticipant;
-import DDS.Subscriber;
-import DDS.SubscriberQosHolder;
-import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
-import OpenDDS.DCPS.transport.AttachStatus;
-import OpenDDS.DCPS.transport.TransportImpl;
-
 import org.opendds.jms.common.ExceptionHelper;
 import org.opendds.jms.common.PartitionHelper;
 import org.opendds.jms.common.util.Logger;
@@ -28,6 +21,13 @@ import org.opendds.jms.qos.SubscriberQosPolicy;
 import org.opendds.jms.resource.ConnectionRequestInfoImpl;
 import org.opendds.jms.resource.ManagedConnectionImpl;
 import org.opendds.jms.transport.TransportManager;
+
+import DDS.DomainParticipant;
+import DDS.Subscriber;
+import DDS.SubscriberQosHolder;
+import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
+import OpenDDS.DCPS.transport.TheTransportRegistry;
+import OpenDDS.DCPS.transport.TransportConfig;
 
 /**
  * @author  Steven Stallion
@@ -79,10 +79,8 @@ public class SubscriberManager {
                 logger.debug("%s using PARTITION %s", subscriber, Arrays.deepToString(holder.value.partition.name));
             }
 
-            TransportImpl transport = transportManager.getTransport();
-            if (transport.attach_to_subscriber(subscriber) != AttachStatus.ATTACH_OK) {
-                throw new JMSException("Unable to attach to Transport; please check logs");
-            }
+            TransportConfig transport = transportManager.getTransport();
+            TheTransportRegistry.bind_config(transport, subscriber);
             logger.debug("Attached %s to %s", subscriber, transport);
 
             return subscriber;

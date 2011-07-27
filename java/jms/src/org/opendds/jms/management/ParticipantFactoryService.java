@@ -8,11 +8,6 @@
 
 package org.opendds.jms.management;
 
-import DDS.DomainParticipantFactory;
-import OpenDDS.DCPS.TheParticipantFactory;
-import OpenDDS.DCPS.TheServiceParticipant;
-import OpenDDS.DCPS.transport.TheTransportFactory;
-
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.management.annotation.Attribute;
@@ -23,6 +18,10 @@ import org.opendds.jms.management.annotation.Operation;
 import org.opendds.jms.management.argument.DCPSArguments;
 import org.opendds.jms.management.argument.DynamicArguments;
 import org.opendds.jms.management.argument.ORBArguments;
+
+import DDS.DomainParticipantFactory;
+import OpenDDS.DCPS.TheParticipantFactory;
+import OpenDDS.DCPS.TheServiceParticipant;
 
 /**
  * @author  Steven Stallion
@@ -93,7 +92,6 @@ public class ParticipantFactoryService extends DynamicMBeanSupport implements Se
             throw new IllegalStateException(name + " is already stopped!");
         }
 
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
 
         instance = null;

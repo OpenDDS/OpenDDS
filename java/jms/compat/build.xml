@@ -153,6 +153,18 @@
         </exec>
     </target>
 
+    <target name="startjboss" depends="setup">
+        <cargo containerId="jboss42x" home="${env.JBOSS_HOME}" action="start" wait="true">
+            <configuration>
+                <property name="cargo.jvmargs" value="-ea ${server.jvmargs}"/> <!-- enable assertions -->
+
+                <!-- Deployables -->
+                <deployable type="rar" file="${jms.basedir}/build/opendds-jms-${opendds.version}.rar"/>
+                <deployable type="ear" file="${build.dir}/${ant.project.name}.ear"/>
+            </configuration>
+        </cargo>
+    </target>
+
     <target name="jboss42x" depends="setup" if="jboss42x.enabled">
         <fail message="JBOSS_HOME is a required environment variable!" unless="env.JBOSS_HOME"/>
 

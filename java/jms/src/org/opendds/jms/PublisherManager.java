@@ -17,8 +17,8 @@ import DDS.DomainParticipant;
 import DDS.Publisher;
 import DDS.PublisherQosHolder;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
-import OpenDDS.DCPS.transport.AttachStatus;
-import OpenDDS.DCPS.transport.TransportImpl;
+import OpenDDS.DCPS.transport.TransportConfig;
+import OpenDDS.DCPS.transport.TheTransportRegistry;
 
 import org.opendds.jms.common.ExceptionHelper;
 import org.opendds.jms.common.PartitionHelper;
@@ -73,10 +73,8 @@ public class PublisherManager {
                 logger.debug("%s using PARTITION %s", publisher, Arrays.deepToString(holder.value.partition.name));
             }
 
-            TransportImpl transport = transportManager.getTransport();
-            if (transport.attach_to_publisher(publisher).value() != AttachStatus._ATTACH_OK) {
-                throw new JMSException("Unable to attach to transport; please check logs");
-            }
+            TransportConfig transport = transportManager.getTransport();
+            TheTransportRegistry.bind_config(transport, publisher);
             logger.debug("Attached %s to %s", publisher, transport);
 
             return publisher;

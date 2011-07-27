@@ -8,6 +8,13 @@
 
 package org.opendds.jms;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,14 +33,10 @@ import javax.jms.TextMessage;
 import javax.resource.ResourceException;
 import javax.security.auth.Subject;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.omg.CORBA.StringSeqHolder;
+import org.opendds.jms.resource.ConnectionRequestInfoImpl;
+import org.opendds.jms.resource.ManagedConnectionImpl;
 
 import DDS.DomainParticipant;
 import DDS.DomainParticipantFactory;
@@ -46,13 +49,7 @@ import DDS.TOPIC_QOS_DEFAULT;
 import DDS.Topic;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
 import OpenDDS.DCPS.TheParticipantFactory;
-import OpenDDS.DCPS.transport.AttachStatus;
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
-
-import org.opendds.jms.resource.ConnectionRequestInfoImpl;
-import org.opendds.jms.resource.ManagedConnectionImpl;
 
 /**
  * @author  Weiqi Gao
@@ -799,12 +796,6 @@ public class AbstractMessageImplTest {
         Subscriber subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assertNotNull(subscriber);
 
-        TransportImpl transport = TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
-        assertNotNull(transport);
-
-        AttachStatus attachStatus = transport.attach_to_subscriber(subscriber);
-        assertNotNull(attachStatus);
-
         final MessagePayloadTypeSupportImpl typeSupport = new MessagePayloadTypeSupportImpl();
         assertNotNull(typeSupport);
 
@@ -820,12 +811,6 @@ public class AbstractMessageImplTest {
 
         Publisher publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assertNotNull(publisher);
-
-        TransportImpl transport2 = TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
-        assertNotNull(transport2);
-
-        AttachStatus attachStatus2 = transport2.attach_to_publisher(publisher);
-        assertNotNull(attachStatus2);
 
         TextMessage message = new TextMessageImpl(null);
 
