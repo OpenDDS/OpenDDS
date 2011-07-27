@@ -1,10 +1,21 @@
+Wed Jul 27 21:30:42 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Refactored to remove redundant code. Generate sequence entities
+          for pre-defined CORBA types. This way we don't have to include
+          any *.pidl based ini files in order to use CORBA::typeSeq values.
+
 Wed Jul 27 21:14:17 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/excelRTD/OpenDDS.xlam:
-        
+
           Fixed minor typo.
-          
-        * tools/excelRTD/doc/userguide.html:     
+
+        * tools/excelRTD/doc/userguide.html:
         * tools/excelRTD/doc/images/OfficeButton.png:
         * tools/excelRTD/doc/images/addIOR.PNG:
         * tools/excelRTD/doc/images/addMonitorTree.PNG:
@@ -18,7 +29,7 @@ Wed Jul 27 21:14:17 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
           Committed work to date on user guide for OpenDDS Real-Time Data for Excel.
           Still some work to do.
-          
+
 Wed Jul 27 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/excelRTD/ExcelRTD.mpc:

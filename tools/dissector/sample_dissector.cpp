@@ -343,15 +343,13 @@ namespace OpenDDS
 
     //------------------------------------------------------------------------
 
-    Sample_Dissector::Sample_Dissector (const std::string &type_id,
-                                        const std::string &subtree)
+    Sample_Dissector::Sample_Dissector (const std::string &subtree)
       :ett_payload_ (-1),
        subtree_label_(),
-       typeId_ (),
        field_ (0)
     {
-      if (!type_id.empty() || !subtree.empty())
-        this->init (type_id, subtree);
+      if (!subtree.empty())
+        this->init (subtree);
     }
 
     Sample_Dissector::~Sample_Dissector ()
@@ -359,20 +357,9 @@ namespace OpenDDS
       delete field_;
     }
 
-    const std::string &
-    Sample_Dissector::typeId()
-    {
-      return this->typeId_;
-    }
-
     void
-    Sample_Dissector::init (const std::string &type_id,
-                            const std::string &subtree)
+    Sample_Dissector::init (const std::string &subtree)
     {
-      if (type_id.length() > 0)
-        {
-          this->typeId_ = type_id;
-        }
 
       if (subtree.length() > 0)
         {
@@ -503,41 +490,10 @@ namespace OpenDDS
     }
 
     //----------------------------------------------------------------------
-
-    Sample_Sequence::Sample_Sequence (const std::string &type_id, Sample_Field *f)
-      : element_ (0),
-        own_element_ (true)
+    Sample_Sequence::Sample_Sequence (Sample_Dissector *sub)
+      : element_ (sub)
     {
-      this->init (type_id,"sequence");
-      element_ = new Sample_Dissector;
-      if (f)
-        {
-          element_->add_field (f);
-        }
-    }
-
-    Sample_Sequence::Sample_Sequence (const std::string &type_id,
-                                      Sample_Dissector *sub)
-      : element_ (sub),
-        own_element_ (false)
-    {
-      this->init (type_id, "sequence");
-    }
-
-    Sample_Sequence::Sample_Sequence (const std::string &type_id,
-                                      Sample_Field::IDLTypeID field_id)
-      : element_ (0),
-        own_element_ (true)
-    {
-      this->init (type_id,"sequence");
-      element_ = new Sample_Dissector;
-      element_->add_field (new Sample_Field (field_id, ""));
-    }
-
-    Sample_Sequence::~Sample_Sequence ()
-    {
-      if (own_element_)
-        delete element_;
+      this->init ("sequence");
     }
 
     Sample_Dissector *
@@ -598,29 +554,12 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Array::Sample_Array (const std::string &type_id,
-                                size_t count,
-                                Sample_Field *field)
-      :Sample_Sequence (type_id, field),
-       count_(count)
-    {
-    }
-    Sample_Array::Sample_Array (const std::string &type_id,
-                                size_t count,
+    Sample_Array::Sample_Array (size_t count,
                                 Sample_Dissector *sub)
-      : Sample_Sequence (type_id, sub),
+      : Sample_Sequence (sub),
         count_ (count)
     {
     }
-
-    Sample_Array::Sample_Array (const std::string &type_id,
-                                size_t count,
-                                Sample_Field::IDLTypeID field_id)
-      : Sample_Sequence (type_id, field_id),
-        count_ (count)
-    {
-    }
-
 
     size_t
     Sample_Array::dissect_i (Wireshark_Bundle_i &params, const std::string &label)
@@ -668,10 +607,10 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Enum::Sample_Enum (const std::string &type_id)
+    Sample_Enum::Sample_Enum ()
       : value_ (0)
     {
-      this->init (type_id, "");
+      this->init ("");
     }
 
     Sample_Enum::~Sample_Enum ()
@@ -687,7 +626,8 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Enum::dissect_i (Wireshark_Bundle_i &params, const std::string &label)
+    Sample_Enum::dissect_i (Wireshark_Bundle_i &params,
+                            const std::string &label)
     {
       guint8 * data = params.get_remainder();
       size_t len = 4;
@@ -825,19 +765,16 @@ namespace OpenDDS
       last->field_ = field;
     }
 
-    Sample_Union::Sample_Union (const std::string &type_id)
+    Sample_Union::Sample_Union ()
       :discriminator_ (0),
-       own_discriminator_(false),
        cases_ (0),
        default_ (0)
     {
-      this->init (type_id,"union");
+      this->init ("union");
     }
 
     Sample_Union::~Sample_Union ()
     {
-      if (own_discriminator_)
-        delete discriminator_;
       delete cases_;
       delete default_;
     }
@@ -846,14 +783,6 @@ namespace OpenDDS
     Sample_Union::discriminator (Sample_Dissector *d)
     {
       this->discriminator_ = d;
-    }
-
-    void
-    Sample_Union::discriminator (Sample_Field::IDLTypeID fid)
-    {
-      this->own_discriminator_ = true;
-      this->discriminator_ = new Sample_Dissector ();
-      this->discriminator_->add_field (new Sample_Field (fid,""));
     }
 
     Switch_Case *
@@ -890,7 +819,8 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Union::dissect_i (Wireshark_Bundle_i &params, const std::string &label)
+    Sample_Union::dissect_i (Wireshark_Bundle_i &params,
+                             const std::string &label)
     {
       guint8 * data = params.get_remainder();
       size_t len = this->discriminator_->compute_length(data);
@@ -932,27 +862,10 @@ namespace OpenDDS
 
     //-----------------------------------------------------------------------
 
-    Sample_Alias::Sample_Alias (const std::string &type_id, Sample_Dissector *base)
-      :base_(base),
-       own_base_ (false)
+    Sample_Alias::Sample_Alias (Sample_Dissector *base)
+      :base_(base)
     {
-      this->init (type_id, "alias");
-    }
-
-    Sample_Alias::Sample_Alias (const std::string &type_id,
-                                Sample_Field::IDLTypeID fid)
-      :base_(0),
-       own_base_ (true)
-    {
-      this->init (type_id, "alias");
-      base_ = new Sample_Dissector ();
-      base_->add_field (new Sample_Field (fid, ""));
-    }
-
-    Sample_Alias::~Sample_Alias ()
-    {
-      if (own_base_)
-        delete base_;
+      this->init ("alias");
     }
 
     size_t

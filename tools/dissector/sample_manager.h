@@ -71,23 +71,21 @@ namespace OpenDDS
           parent_ (0)
       {}
 
-      EntityBase (std::string &n, EntityContext *p);
+      EntityBase (const std::string &n, EntityContext *p);
 
     };
 
     class EntityNode : public EntityBase
     {
     public:
-      EntityNode (std::string &n, EntityContext *p, ACE_Configuration *cfg)
+      EntityNode (const std::string &n, EntityContext *p, ACE_Configuration *cfg)
         : EntityBase (n, p),
           dissector_(0),
-          type_id_ (),
           config_ (cfg)
       {}
       virtual ~EntityNode() {}
 
       Sample_Dissector  *dissector_;
-      std::string        type_id_;
       ACE_Configuration *config_;
     };
 
@@ -110,9 +108,6 @@ namespace OpenDDS
       EntityMap children_;
     };
 
-
-    typedef std::map <std::string, Sample_Field::IDLTypeID> BuiltinTypeMap;
-
     /*
      * The Sample_Dessector_Manager is a singleton which contains a hash map
      * of Sample Base instances keyed to type identifiers. This singleton is
@@ -130,10 +125,13 @@ namespace OpenDDS
     private:
 
       static Sample_Manager instance_;
-      BuiltinTypeMap        builtin_types_;
       EntityContext        *entities_;
 
       void init_from_file (const ACE_TCHAR *filename);
+
+      void init_builtin (Sample_Field::IDLTypeID tid,
+                         const std::string &idl_type,
+                         const std::string &cxx_type);
 
       void load_entities (EntityContext *entities);
 

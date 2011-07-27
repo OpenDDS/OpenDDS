@@ -153,8 +153,7 @@ namespace OpenDDS
     class dissector_Export Sample_Dissector
     {
     public:
-      Sample_Dissector (const std::string &type_id = "",
-                        const std::string &subtree_label = "");
+      Sample_Dissector (const std::string &subtree_label = "");
 
       virtual ~Sample_Dissector ();
 
@@ -163,8 +162,7 @@ namespace OpenDDS
       /// The type_id may be empty in the case where only a subtree needs
       /// to be defined for complex samples that are not otherwise top-level
       /// types.
-      virtual void init (const std::string &type_id,
-                         const std::string &subtree_label = "");
+      virtual void init (const std::string &subtree_label = "");
 
       /// Dissect is the hook function called from an owning dissector.
       /// The signature matches that required by wireshark. The offset
@@ -173,9 +171,6 @@ namespace OpenDDS
       gint dissect (Wireshark_Bundle &params);
 
       virtual size_t compute_length (guint8 *data);
-
-      /// Accessor to the typeId value. Used for registration.
-      const std::string &typeId();
 
       /// Adds a new sample field to the list. The Sample_Dissector instance
       /// takes ownership of this field instance. As a pass-thru to
@@ -207,8 +202,6 @@ namespace OpenDDS
       std::string subtree_label_;
 
     private:
-      std::string typeId_;
-
       /// The list of fields defining the sample.
       Sample_Field *field_;
 
@@ -223,10 +216,7 @@ namespace OpenDDS
     public:
       /// @ctor. Creates an empty base element to be initialized after this
       /// sample sequence holder is created
-      Sample_Sequence (const std::string &type_id, Sample_Field *field = 0);
-      Sample_Sequence (const std::string &type_id, Sample_Dissector *sub);
-      Sample_Sequence (const std::string &type_id, Sample_Field::IDLTypeID field_id);
-      ~Sample_Sequence ();
+      Sample_Sequence (Sample_Dissector *sub);
 
       Sample_Dissector *element();
 
@@ -249,9 +239,7 @@ namespace OpenDDS
     class dissector_Export Sample_Array : public Sample_Sequence
     {
     public:
-      Sample_Array (const std::string &type_id, size_t count, Sample_Field *field = 0);
-      Sample_Array (const std::string &type_id, size_t count, Sample_Dissector *sub);
-      Sample_Array (const std::string &type_id, size_t count, Sample_Field::IDLTypeID field_id);
+      Sample_Array (size_t count, Sample_Dissector *sub);
 
       virtual size_t compute_length (guint8 *data);
 
@@ -272,8 +260,8 @@ namespace OpenDDS
     class dissector_Export Sample_Enum : public Sample_Dissector
     {
     public:
-      Sample_Enum (const std::string &type_id);
-      ~Sample_Enum ();
+      Sample_Enum ();
+      virtual ~Sample_Enum ();
 
       Sample_Field *add_value (const std::string &val);
 
@@ -306,7 +294,7 @@ namespace OpenDDS
                    const std::string &label,
                    Sample_Field *field = 0);
 
-      ~Switch_Case ();
+      virtual ~Switch_Case ();
 
       Switch_Case *add_range (const std::string &label, Sample_Field *field = 0);
       Switch_Case *chain (const std::string &label, Sample_Field *field = 0);
@@ -331,11 +319,10 @@ namespace OpenDDS
     class dissector_Export Sample_Union : public Sample_Dissector
     {
     public:
-      Sample_Union (const std::string & type_id);
-      ~Sample_Union ();
+      Sample_Union ();
+      virtual ~Sample_Union ();
 
       void discriminator (Sample_Dissector *d);
-      void discriminator (Sample_Field::IDLTypeID fid);
       Switch_Case *add_case (const std::string &label, Sample_Field *field = 0);
       void add_default (Sample_Field *value);
 
@@ -357,9 +344,8 @@ namespace OpenDDS
     class dissector_Export Sample_Alias : public Sample_Dissector
     {
     public:
-      Sample_Alias (const std::string &type_id, Sample_Dissector *base);
-      Sample_Alias (const std::string &type_id, Sample_Field::IDLTypeID fid);
-      ~Sample_Alias ();
+      Sample_Alias (Sample_Dissector *base);
+      virtual ~Sample_Alias ();
 
     protected:
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
