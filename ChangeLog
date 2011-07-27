@@ -1,3 +1,15 @@
+Wed Jul 27 14:42:28 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * MPC/config/gen_dissector.mpb:
+
+          Added new base project to facilitate the generation of dissector
+          configuration files.
+
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Scoreboard cleanup.
+
 Wed Jul 27 14:09:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/excelRTD/ExcelRTD.mpc:

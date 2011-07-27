@@ -342,32 +342,32 @@ namespace OpenDDS
         }
       node->type_id_ = tid;
 
-      if (kind.compare (ACE_TEXT("struct")) == 0)
+      if (kind.compare ("struct") == 0)
         {
           build_struct (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("sequence")) == 0)
+      else if (kind.compare ("sequence") == 0)
         {
           build_sequence (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("array")) == 0)
+      else if (kind.compare ("array") == 0)
         {
           build_array (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("enum")) == 0)
+      else if (kind.compare ("enum") == 0)
         {
           build_enum (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("union")) == 0)
+      else if (kind.compare ("union") == 0)
         {
           build_union (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("alias")) == 0)
+      else if (kind.compare ("alias") == 0)
         {
           build_alias (node, key);
           return;
