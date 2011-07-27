@@ -226,7 +226,6 @@ namespace OpenDDS
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
 
       Sample_Dissector *element_;
-      bool own_element_;
     };
 
     /*
@@ -332,7 +331,6 @@ namespace OpenDDS
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
 
       Sample_Dissector *discriminator_;
-      bool own_discriminator_;
       Switch_Case *cases_;
       Sample_Field *default_;
     };
@@ -345,13 +343,11 @@ namespace OpenDDS
     {
     public:
       Sample_Alias (Sample_Dissector *base);
-      virtual ~Sample_Alias ();
 
     protected:
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
 
       Sample_Dissector *base_;
-      bool own_base_;
     };
 
   }

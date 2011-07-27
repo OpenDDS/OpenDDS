@@ -1,3 +1,9 @@
+Wed Jul 27 21:55:27 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+
+          Finish the job started in my previous commit. :-/
+
 Wed Jul 27 21:30:42 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_dissector.h:
