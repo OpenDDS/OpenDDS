@@ -1,3 +1,9 @@
+Wed Jul 27 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+
+          vc10 likes <%quote%> instead of <%equote%>, used MPC specific block.
+
 Wed Jul 27 17:06:14 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/excelRTD/OpenDDS.xlam:
