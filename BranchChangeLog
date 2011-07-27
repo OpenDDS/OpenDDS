@@ -1,3 +1,10 @@
+Wed Jul 27 21:39:26 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Updated to fix the issue of TEST_CHECK not terminating the
+          preocess.
+
 Wed Jul 27 18:28:31 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
