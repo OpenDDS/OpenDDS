@@ -1,3 +1,24 @@
+Wed Jul 27 21:14:17 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+        
+          Fixed minor typo.
+          
+        * tools/excelRTD/doc/userguide.html:     
+        * tools/excelRTD/doc/images/OfficeButton.png:
+        * tools/excelRTD/doc/images/addIOR.PNG:
+        * tools/excelRTD/doc/images/addMonitorTree.PNG:
+        * tools/excelRTD/doc/images/monitorTree.PNG:
+        * tools/excelRTD/doc/images/openDDSTab.PNG:
+        * tools/excelRTD/doc/images/opendds.png:
+        * tools/excelRTD/doc/images/sgram.png:
+        * tools/excelRTD/doc/images/snapshotMonitorTree.PNG:
+        * tools/excelRTD/doc/images/splash.jpg:
+        * tools/excelRTD/doc/images/splash.psd:
+
+          Committed work to date on user guide for OpenDDS Real-Time Data for Excel.
+          Still some work to do.
+          
 Wed Jul 27 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/excelRTD/ExcelRTD.mpc:
