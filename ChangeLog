@@ -1,3 +1,9 @@
+Wed Jul 27 17:06:14 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Changed splash screen to indicate OpenDDS Real-Time Data for Excel Version 1.0.
+
 Wed Jul 27 14:42:28 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * MPC/config/gen_dissector.mpb:
