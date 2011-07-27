@@ -4,7 +4,7 @@ project (ExcelRTD): taolib, dcps, dcps_tcp, dcps_monitor, qt4_gui {
   includes += $(DDS_ROOT)/tools/monitor
 
   macros += _USRDLL RTDServer_EXPORTS
-  macros += RTD_DLL_NAME=\&quot;$(TargetFileName)\&quot;
+  macros += RTD_DLL_NAME=<%equote%>$(TargetFileName)<%equote%>
 
   sharedname = OpenDDS_ExcelRTD
   dllout  = $(DDS_ROOT)/lib

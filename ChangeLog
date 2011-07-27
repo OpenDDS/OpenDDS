@@ -1,3 +1,10 @@
+Wed Jul 27 14:09:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+
+          Use MPC's built-in support for generating an escaped quoted
+          that works with all MPC project types.
+
 Tue Jul 26 22:31:46 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/excelRTD/ExcelRTD.mpc:
