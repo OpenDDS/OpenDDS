@@ -241,7 +241,8 @@ public:
   ACE_THROW_SPEC((CORBA::SystemException));
 
   void add_association(const RepoId& yourId,
-                       const WriterAssociation& writer);
+                       const WriterAssociation& writer,
+                       bool active);
 
   void remove_associations(const WriterIdSeq& writers, bool callback);
 

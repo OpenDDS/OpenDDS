@@ -251,8 +251,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return this->participant_servant_->get_handle(subscription_id_);
 }
 
-void DataReaderImpl::add_association(const RepoId& yourId,
-                                     const WriterAssociation& writer)
+void
+DataReaderImpl::add_association(const RepoId& yourId,
+                                const WriterAssociation& writer,
+                                bool active)
 {
   //
   // The following block is for diagnostic purposes only.
@@ -354,7 +356,7 @@ void DataReaderImpl::add_association(const RepoId& yourId,
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
 
-    this->associate(data, false /*passive*/);
+    this->associate(data, active);
 
     // Check if any publications have already sent a REQUEST_ACK message.
     {

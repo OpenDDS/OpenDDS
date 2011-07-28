@@ -33,7 +33,8 @@ DataWriterRemoteImpl::detach_parent()
 
 void
 DataWriterRemoteImpl::add_association(const RepoId& yourId,
-                                      const ReaderAssociation& reader)
+                                      const ReaderAssociation& reader,
+                                      bool active)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* parent = 0;
@@ -44,7 +45,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     parent = this->parent_;
   }
   if (parent) {
-    parent->add_association(yourId, reader);
+    parent->add_association(yourId, reader, active);
   }
 }
 

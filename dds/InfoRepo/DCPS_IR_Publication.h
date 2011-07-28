@@ -53,7 +53,7 @@ public:
   ///  subscriptions and notifies datawriter if successfully added
   /// This method can mark the participant dead
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_associated_subscription(DCPS_IR_Subscription* sub);
+  int add_associated_subscription(DCPS_IR_Subscription* sub, bool active);
 
   /// Remove the associated subscription
   /// Removes the subscription from the list of associated

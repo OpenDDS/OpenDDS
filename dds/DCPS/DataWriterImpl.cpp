@@ -218,7 +218,8 @@ DataWriterImpl::get_next_handle()
 
 void
 DataWriterImpl::add_association(const RepoId& yourId,
-                                const ReaderAssociation& reader)
+                                const ReaderAssociation& reader,
+                                bool active)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
 
@@ -288,7 +289,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
-  this->associate(data, true /*active*/);
+  this->associate(data, active);
   //TODO: if associate() returns false, inform inforepo and try again as pasv
 }
 

@@ -189,7 +189,8 @@ public:
   ACE_THROW_SPEC((CORBA::SystemException));
 
   void add_association(const RepoId& yourId,
-                       const ReaderAssociation& reader);
+                       const ReaderAssociation& reader,
+                       bool active);
 
   void remove_associations(const ReaderIdSeq & readers,
                            bool callback);

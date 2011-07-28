@@ -140,6 +140,20 @@ increment_incompatibility_count(OpenDDS::DCPS::IncompatibleQosStatus* status,
 }
 
 bool
+compatibleTransports(const OpenDDS::DCPS::TransportLocatorSeq& s1,
+                     const OpenDDS::DCPS::TransportLocatorSeq& s2)
+{
+  for (CORBA::ULong i = 0; i < s1.length(); ++i) {
+    for (CORBA::ULong j = 0; j < s2.length(); ++j) {
+      if (0 == std::strcmp(s1[i].transport_type, s2[j].transport_type)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool
 compatibleQOS(DCPS_IR_Publication  * publication,
               DCPS_IR_Subscription * subscription)
 {
@@ -148,6 +162,16 @@ compatibleQOS(DCPS_IR_Publication  * publication,
   = publication->get_incompatibleQosStatus();
   OpenDDS::DCPS::IncompatibleQosStatus* readerStatus
   = subscription->get_incompatibleQosStatus();
+
+  // Check transport-type compatibility
+  if (!compatibleTransports(publication->get_transportLocatorSeq(),
+                            subscription->get_transportLocatorSeq())) {
+    compatible = false;
+    increment_incompatibility_count(writerStatus,
+                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
+    increment_incompatibility_count(readerStatus,
+                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
+  }
 
   DDS::DataWriterQos const * const writerQos =
     publication->get_datawriter_qos();

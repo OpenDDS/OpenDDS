@@ -50,7 +50,8 @@ DCPS_IR_Publication::~DCPS_IR_Publication()
   }
 }
 
-int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub)
+int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
+                                                     bool active)
 {
   // keep track of the association locally
   int status = associations_.insert(sub);
@@ -78,7 +79,7 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub)
                      std::string(sub_converter).c_str()));
         }
 
-        writer_->add_association(id_, association);
+        writer_->add_association(id_, association, active);
 
       } catch (const CORBA::Exception& ex) {
         ex._tao_print_exception(

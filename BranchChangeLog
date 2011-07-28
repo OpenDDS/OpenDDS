@@ -1,3 +1,29 @@
+Thu Jul 28 22:11:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          If reader and writer have no transport types in common, treat it
+          as an incompatible QoS (fixes FooTest5_0 diff_trans).
+          Pass a boolean parameter to add_association() to indicate which
+          side is active and which is passive.  For now this is hard-coded
+          to be writer=active and reader=passive, but the logic is in the
+          InfoRepo instead of embedded in each participant.
+
 Thu Jul 28 21:33:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:

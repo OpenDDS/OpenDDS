@@ -35,7 +35,8 @@ module OpenDDS {
       // will tell transport and call on_publication_matched()
       oneway void add_association(
         in RepoId yourId,
-        in ReaderAssociation reader
+        in ReaderAssociation reader,
+        in boolean active
         );
 
       // will tell transport that associations are going away

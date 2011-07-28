@@ -33,7 +33,8 @@ module OpenDDS {
       // will tell transport and call on_subscription_matched()
       oneway void add_association(
         in RepoId yourId,
-        in WriterAssociation writer
+        in WriterAssociation writer,
+        in boolean active
         );
 
       // will tell transport that associations are going away

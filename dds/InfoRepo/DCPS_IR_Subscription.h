@@ -55,7 +55,7 @@ public:
   ///  publications and notifies datareader if successfully added
   /// This method can mark the participant dead
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_associated_publication(DCPS_IR_Publication* pub);
+  int add_associated_publication(DCPS_IR_Publication* pub, bool active);
 
   /// Remove the associated publication
   /// Removes the publication from the list of associated
