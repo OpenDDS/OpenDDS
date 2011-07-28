@@ -153,10 +153,11 @@
         </exec>
     </target>
 
+    <!-- Start the JBoss instance with remote debugging enabled (for manual testing), wait for Ctrl-C.  Use the teardown target to stop DCPSInfoRepo.  -->
     <target name="startjboss" depends="setup">
         <cargo containerId="jboss42x" home="${env.JBOSS_HOME}" action="start" wait="true">
             <configuration>
-                <property name="cargo.jvmargs" value="-ea ${server.jvmargs}"/> <!-- enable assertions -->
+                <property name="cargo.jvmargs" value="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n -ea ${server.jvmargs}"/> <!-- enable assertions -->
 
                 <!-- Deployables -->
                 <deployable type="rar" file="${jms.basedir}/build/opendds-jms-${opendds.version}.rar"/>

@@ -1,3 +1,10 @@
+Thu Jul 28 17:00:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+
+          Fixed a bug in the JMS Provider's use of transport API.
+
 Thu Jul 28 16:55:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:

@@ -74,6 +74,8 @@ public class TransportFactory {
         if (transport == null) {
             throw new JMSException("Unable to create Transport; please check logs");
         }
+        
+        transport.addLast(configuration);
 
         Logger logger = Transports.getLogger(configuration);
         logger.debug("Created %s", transport);
