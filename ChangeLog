@@ -1,3 +1,9 @@
+Thu Jul 28 15:37:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/RTDMonitor.cpp:
+        
+          Corrected command line argument conversion error.
+
 Thu Jul 28 14:44:43 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/idl/be_util.cpp:

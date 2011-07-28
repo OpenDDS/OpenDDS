@@ -33,14 +33,12 @@ namespace Monitor {
 class RTDMonitorImpl {
 
   public:
-    RTDMonitorImpl(int argc, char* argv[])
+    RTDMonitorImpl(int argc, ACE_TCHAR **argv)
        : options_( argc, argv)
     {
       if (!TheServiceParticipant->monitor_) {
-        ACE_Argv_Type_Converter converter(argc, argv);
-
         // Initialize the service and consume the ACE+TAO+DDS arguments.
-        TheParticipantFactoryWithArgs(converter.get_argc(), converter.get_TCHAR_argv());
+        TheParticipantFactoryWithArgs(argc, argv);
 
         // Load the SimpleTcp transport library as we know that we will be
         // using it.
@@ -183,7 +181,9 @@ class RTDMonitorImpl {
 
 RTDMonitor::RTDMonitor(int argc, char* argv[])
 {
-  impl_ = new RTDMonitorImpl(argc, argv);
+  ACE_Argv_Type_Converter converter(argc, argv);
+
+  impl_ = new RTDMonitorImpl(converter.get_argc(), converter.get_TCHAR_argv());
 }
 
 RTDMonitor::~RTDMonitor()
