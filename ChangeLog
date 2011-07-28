@@ -1,3 +1,11 @@
+Thu Jul 28 14:44:43 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/idl/be_util.cpp:
+        * tools/dissector/README:
+
+          Added description of the new -Gws option in both the opendds_idl
+          help output and in the readme file.
+
 Thu Jul 28 14:40:40 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/excelRTD/OpenDDS.xlam:
