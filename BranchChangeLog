@@ -1,3 +1,21 @@
+Thu Jul 28 16:45:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateInstance_configs_TransportConfig.gif:
+
+          Additional needed icon.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification/GeneratorResource.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification/GeneratorResourceFactory.java:
+
+          Classes to force UUIDs to be used for elements as xmi:id.
+
 Wed Jul 27 22:18:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
