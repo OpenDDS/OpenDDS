@@ -95,6 +95,9 @@ public:
   /// samples. The default value is 32.
   size_t datalink_control_chunks_;
 
+  /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
+  virtual bool is_reliable() const = 0;
+
 protected:
 
   TransportInst(const char* type,

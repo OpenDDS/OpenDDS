@@ -2021,6 +2021,8 @@ DataWriterImpl::parent() const
 bool
 DataWriterImpl::check_transport_qos(const TransportInst&)
 {
+  // DataWriter does not impose any constraints on which transports
+  // may be used based on QoS.
   return true;
 }
 

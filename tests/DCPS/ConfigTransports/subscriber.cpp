@@ -21,7 +21,6 @@
 #endif
 
 #include "../common/TestSupport.h"
-#include "tests/DCPS/CompatibilityTest/common.h"
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])

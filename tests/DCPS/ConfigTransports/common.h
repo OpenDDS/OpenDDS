@@ -9,10 +9,7 @@
  */
 // ============================================================================
 
-
-
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        #include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 

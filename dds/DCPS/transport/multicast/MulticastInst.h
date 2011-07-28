@@ -98,6 +98,8 @@ public:
   /// Diagnostic aid.
   virtual void dump(std::ostream& os);
 
+  bool is_reliable() const { return this->reliable_; }
+
 private:
   friend class MulticastType;
   explicit MulticastInst(const std::string& name);

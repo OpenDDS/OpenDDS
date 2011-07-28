@@ -84,6 +84,8 @@ public:
   /// This currently doesn't apply to passive reconnections.
   unsigned long passive_connect_duration_;
 
+  bool is_reliable() const { return true; }
+
 private:
   friend class TcpType;
   explicit TcpInst(const std::string& name);

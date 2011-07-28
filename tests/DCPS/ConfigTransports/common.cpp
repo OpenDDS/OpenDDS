@@ -16,7 +16,7 @@
 
 #include "../common/TestSupport.h"
 
-#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include "../FooType4/FooDefTypeSupportImpl.h"
 
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -24,7 +24,6 @@
 
 #include "ace/SString.h"
 #include "ace/Arg_Shifter.h"
-#include "tests/DCPS/CompatibilityTest/common.h"
 
 #include <stdexcept>
 #include <string>
@@ -33,8 +32,8 @@ Options::Options() :
         test_duration(40),
         test_duration_str(ACE_TEXT("40")),
         LEASE_DURATION_STR(ACE_TEXT("infinite")),
-        reliability_kind(::DDS::RELIABLE_RELIABILITY_QOS),
-        reliability_kind_str(ACE_TEXT("reliable")),
+        reliability_kind(::DDS::BEST_EFFORT_RELIABILITY_QOS),
+        reliability_kind_str(ACE_TEXT("best_effort")),
         durability_kind(::DDS::TRANSIENT_LOCAL_DURABILITY_QOS),
         durability_kind_str(ACE_TEXT("transient_local")),
         liveliness_kind(::DDS::AUTOMATIC_LIVELINESS_QOS),
@@ -67,8 +66,8 @@ Options::Options() :
 Options::Options(int argc, ACE_TCHAR *argv[]) :
         test_duration(40),
         test_duration_str(ACE_TEXT("40")),
-        reliability_kind(::DDS::RELIABLE_RELIABILITY_QOS),
-        reliability_kind_str(ACE_TEXT("reliable")),
+        reliability_kind(::DDS::BEST_EFFORT_RELIABILITY_QOS),
+        reliability_kind_str(ACE_TEXT("best_effort")),
         durability_kind(::DDS::TRANSIENT_LOCAL_DURABILITY_QOS),
         durability_kind_str(ACE_TEXT("transient_local")),
         liveliness_kind(::DDS::AUTOMATIC_LIVELINESS_QOS),
@@ -564,7 +563,7 @@ assert_supports_all(const Options& opts, const OpenDDS::DCPS::TransportClient* t
   TEST_ASSERT(tc != 0);
 
   // Assert effective transport protocols
-  int long left = transporti.size();
+  size_t left = transporti.size();
   for (std::vector < std::string>::const_iterator proto = transporti.begin();
           proto < transporti.end(); proto++)
     {
@@ -582,7 +581,7 @@ assert_supports_all(const Options& opts, const OpenDDS::DCPS::TransportClient* t
 }
 
 bool
-wait_publication_matched_status(const Options& opts, const DDS::Entity_ptr writer_)
+wait_publication_matched_status(const Options& opts, const DDS::Entity_ptr /*writer_*/)
 {
 
   int duration = opts.test_duration;

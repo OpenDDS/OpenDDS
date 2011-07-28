@@ -1,3 +1,37 @@
+Thu Jul 28 20:12:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          If the DataReader is RELIABLE_RELIABILITY_QOS,
+          don't use unreliable transports.
+          DataWriterImpl's change here is just a comment.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Improve logging, and make it an error if no transports
+          are available and applicalbe to the TransportClient.
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.h:
+
+          Allow each derived class to identify its level of reliability.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Fixed an rch refcount bug introduced in earlier refactoring.
+
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fixed #includes and warnings.
+          Default reliability for this test is BEST_EFFORT.
+
 Thu Jul 28 17:00:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/compat/build.xml:

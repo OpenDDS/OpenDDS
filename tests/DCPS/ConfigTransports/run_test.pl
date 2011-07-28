@@ -41,8 +41,8 @@ my $qos = {
     durability => transient_local,
     liveliness => automatic,
     lease_time => 5,
-    reliability => reliable,
-#    reliability => best_effort,
+#    reliability => reliable,
+    reliability => best_effort,
 };
 
 ## Entity: [none, participant, pubsub, rw] Determines the level at which

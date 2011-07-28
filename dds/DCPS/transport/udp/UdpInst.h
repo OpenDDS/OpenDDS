@@ -31,6 +31,8 @@ public:
   /// Diagnostic aid.
   virtual void dump(std::ostream& os);
 
+  bool is_reliable() const { return false; }
+
 private:
   friend class UdpType;
   explicit UdpInst(const std::string& name);

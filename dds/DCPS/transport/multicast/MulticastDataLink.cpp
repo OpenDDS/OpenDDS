@@ -36,7 +36,7 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
                                      bool is_active)
   : DataLink(transport, 0, is_loopback, is_active), // priority, is_loopback, is_active
     transport_(transport),
-    session_factory_(session_factory),
+    session_factory_(session_factory, false),
     local_peer_(local_peer),
     config_(0),
     reactor_task_(0),

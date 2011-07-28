@@ -60,6 +60,7 @@ TransportClient::enable_transport()
        p && tc.is_nil(); p = p->parent()) {
     tc = p->transport_config();
   }
+
   if (tc.is_nil()) {
     TransportRegistry* reg = TransportRegistry::instance();
     tc = reg->global_config();
@@ -68,7 +69,11 @@ TransportClient::enable_transport()
       tc = reg->fix_empty_default();
     }
   }
+
   if (tc.is_nil()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TransportClient::enable_transport ")
+               ACE_TEXT("No TransportConfig found.\n")));
     throw Transport::NotConfigured();
   }
 
@@ -85,6 +90,13 @@ TransportClient::enable_transport()
       conn_info_.length(len + 1);
       impl->connection_info(conn_info_[len]);
     }
+  }
+
+  if (impls_.empty()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TransportClient::enable_transport ")
+               ACE_TEXT("No TransportImpl could be created.\n")));
+    throw Transport::NotConfigured();
   }
 }
 

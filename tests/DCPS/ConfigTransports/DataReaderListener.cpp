@@ -6,8 +6,8 @@
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
-#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include "../FooType4/FooDefTypeSupportC.h"
+#include "../FooType4/FooDefTypeSupportImpl.h"
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :

@@ -1600,8 +1600,11 @@ DataReaderImpl::parent() const
 }
 
 bool
-DataReaderImpl::check_transport_qos(const TransportInst&)
+DataReaderImpl::check_transport_qos(const TransportInst& ti)
 {
+  if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+    return ti.is_reliable();
+  }
   return true;
 }
 
