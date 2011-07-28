@@ -1,3 +1,20 @@
+Thu Jul 28 16:55:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+
+          Additional customizations to generator model.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
+
+          When opening a .codegen file, use the GeneratorResourceFactory.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+
+          Modified based on new codegen format.
+
 Thu Jul 28 16:45:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateInstance_configs_TransportConfig.gif:

@@ -88,7 +88,7 @@
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
       <xsd:element name="transportOffset" type="generator:TransportOffset"/>
       <xsd:element name="transport" type="generator:Transport"/>
-      <xsd:element name="configs" type="generator:TransportConfig"/>
+      <xsd:element name="config" type="generator:TransportConfig"/>
       <xsd:element ref="xmi:Extension"/>
     </xsd:choice>
     <xsd:attribute ref="xmi:id"/>
@@ -456,14 +456,13 @@
   <xsd:element name="UdpConfig" type="generator:UdpConfig"/>
   <xsd:complexType name="TransportConfig">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element name="instances" type="generator:TransportInst"/>
       <xsd:element name="swap_bytes" type="generator:SwapBytes"/>
+      <xsd:element name="transportRef" type="generator:TransportRef"/>
       <xsd:element ref="xmi:Extension"/>
     </xsd:choice>
     <xsd:attribute ref="xmi:id"/>
     <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
     <xsd:attribute name="name" type="xsd:string"/>
-    <xsd:attribute name="instances" type="xsd:string"/>
     <xsd:attribute name="swap_bytes" type="xsd:string"/>
   </xsd:complexType>
   <xsd:element name="TransportConfig" type="generator:TransportConfig"/>
@@ -473,6 +472,7 @@
     </xsd:choice>
     <xsd:attribute ref="xmi:id"/>
     <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string"/>
   </xsd:complexType>
   <xsd:element name="TransportInst" type="generator:TransportInst"/>
   <xsd:complexType name="UdpTransport">
@@ -534,4 +534,14 @@
     <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
   </xsd:complexType>
   <xsd:element name="Transports" type="generator:Transports"/>
+  <xsd:complexType name="TransportRef">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="transport" type="generator:TransportInst"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="transport" type="xsd:string"/>
+  </xsd:complexType>
+  <xsd:element name="TransportRef" type="generator:TransportRef"/>
 </xsd:schema>

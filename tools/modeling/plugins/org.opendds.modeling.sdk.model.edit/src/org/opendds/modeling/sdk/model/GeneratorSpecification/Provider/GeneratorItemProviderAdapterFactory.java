@@ -1265,6 +1265,29 @@ public class GeneratorItemProviderAdapterFactory extends
 	}
 
 	/**
+	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TransportRef} instances.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected TransportRefItemProvider transportRefItemProvider;
+
+	/**
+	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TransportRef}.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Adapter createTransportRefAdapter() {
+		if (transportRefItemProvider == null) {
+			transportRefItemProvider = new TransportRefItemProvider(this);
+		}
+
+		return transportRefItemProvider;
+	}
+
+	/**
 	 * This returns the root adapter factory that contains this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1495,6 +1518,8 @@ public class GeneratorItemProviderAdapterFactory extends
 			multicastTransportItemProvider.dispose();
 		if (transportsItemProvider != null)
 			transportsItemProvider.dispose();
+		if (transportRefItemProvider != null)
+			transportRefItemProvider.dispose();
 	}
 
 }

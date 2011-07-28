@@ -51,7 +51,7 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="transport" upperBound="-1"
         eType="#//Transport" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="configs" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="config" upperBound="-1"
         eType="#//TransportConfig" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TransportOffset">
@@ -257,13 +257,15 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TransportConfig">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="instances" upperBound="-1"
-        eType="#//TransportInst"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="swap_bytes" ordered="false"
         eType="#//SwapBytes"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="transportRef" upperBound="-1"
+        eType="#//TransportRef" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TransportInst" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TransportInst" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="UdpTransport" eSuperTypes="#//TransportInst">
     <eStructuralFeatures xsi:type="ecore:EReference" name="local_address_str" eType="#//LocalAddressString"
         containment="true"/>
@@ -315,5 +317,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="Transports">
     <eStructuralFeatures xsi:type="ecore:EReference" name="transport" upperBound="-1"
         eType="#//TransportInst" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TransportRef">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="transport" eType="#//TransportInst"/>
   </eClassifiers>
 </ecore:EPackage>
