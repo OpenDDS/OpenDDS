@@ -1,3 +1,14 @@
+Thu Jul 28 14:40:40 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Added a tool tip and uncommented a line of code.
+
+        * tools/excelRTD/doc/userguide.html:
+        * tools/excelRTD/doc/images/openDDSTab.PNG:
+
+          Continued work on user guide.
+
 Wed Jul 27 21:55:27 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/sample_dissector.h:

@@ -649,8 +649,8 @@ Error: #f88
     };
 }}}</pre>
 </div>
-<div title="Data" modifier="MikeMartinez" created="201002011901" modified="201008051627" tags="publish" changecount="69">
-<pre>The information hierarchy displayed in the tree view of the application [[GUI]] starts with the host at the top level.  Each executing process that publishes monitor information will appear within the host on which they are executing.  The data displayed is derived from [[Monitor Data Topics|MonitorTopics]] distributed in the ~OpenDDS specific ''~MONITOR_DOMAIN_ID'' and the DDS specification defined Builtin Topic data.  The information hierarchy is summarized in the following table.  The table includes references to the IDL data defintions for the data that will be displayed.
+<div title="Data" modifier="Don Hudson" created="201002011901" modified="201107281343" tags="publish" changecount="70">
+<pre>The information hierarchy displayed in the repository monitor tree view starts with the host at the top level.  Each executing process that publishes monitor information will appear within the host on which they are executing.  The data displayed is derived from [[Monitor Data Topics|MonitorTopics]] distributed in the ~OpenDDS specific ''~MONITOR_DOMAIN_ID'' and the DDS specification defined Builtin Topic data.  The information hierarchy is summarized in the following table.  The table includes references to the IDL data defintions for the data that will be displayed.
 
 The Monitor Topics include a variable field that allows the application programmer to extend the topics if desired.  Arbitrary name/value pairs can be added to the data for distribution and will be displayed by the //monitor// application.  The data is defined in IDL with each topic constructed of portions of the [[common IDL|CommonIdl]] definitions.  These IDL definitions are all within the ''~OpenDDS::DCPS'' IDL module.  They are all defined within the file located at //$~DDS_ROOT/dds/monitor/monitor.idl//.
 
@@ -710,12 +710,20 @@ In addition to ~OpenDDS, the  //~OpenDDS Excel RTD Server// uses the [[Qt4|http:
     };
 }}}</pre>
 </div>
-<div title="GUI" modifier="Don Hudson" created="201002022102" modified="201107272105" tags="publish" changecount="62">
-<pre>//The ~OpenDDS Excel Add-in// adds a dedicated tab for ~OpenDDS to the Excel ribbon bar.  However, the tab won't be visible if a workbook isn't open or the active workbook is an add-in.  Under the ~OpenDDS tab are two groups.  The Repository ~IORs/Endpoints Group and Repository Monitors Group.
-{{imgcenter{[img[images/openDDSTab.png]]}}}The Repository ~IORs/Endpoints Group has a drop down list of ~IORs/Endpoints and two buttons: Add and Remove.  Selecting the Add button displays the dialog below.  Selecting the Remove button removes the current selection in the drop down list.
-{{imgcenter{[img[images/addIOR.png]]}}}The Repository Monitors Group has a drop down list of repository monitors that are in the workbook and four buttons: Add, Remove, Go To, and Snapshot.  Selecting the Add button displays the dialog below which in turn adds the monitor tree below that to the worksheet.  Selecting the Remove button removes the current selection in the drop down list from the list and the worksheet.  Selecting Go To button activates the cells of the monitor tree that is currently selected in the drop down list.
+<div title="GUI" modifier="Don Hudson" created="201002022102" modified="201107281415" tags="publish" changecount="100">
+<pre>//The ~OpenDDS Excel Add-in// adds a dedicated tab for ~OpenDDS to the Excel ribbon bar.  However, the tab won't be visible if a workbook isn't open or the active workbook is an add-in.  Under the ~OpenDDS tab are two groups.  Repository ~IORs/Endpoints and Repository Monitors.
+
+{{imgcenter{[img[images/openDDSTab.png]]}}}
+!Repository ~IORs/Endpoints
+The Repository ~IORs/Endpoints Group is for management of ~IORs and endpoints only.  It has a drop down list of ~IORs/Endpoints and two buttons: Add and Remove.  Selecting the Add button displays the dialog below.  Selecting the Remove button removes the current selection in the drop down list.
+
+{{imgcenter{[img[images/addIOR.png]]}}}
+!Repository Monitors
+The Repository Monitors Group has a drop down list of repository monitors that are in the workbook and four buttons: Add, Remove, Go To, and Snapshot.  Selecting the Add button displays the dialog below which in turn adds the monitor tree below that to the worksheet.  Selecting the Remove button removes the current selection in the drop down list from the list and the worksheet.  Selecting the Go To button activates the cells of the monitor tree that is currently selected in the drop down list.
+
 {{imgcenter{[img[images/addMonitorTree.png]]}}}
-{{imgcenter{[img[images/monitorTree.png]]}}}Selecting Snapshot button snapshots the monitor tree that is currently selected in the drop down list either in-place or in another location in the same workbook by replacing the formulas in the cells with the current values.
+{{imgcenter{[img[images/monitorTree.png]]}}}Selecting the Snapshot button snapshots the monitor tree that is currently selected in the drop down list either in-place or in another location in the same workbook by replacing the formulas in the cells with the current values.
+
 {{imgcenter{[img[images/snapshotMonitorTree.png]]}}}</pre>
 </div>
 <div title="MainMenu" modifier="MikeMartinez" created="201002021621" modified="201002022059" changecount="3">
@@ -1066,15 +1074,16 @@ String.prototype.filenameEncode = function()
     };
 }}}</pre>
 </div>
-<div title="Quick Start" modifier="Don Hudson" created="201002021625" modified="201107272034" tags="publish" changecount="147">
-<pre>The //~OpenDDS ~Real-Time Data for Microsoft Excel// application allows visualization of an operating ~OpenDDS system.  The application can monitor multiple ~OpenDDS repositories at a time by subscribing to both the DDS specification defined Builtin Topics and the ~OpenDDS specific Monitor topics.  Repository monitors may be simultaneously running in multiple workbooks in the same and/or separate instances of Excel.  However, embedding workbooks containing repository monitors in documents, presentations, etc., is not supported due to limitations in the underlying technology.  The content of the monitor tree in this application mirrors the content of the monitor tree portion of the stand-alone ~OpenDDS Monitor application.  Additional features of this application include a repository monitor saved on a worksheet will automatically restart when the workbook is opened and a snapshot of a repository monitor can be taken in-place or to another location in the same workbook.  
+<div title="Quick Start" modifier="Don Hudson" created="201002021625" modified="201107281325" tags="publish" changecount="158">
+<pre>//~OpenDDS ~Real-Time Data for Microsoft Excel// allows visualization of an operating ~OpenDDS system.  This application can monitor multiple ~OpenDDS repositories at a time by subscribing to both the DDS specification defined Builtin Topics and the ~OpenDDS specific Monitor topics.  Repository monitors may be simultaneously running in multiple workbooks in the same and/or separate instances of Excel.  However, embedding workbooks containing repository monitors in documents, presentations, etc., is not supported due to limitations in the underlying technology.  The content of the monitor tree in this application mirrors the content of the monitor tree portion of the stand-alone ~OpenDDS Monitor application.  Additional features of this application include a repository monitor saved on a worksheet will automatically restart when the workbook is opened and a snapshot of a repository monitor can be taken in-place or to another location in the same workbook.  
 
-The project is in %~DDS_ROOT%\tools\excelRTD and consists of an Excel add-in and an Excel ~Real-Time Data (RTD) server.  The //~OpenDDS Excel Add-in// is %~DDS_ROOT%\tools\excelRTD\~OpenDDS.xlam and contains Visual Basic macros. The //~OpenDDS Excel RTD Server// is installed to %~DDS_ROOT%\lib\~OpenDDS_RTD(d).dll and is the interface between Excel and ~OpenDDS.  It is a C++ in-process COM server.
+The project is in %~DDS_ROOT%\tools\excelRTD and consists of an Excel add-in and an Excel ~Real-Time Data (RTD) server.  The //~OpenDDS Excel Add-in// is %~DDS_ROOT%\tools\excelRTD\~OpenDDS.xlam and contains Visual Basic for Applications (VBA) macros. The //~OpenDDS Excel RTD Server// is installed to %~DDS_ROOT%\lib\~OpenDDS_RTD(d).dll and is the interface between Excel and ~OpenDDS.  It is a C++ in-process COM server.  To-date, //~OpenDDS ~Real-Time Data for Excel// has only been used with a 32-bit //~OpenDDS Excel RTD Server// and 32-bit version of Excel.
 
 To use //~OpenDDS ~Real-Time Data for Excel//, do the following:
 * Make sure that the [[environment|Setup]] is setup correctly for execution.
 * Make sure that the //~OpenDDS Excel RTD Server// is [[built|Building]].
-* Register the //~OpenDDS Excel RTD Server// (requires administrator rights):
+* Register the //~OpenDDS Excel RTD Server//:
+** This requires administrator rights and you'll get a cryptic error code if you don't normally have them.  If you do a &quot;runas&quot; an administrator remember the environment will have to be set up again as it isn't inherited.
 {{{
   &gt; regsrv32 OpenDDS_RTD(d).dll
 }}}
@@ -1084,7 +1093,7 @@ To use //~OpenDDS ~Real-Time Data for Excel//, do the following:
 *** Select the Excel Options button
 **** Select ~Add-Ins
 ***** Select the Go button next to &quot;Manage: Excel Add-ins&quot; 
-******Select the Browse button
+****** Select the Browse button
 ******* Browse for ~OpenDDS.xlam &gt; Select it.  It will appear on the list of available add-ins and should be checked.
 * Add the IOR/Endpoint of a repository:
 ** On the Ribbon Bar, select the ~OpenDDS tab
@@ -1143,11 +1152,11 @@ To use //~OpenDDS ~Real-Time Data for Excel//, do the following:
     };
 }}}</pre>
 </div>
-<div title="Setup" modifier="Don Hudson" created="201002022012" modified="201107271856" tags="publish" changecount="34">
-<pre>Establishing the environment for building and executing the //~OpenDDS Excel ~Real-Time Data (RTD) Server// consists of setting specific environment variables.  The environment required to execute the application is a subset of the environment required to build the application.
+<div title="Setup" modifier="Don Hudson" created="201002022012" modified="201107281339" tags="publish" changecount="43">
+<pre>Establishing the environment for building and executing the //~OpenDDS Excel ~Real-Time Data (RTD) Server// consists of setting specific environment variables.  The environment required to use the server is a subset of the environment required to build it.
 
 !Build Environment
-The build environment includes the environment needed to build the ACE+TAO+~OpenDDS libraries as well as the additional environment needed to build the //~OpenDDS Excel RTD Server// itself.  The ACE+TAO+~OpenDDS build environment is described in the [[OpenDDS build instructions|http://www.opendds.org/building.html]] but is summarized here for reference.
+The build environment includes the environment needed to build the ACE+TAO+~OpenDDS libraries as well as the additional environment needed to build the //~OpenDDS Excel RTD Server// itself.  The ACE+TAO+~OpenDDS build environment is described in the [[OpenDDS build instructions|http://www.opendds.org/building.html]] but is summarized below for reference.
 
 | ACE+TAO+~OpenDDS Build Environment |c
 | Variable | Status | Value | Description |
@@ -1158,13 +1167,11 @@ The build environment includes the environment needed to build the ACE+TAO+~Open
 |~LD_LIBRARY_PATH | Required |Must include directory with ACE+TAO libraries and directory with ~OpenDDS libraries |This contains the path searched for dynamically linked libraries at compile and load time for the application.  All of the libraries that will be linked at compile time must be reachable via either the standard path or be included in directories found in this path. |
 
 In addition to the ACE+TAO+~OpenDDS build environment, additional environment variables are needed for building the  //~OpenDDS Excel RTD Server//.  These are described in the following table.
-
 |  //~OpenDDS Excel RTD Server// Build Environment |c
 | Variable | Status | Value | Description |
 |QTDIR | Required |Must contain the base of the Qt4 software installation. |This is the base of the Qt4 installation and all Qt4 software - headers and libraries - will be found relative to this directory, with the possible exception noted below for the ~QT4_INCDIR variable. |
 |~QT4_INCDIR | Optional |May contain a separate directory where the Qt4 software header files are located. |Some system installations have the include files located under a separate base directory from the libraries.  Setting this variable accommodates installations with this feature. |
 |~QT_CFG | Optional |Determines library names for Qt. |If your Qt4 installation uses a suffix for the library names (for example, ~QtCore4.lib), set this variable to that suffix (for example, 4). |
-
 !Execution Environment
 To use the //~OpenDDS Excel RTD Server//, the following environment variables need to be set:
 |  //~OpenDDS Excel RTD Server// Execution Environment |c
