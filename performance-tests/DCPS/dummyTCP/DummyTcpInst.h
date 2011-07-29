@@ -29,6 +29,7 @@ namespace OpenDDS
         virtual void dump(std::ostream& os);
 
         TransportImpl* new_impl(const TransportInst_rch& inst = 0);
+        bool is_reliable() const { return true; }
 
         /// Describes the local endpoint to be used to accept
         /// passive connections.

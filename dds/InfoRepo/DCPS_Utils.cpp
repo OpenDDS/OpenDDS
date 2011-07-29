@@ -14,6 +14,8 @@
 #include "ace/ACE.h"  /* For ACE::wild_match() */
 #include "ace/OS_NS_string.h"
 
+#include <cstring>
+
 namespace {
 
 bool

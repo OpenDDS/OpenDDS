@@ -1,3 +1,32 @@
+Fri Jul 29 15:29:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Added a missing #include.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Restored custom settings that were removed in last commit.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+
+          Adapted tests for IDL changes in yesterday's commit.
+
+        * performance-tests/DCPS/SimpleE2ETest:
+        * performance-tests/DCPS/TCPProfilingTest:
+        * performance-tests/DCPS/UDPListenerTest:
+        * performance-tests/DCPS/UDPNoKeyTest:
+        * tests/DCPS/ConfigFile:
+        * tests/DCPS/Monitor:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification:
+
+          Set svn:ignore property.
+
 Thu Jul 28 22:11:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

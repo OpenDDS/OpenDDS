@@ -17,7 +17,8 @@ TAO_DDS_DCPSDataReader_i::~TAO_DDS_DCPSDataReader_i (void)
 
 void TAO_DDS_DCPSDataReader_i::add_association (
     const ::OpenDDS::DCPS::RepoId& yourId,
-    const OpenDDS::DCPS::WriterAssociation& writer
+    const OpenDDS::DCPS::WriterAssociation& writer,
+    bool active
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
