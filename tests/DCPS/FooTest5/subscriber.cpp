@@ -394,7 +394,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Make it KEEP_ALL history so we can verify the received
       // data without dropping.
       dr_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
-      dr_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
+      dr_qos.reliability.kind =
+        using_udp ? ::DDS::BEST_EFFORT_RELIABILITY_QOS
+        : ::DDS::RELIABLE_RELIABILITY_QOS;
       dr_qos.resource_limits.max_samples_per_instance =
         max_samples_per_instance ;
       // The history depth is only used for KEEP_LAST.

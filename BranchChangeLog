@@ -1,3 +1,9 @@
+Fri Jul 29 16:34:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Use BEST_EFFORT_RELIABILITY_QOS with the udp transport.
+
 Fri Jul 29 15:29:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPS_Utils.cpp:
@@ -71,7 +77,7 @@ Thu Jul 28 20:12:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
         * dds/DCPS/transport/framework/TransportClient.cpp:
 
           Improve logging, and make it an error if no transports
-          are available and applicalbe to the TransportClient.
+          are available and applicable to the TransportClient.
 
         * dds/DCPS/transport/framework/TransportInst.h:
         * dds/DCPS/transport/multicast/MulticastInst.h:
