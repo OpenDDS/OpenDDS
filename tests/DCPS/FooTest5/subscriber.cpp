@@ -395,7 +395,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // data without dropping.
       dr_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dr_qos.reliability.kind =
-        using_udp ? ::DDS::BEST_EFFORT_RELIABILITY_QOS
+        (using_udp || mixed_trans)
+        ? ::DDS::BEST_EFFORT_RELIABILITY_QOS
         : ::DDS::RELIABLE_RELIABILITY_QOS;
       dr_qos.resource_limits.max_samples_per_instance =
         max_samples_per_instance ;

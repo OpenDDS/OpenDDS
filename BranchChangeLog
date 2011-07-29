@@ -1,3 +1,9 @@
+Fri Jul 29 17:36:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Similar change as before, this time for the mixed_trans tests.
+
 Fri Jul 29 16:34:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5/subscriber.cpp:
