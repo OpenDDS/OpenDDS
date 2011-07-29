@@ -394,7 +394,9 @@ namespace OpenDDS
                  sample.content_filter_entries_.length());
               offset += len;
               proto_tree *subtree = proto_item_add_subtree (item, ett_filters);
-              for (size_t i = 0; i < sample.content_filter_entries_.length(); i++)
+              for (CORBA::ULong i = 0;
+                   i < sample.content_filter_entries_.length();
+                   i++)
                 {
                   const GUID_t &filter = sample.content_filter_entries_[i];
                   DCPS::RepoIdConverter converter(filter);

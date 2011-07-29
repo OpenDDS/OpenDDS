@@ -64,6 +64,8 @@ namespace OpenDDS
 
       void add_exception (int fieldId, const char *exception_id);
 
+      void fix_reqid (MessageHeader *header);
+
       void start_decoding ();
       virtual void init ();
 

@@ -32,21 +32,22 @@ namespace OpenDDS
   namespace DCPS
   {
 
+    extern "C"
+    {
+      gboolean explicit_datawriter_callback (tvbuff_t *, packet_info *,
+                                             proto_tree *,int *,
+                                             ::MessageHeader *, gchar *,
+                                             gchar *);
+      gboolean heuristic_datawriter_callback (tvbuff_t *, packet_info *,
+                                              proto_tree *,int *,
+                                              ::MessageHeader *, gchar *,
+                                              gchar *);
+    }
+
     class dissector_Export DataWriterRemote_Dissector : public GIOP_Base
     {
     public:
       static DataWriterRemote_Dissector& instance ();
-
-      static gboolean explicit_giop_callback (tvbuff_t *, packet_info *,
-                                              proto_tree *,int *,
-                                              ::MessageHeader *, gchar *,
-                                              gchar *);
-      static gboolean heuristic_giop_callback (tvbuff_t *, packet_info *,
-                                              proto_tree *,int *,
-                                              ::MessageHeader *, gchar *,
-                                              gchar *);
-
-
 
       virtual void init ();
       void register_handoff ();

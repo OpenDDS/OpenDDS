@@ -1,7 +1,19 @@
+Fri Jul 29 18:17:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Clean up warnings on the scoreboard.
+
 Thu Jul 28 16:02:02 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * NEWS:
-        
+
           Added paragraph on OpenDDS Real-Time Data (RTD) for Excel.
 
 Thu Jul 28 15:37:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>

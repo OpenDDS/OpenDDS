@@ -55,6 +55,17 @@ namespace OpenDDS
     typedef ACE_Hash_Map_Manager <gulong, const char *, ACE_Null_Mutex> Known_Topics;
     typedef ACE_Hash_Map_Manager <gulong, const RepoId *, ACE_Null_Mutex> Known_Publications;
 
+    extern "C" {
+      gboolean explicit_inforepo_callback (tvbuff_t *, packet_info *,
+                                           proto_tree *,int *,
+                                           ::MessageHeader *, gchar *,
+                                           gchar *);
+      gboolean heuristic_inforepo_callback (tvbuff_t *, packet_info *,
+                                            proto_tree *,int *,
+                                            ::MessageHeader *, gchar *,
+                                            gchar *);
+    }
+
     class dissector_Export InfoRepo_Dissector : public GIOP_Base
     {
     public:
@@ -62,16 +73,7 @@ namespace OpenDDS
 
       static InfoRepo_Dissector& instance ();
 
-      static gboolean explicit_giop_callback (tvbuff_t *, packet_info *,
-                                              proto_tree *,int *,
-                                              ::MessageHeader *, gchar *,
-                                              gchar *);
-      static gboolean heuristic_giop_callback (tvbuff_t *, packet_info *,
-                                              proto_tree *,int *,
-                                              ::MessageHeader *, gchar *,
-                                              gchar *);
-
-      virtual void init ();
+     virtual void init ();
       void register_handoff ();
 
       static bool assert_topic            (::MessageHeader *);

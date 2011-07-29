@@ -49,6 +49,14 @@ namespace OpenDDS
       initialized_ = true;
     }
 
+    void
+    GIOP_Base::fix_reqid (::MessageHeader *header)
+    {
+      int ofs = 0;
+      header->req_id =
+        ::get_CDR_ulong(tvb_, &ofs, is_big_endian_, GIOP_HEADER_SIZE);
+    }
+
     int
     GIOP_Base::dissect_giop (::MessageHeader *header,
                              gchar *operation,

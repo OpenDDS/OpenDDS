@@ -628,50 +628,49 @@ namespace OpenDDS
 
     extern "C"
     gboolean
-    InfoRepo_Dissector::explicit_giop_callback
+    explicit_inforepo_callback
     (tvbuff_t *tvb, packet_info *pinfo,
      proto_tree *ptree, int *offset,
      ::MessageHeader *header, gchar *operation,
      gchar *idlname)
     {
-      int ofs = 0;
-      header->req_id =
-        ::get_CDR_ulong(tvb, &ofs,
-                        instance().is_big_endian_, GIOP_HEADER_SIZE);
+      InfoRepo_Dissector &dissector =
+        InfoRepo_Dissector::instance();
+
       if (idlname == 0)
         return FALSE;
-      instance().setPacket (tvb, pinfo, ptree, offset);
-      if (instance().dissect_giop (header, operation, idlname) == -1)
+      dissector.setPacket (tvb, pinfo, ptree, offset);
+      dissector.fix_reqid(header);
+      if (dissector.dissect_giop (header, operation, idlname) == -1)
         return FALSE;
       return TRUE;
     }
 
     extern "C"
     gboolean
-    InfoRepo_Dissector::heuristic_giop_callback
+    heuristic_inforepo_callback
     (tvbuff_t *tvb, packet_info *pinfo,
      proto_tree *ptree, int *offset,
      ::MessageHeader *header, gchar *operation, gchar *)
     {
-      int ofs = 0;
-      header->req_id =
-        ::get_CDR_ulong(tvb, &ofs,
-                        instance().is_big_endian_, GIOP_HEADER_SIZE);
+      InfoRepo_Dissector &dissector =
+        InfoRepo_Dissector::instance();
 
-      instance().setPacket (tvb, pinfo, ptree, offset);
+      dissector.setPacket (tvb, pinfo, ptree, offset);
+      dissector.fix_reqid(header);
 
-      return instance().dissect_heur (header, operation);
+      return dissector.dissect_heur (header, operation);
     }
 
     void
     InfoRepo_Dissector::register_handoff ()
     {
-      register_giop_user_module(explicit_giop_callback,
+      register_giop_user_module(explicit_inforepo_callback,
                                 this->proto_label_,
                                 this->repo_id_,
                                 this->proto_id_);
 
-      register_giop_user(heuristic_giop_callback,
+      register_giop_user(heuristic_inforepo_callback,
                          this->proto_label_,
                          this->proto_id_);
 
