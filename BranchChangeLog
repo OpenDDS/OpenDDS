@@ -1,3 +1,16 @@
+Mon Aug  1 21:12:38 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+
+          Remove service configurator file usage in these examples.
+          Add "use strict" and clean up the script.
+
+        * DevGuideExamples/DCPS/Messenger/tcp.conf:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/tcp.conf:
+
+          Removed these files.
+
 Mon Aug  1 17:13:03 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportInst.h:

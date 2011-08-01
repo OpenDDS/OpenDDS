@@ -10,25 +10,26 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
+my $status = 0;
+my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10";
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
+my $pub_opts = "$common_opts -ORBLogFile publisher.log";
+my $sub_opts = "$common_opts -DCPSTransportDebugLevel 6 " .
+               "-ORBLogFile subscriber.log";
 
-$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
-$sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
-
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
+my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                        "$common_opts " .
+                                        "-ORBLogFile DCPSInfoRepo.log " .
+                                        "-o $dcpsrepo_ior ");
 
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+my $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
+my $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
@@ -44,19 +45,19 @@ $Publisher->Spawn ();
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
 
-$PublisherResult = $Publisher->WaitKill (300);
+my $PublisherResult = $Publisher->WaitKill (300);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
 }
 
-$SubscriberResult = $Subscriber->WaitKill (15);
+my $SubscriberResult = $Subscriber->WaitKill (15);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
 }
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
+my $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
