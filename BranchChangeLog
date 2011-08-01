@@ -1,3 +1,18 @@
+Mon Aug  1 17:13:03 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.inl:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * java/dds/OpenDDS/DCPS/transport/TcpInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Move the passive_connect_duration option from the TCP
+          transport to the base class.
+
 Fri Jul 29 17:36:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5/subscriber.cpp:

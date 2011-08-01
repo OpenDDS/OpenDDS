@@ -36,7 +36,4 @@ public class TcpInst extends TransportInst {
 
     public native int getPassiveReconnectDuration();
     public native void setPassiveReconnectDuration(int prd);
-
-    public native int getPassiveConnectDuration();
-    public native void setPassiveConnectDuration(int pcd);
 }

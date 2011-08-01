@@ -631,6 +631,24 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setDatalinkControlChunks
   inst->datalink_control_chunks_ = val;
 }
 
+// TransportInst::getPassiveConnectDuration
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getPassiveConnectDuration
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  return inst->passive_connect_duration_;
+}
+
+// TransportInst::setPassiveConnectDuration
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setPassiveConnectDuration
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  inst->passive_connect_duration_ = val;
+}
+
 // TcpInst
 
 // TcpInst::getLocalAddress
@@ -760,24 +778,6 @@ void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setPassiveReconnectDuration
   OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
                                   false); // Don't take ownership
   inst->passive_reconnect_duration_ = val;
-}
-
-// TcpInst::getPassiveConnectDuration
-jint JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getPassiveConnectDuration
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
-                                  false); // Don't take ownership
-  return inst->passive_connect_duration_;
-}
-
-// TcpInst::setPassiveConnectDuration
-void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setPassiveConnectDuration
-(JNIEnv * jni, jobject jthis, jint val)
-{
-  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
-                                  false); // Don't take ownership
-  inst->passive_connect_duration_ = val;
 }
 
 // UdpInst

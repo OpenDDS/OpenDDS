@@ -77,6 +77,5 @@ OpenDDS::DCPS::TcpInst::dump(std::ostream& os)
   os << formatNameForDump("conn_retry_backoff_multiplier") << this->conn_retry_backoff_multiplier_ << std::endl;
   os << formatNameForDump("conn_retry_attempts")           << this->conn_retry_attempts_ << std::endl;
   os << formatNameForDump("passive_reconnect_duration")    << this->passive_reconnect_duration_ << std::endl;
-  os << formatNameForDump("passive_connect_duration")      << this->passive_connect_duration_ << std::endl;
   os << formatNameForDump("max_output_pause_period")       << this->max_output_pause_period_ << std::endl;
 }

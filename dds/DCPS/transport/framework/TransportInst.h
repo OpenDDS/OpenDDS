@@ -95,6 +95,12 @@ public:
   /// samples. The default value is 32.
   size_t datalink_control_chunks_;
 
+  /// The time period in milliseconds for the acceptor side
+  /// of a connection to wait for the connection.
+  /// The default is 0 (wait forever)
+  /// This currently doesn't apply to passive reconnections.
+  unsigned long passive_connect_duration_;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 

@@ -51,4 +51,7 @@ public abstract class TransportInst implements Serializable {
 
     public native int getDatalinkControlChunks();
     public native void setDatalinkControlChunks(int dcc);
+
+    public native int getPassiveConnectDuration();
+    public native void setPassiveConnectDuration(int pcd);
 }
