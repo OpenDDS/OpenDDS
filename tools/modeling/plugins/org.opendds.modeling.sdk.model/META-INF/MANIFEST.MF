@@ -7,7 +7,9 @@ Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.opendds.modeling.sdk.model.GeneratorSpecification,
+Export-Package: GeneratorSpecification,
+ GeneratorSpecification.util,
+ org.opendds.modeling.sdk.model.GeneratorSpecification,
  org.opendds.modeling.sdk.model.GeneratorSpecification.Util
 Require-Bundle: org.eclipse.emf.ecore.xmi,
  org.eclipse.emf.codegen.ecore,

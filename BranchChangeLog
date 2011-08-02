@@ -1,3 +1,36 @@
+Tue Aug  2 13:36:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/DefaultInstanceTraits.h:
+
+          Remove contents.  TODO: Remove.
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Provide config name to delegate.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+          Exports to allow build.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          Save and retrieve transport config names.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+
+          Don't check for transport offset.
+          Save TransportInsts and TransportConfigs in transport registry.
+          Associate TransportConfigs with TransportInsts.
+          TODO: Transport settings for TransportInsts.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+
+          Specify a tranasport condfig in model.
+          Add TCP transport insts in codegen.
+
 Mon Aug  1 21:12:38 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/run_test.pl:

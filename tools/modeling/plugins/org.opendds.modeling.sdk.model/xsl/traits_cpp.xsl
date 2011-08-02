@@ -1,6 +1,7 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+     xmlns:xmi='http://www.omg.org/XMI'
      xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
      xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
@@ -34,11 +35,14 @@
   <xsl:value-of select="concat('#include &quot;', $modelname, 'Traits.h&quot;', 
                                $newline)"/>
   <xsl:text>
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst_rch.h"
 #include &lt;model/TransportDirectives.h&gt;
 
 #include &lt;stdexcept&gt;
@@ -71,31 +75,80 @@
       <xsl:with-param name="value" select="@name"/>
     </xsl:call-template>
   </xsl:variable>
-  <xsl:variable name="instance-offset" 
-                select="transportOffset/@value"/>
-  <xsl:choose>
-    <xsl:when test="not($instance-offset)">
-      <xsl:value-of select="concat(
-                '   // Skipping generation for instance &quot;',
-                $Instname,
-                '&quot; with no offset',
-                $newline)"/>
-    </xsl:when>
-    <xsl:otherwise>
-      <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
-      <xsl:value-of select="concat($classname, '::~', $classname,
-      '() { }', $newline, $newline)"/>
-      <xsl:value-of select="concat('void ', $classname)"/>
-      <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
+  <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
+
+  <xsl:value-of select="concat($classname, '::', $classname,
+      '() {', $newline)"/>
+  <xsl:variable name="transportInsts" select="//transports/transport"/>
+  <xsl:for-each select="$transportInsts">
+    <xsl:variable name="varname" select="concat(@name, '_inst')"/>
+    <xsl:variable name="transport-type" 
+        select="translate(
+                   substring-before(
+                       substring-after(@xsi:type, ':'), 'Transport'),
+                   $upper, $lower)"/>
+    <xsl:variable name="transport-class">
+      <xsl:text>OpenDDS::DCPS::</xsl:text>
+      <xsl:call-template name="capitalize">
+        <xsl:with-param name="value" select="$transport-type"/>
+      </xsl:call-template>
+      <xsl:text>Inst</xsl:text>
+    </xsl:variable>
+    <xsl:value-of select="concat(
+        '  OpenDDS::DCPS::TransportInst_rch ', $varname, ' = ', $newline,
+        '      TheTransportRegistry->get_inst(&quot;', @name, '&quot;);', 
+        $newline)"/>
+    <xsl:value-of select="concat(
+        '  if (', $varname, '.is_nil()) {', 
+        $newline
+    )"/>
+    <xsl:value-of select="concat(
+        '    ', $varname, ' = ', 
+        'TheTransportRegistry->create_inst(&quot;', @name, '&quot;, ',
+        '&quot;', $transport-type, '&quot;);', $newline
+    )"/>
+    <xsl:text>    // Ignoring actual transport configuration 
 </xsl:text>
-      <xsl:choose>
-        <xsl:when test="not(transport)">
-          <xsl:value-of select="concat(
-                    '  // No transports defined for instance',
-                    ' &quot;', $Instname, '&quot;', $newline, $newline)"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:text>  OpenDDS::DCPS::TransportInst_rch config;
+    <xsl:value-of select="concat(
+        '    ', $transport-class, '_rch child_inst =', $newline,
+        '        OpenDDS::DCPS::static_rchandle_cast&lt;', $transport-class, 
+        '&gt;(', $varname, ');', $newline)"/>
+    <xsl:text>  }
+
+</xsl:text>
+  </xsl:for-each>
+  <xsl:if test="config/transportRef">
+    <xsl:text>  // Associate TransportInsts with TransportConfigs
+</xsl:text>
+  </xsl:if>
+  <xsl:for-each select="config">
+    <xsl:variable name="config-varname" select="concat(@name, '_cfg')"/>
+    <xsl:value-of select="concat(
+        '  OpenDDS::DCPS::TransportConfig_rch ', $config-varname, ' =', $newline,
+        '      TheTransportRegistry->create_config(&quot;', @name, 
+        '&quot;);', $newline
+    )"/>
+    <xsl:for-each select="transportRef">
+      <xsl:variable name="ref-varname" select="concat(
+          $transportInsts[@xmi:id = current()/@transport]/@name, '_inst')"/>
+      <xsl:value-of select="concat('  ', $config-varname, 
+                                 '->instances_.push_back(', $ref-varname, 
+                                 ');', $newline
+      )"/>
+    </xsl:for-each>
+  </xsl:for-each>
+<xsl:text>
+}
+
+</xsl:text>
+
+  <xsl:value-of select="concat($classname, '::~', $classname,
+      '() { }', $newline, $newline)"/>
+  <!--
+  <xsl:value-of select="concat('void ', $classname)"/>
+  <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
+</xsl:text>
+      <xsl:text>  OpenDDS::DCPS::TransportInst_rch config;
   ACE_TString transport_type;
 
   try {
@@ -104,14 +157,12 @@
     // Create configuration for this transport ID
     switch (id) {
 </xsl:text>
-          <xsl:apply-templates/>
-          <xsl:text>      default:
+      <xsl:apply-templates/>
+      <xsl:text>      default:
         throw std::runtime_error("Invalid transport ID in configuration");
     };
   }
 </xsl:text>
-        </xsl:otherwise>
-      </xsl:choose>
 <xsl:text>  // Create the impl
   OpenDDS::DCPS::TransportImpl_rch impl = TheTransportFactory->obtain(id);
   if (!impl.in()) {
@@ -119,8 +170,7 @@
   }
 }
 </xsl:text>
-    </xsl:otherwise>
-  </xsl:choose>
+-->
 
 </xsl:template>
 
