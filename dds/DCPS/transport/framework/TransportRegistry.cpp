@@ -41,6 +41,14 @@ namespace {
     return lhs->name() < rhs->name();
   }
 
+  template <typename T> bool convertToInteger( const std::string& s,
+                                               T& value )
+  {
+    std::stringstream istr(s);
+    if (!(istr >> value) || (istr.peek() != EOF)) return false;
+    return true;
+  }
+
   ///     Function that pulls all the values from the
   ///     specified ACE Configuration Section and places them in a
   ///     value map based on the field name.  Returns the number of
@@ -302,6 +310,16 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                   ACE_ERROR_RETURN((LM_ERROR,
                                     ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                                     ACE_TEXT("Illegal value for swap_bytes (%s) in [config/%s] section.\n"),
+                                    value.c_str(), config_id.c_str()),
+                                   -1);
+                }
+              } else if (name == "passive_connect_duration") {
+                std::string value = (*it).second;
+                if (!convertToInteger(value,
+                                      config->passive_connect_duration_)) {
+                  ACE_ERROR_RETURN((LM_ERROR,
+                                    ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                    ACE_TEXT("Illegal integer value for passive_connect_duration (%s) in [config/%s] section.\n"),
                                     value.c_str(), config_id.c_str()),
                                    -1);
                 }

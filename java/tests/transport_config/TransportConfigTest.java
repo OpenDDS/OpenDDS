@@ -133,8 +133,12 @@ public class TransportConfigTest {
         assert (transport_inst != null);
 
         transport_config.addLast(transport_inst);
+        transport_config.setSwapBytes(true);
+        transport_config.setPassiveConnectDuration(20000);
         assert (transport_config.countInstances() == 1);
         assert (transport_config.getInstance(0).getName().equals("mytcp"));
+        assert (transport_config.getSwapBytes());
+        assert (transport_config.getPassiveConnectDuration() == 20000);
     }
 
     protected static void tearDown() {

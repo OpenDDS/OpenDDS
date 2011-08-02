@@ -32,4 +32,7 @@ public class TransportConfig {
 
     public native boolean getSwapBytes();
     public native void setSwapBytes(boolean swap);
+
+    public native int getPassiveConnectDuration();
+    public native void setPassiveConnectDuration(int pcd);
 }

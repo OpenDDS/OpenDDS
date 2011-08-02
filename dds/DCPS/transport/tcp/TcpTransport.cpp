@@ -612,17 +612,18 @@ TcpTransport::make_passive_connection
 
   ACE_Time_Value abs_timeout(0);
 
-  if (this->tcp_config_->passive_connect_duration_ != 0) {
-    abs_timeout.set(this->tcp_config_->passive_connect_duration_/1000,
-                    this->tcp_config_->passive_connect_duration_%1000 * 1000);
-    abs_timeout += ACE_OS::gettimeofday();
-  }
+  // TODO: Move this code somewhere?
+  //if (this->tcp_config_->passive_connect_duration_ != 0) {
+  //  abs_timeout.set(this->tcp_config_->passive_connect_duration_/1000,
+  //                  this->tcp_config_->passive_connect_duration_%1000 * 1000);
+  //  abs_timeout += ACE_OS::gettimeofday();
+  //}
 
   PriorityKey key(link->transport_priority(), remote_address, link->is_loopback(), link->is_active());
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-            "Passive connect timeout: %d milliseconds (0 == forever).\n",
-            this->tcp_config_->passive_connect_duration_), 5);
+  //VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
+  //          "Passive connect timeout: %d milliseconds (0 == forever).\n",
+  //          this->tcp_config_->passive_connect_duration_), 5);
 
   // Look in our connections_ map to see if the passive connection
   // has already been established for the remote_address.  If so, we

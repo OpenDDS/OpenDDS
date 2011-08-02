@@ -1,3 +1,34 @@
+Tue Aug  2 15:06:05 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * java/dds/OpenDDS/DCPS/transport/TransportConfig.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Move the passive_connect_duration option to the
+          TransportConfig.  Generate a deprecation warning
+          when used on an Inst.
+
+        * java/tests/transport_config/TransportConfigTest.java:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+        * tests/DCPS/ConfigTransports/transports.ini:
+
+          Convert tests to new option location.  Add some additional
+          unit tests.
+
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Writer.h:
+
+          Add missing newlines that were causing warnings.
+
 Tue Aug  2 13:36:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/DefaultInstanceTraits.h:

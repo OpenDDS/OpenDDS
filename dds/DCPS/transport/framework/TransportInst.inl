@@ -22,7 +22,6 @@ OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
     thread_per_connection_(0),
     datalink_release_delay_(10000),
     datalink_control_chunks_(32),
-    passive_connect_duration_(10000),
     name_(name)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);

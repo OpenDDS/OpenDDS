@@ -55,7 +55,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(tcp_inst->conn_retry_backoff_multiplier_ == 4);
   TEST_CHECK(tcp_inst->conn_retry_attempts_ == 4);
   TEST_CHECK(tcp_inst->passive_reconnect_duration_ == 4000);
-  TEST_CHECK(tcp_inst->passive_connect_duration_ == 20000);
   TEST_CHECK(tcp_inst->max_output_pause_period_ == 1000);
 
   TransportInst_rch inst2 = TransportRegistry::instance()->get_inst("anothertcp");
@@ -68,6 +67,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(config->instances_[0] == inst);
   TEST_CHECK(config->instances_[1] == inst2);
   TEST_CHECK(config->swap_bytes_ == true);
+  TEST_CHECK(config->passive_connect_duration_ == 20000);
 
   TransportConfig_rch default_config =
     TransportRegistry::instance()->get_config("test1.ini");
@@ -82,6 +82,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(default_config->instances_[2] == inst);   // mytcp
   TEST_CHECK(default_config->instances_[9]->name() == std::string("tcp7"));
   TEST_CHECK(default_config->swap_bytes_ == false);
+  TEST_CHECK(default_config->passive_connect_duration_ == 10000);
 
   TransportConfig_rch global_config =
     TransportRegistry::instance()->global_config();

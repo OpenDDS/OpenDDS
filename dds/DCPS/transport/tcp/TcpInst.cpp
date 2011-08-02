@@ -57,9 +57,6 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("passive_reconnect_duration"),
                    this->passive_reconnect_duration_, int)
 
-  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("passive_connect_duration"),
-                   this->passive_connect_duration_, unsigned int)
-
   GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("max_output_pause_period"),
                    this->max_output_pause_period_, int)
 

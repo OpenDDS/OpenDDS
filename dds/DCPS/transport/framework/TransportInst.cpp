@@ -37,7 +37,14 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("thread_per_connection"), this->thread_per_connection_, bool)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_release_delay"), this->datalink_release_delay_, int)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_chunks"), this->datalink_control_chunks_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("passive_connect_duration"), this->passive_connect_duration_, unsigned int)
+
+  ACE_TString stringvalue;
+  if (cf.get_string_value (sect, ACE_TEXT("passive_connect_duration"), stringvalue) == 0) {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("(%P|%t) WARNING: passive_connect_duration option ")
+                ACE_TEXT ("is deprecated in the transport inst, must be ")
+                ACE_TEXT ("defined in transport config.\n")));
+  }
 
   adjust_config_value();
   return 0;
@@ -80,7 +87,6 @@ OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
   os << formatNameForDump("thread_per_connection")   << (this->thread_per_connection_ ? "true" : "false") << std::endl;
   os << formatNameForDump("datalink_release_delay")  << this->datalink_release_delay_ << std::endl;
   os << formatNameForDump("datalink_control_chunks") << this->datalink_control_chunks_ << std::endl;
-  os << formatNameForDump("passive_connect_duration")      << this->passive_connect_duration_ << std::endl;
 }
 
 void
