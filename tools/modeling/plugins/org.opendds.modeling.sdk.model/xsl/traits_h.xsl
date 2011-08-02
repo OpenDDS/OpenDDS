@@ -96,6 +96,8 @@
         'OpenDDS::Model::Transport::Type::Values transport_type) = 0;',
         $newline)"/>
   <xsl:value-of select="concat(
+        '    std::string configName(const std::string&amp; modeledName) const;',
+        $newline,
         '  };', $newline
       )"/>
 

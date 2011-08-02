@@ -70,6 +70,7 @@
      These are uniquely qualified by their containing namespace.
   -->
 <xsl:template name="output-instance">
+  <xsl:variable name="instname" select="@name"/>
   <xsl:variable name="Instname">
     <xsl:call-template name="capitalize">
       <xsl:with-param name="value" select="@name"/>
@@ -122,10 +123,11 @@
 </xsl:text>
   </xsl:if>
   <xsl:for-each select="config">
+    <xsl:variable name="config-name" select="concat($instname, '_', @name)"/>
     <xsl:variable name="config-varname" select="concat(@name, '_cfg')"/>
     <xsl:value-of select="concat(
         '  OpenDDS::DCPS::TransportConfig_rch ', $config-varname, ' =', $newline,
-        '      TheTransportRegistry->create_config(&quot;', @name, 
+        '      TheTransportRegistry->create_config(&quot;', $config-name, 
         '&quot;);', $newline
     )"/>
     <xsl:for-each select="transportRef">
@@ -144,6 +146,20 @@
 
   <xsl:value-of select="concat($classname, '::~', $classname,
       '() { }', $newline, $newline)"/>
+
+  <xsl:value-of select="concat('std::string ', $newline, $classname)"/>
+  <xsl:text>::configName(const std::string&amp; modeledName) const {
+  std::string result;
+  if (!modeledName.empty()) {
+</xsl:text>
+  <xsl:value-of select="concat(
+      '    result = std::string(&quot;', $instname, '_&quot;) + modeledName;'
+  )"/>
+<xsl:text>
+  }
+  return result;
+}
+</xsl:text>
   <!--
   <xsl:value-of select="concat('void ', $classname)"/>
   <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {

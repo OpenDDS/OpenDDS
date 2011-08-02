@@ -1,3 +1,10 @@
+Tue Aug  2 16:17:29 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+          Append model instance name to TransportConfig name.
+
 Tue Aug  2 15:06:05 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfig.h:
