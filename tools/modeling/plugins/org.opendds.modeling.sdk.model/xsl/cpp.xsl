@@ -285,38 +285,93 @@ Elements::Data::loadTopics()
   <xsl:text>}
 
 inline
-const std::string&amp;
-Elements::Data::transportConfigName(Participants::Values which)
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-participants">
+      <xsl:text>Elements::Data::transportConfigName(Participants::Values which)
 {
-  return participantTxCfgNames_[which];
+  return participantTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(Participants::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
 }
 
 inline
-const std::string&amp;
-Elements::Data::transportConfigName(Publishers::Values which)
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-publishers">
+      <xsl:text>Elements::Data::transportConfigName(Publishers::Values which)
 {
-  return publisherTxCfgNames_[which];
+  return publisherTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(Publishers::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
 }
 
 inline
-const std::string&amp;
-Elements::Data::transportConfigName(Subscribers::Values which)
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-subscribers">
+      <xsl:text>Elements::Data::transportConfigName(Subscribers::Values which)
 {
-  return subscriberTxCfgNames_[which];
+  return subscriberTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(Subscribers::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
 }
 
 inline
-const std::string&amp;
-Elements::Data::transportConfigName(DataWriters::Values which)
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-writers">
+      <xsl:text>Elements::Data::transportConfigName(DataWriters::Values which)
 {
-  return writerTxCfgNames_[which];
+  return writerTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(DataWriters::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
 }
 
 inline
-const std::string&amp;
-Elements::Data::transportConfigName(DataReaders::Values which)
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-readers">
+      <xsl:text>Elements::Data::transportConfigName(DataReaders::Values which)
 {
-  return readerTxCfgNames_[which];
+  return readerTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(DataReaders::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
 }
 
 inline

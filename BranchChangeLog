@@ -1,3 +1,11 @@
+Tue Aug  2 17:28:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          Handle model with no participants, no publishers, no subscribers,
+          no readers and no writers.
+
 Tue Aug  2 16:17:29 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:

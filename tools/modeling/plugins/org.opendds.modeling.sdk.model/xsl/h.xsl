@@ -242,11 +242,11 @@ namespace OpenDDS { namespace Model {
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
           Subscribers::Values  subscriber(DataReaders::Values which);
-          const std::string&amp;   transportConfigName(Participants::Values which);
-          const std::string&amp;   transportConfigName(Publishers::Values which);
-          const std::string&amp;   transportConfigName(Subscribers::Values which);
-          const std::string&amp;   transportConfigName(DataWriters::Values which);
-          const std::string&amp;   transportConfigName(DataReaders::Values which);
+          std::string          transportConfigName(Participants::Values which);
+          std::string          transportConfigName(Publishers::Values which);
+          std::string          transportConfigName(Subscribers::Values which);
+          std::string          transportConfigName(DataWriters::Values which);
+          std::string          transportConfigName(DataReaders::Values which);
           ///}
 
         private:
