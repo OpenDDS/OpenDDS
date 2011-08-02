@@ -14,6 +14,8 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
+#include "dds/DCPS/debug.h"
+#include "dds/DCPS/transport/framework/TransportDebug.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
@@ -31,6 +33,21 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantFactory_var dpf =
     TheParticipantFactoryWithArgs(argc, argv);
   TEST_CHECK(dpf.in() != 0);
+
+  TEST_CHECK(OpenDDS::DCPS::DCPS_debug_level==1);
+  TEST_CHECK(TheServiceParticipant->n_chunks()==10);
+  TEST_CHECK(TheServiceParticipant->association_chunk_multiplier()==5);
+  TEST_CHECK(TheServiceParticipant->liveliness_factor()==70);
+  TEST_CHECK(TheServiceParticipant->bit_transport_port()==1234);
+  TEST_CHECK(TheServiceParticipant->bit_lookup_duration_msec()==1000);
+  TEST_CHECK(TheServiceParticipant->get_BIT()==false);
+  TEST_CHECK(OpenDDS::DCPS::Transport_debug_level==1);
+  TEST_CHECK(TheServiceParticipant->pending_timeout()==ACE_Time_Value(10));
+  TEST_CHECK(TheServiceParticipant->publisher_content_filter()==false);
+  TEST_CHECK(TheServiceParticipant->federation_recovery_duration()==800);
+  TEST_CHECK(TheServiceParticipant->federation_initial_backoff_seconds()==2);
+  TEST_CHECK(TheServiceParticipant->federation_backoff_multiplier()==3);
+  TEST_CHECK(TheServiceParticipant->federation_liveliness()==70);
 
   TransportInst_rch inst = TransportRegistry::instance()->get_inst("mytcp");
   TEST_CHECK(inst != 0);

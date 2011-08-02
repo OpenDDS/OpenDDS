@@ -78,6 +78,9 @@ static bool got_bit_lookup_duration_msec = false;
 static bool got_global_transport_config = false;
 static bool got_bit_flag = false;
 static bool got_publisher_content_filter = false;
+static bool got_transport_debug_level = false;
+static bool got_pending_timeout = false;
+static bool got_persistent_data_dir = false;
 
 Service_Participant::Service_Participant()
   : orb_(CORBA::ORB::_nil()),
@@ -479,14 +482,17 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSTransportDebugLevel"))) != 0) {
       OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
+      got_transport_debug_level = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPersistentDataDir"))) != 0) {
       this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       arg_shifter.consume_arg();
+      got_persistent_data_dir = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
       this->pending_timeout_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
+      got_pending_timeout = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPublisherContentFilter"))) != 0) {
       this->publisher_content_filter_ = ACE_OS::atoi(currentArg);
@@ -1402,6 +1408,31 @@ Service_Participant::load_common_configuration()
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSBit value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
+    }
+
+    if (got_transport_debug_level) {
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSTransportDebugLevel value from command option (overrides value if it's in config file).\n")));
+    } else {
+      GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSTransportDebugLevel"), OpenDDS::DCPS::Transport_debug_level, int)
+    }
+
+    if (got_persistent_data_dir) {
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSPersistentDataDir value from command option (overrides value if it's in config file).\n")));
+    } else {
+      ACE_TString value;
+      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSPersistentDataDir"), value)
+      this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(value.c_str());
+    }
+
+    if (got_pending_timeout) {
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSPendingTimeout value from command option (overrides value if it's in config file).\n")));
+    } else {
+      int timeout;
+      GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSPendingTimeout"), timeout, int)
+      this->pending_timeout_ = timeout;
     }
 
     if (got_publisher_content_filter) {
