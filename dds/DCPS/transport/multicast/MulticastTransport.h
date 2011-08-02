@@ -29,17 +29,19 @@ public:
   ~MulticastTransport();
 
 protected:
-  virtual DataLink* find_datalink(
-    RepoId local_id,
-    const AssociationData& remote_association,
-    CORBA::Long priority,
-    bool active);
+  virtual DataLink* find_datalink_i(const RepoId& local_id,
+                                    const RepoId& remote_id,
+                                    const TransportBLOB& remote_data,
+                                    CORBA::Long priority,
+                                    bool active);
 
-  virtual DataLink* create_datalink(
-    RepoId local_id,
-    const AssociationData& remote_association,
-    CORBA::Long priority,
-    bool active);
+  virtual DataLink* connect_datalink_i(const RepoId& local_id,
+                                       const RepoId& remote_id,
+                                       const TransportBLOB& remote_data,
+                                       CORBA::Long priority);
+
+  virtual DataLink* accept_datalink(ConnectionEvent& ce);
+  virtual void stop_accepting(ConnectionEvent& ce);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -52,7 +54,15 @@ protected:
 
   virtual void release_datalink_i(DataLink* link,
                                   bool release_pending);
+
+  virtual std::string transport_type() const { return "multicast"; }
+
 private:
+  MulticastDataLink* make_datalink(const RepoId& local_id,
+                                   const RepoId& remote_id,
+                                   CORBA::Long priority,
+                                   bool active);
+
   RcHandle<MulticastInst> config_i_;
 
   /// link for pubs.

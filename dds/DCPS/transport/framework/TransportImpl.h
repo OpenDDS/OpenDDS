@@ -24,6 +24,7 @@
 #include "ace/Synch.h"
 #include <map>
 #include <set>
+#include <string>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -101,17 +102,44 @@ protected:
 
   bool configure(TransportInst* config);
 
-  virtual DataLink* find_datalink(
-    RepoId                  local_id,
-    const AssociationData&  remote_association,
-    CORBA::Long             priority,
-    bool                    active) = 0;
+  DataLink* find_datalink(const RepoId& local_id,
+                          const AssociationData& remote_association,
+                          CORBA::Long priority,
+                          bool active);
 
-  virtual DataLink* create_datalink(
-    RepoId                  local_id,
-    const AssociationData&  remote_association,
-    CORBA::Long             priority,
-    bool                    active) = 0;
+  DataLink* connect_datalink(const RepoId& local_id,
+                             const AssociationData& remote_association,
+                             CORBA::Long priority);
+
+  struct OpenDDS_Dcps_Export ConnectionEvent {
+    ConnectionEvent(const RepoId& local_id,
+                    const AssociationData& remote_association,
+                    CORBA::Long priority);
+
+    void wait(const ACE_Time_Value& timeout);
+    bool complete(const DataLink_rch& link);
+
+    const RepoId& local_id_;
+    const AssociationData& remote_association_;
+    const CORBA::Long priority_;
+    ACE_Thread_Mutex mtx_;
+    ACE_Condition_Thread_Mutex cond_;
+    DataLink_rch link_;
+  };
+
+  virtual DataLink* accept_datalink(ConnectionEvent& ce) = 0;
+  virtual void stop_accepting(ConnectionEvent& ce) = 0;
+
+  virtual DataLink* find_datalink_i(const RepoId& local_id,
+                                    const RepoId& remote_id,
+                                    const TransportBLOB& remote_data,
+                                    CORBA::Long priority,
+                                    bool active) = 0;
+
+  virtual DataLink* connect_datalink_i(const RepoId& local_id,
+                                       const RepoId& remote_id,
+                                       const TransportBLOB& remote_data,
+                                       CORBA::Long priority) = 0;
 
   /// Concrete subclass gets a shot at the config object.  The subclass
   /// will likely downcast the TransportInst object to a
@@ -169,6 +197,10 @@ private:
   void attach_client(TransportClient* client);
   void detach_client(TransportClient* client);
 
+  DataLink* find_connect_i(const RepoId& local_id,
+                           const AssociationData& remote_association,
+                           CORBA::Long priority, bool active, bool connect);
+
 protected:
   typedef ACE_SYNCH_MUTEX                ReservationLockType;
   typedef ACE_Guard<ReservationLockType> ReservationGuardType;
@@ -207,6 +239,8 @@ private:
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
   bool connection_info(TransportLocator& local_info) const;
+
+  virtual std::string transport_type() const = 0;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;

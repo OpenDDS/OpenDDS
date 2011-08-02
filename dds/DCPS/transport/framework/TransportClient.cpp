@@ -158,8 +158,8 @@ TransportClient::associate_i(const AssociationData& data, bool active,
   // Attempt to find an existing DataLink that can be reused
   for (size_t i = 0; i < impls_.size(); ++i) {
 
-    DataLink_rch link = impls_[i]->find_datalink(repo_id_,
-                                                 data, priority, active);
+    DataLink_rch link =
+      impls_[i]->find_datalink(repo_id_, data, priority, active);
     if (!link.is_nil()) {
       add_link(link, data.remote_id_);
       impl = impls_[i];
@@ -168,13 +168,38 @@ TransportClient::associate_i(const AssociationData& data, bool active,
   }
 
   // Create a new DataLink
-  for (size_t i = 0; i < impls_.size(); ++i) {
+  if (active) {
 
-    DataLink_rch link = impls_[i]->create_datalink(repo_id_,
-                                                   data, priority, active);
-    if (!link.is_nil()) {
-      add_link(link, data.remote_id_);
-      impl = impls_[i];
+    for (size_t i = 0; i < impls_.size(); ++i) {
+      DataLink_rch link = impls_[i]->connect_datalink(repo_id_, data, priority);
+      if (!link.is_nil()) {
+        add_link(link, data.remote_id_);
+        impl = impls_[i];
+        return true;
+      }
+    }
+  } else { // passive
+
+    TransportImpl::ConnectionEvent ce(repo_id_, data, priority);
+    for (size_t i = 0; i < impls_.size(); ++i) {
+      DataLink_rch link = impls_[i]->accept_datalink(ce);
+      if (!link.is_nil()) {
+        ce.link_ = link;
+        break;
+      }
+    }
+    if (ce.link_.is_nil()) {
+      ACE_Time_Value timeout; //TODO: get timeout from TransportConfig
+      ce.wait(timeout);
+    }
+    for (size_t i = 0; i < impls_.size(); ++i) {
+      if (ce.link_.is_nil() || impls_[i].in() != ce.link_->impl().in()) {
+        impls_[i]->stop_accepting(ce);
+      }
+    }
+    if (!ce.link_.is_nil()) {
+      add_link(ce.link_, data.remote_id_);
+      impl = ce.link_->impl();
       return true;
     }
   }

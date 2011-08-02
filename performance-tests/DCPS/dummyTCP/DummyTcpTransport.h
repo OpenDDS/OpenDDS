@@ -51,17 +51,20 @@ namespace OpenDDS
         /// Either find a suitable DataLink that already exists (and is
         /// connected), or create one, connect it, save it off for reuse,
         /// and return it.
-        virtual DataLink* find_datalink(
-          RepoId                  local_id,
-          const AssociationData&  remote_association,
-          CORBA::Long             priority,
-          bool                    active);
+        virtual DataLink* find_datalink_i(const RepoId& local_id,
+                                          const RepoId& remote_id,
+                                          const TransportBLOB& remote_data,
+                                          CORBA::Long priority,
+                                          bool active);
 
-        virtual DataLink* create_datalink(
-          RepoId                  local_id,
-          const AssociationData&  remote_association,
-          CORBA::Long             priority,
-          bool                    active);
+        virtual DataLink* connect_datalink_i(const RepoId& local_id,
+                                             const RepoId& remote_id,
+                                             const TransportBLOB& remote_data,
+                                             CORBA::Long priority);
+
+        virtual DataLink* accept_datalink(ConnectionEvent& ce);
+        virtual void stop_accepting(ConnectionEvent& ce);
+        virtual std::string transport_type() const { return "dummy_tcp"; }
 
         virtual bool configure_i(TransportInst* config);
 

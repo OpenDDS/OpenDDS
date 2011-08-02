@@ -55,22 +55,17 @@ OpenDDS::DCPS::DummyTcpTransport::~DummyTcpTransport()
 /// due to an add_subscriptions() call on a TransportInterface object.
 /// This means true (1).  It *is* connecting as a publisher.
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::DummyTcpTransport::find_datalink(
-  RepoId                  /*local_id*/,
-  const AssociationData&  remote_association,
-  CORBA::Long             /*priority*/,
-  bool                    /*active*/)
+OpenDDS::DCPS::DummyTcpTransport::find_datalink_i(
+  const RepoId& local_id,
+  const RepoId& remote_id,
+  const TransportBLOB& remote_data,
+  CORBA::Long priority,
+  bool active)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","find_datalink",5);
 
-  const TransportLocatorSeq& remote_info = remote_association.remote_data_;
-
-  // Get the remote address from the "blob" in the remote_info struct.
-  NetworkAddress* network_order_address =
-    (NetworkAddress*)(remote_info[0].data.get_buffer());
-
-  ACE_INET_Addr remote_address;
-  network_order_address->to_addr(remote_address);
+  ACE_INET_Addr remote_address =
+    AssociationData::get_remote_address(remote_data);
 
   DummyTcpDataLink_rch link;
 
@@ -80,18 +75,18 @@ OpenDDS::DCPS::DummyTcpTransport::find_datalink(
     // First, we have to try to find an existing (connected) DataLink
     // that suits the caller's needs.
 
-    if (this->links_.find(remote_address,link) == 0)
+    if (this->links_.find(remote_address, link) == 0)
       {
-        DummyTcpConnection_rch con = link->get_connection ();
-        if (con->is_connector () && ! con->is_connected ())
+        DummyTcpConnection_rch con = link->get_connection();
+        if (con->is_connector() && ! con->is_connected())
           {
             bool on_new_association = true;
-            if (con->reconnect (on_new_association) == -1)
+            if (con->reconnect(on_new_association) == -1)
               {
                 ACE_ERROR_RETURN ((LM_ERROR,
                                    "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
-                                   remote_address.get_host_addr (),
-                                   remote_address.get_port_number ()),
+                                   remote_address.get_host_addr(),
+                                   remote_address.get_port_number()),
                                   0);
               }
           }
@@ -99,7 +94,7 @@ OpenDDS::DCPS::DummyTcpTransport::find_datalink(
   // Thus we need more checks.
   else
   {
-    if(!con->is_connector () && !con->is_connected ())
+    if(!con->is_connector() && !con->is_connected())
     {
       // The passive connecting side will wait for the connection establishment.
     }
@@ -118,21 +113,16 @@ OpenDDS::DCPS::DummyTcpTransport::find_datalink(
 }
 
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::DummyTcpTransport::create_datalink(
-  RepoId                  /*local_id*/,
-  const AssociationData&  remote_association,
-  CORBA::Long             /*priority*/,
-  bool                    active)
+OpenDDS::DCPS::DummyTcpTransport::connect_datalink_i(
+  const RepoId& /*local_id*/,
+  const RepoId& /*remote_id*/,
+  const TransportBLOB& remote_data,
+  CORBA::Long priority)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","create_datalink",5);
 
-  const TransportLocatorSeq& remote_info = remote_association.remote_data_;
-
-  NetworkAddress* network_order_address =
-    (NetworkAddress*)(remote_info[0].data.get_buffer());
-
-  ACE_INET_Addr remote_address;
-  network_order_address->to_addr(remote_address);
+  ACE_INET_Addr remote_address =
+    AssociationData::get_remote_address(remote_data);
 
   DummyTcpDataLink_rch link;
 
@@ -154,30 +144,7 @@ OpenDDS::DCPS::DummyTcpTransport::create_datalink(
   }
 
   // Now we need to attempt to establish a connection for the DataLink.
-  int result;
-
-  // Active or passive connection establishment is based upon the value
-  // on the connect_as_publisher argument.
-  if (active)
-    {
-      result = this->make_active_connection(remote_address, link.in());
-
-      if (result != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Failed to make active connection.\n"));
-        }
-    }
-  else
-    {
-      result = this->make_passive_connection(remote_address, link.in());
-
-      if (result != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Failed to make passive connection.\n"));
-        }
-    }
+  int result = this->make_active_connection(remote_address, link.in());
 
   if (result != 0)
     {
@@ -198,6 +165,59 @@ OpenDDS::DCPS::DummyTcpTransport::create_datalink(
   return link._retn();
 }
 
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::DummyTcpTransport::accept_datalink(ConnectionEvent& ce)
+{
+  ACE_INET_Addr remote_address = AssociationData::get_remote_address(
+                                   ce.remote_association_.remote_data_[0].data);
+
+  DummyTcpDataLink_rch link;
+
+  // Here is where we actually create the DataLink.
+  link = new DummyTcpDataLink(remote_address, this);
+
+  { // guard scope
+    GuardType guard(this->links_lock_);
+
+    // Attempt to bind the DummyTcpDataLink to our links_ map.
+    if (this->links_.bind(remote_address,link) != 0)
+      {
+        // We failed to bind the new DataLink into our links_ map.
+        // On error, we return a NULL pointer.
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "(%P|%t) ERROR: Unable to bind new DummyTcpDataLink to "
+                          "DummyTcpTransport in links_ map.\n"), 0);
+      }
+  }
+
+  // Now we need to attempt to establish a connection for the DataLink.
+  int result = this->make_passive_connection(remote_address, link.in());
+
+  if (result != 0) {
+    ACE_ERROR((LM_ERROR,
+             "(%P|%t) ERROR: Failed to make passive connection.\n"));
+    GuardType guard(this->links_lock_);
+    // Make sure that we unbind the link (that failed to establish a
+    // connection) from our links_ map.  We intentionally ignore the
+    // return code from the unbind() call since we know that we just
+    // did the bind() moments ago - and with the links_lock_ acquired
+    // the whole time.
+    this->links_.unbind(remote_address);
+
+    // On error, return a NULL pointer.
+    return 0;
+  }
+
+  // That worked.  Return a reference to the DataLink that the caller will
+  // be responsible for.
+  return link._retn();
+}
+
+void
+OpenDDS::DCPS::DummyTcpTransport::stop_accepting(ConnectionEvent& /*ce*/)
+{
+  // no-op
+}
 
 bool
 OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportInst* config)

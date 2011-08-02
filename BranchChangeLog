@@ -1,3 +1,30 @@
+Tue Aug  2 19:13:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          New transport framework features for separating the two kinds of
+          datalink creation (active and passive) and allowing the passive
+          datalink creation to occur asynchronously.
+          Still needs some data strucutre cleanup and error handling in Tcp.
+          Need to determine if and how to do the "handshaking" in Udp/Multicast.
+          Need to use the passive connect duration setting in TransportClient.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+          Removed invalid package names from the Manifest.
+
 Tue Aug  2 17:28:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
@@ -74,7 +101,7 @@ Tue Aug  2 13:36:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/tests/Messenger/Messenger.codegen:
         * tools/modeling/tests/Messenger/Messenger.opendds:
 
-          Specify a tranasport condfig in model.
+          Specify a tranasport config in model.
           Add TCP transport insts in codegen.
 
 Mon Aug  1 21:12:38 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>

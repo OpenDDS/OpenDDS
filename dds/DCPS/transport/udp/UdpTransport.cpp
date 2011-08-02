@@ -68,15 +68,13 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address, bool active)
 }
 
 DataLink*
-UdpTransport::find_datalink(
-  RepoId /*local_id*/,
-  const AssociationData& remote_association,
-  CORBA::Long priority,
-  bool active)
+UdpTransport::find_datalink_i(const RepoId& /*local_id*/,
+                              const RepoId& /*remote_id*/,
+                              const TransportBLOB& remote_data,
+                              CORBA::Long priority,
+                              bool active)
 {
-  ACE_INET_Addr remote_address(
-    get_connection_addr(remote_association.remote_data_[0]));
-        //TODO: [0] on the prev line is just temporary
+  ACE_INET_Addr remote_address = get_connection_addr(remote_data);
 
   bool is_loopback = remote_address == this->config_i_->local_address_;
   PriorityKey key(priority, remote_address, is_loopback, active);
@@ -94,15 +92,13 @@ UdpTransport::find_datalink(
 }
 
 DataLink*
-UdpTransport::create_datalink(
-  RepoId /*local_id*/,
-  const AssociationData& remote_association,
-  CORBA::Long priority,
-  bool active)
+UdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
+                                 const RepoId& /*remote_id*/,
+                                 const TransportBLOB& remote_data,
+                                 CORBA::Long priority)
 {
-  ACE_INET_Addr remote_address(
-    get_connection_addr(remote_association.remote_data_[0]));
-        //TODO: [0] on the prev line is just temporary
+  ACE_INET_Addr remote_address = get_connection_addr(remote_data);
+  const bool active = true;
 
   bool is_loopback = remote_address == this->config_i_->local_address_;
   PriorityKey key(priority, remote_address, is_loopback, active);
@@ -111,6 +107,18 @@ UdpTransport::create_datalink(
   UdpDataLink_rch link = make_datalink(remote_address, active);
   this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
   return link._retn();
+}
+
+DataLink*
+UdpTransport::accept_datalink(ConnectionEvent& /*ce*/)
+{
+  return UdpDataLink_rch(this->server_link_)._retn();
+}
+
+void
+UdpTransport::stop_accepting(ConnectionEvent& /*ce*/)
+{
+  // nothing needed here, since accept_datalink doesn't store the event
 }
 
 bool
@@ -168,21 +176,13 @@ UdpTransport::connection_info_i(TransportLocator& info) const
 }
 
 ACE_INET_Addr
-UdpTransport::get_connection_addr(const TransportLocator& info) const
+UdpTransport::get_connection_addr(const TransportBLOB& data) const
 {
-  if (info.transport_type.in() != std::string("udp")) {
-    ACE_ERROR((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: ")
-               ACE_TEXT("UdpTransport::get_connection_addr: ")
-               ACE_TEXT("transport interface ID does not match:%C\n"),
-               info.transport_type.in()));
-  }
-
   ACE_INET_Addr local_address;
   NetworkAddress network_address;
 
-  size_t len = info.data.length();
-  const char* buffer = reinterpret_cast<const char*>(info.data.get_buffer());
+  size_t len = data.length();
+  const char* buffer = reinterpret_cast<const char*>(data.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);
   cdr >> network_address;

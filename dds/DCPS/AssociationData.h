@@ -21,28 +21,26 @@ namespace DCPS {
 struct AssociationData {
   RepoId               remote_id_;
   TransportLocatorSeq  remote_data_;
-  ACE_INET_Addr        remote_addess_;
-  NetworkAddress       network_order_address_;
   CORBA::Long          publication_transport_priority_;
 
-  ACE_INET_Addr& get_remote_address()
+  static ACE_INET_Addr get_remote_address(const TransportBLOB& remote)
   {
-    if (this->remote_addess_ == ACE_INET_Addr()) {
-      // Get the remote address from the "blob" in the remote_info struct.
-      //TODO: [0] on the next line is just temporary
-      ACE_InputCDR cdr((const char*)remote_data_[0].data.get_buffer(),
-                                    remote_data_[0].data.length());
+    ACE_INET_Addr remote_address;
+    NetworkAddress network_order_address;
 
-      if (cdr >> this->network_order_address_ == 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: AssociationData::get_remote_address failed "
-                  "to de-serialize the NetworkAddress\n"));
-      }
-      else {
-        this->network_order_address_.to_addr(remote_addess_);
-      }
+    // Get the remote address from the "blob" in the remote_info struct.
+    ACE_InputCDR cdr((const char*)remote.get_buffer(),
+                                  remote.length());
+
+    if (cdr >> network_order_address == 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: AssociationData::get_remote_address")
+                 ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+    } else {
+      network_order_address.to_addr(remote_address);
     }
 
-    return this->remote_addess_;
+    return remote_address;
   }
 };
 

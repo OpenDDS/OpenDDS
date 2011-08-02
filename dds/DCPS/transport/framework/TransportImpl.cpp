@@ -187,6 +187,87 @@ TransportImpl::detach_client(TransportClient* client)
   clients_.erase(client);
 }
 
+DataLink*
+TransportImpl::find_connect_i(const RepoId& local_id,
+                              const AssociationData& remote_association,
+                              CORBA::Long priority, bool active, bool connect)
+{
+  const CORBA::ULong num_blobs = remote_association.remote_data_.length();
+  const std::string ttype = transport_type();
+
+  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
+    if (remote_association.remote_data_[idx].transport_type.in() == ttype) {
+      DataLink_rch link;
+      if (connect) {
+        link = connect_datalink_i(local_id, remote_association.remote_id_,
+                                  remote_association.remote_data_[idx].data,
+                                  priority);
+      } else {
+        link = find_datalink_i(local_id, remote_association.remote_id_,
+                               remote_association.remote_data_[idx].data,
+                               priority, active);
+      }
+      if (!link.is_nil()) {
+        return link._retn();
+      }
+    }
+  }
+  return 0;
+}
+
+DataLink*
+TransportImpl::find_datalink(const RepoId& local_id,
+                             const AssociationData& remote_association,
+                             CORBA::Long priority,
+                             bool active)
+{
+  return find_connect_i(local_id, remote_association, priority, active, false);
+}
+
+DataLink*
+TransportImpl::connect_datalink(const RepoId& local_id,
+                                const AssociationData& remote_association,
+                                CORBA::Long priority)
+{
+  return find_connect_i(local_id, remote_association, priority, true, true);
+}
+
+TransportImpl::ConnectionEvent::ConnectionEvent(const RepoId& local_id,
+                                  const AssociationData& remote_association,
+                                  CORBA::Long priority)
+  : local_id_(local_id)
+  , remote_association_(remote_association)
+  , priority_(priority)
+  , cond_(mtx_)
+{}
+
+void
+TransportImpl::ConnectionEvent::wait(const ACE_Time_Value& timeout)
+{
+  ACE_Time_Value deadline;
+  ACE_Time_Value* p_deadline = 0;
+  if (timeout != ACE_Time_Value::zero) {
+    deadline = ACE_OS::gettimeofday() + timeout;
+    p_deadline = &deadline;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
+  while (link_.is_nil()) {
+    cond_.wait(p_deadline);
+  }
+}
+
+bool
+TransportImpl::ConnectionEvent::complete(const DataLink_rch& link)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, false);
+  if (link_.is_nil()) {
+    link_ = link;
+    cond_.signal();
+    return true;
+  }
+  return false;
+}
+
 bool
 TransportImpl::add_pending_association(const RepoId& local_id,
                                        const RepoId& remote_id,

@@ -166,7 +166,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
   }
 
   if (released) {
-    return this->transport_->connect_datalink(this, connection);
+    return this->transport_->connect_tcp_datalink(this, connection);
   }
 
   // Keep a "copy" of the reference to the connection object for ourselves.

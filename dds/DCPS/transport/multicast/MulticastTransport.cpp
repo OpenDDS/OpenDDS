@@ -37,11 +37,11 @@ MulticastTransport::~MulticastTransport()
 }
 
 DataLink*
-MulticastTransport::find_datalink(
-  RepoId local_id,
-  const AssociationData& remote_association,
-  CORBA::Long priority,
-  bool active)
+MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
+                                    const RepoId& remote_id,
+                                    const TransportBLOB& /*remote_data*/,
+                                    CORBA::Long /*priority*/,
+                                    bool active)
 {
   // To accommodate the one-to-many nature of multicast reservations,
   // a session layer is used to maintain state between unique pairs
@@ -61,8 +61,7 @@ MulticastTransport::find_datalink(
 
   if (!link.is_nil()) {
 
-    MulticastPeer remote_peer =
-      RepoIdConverter(remote_association.remote_id_).participantId();
+    MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
 
     MulticastSession_rch session = link->find_or_create_session(remote_peer);
 
@@ -88,12 +87,11 @@ MulticastTransport::find_datalink(
   return link._retn();
 }
 
-DataLink*
-MulticastTransport::create_datalink(
-  RepoId local_id,
-  const AssociationData& remote_association,
-  CORBA::Long priority,
-  bool active)
+MulticastDataLink*
+MulticastTransport::make_datalink(const RepoId& local_id,
+                                  const RepoId& remote_id,
+                                  CORBA::Long priority,
+                                  bool active)
 {
   RcHandle<MulticastSessionFactory> session_factory;
   if (this->config_i_->reliable_) {
@@ -103,17 +101,14 @@ MulticastTransport::create_datalink(
   }
 
   MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
-  MulticastPeer remote_peer =
-    RepoIdConverter(remote_association.remote_id_).participantId();
+  MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
 
   bool is_loopback = local_peer == remote_peer;
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::create_datalink remote addr str "
-            "\"%s\" priority %d is_loopback %d active %d\"\n",
-            remote_association.network_order_address_.addr_.c_str(),
-            priority, is_loopback, active),
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::make_datalink "
+            "remote peer \"%d priority %d is_loopback %d active %d\"\n",
+            remote_peer, priority, is_loopback, active),
             2);
-
 
   MulticastDataLink_rch link;
   ACE_NEW_RETURN(link,
@@ -149,8 +144,6 @@ MulticastTransport::create_datalink(
                      0);
   }
 
-  (active ? this->client_link_ : this->server_link_) = link;
-
   MulticastSession_rch session = link->find_or_create_session(remote_peer);
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -169,8 +162,44 @@ MulticastTransport::create_datalink(
                       remote_peer),
                      0);
   }
-
   return link._retn();
+}
+
+DataLink*
+MulticastTransport::connect_datalink_i(const RepoId& local_id,
+                                       const RepoId& remote_id,
+                                       const TransportBLOB& remote_data,
+                                       CORBA::Long priority)
+{
+  MulticastDataLink_rch link =
+    this->make_datalink(local_id, remote_id, priority, true /*active*/);
+  this->client_link_ = link;
+  return link._retn();
+}
+
+DataLink*
+MulticastTransport::accept_datalink(ConnectionEvent& ce)
+{
+  const std::string ttype = "multicast";
+  const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
+
+  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
+    if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
+
+      MulticastDataLink_rch link =
+        this->make_datalink(ce.local_id_, ce.remote_association_.remote_id_,
+                            ce.priority_, false /*!active*/);
+      this->server_link_ = link;
+      return link._retn();
+    }
+  }
+  return 0;
+}
+
+void
+MulticastTransport::stop_accepting(ConnectionEvent& /*ce*/)
+{
+  // nothing needed here, since accept_datalink doesn't store the event
 }
 
 bool

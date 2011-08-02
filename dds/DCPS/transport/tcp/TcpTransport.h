@@ -50,17 +50,19 @@ public:
 
 protected:
 
-  virtual DataLink* find_datalink(
-    RepoId                  local_id,
-    const AssociationData&  remote_association,
-    CORBA::Long             priority,
-    bool                    active);
+  virtual DataLink* find_datalink_i(const RepoId& local_id,
+                                    const RepoId& remote_id,
+                                    const TransportBLOB& remote_data,
+                                    CORBA::Long priority,
+                                    bool active);
 
-  virtual DataLink* create_datalink(
-    RepoId                  local_id,
-    const AssociationData&  remote_association,
-    CORBA::Long             priority,
-    bool                    active);
+  virtual DataLink* connect_datalink_i(const RepoId& local_id,
+                                       const RepoId& remote_id,
+                                       const TransportBLOB& remote_data,
+                                       CORBA::Long priority);
+
+  virtual DataLink* accept_datalink(ConnectionEvent& ce);
+  virtual void stop_accepting(ConnectionEvent& ce);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -72,6 +74,8 @@ protected:
   /// Called by the DataLink to release itself.
   virtual void release_datalink_i(DataLink* link,
                                   bool release_pending);
+
+  virtual std::string transport_type() const { return "tcp"; }
 
 private:
 
@@ -101,10 +105,14 @@ private:
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
-  int connect_datalink(TcpDataLink*   link,
-                       TcpConnection* connection);
+  int connect_tcp_datalink(TcpDataLink*   link,
+                           TcpConnection* connection);
 
-  void wait_for_connection (const ACE_Time_Value& abs_timeout);
+  void wait_for_connection(const ACE_Time_Value& abs_timeout);
+
+  PriorityKey blob_to_key(const TransportBLOB& remote,
+                          CORBA::Long priority,
+                          bool active);
 
   /// Map Type: (key) PriorityKey to (value) TcpDataLink_rch
   typedef ACE_Hash_Map_Manager_Ex
@@ -123,6 +131,9 @@ private:
 
   typedef ACE_Reverse_Lock<ReservationLockType> Reverse_Lock_t;
   Reverse_Lock_t reverse_reservation_lock_;
+
+  void unbind_all(const std::vector<PriorityKey>& keys, GuardType* guard);
+  void unbind_all(const std::vector<PriorityKey>& keys);
 
 // TBD SOON - Something needs to protect the tcp_config_ reference
 //            because it gets set in our configure() method, and
@@ -170,6 +181,11 @@ private:
   /// TODO: reuse the reconnect_task in the TcpConnection
   ///       for new connection checking.
   TcpConnectionReplaceTask* con_checker_;
+
+  /// Locked by connections_lock_.  Tracks expected connections
+  /// that we have learned about in accept_datalink() but have not yet
+  /// arrived.
+  std::multimap<ConnectionEvent*, PriorityKey> pending_connections_;
 };
 
 } // namespace DCPS
