@@ -251,7 +251,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
         // Ensure there are no properties in this section
         ValueMap vm;
         if (pullValues(cf, sect, vm) > 0) {
-          // There are values inside [transport]
+          // There are values inside [config]
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                             ACE_TEXT("config sections must have a section name\n"),
@@ -272,65 +272,67 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
         for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
           std::string config_id = (*it).first;
 
-          ValueMap values;
-          if (pullValues( cf, (*it).second, values ) == 0) {
+          // Create a TransportConfig object.
+          TransportConfig_rch config = this->create_config(config_id);
+          if (config == 0) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("no instance defined in [config/%s] section.\n"),
+                              ACE_TEXT("Unable to create transport config in [config/%s] section.\n"),
                               config_id.c_str()),
                              -1);
-          } else {
-            // Create a TransportConfig object.
-            TransportConfig_rch config = this->create_config(config_id);
-            if (config == 0) {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("Unable to create transport config in [config/%s] section.\n"),
-                                config_id.c_str()),
-                               -1);
-            }
-            ConfigInfo configInfo;
-            configInfo.first = config;
-            for (ValueMap::const_iterator it=values.begin();
-                 it != values.end(); ++it) {
-              std::string name = (*it).first;
-              if (name == "transports") {
-                std::string value = (*it).second;
-                std::stringstream ss(value);
-                std::string item;
-                while(std::getline(ss, item, ',')) {
-                  configInfo.second.push_back(item);
-                }
-                configInfoVec.push_back(configInfo);
-              } else if (name == "swap_bytes") {
-                std::string value = (*it).second;
-                if ((value == "1") || (value == "true")) {
-                  config->swap_bytes_ = true;
-                } else if ((value != "0") && (value != "false")) {
-                  ACE_ERROR_RETURN((LM_ERROR,
-                                    ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                    ACE_TEXT("Illegal value for swap_bytes (%s) in [config/%s] section.\n"),
-                                    value.c_str(), config_id.c_str()),
-                                   -1);
-                }
-              } else if (name == "passive_connect_duration") {
-                std::string value = (*it).second;
-                if (!convertToInteger(value,
-                                      config->passive_connect_duration_)) {
-                  ACE_ERROR_RETURN((LM_ERROR,
-                                    ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                    ACE_TEXT("Illegal integer value for passive_connect_duration (%s) in [config/%s] section.\n"),
-                                    value.c_str(), config_id.c_str()),
-                                   -1);
-                }
-              } else {
+          }
+
+          ValueMap values;
+          pullValues( cf, (*it).second, values );
+
+          ConfigInfo configInfo;
+          configInfo.first = config;
+          for (ValueMap::const_iterator it=values.begin();
+               it != values.end(); ++it) {
+            std::string name = (*it).first;
+            if (name == "transports") {
+              std::string value = (*it).second;
+              std::stringstream ss(value);
+              std::string item;
+              while(std::getline(ss, item, ',')) {
+                configInfo.second.push_back(item);
+              }
+              configInfoVec.push_back(configInfo);
+            } else if (name == "swap_bytes") {
+              std::string value = (*it).second;
+              if ((value == "1") || (value == "true")) {
+                config->swap_bytes_ = true;
+              } else if ((value != "0") && (value != "false")) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                  ACE_TEXT("Unexpected entry (%s) in [config/%s] section.\n"),
-                                  name.c_str(), config_id.c_str()),
+                                  ACE_TEXT("Illegal value for swap_bytes (%s) in [config/%s] section.\n"),
+                                  value.c_str(), config_id.c_str()),
                                  -1);
               }
+            } else if (name == "passive_connect_duration") {
+              std::string value = (*it).second;
+              if (!convertToInteger(value,
+                                    config->passive_connect_duration_)) {
+                ACE_ERROR_RETURN((LM_ERROR,
+                                  ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%s) in [config/%s] section.\n"),
+                                  value.c_str(), config_id.c_str()),
+                                 -1);
+              }
+            } else {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                                ACE_TEXT("Unexpected entry (%s) in [config/%s] section.\n"),
+                                name.c_str(), config_id.c_str()),
+                               -1);
             }
+          }
+          if (configInfo.second.size() == 0) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                              ACE_TEXT("No transport instances listed in [config/%s] section.\n"),
+                              config_id.c_str()),
+                             -1);
           }
         }
       }

@@ -36,6 +36,10 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("optimum_packet_size"), this->optimum_packet_size_, ACE_UINT32)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("thread_per_connection"), this->thread_per_connection_, bool)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_release_delay"), this->datalink_release_delay_, int)
+
+  // Undocumented - this option is not in the Developer's Guide
+  // Controls the number of chunks in the allocators used by the datalink
+  // for control messages.
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_chunks"), this->datalink_control_chunks_, size_t)
 
   ACE_TString stringvalue;
