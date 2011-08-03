@@ -329,52 +329,6 @@ public class GeneratorItemProviderAdapterFactory extends
 	}
 
 	/**
-	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset} instances.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected TransportOffsetItemProvider transportOffsetItemProvider;
-
-	/**
-	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Adapter createTransportOffsetAdapter() {
-		if (transportOffsetItemProvider == null) {
-			transportOffsetItemProvider = new TransportOffsetItemProvider(this);
-		}
-
-		return transportOffsetItemProvider;
-	}
-
-	/**
-	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.Transport} instances.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected TransportItemProvider transportItemProvider;
-
-	/**
-	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.Transport}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Adapter createTransportAdapter() {
-		if (transportItemProvider == null) {
-			transportItemProvider = new TransportItemProvider(this);
-		}
-
-		return transportItemProvider;
-	}
-
-	/**
 	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.SwapBytes} instances.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -589,29 +543,6 @@ public class GeneratorItemProviderAdapterFactory extends
 	}
 
 	/**
-	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TcpConfig} instances.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected TcpConfigItemProvider tcpConfigItemProvider;
-
-	/**
-	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TcpConfig}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Adapter createTcpConfigAdapter() {
-		if (tcpConfigItemProvider == null) {
-			tcpConfigItemProvider = new TcpConfigItemProvider(this);
-		}
-
-		return tcpConfigItemProvider;
-	}
-
-	/**
 	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.LocalAddressString} instances.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -801,29 +732,6 @@ public class GeneratorItemProviderAdapterFactory extends
 		}
 
 		return passiveConnectDurationItemProvider;
-	}
-
-	/**
-	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.MulticastConfig} instances.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected MulticastConfigItemProvider multicastConfigItemProvider;
-
-	/**
-	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.MulticastConfig}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Adapter createMulticastConfigAdapter() {
-		if (multicastConfigItemProvider == null) {
-			multicastConfigItemProvider = new MulticastConfigItemProvider(this);
-		}
-
-		return multicastConfigItemProvider;
 	}
 
 	/**
@@ -1126,29 +1034,6 @@ public class GeneratorItemProviderAdapterFactory extends
 	}
 
 	/**
-	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.UdpConfig} instances.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected UdpConfigItemProvider udpConfigItemProvider;
-
-	/**
-	 * This creates an adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.UdpConfig}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Adapter createUdpConfigAdapter() {
-		if (udpConfigItemProvider == null) {
-			udpConfigItemProvider = new UdpConfigItemProvider(this);
-		}
-
-		return udpConfigItemProvider;
-	}
-
-	/**
 	 * This keeps track of the one adapter used for all {@link org.opendds.modeling.sdk.model.GeneratorSpecification.TransportConfig} instances.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1438,10 +1323,6 @@ public class GeneratorItemProviderAdapterFactory extends
 			instancesItemProvider.dispose();
 		if (instanceItemProvider != null)
 			instanceItemProvider.dispose();
-		if (transportOffsetItemProvider != null)
-			transportOffsetItemProvider.dispose();
-		if (transportItemProvider != null)
-			transportItemProvider.dispose();
 		if (swapBytesItemProvider != null)
 			swapBytesItemProvider.dispose();
 		if (queueMessagesPerPoolItemProvider != null)
@@ -1460,8 +1341,6 @@ public class GeneratorItemProviderAdapterFactory extends
 			datalinkReleaseDelayItemProvider.dispose();
 		if (datalinkControlChunksItemProvider != null)
 			datalinkControlChunksItemProvider.dispose();
-		if (tcpConfigItemProvider != null)
-			tcpConfigItemProvider.dispose();
 		if (localAddressStringItemProvider != null)
 			localAddressStringItemProvider.dispose();
 		if (enableNagleAlgorithmItemProvider != null)
@@ -1478,8 +1357,6 @@ public class GeneratorItemProviderAdapterFactory extends
 			passiveReconnectDurationItemProvider.dispose();
 		if (passiveConnectDurationItemProvider != null)
 			passiveConnectDurationItemProvider.dispose();
-		if (multicastConfigItemProvider != null)
-			multicastConfigItemProvider.dispose();
 		if (defaultToIPv6ItemProvider != null)
 			defaultToIPv6ItemProvider.dispose();
 		if (portOffsetItemProvider != null)
@@ -1506,8 +1383,6 @@ public class GeneratorItemProviderAdapterFactory extends
 			ttlItemProvider.dispose();
 		if (rcvBufferSIzeItemProvider != null)
 			rcvBufferSIzeItemProvider.dispose();
-		if (udpConfigItemProvider != null)
-			udpConfigItemProvider.dispose();
 		if (transportConfigItemProvider != null)
 			transportConfigItemProvider.dispose();
 		if (udpTransportItemProvider != null)

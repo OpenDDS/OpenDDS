@@ -9,6 +9,7 @@
       </config>
       <config xmi:id="_yVO70Lk4EeCnZ-BwQ1thbQ" name="three">
         <transportRef xmi:id="_4R68cbxIEeCux_vHm5zpDw" transport="_fcfbkLk1EeCtnMwt00SzyA"/>
+        <transportRef xmi:id="_d13OQL4SEeCtlIIkuP1-1g" transport="_1kew4LxrEeCux_vHm5zpDw"/>
         <passive_connect_duration xmi:id="_i1T3sL36EeCp7pL4wVoG1g" value="10000"/>
         <swap_bytes xmi:id="_JKQwob4MEeCtlIIkuP1-1g" value="true"/>
       </config>
@@ -33,6 +34,11 @@
       <max_output_pause_period xmi:id="_a7ieUL1mEeC34_mmUHdSBg" value="3"/>
       <passive_reconnect_duration xmi:id="_gfqOML1mEeC34_mmUHdSBg" value="2000"/>
     </transport>
-    <transport xsi:type="generator:MulticastTransport" xmi:id="_1kew4LxrEeCux_vHm5zpDw" name="mymcast"/>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_1kew4LxrEeCux_vHm5zpDw" name="mymcast">
+      <reliable xmi:id="_LmEAgL4TEeCtlIIkuP1-1g" value="true"/>
+    </transport>
+    <transport xsi:type="generator:UdpTransport" xmi:id="_1G658L4SEeCtlIIkuP1-1g" name="myudp">
+      <local_address_str xmi:id="_2GVvkL4SEeCtlIIkuP1-1g" value="127.0.0.1"/>
+    </transport>
   </transports>
 </generator:CodeGen>

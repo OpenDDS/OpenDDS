@@ -43,29 +43,7 @@
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//Instance">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//Instance/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//Instance/transportOffset"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//Instance/transport"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//Instance/config"/>
-    </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//TransportOffset">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//TransportOffset/value"/>
-    </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//Transport">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//Transport/transportIndex"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//Transport/TCPTransport"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//Transport/UDPTransport"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//Transport/MulticastTransport"/>
-    </genClasses>
-    <genClasses image="false" ecoreClass="Generator.ecore#//TransportNoLongerConfig">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/swap_bytes"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/queue_messages_per_pool"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/queue_initial_pools"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/max_packet_size"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/max_samples_per_packet"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/optimum_packet_size"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/thread_per_connection"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/datalink_release_delay"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TransportNoLongerConfig/datalink_control_chunks"/>
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//SwapBytes">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//SwapBytes/value"/>
@@ -94,16 +72,6 @@
     <genClasses ecoreClass="Generator.ecore#//DatalinkControlChunks">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//DatalinkControlChunks/value"/>
     </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//TcpConfig">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/local_address_str"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/enable_nagle_algorithm"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/conn_retry_initial_delay"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/conn_retry_backoff_multiplier"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/conn_retry_attempts"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/max_output_pause_period"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/passive_reconnect_duration"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/passive_connect_duration"/>
-    </genClasses>
     <genClasses ecoreClass="Generator.ecore#//LocalAddressString">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//LocalAddressString/value"/>
     </genClasses>
@@ -127,21 +95,6 @@
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//PassiveConnectDuration">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//PassiveConnectDuration/value"/>
-    </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//MulticastConfig">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/default_to_ipv6"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/port_offset"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/group_address"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/reliable"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/syn_backoff"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/syn_interval"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/syn_timeout"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/nak_depth"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/nak_interval"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/nak_max"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/nak_timeout"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/ttl"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/rcv_buffer_size"/>
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//DefaultToIPv6">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//DefaultToIPv6/value"/>
@@ -181,9 +134,6 @@
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//RcvBufferSIze">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//RcvBufferSIze/value"/>
-    </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//UdpConfig">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//UdpConfig/local_address_str"/>
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//TransportConfig">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//TransportConfig/name"/>

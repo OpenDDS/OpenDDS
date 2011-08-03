@@ -1,3 +1,15 @@
+Wed Aug  3 21:41:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Remove deprecated parts of the model.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+
+          Add multicast and upd settings.
+
 Wed Aug  3 20:48:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
