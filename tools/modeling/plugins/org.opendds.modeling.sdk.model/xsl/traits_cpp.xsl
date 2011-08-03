@@ -108,12 +108,13 @@
         'TheTransportRegistry->create_inst(&quot;', @name, '&quot;, ',
         '&quot;', $transport-type, '&quot;);', $newline
     )"/>
-    <xsl:text>    // Ignoring actual transport configuration 
+    <xsl:text>    // Working on actual transport configuration 
 </xsl:text>
     <xsl:value-of select="concat(
         '    ', $transport-class, '_rch child_inst =', $newline,
         '        OpenDDS::DCPS::static_rchandle_cast&lt;', $transport-class, 
         '&gt;(', $varname, ');', $newline)"/>
+    <xsl:apply-templates select="*"/>
     <xsl:text>  }
 
 </xsl:text>
@@ -130,6 +131,11 @@
         '      TheTransportRegistry->create_config(&quot;', $config-name, 
         '&quot;);', $newline
     )"/>
+    <xsl:for-each select="*[name() != 'transportRef']">
+      <xsl:value-of select="concat('  ', $config-varname, '->', name(), '_ = ', 
+                                   @value, ';', $newline)"/>
+    </xsl:for-each>
+
     <xsl:for-each select="transportRef">
       <xsl:variable name="ref-varname" select="concat(
           $transportInsts[@xmi:id = current()/@transport]/@name, '_inst')"/>
@@ -199,7 +205,9 @@
 
   <xsl:variable name="label" select="../transportOffset/@value + @transportIndex"/>
   <xsl:value-of select="concat('      case ', $label, ':', $newline)"/>
+  <!--
   <xsl:call-template name="loadTransportLibraries"/>
+  -->
   <xsl:value-of select="concat('        transport_type = ACE_TEXT(&quot;', $type, '&quot;);', $newline)"/>
   <xsl:text>        config = TheTransportFactory->create_configuration(id, transport_type);
 </xsl:text>
@@ -208,7 +216,7 @@
 </xsl:template>
 
 <xsl:template match="swap_bytes">
-  <xsl:value-of select="concat('          config->swap_bytes_ = ', 
+  <xsl:value-of select="concat('    child_inst->swap_bytes_ = ', 
                                @value, ';', $newline)"/>
 </xsl:template>
 
@@ -221,7 +229,7 @@
                    | thread_per_connection
                    | datalink_release_delay
                    | datalink_control_chunks">
-  <xsl:value-of select="concat('          config->', name(), '_ = ', 
+  <xsl:value-of select="concat('    child_inst->', name(), '_ = ', 
                                @value, ';', $newline)"/>
 </xsl:template>
 
@@ -263,7 +271,7 @@
   <xsl:variable name="value">
     <xsl:call-template name="str-value"/>
   </xsl:variable>
-  <xsl:value-of select="concat('          specific_config->local_address_ = ',
+  <xsl:value-of select="concat('    child_inst->local_address_ = ',
                                'ACE_INET_Addr(&quot;', $value, '&quot;)',
                                ';', $newline)"/>
 </xsl:template>
@@ -275,7 +283,6 @@
                    | conn_retry_attempts
                    | max_output_pause_period
                    | passive_reconnect_duration
-                   | passive_connect_duration
                    | default_to_ipv6
                    | port_offset
                    | reliable
@@ -288,7 +295,7 @@
                    | nak_interval
                    | nak_timeout">
 
-  <xsl:value-of select="concat('          specific_config->', name(),  '_ = ',
+  <xsl:value-of select="concat('    child_inst->', name(),  '_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
@@ -297,7 +304,7 @@
   <xsl:variable name="value">
     <xsl:call-template name="str-value"/>
   </xsl:variable>
-  <xsl:value-of select="concat('          specific_config->group_address_ = ',
+  <xsl:value-of select="concat('    child_inst->group_address_ = ',
                                'ACE_INET_Addr(&quot;', $value, '&quot;)',
                                ';', $newline)"/>
 </xsl:template>
@@ -314,11 +321,11 @@
   </xsl:choose>
 </xsl:template>
 
+<!--
 <xsl:template name="loadTransportLibraries">
   <xsl:variable name="type-enum">
     <xsl:call-template name="transport-type-enum"/>
   </xsl:variable>
-  <!-- if its not a TCP transport, load it anyway for BIT -->
   <xsl:if test="$type-enum != $tcp-transport-enum">
     <xsl:text>#if !defined (DDS_HAS_MINIMUM_BIT)
         if (TheServiceParticipant->get_BIT()) {
@@ -332,7 +339,6 @@
   <xsl:value-of select="concat('        loadTransportLibraryIfNeeded(',
                                $type-enum, ');', $newline)"/>
 </xsl:template>
-
 <xsl:template name="transport-type-enum">
   <xsl:choose>
     <xsl:when test="TCPTransport">
@@ -349,6 +355,7 @@
     </xsl:when>
   </xsl:choose>
 </xsl:template>
+-->
 <!-- Handle string values with and without quotes -->
 <xsl:template name="str-value">
   <xsl:param name="value" select="@value"/>

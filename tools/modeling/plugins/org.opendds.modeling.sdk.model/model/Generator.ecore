@@ -258,13 +258,31 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TransportConfig">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="swap_bytes" ordered="false"
-        eType="#//SwapBytes"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="transportRef" upperBound="-1"
         eType="#//TransportRef" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="passive_connect_duration"
+        eType="#//PassiveConnectDuration" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="swap_bytes" eType="#//SwapBytes"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TransportInst" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="queue_messages_per_pool"
+        eType="#//QueueMessagesPerPool" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="queue_initial_pools" eType="#//QueueInitialPool"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="max_packet_size" eType="#//MaxPacketSize"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="max_samples_per_packet"
+        eType="#//MaxSamplesPerPacket" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="optimum_packet_size" eType="#//OptimumPacketSize"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="thread_per_connection"
+        eType="#//ThreadPerConnection" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="datalink_release_delay"
+        eType="#//DatalinkReleaseDelay" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="datalink_control_chunks"
+        eType="#//DatalinkControlChunks" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="UdpTransport" eSuperTypes="#//TransportInst">
     <eStructuralFeatures xsi:type="ecore:EReference" name="local_address_str" eType="#//LocalAddressString"
@@ -285,8 +303,6 @@
         eType="#//MaxOutputPausePeriod" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="passive_reconnect_duration"
         eType="#//PassiveReconnectDuration" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="passive_connect_duration"
-        eType="#//PassiveConnectDuration" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MulticastTransport" eSuperTypes="#//TransportInst">
     <eStructuralFeatures xsi:type="ecore:EReference" name="default_to_ipv6" eType="#//DefaultToIPv6"

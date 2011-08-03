@@ -85,16 +85,9 @@
 
   <!-- output struct declaration -->
   <xsl:value-of select="concat($newline,
-        '  struct ', $export, $structname, 
-        ' : OpenDDS::Model::DefaultInstanceTraits {', $newline)"/>
+        '  struct ', $export, $structname, ' {', $newline)"/>
   <xsl:value-of select="concat('    ', $structname, '();', $newline)"/>
   <xsl:value-of select="concat('    virtual ~', $structname, '();', $newline)"/>
-
-  <xsl:value-of select="concat(
-        '    virtual void loadTransportLibraryIfNeeded(', $newline,
-        '                    ',
-        'OpenDDS::Model::Transport::Type::Values transport_type) = 0;',
-        $newline)"/>
   <xsl:value-of select="concat(
         '    std::string configName(const std::string&amp; modeledName) const;',
         $newline,
