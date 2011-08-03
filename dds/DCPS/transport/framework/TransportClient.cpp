@@ -78,7 +78,8 @@ TransportClient::enable_transport()
   }
 
   swap_bytes_ = tc->swap_bytes_;
-  passive_connect_duration_.set_msec(tc->passive_connect_duration_);
+  passive_connect_duration_.set(tc->passive_connect_duration_ / 1000,
+                                (tc->passive_connect_duration_ % 1000) * 1000);
 
   const size_t n = tc->instances_.size();
   for (size_t i = 0; i < n; ++i) {
