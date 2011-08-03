@@ -60,6 +60,9 @@ public:
       CORBA::SystemException
     ));
 
+  virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/)
+    ACE_THROW_SPEC((CORBA::SystemException)) {}
+
   virtual void remove_associations (
       const OpenDDS::DCPS::WriterIdSeq & writers,
       ::CORBA::Boolean notify_lost

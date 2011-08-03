@@ -58,24 +58,6 @@ public:
 
   virtual ~TransportImpl();
 
-  /// Called when the receive strategy received the FULLY_ASSOCIATED
-  /// message.
-  bool demarshal_acks(ACE_Message_Block* acks, bool swap_bytes);
-
-  /// Return true if the subscriptions to a datawriter is
-  /// acknowledged, otherwise return false.
-  /// In current supported transports, only SimpleTCP requires acknowledgment.
-  /// Other transports do not need acknowledgment from subscriber side so these
-  /// transports need override this function to always return true.
-  virtual bool acked(RepoId pub_id, RepoId sub_id);
-
-  /// Remove the pub_id-sub_id pair from ack map.
-  /// In current supported transports, only SimpleTCP requires acknowledgment so
-  /// it does remove the ack from ack map.
-  /// Other transports has empty ack map so these transports need override
-  /// this function to be noop.
-  virtual void remove_ack(RepoId pub_id, RepoId sub_id);
-
   /// Callback from the DataLink to clean up any associated resources.
   /// This usually is done when the DataLink is lost. The call is made with
   /// no transport/DCPS locks held.
@@ -84,12 +66,6 @@ public:
   /// Expose the configuration information so others can see what
   /// we can do.
   TransportInst* config() const;
-
-  /// This method is called when the FULLY_ASSOCIATED ack of the pending
-  /// associations is received. If the datawriter is registered, the
-  /// datawriter will be notified, otherwise the status of the pending
-  /// associations will be marked as FULLY_ASSOCIATED.
-  void check_fully_association();
 
   /// Diagnostic aid.
   void dump();
@@ -217,21 +193,7 @@ protected:
 
   void create_reactor_task();
 
-public:
-  /// Called on publisher side as the last step of the add_associations().
-  /// The pending publications are cached to pending_association_sub_map_.
-  /// If the transport already received the FULLY_ASSOCIATED acks from
-  /// subscribers then the transport will notify the datawriter fully
-  /// association and the associations will be
-  /// removed from the pending associations cache.
-  bool add_pending_association(const RepoId& local_id,
-                               const RepoId& remote_id,
-                               TransportSendListener* tsl);
-
 private:
-
-  void check_fully_association(const RepoId& pub_id);
-  bool check_fully_association(const RepoId& pub_id, const RepoId& sub_id);
 
   /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference
@@ -260,21 +222,6 @@ private:
   /// The reactor (task) object - may not even be used if the concrete
   /// subclass (of TransportImpl) doesn't require a reactor.
   TransportReactorTask_rch reactor_task_;
-
-  /// These are used by the publisher side.
-
-  typedef std::map<PublicationId, std::vector<SubscriptionId>,
-                   GUID_tKeyLessThan>
-    PendingAssociationsMap;
-
-  /// pubid -> remote sub ids map.
-  PendingAssociationsMap pending_association_sub_map_;
-
-  std::map<PublicationId, TransportSendListener*, GUID_tKeyLessThan>
-    association_listeners_;
-
-  /// Fully association acknowledged map. pubid -> *subid
-  RepoIdSetMap acked_sub_map_;
 
   /// smart ptr to the associated DL cleanup task
   DataLinkCleanupTask dl_clean_task_;

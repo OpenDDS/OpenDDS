@@ -244,6 +244,8 @@ public:
                        const WriterAssociation& writer,
                        bool active);
 
+  void association_complete(const RepoId& remote_id);
+
   void remove_associations(const WriterIdSeq& writers, bool callback);
 
   void update_incompatible_qos(const IncompatibleQosStatus& status);

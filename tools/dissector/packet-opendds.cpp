@@ -123,7 +123,6 @@ const value_string sample_id_vals[] = {
   { OpenDDS::DCPS::UNREGISTER_INSTANCE,    "UNREGISTER_INSTANCE"   },
   { OpenDDS::DCPS::DISPOSE_INSTANCE,       "DISPOSE_INSTANCE"      },
   { OpenDDS::DCPS::GRACEFUL_DISCONNECT,    "GRACEFUL_DISCONNECT"   },
-  { OpenDDS::DCPS::FULLY_ASSOCIATED,       "FULLY_ASSOCIATED"      },
   { OpenDDS::DCPS::REQUEST_ACK,            "REQUEST_ACK"           },
   { OpenDDS::DCPS::SAMPLE_ACK,             "SAMPLE_ACK"            },
   { OpenDDS::DCPS::END_COHERENT_CHANGES,   "END_COHERENT_CHANGES"  },

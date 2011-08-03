@@ -45,16 +45,6 @@ public:
   MapType& map();
   const MapType& map() const;
 
-  /// The size of the serialized map.
-  size_t marshaled_size();
-
-  /// Serialize this map. The data in the stream:
-  /// size of this map, list of key(repoid)-value(RepoIdSet).
-  ACE_Message_Block* marshal();
-
-  /// Demarshal the serialized data of a RepoIdSetMap.
-  int demarshal(ACE_Message_Block* acks, bool swap_bytes);
-
   /// List the key of this map.
   void get_keys(RepoIdSet& keys) const;
 

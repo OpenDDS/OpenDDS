@@ -39,6 +39,10 @@ module OpenDDS {
         in boolean active
         );
 
+      // Called by the InfoRepo to the active peer when the passive peer
+      // has indicated that the connection is made.
+      oneway void association_complete(in RepoId remote_id);
+
       // will tell transport that associations are going away
       // The notify_lost flag true indicates the remove_association is invoked
       // by the InfoRepo after it detected a lost reader. The InfoRepo detects

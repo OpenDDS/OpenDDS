@@ -69,8 +69,6 @@ private:
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
   virtual const RepoId& get_repo_id() const = 0;
   virtual CORBA::Long get_priority_value(const AssociationData& data) const = 0;
-  virtual void post_associate(const RepoId& /*remote_id*/,
-                              const TransportImpl_rch& /*impl*/) {}
 
   // transport_detached() is called from TransportImpl when it shuts down
   friend class TransportImpl;
@@ -78,8 +76,6 @@ private:
 
   // helpers
   void add_link(const DataLink_rch& link, const RepoId& peer);
-  bool associate_i(const AssociationData& data, bool active,
-                   TransportImpl_rch& impl);
   TransportSendListener* get_send_listener();
   TransportReceiveListener* get_receive_listener();
 

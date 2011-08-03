@@ -277,6 +277,16 @@ public:
                    , OpenDDS::DCPS::Invalid_Domain
                    , OpenDDS::DCPS::Invalid_Participant));
 
+  virtual void association_complete(DDS::DomainId_t domainId,
+                                    const OpenDDS::DCPS::RepoId& participantId,
+                                    const OpenDDS::DCPS::RepoId& localId,
+                                    const OpenDDS::DCPS::RepoId& remoteId)
+  ACE_THROW_SPEC((CORBA::SystemException,
+                  OpenDDS::DCPS::Invalid_Domain,
+                  OpenDDS::DCPS::Invalid_Participant,
+                  OpenDDS::DCPS::Invalid_Publication,
+                  OpenDDS::DCPS::Invalid_Subscription));
+
   bool remove_by_owner(
     DDS::DomainId_t domain,
     long              owner);

@@ -290,13 +290,6 @@ OpenDDS::DCPS::DataLink::connection_notice_as_str(ConnectionNotice notice)
 
 ACE_INLINE
 void
-OpenDDS::DCPS::DataLink::fully_associated()
-{
-  //noop
-}
-
-ACE_INLINE
-void
 OpenDDS::DCPS::DataLink::terminate_send()
 {
   this->send_strategy_->terminate_send(false);

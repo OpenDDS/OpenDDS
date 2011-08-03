@@ -263,7 +263,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     RepoIdConverter reader_converter(yourId);
     RepoIdConverter writer_converter(writer.writerId);
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataReaderImpl::add_associations - ")
+               ACE_TEXT("(%P|%t) DataReaderImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
                std::string(reader_converter).c_str(),
@@ -277,7 +277,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   if (entity_deleted_ == true) {
     if (DCPS_debug_level >= 1)
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataReaderImpl::add_associations")
+                 ACE_TEXT("(%P|%t) DataReaderImpl::add_association")
                  ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
 
     return;
@@ -324,7 +324,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       if (DCPS_debug_level > 4) {
         RepoIdConverter converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
-                   "(%P|%t) DataReaderImpl::add_associations: "
+                   "(%P|%t) DataReaderImpl::add_association: "
                    "inserted writer %C.return %d \n",
                    std::string(converter).c_str(), bpair.second));
 
@@ -336,7 +336,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
           RepoIdConverter reader_converter(subscription_id_);
           RepoIdConverter writer_converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
-                    ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+                    ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
                     ACE_TEXT("reader %C is associated with writer %C.\n"),
                     std::string(reader_converter).c_str(),
                     std::string(writer_converter).c_str()));
@@ -356,7 +356,14 @@ DataReaderImpl::add_association(const RepoId& yourId,
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
 
-    this->associate(data, active);
+    if (!this->associate(data, active)) {
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_ERROR,
+                  ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                  ACE_TEXT("ERROR: transport layer failed to associate.\n")));
+      }
+      return;
+    }
 
     // Check if any publications have already sent a REQUEST_ACK message.
     {
@@ -389,7 +396,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       if (DCPS_debug_level >= 5) {
         RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+                   ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
                    ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
                    std::string(converter).c_str()));
       }
@@ -427,7 +434,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       if (DCPS_debug_level > 4) {
         RepoIdConverter converter(writer.writerId);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+                   ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
                    ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
                    std::string(converter).c_str(),
                    handle));
@@ -474,9 +481,28 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
   }
 
+  if (!active) {
+    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+    try {
+      repo->association_complete(this->domain_id_,
+                                 this->participant_servant_->get_id(),
+                                 this->subscription_id_, writer.writerId);
+    } catch (const CORBA::Exception& e) {
+      e._tao_print_exception("ERROR: Exception from DCPSInfo::"
+        "association_complete");
+    }
+  }
+
   if (this->monitor_) {
     this->monitor_->report();
   }
+}
+
+void
+DataReaderImpl::association_complete(const RepoId& /*remote_id*/)
+{
+  // For the current DCPSInfoRepo implementation, the DataReader side will
+  // always be passive, so association_complete() will not be called.
 }
 
 void

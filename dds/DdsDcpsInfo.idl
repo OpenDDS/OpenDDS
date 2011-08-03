@@ -175,7 +175,20 @@ module OpenDDS {
         raises (Invalid_Domain,
                 Invalid_Participant);
 
-      /// Forces associatios to dissolve by participant.
+      /// Inform the InfoRepo that the process of creating an association,
+      /// which was started by the Data{Reader,Writer}Remote::add_association()
+      /// operation, has completed.  The peer that was passive
+      /// ("active" parameter == false) calls this after the connection is made.
+      void association_complete(in DDS::DomainId_t domainId,
+                                in RepoId participantId,
+                                in RepoId localId,
+                                in RepoId remoteId)
+        raises(Invalid_Domain,
+               Invalid_Participant,
+               Invalid_Publication,
+               Invalid_Subscription);
+
+      /// Forces associations to dissolve by participant.
       void disassociate_participant(in DDS::DomainId_t domainId,
                                     in RepoId local_id,
                                     in RepoId remote_id)

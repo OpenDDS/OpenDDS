@@ -44,10 +44,6 @@ namespace OpenDDS
 
         virtual void pre_stop_i();
 
-        /// Called on subscriber side to send the fully association
-        /// message to the publisher.
-        virtual void fully_associated ();
-
       protected:
 
         /// Called when the DataLink is self-releasing because all of its

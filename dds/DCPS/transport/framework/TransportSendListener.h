@@ -63,9 +63,6 @@ public:
     DataSample* /* data */)
   {}
 
-  virtual void fully_associated(const RepoId& /* remote_id */)
-  {}
-
 protected:
 
   TransportSendListener();

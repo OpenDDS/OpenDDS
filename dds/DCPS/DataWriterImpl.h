@@ -192,6 +192,8 @@ public:
                        const ReaderAssociation& reader,
                        bool active);
 
+  void association_complete(const RepoId& remote_id);
+
   void remove_associations(const ReaderIdSeq & readers,
                            bool callback);
 
@@ -419,10 +421,6 @@ public:
   int         control_dropped_count_;
   int         control_delivered_count_;
 
-  /// Called by transport after transport received the
-  /// FULLY_ASSOCIATED ack from the associated subscriber.
-  void fully_associated(const RepoId& remote_association);
-
   /**
    * This method create a header message block and chain with
    * the sample data. The header contains the information
@@ -539,9 +537,6 @@ private:
   CORBA::Long get_priority_value(const AssociationData&) const {
     return this->qos_.transport_priority.value;
   }
-
-  void post_associate(const RepoId& remote_id,
-                      const TransportImpl_rch& impl);
 
   friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_
 

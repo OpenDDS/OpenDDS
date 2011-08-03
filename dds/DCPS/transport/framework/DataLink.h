@@ -94,8 +94,7 @@ public:
   void stop();
 
   /// The resume_send is used in the case of reconnection
-  /// on the subscriber's side, e.g.,to send
-  /// out the FULLY_ASSOCIATED message to publisher.
+  /// on the subscriber's side.
   void resume_send();
 
   // ciju: Called by TransportImpl
@@ -126,11 +125,6 @@ public:
   /// removed from internal DataLink structures so it no longer
   /// receives events.
   void remove_listener(const RepoId& local_id);
-
-  /// A hook for the concrete transport to do something special on
-  /// subscriber side after both add_associations is received and
-  /// the connection is established.
-  virtual void fully_associated();
 
   // ciju: Called by LinkSet with locks held
   /// Called by the TransportClient objects that reference this
@@ -182,10 +176,6 @@ public:
   /// Called before release the datalink or before shutdown to let
   /// the concrete DataLink to do anything necessary.
   virtual void pre_stop_i();
-
-  /// This is called on subscriber side to serialize the
-  /// associated publication and subscriptions.
-  ACE_Message_Block* marshal_acks();
 
   // Call-back from the concrete transport object.
   // The connection has been broken. No locks are being held.

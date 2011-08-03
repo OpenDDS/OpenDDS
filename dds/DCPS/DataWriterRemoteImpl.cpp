@@ -50,6 +50,22 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 void
+DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
+  ACE_THROW_SPEC((CORBA::SystemException))
+{
+  DataWriterImpl* parent = 0;
+  DDS::DataWriter_var dwv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->association_complete(remote_id);
+  }
+}
+
+void
 DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
 ACE_THROW_SPEC((CORBA::SystemException))

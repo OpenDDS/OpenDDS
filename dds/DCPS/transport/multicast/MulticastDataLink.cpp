@@ -263,7 +263,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       }
     }
     if (this->check_fully_association_) {
-      this->transport_->check_fully_association ();
+      //TODO: this->transport_->check_fully_association();
       this->check_fully_association_ = false;
     }
   } break;

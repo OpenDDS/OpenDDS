@@ -234,10 +234,9 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
         }
       }
 
-      TcpConnection_rch connection;
       ConnectionMap::iterator iter = this->connections_.find(key);
       if (iter != this->connections_.end()) {
-        connection = iter->second;
+        TcpConnection_rch connection = iter->second;
         this->connections_.erase(iter);
 
         if (this->connect_tcp_datalink(link.in(), connection.in()) == -1) {
@@ -765,7 +764,7 @@ TcpTransport::connect_tcp_datalink(TcpDataLink* link,
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::connect_datalink() - ")
+               ACE_TEXT("(%P|%t) TcpTransport::connect_tcp_datalink() - ")
                ACE_TEXT("creating send strategy with priority %d.\n"),
                link->transport_priority()));
   }

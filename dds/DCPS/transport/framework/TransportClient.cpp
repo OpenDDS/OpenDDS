@@ -141,18 +141,6 @@ TransportClient::associate(const AssociationData& data, bool active)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
   repo_id_ = get_repo_id();
-  TransportImpl_rch impl;
-  if (associate_i(data, active, impl)) {
-    post_associate(data.remote_id_, impl);
-    return true;
-  }
-  return false;
-}
-
-bool
-TransportClient::associate_i(const AssociationData& data, bool active,
-                             TransportImpl_rch& impl)
-{
   const CORBA::Long priority = get_priority_value(data);
 
   // Attempt to find an existing DataLink that can be reused
@@ -162,7 +150,6 @@ TransportClient::associate_i(const AssociationData& data, bool active,
       impls_[i]->find_datalink(repo_id_, data, priority, active);
     if (!link.is_nil()) {
       add_link(link, data.remote_id_);
-      impl = impls_[i];
       return true;
     }
   }
@@ -174,7 +161,6 @@ TransportClient::associate_i(const AssociationData& data, bool active,
       DataLink_rch link = impls_[i]->connect_datalink(repo_id_, data, priority);
       if (!link.is_nil()) {
         add_link(link, data.remote_id_);
-        impl = impls_[i];
         return true;
       }
     }
@@ -199,7 +185,6 @@ TransportClient::associate_i(const AssociationData& data, bool active,
     }
     if (!ce.link_.is_nil()) {
       add_link(ce.link_, data.remote_id_);
-      impl = ce.link_->impl();
       return true;
     }
   }
@@ -216,7 +201,6 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
   TransportReceiveListener* trl = get_receive_listener();
   if (trl) {
     link->make_reservation(peer, repo_id_, trl);
-    link->fully_associated();
   } else {
     link->make_reservation(peer, repo_id_, get_send_listener());
   }

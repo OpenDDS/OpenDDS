@@ -47,10 +47,6 @@ public:
 
   virtual void pre_stop_i();
 
-  /// Called on subscriber side to send the fully association
-  /// message to the publisher.
-  virtual void fully_associated();
-
   /// Set release pending flag.
   void set_release_pending (bool flag);
   /// Get release pending flag.

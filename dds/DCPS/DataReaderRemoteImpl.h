@@ -44,6 +44,9 @@ public:
                                bool active)
   ACE_THROW_SPEC((CORBA::SystemException));
 
+  virtual void association_complete(const RepoId& remote_id)
+  ACE_THROW_SPEC((CORBA::SystemException));
+
   virtual void remove_associations(const WriterIdSeq& writers,
                                    CORBA::Boolean callback)
   ACE_THROW_SPEC((CORBA::SystemException));

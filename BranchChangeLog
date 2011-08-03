@@ -1,3 +1,61 @@
+Wed Aug  3 18:49:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * tools/dissector/packet-opendds.cpp:
+
+          Removed FULLY_ASSOCIATED messages in the transport layer.
+          The equivalent functionality, applicable to all transpot types, is
+          now implemented as an InfoRepo-mediated call (association_complete).
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Removed old comments that are no longer relevant.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+
+          Adapted to new IDL and transport framework APIs.
+
 Wed Aug  3 17:55:10 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportInst.cpp:

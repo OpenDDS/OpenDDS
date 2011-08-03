@@ -55,6 +55,16 @@ public:
   /// Returns 0 if added, 1 if already exists, -1 other failure
   int add_associated_subscription(DCPS_IR_Subscription* sub, bool active);
 
+  /// The service participant that contains this Publication has indicated
+  /// that the assocation to peer "remote" is complete.  This method will
+  /// locate the Subscription object for "remote" in order to inform it
+  /// of the completed association.
+  void association_complete(const OpenDDS::DCPS::RepoId& remote);
+
+  /// Invoke the DataWriterRemote::association_complete() callback, passing
+  /// the "remote" parameter (Subscription) to the service participant.
+  void call_association_complete(const OpenDDS::DCPS::RepoId& remote);
+
   /// Remove the associated subscription
   /// Removes the subscription from the list of associated
   ///  subscriptions if return successful
