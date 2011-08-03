@@ -13,6 +13,8 @@
 #include "TransportImpl.h"
 #include "DataLinkSet.h"
 
+#include "ace/Time_Value.h"
+
 #include <vector>
 
 // Forward definition of a test-friendly class in the global name space
@@ -85,10 +87,20 @@ private:
 
   typedef std::map<RepoId, DataLink_rch, GUID_tKeyLessThan> DataLinkIndex;
 
+
+  // Associated Impls and DataLinks:
+  
   std::vector<TransportImpl_rch> impls_;
   DataLinkSet links_;
   DataLinkIndex data_link_index_;
+
+
+  // Configuration details:
+
   bool swap_bytes_;
+  ACE_Time_Value passive_connect_duration_;
+
+
   TransportLocatorSeq conn_info_;
   ACE_Thread_Mutex lock_;
   RepoId repo_id_;

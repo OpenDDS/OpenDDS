@@ -29,7 +29,6 @@ namespace DCPS {
 TcpTransport::TcpTransport(const TransportInst_rch& inst)
   : reverse_reservation_lock_(this->reservation_lock()),
     acceptor_(new TcpAcceptor(this)),
-    connections_updated_(this->connections_lock_),
     con_checker_(new TcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
@@ -414,14 +413,6 @@ TcpTransport::shutdown_i()
     GuardType guard(this->connections_lock_);
 
     this->connections_.clear();
-    // TBD SOON - Need to set some flag to tell those threads waiting on
-    //            the connections_updated_ condition that there is no hope
-    //            of ever getting the connection that they seek - they should
-    //            give up rather than continue to wait.
-
-    // We need to signal all of the threads that may be stuck wait()'ing
-    // on the connections_updated_ condition.
-    this->connections_updated_.broadcast();
   }
 
   // Disconnect all of our DataLinks, and clear our links_ collection.
@@ -551,7 +542,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   // Take ownership of the passed-in connection pointer.
   TcpConnection_rch connection_obj = connection;
 
-  if (DCPS_debug_level > 9) {
+  if (Transport_debug_level > 5) {
     std::stringstream os;
     dump(os);
 
@@ -577,22 +568,45 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     if (iter->second == key) {
       GuardType guard(this->links_lock_);
       if (this->links_.find(key, link) == 0 /* found */) {
+        VDBG_LVL((LM_DEBUG,
+                  ACE_TEXT("(%P|%t) found matching key in links_ and ")
+                  ACE_TEXT("pending_connections_\n")), 5);
         evt = iter->first;
-        //TODO: cleanup other multimap entries
+        this->pending_connections_.erase(iter);
         break;
       }
     }
   }
-  if (!link.is_nil()) {
+
+  if (!link.is_nil()) { // found in pending_connections_
+    // remove other entries for this ConnectionEvent in pending_connections_
+    std::pair<iter_t, iter_t> range =
+      this->pending_connections_.equal_range(evt);
+    for (iter_t iter = range.first; iter != range.second; ++iter) {
+      GuardType guard(this->links_lock_);
+      this->links_.unbind(iter->second);
+    }
+    this->pending_connections_.erase(range.first, range.second);
+
     if (this->connect_tcp_datalink(link.in(), connection) == -1) {
-      //TODO: error
+      VDBG_LVL((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: connect_tcp_datalink failed\n")), 5);
+      GuardType guard(this->links_lock_);
+      this->links_.unbind(key);
+    } else if (!evt->complete(link._retn())) {
+      VDBG_LVL((LM_DEBUG,
+                ACE_TEXT("(%P|%t) another connection completed first\n")), 5);
+      GuardType guard(this->links_lock_);
+      this->links_.unbind(key);
+    } else {
+      this->con_checker_->add(connection_obj);
     }
-    if (!evt->complete(link._retn())) {
-      //TODO: other transport completed first
-    }
-    this->con_checker_->add(connection_obj);
     return;
   }
+
+  // If we reach this point, this key was not in pending_connections_, so the
+  // accept_datalink() call hasn't happened yet.  Store in connections_ for the
+  // accept_datalink() method to find.
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n"
             , this->connections_.size()), 5);
@@ -610,17 +624,10 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                connection->transport_priority()));
   }
 
-  // Swap in the new connection.
-  this->connections_[ key] = connection_obj;
+  this->connections_[key] = connection_obj;
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n"
             , this->connections_.size()), 5);
-
-  // Regardless of the outcome of the bind operation, let's tell any threads
-  // that are wait()'ing on the connections_updated_ condition to check
-  // the connections_ map again.
-
-  this->connections_updated_.broadcast();
 
   // Enqueue the connection to the reconnect task that verifies if the connection
   // is re-established.
@@ -660,102 +667,7 @@ TcpTransport::make_active_connection(const ACE_INET_Addr& remote_address,
   return this->connect_tcp_datalink(link, connection.in());
 }
 
-int
-TcpTransport::make_passive_connection
-(const ACE_INET_Addr& remote_address,
- TcpDataLink*   link)
-{
-  DBG_ENTRY_LVL("TcpTransport","make_passive_connection",6);
-
-  TcpConnection_rch connection;
-
-  if (DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    buffer << *link;
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::make_passive_connection() - ")
-               ACE_TEXT("waiting for connection from %C:%d and priority %d.\n%C"),
-               remote_address.get_host_name(),
-               remote_address.get_port_number(),
-               link->transport_priority(),
-               buffer.str().c_str()));
-  }
-
-  ACE_Time_Value abs_timeout(0);
-
-  // TODO: Move this code somewhere?
-  //if (this->tcp_config_->passive_connect_duration_ != 0) {
-  //  abs_timeout.set(this->tcp_config_->passive_connect_duration_/1000,
-  //                  this->tcp_config_->passive_connect_duration_%1000 * 1000);
-  //  abs_timeout += ACE_OS::gettimeofday();
-  //}
-
-  PriorityKey key(link->transport_priority(), remote_address, link->is_loopback(), link->is_active());
-
-  //VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-  //          "Passive connect timeout: %d milliseconds (0 == forever).\n",
-  //          this->tcp_config_->passive_connect_duration_), 5);
-
-  // Look in our connections_ map to see if the passive connection
-  // has already been established for the remote_address.  If so, we
-  // will extract it from the connections_ map and give it to the link.
-  {
-    GuardType guard(this->connections_lock_);
-
-    while (true) {
-      if ((abs_timeout != ACE_Time_Value::zero)
-          && (abs_timeout <= ACE_OS::gettimeofday())) {
-        // This doesn't necessarily represent an error.
-        // It could just be a delay on the remote side. More a QOS issue.
-        VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n"), 5);
-        return -1;
-      }
-
-      // check if there's already a connection waiting
-      ConnectionMap::iterator position = this->connections_.find(key);
-
-      if (position != this->connections_.end()) {
-        connection = position->second;
-        this->connections_.erase(position);
-        break; // break out and continue with connection establishment
-      }
-
-      if (link->is_loopback()) {
-        // The reservation lock needs be released at this point so the publisher
-        // attached to same transport can make reservation and try to connect to
-        // peer in.
-        ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_reservation_lock_, -1);
-        // Now lets wait for an update
-        wait_for_connection (abs_timeout);
-      }
-      else {
-        //Now lets wait for an update
-        wait_for_connection (abs_timeout);
-      }
-    }
-  }
-
-  // TBD SOON - Check to see if we we woke up because the Transport
-  //            is shutting down.  If so, return a -1 now.
-
-  return this->connect_tcp_datalink(link, connection.in());
-}
-
-
-void
-TcpTransport::wait_for_connection(const ACE_Time_Value& abs_timeout)
-{
-  // Now lets wait for an update
-  if (abs_timeout == ACE_Time_Value::zero) {
-    this->connections_updated_.wait(0);
-
-  } else {
-    this->connections_updated_.wait(&abs_timeout);
-  }
-}
-
-
-/// Common code used by make_active_connection() and make_passive_connection().
+/// Common code used by accept_datalink(), passive_connection(), and make_active_connection().
 int
 TcpTransport::connect_tcp_datalink(TcpDataLink* link,
                                    TcpConnection* connection)

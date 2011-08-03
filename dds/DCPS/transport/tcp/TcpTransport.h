@@ -99,16 +99,10 @@ private:
   int make_active_connection(const ACE_INET_Addr& remote_address,
                              TcpDataLink*   link);
 
-  /// Called by find_or_create_datalink().
-  int make_passive_connection(const ACE_INET_Addr& remote_address,
-                              TcpDataLink*   link);
-
   /// Code common to make_active_connection() and
   /// make_passive_connection().
   int connect_tcp_datalink(TcpDataLink*   link,
                            TcpConnection* connection);
-
-  void wait_for_connection(const ACE_Time_Value& abs_timeout);
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
                           CORBA::Long priority,
@@ -165,11 +159,7 @@ private:
   /// with a DataLink.
   ConnectionMap connections_;
 
-  /// Condition that will be signal()'ed whenever something has been
-  /// inserted into connections_.
-  ConditionType connections_updated_;
-
-  /// This protects the connections_ and the connections_updated_
+  /// This protects the connections_ and the pending_connections_
   /// data members.
   LockType connections_lock_;
 

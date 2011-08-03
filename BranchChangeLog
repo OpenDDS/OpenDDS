@@ -1,3 +1,16 @@
+Wed Aug  3 20:06:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Use the passive_connect_duration_ setting from TransportConfig.
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Removed old make_passive_connection() and related code.
+          Improved logging and data structure cleanup for error conditions.
+
 Wed Aug  3 18:49:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

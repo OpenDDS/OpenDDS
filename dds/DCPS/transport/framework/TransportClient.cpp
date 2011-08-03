@@ -78,6 +78,7 @@ TransportClient::enable_transport()
   }
 
   swap_bytes_ = tc->swap_bytes_;
+  passive_connect_duration_.set_msec(tc->passive_connect_duration_);
 
   const size_t n = tc->instances_.size();
   for (size_t i = 0; i < n; ++i) {
@@ -175,8 +176,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       }
     }
     if (ce.link_.is_nil()) {
-      ACE_Time_Value timeout; //TODO: get timeout from TransportConfig
-      ce.wait(timeout);
+      ce.wait(passive_connect_duration_);
     }
     for (size_t i = 0; i < impls_.size(); ++i) {
       if (ce.link_.is_nil() || impls_[i].in() != ce.link_->impl().in()) {
