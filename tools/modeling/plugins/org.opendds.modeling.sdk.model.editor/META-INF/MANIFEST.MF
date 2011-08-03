@@ -14,6 +14,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.opendds.modeling.sdk.model.edit;visibility:=reexport,
  org.eclipse.emf.ecore.xmi;visibility:=reexport,
  org.eclipse.emf.edit.ui;visibility:=reexport,
- org.eclipse.ui.ide;visibility:=reexport
+ org.eclipse.ui.ide;visibility:=reexport,
+ org.junit4
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.core.filesystem

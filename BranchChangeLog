@@ -1,3 +1,23 @@
+Tue Aug  2 21:38:05 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+
+          A generated file that changed after runing build.pl (likely 
+          due to the previous change).
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedModelFile.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Introducing the transport config concepts to the modeling SDK. 
+          Implemented initialization of the generator using the names of 
+          transport config found in the model.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/test/org/opendds/modeling/sdk/model/GeneratorSpecification:
+
+          Added a couple of tests
+
 Tue Aug  2 21:19:07 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

@@ -1,33 +1,46 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.TreeSet;
 
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class ParsedModelFile extends ParsedXmlFile {
-	private static final String modelNameExpression = "//opendds:OpenDDSModel/@name";
-	private static final String transportIndexExpression = "//@transportId";
-	private static final String dataLibExpression = "//libs[@xsi:type='types:DataLib']";
 
-	private static XPathExpression nameExpr;
-	private static XPathExpression transportIdExpr;
-	private static XPathExpression dataLibExpr;
+	static private final NodeList EMPTY_NODE_LIST = new NodeList() {
 
-	private String modelName;
-	private Set<Integer> transportIndices = new TreeSet<Integer>();
-	private Boolean hasDataLib;
+		@Override
+		public Node item(int index) {
+			return null;
+		}
+
+		@Override
+		public int getLength() {
+			return 0;
+		}
+	};
+
+	private final XPathMatcher nameExpr = new XPathMatcher("//opendds:OpenDDSModel/@name");
+	private final XPathMatcher transportNameExpr = new XPathMatcher("//@transportConfig");
+	private final XPathMatcher dataLibExpr = new XPathMatcher("//libs[@xsi:type='types:DataLib']");
+	private final Collection<String> transportNames = new TreeSet<String>();
+	
+	private String modelNameCache;
+	private Boolean hasDataLibCache;
 
 	/**
-	 * Create a new object of the ParsedModelFile class.
-	 * This is the correct way to obtain new instances of this class.
+	 * Create a new object of the ParsedModelFile class. This is the correct way
+	 * to obtain new instances of this class.
 	 * 
-	 * @param fp - IFileProvider to be used by a ParsedModelFile object.
-	 * @param eh - IErrorHandler to be used by a ParsedModelFile object.
-	 * @return   - ParsedModelFile object.
+	 * @param fp
+	 *            - IFileProvider to be used by a ParsedModelFile object.
+	 * @param eh
+	 *            - IErrorHandler to be used by a ParsedModelFile object.
+	 * @return - ParsedModelFile object.
 	 */
 	public static ParsedModelFile create(IFileProvider fp, IErrorHandler eh) {
 		return new ParsedModelFile(fp, eh);
@@ -39,95 +52,84 @@ public class ParsedModelFile extends ParsedXmlFile {
 
 	@Override
 	public void reset() {
-		modelName = null;
-		transportIndices.clear();
-		hasDataLib = null;
+		modelNameCache = null;
+		transportNames.clear();
+		hasDataLibCache = null;
 		super.reset();
 	}
 
 	public String getModelName() {
-		if( sourceName == null) {
+		if (sourceName == null) {
 			return null;
 		}
 
-		if( modelName == null) {
-			NodeList nodes = parseExpression( getNameExpr());
-			if( nodes != null && nodes.getLength() > 0) {
-				modelName = nodes.item(0).getNodeValue();
-			}
+		if (modelNameCache != null) {
+			return modelNameCache;
 		}
 
-		return modelName;
+		NodeList nodes = nameExpr.retrieve(this);
+		if (nodes.getLength() > 0) {
+			modelNameCache = nodes.item(0).getNodeValue();
+		}
+		return modelNameCache;
 	}
-	
-	public Set<Integer> getTransportIds() {
-		if( this.sourceName == null) {
+
+	public Collection<String> getTransportNames() {
+		if (this.sourceName == null) {
 			return null;
 		}
 
-		if( transportIndices.isEmpty()) {
-			NodeList nodes = parseExpression( getTransportIdExpr());
-			if( nodes != null) {
-				for( int index = 0; index < nodes.getLength(); ++index) {
-					transportIndices.add(Integer.valueOf(nodes.item(index).getNodeValue()));
-				}
-			}
+		if (!transportNames.isEmpty()) {
+			return transportNames;
 		}
 
-		return transportIndices;
+		NodeList nodes = transportNameExpr.retrieve(this);
+		for (int index = 0; index < nodes.getLength(); ++index) {
+			transportNames.add(nodes.item(index).getNodeValue());
+		}
+		return transportNames;
 	}
 
 	public Boolean hasDataLib() {
-		if( this.sourceName == null) {
+		if (this.sourceName == null) {
 			return null;
 		}
 
-		if( hasDataLib == null) {
-			NodeList nodes = parseExpression( getDataLibExpr());
-			if( nodes != null) {
-			    hasDataLib = new Boolean(nodes.getLength() > 0);
-			}
+		if (hasDataLibCache != null) {
+			return hasDataLibCache;
 		}
 
-		return hasDataLib;
-	}
-
-	private XPathExpression getNameExpr() {
-		if (nameExpr == null) {
-			try {
-				nameExpr = getXpath().compile(modelNameExpression);
-
-			} catch (XPathExpressionException e) {
-				errorHandler.error(IErrorHandler.Severity.ERROR, "getNameExpr",
-						"XPath expression not available to obtain the model name.", e);
-			}
-		}
-		return nameExpr;
+		NodeList nodes = dataLibExpr.retrieve(this);
+		hasDataLibCache = new Boolean(nodes.getLength() > 0);
+		return hasDataLibCache;
 	}
 	
-	private XPathExpression getTransportIdExpr() {
-		if (transportIdExpr == null) {
-			try {
-				transportIdExpr = getXpath().compile(transportIndexExpression);
-
-			} catch (XPathExpressionException e) {
-				errorHandler.error(IErrorHandler.Severity.ERROR, "getTransportIdExpr",
-						"XPath expression not available to obtain the active transport Id values.", e);
-			}
-		}
-		return transportIdExpr;
-	}
 	
-	private XPathExpression getDataLibExpr() {
-		if (dataLibExpr == null) {
-			try {
-				dataLibExpr = getXpath().compile(dataLibExpression);
-			} catch (XPathExpressionException e) {
-				errorHandler.error(IErrorHandler.Severity.ERROR, "getDataLibExpr",
-						"XPath expression not available to check for DataLibs.", e);
-			}
+	static class XPathMatcher {
+		private XPathExpression expr;
+		private final String xpath;
+
+		XPathMatcher(String xpath) {
+			this.xpath = xpath;
 		}
-		return dataLibExpr;
+
+		NodeList retrieve(ParsedXmlFile pxf) {
+
+			if (expr != null) {
+				return pxf.parseExpression(expr);
+			}
+
+			try {
+				expr = pxf.getXpath().compile(xpath);
+			} catch (XPathExpressionException e) {
+				pxf.errorHandler.error(IErrorHandler.Severity.ERROR,
+						"retrieve", "Failed to compile XPath expression: "
+								+ xpath, e);
+			}
+			NodeList nl = pxf.parseExpression(expr);
+			return (nl == null) ? EMPTY_NODE_LIST : nl;
+		}
 	}
+
 
 }
