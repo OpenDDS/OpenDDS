@@ -1160,18 +1160,15 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 
 		// Restrict the tree editors to the desired scope.
 		//
-		EList<Resource> resources = editingDomain.getResourceSet()
-				.getResources();
+		EList<Resource> resources = editingDomain.getResourceSet().getResources();
 		if (resources.size() > 0) {
 			Resource resource = resources.get(0);
 			EList<EObject> contents = resource.getContents();
 			if (contents.size() > 0) {
 				EObject root = contents.get(0);
 				if (root instanceof CodeGen) {
-					customizationViewer.setTreeInput(((CodeGen) root)
-							.getInstances());
-					environmentViewer.setTableInput(((CodeGen) root)
-							.getSearchPaths());
+					customizationViewer.setTreeInput(root);
+					environmentViewer.setTableInput(((CodeGen) root).getSearchPaths());
 				}
 			}
 		}

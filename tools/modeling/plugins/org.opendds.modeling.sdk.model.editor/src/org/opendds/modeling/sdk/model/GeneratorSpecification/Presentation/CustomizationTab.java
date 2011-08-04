@@ -10,6 +10,8 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTargetListener;
@@ -22,12 +24,28 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Instances;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Transports;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.genspec;
 
 /**
  * @author martinezm
  *
  */
 public class CustomizationTab extends StructuredViewer {
+	
+	// A view filter class that can limit what instances show in the viewer
+	private static final class CustomizationViewFilter extends ViewerFilter {
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			
+			if (parentElement instanceof genspec)
+				return element instanceof Instances || element instanceof Transports;
+			
+			return true;
+		}
+	}
+
 	// A TreeViewer with the protected abstract StructuredViewer methods
 	// exposed so that we can simply delegate to them.
 	protected TreeViewerDelegate treeViewer;
@@ -37,52 +55,24 @@ public class CustomizationTab extends StructuredViewer {
 	/**
 	 *
 	 */
-	public CustomizationTab( Composite parent) {
+	public CustomizationTab(Composite parent) {
 		control = new Composite(parent, 0);
+		control.setLayout(new GridLayout(1, true));
 
-		control.setLayout( new GridLayout( 2, true));
-		{
-			Composite panel = new Composite(control, 0);
-			GridData panelData = new GridData(SWT.FILL, SWT.FILL, true, true);
-			panel.setLayoutData(panelData);
+		Composite panel = new Composite(control, 0);
+		GridData panelData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		panel.setLayoutData(panelData);
+		panel.setLayout(new GridLayout(1, true));
 
-			GridLayout layout = new GridLayout(1, true);
-			panel.setLayout(layout);
-			{
-				Label label = new Label(panel, 0);
-				label.setText("Model Instance Definitions");
-				GridData data = new GridData(SWT.CENTER, SWT.TOP, false, false);
-				label.setLayoutData(data);
-			}
+		Label label = new Label(panel, 0);
+		label.setText("Model Instance Definitions");
+		label.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 
-			{
-				Composite treePane = new Composite(panel,0);
-				GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
-				treePane.setLayoutData(data);
-
-				treePane.setLayout( new FillLayout(SWT.VERTICAL));
-				treeViewer = new TreeViewerDelegate( treePane, SWT.FULL_SELECTION);
-			}
-
-		}
-
-		{
-			Composite panel = new Composite(control, 0);
-			GridData panelData = new GridData(SWT.LEAD, SWT.FILL, true, true);
-			panel.setLayoutData(panelData);
-
-			GridLayout layout = new GridLayout(1, true);
-			panel.setLayout(layout);
-			{
-				Label label = new Label(panel, 0);
-				label.setText("Selection Information");
-				GridData data = new GridData(SWT.CENTER, SWT.TOP, true, true);
-				label.setLayoutData(data);
-
-				// TODO add content here
-			}
-		}
-
+		Composite treePane = new Composite(panel, 0);
+		treePane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		treePane.setLayout(new FillLayout(SWT.VERTICAL));
+		
+		treeViewer = new TreeViewerDelegate(treePane, SWT.FULL_SELECTION);
 	}
 
 	/* (non-Javadoc)
@@ -236,6 +226,8 @@ public class CustomizationTab extends StructuredViewer {
 	// interfaces uses this tab form instead.
 	public void setTreeInput(Object input) {
 		treeViewer.setInput(input);
+		treeViewer.addFilter(new CustomizationViewFilter());
+
 	}
 
 
