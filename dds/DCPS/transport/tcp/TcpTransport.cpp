@@ -209,8 +209,11 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
   const std::string ttype = "tcp";
   const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
 
-  std::vector<PriorityKey> keys;
   GuardType guard(this->connections_lock_);
+  std::vector<PriorityKey> keys;
+  TcpDataLink_rch ready_link; // a datalink that's already ready to use
+  PriorityKey ready_key; // key for ready_link
+  TcpConnection_rch connection;
 
   for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
     if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
@@ -235,26 +238,31 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
 
       ConnectionMap::iterator iter = this->connections_.find(key);
       if (iter != this->connections_.end()) {
-        TcpConnection_rch connection = iter->second;
+        connection = iter->second;
         this->connections_.erase(iter);
-
-        if (this->connect_tcp_datalink(link.in(), connection.in()) == -1) {
-          GuardType guard(this->links_lock_);
-          this->links_.unbind(key);
-          link = 0;
-        }
-        this->unbind_all(keys); // these are the blobs that didn't connect
-        return link._retn();
+        ready_link = link;
+        ready_key = key;
+        break;
       }
       keys.push_back(key);
     }
   }
 
-  for (size_t i = 0; i < keys.size(); ++i) {
-    this->pending_connections_.insert(std::make_pair(&ce, keys[i]));
+  if (ready_link.is_nil()) {
+    for (size_t i = 0; i < keys.size(); ++i) {
+      this->pending_connections_.insert(std::make_pair(&ce, keys[i]));
+    }
+    return 0; // no link ready, passive_connection will signal the event later
   }
 
-  return 0;
+  guard.release(); // connect_tcp_datalink() isn't called with connections_lock_
+  if (this->connect_tcp_datalink(ready_link.in(), connection.in()) == -1) {
+    GuardType guard(this->links_lock_);
+    this->links_.unbind(ready_key);
+    ready_link = 0;
+  }
+  this->unbind_all(keys); // these are the blobs that didn't connect
+  return ready_link._retn();
 }
 
 void

@@ -1,9 +1,16 @@
+Thu Aug  4 21:59:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed a deadlock between connections_lock_ and the ACE reactor token
+          for concurrent calls to accept_datalink() and passive_connection().
+
 Thu Aug  4 21:39:08 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
 
-          Modified the customizatin tab to show both Instances and Transports.
+          Modified the customization tab to show both Instances and Transports.
 
 Thu Aug  4 20:37:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
