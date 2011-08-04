@@ -1,3 +1,10 @@
+Thu Aug  4 15:50:58 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+
+          Adding customizations to a generated file in order to be able to show 
+          the name of the referred transport instance.
+
 Thu Aug  4 18:27:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.h:
