@@ -145,6 +145,9 @@ TransportClient::associate(const AssociationData& data, bool active)
   repo_id_ = get_repo_id();
   const CORBA::Long priority = get_priority_value(data);
 
+  MultiReservLock mrl(impls_);
+  ACE_GUARD_RETURN(MultiReservLock, guard2, mrl, false);
+
   // Attempt to find an existing DataLink that can be reused
   for (size_t i = 0; i < impls_.size(); ++i) {
 
@@ -404,6 +407,75 @@ TransportClient::remove_all_msgs()
 {
   const int ret = links_.remove_all_msgs(repo_id_);
   return ret == 0;
+}
+
+
+// MultiReservLock nested class
+
+
+TransportClient::MultiReservLock::MultiReservLock(
+  const std::vector<TransportImpl_rch>& impls)
+  : impls_(impls)
+{
+  for (size_t i = 0; i < impls_.size(); ++i) {
+    sorted_.insert(impls_[i].in());
+  }
+}
+
+int
+TransportClient::MultiReservLock::action_fwd(
+  TransportClient::MultiReservLock::PMF function,
+  TransportClient::MultiReservLock::PMF undo)
+{
+  typedef std::set<TransportImpl*>::iterator iter_t;
+  for (iter_t iter = sorted_.begin(); iter != sorted_.end(); ++iter) {
+    int ret = ((*iter)->reservation_lock().*function)();
+    if (ret != 0) {
+      while (iter != sorted_.begin()) {
+        ((*--iter)->reservation_lock().*undo)();
+      }
+      return ret;
+    }
+  }
+  return 0;
+}
+
+int
+TransportClient::MultiReservLock::action_rev(
+  TransportClient::MultiReservLock::PMF function)
+{
+  int ret = 0;
+  typedef std::set<TransportImpl*>::reverse_iterator iter_t;
+  for (iter_t iter = sorted_.rbegin(); iter != sorted_.rend(); ++iter) {
+    ret += ((*iter)->reservation_lock().*function)();
+  }
+  return ret;
+}
+
+int
+TransportClient::MultiReservLock::acquire()
+{
+  return action_fwd(&TransportImpl::ReservationLockType::acquire,
+                    &TransportImpl::ReservationLockType::release);
+}
+
+int
+TransportClient::MultiReservLock::tryacquire()
+{
+  return action_fwd(&TransportImpl::ReservationLockType::tryacquire,
+                    &TransportImpl::ReservationLockType::release);
+}
+
+int
+TransportClient::MultiReservLock::release()
+{
+  return action_rev(&TransportImpl::ReservationLockType::release);
+}
+
+int
+TransportClient::MultiReservLock::remove()
+{
+  return action_rev(&TransportImpl::ReservationLockType::remove);
 }
 
 }

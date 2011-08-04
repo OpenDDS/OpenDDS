@@ -163,7 +163,7 @@ private:
   /// no longer used for any associations.  This occurs during
   /// a "remove associations" operation being performed by some
   /// TransportClient that uses this TransportImpl.  The
-  /// TransportClient is known to have acquired our reservation_lock_ [TODO],
+  /// TransportClient is known to have acquired our reservation_lock_,
   /// so there won't be any reserve_datalink() calls being made from
   /// any other threads while we perform this release.
   /// Since there are some delay of the datalink release, the release_pending

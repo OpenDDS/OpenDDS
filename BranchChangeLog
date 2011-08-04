@@ -1,3 +1,13 @@
+Thu Aug  4 18:27:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Need to lock the reservation locks for the various transport impls
+          in TransportClient::associate().  It can be called from multiple
+          threads due to nested upcalls from TAO.
+
 Thu Aug  4 14:30:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:

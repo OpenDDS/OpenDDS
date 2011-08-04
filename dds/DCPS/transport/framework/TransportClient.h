@@ -104,6 +104,22 @@ private:
   TransportLocatorSeq conn_info_;
   ACE_Thread_Mutex lock_;
   RepoId repo_id_;
+
+
+  class MultiReservLock {
+  public:
+    explicit MultiReservLock(const std::vector<TransportImpl_rch>& impls);
+    int acquire();
+    int tryacquire();
+    int release();
+    int remove();
+  private:
+    typedef int (TransportImpl::ReservationLockType::*PMF)();
+    int action_fwd(PMF function, PMF undo);
+    int action_rev(PMF function);
+    const std::vector<TransportImpl_rch>& impls_;
+    std::set<TransportImpl*> sorted_;
+  };
 };
 
 }
