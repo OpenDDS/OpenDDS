@@ -34,7 +34,7 @@ namespace OpenDDS
       return reinterpret_cast<guint8 *>(ep_tvb_memdup(tvb, offset, remainder));
     }
 
-    Sample_Field::Sample_Field (IDLTypeID id, const char *label)
+    Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)
       : label_ (label),
         type_id_ (id),
         nested_ (0),
@@ -42,7 +42,7 @@ namespace OpenDDS
     {
     }
 
-    Sample_Field::Sample_Field (Sample_Dissector *n, const char *label)
+    Sample_Field::Sample_Field (Sample_Dissector *n, const std::string &label)
       : label_(label),
         type_id_ (Undefined),
         nested_ (n),
@@ -67,13 +67,13 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Field::chain (IDLTypeID ti, const char *l)
+    Sample_Field::chain (IDLTypeID ti, const std::string &l)
     {
       return chain (new Sample_Field (ti, l));
     }
 
     Sample_Field *
-    Sample_Field::chain (Sample_Dissector *n, const char *l)
+    Sample_Field::chain (Sample_Dissector *n, const std::string &l)
     {
       return chain (new Sample_Field (n, l));
     }
@@ -291,7 +291,7 @@ namespace OpenDDS
 
     size_t
     Sample_Field::dissect_i (Wireshark_Bundle_Field &params,
-                             std::string &alt_label)
+                             const std::string &alt_label)
     {
       size_t len = 0;
       if (this->nested_ == 0)
@@ -343,15 +343,13 @@ namespace OpenDDS
 
     //------------------------------------------------------------------------
 
-    Sample_Dissector::Sample_Dissector (const char *type_id,
-                                        const char *subtree)
+    Sample_Dissector::Sample_Dissector (const std::string &subtree)
       :ett_payload_ (-1),
        subtree_label_(),
-       typeId_ (),
        field_ (0)
     {
-      if (type_id != 0 || subtree != 0)
-        this->init (type_id, subtree);
+      if (!subtree.empty())
+        this->init (subtree);
     }
 
     Sample_Dissector::~Sample_Dissector ()
@@ -359,24 +357,11 @@ namespace OpenDDS
       delete field_;
     }
 
-    std::string &
-    Sample_Dissector::typeId()
-    {
-      return this->typeId_;
-    }
-
     void
-    Sample_Dissector::init (const char *type_id,
-                            const char *subtree)
+    Sample_Dissector::init (const std::string &subtree)
     {
-      size_t len = (type_id == 0) ? 0 : ACE_OS::strlen(type_id);
-      if (len > 0)
-        {
-          this->typeId_ = type_id;
-        }
 
-      len = (subtree == 0) ? 0 : ACE_OS::strlen(subtree);
-      if (len > 0)
+      if (subtree.length() > 0)
         {
           this->subtree_label_ = subtree;
 
@@ -403,20 +388,20 @@ namespace OpenDDS
 
     Sample_Field *
     Sample_Dissector::add_field (Sample_Field::IDLTypeID type_id,
-                                 const char *label)
+                                 const std::string &label)
     {
       return add_field (new Sample_Field (type_id, label));
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (Sample_Dissector *n, const char *label)
+    Sample_Dissector::add_field (Sample_Dissector *n, const std::string &label)
     {
       return add_field (new Sample_Field (n, label));
     }
 
     size_t
     Sample_Dissector::dissect_i (Wireshark_Bundle_i &params,
-                                 std::string &label)
+                                 const std::string &label)
 
     {
       size_t data_pos = 0;
@@ -505,41 +490,10 @@ namespace OpenDDS
     }
 
     //----------------------------------------------------------------------
-
-    Sample_Sequence::Sample_Sequence (const char *type_id, Sample_Field *f)
-      : element_ (0),
-        own_element_ (true)
+    Sample_Sequence::Sample_Sequence (Sample_Dissector *sub)
+      : element_ (sub)
     {
-      this->init (type_id,"sequence");
-      element_ = new Sample_Dissector;
-      if (f)
-        {
-          element_->add_field (f);
-        }
-    }
-
-    Sample_Sequence::Sample_Sequence (const char *type_id,
-                                      Sample_Dissector *sub)
-      : element_ (sub),
-        own_element_ (false)
-    {
-      this->init (type_id, "sequence");
-    }
-
-    Sample_Sequence::Sample_Sequence (const char *type_id,
-                                      Sample_Field::IDLTypeID field_id)
-      : element_ (0),
-        own_element_ (true)
-    {
-      this->init (type_id,"sequence");
-      element_ = new Sample_Dissector;
-      element_->add_field (new Sample_Field (field_id, ""));
-    }
-
-    Sample_Sequence::~Sample_Sequence ()
-    {
-      if (own_element_)
-        delete element_;
+      this->init ("sequence");
     }
 
     Sample_Dissector *
@@ -549,7 +503,8 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Sequence::dissect_i (Wireshark_Bundle_i &params, std::string &label)
+    Sample_Sequence::dissect_i (Wireshark_Bundle_i &params,
+                                const std::string &label)
     {
       guint8 *data = params.get_remainder();
       guint32 len = (guint32)compute_length (data);
@@ -599,32 +554,15 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Array::Sample_Array (const char *type_id,
-                                size_t count,
-                                Sample_Field *field)
-      :Sample_Sequence (type_id, field),
-       count_(count)
-    {
-    }
-    Sample_Array::Sample_Array (const char *type_id,
-                                size_t count,
+    Sample_Array::Sample_Array (size_t count,
                                 Sample_Dissector *sub)
-      : Sample_Sequence (type_id, sub),
+      : Sample_Sequence (sub),
         count_ (count)
     {
     }
-
-    Sample_Array::Sample_Array (const char *type_id,
-                                size_t count,
-                                Sample_Field::IDLTypeID field_id)
-      : Sample_Sequence (type_id, field_id),
-        count_ (count)
-    {
-    }
-
 
     size_t
-    Sample_Array::dissect_i (Wireshark_Bundle_i &params, std::string &label)
+    Sample_Array::dissect_i (Wireshark_Bundle_i &params, const std::string &label)
     {
       guint8 * data = params.get_remainder();
       size_t len = compute_length (data);
@@ -669,10 +607,10 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Enum::Sample_Enum (const char *type_id)
+    Sample_Enum::Sample_Enum ()
       : value_ (0)
     {
-      this->init (type_id, "");
+      this->init ("");
     }
 
     Sample_Enum::~Sample_Enum ()
@@ -681,14 +619,15 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Enum::add_value (const char *name)
+    Sample_Enum::add_value (const std::string &name)
     {
       Sample_Field *sf = new Sample_Field (Sample_Field::Enumeration, name);
       return (value_ == 0) ? (value_ = sf) : value_->chain (sf);
     }
 
     size_t
-    Sample_Enum::dissect_i (Wireshark_Bundle_i &params, std::string &label)
+    Sample_Enum::dissect_i (Wireshark_Bundle_i &params,
+                            const std::string &label)
     {
       guint8 * data = params.get_remainder();
       size_t len = 4;
@@ -717,7 +656,7 @@ namespace OpenDDS
     }
 
     bool
-    Sample_Enum::index_of (std::string &value, size_t &result)
+    Sample_Enum::index_of (const std::string &value, size_t &result)
     {
       result = 0;
       Sample_Field *iter = value_;
@@ -734,7 +673,7 @@ namespace OpenDDS
     //----------------------------------------------------------------------
 
     Switch_Case::Switch_Case (Sample_Field::IDLTypeID type_id,
-                              const char *label,
+                              const std::string &label,
                               Sample_Field *field)
       : Sample_Field (type_id, label),
         span_(0),
@@ -749,7 +688,7 @@ namespace OpenDDS
     }
 
     Switch_Case *
-    Switch_Case::add_range (const char *label, Sample_Field *field)
+    Switch_Case::add_range (const std::string &label, Sample_Field *field)
     {
       Switch_Case *c = new Switch_Case (this->type_id_, label);
 
@@ -778,13 +717,13 @@ namespace OpenDDS
     }
 
     Switch_Case *
-    Switch_Case::chain (const char *label, Sample_Field *field)
+    Switch_Case::chain (const std::string &label, Sample_Field *field)
     {
       return chain (new Switch_Case (this->type_id_,label, field));
     }
 
     Sample_Field *
-    Switch_Case::do_switch (std::string &_d, guint8 *data)
+    Switch_Case::do_switch (const std::string &_d, guint8 *data)
     {
       // extract the discriminator value pointed to by data,
       // convert element label and compare. If lower_bound_ is nil,
@@ -826,19 +765,16 @@ namespace OpenDDS
       last->field_ = field;
     }
 
-    Sample_Union::Sample_Union (const char *type_id)
+    Sample_Union::Sample_Union ()
       :discriminator_ (0),
-       own_discriminator_(false),
        cases_ (0),
        default_ (0)
     {
-      this->init (type_id,"union");
+      this->init ("union");
     }
 
     Sample_Union::~Sample_Union ()
     {
-      if (own_discriminator_)
-        delete discriminator_;
       delete cases_;
       delete default_;
     }
@@ -849,16 +785,8 @@ namespace OpenDDS
       this->discriminator_ = d;
     }
 
-    void
-    Sample_Union::discriminator (Sample_Field::IDLTypeID fid)
-    {
-      this->own_discriminator_ = true;
-      this->discriminator_ = new Sample_Dissector ();
-      this->discriminator_->add_field (new Sample_Field (fid,""));
-    }
-
     Switch_Case *
-    Sample_Union::add_case (const char *label, Sample_Field *field)
+    Sample_Union::add_case (const std::string &label, Sample_Field *field)
     {
       Sample_Field::IDLTypeID type_id =
         discriminator_->get_field_type();
@@ -891,7 +819,8 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Union::dissect_i (Wireshark_Bundle_i &params, std::string &label)
+    Sample_Union::dissect_i (Wireshark_Bundle_i &params,
+                             const std::string &label)
     {
       guint8 * data = params.get_remainder();
       size_t len = this->discriminator_->compute_length(data);
@@ -933,31 +862,14 @@ namespace OpenDDS
 
     //-----------------------------------------------------------------------
 
-    Sample_Alias::Sample_Alias (const char *type_id, Sample_Dissector *base)
-      :base_(base),
-       own_base_ (false)
+    Sample_Alias::Sample_Alias (Sample_Dissector *base)
+      :base_(base)
     {
-      this->init (type_id, "alias");
-    }
-
-    Sample_Alias::Sample_Alias (const char *type_id,
-                                Sample_Field::IDLTypeID fid)
-      :base_(0),
-       own_base_ (true)
-    {
-      this->init (type_id, "alias");
-      base_ = new Sample_Dissector ();
-      base_->add_field (new Sample_Field (fid, ""));
-    }
-
-    Sample_Alias::~Sample_Alias ()
-    {
-      if (own_base_)
-        delete base_;
+      this->init ("alias");
     }
 
     size_t
-    Sample_Alias::dissect_i (Wireshark_Bundle_i &p, std::string &l)
+    Sample_Alias::dissect_i (Wireshark_Bundle_i &p, const std::string &l)
     {
       return base_->dissect_i (p, l);
     }

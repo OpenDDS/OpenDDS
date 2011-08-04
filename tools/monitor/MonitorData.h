@@ -56,7 +56,7 @@ class TreeNode;
 class MonitorData {
   public:
     /// Construct with an IOR only.
-    MonitorData( const Options& options, MonitorDataModel* model);
+    MonitorData( const Options& options, MonitorDataModel* model, bool mapExistingIORKeys = true);
 
     /// Virtual destructor.
     virtual ~MonitorData();

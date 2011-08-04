@@ -73,6 +73,7 @@ be_util::usage (void)
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
     ACE_TEXT(" -SI\t\t\tsuppress generation of *TypeSupport.idl\n")
+    ACE_TEXT(" -Gws\t\t\tgenerate wireshark sample dissector configuration\n")
     ACE_TEXT(" -Wb,export_macro=<macro name>\t\tsets export macro ")
     ACE_TEXT("for all files\n")
     ACE_TEXT(" -Wb,export_include=<include path>\tsets export include ")

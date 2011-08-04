@@ -141,6 +141,8 @@ class TreeNode {
     TreeNode*  parent() const;
     TreeNode*& parent();
 
+    QList<TreeNode*> children() const;
+
     /// Access the source node for our data, if different from us.
     TreeNode*  valueSource() const;
     TreeNode*& valueSource();
@@ -455,6 +457,13 @@ Monitor::TreeNode*&
 Monitor::TreeNode::parent()
 {
   return this->parent_;
+}
+
+inline
+QList<Monitor::TreeNode*>
+Monitor::TreeNode::children() const
+{
+  return this->children_;
 }
 
 inline

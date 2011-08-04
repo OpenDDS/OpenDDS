@@ -20,6 +20,8 @@
 #include "GraphGenerator.h"
 #include "NodeGenerator.h"
 
+#include "dds/DCPS/Service_Participant.h"
+
 #ifdef DEVELOPMENT
 #include <iostream>
 #endif /* DEVELOPMENT */
@@ -542,7 +544,13 @@ namespace Monitor {
     this->dataSource_->disable();
     delete this->model_;
     delete this->dataSource_;
+
+    ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Viewer::closeEvent() - cleaning up service resources")
+    ));
+
+    // Clean up the service resources.
+    TheServiceParticipant->shutdown();
   }
 
 } // End of namespace Monitor
-

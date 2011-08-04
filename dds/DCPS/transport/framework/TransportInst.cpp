@@ -86,7 +86,7 @@ OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
   os << formatNameForDump("queue_messages_per_pool") << this->queue_messages_per_pool_ << std::endl;
   os << formatNameForDump("queue_initial_pools")     << this->queue_initial_pools_ << std::endl;
   os << formatNameForDump("max_packet_size")         << this->max_packet_size_ << std::endl;
-  os << formatNameForDump("max_samples_per_packet:") << this->max_samples_per_packet_ << std::endl;
+  os << formatNameForDump("max_samples_per_packet")  << this->max_samples_per_packet_ << std::endl;
   os << formatNameForDump("optimum_packet_size")     << this->optimum_packet_size_ << std::endl;
   os << formatNameForDump("thread_per_connection")   << (this->thread_per_connection_ ? "true" : "false") << std::endl;
   os << formatNameForDump("datalink_release_delay")  << this->datalink_release_delay_ << std::endl;

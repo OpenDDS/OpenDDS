@@ -91,7 +91,7 @@ MonitorDataModel::index( TreeNode* node, int column) const
 }
 
 TreeNode*
-MonitorDataModel::getNode( const QModelIndex &index) const
+MonitorDataModel::getNode( const QModelIndex &index, bool defaultToRoot) const
 {
   if( index.isValid()) {
     TreeNode* node = static_cast< TreeNode*>( index.internalPointer());
@@ -99,7 +99,12 @@ MonitorDataModel::getNode( const QModelIndex &index) const
       return node;
     }
   }
-  return this->root_;
+
+  if (defaultToRoot) {
+    return this->root_;
+  } else {
+    return NULL;
+  }
 }
 
 QModelIndex

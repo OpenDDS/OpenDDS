@@ -32,7 +32,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-    typedef void (DecodeFN) (::MessageHeader *);
+    typedef bool (DecodeFN) (::MessageHeader *);
     typedef ACE_Hash_Map_Manager <const char *, DecodeFN*, ACE_Null_Mutex> DecodeFN_Map;
 
     class dissector_Export GIOP_Base
@@ -41,7 +41,7 @@ namespace OpenDDS
       int dissect_giop (MessageHeader *header,
                         gchar *operation,
                         gchar *idlname);
-      bool dissect_heur ();
+      gboolean dissect_heur (MessageHeader *header, gchar *operation);
 
       void setPacket (tvbuff_t* buf, packet_info* pi, proto_tree* pt, int *poff)
       {
@@ -63,6 +63,8 @@ namespace OpenDDS
       void add_publisher_qos (int fieldId, int ett, proto_tree *subtree = 0);
 
       void add_exception (int fieldId, const char *exception_id);
+
+      void fix_reqid (MessageHeader *header);
 
       void start_decoding ();
       virtual void init ();

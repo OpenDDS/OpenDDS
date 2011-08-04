@@ -227,19 +227,17 @@ namespace OpenDDS
     const char *
     InfoRepo_Dissector::topic_for_pub (const RepoId *pub)
     {
-      gulong key = ACE::hash_pjw(reinterpret_cast<const char *>(pub), sizeof (RepoId));
+      gulong key = ACE::hash_pjw(reinterpret_cast<const char *>(pub),
+                                 sizeof (RepoId));
       const RepoId *topicId = 0;
       if (publications_.find (key,topicId) != 0)
         {
-          ACE_DEBUG ((LM_DEBUG,"topic_for_pub could not find pub\n"));
           return 0;
         }
       const char *data_name = 0;
-      key =   ACE::hash_pjw(reinterpret_cast<const char *>(topicId), sizeof (RepoId));
-      if (topics_.find (key, data_name) != 0)
-        {
-          ACE_DEBUG ((LM_DEBUG,"topic_for_pub could not find topicid\n"));
-        }
+      key = ACE::hash_pjw(reinterpret_cast<const char *>(topicId),
+                          sizeof (RepoId));
+      topics_.find (key, data_name);
       return data_name;
     }
 
@@ -362,7 +360,7 @@ namespace OpenDDS
                 Invalid_Participant);
      */
 
-    void
+    bool
     InfoRepo_Dissector::assert_topic(::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -380,13 +378,13 @@ namespace OpenDDS
 
               if (instance().pinfo_->fd->flags.visited)
                 {
-                  return;
+                  return true;
                 }
 
               if (status == CREATED || status == ENABLED)
                 {
                   instance().map_pending (pt,rid);
-                  return;
+                  return true;
                 }
             }
             break;
@@ -411,7 +409,7 @@ namespace OpenDDS
 //           instance().add_topic_qos (hf_qos, instance().ett_topic_qos_);
           if (instance().pinfo_->fd->flags.visited)
             {
-              return;
+              return true;
             }
 
           instance().add_pending (header->req_id, dname);
@@ -425,6 +423,7 @@ namespace OpenDDS
         }
       }
 
+      return true;
     }
 
     /*
@@ -443,7 +442,7 @@ namespace OpenDDS
             Invalid_Topic);
     */
 
-    void
+    bool
     InfoRepo_Dissector::add_publication (::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -485,6 +484,8 @@ namespace OpenDDS
                       header->message_type));
         }
       }
+
+      return true;
     }
 
     /*
@@ -496,7 +497,7 @@ namespace OpenDDS
                                               in ::DDS::DomainParticipantQos qos)
         raises (Invalid_Domain);
     */
-    void
+    bool
     InfoRepo_Dissector::add_domain_participant (::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -521,9 +522,11 @@ namespace OpenDDS
         }
 
       }
+
+      return true;
     }
 
-    void
+    bool
     InfoRepo_Dissector::add_subscription (::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -544,9 +547,11 @@ namespace OpenDDS
                       header->message_type));
         }
       }
-    }
 
-    void
+      return true;
+   }
+
+    bool
     InfoRepo_Dissector::remove_publication (::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -567,9 +572,11 @@ namespace OpenDDS
                       header->message_type));
         }
       }
+
+      return true;
     }
 
-    void
+    bool
     InfoRepo_Dissector::remove_subscription (::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -590,9 +597,11 @@ namespace OpenDDS
                       header->message_type));
         }
       }
+
+      return true;
     }
 
-    void
+    bool
     InfoRepo_Dissector::remove_domain_participant (::MessageHeader *header)
     {
       instance().start_decoding ();
@@ -613,60 +622,55 @@ namespace OpenDDS
                       header->message_type));
         }
       }
+
+      return true;
     }
 
     extern "C"
     gboolean
-    InfoRepo_Dissector::explicit_giop_callback
+    explicit_inforepo_callback
     (tvbuff_t *tvb, packet_info *pinfo,
      proto_tree *ptree, int *offset,
      ::MessageHeader *header, gchar *operation,
      gchar *idlname)
     {
-      int ofs = 0;
-      header->req_id =
-        ::get_CDR_ulong(tvb, &ofs,
-                        instance().is_big_endian_, GIOP_HEADER_SIZE);
+      InfoRepo_Dissector &dissector =
+        InfoRepo_Dissector::instance();
+
       if (idlname == 0)
         return FALSE;
-      instance().setPacket (tvb, pinfo, ptree, offset);
-      if (instance().dissect_giop (header, operation, idlname) == -1)
+      dissector.setPacket (tvb, pinfo, ptree, offset);
+      dissector.fix_reqid(header);
+      if (dissector.dissect_giop (header, operation, idlname) == -1)
         return FALSE;
       return TRUE;
     }
 
     extern "C"
     gboolean
-    InfoRepo_Dissector::heuristic_giop_callback
+    heuristic_inforepo_callback
     (tvbuff_t *tvb, packet_info *pinfo,
      proto_tree *ptree, int *offset,
      ::MessageHeader *header, gchar *operation, gchar *)
     {
+      InfoRepo_Dissector &dissector =
+        InfoRepo_Dissector::instance();
 
-      ACE_UNUSED_ARG (tvb);
-      ACE_UNUSED_ARG (pinfo);
-      ACE_UNUSED_ARG (ptree);
-      ACE_UNUSED_ARG (offset);
-      //     ACE_UNUSED_ARG (header);
-      ACE_UNUSED_ARG (operation);
+      dissector.setPacket (tvb, pinfo, ptree, offset);
+      dissector.fix_reqid(header);
 
-      int ofs = 0;
-      header->req_id =
-        ::get_CDR_ulong(tvb, &ofs,
-                        instance().is_big_endian_, GIOP_HEADER_SIZE);
-      return FALSE;
-
+      return dissector.dissect_heur (header, operation);
     }
 
     void
     InfoRepo_Dissector::register_handoff ()
     {
-      register_giop_user_module(explicit_giop_callback,
+      register_giop_user_module(explicit_inforepo_callback,
                                 this->proto_label_,
                                 this->repo_id_,
                                 this->proto_id_);
 
-      register_giop_user(heuristic_giop_callback,
+      register_giop_user(heuristic_inforepo_callback,
                          this->proto_label_,
                          this->proto_id_);
 

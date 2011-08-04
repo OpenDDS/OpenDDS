@@ -30,7 +30,11 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0), java_(false), suppress_idl_(false), seq_("Seq")
+  : filename_(0),
+    java_(false),
+    suppress_idl_(false),
+    generate_wireshark_(false),
+    seq_("Seq")
 {
 }
 
@@ -115,7 +119,6 @@ bool BE_GlobalData::java() const
   return this->java_;
 }
 
-
 bool
 BE_GlobalData::do_included_files() const
 {
@@ -148,6 +151,7 @@ BE_GlobalData::open_streams(const char* filename)
   header_name_ = (filebase + "TypeSupportImpl.h").c_str();
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
+  ws_config_name_ = (filebase + "_ws.ini").c_str();
 }
 
 
@@ -203,6 +207,17 @@ BE_GlobalData::parse_args(long& i, char** av)
     } else {
       output_dir_ = av[++i];
     }
+    break;
+  case 'G':
+    if (0 == ACE_OS::strcmp(av[i],"-Gws"))
+      generate_wireshark_ = true;
+    else
+      {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
+                   ACE_TEXT(" option\n"), av[i]));
+        idl_global->set_compile_flags(idl_global->compile_flags()
+                                      | IDL_CF_ONLY_USAGE);
+      }
     break;
   case 'S':
     switch (av[i][2]) {

@@ -1,0 +1,3694 @@
+Mon Jul 25 20:36:28 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * OpenDDS version 2.4 released.
+
+Mon Jul 25 20:25:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+          Updated Modeling SDK version number to 1.1.0.
+
+Mon Jul 25 19:22:29 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Reformatting the notes for readability.
+
+Mon Jul 25 18:52:35 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * NEWS:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Moved the content related to the Modeling SDK into the online help.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/styles.css:
+
+          Added a style entry for the release notes.
+
+Mon Jul 25 17:39:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updates for forthcoming OpenDDS 2.4 release.
+
+Mon Jul 25 17:08:11 UTC 2011  Don Hudson  <Don Hudson@ociweb.com>
+
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/NodeGenerator.cpp:
+
+          Replaced calls to QObject::toStdString() with toLocal8Bit().constData()
+          to avoid QString-related aborts under windows.
+
+Mon Jul 25 14:57:45 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * NEWS:
+
+          Added description of changes to the OpenDDS Modeling SDK.
+
+Fri Jul 22 18:47:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:
+
+          Added missing file.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/connecting_figures.html:
+
+          Removed empty anchor causing empty box in Eclipse HTML rendering.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/index.html:
+
+          Fixed invalid link to styles.css.
+
+Fri Jul 22 17:05:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcpslib_topic_shared.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/topics_usage.html:
+
+          Added discussion about using shared Topics.
+
+Fri Jul 22 15:12:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+          Extended to include usage of shared Topic.
+
+Fri Jul 22 03:34:40 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * AUTHORS:
+
+          Updated with the names of the new contributors (since 2.3).
+
+Thu Jul 21 22:33:20 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * NEWS:
+
+          Added a note about the dissector enhancements.
+
+Thu Jul 21 18:16:19 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * NEWS:
+
+          Added a note about end of support for TAO 1.5a.
+
+Wed Jul 20 21:54:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Fix more wide-char build compatibility issues.
+
+Wed Jul 20 19:08:51 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * NEWS:
+
+          Updated NEWS file with section on Monitor tool's
+          new graph features.
+
+        * tools/monitor/README:
+
+          Minor update.
+
+
+Wed Jul 20 15:12:27 UTC 2011  Chip Jones <jonesc@ociweb.com>
+
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/Monitor.mpc:
+
+          Fixed data type size warning on 64-bit systems.
+          Removed Graphviz library dependency from MPC file.
+
+Tue Jul 19 23:12:43 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Fix wide-char build compatibility issues.
+
+Tue Jul 19 17:03:35 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * tools/monitor/GraphGenerator.h:
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/QosFormatter.h:
+        * tools/monitor/QosFormatter.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.h:
+        * tools/monitor/Viewer.cpp:
+
+          Fixed fuzz, compiler warnings and errors and disabled
+          NodeView context menus.
+
+Tue Jul 19 16:26:49 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/Monitor.mpc:
+        * tools/monitor/MonitorTask.h:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Monitor.ui:
+        * tools/monitor/Options.h:
+        * tools/monitor/Options.cpp:
+        * tools/monitor/QosFormatter.h:
+        * tools/monitor/QosFormatter.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.h:
+        * tools/monitor/Viewer.cpp:
+
+          Preliminary changes to the monitor tool to support generation
+          of Graphviz images. Also includes partial support for Qt-based
+          graphs. The Viewer app now includes TreeView, NodeView and
+          GraphvizView panels as well asGraphviz options and Node
+          options windows. These changes are r4718.
+
+        * tools/monitor/GraphGenerator.h:
+        * tools/monitor/GraphGenerator.cpp:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/GvOptions.ui:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/NodeOptions.ui:
+
+          These files were added.
+
+Mon Jul 18 15:32:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+
+          Fix validation error.
+
+Mon Jul 18 14:09:52 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_manager.cpp:
+
+          Remove the use of ACE_Tokenizer, it is not consistent between
+          TAO 1.5a, 1.6a and DOC implementations.
+
+Sun Jul 17 17:52:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/README:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Reimplemented the initialization so that a namespace tree for
+          modules can be properly initialized. Previously, the
+          initialization structure was flat, with module membership being
+          as separate state. Now a module namespace is constructed to
+          ensure identifier uniqueness.
+
+        * tools/dissector/README.txt:
+
+          Removed this file. This file was a sloppy addition. Moved the
+          configuration instructions to a new section of the existing
+          README file.
+
+Fri Jul 15 22:27:38 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+
+          Scoreboard cleanup.
+
+Fri Jul 15 15:36:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Need mpb inherited to pick up rules.dds.GNU.
+
+        * rules.dds.GNU:
+
+          Set exceptions ?= 1 in case the user has a version
+          of ACE that doesn't do this already.
+
+Fri Jul 15 14:02:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.opendds:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+
+          Validation errors.
+
+Thu Jul 14 19:55:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+        * tools/dissector/README.txt:
+
+          Added support for processing *.ini files. The format of the
+          configuration file is described in README.txt. I anticipate that
+          the DDS IDL compiler will generate these configuration files at
+          some point.
+
+Wed Jul 13 19:00:13 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Fixed path that was broken as a result of moving validation
+          project to plugins.
+
+Wed Jul 13 18:45:00 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+        * tools/modeling/validation/modelvalidation:
+
+          Moved tools/modeling/validation/modelvalidation to tools/modeling/plugins/org.opendds.modeling.validation
+          in order to convert modelvalidation project to an eclipse plugin.
+
+Wed Jul 13 18:38:22 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.validation/.project:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+Wed Jul 13 18:15:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+
+          Sample_Alias's members aren't defined anywhere.  Surrounded the class
+          with an "#if 0" for now so that the library will link.
+
+Wed Jul 13 18:10:39 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+
+          Enabled drag and drop from DcpsLib elements in Project Explorer to DcpsLib diagram
+          to support external topic references.
+
+Wed Jul 13 17:58:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Now that ant is not running a JUnit target, no need to parse
+          JUnit's output for errors.
+
+Wed Jul 13 16:29:14 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Fixed some fuzz and compiler errors. Error was due to failure to
+          hash std::string on some platforms, so I reverted to using const
+          char * as the key.
+
+Wed Jul 13 15:59:41 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+        * tools/modeling/validation/modelvalidation/build.properties:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+
+          Tweaks to the validation API, and improvements made for running funtional tests as part of nightly build.
+
+Tue Jul 12 22:47:46 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Moved String and WString from a specialized dissector type to a
+          built in type.
+
+          Completed the handling of Unions.
+
+          Simplified the initialization of types to be more able to be
+          data-driven with a small set of type-specific factories.
+
+Tue Jul 12 21:21:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          Copy in referred QOS policies in an external topic.
+
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.mwc:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Test reference to external topic with qos policies.
+
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.mpc:
+
+          Removed this file.
+
+Tue Jul 12 19:08:40 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/icons:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DestinationOrderQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DsQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DurabilityQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/EfQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/GdQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/HistoryQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LbQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LivelinessQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/OsQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/OwnershipQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/PartitionQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/PresentationQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RdlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/ReliabilityQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TbfQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TpQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/UdQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/WdlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/MultiTopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DeadlineQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DestinationOrderQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DurabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/EfQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/GdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/HistoryQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LbQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LifespanQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LivelinessQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/OsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/OwnershipQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/PartitionQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/PresentationQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/ReliabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/StructItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TbfQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TpQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/UdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/WdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.model/.settings:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/.settings:
+
+          Undo commit r4667 as numerous changes were accidently committed due to Dean Wette having
+          Eclipse using spaces instead of tabs (the default).
+
+Tue Jul 12 18:28:04 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          More support for referenced content filtered topics.
+
+        * tools/modeling/tests/CfTopic/CfTopic.codegen:
+        * tools/modeling/tests/CfTopic/CfTopic.mpc:
+        * tools/modeling/tests/CfTopic/CfTopic.mwc:
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+        * tools/modeling/tests/CfTopic/run_test.pl:
+        * tools/modeling/tests/Chained/Chained.mpc:
+        * tools/modeling/tests/Chained/Chained.mwc:
+        * tools/modeling/tests/Chained/publisher.cpp:
+        * tools/modeling/tests/Chained/run_test.pl:
+        * tools/modeling/tests/Chained/subscriber.cpp:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.mwc:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.opendds:
+        * tools/modeling/tests/Chained_Topic/subscriber.cpp:
+
+          Refer to external content filtered topics.
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+
+          Fix validation error.
+
+Tue Jul 12 16:04:40 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DestinationOrderQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DsQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DurabilityQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/EfQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/GdQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/HistoryQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LbQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LivelinessQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/OsQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/OwnershipQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/PartitionQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/PresentationQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RdlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/ReliabilityQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TbfQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TpQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/UdQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/WdlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/MultiTopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DeadlineQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DestinationOrderQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DurabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/EfQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/GdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/HistoryQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LbQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LifespanQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LivelinessQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/OsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/OwnershipQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/PartitionQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/PresentationQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/ReliabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/StructItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TbfQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TpQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/UdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/WdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+
+          Enabled drag and drop from DcpsLib elements in Project Explorer to DcpsLib diagram
+          to support external topic references.
+
+Tue Jul 12 15:15:25 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Fix so that Ecore packages don't show up multiple times when
+          navigating model contents in Project Explorer view as
+          must be done when performing drag and drop.
+
+Tue Jul 12 14:59:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          Handle content filtered topics with external related topics.
+
+Tue Jul 12 12:32:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+
+          Removed misleading warnings about no structs with isDcpsDataType=true
+          defined and a struct with isDcpsDataType=false not being used
+          elsewhere.
+
+Tue Jul 12 01:23:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Revised field labeling so that no field-specific information is
+          stored as state in the dissectors. This ensures that a single
+          sample dissector can be used for multiple field instances. Combined
+          the wireshark parameters into a single struct.
+
+          Added initial implementation of the Union dissector. Still
+          working out the details for defining a Union.
+
+Mon Jul 11 19:05:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+
+          Fix duplicate xml:id
+
+Mon Jul 11 16:54:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpc.xsl:
+
+          Add imported-topic models as parents to mpc project.
+
+Mon Jul 11 14:57:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+
+          These two projects can't build in parallel
+          because they both build Test.idl.
+
+Mon Jul 11 12:12:23 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Renamed "Sample_Base" to "Sample_Dissector" since the model now
+          seems to be satisfied by a common set of discrete field
+          dissectors that are strung together to compose a single
+          dissector for an arbitrarily complex sample. The code for doing
+          the dissection is now separate from the code that manages and
+          will construct the dissectors.
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Removed these files. They are replaced by sample_dissector.* and
+          sample_manager.*.
+
+Fri Jul  8 22:43:33 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          More refinements to the basic dissector framework. Added tools for
+          working with Sequences, arrays, strings, enums. Unions are not yet
+          set, since I need to sort out how to deal with the discriminator.
+
+          Also need to add byte-order handling and avoid using native types
+          when specifying sizes. May need to rethink formatting plan.
+
+Fri Jul  8 18:04:04 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+
+          Provide scope in topic enums.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          Make topic enums scoped and normalized, like type enums.
+          Process all topics rather, than those in your DCPS lib (now may be
+          referenced).
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          External topic refs:
+          -- switch process-external-refs to taking a string param, rather than
+             a node-set.  (This is so it can easily be appended to as topics are
+             referenced.
+          -- handle an external ref referencing another external ref (with
+             possibly a different starting point)
+
+        * tools/modeling/tests/Codegen/aPublisher.cpp:
+        * tools/modeling/tests/Codegen/aSubscriber.cpp:
+        * tools/modeling/tests/Exchange/subscriber.cpp:
+        * tools/modeling/tests/MultiTopic/subscriber.cpp:
+
+          Incorporate change where topic enum includes scope.
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.opendds:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/publisher.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/subscriber.cpp:
+        * tools/modeling/tests/ReferExternalProj/publisher.cpp:
+        * tools/modeling/tests/ReferExternalProj/subscriber.cpp:
+
+          Ease confusion by renaming some types and packages.
+          Ease confusion by renaming some readers and writers.
+          Add readers and writers referencing topics in different models.
+
+        * tools/modeling/tests/setup.pl:
+
+          Allow command-line specified directories to end with a slash.
+
+Fri Jul  8 17:00:03 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Added documentation to the header and simplified the class
+          definitions to the essentials for clutter reduction.
+
+Fri Jul  8 14:16:52 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Further generalization of the sample dissection.
+
+Fri Jul  8 13:25:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added logging for the create_topic() error condition of the type_name
+          not being registered with type support.
+
+Thu Jul  7 22:08:40 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          First pass at making the sample dissection generic. Still using
+          hard-wired initialization, but getting closer to a point where
+          initialization can be done dynamically.
+
+Thu Jul  7 17:44:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+
+          New template substring-before-last
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpb.xsl:
+
+          Include models of externally-referenced topics in our
+          inherited projects list.
+
+Wed Jul  6 16:17:37 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Adding prototype sample dissectors for working out development
+          issues. These are explicitly bound to specific data, captured
+          from the DCPS/MultiTopic test. Also cleaned up some now
+          redundant debug output.
+
+Wed Jul  6 15:47:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Same as the previous commit: adapting for alternate Ant installation.
+
+Wed Jul  6 14:01:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Merged a change that was initially developed in the sbir_transport
+          branch: allows location of Ant when it's installed from a Linux
+          package instead of the standard Ant directory layout.
+
+Tue Jul  5 22:58:08 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/plugin.cpp:
+        * tools/dissector/sample_base.h:
+        * tools/dissector/sample_base.cpp:
+
+          Begin laying out the integration of sample dissection.
+
+Tue Jul  5 16:16:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_lem_stub.mpb:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/docs/README:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+
+          Fixed whitespace.  Text files must end with a newline to avoid the
+          warning from svn diff: "No newline at end of file"
+
+Tue Jul  5 13:16:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          more fuzz
+
+Sun Jul  3 16:54:03 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fuzz fix, complete the association from publication ID to
+          registered topic data type name.
+
+Fri Jul  1 20:00:41 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fixed use of a non-portable type name as discovered by Adam.
+          Added some more debugging output.
+
+Fri Jul  1 16:13:57 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Another incremental patch. I found a bug in the giop dissector
+          from wireshark, it was not setting the request ID in the header
+          information passed to a sub-dissector. The request ID is
+          necessary for correlating information in replies to information
+          in requests. Fortunately there is a fairly simple work-around.
+
+Fri Jul  1 14:17:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Arrays/run_test.pl:
+        * tools/modeling/tests/CfTopic/run_test.pl:
+        * tools/modeling/tests/Chained_Topic/run_test.pl:
+        * tools/modeling/tests/Codegen/run_test.pl:
+        * tools/modeling/tests/Comments/run_test.pl:
+        * tools/modeling/tests/CompositeKey/run_test.pl:
+        * tools/modeling/tests/CopyTopicQos/run_test.pl:
+        * tools/modeling/tests/DataLibRef/run_test.pl:
+        * tools/modeling/tests/Deep/Down/Reference/run_test.pl:
+        * tools/modeling/tests/DomainZero/run_test.pl:
+        * tools/modeling/tests/EmptyLibs/run_test.pl:
+        * tools/modeling/tests/Exchange/run_test.pl:
+        * tools/modeling/tests/ExternalPolicies/run_test.pl:
+        * tools/modeling/tests/InvalidNames/run_test.pl:
+        * tools/modeling/tests/Looped/run_test.pl:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/MessengerDpQos/run_test.pl:
+        * tools/modeling/tests/MessengerGlobalNs/run_test.pl:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+        * tools/modeling/tests/MessengerMixed/run_test.pl:
+        * tools/modeling/tests/MessengerMulti/run_test.pl:
+        * tools/modeling/tests/MessengerNoPub/run_test.pl:
+        * tools/modeling/tests/MessengerNoSub/run_test.pl:
+        * tools/modeling/tests/MessengerPubQos/run_test.pl:
+        * tools/modeling/tests/MessengerSimpleTypes/run_test.pl:
+        * tools/modeling/tests/MessengerSplit/run_test.pl:
+        * tools/modeling/tests/MessengerWriterQos/run_test.pl:
+        * tools/modeling/tests/ModuleNameConflict/run_test.pl:
+        * tools/modeling/tests/MultiDCPS/run_test.pl:
+        * tools/modeling/tests/MultiInstance/run_test.pl:
+        * tools/modeling/tests/MultiTopic/run_test.pl:
+        * tools/modeling/tests/PolicyLib/run_test.pl:
+        * tools/modeling/tests/ReaderQos/run_test.pl:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/RemoteInstHandles/run_test.pl:
+        * tools/modeling/tests/ReusedExtTypes/run_test.pl:
+        * tools/modeling/tests/ReusedTypes/run_test.pl:
+        * tools/modeling/tests/Sequences/run_test.pl:
+        * tools/modeling/tests/StockQuoter/run_test.pl:
+        * tools/modeling/tests/SubscriberQos/run_test.pl:
+        * tools/modeling/tests/TopicQos/run_test.pl:
+        * tools/modeling/tests/UDP/run_test.pl:
+
+          delete *.log prior to running tests.
+
+Thu Jun 30 19:46:02 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/providers/ValidationDecoratorProvider.xpt:
+
+          Avoid "Decorator refresh failure" that can occur when
+          validating in one sub-diagram that is the same type as
+          another opened sub-diagram (e.g. two PolicyLib diagrams).
+          This problem was causing subsequent validations to fail
+          in either sub-diagram.
+
+Wed Jun 29 22:33:13 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-datawriter.cpp:
+
+          This is what I get for not doing a check-compile before
+          committing. Now the build works.
+
+Wed Jun 29 22:14:49 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Another incremental commit. Split the multiple classes in
+          packet-repo.* into their own header/impl files.
+
+Wed Jun 29 13:50:46 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dcps_lem_stub.mpb:
+          New base project for the dcps lem stub library, needed for dds4ccm
+
+Tue Jun 28 20:52:44 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/docs/README:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+
+          Refactor validation tool for better ease of use.
+
+Tue Jun 28 15:46:11 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fix for scoreboard error on windows builds.
+
+Tue Jun 28 15:08:46 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/XMI.xsd:
+        * tools/modeling/validation/modelvalidation/build.properties:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/validation/modelvalidation/src/xsl/Default.xslt:
+
+          Added support for validation of .codegen files.
+
+Tue Jun 28 14:26:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.site:
+
+          svn:ignore only
+
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/validation/modelvalidation/src/java/log4j.xml:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSXMISchemaTransformer.java:
+        * tools/modeling/validation/modelvalidation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Whitespace cleanup only.
+
+Mon Jun 27 23:27:09 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Replaced the original packet.cpp with packet-opendds.[cpp|h] and
+          added packet-repo.*. This is not a final commit by any stretch,
+          format is still in flux, lacking documentation, style unification,
+          etc.
+
+          Reformatted original C-style organization of dds packet dissector
+          to be more object oriented, but more work is needed to make that
+          right.
+
+        * tools/dissector/packet.cpp:
+
+          Removed this file.
+
+Fri Jun 24 16:26:14 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/test/data/satellite.opendds:
+        * tools/modeling/validation/modelvalidation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Changed the unit/functional test code to report which files are invalid
+          as a result of failure when running the ant test target.
+
+Fri Jun 24 15:23:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Build and run the new modelvalidation tool as part of the test
+          setup step.  This will cause an error to be seen if any of the
+          .opendds files under this directory are no longer valid according
+          to the .xsd schemas in plugins/org.opendds.modeling.model/model.
+
+Fri Jun 24 14:04:27 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Protect generated IDL from multiple inclusion
+          with #ifndef/#define/#endif
+
+Thu Jun 23 21:12:50 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/docs/README:
+        * tools/modeling/validation/modelvalidation/lib/test/junit-4.4.jar:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+
+          Added junit-4.4.jar file needed for ant build.xml to run tests.
+          Changed how the tool is packaged.
+
+Thu Jun 23 20:02:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          Added NEWS items for a few of the major changes since last release.
+
+Thu Jun 23 17:14:40 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/build.properties:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+        * tools/modeling/validation/modelvalidation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/validation/modelvalidation/src/java/log4j.xml:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/validation/modelvalidation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Usability refinements to the validation tool, changed ant to run unit
+          tests when building a distribution
+
+Wed Jun 22 14:56:03 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/.classpath:
+        * tools/modeling/validation/modelvalidation/.project:
+        * tools/modeling/validation/modelvalidation/build.properties:
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/lib/commons-cli-1.2.jar:
+        * tools/modeling/validation/modelvalidation/lib/log4j-1.2.16.jar:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+        * tools/modeling/validation/modelvalidation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/validation/modelvalidation/src/java/log4j.xml:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSXMISchemaTransformer.java:
+        * tools/modeling/validation/modelvalidation/src/xsl/Default.xslt:
+        * tools/modeling/validation/modelvalidation/src/xsl/OpenDDSXMI.xslt:
+        * tools/modeling/validation/modelvalidation/src/xsl/TopicsXMI.xslt:
+        * tools/modeling/validation/modelvalidation/src/xsl/TypesXMI.xslt:
+        * tools/modeling/validation/modelvalidation/test/data/DataLibConstraintErrorsTest1.opendds:
+        * tools/modeling/validation/modelvalidation/test/data/satellite.opendds:
+        * tools/modeling/validation/modelvalidation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Initial commit of tool for validating .opendds model xml files with a
+          set of XML Schema files that are corrected via a XSLT transformation
+          of the XSD files generated by the emf's code generator
+
+Tue Jun 21 20:08:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Access to the queue_ must be with the lock_ held.
+          Don't call work_available() when nothing has been added to the queue,
+          it will be called later when there is actual work in the queue.
+
+Tue Jun 21 18:27:18 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/problems_view_menu.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/performingvalidations.html:
+
+          Add discussion about issue when validating two libs in the same model and how
+          to restrict scope of errors shown in the Problem view.
+
+Tue Jun 21 12:35:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Remove QoS policy validation checks as the ones defined in the PolicyLib
+          diagram apply to any other diagram too.
+
+Mon Jun 20 19:55:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/parsers/PredefinedParser.xpt:
+
+          Updated to support display/input of infinity for EInt types too.
+
+Mon Jun 20 18:54:42 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Enumerations.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/EnumerationsXMI.xsd:
+
+          Changed Period's second attribute type from ELong to EInt as 32-bit EInt
+          corresponds to 32-bit CORBA Long used in DDS.
+
+Mon Jun 20 17:58:43 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Add duration validation checks.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfmap:
+
+          Copied container of policy audits from PolicyLib.gmfmap to this file.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Updates auto-generated by GMF.
+
+        * tools/modeling/testdata/QosPolicies/QosPoliciesConstraintErrorsTest1.opendds:
+        * tools/modeling/testdata/QosPolicies/QosPoliciesConstraintErrorsTest1.opendds_diagram:
+
+          Added tests for policy duration validations.
+
+Fri Jun 17 16:58:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfmap:
+
+          Added validation checks for max_samples, max_instances,
+          and max_samples_per_instance.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Copied container of policy audits from PolicyLib.gmfmap to this file.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Updates auto-generated by GMF.
+
+        * tools/modeling/testdata/QosPolicies:
+        * tools/modeling/testdata/QosPolicies/QosPoliciesConstraintErrorsTest1.opendds:
+        * tools/modeling/testdata/QosPolicies/QosPoliciesConstraintErrorsTest1.opendds_diagram:
+
+          Added tests for policy validations.
+
+Fri Jun 17 16:36:27 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/KeyTest:
+        * tests/DCPS/KeyTest/BoundTest.idl:
+        * tests/DCPS/KeyTest/BoundTest2.idl:
+        * tests/DCPS/KeyTest/IsBounded.cpp:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+
+          More splitting of IDL files with large amounts of generated
+          code.  There are still some builds having problems with this
+          file.
+
+Fri Jun 17 14:09:11 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fix some missing includes that were exposed by yesterday's
+          IDL changes.
+
+        * tests/DCPS/Compiler/idl_test3_lib:
+
+          Add svn:ignore entries for the new IDL generated files.
+
+Thu Jun 16 21:27:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/monitor/MonitorDataStorage.inl:
+
+          Fix some unused variable warnings.
+
+Thu Jun 16 19:50:46 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef2.idl:
+
+          Fix some fuzz errors.
+
+Thu Jun 16 19:12:43 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+
+          Add /bigobj option here as well.
+
+Thu Jun 16 18:53:21 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+
+          Add the /bigobj option to the vc9 & vc10 builds.
+
+Thu Jun 16 16:29:40 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef2.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef3.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/SharedTypes.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          More splitting to try to fix object file size issues.
+
+Thu Jun 16 15:58:16 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/monitor/MonitorDataStorage.cpp:
+
+          Fixed problem of monitor creating new transport nodes
+          when existing transport nodes are updated by changing
+          manageTransportLink() to lookup an existing transport
+          using label "Transport" instead of "Transport Id" to
+          match the label used when a transport node is created.
+
+          Fixed some indentions.
+
+Thu Jun 16 15:34:49 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef2.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Split the FooDef.idl file to avoid some build problems
+          with large object files.
+
+Thu Jun 16 14:58:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Default inline to 1, since we now have make install but it doesn't
+          work yet with inline = 0.
+
+Wed Jun 15 17:57:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfmap:
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds:
+
+          Overlooked ReaderDataLifecycleQosPolicy when setting default
+          durations to infinite in "Tue Jun 14 19:29:20 UTC 2011" commit.
+
+Wed Jun 15 15:33:47 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          Do some refactoring of the code generation for
+          gen_is_bounded() and gen_max_marshaled_size().  The
+          new opendds_idl compiler:
+            - Only generates these functions for DCPS types
+            - Performs the computations related to these functions
+              at idl compilation time.  This effectively "flattens"
+              their implementation as the return of a single
+              constant.
+            - Handles unions properly (the previous implementation
+              pessimistically marked all unions as unbounded).
+            - Detects recursion of struct definitions (previously
+              resulted in potentially infinite recursion code being
+              generated for gen_max_marshaled_size()).
+            - Cleans up and reduces the size of the code generator.
+
+          WARNING: One side effect of this change is that changing
+          one IDL file may effect the code generated by other IDL
+          files, so you may have to recompile all your IDL to get
+          a properly building and executing system.  To some extent,
+          this has always been true with OpenDDS (and TAO), but
+          this change introduces a new way for this to affect
+          applications.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Add a gen_max_marshaled_size() implementation (since one
+          is no longer automatically generated).
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test3_main/README.txt:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Change this test so it no longer used functions that are
+          no longer generated.  This involved wrapping some data
+          types in structures and adding a lot of DCPS_DATA_TYPE
+          pragmas (to force code generation).
+
+        * tests/DCPS/KeyTest/BoundTest.idl:
+        * tests/DCPS/KeyTest/IsBounded.cpp:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Add some new unit test code that explicitly tests these
+          generated functions with a broad range of data types and
+          situations.
+
+        * dds/monitor/monitor.idl:
+
+          Reuse existing sequence typedefs.
+
+Wed Jun 15 15:24:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          For instances without transports, generate the class
+          implementation.
+
+Wed Jun 15 15:22:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds:
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds_diagram:
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1_screenshot_1.png:
+
+          Fixed model file after Dean Wette identified it as being invalid XML
+          using the validator he's currently developing.
+
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds_diagram_datalib:
+
+          Removed this file.
+
+Tue Jun 14 20:44:31 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/policy_duration_infinite.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/adding_policies.html:
+
+          Added information about policies with infinite durations.
+
+Tue Jun 14 19:29:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfmap:
+
+          Set default durations for deadlineQosPolicy, lifespanQosPolicy,
+          livelinessQosPolicy, and reliabilityQosPolicy to infinity per
+          DDS spec.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          GMF-generated changes based on map file modifications.
+
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds:
+
+          Updated to account for change in default durations.
+
+Tue Jun 14 13:06:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+
+          Removed unused class topicField left over from attempt to follow
+          DDS profile spec.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Updates due to the removal of element from OpenDDS.ecore.
+
+Mon Jun 13 21:11:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Decision was made to use the "lower quality" schema generator
+          invoked by setting Generate Schema property to true and fix
+          as necessary using XSL stylesheets.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TypesXMI.xsd:
+
+          Generated automatically as part of model generation.
+
+Mon Jun 13 20:52:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/QosPolicyCreationHelper.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+
+          Further updates that should have been commited as part of then profile-driven
+          inheritance removal commit.
+
+Mon Jun 13 20:01:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore_diagram:
+
+          Added missing element defined outside of Topics.ecore
+          to the diagram.
+
+Mon Jun 13 19:54:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+
+          Removed profile-driven inheritance from domain, topic, and policies
+          (policy classes starting with lower-case character) to minimize
+          multiple inheritance which does not map well to XSD. The profile
+          driven inheritance wasn't adding any members anyway.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+
+          Additions of notationViewFactoryClassName attributes due to
+          OpenDDS.ecore changes.
+
+Fri Jun 10 23:25:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+          make destructor virtual
+
+
+Fri Jun 10 19:36:23 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/parsers/PredefinedParser.xpt:
+
+          Generate code allowing infinity to be specified and displayed
+          for ELong types to support infinite duration for QoS policy
+          periods.
+
+Thu Jun  9 22:06:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/scripts/dds_fuzz.pl:
+
+          New script that runs fuzz.pl (from ACE) passing in the list of tests
+          that are applicable to OpenDDS.  Try running with -m to check only
+          svn added or modified files.
+
+Thu Jun  9 19:34:29 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore_diagram:
+
+          Update to include DomainEntity and class attributes.
+
+Thu Jun  9 19:25:27 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Disabled schema generation. As discussed in EMF book,
+          12.3 Generator Model Properties, p353, schema generation should
+          instead be done using the Generator pull-down menu to get
+          "higher quality XML Schema."
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TypesXMI.xsd:
+
+          Generated using Generator menu which fixes import statements to
+          use correct file names. Note that these auto-generated schemas are not suitable
+          for validation.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Updates to account for OpenDDS.genmodel change.
+
+Wed Jun  8 22:49:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Fixed more GCC 4.6 warnings.
+
+Wed Jun  8 20:45:56 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Add some #if code to make the rand_r calls work with older
+          ACE versions.
+
+Wed Jun  8 20:01:13 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/codegen/model/TransportDirectives.cpp:
+        * tools/modeling/tests/UDP/run_test.pl:
+
+          fuzz.
+
+Tue Jun  7 22:37:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Add a few random characters to the end of the #ifndef macro,
+          similar to what tao_idl does.  This avoids possible conflicts when
+          combining includes generated from two same-named files in different
+          directories.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Improve the warning generated when a struct/union field has a type
+          that we don't support in OpenDDS custom marshaling.  The warning now
+          indicates the name of the struct/union and not just the field.
+
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+
+          Issue an error if a union type is used for DCPS_DATA_TYPE.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Fixed GCC 4.6 unused local variable warning.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Simplified instructions for creating zip file.
+
+Tue Jun  7 19:51:46 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          implement loadTransportLibraryIfNeeded(), processing required
+          directives.
+
+        * tools/modeling/codegen/model/TransportDirectives.h:
+        * tools/modeling/codegen/model/TransportDirectives.cpp:
+
+          added files to hold enums and literal directives
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          invoke loadTransportLibraryIfNeeded() to load transport
+          libraries.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+
+          added loadTransportLibraryIfNeeded() abstract method.
+
+        * tools/modeling/tests/UDP/run_test.pl:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+
+          remove -ORBSvcConfig command line args
+
+Tue Jun  7 15:57:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ModuleNameConflict/run_test.pl:
+
+          add library path for MessengerMixed library.
+
+Mon Jun  6 21:24:45 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Don't try to dump the config to the log if there's no config.
+          Thanks to levent sevil <levent dot sevil at gmail dot com>.
+
+        * tests/DCPS/KeyTest:
+
+          svn property change only
+
+Mon Jun  6 21:08:34 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+
+          Fixed problem with duplicated xmi:id values (which prevents XML Schema
+          validation)
+
+Mon Jun  6 19:19:03 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Changed calls to create_contentfilteredtopic() and
+          create_multitopic() to qualify StringSeq() with DDS:: as there is
+          an OpenDDS::DCPS::StringSeq() which was causing the Modeling SDK
+          generated code to not compile when the monitor support was included
+          (at least under vc9).
+
+Mon Jun  6 15:17:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+
+          Add model to codegen paths.
+
+Sat Jun  4 04:42:53 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Added an additional note about using the zip command.
+
+Fri Jun  3 21:40:54 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+
+          Use scope in type-name, if available.
+          Use scope in scopename, if available.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Comment.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+          Separate scope from name in external-ref type.
+
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mpc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mwc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.opendds:
+
+          Refer to external type with conflicting module name.
+
+Thu Jun  2 03:20:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Don't output a switch with no cases (warning) for incomplete
+          transports.
+
+Wed Jun  1 15:37:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          In anticipation of publishing the schemas for model files,
+          enable generation of schema files.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+
+          The schema file for .opendds files.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/CoreXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/EnumerationsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TypesXMI.xsd:
+
+          Schema files imported by OpenDDSXMI.xsd.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/XMI.xsd:
+
+          The schema for XMI used by EMF. This is identical to
+          platform:/plugin/org.eclipse.emf.ecore/model/XMI.xsd except for
+          standalone="no" in the header.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Update to track the change in OpenDDS.genmodel.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model:
+
+          Ignore the .xsd2ecore files that are generated along with the
+          .xsd files.
+
+Tue May 31 23:24:43 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InstanceState.cpp:
+
+          RT14752: removed unused variables to avoid compiler warnings
+                   from gcc 4.6.  Thanks to Johnny Willemsen (jwillemsen
+                   at remedy dot nl) for reporting this.
+
+Tue May 31 20:04:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Move the point where the initial monitor message is published.
+          The message was being sent before the GUID was initialized.
+
+        * tools/monitor/MonitorDataStorage.inl:
+
+          Don't generate entries for a transport with a key of zero.  This
+          is really a nil-reference.  In addition, don't show QoS data
+          when it is not found.  There are still additional QoS-related
+          problems that prevent the proper display of this data, but this
+          change prevents the display of uninitialized data.
+
+Tue May 31 12:43:14 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/plugin/plugin.xpt:
+
+          Modify menu template to not enable cut, copy and paste of figure elements
+          because copy and paste are broken in GMF 2.2.2 (see
+          http://esalagea.wordpress.com/2011/04/13/lets-solve-once-for-all-the-gmf-copy-paste-problem-and-then-forget-about-it/
+          for more information).
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+          Updates due to addition of AROUND template in plugin.xpt.
+
+Fri May 27 20:00:24 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+
+          Files that should have been checked in as part of the "Thu May 26 17:13:09 UTC 2011"
+          commit.
+
+Fri May 27 07:54:36 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/InstanceState.cpp:
+          Typo fix
+
+        * dds/DCPS/OwnershipManager.cpp:
+          Fixed GCC 4.6 warnings
+
+Thu May 26 17:13:09 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/figures/UmlPackageFig.java:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph:
+
+          Fixed so that when a lib (or package) on the canvas is dragged
+          inside a parent package, visual feedback will occur that the
+          lib will be owned by the package and when mouse button is released
+          the lib will actually be own the package. Previously, unless
+          moving to the top region of the package compartment, after moving
+          the lib inside a package it would appear that the lib was inside
+          the package but it really wasn't. This problem arose because
+          libs and packages can be both top nodes on the canvas and compartment
+          children.
+
+Wed May 25 15:11:25 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_init.cpp:
+
+          Define the __OPENDDS_IDL preprocessor macro, similar to __TAO_IDL.
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Use __OPENDDS_IDL in the test.
+
+Mon May 23 19:30:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Fixed some Perl errors, added "use strict" and cleaned up.
+
+Mon May 23 18:14:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          ...and don't attempt to run RemoteInstHandles when Built-In Topics
+          are not available in the build.
+
+Mon May 23 16:29:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Allow --prefix argument to configure script, for use with
+          "make install".
+
+Mon May 23 16:00:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.mpc:
+
+          This test requires Built-In Topics.
+
+Mon May 23 15:15:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/Reconnect/Reconnect_export.h:
+
+          Create a library of generated code to work better
+          with parallel builds.
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Use proper type for 'argv', matching the Entities class.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Generate ACE_TEXT() around string literals where needed.
+
+        * tools/modeling/tests/setup.pl:
+
+          Fix for the case where the 'bin' subdirectory of the plugin doesn't
+          exist yet.
+
+Fri May 20 20:03:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/pub_multicast.ini:
+        * tests/DCPS/LargeSample/pub_udp.ini:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/sub_multicast.ini:
+        * tests/DCPS/LargeSample/sub_udp.ini:
+
+          Use consistent logging and built-in topic settings for all of the
+          transport types.
+
+Fri May 20 12:46:44 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/customization.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/generate.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/moving_between_diagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/using_packages.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/index.html:
+
+          Fixed typos in help text.
+
+Thu May 19 20:18:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Install headers and library.
+
+Thu May 19 19:44:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed broken regex patterns in add_lib_path.
+
+Thu May 19 19:38:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Cleaned up the script.  Use Getopt::Long to allow repeated arguments
+          with cumulative effect (-l listone.lst -l listtwo.lst).
+
+        * dds/DCPS/RTPS/md5.h:
+
+          Fuzz.
+
+Thu May 19 18:49:19 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet.cpp:
+
+          Reimplemented use of a Wireshark 1.4.x-specific function to
+          be compatible with older implementations.
+
+Thu May 19 17:51:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Typo fix in comment.
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Use const for swap_bytes.
+          Cast to avoid warnings on 64-bit platforms.
+
+        * tools/dissector/packet.cpp:
+
+          Cast to avoid warnings on 64-bit platforms.
+
+Thu May 19 16:05:34 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Add the "." path (ACE 5.5a does not do so).
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Change to byte ordering macros compatible with TAO 1.5a.
+
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Fix a typo caused by the fuzz cleanup.
+
+Thu May 19 15:56:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+
+          Fix for SunCC.
+
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+
+          Need to override both overloads of check_header().
+
+Thu May 19 15:36:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Further clean-up from the merge: fix for GCC 3.3.x.
+
+Thu May 19 14:46:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet.cpp:
+
+          Fix for dissecting TCP frames that contain multiple DCPS messages.
+          Also works for DCPS messages that span TCP frames.
+
+Thu May 19 14:31:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/md5.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/KeyTest/md5_test.cpp:
+        * tests/DCPS/KeyTest/run_test.pl:
+        * tests/transport/dds_comparative/SubReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+
+          Clean up from yesterday's merge.  Fuzz and portability problems.
+
+Thu May 19 14:23:50 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Change literal to explicitly be a 64 bit value.
+
+Wed May 18 21:32:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "RTPS", which includes the start of the DDS
+          Interoperability specification (OMG formal/2010-11-01).  This
+          is not yet a complete implementation, but it contains changes
+          that impact the existing OpenDDS transport protocol, including
+          64-bit sequence numbers, support for fragmentation and
+          reassembly in UDP-based transports, and the ability to marshal
+          only the key fields for registration/unregistration/disposal
+          messages.  For full details of the changes see the branch-specific
+          change log at docs/history/ChangeLog-RTPS-1.
+
+Wed May 18 20:27:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          set length properly when changing from a zero copy sequence to
+          a single copy sequence.
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          test above change.
+
+Wed May 18 18:01:58 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Removed EMF/GMF TODO sections as they are no long applicable.
+
+Wed May 18 13:43:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Force use of qualified typename in sequence typedefs.  This is
+          due to a TAO idl compiler bug, where if the type is not defined
+          the sequence type will not be known.  Then bad things happen in
+          marshalling and demarshalling.  Fixes issue found in Myra.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpb.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpc.xsl:
+
+          Fix reference to DataLib (should be types:DataLib
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+          Don't output invalid code for incomplete instances.
+
+        * tools/modeling/tests/MultiInstance/MultiInstance.codegen:
+
+          Examples to test incomplete instances in codegen.
+
+Tue May 17 21:01:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedXmlFile.java:
+
+          Added a helper method that can dump out a XSLT result to a file.
+          This is not used, but it can be uncommented to help with debugging.
+
+Fri May 13 14:18:21 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Remove trailing spaces.
+
+Thu May 12 19:34:25 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Monitor/run_odds_mon.pl:
+
+          Add this script to interactively run this test with the
+          graphical monitor.
+
+Wed May 11 13:49:07 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/MonitorFactory.h:
+        * dds/DCPS/MonitorFactory.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fix a static destruction problem in the monitor code by always
+          use the ACE service mechanism (it was previously a mix).
+
+Fri May  6 14:20:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Fixed malformed test list entry.
+
+Wed May  4 13:28:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds:
+
+          Added missing Period references.
+
+Wed May  4 12:50:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramDomainModelWizardPage.java:
+
+          Restrict characters for model name to be valid C++ identifier characters
+          since model name is used as part of export macro in tao_idl generated code.
+
+Wed May  4 03:58:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          don't execute looped test.
+
+Tue May  3 22:32:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed a logging message.
+
+        * tools/modeling/codegen/model/Application.h:
+        * tools/modeling/codegen/model/Application.cpp:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Use DomainParticipantFactory_var to avoid leaking references.
+
+Tue May  3 22:18:00 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/StockQuoter/subscriber.cpp:
+
+          Signal read cond sync when all messages received.
+
+Tue May  3 19:14:37 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Remove xsl:message for debugging.
+
+Tue May  3 18:41:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Fix module name as only case-different from field name - don't output
+          qualified name when in same module.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+          Typo in comments.
+
+        * tools/modeling/tests/ModuleNameConflict:
+
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mpc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mwc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.opendds:
+        * tools/modeling/tests/ModuleNameConflict/publisher.cpp:
+        * tools/modeling/tests/ModuleNameConflict/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Test module name as only case-different from field name.
+
+Tue May  3 18:37:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts:
+
+          Have subversion ignore files removed in previous commit.
+
+Tue May  3 18:10:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/DataLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DcpsLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/PolicyLibEditPart.java:
+
+          An attempt was made to remove these files on the RT13927 branch since they're auto-generated
+          (see ChangeLog entry Fri Jan 14 14:52:17 UTC 2011).
+          Attempting to remove again.
+
+Tue May  3 14:03:32 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+          Another auto-generated update due to shared wdlQosPolicy addition.
+
+Tue May  3 13:25:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Fixed so wdlQosPolicy stereotype (WriterDataLifecycleQosPolicy) can be added as a shared policy for DataWriter.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+
+          Auto-generated updates due to changes in mapping.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/WdlQosPolicy2ItemSemanticEditPolicy.java:
+
+          Override destroy command to only remove reference to shared policy.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts:
+
+          Ignore newly wdlQosPolicy related auto-generated files.
+
+Mon May  2 19:09:03 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/commands/RequestToCommandConverter.java:
+
+          Generalize a cast to extend appliciblility of destroyElementRequestToDestroyReferenceCommand().
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/StructItemSemanticEditPolicy.java:
+
+          Remove Struct's reference instead of deletion when user removes datatype from a Topic or MultiTopic figure.
+
+Tue Apr 26 14:27:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+
+          Change stereotype dcpslib to dcpsLib to be consistent with other libs.
+
+Fri Apr 22 19:36:08 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/integration.html:
+
+          Further touch up.
+
+Fri Apr 22 19:13:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/integration.html:
+
+          Removed sections that were a copy from generate.html. Fixed typo.
+
+Fri Apr 15 15:08:28 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/tocreference.xml:
+
+          Removed duplicate policy entry in TOC.
+
+Fri Apr 15 14:50:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Added OpenDDS and ACE version numbers to the "Generated by..."
+          comment which is inserted at the top of generated files.
+          Moved this comment to the real top of the file, before #includes.
+
+Fri Apr 15 14:25:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_suppress_any_support.mpb:
+        * dds/DdsDcps.mpc:
+
+          Improved support for building OpenDDS with TAO's Anys and Typecodes.
+          To use, set the MPC feature dds_suppress_anys to 0.
+
+Thu Apr 14 12:07:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Added validation warning if Pub/Sub's transportID not explicitly set.
+
+Fri Apr  8 18:24:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Handle cycles in definitions (accomplished with sequences).
+
+        * tools/modeling/tests/Looped:
+        * tools/modeling/tests/Looped/Looped.codegen:
+        * tools/modeling/tests/Looped/Looped.mpc:
+        * tools/modeling/tests/Looped/Looped.mwc:
+        * tools/modeling/tests/Looped/Looped.opendds:
+        * tools/modeling/tests/Looped/publisher.cpp:
+        * tools/modeling/tests/Looped/subscriber.cpp:
+
+          Example of complex loops in type definitions.
+
+        * tools/modeling/tests/StockQuoter:
+        * tools/modeling/tests/StockQuoter/StockQuoter.codegen:
+        * tools/modeling/tests/StockQuoter/StockQuoter.mpc:
+        * tools/modeling/tests/StockQuoter/StockQuoter.mwc:
+        * tools/modeling/tests/StockQuoter/StockQuoter.opendds:
+        * tools/modeling/tests/StockQuoter/publisher.cpp:
+        * tools/modeling/tests/StockQuoter/subscriber.cpp:
+
+          Example of simple loops in type definitions.
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+Wed Apr  6 19:15:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+
+          Fix deadlock: In QueryConditionImpl::get_trigger_value(), acquire
+          parent_->sample_lock_, before lock_.
+
+Tue Apr  5 13:40:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+
+          Updated a Modeling SDK version 1.0.0 that should have been changed to
+          1.0.1 before that release.
+
+Fri Apr  1 21:00:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Added details about supporting custom and shared policies in DcpsLib.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/QosPolicyCreationHelper.java:
+
+          Simply code and remove assumption about max number of levels in DcpsLib containment a domain element can live.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/QosPolicyClassNameToRefName.java:
+
+          This class has not been used for months but I forgot to remove earlier so removing now.
+
+Fri Apr  1 16:36:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          Labeled the changes that were released with the Modeling SDK 1.0.1.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Fixed a typo.
+
+Fri Apr  1 15:07:51 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * NEWS:
+
+          Added entry about removal of connector tools for DataReader/DataWriter.
+
+Thu Mar 31 20:06:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedXmlFile.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+        * tools/modeling/tests/setup.pl:
+
+          Changed the "up-to-date" checking strategy, due to external references
+          it's not practical to determine the set of input files so instead we
+          generate to an in-memory buffer and update the filesystem if anything
+          in the output has changed.  At the same time, fixed some bugs where
+          ParsedXmlFile was caching too much, causing changes in the model to
+          not be reflected in the transformer source.
+
+Thu Mar 31 18:31:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/Dcps.gif:
+
+          Changed layer boundary size from 16x11 to 16x16. For some reason original
+          size was causing rendering problems using Microsoft viewers.
+
+Thu Mar 31 16:48:41 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/pub_creation.html:
+
+          Removed obsolete content. Added screenshot.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/sub_creation.html:
+
+          Mirrors pub_creation.html instead of refering to pub creation.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_pub_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_sub_example.png:
+
+          Pub/sub screenshots.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Subscriber now mirrors publisher.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/sub_datareader_creation.html:
+
+          Removed this file.
+
+Thu Mar 31 15:18:14 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+          Included DataReader and DataWriter in collection of figures that have
+          modeling assistance enabled. This allows connection handles to work
+          as expected on DataReaders and DataWriters removing the need to have
+          special connector tools on the palette for connecting these figures
+          to topic related figures.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmftool:
+
+          Removed DataReader/DataWriter connection tools from palette.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_datareader_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_datawriter_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareader_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datawriter_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+          Updated to account for removal of DataReader/DataWriter connection tools from palette.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datareaderwriter_topic_connection_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:
+
+          Removed these files.
+
+Wed Mar 30 18:46:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ReusedExtTypes/ReusedData.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedData.opendds:
+
+          Missed in last checkin.
+
+Tue Mar 29 20:14:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/creating_figures.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Add discussion about creating figures that aren't auto-sized and how
+          this can hide content added to its compartments.
+
+Mon Mar 28 18:47:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          Fix repeated type references.
+
+        * tools/modeling/tests/ReusedExtTypes:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.mpc:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.mwc:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.opendds:
+        * tools/modeling/tests/ReusedExtTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedExtTypes/subscriber.cpp:
+
+        * tools/modeling/tests/ReusedTypes:
+
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.codegen:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.mpc:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.mwc:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.opendds:
+        * tools/modeling/tests/ReusedTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedTypes/subscriber.cpp:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.codegen:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.mpc:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.mwc:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.opendds:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Tests for repeated type references.
+
+Mon Mar 28 19:40:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/concepts/modeling.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datareaderwriter_topic_connection_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_diagram_editor.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_diagram_selection.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_project_selection.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/struct.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/types_with_fields.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datawriter_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/topics_usage.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Addressed deficiencies in the on-line help based on feedback from Steve Totten.
+
+Mon Mar 28 18:31:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fix last Friday's change for the MultiTopic case.
+
+Mon Mar 28 17:55:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Now need an add_lib_path() to locate the shared library for the test.
+
+Mon Mar 28 16:54:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Versions of GMF gen models after generating on top of an
+          existing gen model file from the map files. Compared to
+          generating to fresh gen model file, notationViewFactoryClassName
+          property values are explicitly set. From testing determined that
+          this side effect is benign and verified it is the only change
+          from creating a fresh gen model file. These versions of the gen
+          model files should be easier to verify when making incremental
+          changes to the map and graphic defintion files.
+
+Mon Mar 28 12:53:02 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/creating_dcps_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/modeling_perspective.html:
+
+          Fixed typos identified by Steve Totten.
+
+Fri Mar 25 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+
+          Account for the scenario where an ORB upcall is active in one of
+          the "remotes" while its "parent" object is cleaning up.  In this
+          case the parent is explicitly detached, making the upcall a no-op.
+
+Fri Mar 25 15:27:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+          Updated Eclipse plugin & feature version numbers for OpenDDS Modeling
+          SDK from 1.0.0 to 1.0.1 in preparation for a new release.
+
+Thu Mar 24 21:38:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fixed a compiler error on SunCC.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Changed the Service_Participant singleton from TAO_Singleton<> to
+          ACE_Singleton<>.  TAO may not be initialized at the time the
+          Service_Participant is first accessed.  This causes the TAO_Singleton
+          to go through the "we'll have to leak" path, which we don't want.
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Removed an LM_ERROR log message in get_configuration() when the
+          configuration is not found.  That's a normal condition (even though
+          we end up throwing an exception for it) so no need to log.
+
+        * tests/DCPS/ContentFilteredTopic/Messenger.idl:
+
+          Removed parts of the IDL that are not used by the test.
+
+        * java/tests/messenger/both:
+        * performance-tests/DCPS/MulticastListenerTest:
+        * tests/DCPS/LivelinessTimeout:
+        * tests/DCPS/MultiTopic:
+        * tests/DCPS/QueryCondition:
+
+          Updated svn:ignore properties.
+
+Thu Mar 24 19:04:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * NEWS:
+
+          Added content about OpenDDS Modeling SDK changes since
+          the previous release.
+
+Thu Mar 24 17:53:06 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          IDs for org.eclipse.ui.preferencePages extension were not unique among
+          the diagrams resulting in all preference pages showing up under
+          DataLib preferences. Changed so IDs are derived from plug-in IDs.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+          Updates generated by GMF.
+
+Thu Mar 24 14:41:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgraph:
+
+          Fix problem with domain figure's outline being barely visible.
+
+Thu Mar 24 14:33:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Clean up from yesterday's commit.
+
+Thu Mar 24 13:56:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/MultiTopicDataTypeEditPart.java:
+
+          Oops. Forgot to commit update to MultiTopicDataType similar to update to
+          Topic in "Tue Mar 22 19:32:27 UTC 2011" commit.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
+
+          Format change caused by GMF code generator.
+
+Wed Mar 23 18:36:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/OpenDDSLibHelper.java:
+
+          Added helper class for working with the OpenDDSLib derived EClasses.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/diagram/editpolicies/NodeItemSemanticEditPolicy.xpt:
+
+          Modified template definition of getDestroyElementCommand() to check using
+          OpenDDSLibHelper if the element to destroy is in a different
+          library than view's model element. If so, don't destroy. This fixes a bug
+          where deleting, say, a Topic on a diagram with a shared policy would also
+          delete the policy itself.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DeadlineQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LbQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LifespanQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LivelinessQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/ReliabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TbfQosPolicy2ItemSemanticEditPolicy.java:
+
+          Changes in auto-generated code due to using modified template definition.
+
+Wed Mar 23 18:23:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+
+          Now need an add_lib_path() to locate the corresponding C++ pub/sub.
+
+Wed Mar 23 15:42:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        DisjointSequence changes originally developed by Brian Johnson.
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Changed DisjointSequence to store a set of SequenceRanges, so
+          that we only need to store the lowest and highest values of a
+          contiguous range of seen SequenceNumbers.  The largest change
+          I made to the interface for DisjointSequence were to remove
+          the range_iterator and related functions and replace it with
+          a function called missing_sequence_ranges() which returned a
+          set of SequenceRanges indicating ranges of unseen
+          SequenceNumbers (the inverse of the DisjointSequence itself).
+          Other changes to the interface were changing shift to
+          lowest_valid which was intended to better indicate what was
+          going on and changed it to return an indication that
+          SequenceNumbers were dropped (which allowed the removing of
+          seen, which really wasn't "seen" it was "will this be
+          shifted?") and the implicit conversion to SequenceNumber was
+          removed.  previous_sequence_number now can be a non-static
+          function and use low() as the reference point and normalize
+          is no longer needed.  The DisjointSequence used to be
+          understood that the first value in the set was really the
+          last contiguous SequenceNumber from the start that was
+          received, now the lowest SequenceRange is a range of a
+          single value indicating the the same as before.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed to use explicit call of low().
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          I changed code due to change of DisjointSequence interface:
+          changing to use explicit call of low(), lowest_valid(), and
+          just using the RangeSet returned by missingSequenceRanges.
+          I changed every DisjointSequence name from "missing" to
+          "received", since a DisjointSequence is a "set" of received
+          SequenceNumbers which provides an interface for getting the
+          missing SequenceNumbers.  I also changed the code to be more
+          efficient and call update with a range instead of each
+          consecutive value.
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Changed to call missingSequenceRanges() and use explicit call
+          of low().  More test coverage of range-combining in lowest_valid()
+          and in update().
+
+Tue Mar 22 19:32:27 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
+
+          Refresh Topic's datatype compartment if the datatype is changed.
+
+Tue Mar 22 15:14:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+
+          Same fix as the one for WaitForAck.mpc, below.
+
+Tue Mar 22 15:05:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Cleaned up formatting in a logging message.
+
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+
+          Missed the "libs +=" change in this file yesterday.
+
+        * tests/DCPS/sub_init_loop/SubInitLoop_export.h:
+
+          Forgot to svn add this yesterday.
+
+Mon Mar 21 18:47:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy_export.h:
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc:
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency_export.h:
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/CorbaSeq/CorbaSeq_export.h:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+
+          More parallel build fixes (see previous commit).
+
+Mon Mar 21 17:45:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr_export.h:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr_export.h:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/Priority_export.h:
+        * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:
+        * performance-tests/DCPS/TransportLatency/TransportLatency_export.h:
+        * tests/DCPS/BidirMessenger/BidirMessenger.mpc:
+        * tests/DCPS/BidirMessenger/BidirMessenger_export.h:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest_export.h:
+        * tests/DCPS/DPFactoryQos/DPFactoryQos.mpc:
+        * tests/DCPS/DPFactoryQos/DPFactoryQos_export.h:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/Deadline_export.h:
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+        * tests/DCPS/GroupPresentation/GroupPresentation_export.h:
+        * tests/DCPS/LargeSample/LargeSample.mpc:
+        * tests/DCPS/LargeSample/LargeSample_export.h:
+        * tests/DCPS/LatencyBudget/LatencyBudget.mpc:
+        * tests/DCPS/LatencyBudget/LatencyBudget_export.h:
+        * tests/DCPS/Lifespan/Lifespan.mpc:
+        * tests/DCPS/Lifespan/Lifespan_export.h:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness_export.h:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/Messenger_export.h:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/Messenger_export.h:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Ownership/Ownership_export.h:
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+        * tests/DCPS/PersistentDurability/PersistentDurability_export.h:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Priority_export.h:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber_export.h:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline_export.h:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/SetQosPartition/SetQosPartition_export.h:
+        * tests/DCPS/StringKey/StringKey.mpc:
+        * tests/DCPS/StringKey/StringKey_export.h:
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+        * tests/DCPS/TransientDurability/TransientDurability_export.h:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest_export.h:
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+        * tests/DCPS/WaitForAck/WaitForAck_export.h:
+
+          Fixed parallel build issues with tests & examples.  See the note at
+          the end of the Mon Mar 14 23:41:58 UTC 2011 ChangeLog entry.
+
+Mon Mar 21 15:36:30 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/providers/BasicTypesSupplier.java:
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/BasicTypeIdentifier.java:
+
+          Move method to to detect if a type is a basic type from a diagram plug-in to
+          the common plug-in to so it can be re-used in common code without cyclical dependencies
+          between plug-ins.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/providers/FieldParserProvider.java:
+
+          Use basic type detection from common plug-in.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentFilter.java:
+
+          Don't present the comment tab in the property sheet if the type is a basic type.
+
+Mon Mar 21 14:53:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Use a more descriptive message with --verbose.
+
+        * examples/DCPS/DistributedContent/main.cpp:
+
+          ACE_RANDR_TYPE was removed from the DOC Group repo, it's not needed.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Removed dead code that also mentioned ACE_RANDR_TYPE.
+
+Mon Mar 21 14:52:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
+
+          Fix so that if comment format picked first before comment text is entered
+          the new format is saved instead of being ignored.
+
+Mon Mar 21 12:49:49 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
+
+          Make default value in format combobox be based on the default literal
+          set in the Ecore model for Comment's CommentFormat.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:
+
+          Change the default literal for Comment's CommentFormat to DOXYGEN.
+
+Fri Mar 18 21:58:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+        * tools/modeling/tests/Comments/Comments.opendds:
+
+          Output comments from DCPSlib in _T.h
+
+Fri Mar 18 20:38:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Output comments in IDL.
+
+        * tools/modeling/tests/Comments:
+        * tools/modeling/tests/Comments/Comments.codegen:
+        * tools/modeling/tests/Comments/Comments.mpc:
+        * tools/modeling/tests/Comments/Comments.mwc:
+        * tools/modeling/tests/Comments/Comments.opendds:
+        * tools/modeling/tests/Comments/publisher.cpp:
+        * tools/modeling/tests/Comments/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          New test case with comments in datalib.
+
+Fri Mar 18 17:57:29 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
+
+          Copied EFactory used for Comment creation used in 1st version of this file
+          into this version so comments will persist after the comment field looses
+          focus.
+
+Fri Mar 18 16:01:00 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Change diagram editor ID to be what was the default value when using
+          the package name prefix org.opendds.modeling.model.opendds.diagram.<lib>.
+          This will allow existing model diagrams to open without error.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/part/OpenDDSDataLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/part/OpenDDSPolicyLibDiagramEditor.java:
+
+          Auto-generated update based on diagram editor ID change.
+
+Fri Mar 18 14:47:45 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Fixed a bug with default.features.  Put "extra" DDS features in the
+          default.features instead of passing them on the command line with
+          -features.  The old way was too hard to use, the user would have to
+          remember to run MPC with a similar command line.
+
+Fri Mar 18 13:45:49 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit:
+
+          svn:ignore auto-generated files.
+
+Fri Mar 18 12:53:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          For the package name prefix incorrectly had
+          org.opendds.modeling.model.opendds.diagram.<lib>.
+          Fixed to be
+          org.opendds.modeling.diagram.<lib>.
+          This change results in shorter paths to the Java diagram code which should
+          reduce the opportunity of running into problems with subversion and excessive
+          path lengths.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram:
+
+          All the Java source code has been moved to these directories. Because the package name changed
+          all the Java files have been updated to use the new package names.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+          Updates to account for package name change.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram:
+
+          These directories have been removed since the source files under these directories
+          are now in their proper location.
+
+Thu Mar 17 22:14:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-latency-tables.pl:
+
+          Allow "mrel" as the tranport identifier for multicast-reliable.
+
+Thu Mar 17 21:30:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed a bug where get_topicdescription() was returning the
+          the "related" Topic instead of the Content-Filtered Topic.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Regression test for the above bug.
+
+Thu Mar 17 12:09:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+
+          Intended changes for "Tue Mar 15 14:05:11 UTC 2011" commit. (May have forgotten
+          @generated NOT tag and changes got overridden after regenerating code to format changes.)
+
+Wed Mar 16 20:49:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * docs/design/CONTENT_SUBSCRIPTION:
+
+          Documented the Content-Subscription changes & implementation.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Fixed a compiler warning.
+
+Wed Mar 16 19:44:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/impl/diagram/editparts/NodeEditPart.xpt:
+
+          Modified Xpand code for EditPart's getPrimaryChildEditPart() method so that the method is only
+          created if there is an editable label and if so then the first editable label is returned. The
+          original version returns the first label, even if it is read-only, which results in cursor not
+          being placed on an editable label as would be expected.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Updated to that custom code generation templates can be used.
+
+Wed Mar 16 19:40:56 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+        Updates that should have been committed as part of the
+        Mon Mar 14 12:29:42 UTC 2011 commit.
+
+Wed Mar 16 19:17:50 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/sheet/ElementCommentPropertySection.java:
+
+          Use code formatted by code generator.
+
+Tue Mar 15 22:32:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Change the wait_for_acknowledgments() delay from infinite to
+          finite-but-sufficient (1 minute).  The value for infinite delay
+          doesn't seem to be handled correctly, but that should be addressed
+          in the WaitForAck test and not here.
+
+Tue Mar 15 22:09:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Don't log a warning when we receive a parameter update from the
+          InfoRepo and we aren't tracking that reader because publisher-side
+          content filtering is disabled.
+
+        * java/jms/native/build.xml:
+
+          Running GNU Make requires a "make depend" step.
+
+Tue Mar 15 15:36:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed a compiler warning.
+
+        * MPC/config/dcps_test_lib.mpb:
+
+          New base project for DDS tests that create libraries.
+
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+
+          Update these files to use the new mpb.  Also requires latest MPC rev.
+
+        * lib/.empty:
+
+          Removed this file.  It's a relic from the CVS days.
+
+Tue Mar 15 14:05:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+
+          Extend region of Package figure to include entire compartment
+          for which children (Subpackages and libraries) selected from the palette
+          are added to the Package. (RT 14610)
+
+Mon Mar 14 23:41:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+
+          Implemented wait_for_acknowledgments() behavior with content-
+          filtering, including the ability for the DataWriter to send
+          customized control messages (REQUEST_ACK) to each DataLink.
+
+        * tools/dissector/packet.cpp:
+
+          Added new DataSampleHeader flag to Wireshark.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+
+          Test wait_for_acknowledgments() with content-filtering.
+
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/NotifyTest/NotifyTest_export.h:
+        * tests/DCPS/Partition/Partition.mpc:
+        * tests/DCPS/Partition/Partition_export.h:
+
+          Re-organized these two tests so that they build a shared library
+          from the generated code.  This prevents duplicate code compilation
+          steps with MPC types that use per-project dirs for object files, and
+          prevents parallel build errors on MPC types that always run custom
+          build steps per-project even if the outputs are up to date.
+          This is a bit of a "pilot project" of this way of setting up the
+          tests.  If it works well, many other tests will be changed too.
+
+Mon Mar 14 12:29:42 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:
+
+          Added CommentFormat EEnum to indicate how the comment should be
+          formatted in the C++ code.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.properties:
+
+          Updated to pick up CommentFormat.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
+
+          Present combobox for comment format below comment.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/element_comment_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/adding_comments.html:
+
+          Added paragraph about comment format.
+
+Thu Mar 10 18:32:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+          Fixed SunCC warnings in the new code for content-subscription.
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/messenger/both:
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/both/java_both_test.mpc:
+        * java/tests/messenger/both/opendds_tcp.ini:
+        * java/tests/messenger/both/run_test.pl:
+
+          Added a new Java test that runs both publisher and subscriber in
+          the same process (and same domain participant).  It also serves
+          as an example of reading with wait sets and conditions instead
+          of using a listener class.
+
+Thu Mar 10 14:39:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/element_comment_example.png:
+
+          Update to reflect re-ordering of property sheet tabs.
+
+Thu Mar 10 14:29:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+          Re-ordered property sheet tabs so that the Comment tab shows up first.
+
+Wed Mar  9 22:03:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+
+          Attempting to fix Doxygen comment formatting.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Removed a duplicate #include.
+
+Wed Mar  9 20:54:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Now that Service_Participant (as of Tue Mar  8 20:11:23) is releasing
+          its reference on the POA  (and the other references are cleaned up)
+          the ORB really is shutting down and going away, the entirity of
+          finalize() can't be called from within our event handler inside of
+          ORB::run().  Instead call finalize() after run() returns.  This could
+          break code that's depending on calling run() multiple times, but we
+          don't know of such code.
+
+Wed Mar  9 20:26:52 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:
+
+          Added Element class and Comment class with Element optionally owning a Comment.
+          Entity now inherits from Element.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
+
+          Updated so that all class (eventually) inherit from Element. This way comments
+          can be added to all modeling elements.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Re-generated and set Multiline property for Comment body to true.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore_diagram:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore_diagram:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+
+          Auto-generated dependency updates.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/part/ElementCommentFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/ElementCommentFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/ElementCommentFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/sheet:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/part/ElementCommentFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/part/ElementCommentFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Added Comment tab for viewing/entering comments to the property sheet that's active whenever
+          a diagram item is selected whose modeling  element inherits from Element.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/element_comment_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/adding_comments.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Updated help content to include discussion of adding comments.
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram:
+
+          Sprinkled some comments in the Struct and its content.
+
+Wed Mar  9 19:30:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Refrain from holding references to the POAs and Servants.
+          Also cleaned up some style (using this-> consistently, etc).
+
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          More 64-bit warnings.
+
+Tue Mar  8 20:11:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GroupRakeData.cpp:
+        * dds/DCPS/GuidBuilder.cpp:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/WaitSet.cpp:
+        * dds/DCPS/transport/framework/BasicQueueLinkAllocator_T.h:
+        * dds/DCPS/transport/framework/BasicQueueLinkPool_T.h:
+        * dds/DCPS/transport/framework/BasicQueue_T.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.h:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/InfoRepo/InfoRepoMulticastResponder.cpp:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+
+          Fixed 64-bit and signed/unsigned mismatch warnings in all core libs.
+          SunCC compatibility for recently-added code.
+          Fixed a few memory management and refcounting bugs.
+
+Mon Mar  7 23:50:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Allow for a "short read" of one sample at a time.
+
+        * tools/dissector/README:
+
+          Documented newly-implemented header fields.
+
+Mon Mar  7 22:45:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/Util.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Fixed scoreboard errors and warnings from my commit last Friday.
+
+Mon Mar  7 19:40:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Don't mention specific_config when it has no subelements to
+          prevent warning.
+
+Mon Mar  7 15:52:09 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/struct.html:
+
+          Put discussion on Keys under its own header to make stand out.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+
+          Added caution about modifying the model directly using the Property view.
+
+Mon Mar  7 15:22:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_collection_types_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_simple_types_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_struct_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_typedef_field_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_union_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/basic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/collection_types.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/struct.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/types_with_fields.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/union.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Extract sections of data types to their own pages to make it easier to navigate the content
+          and to provide room for growth of content.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/adding_types.html:
+
+          Removed this file as content has been extracted to separate pages.
+
+Fri Mar  4 20:35:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/Util.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+
+          Implemented publisher-side filtering for Content-Filtered Topics.
+          It can be disabled using "-DCPSPublisherContentFilter 0" on the
+          command line or the equivalent setting in the [common] section of the
+          config file.
+          wait_for_acknowledgments() still needs work to make it aware of the
+          fact that some associated DataReaders may be expected to have lower
+          values of the sequence number if the most recent sample(s) were
+          filtered out.
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/UpdateDataTypes.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+        * dds/InfoRepo/UpdateProcessor_T.h:
+        * dds/InfoRepo/UpdateProcessor_T.cpp:
+        * dds/InfoRepo/Updater.h:
+
+          InfoRepo support for communicating the Content-Filtered Topic's
+          filter string and subscription parameters from the subscriber to
+          any associated data writers.  Parameters can be changed at any time.
+          The ContentFilteredTopic::set_expression_parameters() will block
+          until all associated data writers are made aware of the new params.
+          Federation and Persistence for the above.
+
+        * tools/dissector/packet.cpp:
+
+          Updated the Wireshark Dissector for these changes to the
+          DataSampleHeader.
+
+        * performance-tests/DCPS/TCPListenerTest/Writer.h:
+
+          Join the thread in the destructor to prevent the thread's cleanup
+          code (in ACE) from running while ACE itself is cleaning up (in main).
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/dcps.ini:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+
+          Extend this test, in order to exercise the new features.
+          Run the test with both settings for -DCPSPublisherContentFilter.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Test the subscription parameters dynamic updating.
+
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+
+          Update tests for changes to internal classes.
+
+        * docs/design/PERSISTENCE:
+
+          Typo fix.
+
+        * configure:
+
+          Whitespace fix only.
+
+        * dds/InfoRepo/README:
+
+          Removed this file.  It only had info about the domain_ids file, which
+          is long since gone.
+
+Thu Mar  3 17:51:36 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Only generate #pragma DCPS_DATA_TYPE if @isDcpsDataType
+
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.opendds:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.opendds:
+
+          Explicitly set @isDcpsDataType where needed.
+
+        * tools/modeling/tests/Chained/run_test.pl:
+        * tools/modeling/tests/Chained_Data/run_test.pl:
+
+          Removed files.
+
+Thu Mar  3 14:28:07 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore_diagram:
+
+          Diagram of Generator model to help in navigating the modeling elements.
+
+Wed Mar  2 21:49:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/expfile.pl:
+
+          If the file exists but is zero-length, still need to generate.
+
+Wed Mar  2 15:50:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+
+          Fuzz.
+
+Tue Mar  1 17:11:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.opendds:
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+
+          Read BIT samples, instead of taking them.
+          Manually enable subscriber.
+          Check return code of all enable() calls.
+          Cleanup.
+
+Tue Mar  1 16:24:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/authoring_guide.html:
+
+          Added to HTML tools section, discussed duplication content from dev guide.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/policy_libs_defined.html:
+
+          Refer to policy references instead of dev guide.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/QoS.css:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/deadline.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/destination_order.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/durability.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/durability_service.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/entity_factory.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/group_data.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/history.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/index.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/latency_budget.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/lifespan.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/liveliness.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/ownership.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/ownership_strength.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/partition.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/presentation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/reader_data_lifecycle.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/reliability.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/resource_limits.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/time_based_filter.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/topic_data.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/transport_priority.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/user_data.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/writer_data_lifecycle.html:
+
+          Markup taken from Framemaker HTML export of QoS section of dev guide..
+
+        * tools/modeling/plugins/org.opendds.modeling.help/toc.xml:
+
+          Add reference section.
+          Remove reference to toc.html and let help system generate instead.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/tocreference.xml:
+
+          Reference the policy definitions.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
+
+          Removed this file.
+
+Tue Mar  1 15:36:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.opendds:
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Update for a more reliable test.
+
+Mon Feb 28 21:10:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/adding_types.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/creating_data_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/data_libs_defined.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/using_types_from_other_datalibs.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/compartments_usage.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/creating_dcps_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datawriter_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/dcps_libs_defined.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/domain_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/domain_participant_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/pub_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/sub_datareader_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/topics_usage.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/working_with_qos_policies.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/arranging_figures.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/connecting_figures.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/exporting_diagrams_as_images.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/modeling_perspective.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/moving_between_diagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/setting_element_attributes.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/opendds_model.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/using_libs_from_other_files.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/using_packages.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/adding_policies.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/creating_policy_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/policy_libs_defined.html:
+
+          Split out sections from workingwith*.html files into individual pages to make navigation easier
+          and to allow for additional content to be added without adding to already over-crowded pages.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Updated to refer to new HTML pages.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdatalib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdcpslib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithpolicylib.html:
+
+          Removed these files as their sections were split out into separate pages.
+
+Mon Feb 28 19:53:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles:
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.codegen:
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.mpc:
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.mwc:
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.opendds:
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Test of Remote Instance Handles
+
+Fri Feb 25 14:10:58 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:
+
+          As a follow on to previous commit, added missing refresh methods to delegate to the
+          TreeViewerDelegate so that the ColumnViewer will handle instead of the StructuredViewer
+          (refresh can be invoked by selecting from the Model Customization tab's context menu).
+
+Thu Feb 24 20:21:25 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:
+
+          Fix so that when creating new transport elements the PropertySheet will change
+          selection to the new element.
+
+Mon Feb 21 16:09:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * AUTHORS:
+
+          Chris Cleeland, Don Hudson, and Jeff Schmitz, all of OCI, are now
+          OpenDDS AUTHORS.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Updated handling of Eclipse content.jar and artifacts.jar files.
+
+Mon Feb 21 15:52:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+        * ChangeLog:
+        * docs/history/ChangeLog-2.3:
+
+          Starting new ChangeLog for release 2.4 development, updated version
+          numbers in README and in NEWS.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

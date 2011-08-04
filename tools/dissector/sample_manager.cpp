@@ -28,9 +28,7 @@ namespace OpenDDS
 {
   namespace DCPS
   {
-
-
-    EntityBase::EntityBase(std::string &n, EntityContext *p)
+    EntityBase::EntityBase(const std::string &n, EntityContext *p)
       : name_ (n),
         fqname_ (),
         idl_name_ (),
@@ -86,6 +84,33 @@ namespace OpenDDS
     Sample_Manager::instance ()
     {
       return instance_;
+    }
+
+    int
+    Sample_Manager::get_string_value (ACE_Configuration *config,
+                                      const ACE_Configuration_Section_Key &base,
+                                      const std::string &label,
+                                      std::string &value)
+    {
+      ACE_TString tval;
+      int result=
+        config->get_string_value (base,
+                                  ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),
+                                  tval);
+      if (result == 0)
+        value = ACE_TEXT_ALWAYS_CHAR (tval.c_str());
+      return result;
+    }
+
+    int
+    Sample_Manager::get_int_value (ACE_Configuration *config,
+                                   const ACE_Configuration_Section_Key &base,
+                                   const std::string &label,
+                                   u_int &value)
+    {
+      return config->get_integer_value (base,
+                                        ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),
+                                        value);
     }
 
     void
@@ -169,25 +194,98 @@ namespace OpenDDS
                                   this->entities_);
     }
 
+
+    void
+    Sample_Manager::init_builtin (Sample_Field::IDLTypeID tid,
+                                  const std::string &idl_type,
+                                  const std::string &cxx_type)
+    {
+      EntityMap::iterator iter;
+      Sample_Dissector *d = 0;
+      EntityNode *node = 0;
+      iter = this->entities_->children_.find(idl_type);
+      if (iter == this->entities_->children_.end())
+        {
+          node = new EntityNode (idl_type, this->entities_, 0);
+          this->entities_->children_[idl_type] = node;
+        }
+      else
+        {
+          node = dynamic_cast<EntityNode *>(iter->second);
+        }
+
+      if (node->dissector_ == 0)
+        {
+          d = new Sample_Dissector;
+          d->add_field (new Sample_Field (tid, ""));
+
+          node->dissector_ = d;
+        }
+
+      EntityContext *corba_ctx = 0;
+      EntityContext *ctx = 0;
+      std::string module("CORBA");
+      iter = this->entities_->children_.find(module);
+      if (iter == this->entities_->children_.end())
+        {
+          corba_ctx = new EntityContext (module, this->entities_);
+          this->entities_->children_[module] = corba_ctx;
+        }
+      else
+        {
+          corba_ctx = dynamic_cast<EntityContext *>(iter->second);
+        }
+
+      ctx = (tid == Sample_Field::String || tid == Sample_Field::WString) ?
+        this->entities_ :
+        corba_ctx;
+
+      iter = ctx->children_.find (cxx_type);
+      if (iter == ctx->children_.end())
+        {
+          node = new EntityNode (cxx_type, ctx, 0);
+          ctx->children_[cxx_type] = node;
+        }
+      else
+        {
+          node = dynamic_cast<EntityNode *>(iter->second);
+        }
+
+      if (node->dissector_ == 0)
+        node->dissector_ = d;
+
+      std::string seqname;
+      switch (tid) {
+      case Sample_Field::String :
+        seqname = "StringSeq";
+        break;
+        case Sample_Field::WString :
+        seqname = "WStringSeq";
+        break;
+      default:
+        seqname = cxx_type + "Seq";
+      }
+
+      iter= corba_ctx->children_.find (seqname);
+      if (iter == corba_ctx->children_.end())
+        {
+          node = new EntityNode (seqname, ctx, 0);
+          corba_ctx->children_[seqname] = node;
+        }
+      else
+        {
+          node = dynamic_cast<EntityNode *>(iter->second);
+        }
+
+      if (node->dissector_ == 0)
+        {
+          node->dissector_ = new Sample_Sequence (d);
+        }
+    }
+
     void
     Sample_Manager::init ()
     {
-      this->builtin_types_["boolean"] = Sample_Field::Boolean;
-      this->builtin_types_["char"] = Sample_Field::Char;
-      this->builtin_types_["octet"] = Sample_Field::Octet;
-      this->builtin_types_["wchar"] = Sample_Field::WChar;
-      this->builtin_types_["short"] = Sample_Field::Short;
-      this->builtin_types_["unsigned short"] = Sample_Field::UShort;
-      this->builtin_types_["long"] = Sample_Field::Long;
-      this->builtin_types_["unsigned long"] = Sample_Field::ULong;
-      this->builtin_types_["long long"] = Sample_Field::LongLong;
-      this->builtin_types_["unsigned long long"] = Sample_Field::ULongLong;
-      this->builtin_types_["float"] = Sample_Field::Float;
-      this->builtin_types_["double"] = Sample_Field::Double;
-      this->builtin_types_["long double"] = Sample_Field::LongDouble;
-      this->builtin_types_["string"] = Sample_Field::String;
-      this->builtin_types_["wstring"] = Sample_Field::WString;
-
       this->entities_ = new EntityContext;
 
       // - from env get directory for config files use "." by default
@@ -221,6 +319,23 @@ namespace OpenDDS
           path += ACE_TEXT_ALWAYS_CHAR (name);
           this->init_from_file (ACE_TEXT_CHAR_TO_TCHAR (path.c_str()));
         }
+
+
+      this->init_builtin (Sample_Field::Boolean, "boolean", "Boolean");
+      this->init_builtin (Sample_Field::Char, "char", "Char");
+      this->init_builtin (Sample_Field::Octet, "octet", "Octet");
+      this->init_builtin (Sample_Field::WChar, "wchar", "WChar");
+      this->init_builtin (Sample_Field::Short, "short", "Short");
+      this->init_builtin (Sample_Field::UShort, "unsigned short", "UShort");
+      this->init_builtin (Sample_Field::Long, "long", "Long");
+      this->init_builtin (Sample_Field::ULong, "unsigned long", "ULong");
+      this->init_builtin (Sample_Field::LongLong, "long long", "LongLong");
+      this->init_builtin (Sample_Field::ULongLong, "unsigned long long", "ULongLong");
+      this->init_builtin (Sample_Field::Float, "float", "Float");
+      this->init_builtin (Sample_Field::Double, "double", "Double");
+      this->init_builtin (Sample_Field::LongDouble, "long double", "LongDouble");
+      this->init_builtin (Sample_Field::String, "string", "char *");
+      this->init_builtin (Sample_Field::WString, "wstring", "wchar_t *");
 
       this->load_entities (this->entities_);
     }
@@ -259,9 +374,10 @@ namespace OpenDDS
     Sample_Manager::build_type (EntityNode *node)
     {
       ACE_Configuration_Section_Key key;
+      const ACE_TCHAR * tname = ACE_TEXT_CHAR_TO_TCHAR(node->fqname_.c_str());
       int status =
         node->config_->open_section (node->config_->root_section(),
-                                     ACE_TEXT_CHAR_TO_TCHAR(node->fqname_.c_str()),
+                                     tname,
                                      0,
                                      key);
       if (status != 0)
@@ -273,54 +389,42 @@ namespace OpenDDS
         }
 
       std::string label = node->name_ + ".kind";
-      ACE_TString kind;
-      status =
-        node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()), kind);
+      std::string kind;
+      status = get_string_value (node->config_, key, label, kind);
       if (status != 0)
         {
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("section %s does not have a kind value\n"),
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT("section %s does not have a kind value\n"),
                       node->name_.c_str()));
           return;
         }
 
-      label = node->name_ + ".repoid";
-      ACE_TString tid;
-      status =
-        node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()), tid);
-      if (status != 0)
-        {
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("section %s does not have a repoid value\n"),
-                      node->name_.c_str()));
-          return;
-        }
-      node->type_id_ = ACE_TEXT_ALWAYS_CHAR (tid.c_str());
-
-      if (kind.compare (ACE_TEXT("struct")) == 0)
+      if (kind.compare ("struct") == 0)
         {
           build_struct (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("sequence")) == 0)
+      else if (kind.compare ("sequence") == 0)
         {
           build_sequence (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("array")) == 0)
+      else if (kind.compare ("array") == 0)
         {
           build_array (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("enum")) == 0)
+      else if (kind.compare ("enum") == 0)
         {
           build_enum (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("union")) == 0)
+      else if (kind.compare ("union") == 0)
         {
           build_union (node, key);
           return;
         }
-      else if (kind.compare (ACE_TEXT("alias")) == 0)
+      else if (kind.compare ("alias") == 0)
         {
           build_alias (node, key);
           return;
@@ -334,9 +438,10 @@ namespace OpenDDS
     }
 
     Sample_Dissector *
-    Sample_Manager::fqfind (std::string idlname, EntityContext *context)
+    Sample_Manager::fqfind (const std::string &name, EntityContext *context)
     {
       EntityContext *ctx = context;
+      std::string idlname = name;
       size_t pos = idlname.find ("::");
       if (pos == 0)
         {
@@ -380,53 +485,57 @@ namespace OpenDDS
       return node->dissector_;
     }
 
+
+    //---------------------------------------------------------------------
+
     void
     Sample_Manager::build_struct (EntityNode *node,
                                   const ACE_Configuration_Section_Key &key)
     {
-      node->dissector_ = new Sample_Dissector (node->type_id_.c_str(),
-                                               node->name_.c_str());
+      node->dissector_ = new Sample_Dissector (node->name_);
       Sample_Field *f = 0;
 
       std::string label = node->name_ + ".order";
-      ACE_TString order;
-      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),order))
+      std::string order;
+      if (get_string_value (node->config_, key, label, order))
         return;
 
-      std::string tokenizer = ACE_TEXT_ALWAYS_CHAR (order.c_str());
-      size_t pos = tokenizer.find (' ');
+      size_t pos = order.find (' ');
       std::string p =
-        (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
+        (pos == std::string::npos) ? order : order.substr (0,pos);
       while (!p.empty())
         {
-
-          ACE_TString type_str;
-          node->config_->get_string_value (key, ACE_TEXT_CHAR_TO_TCHAR(p.c_str()), type_str);
-          std::string kind(ACE_TEXT_ALWAYS_CHAR (type_str.c_str()));
-
-          BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
-          if (iter != builtin_types_.end())
-            f = node->dissector_->add_field (iter->second, p.c_str());
-          else
-            {
-              Sample_Dissector *value = this->fqfind (kind, node->parent_);
-              if (value != 0)
-                f = node->dissector_->add_field (value, p.c_str());
-            }
-
-
+          std::string kind;
+          get_string_value (node->config_, key, p, kind);
+          Sample_Dissector *value = this->fqfind (kind, node->parent_);
+          if (value != 0)
+            f = node->dissector_->add_field (value, p);
           if (pos == std::string::npos)
             p.clear();
           else
             {
-              tokenizer = tokenizer.substr (pos+1);
-              pos = tokenizer.find(' ');
+              order = order.substr (pos+1);
+              pos = order.find(' ');
               p = (pos == std::string::npos) ?
-                tokenizer :
-                tokenizer.substr (0,pos);
+                order :
+                order.substr (0,pos);
             }
         }
 
+    }
+
+    void
+    Sample_Manager::build_alias (EntityNode *node,
+                                 const ACE_Configuration_Section_Key &key)
+    {
+      std::string label = node->name_ + ".base";
+      std::string kind;
+      if (get_string_value (node->config_, key, label, kind))
+        return;
+
+      Sample_Dissector *value = this->fqfind (kind, node->parent_);
+      if (value != 0)
+        node->dissector_ = new Sample_Alias (value);
     }
 
     void
@@ -434,52 +543,14 @@ namespace OpenDDS
                                     const ACE_Configuration_Section_Key &key)
     {
       std::string label = node->name_ + ".element";
-      ACE_TString type_str;
-      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),type_str))
+      std::string kind;
+      if (get_string_value (node->config_, key, label, kind))
         return;
 
-      Sample_Dissector *sequence = 0;
-      std::string kind(ACE_TEXT_ALWAYS_CHAR(type_str.c_str()));
-      BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
-      if (iter != builtin_types_.end())
-        {
-          sequence = new Sample_Sequence (node->type_id_.c_str(), iter->second);
-        }
-      else
-        {
-          Sample_Dissector *value = this->fqfind (kind, node->parent_);
-          if (value != 0)
-            sequence = new Sample_Sequence (node->type_id_.c_str(), value);
-        }
-      node->dissector_ = sequence;
+      Sample_Dissector *value = this->fqfind (kind, node->parent_);
+      if (value != 0)
+        node->dissector_ = new Sample_Sequence (value);
     }
-
-
-    void
-    Sample_Manager::build_alias (EntityNode *node,
-                                 const ACE_Configuration_Section_Key &key)
-    {
-      std::string label = node->name_ + ".base";
-      ACE_TString type_str;
-      if (node->config_->get_string_value (key, ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),type_str))
-        return;
-
-      Sample_Dissector *alias = 0;
-      std::string kind(ACE_TEXT_ALWAYS_CHAR(type_str.c_str()));
-      BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
-      if (iter != builtin_types_.end())
-        {
-          alias = new Sample_Alias (node->type_id_.c_str(), iter->second);
-        }
-      else
-        {
-          Sample_Dissector *value = this->fqfind (kind, node->parent_);
-          if (value != 0)
-            alias = new Sample_Alias (node->type_id_.c_str(), value);
-        }
-      node->dissector_ = alias;
-    }
-
 
     void
     Sample_Manager::build_array (EntityNode *node,
@@ -487,32 +558,17 @@ namespace OpenDDS
     {
       std::string label = node->name_ + ".size";
       u_int size = 0;
-      if (node->config_->get_integer_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),size))
+      if (get_int_value (node->config_, key, label, size))
         return;
 
       label = node->name_ + ".element";
-      ACE_TString type_str;
-      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),type_str))
+      std::string kind;
+      if (get_string_value (node->config_, key, label, kind))
         return;
 
-      Sample_Dissector *array = 0;
-      std::string kind(ACE_TEXT_ALWAYS_CHAR(type_str.c_str()));
-      BuiltinTypeMap::iterator iter = builtin_types_.find(kind);
-      if (iter != builtin_types_.end())
-        {
-          array = new Sample_Array (node->type_id_.c_str(),
-                                    (size_t)size,
-                                    iter->second);
-        }
-      else
-        {
-          Sample_Dissector *value = this->fqfind (kind, node->parent_);
-          if (value != 0)
-            array = new Sample_Array (node->type_id_.c_str(),
-                                      (size_t)size,
-                                      value);
-        }
-      node->dissector_ = array;
+      Sample_Dissector *value = this->fqfind (kind, node->parent_);
+      if (value != 0)
+        node->dissector_ = new Sample_Array ((size_t)size, value);
     }
 
     void
@@ -520,29 +576,27 @@ namespace OpenDDS
                                 const ACE_Configuration_Section_Key &key)
     {
       std::string label = node->name_ + ".order";
-      ACE_TString order;
-      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),order))
+      std::string order;
+      if (get_string_value (node->config_, key, label, order))
         return;
 
-      Sample_Enum *sample =
-        new Sample_Enum (node->type_id_.c_str());
+      Sample_Enum *sample = new Sample_Enum ();
 
-      std::string tokenizer = ACE_TEXT_ALWAYS_CHAR (order.c_str());
-      size_t pos = tokenizer.find (' ');
+      size_t pos = order.find (' ');
       std::string p =
-        (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
+        (pos == std::string::npos) ? order : order.substr (0,pos);
       while (!p.empty())
         {
-          sample->add_value (p.c_str());
+          sample->add_value (p);
           if (pos == std::string::npos)
             p.clear();
           else
             {
-              tokenizer = tokenizer.substr (pos+1);
-              pos = tokenizer.find(' ');
+              order = order.substr (pos+1);
+              pos = order.find(' ');
               p = (pos == std::string::npos) ?
-                tokenizer :
-                tokenizer.substr (0,pos);
+                order :
+                order.substr (0,pos);
             }
         }
       node->dissector_ = sample;
@@ -553,104 +607,89 @@ namespace OpenDDS
                                  const ACE_Configuration_Section_Key &key)
     {
       std::string label = node->name_ + ".order";
-      ACE_TString order;
-      ACE_TString case_name;
-      ACE_TString case_type;
+      std::string order;
+      std::string case_name;
+      std::string case_type;
       Sample_Dissector *value = 0;
-      Sample_Field *f = 0;
+      Sample_Field *field = 0;
 
-      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),order))
+      if (get_string_value (node->config_, key, label, order))
         return;
 
       label = node->name_ + ".discriminator";
-      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),case_type))
+      if (get_string_value (node->config_, key, label, case_type))
         return;
 
-      Sample_Union *s_union = new Sample_Union (node->type_id_.c_str());
+      Sample_Union *s_union = new Sample_Union ();
 
-      BuiltinTypeMap::iterator iter =
-        builtin_types_.find(std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())));
-      if (iter != builtin_types_.end())
-        {
-          s_union->discriminator (iter->second);
-        }
-      value = fqfind (std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())), node->parent_);
+      value = fqfind (case_type, node->parent_);
       if (value != 0)
         s_union->discriminator (value);
+      else
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("build union could not find ")
+                      ACE_TEXT ("discriminator type %s\n"),
+                      case_type.c_str()));
+        }
 
       label = "default.type";
-      if (node->config_->get_string_value (key,ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),case_type) == 0)
+      if (get_string_value (node->config_, key, label, case_type) == 0)
         {
           label = "default.name";
-          node->config_->get_string_value (key, ACE_TEXT_CHAR_TO_TCHAR(label.c_str()), case_name);
+          get_string_value (node->config_, key, label, case_name);
 
-          iter = builtin_types_.find(std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())));
-          if (iter != builtin_types_.end())
-            f = new Sample_Field (iter->second, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
-          else
-            {
-              value = fqfind (std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())), node->parent_);
-              if (value != 0)
-                f = new Sample_Field (value, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
-            }
-          s_union->add_default (f);
+          value = fqfind (case_type, node->parent_);
+          if (value != 0)
+            s_union->add_default (new Sample_Field (value, case_name));
         }
 
       Switch_Case *sc = 0;
       bool ranged = false;
-      std::string tokenizer = ACE_TEXT_ALWAYS_CHAR(order.c_str());
-      size_t pos = tokenizer.find (' ');
+      size_t pos = order.find (' ');
       std::string p =
-        (pos == std::string::npos) ? tokenizer : tokenizer.substr (0,pos);
+        (pos == std::string::npos) ? order : order.substr (0,pos);
       while (!p.empty())
         {
           label = p + ".type";
           bool new_range =
-            (node->config_->get_string_value (key,
-                                              ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),
+            (get_string_value (node->config_, key,
+                                              label,
                                               case_type) != 0);
           if (!new_range)
             {
               label = p + ".name";
-              node->config_->get_string_value (key,
-                                               ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),
+              get_string_value (node->config_, key,
+                                               label,
                                                case_name);
             }
 
-
-          f = 0;
+          field = 0;
           if (!new_range)
             {
-              iter = builtin_types_.find(std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())));
-              if (iter != builtin_types_.end())
-                f = new Sample_Field (iter->second, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
-              else
-                {
-                  value = fqfind (std::string(ACE_TEXT_ALWAYS_CHAR(case_type.c_str())), node->parent_);
-                  if (value != 0)
-                    f = new Sample_Field (value, ACE_TEXT_ALWAYS_CHAR(case_name.c_str()));
-                }
+              value = fqfind (case_type, node->parent_);
+              if (value != 0)
+                field = new Sample_Field (value, case_name);
             }
           if (ranged)
             {
-              sc = sc->add_range (p.c_str(), f);
+              sc = sc->add_range (p, field);
             }
           else
             {
               sc = sc == 0 ?
-                s_union->add_case (p.c_str(), f) :
-                sc->chain (p.c_str(), f);
+                s_union->add_case (p, field) : sc->chain (p, field);
             }
           ranged = new_range;
           if (pos == std::string::npos)
             p.clear();
           else
             {
-              tokenizer = tokenizer.substr (pos+1);
-              pos = tokenizer.find(' ');
+              order = order.substr (pos+1);
+              pos = order.find(' ');
               p = (pos == std::string::npos) ?
-                tokenizer :
-                tokenizer.substr (0,pos);
+                order :
+                order.substr (0,pos);
             }
         }
 

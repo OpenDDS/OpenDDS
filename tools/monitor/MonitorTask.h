@@ -49,7 +49,8 @@ class MonitorTask : public ACE_Task_Base {
 
     MonitorTask(
       MonitorDataStorage* data,
-      const Options&      options
+      const Options&      options,
+      bool                mapExistingIORKeys = true
     );
 
     virtual ~MonitorTask();

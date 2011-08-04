@@ -49,6 +49,14 @@ namespace OpenDDS
       initialized_ = true;
     }
 
+    void
+    GIOP_Base::fix_reqid (::MessageHeader *header)
+    {
+      int ofs = 0;
+      header->req_id =
+        ::get_CDR_ulong(tvb_, &ofs, is_big_endian_, GIOP_HEADER_SIZE);
+    }
+
     int
     GIOP_Base::dissect_giop (::MessageHeader *header,
                              gchar *operation,
@@ -63,13 +71,24 @@ namespace OpenDDS
       //GIOP_Decoder *decoder = find_giop_decoder (operation);
       DecodeFN *decoder = find_giop_decoder (operation);
 
+      if (decoder != 0 && (*decoder)(header))
+          return 0;
+      return -1;
+    }
+
+    gboolean
+    GIOP_Base::dissect_heur (::MessageHeader *header,
+                             gchar *operation)
+    {
+      this->is_big_endian_ = ::is_big_endian(header);
+
+      //GIOP_Decoder *decoder = find_giop_decoder (operation);
+      DecodeFN *decoder = find_giop_decoder (operation);
+
       if (decoder == 0)
-        return -1;
+        return false;
 
-      (*decoder)(header);
-
-      //    decoder->decode (header);
-      return 0;
+      return (*decoder)(header);
     }
 
     void
@@ -95,9 +114,6 @@ namespace OpenDDS
         {
           return func;
         }
-      ACE_DEBUG ((LM_DEBUG,
-                  "GIOP_Base::find_giop_decoder: Unknown operation %s\n",
-                  opname));
       return 0;
     }
 
