@@ -168,7 +168,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
 DataLink*
 MulticastTransport::connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
+                                       const TransportBLOB& /*remote_data*/,
                                        CORBA::Long priority)
 {
   MulticastDataLink_rch link =

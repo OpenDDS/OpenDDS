@@ -56,11 +56,11 @@ OpenDDS::DCPS::DummyTcpTransport::~DummyTcpTransport()
 /// This means true (1).  It *is* connecting as a publisher.
 OpenDDS::DCPS::DataLink*
 OpenDDS::DCPS::DummyTcpTransport::find_datalink_i(
-  const RepoId& local_id,
-  const RepoId& remote_id,
+  const RepoId& /*local_id*/,
+  const RepoId& /*remote_id*/,
   const TransportBLOB& remote_data,
-  CORBA::Long priority,
-  bool active)
+  CORBA::Long /*priority*/,
+  bool /*active*/)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","find_datalink",5);
 
@@ -117,7 +117,7 @@ OpenDDS::DCPS::DummyTcpTransport::connect_datalink_i(
   const RepoId& /*local_id*/,
   const RepoId& /*remote_id*/,
   const TransportBLOB& remote_data,
-  CORBA::Long priority)
+  CORBA::Long /*priority*/)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","create_datalink",5);
 

@@ -1,3 +1,14 @@
+Thu Aug  4 14:30:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpLoader.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+
+          Fixed warnings.
+
 Wed Aug  3 21:41:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
@@ -8,7 +19,7 @@ Wed Aug  3 21:41:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Messenger/Messenger.codegen:
 
-          Add multicast and upd settings.
+          Add multicast and udp settings.
 
 Wed Aug  3 20:48:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 

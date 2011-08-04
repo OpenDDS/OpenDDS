@@ -31,7 +31,7 @@ public:
 };
 
 int
-DCPS_DummyTcpLoader::init (int argc, ACE_TCHAR* argv[])
+DCPS_DummyTcpLoader::init (int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
   DBG_ENTRY_LVL("DCPS_DummyTcpLoader","init",1);
 
