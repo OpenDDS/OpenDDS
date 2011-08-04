@@ -1,3 +1,18 @@
+Thu Aug  4 20:37:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedGeneratorFile.java:
+
+          detect transportOffset in codegen
+          detect instance/transport in codegen
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+
+          validation checks - no transportOffset, no instance/transport.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+
+          validate in main thread.
+
 Thu Aug  4 20:04:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4768 through r4826.
