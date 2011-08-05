@@ -1,3 +1,10 @@
+Fri Aug  5 15:00:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations:
+        * tools/modeling/migrations/v1tov2.rb:
+
+          tool for migrating codegen files and opendds models
+
 Thu Aug  4 21:59:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpTransport.cpp:
