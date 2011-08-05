@@ -71,6 +71,7 @@ import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchPaths;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportConfig;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Transports;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.ParsedModelFile;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
 
@@ -194,6 +195,9 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 		Instances instances = generatorFactory.createInstances();
 		codeGen.setInstances(instances);
+		
+		Transports transports = generatorFactory.createTransports();
+		codeGen.setTransports(transports);
 		
 		Instance instance = generatorFactory.createInstance();
 		instances.getInstance().add(instance);
