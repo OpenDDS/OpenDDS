@@ -1,10 +1,21 @@
+Fri Aug  5 21:00:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          Include name in transport inst
+
+        * tools/modeling/tests/Arrays/Arrays.codegen:
+        * tools/modeling/tests/Arrays/Arrays.opendds:
+
+          Redo migration.
+          
 Fri Aug  5 19:01:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/migrations/v1tov2.rb:
 
           Move swap_bytes, passive_connect_duration to config.
           Additional documentation
-          
+
         * tools/modeling/tests/Arrays/Arrays.codegen:
         * tools/modeling/tests/Arrays/Arrays.opendds:
 

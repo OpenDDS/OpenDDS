@@ -10,7 +10,7 @@ end
 
 class ModelMigrator 
   def initialize
-    @transport_id_re = / transportId=(['"][^'"]*['"])/
+    @transport_id_re = / transportId=['"]([^'"]*)['"]/
     @transport_config_re = / transportConfig=['"][^'"]*['"]/
   end
 
@@ -26,7 +26,7 @@ class ModelMigrator
       # else line has no transport config attribute, 
       # replace transport id with transport config
       else
-        line.sub(@transport_id_re, " transportConfig=#{transport_id[1]}")
+        line.sub(@transport_id_re, " transportConfig=\"trans#{transport_id[1]}\"")
       end
     else
       line
@@ -52,7 +52,7 @@ class Transport
   end
 
   def output
-    puts "    <transport xsi:type=\"generator:#{@type}\" xmi:id=\"#{xmi_id}\">"
+    puts "    <transport xsi:type=\"generator:#{@type}\" xmi:id=\"#{xmi_id}\" name=\"#{@transport_id}\">"
     puts @text.map {|l| l.sub(/^ */, '      ')}
     puts "    </transport>"
   end
@@ -74,6 +74,7 @@ class GeneratorMigrator
     @udp_close_re = /<\/UDPTransport>/
     @mc_open_re = /<MulticastTransport>/
     @mc_close_re = /<\/MulticastTransport>/
+    @generator_open_re = /<\generator:CodeGen (.*)>/
     @generator_close_re = /<\/generator:CodeGen>/
     @transports_re = /<transports>/
     @swap_bytes_re = /<swap_bytes *value=['"]([^'"]*)['"]/
@@ -103,7 +104,7 @@ class GeneratorMigrator
     if line =~ @transport_offset_re
       # do nothing - removed from model
     elsif results = @transport_open_re.match(line)
-      @current_transport_id = results[1] # remember for later
+      @current_transport_id = "trans" + results[1] # remember for later
     elsif line =~ @transport_close_re
       puts line if @transports.empty? # already migrated
     elsif line =~ @swap_bytes_re || line =~ @passive_connect_duration_re
@@ -123,6 +124,12 @@ class GeneratorMigrator
     elsif line =~ @transports_re
       @has_transports = true # remember in case rerunning file
       puts line
+    elsif results = @generator_open_re.match(line)
+      if line =~ /xmlns:xsi=/
+        puts line # rerunning file
+      else
+        puts "<generator:CodeGen #{results[1]} xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+      end
     elsif line =~ @generator_close_re
       output_transports unless @has_transports # output transportInsts
       puts line
@@ -139,6 +146,7 @@ if ARGV.empty?
    puts "  NOTE: both model and codegen accepted"
    exit
 end
+
 
 File.open(ARGV[0]) do |file|
   @model_re = /<opendds:OpenDDSModel /
