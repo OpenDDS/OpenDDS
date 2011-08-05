@@ -1,3 +1,11 @@
+Fri Aug  5 15:34:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          output xsi:type attribute, instead of type.
+          output closing </transport> tag when running against already-migrated
+          file.
+
 Fri Aug  5 15:00:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/migrations:

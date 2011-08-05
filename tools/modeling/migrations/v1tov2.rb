@@ -52,7 +52,7 @@ class Transport
   end
 
   def output
-    puts "    <transport type=\"generator:#{@type}\" xmi:id=\"#{xmi_id}\">"
+    puts "    <transport xsi:type=\"generator:#{@type}\" xmi:id=\"#{xmi_id}\">"
     puts @text.map {|l| l.sub(/^ */, '      ')}
     puts "    </transport>"
   end
@@ -75,6 +75,7 @@ class GeneratorMigrator
     @mc_open_re = /<MulticastTransport>/
     @mc_close_re = /<\/MulticastTransport>/
     @generator_close_re = /<\/generator:CodeGen>/
+    @transports_re = /<transports>/
   end
 
   def output_transports
@@ -97,7 +98,11 @@ class GeneratorMigrator
     elsif results = @transport_open_re.match(line)
       @current_transport_id = results[1]
     elsif line =~ @transport_close_re
-      @current_transport_id = nil
+      if @current_transport_id
+        @current_transport_id = nil
+      else
+        puts line # already migrated
+      end
     elsif line =~ @tcp_open_re
       transport 'TcpTransport'
     elsif line =~ @udp_open_re
@@ -108,8 +113,11 @@ class GeneratorMigrator
       @current_transport = nil
     elsif @current_transport
       @current_transport << line
-    elsif @generator_close_re =~ line
-      output_transports
+    elsif line =~ @transports_re
+      @has_transports = true
+      puts line
+    elsif line =~ @generator_close_re
+      output_transports unless @has_transports
       puts line
     else
       puts line
