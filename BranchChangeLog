@@ -1,8 +1,20 @@
+Fri Aug  5 19:01:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          Move swap_bytes, passive_connect_duration to config.
+          Additional documentation
+          
+        * tools/modeling/tests/Arrays/Arrays.codegen:
+        * tools/modeling/tests/Arrays/Arrays.opendds:
+
+          Migrated files using migrator.
+
 Fri Aug  5 15:51:34 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
 
-          Making the wizard create the "Transports" container in the newly 
+          Making the wizard create the "Transports" container in the newly
           created model instance.
 
 Fri Aug  5 15:34:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>

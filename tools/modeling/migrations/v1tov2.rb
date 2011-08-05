@@ -76,6 +76,8 @@ class GeneratorMigrator
     @mc_close_re = /<\/MulticastTransport>/
     @generator_close_re = /<\/generator:CodeGen>/
     @transports_re = /<transports>/
+    @swap_bytes_re = /<swap_bytes *value=['"]([^'"]*)['"]/
+    @passive_connect_duration_re = /<passive_connect_duration *value=['"]([^'"]*)['"]/
   end
 
   def output_transports
@@ -89,36 +91,43 @@ class GeneratorMigrator
     @transports << @current_transport
     puts "      <config name=\"#{@current_transport_id}\">"
     puts "        <transportRef transport=\"#{@current_transport.xmi_id}\"/>"
+  end
+
+  def close_transport
+    @current_transport = nil
+    @current_transport_id = nil
     puts "      </config>"
   end
 
   def process line
     if line =~ @transport_offset_re
-      # do nothing
+      # do nothing - removed from model
     elsif results = @transport_open_re.match(line)
-      @current_transport_id = results[1]
+      @current_transport_id = results[1] # remember for later
     elsif line =~ @transport_close_re
-      if @current_transport_id
-        @current_transport_id = nil
+      puts line if @transports.empty? # already migrated
+    elsif line =~ @swap_bytes_re || line =~ @passive_connect_duration_re
+      if @current_transport
+        puts line.sub(/^ */, '        ') # change indent
       else
         puts line # already migrated
       end
     elsif line =~ @tcp_open_re
-      transport 'TcpTransport'
+      transport 'TcpTransport' # output config now, transport later
     elsif line =~ @udp_open_re
-      transport 'UdpTransport'
+      transport 'UdpTransport' # output config now, transport later
     elsif line =~ @mc_open_re
-      transport 'MulticastTransport'
+      transport 'MulticastTransport' # output config now, transport later
     elsif line =~ @tcp_close_re || line =~ @udp_close_re || line =~ @mc_close_re
-      @current_transport = nil
-    elsif @current_transport
-      @current_transport << line
+      close_transport # finish condig output
     elsif line =~ @transports_re
-      @has_transports = true
+      @has_transports = true # remember in case rerunning file
       puts line
     elsif line =~ @generator_close_re
-      output_transports unless @has_transports
+      output_transports unless @has_transports # output transportInsts
       puts line
+    elsif @current_transport
+      @current_transport << line # save text for later output
     else
       puts line
     end
