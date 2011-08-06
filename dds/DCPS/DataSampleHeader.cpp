@@ -417,8 +417,6 @@ std::ostream& operator<<(std::ostream& str, const MessageId value)
     return str << "DISPOSE_INSTANCE";
   case GRACEFUL_DISCONNECT:
     return str << "GRACEFUL_DISCONNECT";
-  case FULLY_ASSOCIATED:
-    return str << "FULLY_ASSOCIATED";
   case REQUEST_ACK:
     return str << "REQUEST_ACK";
   case SAMPLE_ACK:

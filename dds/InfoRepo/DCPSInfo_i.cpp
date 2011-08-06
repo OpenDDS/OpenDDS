@@ -10,8 +10,12 @@
 
 #include /**/ "DCPSInfo_i.h"
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportInst.h"
+#include "dds/DCPS/transport/framework/TransportInst_rch.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #include "UpdateManager.h"
 #include "ShutdownInterface.h"
 
@@ -396,7 +400,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
   const OpenDDS::DCPS::RepoId& topicId,
   OpenDDS::DCPS::DataWriterRemote_ptr publication,
   const DDS::DataWriterQos & qos,
-  const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::PublisherQos & publisherQos)
 ACE_THROW_SPEC((CORBA::SystemException
                  , OpenDDS::DCPS::Invalid_Domain
@@ -461,7 +465,7 @@ ACE_THROW_SPEC((CORBA::SystemException
                           , callback.in()
                           , const_cast<DDS::PublisherQos &>(publisherQos)
                           , const_cast<DDS::DataWriterQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportInterfaceInfo &>
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
                           (transInfo), csi);
     this->um_->create(actor);
 
@@ -486,7 +490,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                                     const OpenDDS::DCPS::RepoId& pubId,
                                     const char* pub_str,
                                     const DDS::DataWriterQos & qos,
-                                    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+                                    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
                                     const DDS::PublisherQos & publisherQos,
                                     bool associate)
 {
@@ -668,7 +672,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
   const OpenDDS::DCPS::RepoId& topicId,
   OpenDDS::DCPS::DataReaderRemote_ptr subscription,
   const DDS::DataReaderQos & qos,
-  const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::SubscriberQos & subscriberQos,
   const char* filterExpression,
   const DDS::StringSeq& exprParams)
@@ -737,7 +741,7 @@ ACE_THROW_SPEC((CORBA::SystemException
                           , callback.in()
                           , const_cast<DDS::SubscriberQos &>(subscriberQos)
                           , const_cast<DDS::DataReaderQos &>(qos)
-                          , const_cast<OpenDDS::DCPS::TransportInterfaceInfo &>
+                          , const_cast<OpenDDS::DCPS::TransportLocatorSeq &>
                           (transInfo), csi);
 
     this->um_->create(actor);
@@ -765,7 +769,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   const OpenDDS::DCPS::RepoId& subId,
   const char* sub_str,
   const DDS::DataReaderQos & qos,
-  const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+  const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::SubscriberQos & subscriberQos,
   const char* filterExpression,
   const DDS::StringSeq& exprParams,
@@ -1429,6 +1433,42 @@ ACE_THROW_SPEC((CORBA::SystemException
   }
 }
 
+void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
+  const OpenDDS::DCPS::RepoId& participantId,
+  const OpenDDS::DCPS::RepoId& localId,
+  const OpenDDS::DCPS::RepoId& remoteId)
+ACE_THROW_SPEC((CORBA::SystemException,
+                OpenDDS::DCPS::Invalid_Domain,
+                OpenDDS::DCPS::Invalid_Participant,
+                OpenDDS::DCPS::Invalid_Publication,
+                OpenDDS::DCPS::Invalid_Subscription))
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  DCPS_IR_Domain_Map::iterator dom_iter = this->domains_.find(domainId);
+  if (dom_iter == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* partPtr = dom_iter->second->participant(participantId);
+  if (0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  // localId could be pub or sub (initial implementation will only use sub
+  // since the DataReader is the passive peer)
+  DCPS_IR_Subscription* sub = 0;
+  DCPS_IR_Publication* pub = 0;
+  if (0 == partPtr->find_subscription_reference(localId, sub)) {
+    sub->association_complete(remoteId);
+  } else if (0 == partPtr->find_publication_reference(localId, pub)) {
+    pub->association_complete(remoteId);
+  } else {
+    // arbitrary selection of which exception to throw
+    throw OpenDDS::DCPS::Invalid_Subscription();
+  }
+}
+
 void TAO_DDS_DCPSInfo_i::ignore_domain_participant(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& myParticipantId,
@@ -2023,52 +2063,50 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
 }
 
 int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
-                                       const ACE_TCHAR* listen_str)
+                                       const char* listen_str)
 {
   int status = 0;
 
   try {
 
 #ifndef ACE_AS_STATIC_LIBS
-    if (ACE_Service_Config::current()->find(ACE_TEXT("DCPS_SimpleTcpLoader"))
+    if (ACE_Service_Config::current()->find(ACE_TEXT("OpenDDS_Tcp"))
         < 0 /* not found (-1) or suspended (-2) */) {
       static const ACE_TCHAR directive[] =
-        ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
-        ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"");
+        ACE_TEXT("dynamic OpenDDS_Tcp Service_Object * ")
+        ACE_TEXT("OpenDDS_Tcp:_make_TcpLoader()");
       ACE_Service_Config::process_directive(directive);
     }
 #endif
 
-    OpenDDS::DCPS::TransportImpl_rch trans_impl
-    = TheTransportFactory->create_transport_impl(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                 ACE_TEXT("SimpleTcp"),
-                                                 OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    std::string config_name =
+      OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
+      + "InfoRepoBITTransportConfig";
+    OpenDDS::DCPS::TransportConfig_rch config =
+      OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_name);
 
-    OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->get_or_create_configuration(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                       ACE_TEXT("SimpleTcp"));
+    std::string inst_name =
+      OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
+      + "InfoRepoBITTCPTransportInst";
+    OpenDDS::DCPS::TransportInst_rch inst =
+      OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
+                                                               "tcp");
+    config->instances_.push_back(inst);
 
-    config->datalink_release_delay_ = 0;
+    OpenDDS::DCPS::TcpInst_rch tcp_inst =
+      OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
 
-    OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*>(config.in());
+    inst->datalink_release_delay_ = 0;
 
-    tcp_config->conn_retry_attempts_ = 0;
+    tcp_inst->conn_retry_attempts_ = 0;
 
     if (listen_address_given) {
-      tcp_config->local_address_ = ACE_INET_Addr(listen_str);
-      tcp_config->local_address_str_ = listen_str;
-    }
-
-    if (trans_impl->configure(config.in()) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::init_transport: ")
-                 ACE_TEXT("Failed to configure the transport.\n")));
-      status = 1;
+      tcp_inst->local_address_ = ACE_INET_Addr(listen_str);
+      tcp_inst->local_address_str_ = listen_str;
     }
 
   } catch (...) {
-    // TransportFactory is extremely varied in the exceptions that
+    // TransportRegistry is extremely varied in the exceptions that
     // it throws on failure; do not allow exceptions to bubble up
     // beyond this point.
     status = 1;

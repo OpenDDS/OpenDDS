@@ -8,6 +8,9 @@
 
 #include "UdpDataLink.h"
 #include "UdpTransport.h"
+#include "UdpInst.h"
+
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
@@ -47,6 +50,39 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpDataLink::open: open failed: %m\n")),
                      false);
+  }
+
+  // If listening on "any" host/port, need to record the actual port number
+  // selected by the OS, as well as our actual hostname, into the config_
+  // object's local_address_ for use in UdpTransport::connection_info_i().
+  if (!this->active_ && this->config_->local_address_.is_any()) {
+    ACE_INET_Addr address;
+    if (this->socket_.get_local_addr(address) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: UdpDataLink::open - %p"),
+                        ACE_TEXT("cannot get local addr\n")), false);
+    }
+    const unsigned short port = address.get_port_number();
+    const std::string hostname = get_fully_qualified_hostname();
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) UdpDataLink::open listening on %C:%hu\n"),
+              hostname.c_str(), port), 2);
+    this->config_->local_address_.set(port, hostname.c_str());
+
+  // Similar case to the "if" case above, but with a bound host/IP but no port
+  } else if (!this->active_ &&
+             0 == this->config_->local_address_.get_port_number()) {
+    ACE_INET_Addr address;
+    if (this->socket_.get_local_addr(address) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: UdpDataLink::open - %p"),
+                        ACE_TEXT("cannot get local addr\n")), false);
+    }
+    const unsigned short port = address.get_port_number();
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) UdpDataLink::open listening on port %hu\n"),
+              port), 2);
+    this->config_->local_address_.set_port_number(port);
   }
 
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)

@@ -20,14 +20,9 @@ $corbaloc_suffix = '/DCPSInfoRepo';
 $pub_ini = '-DCPSConfigFile pub.ini';
 $sub_ini = '-DCPSConfigFile sub.ini';
 if (!new PerlACE::ConfigList->check_config ('STATIC')) {
-  $repo_bit_opt = "-ORBSvcConf tcp.conf";
   if ($ARGV[0] eq 'udp' || $ARGV[1] eq 'udp') {
-    $svc_conf = " -ORBSvcConf udp.conf ";
-    $pub_ini = '-t udp -DCPSConfigFile pub_udp.ini';
-    $sub_ini = '-t udp -DCPSConfigFile sub_udp.ini';
-  }
-  else {
-    $svc_conf = " -ORBSvcConf tcp.conf";
+    $pub_ini = '-DCPSConfigFile pub_udp.ini';
+    $sub_ini = '-DCPSConfigFile sub_udp.ini';
   }
 
   if ($ARGV[0] eq 'host_port_only' || $ARGV[1] eq 'host_port_only') {

@@ -3,10 +3,9 @@
 #include  "DomainParticipantListener.h"
 #include  "dds/DCPS/Marked_Default_Qos.h"
 #include  "dds/DCPS/Qos_Helper.h"
-#include  "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -592,7 +591,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Test 34 passed.\n")));
         }
 
-     TheTransportFactory->release();
      TheServiceParticipant->shutdown();
      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) All tests completed without exceptions.\n")));
     }

@@ -1,5 +1,5 @@
 This test tests the publisher and datawriter's basic functionalities with the
-SimpleTCPTransport available.
+tcp transport.
 
 Author: Yan Dai
 Reference: Ciju John
@@ -10,14 +10,14 @@ Manually run test:
 
   ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
 
-(2) Launch the subscirber:
+(2) Launch the subscriber:
 
-    FooTest3_subscriber -DCPSInfoRepo file://repo.ior -p pubid.txt:localhost:5555 -s 2:localhost:6666 -n <num_expected_messages> -v <file://PubDriver_ior_fname>
+    FooTest3_subscriber -DCPSInfoRepo file://repo.ior -n <num_expected_msgs>
 
 (3) Launch the publisher:
 
-    FooTest3_publisher -DCPSInfoRepo file://repo.ior -p pubid.txt:localhost:5555 -s 2:localhost:6666 -t <test number>
-                       -d <history_depth> -DCPSChunks <pre_allocate_chunks>  -v <PubDriver_ior_fname>
+    FooTest3_publisher -DCPSInfoRepo file://repo.ior -t <test number>
+                       -d <history_depth> -DCPSChunks <pre_allocate_chunks>
 
     The basic functions are tested for DataWriter and Publisher:
 
@@ -86,10 +86,3 @@ Auto run test:
 
    liveliness test
       run_test.pl liveliness
-
-   reenqueue_all test
-      run_test.pl reenqueue_all
-
-      This test lauches two datareaders. The first datareader starts register test
-      and the second datareader makes the datawriter reenqueue_all and send all data
-      samples previously sent to first reader to second datareader.

@@ -7,7 +7,8 @@ project: dcps_java {
     // Ensure sharedname matches the opendds-jms jar naming scheme:
     sharedname       = opendds-jms-native
 
-    after           += InfoRepoLib Federator DCPSInfoRepoServ
+    after           += DCPSInfoRepo_Lib DCPSInfoRepo_Federator \
+                       DCPSInfoRepo_Serv
 
     dcps_ts_flags   += -Wb,export_macro=opendds_jms_native_Export
 
@@ -20,7 +21,9 @@ project: dcps_java {
 
     includes        += $(TAO_ROOT)/orbsvcs $(ACE_ROOT)
 
-    libs            += DCPSInfoRepoServ InfoRepoLib Federator
+    libs            += OpenDDS_InfoRepoServ OpenDDS_InfoRepoLib \
+                       OpenDDS_Federator
+
     libout           = $(DDS_ROOT)/lib
 
     // Older versions of Visual Studio will create the intermediate directories

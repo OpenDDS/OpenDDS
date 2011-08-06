@@ -21,7 +21,7 @@ operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
   outCdr << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
 
   outCdr << ACE_OutputCDR::from_octet(value.reserved_);
-  outCdr << ACE_TEXT_ALWAYS_CHAR(value.addr_.c_str());
+  outCdr << value.addr_.c_str();
 
   return outCdr.good_bit();
 }
@@ -44,7 +44,7 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
   if (inCdr >> buf == 0)
     return 0;
 
-  value.addr_ = ACE_TEXT_CHAR_TO_TCHAR(buf);
+  value.addr_ = buf;
 
   delete[] buf;
 
@@ -54,9 +54,9 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_TString get_fully_qualified_hostname()
+std::string get_fully_qualified_hostname()
 {
-  static ACE_TString fullname;
+  static std::string fullname;
 
   if (fullname.length() == 0) {
     size_t addr_count;
@@ -88,7 +88,7 @@ ACE_TString get_fully_qualified_hostname()
           if (addr_array[i].is_loopback() == false && ACE_OS::strchr(hostname, '.') != 0) {
             VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
                       hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
-            fullname = ACE_TEXT_CHAR_TO_TCHAR(hostname);
+            fullname = hostname;
             return fullname;
 
           } else {
@@ -101,7 +101,7 @@ ACE_TString get_fully_qualified_hostname()
 
             OpenDDS::DCPS::HostnameInfo info;
             info.index_ = i;
-            info.hostname_ = ACE_TEXT_CHAR_TO_TCHAR(hostname);
+            info.hostname_ = hostname;
             nonFQDN.push_back(info);
           }
         }
@@ -114,7 +114,7 @@ ACE_TString get_fully_qualified_hostname()
     for (OpenDDS::DCPS::HostnameInfoVector::iterator it = itBegin; it != itEnd; ++it) {
       if (addr_array[it->index_].is_loopback() == false) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Could not find FQDN. Using "
-                   "\"%s\" as fully qualified hostname, please "
+                   "\"%C\" as fully qualified hostname, please "
                    "correct system configuration.\n", it->hostname_.c_str()));
         fullname = it->hostname_;
         return fullname;
@@ -123,14 +123,14 @@ ACE_TString get_fully_qualified_hostname()
 
     if (itBegin != itEnd) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Could not find FQDN. Using "
-                 "\"%s\" as fully qualified hostname, please "
+                 "\"%C\" as fully qualified hostname, please "
                  "correct system configuration.\n", itBegin->hostname_.c_str()));
       fullname = itBegin->hostname_;
       return fullname;
     }
 
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: failed to discover the fully qualified hostname \n"));
+               "(%P|%t) ERROR: failed to discover the fully qualified hostname\n"));
   }
 
   return fullname;

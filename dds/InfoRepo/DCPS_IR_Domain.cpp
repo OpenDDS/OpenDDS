@@ -22,7 +22,7 @@
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
-
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -807,8 +807,11 @@ int DCPS_IR_Domain::init_built_in_topics_transport()
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   try {
-    transportImpl_ =
-      TheTransportFactory->obtain(OpenDDS::DCPS::BIT_ALL_TRAFFIC);
+    std::string config_name =
+      OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
+      + "InfoRepoBITTransportConfig";
+    transportConfig_ =
+      OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_name);
 
     // Create the Publisher
     bitPublisher_ =
@@ -825,36 +828,8 @@ int DCPS_IR_Domain::init_built_in_topics_transport()
     }
 
     // Attach the Publisher with the TransportImpl.
-    OpenDDS::DCPS::PublisherImpl* pubServant
-    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(bitPublisher_.in());
-
-    OpenDDS::DCPS::AttachStatus status
-    = pubServant->attach_transport(transportImpl_.in());
-
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      // We failed to attach to the transport for some reason.
-      const ACE_TCHAR* status_str;
-
-      switch (status) {
-      case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-        status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-        break;
-      case OpenDDS::DCPS::ATTACH_ERROR:
-        status_str = ACE_TEXT("ATTACH_ERROR");
-        break;
-      case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-        status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-        break;
-      default:
-        status_str = ACE_TEXT("Unknown Status");
-        break;
-      }
-
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Failed to attach to the transport. ")
-                        ACE_TEXT("AttachStatus == %s\n"), status_str),
-                       1);
-    }
+    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(transportConfig_,
+                                                              bitPublisher_.in());
 
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception(

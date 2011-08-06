@@ -39,7 +39,6 @@ public:
 
 protected:
   DDS::Publisher_var publisher_;
-  OpenDDS::DCPS::TransportImpl_rch transport_;
 
   DDS::DataWriter_var writer_;
   Writer_ptr writer_i_;
@@ -82,7 +81,6 @@ public:
 
 protected:
   DDS::Subscriber_var subscriber_;
-  OpenDDS::DCPS::TransportImpl_rch transport_;
 
   DDS::DataReader_var reader_;
   Reader_ptr reader_i_;

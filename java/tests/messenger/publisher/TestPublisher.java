@@ -8,7 +8,6 @@
 
 import DDS.*;
 import OpenDDS.DCPS.*;
-import OpenDDS.DCPS.transport.*;
 import org.omg.CORBA.StringSeqHolder;
 import Messenger.*;
 
@@ -54,20 +53,7 @@ public class TestPublisher {
             return;
         }
 
-        //OpenDDS-specific attachment of transport to publisher
-        TransportImpl transport_impl =
-            TheTransportFactory.create_transport_impl(1,
-                TheTransportFactory.AUTO_CONFIG);
-        if (transport_impl == null) {
-            System.err.println("ERROR: Transport creation failed");
-            return;
-        }
-
-        AttachStatus stat = transport_impl.attach_to_publisher(pub);
-        if(stat != AttachStatus.ATTACH_OK) {
-            System.err.println("ERROR: Couldn't attach transport.");
-            System.exit(1);
-        }
+        // Use the default transport configuration (do nothing)
 
         DataWriter dw = pub.create_datawriter(top,
                                               DATAWRITER_QOS_DEFAULT.get(),
@@ -120,24 +106,13 @@ public class TestPublisher {
             int ret = mdw.write(msg, handle);
             if (ret != RETCODE_OK.value) {
                 System.err.println("ERROR " + msg.count +
-                                   "dth write() returned " + ret);
+                                   " write() returned " + ret);
           }
-        }
-
-        // Wait for samples to be acknowledged, need a finite timeout for
-        // non-TCP transports which don't support wait_for_acks
-        timeout.sec = 10;
-        timeout.nanosec = 0;
-        int ret = dw.wait_for_acknowledgments(timeout);
-        if (ret != RETCODE_OK.value && ret != RETCODE_TIMEOUT.value) {
-            System.err.println("ERROR: wait_for_acknowledgments failed!");
-            return;
         }
 
         // Clean up
         dp.delete_contained_entities();
         dpf.delete_participant(dp);
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
 }

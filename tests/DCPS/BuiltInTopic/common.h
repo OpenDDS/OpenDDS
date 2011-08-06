@@ -5,7 +5,6 @@
 #define COMMON_H
 
 #include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DCPS/TopicImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
@@ -50,26 +49,6 @@ enum Ignore_Kind
 
 extern int ignore_kind;
 
-extern OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
-extern OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-
-enum TransportTypeId
-{
-  SIMPLE_TCP
-};
-
-enum TransportInstanceId
-{
-  SUB_TRAFFIC,
-  PUB_TRAFFIC
-};
-
-
-
-int init_transport ();
-int cleanup_transport ();
-int attach_publisher_transport ();
-int attach_subscriber_transport ();
 int ignore ();
 int write ();
 int read (int expect_success);

@@ -37,6 +37,8 @@ public:
 
   InstanceDataMap& data_map ();
 
+  bool finished() { return finished_; }
+
 private:
 
   InstanceDataMap       data_map_;
@@ -50,6 +52,8 @@ private:
   int write_delay_msec_;
   int check_data_dropped_;
   PubDriver*   pubdriver_;
+
+  bool finished_;
 };
 
 #endif /* WRITER_H */

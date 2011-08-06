@@ -10,7 +10,7 @@ package org.opendds.jms.transport;
 
 import javax.jms.JMSException;
 
-import OpenDDS.DCPS.transport.TransportImpl;
+import OpenDDS.DCPS.transport.TransportConfig;
 
 /**
  * @author Steven Stallion
@@ -18,7 +18,7 @@ import OpenDDS.DCPS.transport.TransportImpl;
  */
 public class TransportManager {
     private TransportFactory tf;
-    private TransportImpl transport;
+    private TransportConfig transport;
 
     public TransportManager(TransportFactory tf) {
         assert tf != null;
@@ -30,7 +30,7 @@ public class TransportManager {
         transport = tf.createTransport();
     }
 
-    public synchronized TransportImpl getTransport() throws JMSException {
+    public synchronized TransportConfig getTransport() throws JMSException {
         if (transport == null) {
             createTransport();
         }

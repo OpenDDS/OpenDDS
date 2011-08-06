@@ -120,7 +120,8 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createParticipant(
   return this->participants_[participant] = this->delegate_.createParticipant(
            this->modelData_.domain( participant),
            this->modelData_.qos( participant),
-           this->modelData_.mask( participant)
+           this->modelData_.mask( participant),
+           configName(this->modelData_.transportConfigName(participant))
          );
 }
 
@@ -232,9 +233,6 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublisher(
 )
 {
   typename Participants::Values participant = this->modelData_.participant( publisher);
-  OpenDDS::DCPS::TransportIdType transport = this->modelData_.transport( publisher);
-
-  this->transport_config(transport + this->transport_key_base);
 
   if( !this->participants_[ participant]) {
     this->createParticipant( participant);
@@ -244,7 +242,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublisher(
     this->participants_[ participant],
     this->modelData_.qos( publisher),
     this->modelData_.mask( publisher),
-    transport + this->transport_key_base
+    configName(this->modelData_.transportConfigName(publisher))
   );
 }
 
@@ -256,9 +254,6 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
 )
 {
   typename Participants::Values participant = this->modelData_.participant( subscriber);
-  OpenDDS::DCPS::TransportIdType transport = this->modelData_.transport( subscriber);
-
-  this->transport_config(transport + this->transport_key_base);
 
   if( !this->participants_[ participant]) {
     this->createParticipant( participant);
@@ -268,7 +263,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
     this->participants_[ participant],
     this->modelData_.qos( subscriber),
     this->modelData_.mask( subscriber),
-    transport + this->transport_key_base
+    configName(this->modelData_.transportConfigName(subscriber))
   );
 }
 
@@ -295,6 +290,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublication( typename
     dynamic_cast<DDS::Topic*>(this->topics_[participant][topic]),
     this->modelData_.qos(writer),
     this->modelData_.mask(writer),
+    configName(this->modelData_.transportConfigName(writer)),
     this->modelData_.copyTopicQos(writer)
   );
 }
@@ -321,6 +317,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typenam
     this->topics_[participant][topic],
     this->modelData_.qos(reader),
     this->modelData_.mask(reader),
+    configName(this->modelData_.transportConfigName(reader)),
     this->modelData_.copyTopicQos(reader)
   );
 }

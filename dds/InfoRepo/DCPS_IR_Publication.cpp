@@ -25,7 +25,7 @@ DCPS_IR_Publication::DCPS_IR_Publication(OpenDDS::DCPS::RepoId id,
                                          DCPS_IR_Topic* topic,
                                          OpenDDS::DCPS::DataWriterRemote_ptr writer,
                                          DDS::DataWriterQos qos,
-                                         OpenDDS::DCPS::TransportInterfaceInfo info,
+                                         const OpenDDS::DCPS::TransportLocatorSeq& info,
                                          DDS::PublisherQos publisherQos)
   : id_(id),
     participant_(participant),
@@ -50,7 +50,8 @@ DCPS_IR_Publication::~DCPS_IR_Publication()
   }
 }
 
-int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub)
+int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
+                                                     bool active)
 {
   // keep track of the association locally
   int status = associations_.insert(sub);
@@ -58,14 +59,13 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub)
   switch (status) {
   case 0: {
     // inform the datawriter about the association
-    OpenDDS::DCPS::ReaderAssociationSeq associationSeq(2);
-    associationSeq.length(1);
-    associationSeq[0].readerTransInfo = sub->get_transportInterfaceInfo();
-    associationSeq[0].readerId = sub->get_id();
-    associationSeq[0].subQos = *(sub->get_subscriber_qos());
-    associationSeq[0].readerQos = *(sub->get_datareader_qos());
-    associationSeq[0].filterExpression = sub->get_filter_expression().c_str();
-    associationSeq[0].exprParams = sub->get_expr_params();
+    OpenDDS::DCPS::ReaderAssociation association;
+    association.readerTransInfo = sub->get_transportLocatorSeq();
+    association.readerId = sub->get_id();
+    association.subQos = *(sub->get_subscriber_qos());
+    association.readerQos = *(sub->get_datareader_qos());
+    association.filterExpression = sub->get_filter_expression().c_str();
+    association.exprParams = sub->get_expr_params();
 
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
@@ -79,7 +79,7 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub)
                      std::string(sub_converter).c_str()));
         }
 
-        writer_->add_associations(id_, associationSeq);
+        writer_->add_association(id_, association, active);
 
       } catch (const CORBA::Exception& ex) {
         ex._tao_print_exception(
@@ -121,6 +121,23 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub)
   };
 
   return status;
+}
+
+void
+DCPS_IR_Publication::association_complete(const OpenDDS::DCPS::RepoId& remote)
+{
+  typedef DCPS_IR_Subscription_Set::ITERATOR iter_t;
+  for (iter_t iter = associations_.begin(); iter != associations_.end(); ++iter) {
+    if ((*iter)->get_id() == remote) {
+      (*iter)->call_association_complete(get_id());
+    }
+  }
+}
+
+void
+DCPS_IR_Publication::call_association_complete(const OpenDDS::DCPS::RepoId& remote)
+{
+  writer_->association_complete(remote);
 }
 
 int DCPS_IR_Publication::remove_associated_subscription(DCPS_IR_Subscription* sub,
@@ -584,15 +601,9 @@ DDS::PublisherQos* DCPS_IR_Publication::get_publisher_qos()
   return &publisherQos_;
 }
 
-OpenDDS::DCPS::TransportInterfaceId DCPS_IR_Publication::get_transport_id() const
+OpenDDS::DCPS::TransportLocatorSeq DCPS_IR_Publication::get_transportLocatorSeq() const
 {
-  return info_.transport_id;
-}
-
-OpenDDS::DCPS::TransportInterfaceInfo DCPS_IR_Publication::get_transportInterfaceInfo() const
-{
-  OpenDDS::DCPS::TransportInterfaceInfo info = info_;
-  return info;
+  return info_;
 }
 
 OpenDDS::DCPS::IncompatibleQosStatus* DCPS_IR_Publication::get_incompatibleQosStatus()

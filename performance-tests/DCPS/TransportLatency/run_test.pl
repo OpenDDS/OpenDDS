@@ -13,45 +13,20 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$opts =  "-ORBSvcConf ./tcp.conf";
+$opts =  "-ORBSvcConf dummy_tcp.conf";
 $pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSBit 0";
 $sub_opts = "$opts -DCPSConfigFile sub.ini -DCPSBit 0";
 
-if ($ARGV[0] eq 'udp') {
-    $opts =  "-ORBSvcConf udp.conf -t udp -ORBSvcConf tcp.conf";
-    $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
-}
-elsif ($ARGV[0] eq 'multicast') {
-    $opts =  "-ORBSvcConf multicast.conf -ORBSvcConf tcp.conf";
-    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
-}
-elsif ($ARGV[0] eq 'default_tcp') {
-    $opts =  "-ORBSvcConf tcp.conf -t default_tcp";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
-}
-elsif ($ARGV[0] eq 'default_udp') {
-    $opts =  "-ORBSvcConf udp.conf -ORBSvcConf tcp.conf"
-        . " -t default_udp";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
-}
-elsif ($ARGV[0] eq '-n') {
+if ($ARGV[0] eq '-n') {
     $pub_opts = $pub_opts." -n $ARGV[1]";
-}
-elsif ($ARGV[0] eq 'default_multicast') {
-    $opts =  "-ORBSvcConf multicast.conf -ORBSvcConf tcp.conf";
-    $pub_opts = "$opts -t default_multicast";
-    $sub_opts = "$opts -t default_multicast";
 }
 elsif ($ARGV[0] eq '-debug') {
     if($ARGV[1] eq '-n') {
-      $pub_opts = $pub_opts." -d -n $ARGV[2]";
+      $pub_opts = $pub_opts." -ORBDebugLevel 10 -d -n $ARGV[2]";
     }
     else {
-      $pub_opts = $pub_opts." -d";
+      $pub_opts = $pub_opts." -ORBDebugLevel 10 -d";
+      $sub_opts = $pub_opts." -ORBDebugLevel 10 ";
     }
 }
 elsif ($ARGV[0] ne '') {
@@ -65,7 +40,7 @@ $repo_bit_opt = "-NOBITS";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_opt -o $dcpsrepo_ior ");
+                                     "$repo_bit_opt -o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 

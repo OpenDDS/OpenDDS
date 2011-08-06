@@ -43,7 +43,7 @@ public:
                       DCPS_IR_Topic* topic,
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
                       DDS::DataWriterQos qos,
-                      OpenDDS::DCPS::TransportInterfaceInfo info,
+                      const OpenDDS::DCPS::TransportLocatorSeq& info,
                       DDS::PublisherQos publisherQos);
 
   ~DCPS_IR_Publication();
@@ -53,7 +53,17 @@ public:
   ///  subscriptions and notifies datawriter if successfully added
   /// This method can mark the participant dead
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_associated_subscription(DCPS_IR_Subscription* sub);
+  int add_associated_subscription(DCPS_IR_Subscription* sub, bool active);
+
+  /// The service participant that contains this Publication has indicated
+  /// that the assocation to peer "remote" is complete.  This method will
+  /// locate the Subscription object for "remote" in order to inform it
+  /// of the completed association.
+  void association_complete(const OpenDDS::DCPS::RepoId& remote);
+
+  /// Invoke the DataWriterRemote::association_complete() callback, passing
+  /// the "remote" parameter (Subscription) to the service participant.
+  void call_association_complete(const OpenDDS::DCPS::RepoId& remote);
 
   /// Remove the associated subscription
   /// Removes the subscription from the list of associated
@@ -122,11 +132,7 @@ public:
   /// Update PublisherQos only.
   void set_qos(const DDS::PublisherQos& qos);
 
-  /// get the transport ID of the transport implementation type.
-  OpenDDS::DCPS::TransportInterfaceId   get_transport_id() const;
-
-  /// Returns a copy of the TransportInterfaceInfo object
-  OpenDDS::DCPS::TransportInterfaceInfo get_transportInterfaceInfo() const;
+  OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
 
   /// Return pointer to the incompatible qos status
   /// Publication retains ownership
@@ -185,7 +191,7 @@ private:
   /// the corresponding DataWriterRemote object
   OpenDDS::DCPS::DataWriterRemote_var writer_;
   DDS::DataWriterQos qos_;
-  OpenDDS::DCPS::TransportInterfaceInfo info_;
+  OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::PublisherQos publisherQos_;
 
   DCPS_IR_Subscription_Set associations_;

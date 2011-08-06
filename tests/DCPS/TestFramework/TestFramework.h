@@ -20,8 +20,6 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsPublicationC.h>
 
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
-
 #include "TestFrameworkC.h"
 #include "TestFrameworkTypeSupportC.h"
 #include "TestFrameworkTypeSupportImpl.h"
@@ -33,8 +31,6 @@ public:
   static const DDS::DomainId_t DEFAULT_DOMAIN;
   static const char* DEFAULT_TOPIC;
   static const DDS::Duration_t DEFAULT_TIMEOUT;
-  static const ACE_TCHAR* DEFAULT_TRANSPORT;
-  static const OpenDDS::DCPS::TransportIdType DEFAULT_TRANSPORT_ID;
 
   virtual ~TestBase();
 
@@ -50,10 +46,6 @@ public:
     DDS::TopicQos& qos,
     DDS::TopicListener_ptr& listener,
     DDS::StatusMask& status);
-
-  virtual DDS::ReturnCode_t init_transport(
-    OpenDDS::DCPS::TransportIdType& transport_id,
-    ACE_TString& transport_type);
 
   int run(int &argc, ACE_TCHAR* arg[]);
 
@@ -82,11 +74,6 @@ protected:
 
   DDS::Topic_var create_topic()
   ACE_THROW_SPEC((CORBA::SystemException));
-
-  OpenDDS::DCPS::TransportImpl_rch find_or_create_transport()
-  ACE_THROW_SPEC((CORBA::SystemException));
-
-  static OpenDDS::DCPS::TransportIdType next_transport_id();
 };
 
 #endif  /* DCPS_TESTFRAMEWORK_H */

@@ -15,15 +15,6 @@ $status = 0;
 
 $svc_conf = '';
 $repo_bit_opt = '';
-if (!new PerlACE::ConfigList->check_config ('STATIC')) {
-  $repo_bit_opt = "-ORBSvcConf tcp.conf";
-  if ($ARGV[0] eq 'udp') {
-    $svc_conf = " -ORBSvcConf udp.conf ";
-  }
-  else {
-    $svc_conf = " -ORBSvcConf tcp.conf";
-  }
-}
 
 my($port1) = PerlACE::random_port();
 $ns_ior = "ns.ior";

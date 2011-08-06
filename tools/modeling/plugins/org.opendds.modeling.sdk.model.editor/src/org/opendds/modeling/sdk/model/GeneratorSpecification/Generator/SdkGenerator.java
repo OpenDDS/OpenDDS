@@ -120,7 +120,53 @@ public class SdkGenerator {
 		generate(SdkTransformer.TransformType.MPB);
 		generate(SdkTransformer.TransformType.PATH_MPB);
 	}
-	
+
+	public String validate() {
+		String modelFileName = getModelFileName();
+		if( modelFileName == null || modelFileName.isEmpty()) {
+			return "model file name not specified";
+		}
+
+		String targetDirName = getTargetDirName();
+		if( targetDirName == null || targetDirName.isEmpty()) {
+			return "target dir name not specified";
+		}
+
+		try {
+			URL targetUrl = fileProvider.fromWorkspace(targetDirName, true);
+			if( targetUrl == null) {
+				return null;
+			}
+
+			File targetFolder = new File(targetUrl.toURI());
+			if (!targetFolder.exists()) {
+				targetFolder.mkdirs();
+			}
+
+			String modelname = getModelName();
+			if (modelname == null) {
+				return "model name not present in model";
+			}
+
+		} catch (Exception e) {
+			return "error " +  e.getMessage() + " opening model file";
+		}
+
+		if (parsedGeneratorFile.hasOffset()) {
+	//		errorHandler.error(IErrorHandler.Severity.ERROR, "Model File",
+		//			"Generator file contains transportOffset property on instance", 
+          //          new RuntimeException("transportOffset"));
+			return "Generator file contains transportOffset property on instance";
+		}
+
+		if (parsedGeneratorFile.hasInstanceTransport()) {
+//			errorHandler.error(IErrorHandler.Severity.ERROR, "Model File",
+	//				"Generator file contains transport property on instance", 
+      //              new RuntimeException("transport instance"));
+			return "Generator file contains transport property on instance"; 
+		}
+		return null;
+	}
 	/**
 	 * Generate the specified output code using the contained generator model.
 	 * 
@@ -166,7 +212,7 @@ public class SdkGenerator {
 					"Unable to open the output file for conversion: " + result, e);
 			return;
 		}
-
+		
 		Source source = parsedGeneratorFile.getSource(which.needsResolvedModel() ? transformer : null);
 		if (source != null) {
 			transformer.transform(which, source, result);
@@ -339,7 +385,12 @@ public class SdkGenerator {
 		});
 
 		cg.setSourceName(inputFile);
-		cg.generateAll();
+		String msg = cg.validate();
+		if (msg == null) {
+			cg.generateAll();			
+		} else {
+			System.err.println("ERROR: " + msg);
+		}
 	}
 
 }

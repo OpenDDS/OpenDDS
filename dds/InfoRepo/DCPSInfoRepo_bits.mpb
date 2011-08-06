@@ -1,4 +1,2 @@
-feature(built_in_topics) {
-  libs  += SimpleTcp
-  after += SimpleTcp
+feature(built_in_topics): dcps_tcp {
 }

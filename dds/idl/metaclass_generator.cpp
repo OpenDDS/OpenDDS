@@ -243,6 +243,7 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "ComparatorBase::Ptr next) const\n"
     "  {\n"
     "    ACE_UNUSED_ARG(next);\n";
+  be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
   std::for_each(fields.begin(), fields.end(), gen_field_createQC);
   be_global->impl_ <<
     exception <<
@@ -290,6 +291,5 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "  static MetaStructImpl<" << clazz << "> msi;\n"
     "  return msi;\n"
     "}\n\n";
-  be_global->add_include("stdexcept", BE_GlobalData::STREAM_CPP);
   return true;
 }

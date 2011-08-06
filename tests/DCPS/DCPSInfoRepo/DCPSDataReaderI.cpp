@@ -15,36 +15,30 @@ TAO_DDS_DCPSDataReader_i::~TAO_DDS_DCPSDataReader_i (void)
   {
   }
 
-void TAO_DDS_DCPSDataReader_i::add_associations (
+void TAO_DDS_DCPSDataReader_i::add_association (
     const ::OpenDDS::DCPS::RepoId& yourId,
-    const OpenDDS::DCPS::WriterAssociationSeq & writers
+    const OpenDDS::DCPS::WriterAssociation& writer,
+    bool /*active*/
   )
   ACE_THROW_SPEC ((
     CORBA::SystemException
   ))
   {
-    CORBA::ULong length = writers.length();
 
-    OpenDDS::DCPS::RepoIdConverter converter(yourId);
+    OpenDDS::DCPS::RepoIdConverter converterY(yourId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("\nTAO_DDS_DCPSDataReader_i::add_associations () :\n")
-      ACE_TEXT("\tReader %C Adding association to %d writers:\n"),
-      std::string(converter).c_str(),
-      length
+      ACE_TEXT("\tReader %C Adding association to writer:\n"),
+      std::string(converterY).c_str()
     ));
 
-    for (CORBA::ULong cnt = 0; cnt < length; ++cnt)
-      {
-        OpenDDS::DCPS::RepoIdConverter converter(writers[cnt].writerId);
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("\tAssociation - %d\n")
-          ACE_TEXT("\t writer id - %C\n")
-          ACE_TEXT("\t transport_id - %d\n\n"),
-          cnt,
-          std::string(converter).c_str(),
-          writers[ cnt].writerTransInfo.transport_id
-        ));
-      }
+    OpenDDS::DCPS::RepoIdConverter converterW(writer.writerId);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("\t writer id - %C\n")
+      ACE_TEXT("\t transport_id - %C\n\n"),
+      std::string(converterW).c_str(),
+      writer.writerTransInfo[0].transport_type.in()
+    ));
 
   }
 

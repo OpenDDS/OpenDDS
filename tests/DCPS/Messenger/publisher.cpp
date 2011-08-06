@@ -13,60 +13,16 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #endif
 
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
-
-namespace {
-
-OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
-
-int
-parse_args(int argc, ACE_TCHAR *argv[])
-{
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:"));
-
-  int c;
-  while ((c = get_opts()) != -1) {
-    switch (c) {
-    case 't':
-
-      if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("udp")) == 0) {
-        transport_impl_id = 2;
-
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("multicast")) == 0) {
-        transport_impl_id = 3;
-
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("default_tcp")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
-
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("default_udp")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_UDP_ID;
-
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("default_multicast")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_MULTICAST_ID;
-      }
-
-      break;
-    case '?':
-    default:
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("usage: %C -t config\n"), argv[0]),
-                       -1);
-    }
-  }
-
-  return 0;
-}
-
-} // namespace
+#include "Args.h"
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -134,18 +90,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    // Initialize and attach Transport
-    OpenDDS::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create_transport_impl(transport_impl_id,
-                                                 OpenDDS::DCPS::AUTO_CONFIG);
-
-    if (transport_impl->attach(pub.in()) != OpenDDS::DCPS::ATTACH_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: attach failed!\n")),
-                       -1);
-    }
-
     // Create DataWriter
     DDS::DataWriter_var dw =
       pub->create_datawriter(topic.in(),
@@ -176,7 +120,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
 
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

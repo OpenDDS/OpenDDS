@@ -17,7 +17,6 @@
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Service_Config.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include <set>
 
@@ -39,13 +38,6 @@ class RTDMonitorImpl {
       if (!TheServiceParticipant->monitor_) {
         // Initialize the service and consume the ACE+TAO+DDS arguments.
         TheParticipantFactoryWithArgs(argc, argv);
-
-        // Load the SimpleTcp transport library as we know that we will be
-        // using it.
-        ACE_Service_Config::process_directive(
-          ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
-          ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"")
-        );
       }
 
       this->model_ = new MonitorDataModel();
@@ -63,7 +55,6 @@ class RTDMonitorImpl {
     {
       // Clean up the service resources.
       if (!TheServiceParticipant->monitor_) {
-        TheTransportFactory->release();
         TheServiceParticipant->shutdown();
       }
     }

@@ -18,11 +18,10 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/Arg_Shifter.h"
 
@@ -31,10 +30,6 @@
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
-ACE_TString reader_address_str = ACE_TEXT("localhost:0");
-ACE_TString writer_address_str = ACE_TEXT("localhost:0");
-int reader_address_given = 0;
-int writer_address_given = 0;
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
@@ -47,153 +42,6 @@ bool support_client_side_BIT = false;
 // default to using TCP
 int sub_using_udp = 0;
 int pub_using_udp = 0;
-OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
-OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-
-enum TransportTypeId
-{
-  SIMPLE_TCP,
-  SIMPLE_UDP
-};
-
-enum TransportInstanceId
-{
-  SUB_TRAFFIC,
-  PUB_TRAFFIC
-};
-
-
-
-int init_tranport ()
-{
-  int status = 0;
-
-  if (sub_using_udp)
-    {
-      reader_transport_impl
-        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      ACE_TEXT("udp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("udp"));
-
-      OpenDDS::DCPS::UdpConfiguration* reader_udp_config
-        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (reader_config.in ());
-
-      if (!reader_address_given)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub UDP")
-                    ACE_TEXT(" Must specify an address for UDP.\n")));
-          return 11;
-        }
-
-
-      ACE_INET_Addr reader_address (reader_address_str.c_str ());
-      reader_udp_config->local_address_ = reader_address;
-
-      if (reader_transport_impl->configure(reader_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub UDP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-  else
-    {
-      reader_transport_impl
-        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      ACE_TEXT("SimpleTcp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
-
-      OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
-
-      if (reader_address_given)
-        {
-          ACE_INET_Addr reader_address (reader_address_str.c_str ());
-          reader_tcp_config->local_address_ = reader_address;
-          reader_tcp_config->local_address_str_ = reader_address_str;
-        }
-        // else use default address - OS assigned.
-
-      if (reader_transport_impl->configure(reader_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub TCP ")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-
-  if (pub_using_udp)
-    {
-      writer_transport_impl
-         = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                       ACE_TEXT("udp"),
-                                                       OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("udp"));
-
-      OpenDDS::DCPS::UdpConfiguration* writer_udp_config
-        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (writer_config.in ());
-
-      if (!writer_address_given)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: pub UDP")
-                    ACE_TEXT(" Must specify an address for UDP.\n")));
-          return 12;
-        }
-
-      ACE_INET_Addr writer_address (writer_address_str.c_str ());
-      writer_udp_config->local_address_ = writer_address;
-
-      if (writer_transport_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub UDP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-  else
-    {
-      writer_transport_impl
-        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      ACE_TEXT("SimpleTcp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
-
-      OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
-
-      if (writer_address_given)
-        {
-          ACE_INET_Addr writer_address (writer_address_str.c_str());
-          writer_tcp_config->local_address_ = writer_address;
-          writer_tcp_config->local_address_str_ = writer_address_str;
-        }
-        // else use default address - OS assigned.
-
-      if (writer_transport_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub TCP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-
-  return status;
-}
 
 
 int wait_for_data (::DDS::Subscriber_ptr sub,
@@ -222,11 +70,6 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  reader_address_str = ACE_LOCALHOST;
-  reader_address_str += ACE_TEXT(":16701");
-  writer_address_str = ACE_LOCALHOST;
-  writer_address_str += ACE_TEXT(":29803");
-
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
   ACE_Arg_Shifter arg_shifter (argc, argv);
@@ -238,8 +81,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -m multiple_instances?1:0   defaults to 0
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
-    //  -s sub transport address    defaults to localhost:16701
-    //  -p pub transport address    defaults to localhost:29803
     //  -z                          verbose transport debug
     //  -b                          enable client side Built-In topic support
     //  -us                         Subscriber using UDP transport
@@ -265,18 +106,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
-    {
-      reader_address_str = currentArg;
-      reader_address_given = 1;
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
-    {
-      writer_address_str = currentArg;
-      writer_address_given = 1;
       arg_shifter.consume_arg ();
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
@@ -410,40 +239,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           1);
       }
 
-      // Initialize the transport
-      if (0 != ::init_tranport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) init_transport failed!\n")),
-                           1);
-      }
-
       // Attach the subscriber to the transport.
-      OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
-
-      if (0 == sub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
-                          1);
+      if (sub_using_udp) {
+        TheTransportRegistry->bind_config("udp", sub.in());
+      } else {
+        TheTransportRegistry->bind_config("tcp", sub.in());
       }
-
-      sub_impl->attach_transport(reader_transport_impl.in());
-
 
       // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl
-        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
-
-      if (0 == pub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
-                          1);
+      if (pub_using_udp) {
+        TheTransportRegistry->bind_config("udp", pub.in());
+      } else {
+        TheTransportRegistry->bind_config("tcp", pub.in());
       }
-
-      pub_impl->attach_transport(writer_transport_impl.in());
 
       // Create the datawriter
       ::DDS::DataWriterQos dw_qos;
@@ -526,6 +334,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           1);
       }
 
+      // TODO: Make this test work (incompatible transports) with the
+      //       new transport scheme.
       int incompatible_transport_found = 0;
       for (CORBA::ULong ii =0; ii < incomp.policies.length (); ii++)
         {
@@ -659,10 +469,6 @@ cleanup:
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
-      reader_transport_impl = 0;
-      writer_transport_impl = 0;
-
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

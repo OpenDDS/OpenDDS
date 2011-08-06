@@ -19,35 +19,30 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct AssociationData {
-  RepoId                  remote_id_;
-  TransportInterfaceInfo  remote_data_;
-  ACE_INET_Addr        remote_addess_;
-  NetworkAddress       network_order_address_;
-  ACE_INET_Addr& get_remote_address ()
-  {
-    if (this->remote_addess_ == ACE_INET_Addr()) {
-      // Get the remote address from the "blob" in the remote_info struct.
-      ACE_InputCDR cdr((const char*)remote_data_.data.get_buffer(), remote_data_.data.length());
+  RepoId               remote_id_;
+  TransportLocatorSeq  remote_data_;
+  CORBA::Long          publication_transport_priority_;
 
-      if (cdr >> this->network_order_address_ == 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: AssociationData::get_remote_address failed "
-                  "to de-serialize the NetworkAddress\n"));
-      }
-      else {
-        this->network_order_address_.to_addr(remote_addess_);
-      }
+  static ACE_INET_Addr get_remote_address(const TransportBLOB& remote)
+  {
+    ACE_INET_Addr remote_address;
+    NetworkAddress network_order_address;
+
+    // Get the remote address from the "blob" in the remote_info struct.
+    ACE_InputCDR cdr((const char*)remote.get_buffer(),
+                                  remote.length());
+
+    if (cdr >> network_order_address == 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: AssociationData::get_remote_address")
+                 ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+    } else {
+      network_order_address.to_addr(remote_address);
     }
 
-    return this->remote_addess_;
+    return remote_address;
   }
 };
-
-struct AssociationInfo {
-  size_t            num_associations_;
-  AssociationData*  association_data_;
-};
-
-typedef std::vector<AssociationInfo> AssociationInfoList;
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -26,7 +26,7 @@ namespace { // anonymous namespace for file scope.
   enum { DEFAULT_ID              =  -1};
   enum { DEFAULT_TEST_DOMAIN     = 521};
   enum { DEFAULT_TEST_DURATION   =  60};
-  enum { DEFAULT_TRANSPORT_KEY   =   1};
+  const char DEFAULT_TRANSPORT_KEY[] = "tcp1";
   enum { DEFAULT_RAW_BUFFER_SIZE = 500};
 
   // const unsigned long DEFAULT_TEST_DOMAIN    = 521;
@@ -73,13 +73,13 @@ namespace { // anonymous namespace for file scope.
   // Map command line arguments to transport types and keys.
   const struct TransportTypeArgMappings {
     ACE_TString optionName;
-    std::pair< Test::Options::TransportType, unsigned int>
+    std::pair< Test::Options::TransportType, std::string>
                 transportInfo;
 
   } transportTypeArgMappings[] = {
-    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, 1U) }, // [transport_impl_1]
-    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, 2U) }, // [transport_impl_2]
-    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  3U) }  // [transport_impl_3]
+    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, "tcp1") },
+    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, "udp1") },
+    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  "mcast1") }
   };
 
 } // end of anonymous namespace.

@@ -83,11 +83,11 @@ int find(
 
 template <typename Container, typename Key>
 int find(
-  Container& c,
+  const Container& c,
   const Key& key,
   typename Container::mapped_type& value)
 {
-  typename Container::iterator iter =
+  typename Container::const_iterator iter =
     c.find(key);
 
   if (iter == c.end()) {

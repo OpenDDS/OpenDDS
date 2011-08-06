@@ -242,8 +242,11 @@ namespace OpenDDS { namespace Model {
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
           Subscribers::Values  subscriber(DataReaders::Values which);
-          OpenDDS::DCPS::TransportIdType transport(Publishers::Values which);
-          OpenDDS::DCPS::TransportIdType transport(Subscribers::Values which);
+          std::string          transportConfigName(Participants::Values which);
+          std::string          transportConfigName(Publishers::Values which);
+          std::string          transportConfigName(Subscribers::Values which);
+          std::string          transportConfigName(DataWriters::Values which);
+          std::string          transportConfigName(DataReaders::Values which);
           ///}
 
         private:
@@ -252,6 +255,7 @@ namespace OpenDDS { namespace Model {
           void loadDomains();
           void loadTopics();
           void loadMaps();
+          void loadTransportConfigNames();
 
           void buildParticipantsQos();
           void buildTopicsQos();
@@ -267,20 +271,21 @@ namespace OpenDDS { namespace Model {
   <xsl:text>
           unsigned long             domains_[                Participants::LAST_INDEX];
           DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
+          std::string               participantTxCfgNames_[  Participants::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-publishers">
   <xsl:text>
           Participants::Values      publisherParticipants_[   Publishers::LAST_INDEX];
           DDS::PublisherQos         publishersQos_[           Publishers::LAST_INDEX];
-          OpenDDS::DCPS::TransportIdType publisherTransports_[Publishers::LAST_INDEX];
+          std::string               publisherTxCfgNames_[     Publishers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-subscribers">
   <xsl:text>
           Participants::Values      subscriberParticipants_[   Subscribers::LAST_INDEX];
           DDS::SubscriberQos        subscribersQos_[           Subscribers::LAST_INDEX];
-          OpenDDS::DCPS::TransportIdType subscriberTransports_[Subscribers::LAST_INDEX];
+          std::string               subscriberTxCfgNames_[     Subscribers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-writers">
@@ -289,6 +294,7 @@ namespace OpenDDS { namespace Model {
           Publishers::Values        publishers_[             DataWriters::LAST_INDEX];
           DDS::DataWriterQos        writersQos_[             DataWriters::LAST_INDEX];
           bool                      writerCopyTopicQos_[     DataWriters::LAST_INDEX];
+          std::string               writerTxCfgNames_[       DataWriters::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-readers">
@@ -297,6 +303,7 @@ namespace OpenDDS { namespace Model {
           Subscribers::Values       subscribers_[            DataReaders::LAST_INDEX];
           DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
           bool                      readerCopyTopicQos_[     DataReaders::LAST_INDEX];
+          std::string               readerTxCfgNames_[       DataReaders::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$topics">
@@ -941,6 +948,7 @@ inline
 </xsl:choose>
 <xsl:text>}
 
+<!--
 inline
 OpenDDS::DCPS::TransportIdType
 </xsl:text>
@@ -962,7 +970,8 @@ OpenDDS::DCPS::TransportIdType
   </xsl:otherwise>
 </xsl:choose>
 <xsl:text>}
-
+-->
+<!--
 inline
 OpenDDS::DCPS::TransportIdType
 </xsl:text>
@@ -984,9 +993,9 @@ OpenDDS::DCPS::TransportIdType
   </xsl:otherwise>
 </xsl:choose>
     <xsl:text>}
+-->
 </xsl:text>
 </xsl:template>
-
 <!-- Output enumeration within Elements class -->
 <xsl:template name="generate-enum">
   <xsl:param name="class" />

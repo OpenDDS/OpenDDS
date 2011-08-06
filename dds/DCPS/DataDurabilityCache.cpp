@@ -375,7 +375,12 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
               std::ifstream is;
 
               if (!file->read(is)) {
-                //TODO: error logging
+                if (DCPS_debug_level) {
+                  ACE_ERROR((LM_ERROR,
+                             ACE_TEXT("(%P|%t) DataDurabilityCache::init ")
+                             ACE_TEXT("couldn't open file for PERSISTENT ")
+                             ACE_TEXT("data: %C\n"), file->name().c_str()));
+                }
                 continue;
               }
 

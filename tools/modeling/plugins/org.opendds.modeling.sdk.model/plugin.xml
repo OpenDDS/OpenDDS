@@ -10,5 +10,10 @@
 
 <plugin>
 
+   <extension point="org.eclipse.emf.ecore.extension_parser">
+      <parser
+            type="codegen"
+            class="org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorResourceFactory"/>
+   </extension>
 
 </plugin>

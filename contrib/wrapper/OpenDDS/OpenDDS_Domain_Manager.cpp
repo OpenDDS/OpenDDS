@@ -195,7 +195,7 @@ OpenDDS_Domain_Manager::parse_args (int & argc, ACE_TCHAR * argv [])
             else if (ACE_OS::strcmp (current,
                                      ACE_TEXT("default_tcp")) == 0)
               {
-                transport_impl_id_ = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
+                transport_impl_id_ = OpenDDS::DCPS::DEFAULT_TCP_ID;
               }
             else if (ACE_OS::strcmp (current,
                                      ACE_TEXT("default_udp")) == 0)

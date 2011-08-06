@@ -13,7 +13,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -62,14 +61,15 @@ SPMonitorImpl::report()
       }
     }
     length = 0;
-    const TransportFactory::ImplMap& transports =
-      TransportFactory::instance()->get_transport_impl_map();
-    report.transports.length(static_cast<CORBA::ULong>(transports.size()));
-    for (TransportFactory::ImplMap::const_iterator mapIter = transports.begin();
-         mapIter != transports.end();
-         ++mapIter) {
-      report.transports[length++] = mapIter->first;
-    }
+    // TODO: Redo the transport-related monitor publishing here...
+    //const TransportFactory::ImplMap& transports =
+    //  TransportFactory::instance()->get_transport_impl_map();
+    //report.transports.length(static_cast<CORBA::ULong>(transports.size()));
+    //for (TransportFactory::ImplMap::const_iterator mapIter = transports.begin();
+    //     mapIter != transports.end();
+    //     ++mapIter) {
+    //  report.transports[length++] = mapIter->first;
+    //}
     this->sp_writer_->write(report, DDS::HANDLE_NIL);
   }
 }

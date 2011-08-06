@@ -26,89 +26,14 @@
 
 #include "common.h"
 
-OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-static const ACE_TCHAR * writer_address_str = ACE_TEXT("localhost:0");
-
-static int writer_address_given = 0;
-
-static int topics = 0 ;
-
-static int init_writer_tranport ()
-{
-  int status = 0;
-
-  if (using_udp)
-    {
-      writer_transport_impl =
-          TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      ACE_TEXT("udp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("udp"));
-
-      OpenDDS::DCPS::UdpConfiguration* writer_udp_config
-        = static_cast <OpenDDS::DCPS::UdpConfiguration*> (writer_config.in ());
-
-      if (!writer_address_given)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: pub UDP")
-                    ACE_TEXT(" Must specify an address for UDP.\n")));
-          return 12;
-        }
-
-      ACE_INET_Addr writer_address (writer_address_str);
-      writer_udp_config->local_address_ = writer_address;
-
-      if (writer_transport_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub UDP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-  else
-    {
-      writer_transport_impl =
-          TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      ACE_TEXT("SimpleTcp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
-
-      OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
-
-      if (writer_address_given)
-        {
-          ACE_INET_Addr writer_address (writer_address_str);
-          writer_tcp_config->local_address_ = writer_address;
-          writer_tcp_config->local_address_str_ = writer_address_str;
-        }
-        // else use default address - OS assigned.
-
-      if (writer_transport_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub TCP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-    }
-
-  return status;
-}
-
+static int topics = 0;
 
 /// parse the command line arguments
-int parse_args (int argc, ACE_TCHAR *argv[])
+int parse_args(int argc, ACE_TCHAR *argv[])
 {
-  u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
-  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
-  ACE_Arg_Shifter arg_shifter (argc, argv);
+  u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
+  ACE_Arg_Shifter arg_shifter(argc, argv);
 
   while (arg_shifter.is_anything_left ())
   {
@@ -116,7 +41,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -i num_ops_per_thread       defaults to 10
     //  -w num_datawriters          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
-    //  -p pub transport address    defaults to localhost:23456
     //  -z                          verbose transport debug
 
     const ACE_TCHAR *currentArg = 0;
@@ -162,21 +86,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
               return 1 ;
           }
         }
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
-    {
-      writer_address_str = currentArg;
-      writer_address_given = 1;
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
-    {
-      using_udp = ACE_OS::atoi (currentArg);
-      if (using_udp == 1)
-      {
-        ACE_DEBUG((LM_DEBUG, "Publisher Using UDP transport.\n"));
-      }
-      arg_shifter.consume_arg();
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
@@ -341,56 +250,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("(%P|%t) create_publisher failed.\n")),
                           1);
       }
-
-      // Initialize the transport
-      if (0 != ::init_writer_tranport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) init_transport failed!\n")),
-                           1);
-      }
-
-      // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl
-        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
-
-      if (0 == pub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
-                          1);
-      }
-
-      OpenDDS::DCPS::AttachStatus attach_status =
-        pub_impl->attach_transport(writer_transport_impl.in());
-
-      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-        {
-          // We failed to attach to the transport for some reason.
-          ACE_TString status_str;
-
-          switch (attach_status)
-            {
-              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-                break;
-              case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = ACE_TEXT("ATTACH_ERROR");
-                break;
-              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-                break;
-              default:
-                status_str = ACE_TEXT("Unknown Status");
-                break;
-            }
-
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
-                            ACE_TEXT("AttachStatus == %s\n"),
-                            status_str.c_str()),
-                            1);
-        }
 
       // Create the datawriters
       ::DDS::DataWriterQos dw_qos;
@@ -651,7 +510,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dp->delete_contained_entities();
       dpf->delete_participant(dp.in ());
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

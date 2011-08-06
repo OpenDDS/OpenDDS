@@ -57,7 +57,7 @@ private:
   CORBA::ORB_var orb_;
 
   ACE_TString ior_file_;
-  ACE_TString listen_address_str_;
+  std::string listen_address_str_;
   int listen_address_given_;
   bool use_bits_;
   bool resurrect_;

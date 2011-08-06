@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,6 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "EntityImpl.h"
 #include "StatusConditionImpl.h"
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -97,6 +97,20 @@ void
 EntityImpl::notify_status_condition()
 {
   dynamic_cast<StatusConditionImpl*>(status_condition_.in())->signal_all();
+}
+
+void
+EntityImpl::transport_config(const TransportConfig_rch& cfg)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  transport_config_ = cfg;
+}
+
+TransportConfig_rch
+EntityImpl::transport_config() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TransportConfig_rch());
+  return transport_config_;
 }
 
 } // namespace DCPS

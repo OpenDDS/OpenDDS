@@ -156,13 +156,13 @@ typedef struct ActorStrt<
       DDS::SubscriberQos&,
       DDS::DataReaderQos&,
       std::string,
-      OpenDDS::DCPS::TransportInterfaceInfo&,
+      OpenDDS::DCPS::TransportLocatorSeq&,
       ContentSubscriptionInfo&> URActor;
 typedef struct ActorStrt<
       DDS::PublisherQos&,
       DDS::DataWriterQos&,
       std::string,
-      OpenDDS::DCPS::TransportInterfaceInfo&,
+      OpenDDS::DCPS::TransportLocatorSeq&,
       ContentSubscriptionInfo&> UWActor;
 typedef struct ActorStrt<QosSeq, QosSeq, std::string,
                          BinSeq, ContentSubscriptionBin> DActor;

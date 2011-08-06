@@ -17,7 +17,7 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    class DummyTcpConfiguration;
+    class DummyTcpInst;
     class DummyTcpSynchResource;
 
 
@@ -26,7 +26,7 @@ namespace OpenDDS
       public:
 
         DummyTcpSendStrategy(DummyTcpDataLink*      link,
-                              DummyTcpConfiguration* config,
+                              DummyTcpInst* config,
                               DummyTcpConnection*    connection,
                               DummyTcpSynchResource* synch_resource,
                               TransportReactorTask* task,

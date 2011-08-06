@@ -19,7 +19,7 @@ UdpInitializer::UdpInitializer()
   ACE_Service_Config::process_directive(ace_svc_desc_UdpLoader);
 
 #if (OPENDDS_UDP_HAS_DLL == 0)
-  ACE_Service_Config::process_directive(ACE_TEXT("static UdpLoader"));
+  ACE_Service_Config::process_directive(ACE_TEXT("static OpenDDS_Udp"));
 #endif  /* OPENDDS_UDP_HAS_DLL */
 }
 

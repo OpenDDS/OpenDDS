@@ -11,7 +11,6 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastConfiguration.h"
 #include "MulticastDataLink_rch.h"
 #include "MulticastTypes.h"
 
@@ -22,32 +21,49 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Multicast_Export MulticastTransport
-  : public TransportImpl {
+class MulticastInst;
+
+class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
-  MulticastTransport();
+  explicit MulticastTransport(const TransportInst_rch& inst);
   ~MulticastTransport();
 
 protected:
-  virtual DataLink* find_or_create_datalink(
-    RepoId local_id,
-    const AssociationData* remote_association,
-    CORBA::Long priority,
-    bool active);
+  virtual DataLink* find_datalink_i(const RepoId& local_id,
+                                    const RepoId& remote_id,
+                                    const TransportBLOB& remote_data,
+                                    CORBA::Long priority,
+                                    bool active);
 
-  virtual int configure_i(TransportConfiguration* config);
+  virtual DataLink* connect_datalink_i(const RepoId& local_id,
+                                       const RepoId& remote_id,
+                                       const TransportBLOB& remote_data,
+                                       CORBA::Long priority);
+
+  virtual DataLink* accept_datalink(ConnectionEvent& ce);
+  virtual void stop_accepting(ConnectionEvent& ce);
+
+  virtual bool configure_i(TransportInst* config);
 
   virtual void shutdown_i();
 
-  virtual int connection_info_i(TransportInterfaceInfo& info) const;
+  virtual bool connection_info_i(TransportLocator& info) const;
 
   virtual bool acked(RepoId local_id, RepoId remote_id);
   virtual void remove_ack(RepoId local_id, RepoId remote_id);
 
   virtual void release_datalink_i(DataLink* link,
                                   bool release_pending);
+
+  virtual std::string transport_type() const { return "multicast"; }
+
 private:
-  MulticastConfiguration* config_i_;
+  MulticastDataLink* make_datalink(const RepoId& local_id,
+                                   const RepoId& remote_id,
+                                   CORBA::Long priority,
+                                   bool active);
+
+  RcHandle<MulticastInst> config_i_;
 
   /// link for pubs.
   MulticastDataLink_rch client_link_;

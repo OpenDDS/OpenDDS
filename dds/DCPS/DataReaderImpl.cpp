@@ -27,6 +27,7 @@
 #include "MonitorFactory.h"
 #include "DataReaderRemoteImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -250,23 +251,23 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return this->participant_servant_->get_handle(subscription_id_);
 }
 
-void DataReaderImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
-                                      const OpenDDS::DCPS::WriterAssociationSeq & writers)
-ACE_THROW_SPEC((CORBA::SystemException))
+void
+DataReaderImpl::add_association(const RepoId& yourId,
+                                const WriterAssociation& writer,
+                                bool active)
 {
   //
   // The following block is for diagnostic purposes only.
   //
   if (DCPS_debug_level >= 1) {
     RepoIdConverter reader_converter(yourId);
-    RepoIdConverter writer_converter(writers[0].writerId);
+    RepoIdConverter writer_converter(writer.writerId);
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataReaderImpl::add_associations - ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("(%P|%t) DataReaderImpl::add_association - ")
+               ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
                std::string(reader_converter).c_str(),
-               std::string(writer_converter).c_str(),
-               writers.length()));
+               std::string(writer_converter).c_str()));
   }
 
   //
@@ -276,7 +277,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (entity_deleted_ == true) {
     if (DCPS_debug_level >= 1)
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataReaderImpl::add_associations")
+                 ACE_TEXT("(%P|%t) DataReaderImpl::add_association")
                  ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
 
     return;
@@ -292,9 +293,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
     subscription_id_ = yourId;
   }
 
-  CORBA::ULong wr_len = writers.length();
-  WriterInfo ** infos = new WriterInfo*[wr_len];
-
   //
   // We do the following while holding the publication_handle_lock_.
   //
@@ -309,45 +307,39 @@ ACE_THROW_SPEC((CORBA::SystemException))
     {
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
-      for (CORBA::ULong i = 0; i < wr_len; i++) {
-        PublicationId writer_id = writers[i].writerId;
-        infos[i] = new WriterInfo(this, writer_id, writers[i].writerQos);
-        std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
-          // This insertion is idempotent.
-          WriterMapType::value_type(
-            writer_id,
-            infos[i]));
-        this->statistics_.insert(
-          StatsMapType::value_type(
-            writer_id,
-            WriterStats(
-              this->raw_latency_buffer_size_,
-              this->raw_latency_buffer_type_)));
+      const PublicationId& writer_id = writer.writerId;
+      WriterInfo* info = new WriterInfo(this, writer_id, writer.writerQos);
+      std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
+        // This insertion is idempotent.
+        WriterMapType::value_type(
+          writer_id,
+          info));
+      this->statistics_.insert(
+        StatsMapType::value_type(
+          writer_id,
+          WriterStats(
+            this->raw_latency_buffer_size_,
+            this->raw_latency_buffer_type_)));
 
-        if (DCPS_debug_level > 4) {
-          RepoIdConverter converter(writer_id);
+      if (DCPS_debug_level > 4) {
+        RepoIdConverter converter(writer_id);
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) DataReaderImpl::add_association: "
+                   "inserted writer %C.return %d \n",
+                   std::string(converter).c_str(), bpair.second));
+
+        WriterMapType::iterator iter = writers_.find(writer_id);
+        if (iter != writers_.end()) {
+          // This may not be an error since it could happen that the sample
+          // is delivered to the datareader after the write is dis-associated
+          // with this datareader.
+          RepoIdConverter reader_converter(subscription_id_);
+          RepoIdConverter writer_converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DataReaderImpl::add_associations: "
-                     "inserted writer %C.return %d \n",
-                     std::string(converter).c_str(), bpair.second));
-
-          WriterMapType::iterator iter = writers_.find(writer_id);
-          if (iter != writers_.end()) {
-          if (DCPS_debug_level > 4) {
-            // This may not be an error since it could happen that the sample
-            // is delivered to the datareader after the write is dis-associated
-            // with this datareader.
-            RepoIdConverter reader_converter(subscription_id_);
-            RepoIdConverter writer_converter(writer_id);
-            ACE_DEBUG((LM_DEBUG,
-                      ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-                      ACE_TEXT("reader %C is associated with writer %C.\n"),
-                      std::string(reader_converter).c_str(),
-                      std::string(writer_converter).c_str()));
-          }
-          }
-
-
+                    ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                    ACE_TEXT("reader %C is associated with writer %C.\n"),
+                    std::string(reader_converter).c_str(),
+                    std::string(writer_converter).c_str()));
         }
       }
     }
@@ -358,32 +350,37 @@ ACE_THROW_SPEC((CORBA::SystemException))
     // usage of an existing connection or initiate creation of a new
     // connection if no suitable connection is available.
     //
-    this->subscriber_servant_->add_associations(writers, this, qos_);
+    AssociationData data;
+    data.remote_id_ = writer.writerId;
+    data.remote_data_ = writer.writerTransInfo;
+    data.publication_transport_priority_ =
+      writer.writerQos.transport_priority.value;
+
+    if (!this->associate(data, active)) {
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_ERROR,
+                  ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                  ACE_TEXT("ERROR: transport layer failed to associate.\n")));
+      }
+      return;
+    }
 
     // Check if any publications have already sent a REQUEST_ACK message.
     {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-      for (unsigned int index = 0; index < wr_len; ++index) {
-        WriterMapType::iterator where
-        = this->writers_.find(writers[ index].writerId);
+      WriterMapType::iterator where = this->writers_.find(writer.writerId);
 
-        if (where != this->writers_.end()) {
-          ACE_Time_Value now = ACE_OS::gettimeofday();
+      if (where != this->writers_.end()) {
+        const ACE_Time_Value now = ACE_OS::gettimeofday();
 
-          ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-          if (where->second->should_ack(now)) {
-            SequenceNumber sequence = where->second->ack_sequence();
-            DDS::Time_t timenow = time_value_to_time(now);
-            bool result = this->send_sample_ack(
-                            writers[ index].writerId,
-                            sequence,
-                            timenow);
-
-            if (result) {
-              where->second->clear_acks(sequence);
-            }
+        if (where->second->should_ack(now)) {
+          const SequenceNumber sequence = where->second->ack_sequence();
+          const DDS::Time_t timenow = time_value_to_time(now);
+          if (this->send_sample_ack(writer.writerId, sequence, timenow)) {
+            where->second->clear_acks(sequence);
           }
         }
       }
@@ -392,14 +389,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
     //
     // LIVELINESS policy timers are managed here.
     //
-    if (liveliness_lease_duration_  != ACE_Time_Value::zero) {
+    if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
       // this call will start the timer if it is not already set
-      ACE_Time_Value now = ACE_OS::gettimeofday();
+      const ACE_Time_Value now = ACE_OS::gettimeofday();
 
       if (DCPS_debug_level >= 5) {
         RepoIdConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+                   ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
                    ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
                    std::string(converter).c_str()));
       }
@@ -419,26 +416,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // readers of Builtin Topics.
   //
   if (!is_bit_) {
-    //
-    // We derive a list of writer Id values corresponding to the writer
-    // argument list.
-    //
-    WriterIdSeq wr_ids;
-    wr_ids.length(wr_len);
 
-    for (CORBA::ULong i = 0; i < wr_len; ++i) {
-      wr_ids[i] = writers[i].writerId;
-    }
-
-    //
-    // Here we convert the list of writer Id values to local handle
-    // values.
-    //
-    DDS::InstanceHandleSeq handles;
-
-    if (this->lookup_instance_handles(wr_ids, handles) == false
-        || handles.length() != wr_len)
-      return;
+    DDS::InstanceHandle_t handle =
+      this->participant_servant_->get_handle(writer.writerId);
 
     //
     // We acquire the publication_handle_lock_ for the remainder of our
@@ -447,19 +427,17 @@ ACE_THROW_SPEC((CORBA::SystemException))
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
 
-      for (unsigned int index = 0; index < wr_len; ++index) {
-        // This insertion is idempotent.
-        this->id_to_handle_map_.insert(
-          RepoIdToHandleMap::value_type(wr_ids[ index], handles[ index]));
+      // This insertion is idempotent.
+      this->id_to_handle_map_.insert(
+        RepoIdToHandleMap::value_type(writer.writerId, handle));
 
-        if (DCPS_debug_level > 4) {
-          RepoIdConverter converter(wr_ids[index]);
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
-                     ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-                     std::string(converter).c_str(),
-                     handles[index]));
-        }
+      if (DCPS_debug_level > 4) {
+        RepoIdConverter converter(writer.writerId);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                   ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
+                   std::string(converter).c_str(),
+                   handle));
       }
 
       // We need to adjust these after the insertions have all completed
@@ -473,8 +451,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       ++this->subscription_match_status_.total_count;
       ++this->subscription_match_status_.total_count_change;
 
-      this->subscription_match_status_.last_publication_handle
-      = handles[ wr_len - 1];
+      this->subscription_match_status_.last_publication_handle = handle;
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
@@ -500,25 +477,39 @@ ACE_THROW_SPEC((CORBA::SystemException))
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-      for (unsigned int index = 0; index < wr_len; ++index) {
-        infos[index]->handle_ = handles[index];
-      }
+      this->writers_[writer.writerId]->handle_ = handle;
+    }
+  }
+
+  if (!active) {
+    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+    try {
+      repo->association_complete(this->domain_id_,
+                                 this->participant_servant_->get_id(),
+                                 this->subscription_id_, writer.writerId);
+    } catch (const CORBA::Exception& e) {
+      e._tao_print_exception("ERROR: Exception from DCPSInfo::"
+        "association_complete");
     }
   }
 
   if (this->monitor_) {
     this->monitor_->report();
   }
-
-  delete []infos;
 }
 
-void DataReaderImpl::remove_associations(
-  const OpenDDS::DCPS::WriterIdSeq & writers,
-  CORBA::Boolean notify_lost)
-ACE_THROW_SPEC((CORBA::SystemException))
+void
+DataReaderImpl::association_complete(const RepoId& /*remote_id*/)
 {
-  DBG_ENTRY_LVL("DataReaderImpl","remove_associations",6);
+  // For the current DCPSInfoRepo implementation, the DataReader side will
+  // always be passive, so association_complete() will not be called.
+}
+
+void
+DataReaderImpl::remove_associations(const WriterIdSeq& writers,
+                                    bool notify_lost)
+{
+  DBG_ENTRY_LVL("DataReaderImpl", "remove_associations", 6);
 
   if (DCPS_debug_level >= 1) {
     RepoIdConverter reader_converter(subscription_id_);
@@ -600,7 +591,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
   }
 
-  this->subscriber_servant_->remove_associations(updated_writers, this->subscription_id_);
+  for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
+    this->disassociate(updated_writers[i]);
+  }
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
@@ -650,7 +643,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 }
 
-void DataReaderImpl::remove_all_associations()
+void
+DataReaderImpl::remove_all_associations()
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",6);
 
@@ -687,9 +681,8 @@ void DataReaderImpl::remove_all_associations()
   }
 }
 
-void DataReaderImpl::update_incompatible_qos(
-  const OpenDDS::DCPS::IncompatibleQosStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
+void
+DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataReaderListener* listener =
     listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
@@ -1179,15 +1172,67 @@ ACE_THROW_SPEC((CORBA::SystemException))
   this->set_enabled();
 
   if (topic_servant_) {
-    CORBA::String_var name = topic_servant_->get_name();
 
-    DDS::ReturnCode_t return_value;
-    return_value = subscriber_servant_->reader_enabled(
-             dr_remote_objref_.in(),
-             dr_local_objref_.in(),
-             this,
-             name.in(),
-             topic_servant_->get_id());
+    try {
+      this->enable_transport();
+
+      const TransportLocatorSeq& trans_conf_info = this->connection_info();
+
+      CORBA::String_var filterExpression = "";
+      DDS::StringSeq exprParams;
+  #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
+      if (cft) {
+        filterExpression = cft->get_filter_expression();
+        cft->get_expression_parameters(exprParams);
+      }
+  #endif
+
+      DDS::SubscriberQos sub_qos;
+      this->subscriber_servant_->get_qos(sub_qos);
+
+      DCPSInfo_var repo =
+        TheServiceParticipant->get_repository(this->domain_id_);
+      this->subscription_id_ =
+        repo->add_subscription(this->domain_id_,
+                               this->participant_servant_->get_id(),
+                               this->topic_servant_->get_id(),
+                               this->dr_remote_objref_,
+                               this->qos_,
+                               trans_conf_info,
+                               sub_qos,
+                               filterExpression,
+                               exprParams);
+
+      if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+                   ACE_TEXT("add_subscription returned invalid id.\n")));
+        return DDS::RETCODE_ERROR;
+      }
+
+    } catch (const Transport::Exception&) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+                   ACE_TEXT("Transport Exception.\n")));
+        return DDS::RETCODE_ERROR;
+
+    } catch (const CORBA::SystemException& sysex) {
+      sysex._tao_print_exception(
+        "ERROR: System Exception"
+        " in DataReaderImpl::enable");
+      return DDS::RETCODE_ERROR;
+
+    } catch (const CORBA::UserException& userex) {
+      userex._tao_print_exception(
+        "ERROR: User Exception"
+        " in DataReaderImpl::enable");
+      return DDS::RETCODE_ERROR;
+    }
+
+    const CORBA::String_var name = topic_servant_->get_name();
+    DDS::ReturnCode_t return_value =
+      this->subscriber_servant_->reader_enabled(name.in(), this);
 
     if (this->monitor_) {
       this->monitor_->report();
@@ -1576,6 +1621,21 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
 }
 
+EntityImpl*
+DataReaderImpl::parent() const
+{
+  return this->subscriber_servant_;
+}
+
+bool
+DataReaderImpl::check_transport_qos(const TransportInst& ti)
+{
+  if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+    return ti.is_reliable();
+  }
+  return true;
+}
+
 bool
 DataReaderImpl::send_sample_ack(
   const RepoId& publication,
@@ -1588,7 +1648,7 @@ DataReaderImpl::send_sample_ack(
   ACE_Message_Block* data;
   ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
 
-  bool doSwap    = this->subscriber_servant_->swap_bytes();
+  bool doSwap    = this->swap_bytes();
   bool byteOrder = (doSwap? !TAO_ENCAP_BYTE_ORDER: TAO_ENCAP_BYTE_ORDER);
 
   Serializer serializer(data, doSwap);
@@ -1627,7 +1687,7 @@ DataReaderImpl::send_sample_ack(
                std::string(publicationBuffer).c_str()));
   }
 
-  return this->subscriber_servant_->send_response(publication, sample_ack);
+  return this->send_response(publication, sample_ack);
 }
 
 void DataReaderImpl::notify_read_conditions()
@@ -1650,11 +1710,6 @@ SubscriberImpl* DataReaderImpl::get_subscriber_servant()
 RepoId DataReaderImpl::get_subscription_id() const
 {
   return subscription_id_;
-}
-
-void DataReaderImpl::set_subscription_id(RepoId subscription_id)
-{
-  subscription_id_ = subscription_id;
 }
 
 char *

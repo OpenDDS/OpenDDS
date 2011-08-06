@@ -8,17 +8,11 @@ project(*Publisher): dcpsexe_with_tcp {
   libs     +=  DcpsFooType3Unbounded
   libpaths += ../FooType3Unbounded
 
-  IDL_Files {
-    Test.idl
-  }
-
   Source_Files {
     pub_main.cpp
     PubDriver.cpp
     InstanceDataMap.cpp
     Writer.cpp
-    TestS.cpp
-    TestC.cpp
     test_helper.cpp
   }
 }
@@ -29,15 +23,9 @@ project(*Subscriber): dcpsexe_with_tcp {
   libs     += DcpsFooType3Unbounded
   libpaths += ../FooType3Unbounded
 
-  IDL_Files {
-    Test.idl
-  }
-
   Source_Files {
     sub_main.cpp
     SubDriver.cpp
-    SimpleDataReader.cpp
-    SimpleSubscriber.cpp
-    TestC.cpp
+    DataReaderListener.cpp
   }
 }

@@ -20,8 +20,6 @@
 #include "MonitorFactory.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "AssociationData.h"
-#include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "tao/debug.h"
@@ -31,7 +29,7 @@ namespace DCPS {
 
 // Implementation skeleton constructor
 PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
-                             RepoId                id,
+                             RepoId id,
                              const DDS::PublisherQos& qos,
                              DDS::PublisherListener_ptr a_listener,
                              const DDS::StatusMask& mask,
@@ -50,7 +48,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     aggregation_period_start_(ACE_Time_Value::zero),
     reverse_pi_lock_(pi_lock_),
     monitor_(0),
-    publisher_id_ (id)
+    publisher_id_(id)
 {
   if (!CORBA::is_nil(a_listener)) {
     fast_listener_ = listener_.in();
@@ -61,10 +59,6 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
 // Implementation skeleton destructor
 PublisherImpl::~PublisherImpl()
 {
-  // Tell the transport to detach this
-  // Publisher/TransportInterface.
-  this->detach_transport();
-
   //The datawriters should be deleted already before calling delete
   //publisher.
   if (!is_clean()) {
@@ -92,9 +86,9 @@ PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
        it != datawriter_map_.end(); ++it) {
-    if (a_handle
-        == it->second->local_writer_objref_->get_instance_handle())
+    if (a_handle == it->second->get_instance_handle()) {
       return true;
+    }
   }
 
   return false;
@@ -212,13 +206,12 @@ DDS::ReturnCode_t
 PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  DataWriterImpl* dw_servant =
-    dynamic_cast <DataWriterImpl*>(a_datawriter);
+  DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
 
   {
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
 
-    if (dw_publisher.in()!= this) {
+    if (dw_publisher.in() != this) {
       RepoId id = dw_servant->get_publication_id();
       RepoIdConverter converter(id);
       ACE_ERROR((LM_ERROR,
@@ -233,8 +226,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // Trigger data to be persisted, i.e. made durable, if so
   // configured. This needs be called before unregister_instances
   // because unregister_instances may cause instance dispose.
-  if (!dw_servant->persist_data()
-      && DCPS_debug_level >= 2) {
+  if (!dw_servant->persist_data() && DCPS_debug_level >= 2) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("PublisherImpl::delete_datawriter, ")
@@ -246,7 +238,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
   dw_servant->unregister_instances(source_timestamp);
 
   CORBA::String_var topic_name = dw_servant->get_topic_name();
-  DataWriterImpl* local_writer = 0;
   RepoId publication_id  = GUID_UNKNOWN;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -265,10 +256,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
                         ACE_TEXT("datawriter %C not found.\n"),
                         std::string(converter).c_str()), DDS::RETCODE_ERROR);
     }
-
-    local_writer = it->second->local_writer_impl_;
-
-    PublisherDataWriterInfo* dw_info = it->second;
 
     // We can not erase the datawriter from datawriter map by the topic name
     // because the map might have multiple datawriters with the same topic
@@ -291,11 +278,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
       datawriter_map_.erase(the_writ);
     }
 
-    publication_map_.erase(publication_id);
+    publication_map_.erase(it);
 
     // Release pi_lock_ before making call to transport layer to avoid
     // some deadlock situations that threads acquire locks(PublisherImpl
-    // pi_lock_, TransportInterface reservation_lock and TransportImpl
+    // pi_lock_, TransportClient reservation_lock and TransportImpl
     // lock_) in reverse order.
     ACE_GUARD_RETURN(reverse_lock_type, reverse_monitor, this->reverse_pi_lock_,
                      DDS::RETCODE_ERROR);
@@ -309,36 +296,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
     // remove_association may lost.
     dw_servant->remove_all_associations();
 
-    OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
-
-    if (impl.is_nil()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("PublisherImpl::delete_datawriter, ")
-                 ACE_TEXT("the publisher has not been attached ")
-                 ACE_TEXT("to the TransportImpl.\n")));
-      return DDS::RETCODE_ERROR;
-    }
-
-    // Unregister the DataWriterImpl object with the TransportImpl.
-    else if (impl->unregister_publication(publication_id) == -1) {
-      RepoIdConverter converter(publication_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("PublisherImpl::delete_datawriter: ")
-                 ACE_TEXT("failed to unregister datawriter %C ")
-                 ACE_TEXT("with TransportImpl.\n"),
-                 std::string(converter).c_str()));
-      return DDS::RETCODE_ERROR;
-    }
-
-    delete dw_info;
-
     dw_servant->cleanup();
   }
 
   // not just unregister but remove any pending writes/sends.
-  local_writer->unregister_all();
+  dw_servant->unregister_all();
 
   try {
     DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
@@ -360,15 +322,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return DDS::RETCODE_ERROR;
   }
 
-  // Decrease ref count after the servant is removed from the
-  // map.
-  local_writer->_remove_ref();
+  // Decrease ref count after the servant is removed from the maps.
+  dw_servant->_remove_ref();
 
   return DDS::RETCODE_OK;
 }
 
 DDS::DataWriter_ptr
-PublisherImpl::lookup_datawriter(const char * topic_name)
+PublisherImpl::lookup_datawriter(const char* topic_name)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -392,7 +353,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return DDS::DataWriter::_nil();
 
   } else {
-    return DDS::DataWriter::_duplicate(it->second->local_writer_objref_);
+    return DDS::DataWriter::_duplicate(it->second);
   }
 }
 
@@ -403,9 +364,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // mark that the entity is being deleted
   set_deleted(true);
 
-  while (1) {
+  while (true) {
     PublicationId pub_id = GUID_UNKNOWN;
-    DDS::DataWriter_ptr a_datawriter;
+    DataWriterImpl* a_datawriter;
 
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -413,16 +374,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
         this->pi_lock_,
         DDS::RETCODE_ERROR);
 
-      if (datawriter_map_.empty())
+      if (datawriter_map_.empty()) {
         break;
-      else {
-        pub_id = datawriter_map_.begin()->second->publication_id_;
-        a_datawriter = datawriter_map_.begin()->second->local_writer_objref_;
+      } else {
+        a_datawriter = datawriter_map_.begin()->second;
+        pub_id = a_datawriter->get_publication_id();
       }
     }
 
-    DDS::ReturnCode_t ret =
-      delete_datawriter(a_datawriter);
+    DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
 
     if (ret != DDS::RETCODE_OK) {
       RepoIdConverter converter(pub_id);
@@ -468,9 +428,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
              iter != publication_map_.end();
              ++iter) {
           DDS::DataWriterQos qos;
-          iter->second->local_writer_impl_->get_qos(qos);
-          RepoId id =
-            iter->second->local_writer_impl_->get_publication_id();
+          iter->second->get_qos(qos);
+          RepoId id = iter->second->get_publication_id();
           std::pair<DwIdToQosMap::iterator, bool> pair =
             idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
@@ -573,8 +532,18 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    guard,
                    this->pi_lock_,
                    DDS::RETCODE_ERROR);
-  suspend_depth_count_ ++;
+  ++suspend_depth_count_;
   return DDS::RETCODE_OK;
+}
+
+bool
+PublisherImpl::is_suspended() const
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->pi_lock_,
+                   false);
+  return suspend_depth_count_;
 }
 
 DDS::ReturnCode_t
@@ -594,7 +563,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    this->pi_lock_,
                    DDS::RETCODE_ERROR);
 
-  suspend_depth_count_ --;
+  --suspend_depth_count_;
 
   if (suspend_depth_count_ < 0) {
     suspend_depth_count_ = 0;
@@ -602,8 +571,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 
   if (suspend_depth_count_ == 0) {
-    this->send(available_data_list_);
-    available_data_list_.reset();
+
+    for (PublicationMap::iterator it = this->publication_map_.begin();
+         it != this->publication_map_.end(); ++it) {
+      it->second->send_suspended_data();
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -645,7 +617,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (this->change_depth_ == 1) {
     for (PublicationMap::iterator it = this->publication_map_.begin();
          it != this->publication_map_.end(); ++it) {
-      it->second->local_writer_impl_->begin_coherent_changes();
+      it->second->begin_coherent_changes();
     }
   }
 
@@ -697,15 +669,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
     for (PublicationMap::iterator it = this->publication_map_.begin();
          it != this->publication_map_.end(); ++it) {
 
-      if (it->second->local_writer_impl_->coherent_samples_ == 0) {
+      if (it->second->coherent_samples_ == 0) {
         continue;
       }
 
-      std::pair<GroupCoherentSamples::iterator, bool> pair
-        = group_samples.insert(GroupCoherentSamples::value_type(
-        it->second->local_writer_impl_->publication_id_,
-        WriterCoherentSample(it->second->local_writer_impl_->coherent_samples_,
-                             it->second->local_writer_impl_->sequence_number_)));
+      std::pair<GroupCoherentSamples::iterator, bool> pair =
+        group_samples.insert(GroupCoherentSamples::value_type(
+          it->second->get_publication_id(),
+          WriterCoherentSample(it->second->coherent_samples_,
+                               it->second->sequence_number_)));
 
       if (pair.second == false) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -717,11 +689,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
     for (PublicationMap::iterator it = this->publication_map_.begin();
          it != this->publication_map_.end(); ++it) {
-      if (it->second->local_writer_impl_->coherent_samples_ == 0) {
+      if (it->second->coherent_samples_ == 0) {
         continue;
       }
 
-      it->second->local_writer_impl_->end_coherent_changes(group_samples);
+      it->second->end_coherent_changes(group_samples);
     }
   }
 
@@ -751,7 +723,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     // Collect writers to request acks
     for (DataWriterMap::iterator it(this->datawriter_map_.begin());
          it != this->datawriter_map_.end(); ++it) {
-      DataWriterImpl* writer = it->second->local_writer_impl_;
+      DataWriterImpl* writer = it->second;
 
       if (writer->should_ack()) {
         DataWriterImpl::AckToken token = writer->create_ack_token(max_wait);
@@ -885,232 +857,48 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return DDS::RETCODE_OK;
 }
 
-int
+bool
 PublisherImpl::is_clean() const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->pi_lock_,
-                   -1);
+                   false);
   return datawriter_map_.empty() && publication_map_.empty();
 }
 
-void PublisherImpl::add_associations(const ReaderAssociationSeq & readers,
-                                     DataWriterImpl* writer,
-                                     const DDS::DataWriterQos writer_qos)
-{
-  if (entity_deleted_ == true) {
-    if (DCPS_debug_level >= 1)
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) PublisherImpl::add_associations ")
-                 ACE_TEXT("This is a deleted publisher, ")
-                 ACE_TEXT("ignoring add.\n")));
-
-    return;
-  }
-
-  AssociationInfo info;
-  info.num_associations_ = readers.length();
-
-  // TransportInterface does not take ownership of the associations.
-  // The associations will be deleted when transport inform
-  // datawriter fully associated (in DataWriterImpl::fully_associated()).
-  info.association_data_ = new AssociationData[info.num_associations_];
-
-  for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
-    info.association_data_[i].remote_id_ = readers[i].readerId;
-    info.association_data_[i].remote_data_ = readers[i].readerTransInfo;
-  }
-
-  if (DCPS_debug_level > 4) {
-    RepoIdConverter converter(writer->get_publication_id());
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) PublisherImpl::add_associations(): ")
-               ACE_TEXT("adding %d subscriptions to publication %C with priority %d.\n"),
-               info.num_associations_,
-               std::string(converter).c_str(),
-               writer_qos.transport_priority.value));
-  }
-
-  this->add_subscriptions(writer->get_publication_id(),
-                          info,
-                          writer_qos.transport_priority.value,
-                          writer);
-}
-
-void
-PublisherImpl::remove_associations(const ReaderIdSeq & readers,
-                                   const RepoId&       writer)
-{
-  // Delegate to the (inherited) TransportInterface version.
-
-  // TMB - I don't know why I have to do it this way, but the compiler
-  //       on linux complains with an error otherwise.
-  this->TransportInterface::remove_associations(readers.length(),
-                                                readers.get_buffer(),
-                                                writer,
-                                                true); // as pub side
-}
-
 DDS::ReturnCode_t
-PublisherImpl::writer_enabled(
-  OpenDDS::DCPS::DataWriterRemote_ptr remote_writer,
-  DDS::DataWriter_ptr    local_writer,
-  const char*              topic_name,
-  //BuiltinTopicKey_t topic_key
-  RepoId                   topic_id)
-{
-  PublisherDataWriterInfo* info = new PublisherDataWriterInfo;
-  info->remote_writer_objref_ = remote_writer;
-  info->local_writer_objref_ = local_writer;
-  info->local_writer_impl_ =
-    dynamic_cast<DataWriterImpl*>(local_writer);
-
-  info->topic_id_      = topic_id;
-  // all other info memebers default in constructor
-
-  /// Load the publication into the repository and get the
-  /// publication_id_ in return.
-  try {
-    DDS::DataWriterQos qos;
-    info->local_writer_objref_->get_qos(qos);
-
-    OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info =
-      connection_info();
-    trans_conf_info.publication_transport_priority = qos.transport_priority.value;
-
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
-    info->publication_id_ =
-      repo->add_publication(
-        this->domain_id_, // Loaded during Publisher
-        // construction
-        this->participant_->get_id(),   // Loaded during Publisher construction.
-        info->topic_id_, // Loaded during DataWriter construction.
-        info->remote_writer_objref_,
-        qos,
-        trans_conf_info ,   // Obtained during setup.
-        this->qos_);
-
-    if (info->publication_id_ == GUID_UNKNOWN) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: PublisherImpl::writer_enabled, ")
-                 ACE_TEXT("add_publication returned invalid id. \n")));
-      return DDS::RETCODE_ERROR;
-    }
-
-    info->local_writer_impl_->set_publication_id(info->publication_id_);
-
-    OpenDDS::DCPS::TransportImpl_rch impl = this->get_transport_impl();
-
-    if (impl.is_nil()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("PublisherImpl::writer_enabled, ")
-                 ACE_TEXT("the publisher has not been attached to ")
-                 ACE_TEXT("the TransportImpl.\n")));
-      return DDS::RETCODE_ERROR;
-    }
-
-    // Register the DataWriterImpl object with the TransportImpl.
-    else if (impl->register_publication(info->publication_id_,
-                                        info->local_writer_impl_) == -1) {
-      RepoIdConverter converter(info->publication_id_);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("PublisherImpl::writer_enabled: ")
-                 ACE_TEXT("failed to register datawriter %C with ")
-                 ACE_TEXT("TransportImpl.\n"),
-                 std::string(converter).c_str()));
-      return DDS::RETCODE_ERROR;
-    }
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in PublisherImpl::writer_enabled");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR:  Exception"
-      " in PublisherImpl::writer_enabled");
-    return DDS::RETCODE_ERROR;
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->pi_lock_,
-                     DDS::RETCODE_ERROR);
-    DataWriterMap::iterator it =
-      datawriter_map_.insert(DataWriterMap::value_type(topic_name, info));
-
-    if (it == datawriter_map_.end()) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("PublisherImpl::writer_enabled, ")
-                        ACE_TEXT("insert datawriter(topic_name=%C) ")
-                        ACE_TEXT("failed.\n"),
-                        topic_name),
-                       DDS::RETCODE_ERROR);
-    }
-
-    std::pair<PublicationMap::iterator, bool> pair =
-      publication_map_.insert(
-        PublicationMap::value_type(info->publication_id_, info));
-
-    if (pair.second == false) {
-      RepoIdConverter converter(info->publication_id_);
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("PublisherImpl::writer_enabled: ")
-                        ACE_TEXT("insert publication %C failed.\n"),
-                        std::string(converter).c_str()), DDS::RETCODE_ERROR);
-    }
-
-    // Increase ref count when the servant is added to the
-    // datawriter/publication map.
-    info->local_writer_impl_->_add_ref();
-  }
-
-  return DDS::RETCODE_OK;
-}
-
-DDS::ReturnCode_t
-PublisherImpl::data_available(DataWriterImpl* writer,
-                              bool resend)
+PublisherImpl::writer_enabled(const char* topic_name,
+                              DataWriterImpl* writer)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->pi_lock_,
                    DDS::RETCODE_ERROR);
 
-  DataSampleList list;
+  datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 
-  if (resend) {
-    list = writer->get_resend_data();
+  const RepoId publication_id = writer->get_publication_id();
 
-  } else {
-    list = writer->get_unsent_data();
+  std::pair<PublicationMap::iterator, bool> pair =
+    publication_map_.insert(PublicationMap::value_type(publication_id, writer));
+
+  if (pair.second == false) {
+    RepoIdConverter converter(publication_id);
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("PublisherImpl::writer_enabled: ")
+                      ACE_TEXT("insert publication %C failed.\n"),
+                      std::string(converter).c_str()), DDS::RETCODE_ERROR);
   }
 
-  if (this->suspend_depth_count_ > 0) {
-    // append list to the avaliable data list.
-    // Collect samples from all of the Publisher's Datawriters
-    // in this list so when resume_publication is called
-    // the Publisher does not have to iterate over its
-    // DataWriters to get the unsent data samples.
-    available_data_list_.enqueue_tail_next_send_sample(list);
-
-  } else {
-    // Do LATENCY_BUDGET processing here.
-    // Do coherency processing here.
-    // tell the transport to send the data sample(s).
-    this->send(list);
-  }
+  // Increase ref count when the servant is added to the
+  // datawriter/publication map.
+  writer->_add_ref();
 
   return DDS::RETCODE_OK;
 }
+
 
 DDS::PublisherListener*
 PublisherImpl::listener_for(DDS::StatusKind kind)
@@ -1133,8 +921,7 @@ PublisherImpl::assert_liveliness_by_participant()
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
        it != datawriter_map_.end(); ++it) {
-    DDS::ReturnCode_t dw_ret
-    = it->second->local_writer_impl_->assert_liveliness_by_participant();
+    DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
 
     if (dw_ret != DDS::RETCODE_OK) {
       ret = dw_ret;
@@ -1160,17 +947,11 @@ PublisherImpl::get_publication_ids(PublicationIdVec& pubs)
   }
 }
 
+EntityImpl*
+PublisherImpl::parent() const
+{
+  return this->participant_;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
-
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class std::multimap<ACE_CString, PublisherDataWriterInfo*>;
-template class std::map<PublicationId, PublisherDataWriterInfo*>;
-
-#elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate std::multimap<ACE_CString, PublisherDataWriterInfo*>
-#pragma instantiate std::map<PublicationId, PublisherDataWriterInfo*>
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

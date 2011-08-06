@@ -39,7 +39,7 @@ typedef std::pair<TransportQueueElement*, TransportQueueElement*> ElementPair;
  * This class maintains a counter that, when decremented to 0, will
  * trigger some logic (defined in the subclass) that will "return
  * the loan" of the sample.  The sample is "loaned" to the transport
- * via a send() or send_control() call on the TransportInterface.
+ * via a send() or send_control() call on the TransportClient.
  * This wrapper object will "return the loan" when all DataLinks have
  * "returned" their sub-loans.
  */

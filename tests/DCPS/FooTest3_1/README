@@ -1,5 +1,5 @@
 This is the integration test that test the publisher side with
-SimpleTCPTransport available.
+the TCP transport.
 
 Manually run test:
 

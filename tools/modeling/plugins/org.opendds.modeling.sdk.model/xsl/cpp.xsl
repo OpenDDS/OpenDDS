@@ -54,10 +54,9 @@
   <xsl:text>
 
 // For transport configuration
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "model/Utilities.h"
@@ -121,6 +120,7 @@ Elements::Data::Data()
   this->loadDomains();
   this->loadTopics();
   this->loadMaps(); /// MUST precede the QoS loading.
+  this->loadTransportConfigNames();
 
   this->buildParticipantsQos();
   this->buildTopicsQos();
@@ -142,7 +142,8 @@ Elements::Data::~Data()
       free(this->typeNames_[index]); // Created by CORBA::string_dup()
       this->typeNames_[index] = 0;
     }
-  }</xsl:text>
+  }
+</xsl:text>
 </xsl:if>
 <xsl:if test="$cf-topics">
   <xsl:text>
@@ -284,6 +285,143 @@ Elements::Data::loadTopics()
   <xsl:text>}
 
 inline
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-participants">
+      <xsl:text>Elements::Data::transportConfigName(Participants::Values which)
+{
+  return participantTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(Participants::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
+}
+
+inline
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-publishers">
+      <xsl:text>Elements::Data::transportConfigName(Publishers::Values which)
+{
+  return publisherTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(Publishers::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
+}
+
+inline
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-subscribers">
+      <xsl:text>Elements::Data::transportConfigName(Subscribers::Values which)
+{
+  return subscriberTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(Subscribers::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
+}
+
+inline
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-writers">
+      <xsl:text>Elements::Data::transportConfigName(DataWriters::Values which)
+{
+  return writerTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(DataWriters::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
+}
+
+inline
+std::string
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$lib-readers">
+      <xsl:text>Elements::Data::transportConfigName(DataReaders::Values which)
+{
+  return readerTxCfgNames_[which];</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>Elements::Data::transportConfigName(DataReaders::Values)
+{
+  return "";</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
+<xsl:text>
+}
+
+inline
+void
+Elements::Data::loadTransportConfigNames()
+{
+</xsl:text>
+  <xsl:for-each select="$lib-participants[@transportConfig]">
+    <xsl:variable name="enum"> 
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  participantTxCfgNames_[Participants::',
+                                 $enum, '] = &quot;', @transportConfig, 
+                                 '&quot;;', $newline)"/>
+  </xsl:for-each>
+  <xsl:for-each select="$lib-publishers[@transportConfig]">
+    <xsl:variable name="enum"> 
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  publisherTxCfgNames_[Publishers::',
+                                 $enum, '] = &quot;', @transportConfig, 
+                                 '&quot;;', $newline)"/>
+  </xsl:for-each>
+  <xsl:for-each select="$lib-subscribers[@transportConfig]">
+    <xsl:variable name="enum"> 
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  subscriberTxCfgNames_[Subscribers::',
+                                 $enum, '] = &quot;', @transportConfig, 
+                                 '&quot;;', $newline)"/>
+  </xsl:for-each>
+  <xsl:for-each select="$lib-writers[@transportConfig]">
+    <xsl:variable name="enum"> 
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  writerTxCfgNames_[DataWriters::',
+                                 $enum, '] = &quot;', @transportConfig, 
+                                 '&quot;;', $newline)"/>
+  </xsl:for-each>
+  <xsl:for-each select="$lib-readers[@transportConfig]">
+    <xsl:variable name="enum"> 
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  readerTxCfgNames_[DataReaders::',
+                                 $enum, '] = &quot;', @transportConfig, 
+                                 '&quot;;', $newline)"/>
+  </xsl:for-each>
+<xsl:text>}
+
+inline
 void
 Elements::Data::loadMaps()
 {
@@ -394,21 +532,21 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- Assign Transport ID -->
-  <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n' -->
+  <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n'
   <xsl:for-each select="$lib-publishers">
     <xsl:text>  this->publisherTransports_[ Publishers::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
-
+ -->
   <!-- Assign Transport ID -->
-  <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n' -->
+  <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n'
   <xsl:for-each select="$lib-subscribers">
     <xsl:text>  this->subscriberTransports_[ Subscribers::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
-  </xsl:for-each>
+  </xsl:for-each> -->
   <xsl:text>}
 
 inline

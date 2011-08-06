@@ -14,18 +14,16 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/SubscriptionInstance.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 
 #include "FooTypeTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+# include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 namespace
 {
-static OpenDDS::DCPS::TransportIdType transportId = 0;
 
 static const size_t SAMPLES_PER_TEST = 100;
 
@@ -78,46 +76,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_publisher failed!\n")), -1);
-    }
-
-    // Attach Subscriber Transport
-    ++transportId;
-
-    OpenDDS::DCPS::TransportConfiguration_rch sub_config =
-      TheTransportFactory->get_or_create_configuration(transportId,
-                                                       ACE_TEXT("SimpleTcp"));
-
-    OpenDDS::DCPS::TransportImpl_rch sub_transport =
-      TheTransportFactory->create_transport_impl(transportId);
-
-    OpenDDS::DCPS::AttachStatus sub_status =
-      sub_transport->attach(subscriber.in());
-
-    if (sub_status != OpenDDS::DCPS::ATTACH_OK)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach_transport failed!\n")), -1);
-    }
-
-    // Attach Publisher Transport
-    ++transportId;
-
-    OpenDDS::DCPS::TransportConfiguration_rch pub_config =
-      TheTransportFactory->get_or_create_configuration(transportId,
-                                                       ACE_TEXT("SimpleTcp"));
-
-    OpenDDS::DCPS::TransportImpl_rch pub_transport =
-      TheTransportFactory->create_transport_impl(transportId);
-
-    OpenDDS::DCPS::AttachStatus pub_status =
-      pub_transport->attach(publisher.in());
-
-    if (pub_status != OpenDDS::DCPS::ATTACH_OK)
-    {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach_transport failed!\n")), -1);
     }
 
     // Register Type (FooType)
@@ -325,7 +283,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     participant->delete_contained_entities();
     TheParticipantFactory->delete_participant(participant);
 
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e)

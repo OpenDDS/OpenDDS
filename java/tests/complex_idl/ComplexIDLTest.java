@@ -59,24 +59,23 @@ public class ComplexIDLTest extends QuoteSupport {
         publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (publisher != null);
 
-        AttachStatus status;
+        // Use the API to configure the transport
+        TransportConfig transport_config =
+            TheTransportRegistry.create_config("Config");
+        assert (transport_config != null);
 
-        TransportImpl transport1 =
-            TheTransportFactory.create_transport_impl(1, TheTransportFactory.AUTO_CONFIG);
-        assert (transport1 != null);
+        TransportInst transport_inst =
+            TheTransportRegistry.create_inst("myctp",
+                                             TheTransportRegistry.TRANSPORT_TCP);
+        assert (transport_inst != null);
+        transport_config.addLast(transport_inst);
 
-        status = transport1.attach_to_publisher(publisher);
-        assert (status.value() != AttachStatus._ATTACH_ERROR);
+        TheTransportRegistry.bind_config(transport_config, publisher);
 
         subscriber = participant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (subscriber != null);
 
-        TransportImpl transport2 =
-            TheTransportFactory.create_transport_impl(2, TheTransportFactory.AUTO_CONFIG);
-        assert (transport2 != null);
-
-        status = transport2.attach_to_subscriber(subscriber);
-        assert (status.value() != AttachStatus._ATTACH_ERROR);
+        TheTransportRegistry.bind_config(transport_config, subscriber);
     }
 
     protected static void testQuotes() throws Exception {
@@ -228,7 +227,6 @@ public class ComplexIDLTest extends QuoteSupport {
         participant.delete_contained_entities();
         dpf.delete_participant(participant);
 
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
 

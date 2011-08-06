@@ -141,7 +141,7 @@ public:
     const OpenDDS::DCPS::RepoId& topicId,
     OpenDDS::DCPS::DataWriterRemote_ptr publication,
     const DDS::DataWriterQos & qos,
-    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
     const DDS::PublisherQos & publisherQos)
   ACE_THROW_SPEC((CORBA::SystemException
                    , OpenDDS::DCPS::Invalid_Domain
@@ -175,7 +175,7 @@ public:
                        const OpenDDS::DCPS::RepoId& pubId,
                        const char* pub_str,
                        const DDS::DataWriterQos & qos,
-                       const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+                       const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
                        const DDS::PublisherQos & publisherQos,
                        bool associate = false);
 
@@ -194,7 +194,7 @@ public:
     const OpenDDS::DCPS::RepoId& topicId,
     OpenDDS::DCPS::DataReaderRemote_ptr subscription,
     const DDS::DataReaderQos & qos,
-    const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+    const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
     const DDS::SubscriberQos & subscriberQos,
     const char* filterExpression,
     const DDS::StringSeq& exprParams)
@@ -230,7 +230,7 @@ public:
                         const OpenDDS::DCPS::RepoId& subId,
                         const char* sub_str,
                         const DDS::DataReaderQos & qos,
-                        const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
+                        const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
                         const DDS::SubscriberQos & subscriberQos,
                         const char* filterExpression,
                         const DDS::StringSeq& exprParams,
@@ -276,6 +276,16 @@ public:
   ACE_THROW_SPEC((CORBA::SystemException
                    , OpenDDS::DCPS::Invalid_Domain
                    , OpenDDS::DCPS::Invalid_Participant));
+
+  virtual void association_complete(DDS::DomainId_t domainId,
+                                    const OpenDDS::DCPS::RepoId& participantId,
+                                    const OpenDDS::DCPS::RepoId& localId,
+                                    const OpenDDS::DCPS::RepoId& remoteId)
+  ACE_THROW_SPEC((CORBA::SystemException,
+                  OpenDDS::DCPS::Invalid_Domain,
+                  OpenDDS::DCPS::Invalid_Participant,
+                  OpenDDS::DCPS::Invalid_Publication,
+                  OpenDDS::DCPS::Invalid_Subscription));
 
   bool remove_by_owner(
     DDS::DomainId_t domain,
@@ -459,7 +469,7 @@ public:
   /// Initialize the transport for the Built-In Topics
   /// Returns 0 (zero) if succeeds
   int init_transport(int listen_address_given,
-                     const ACE_TCHAR* listen_str);
+                     const char* listen_str);
 
   bool receive_image(const Update::UImage& image);
 

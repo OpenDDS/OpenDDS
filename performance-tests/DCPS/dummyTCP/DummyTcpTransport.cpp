@@ -8,21 +8,25 @@
 #include "DummyTcpAcceptor.h"
 #include "DummyTcpSendStrategy.h"
 #include "DummyTcpReceiveStrategy.h"
-#include "DummyTcpConfiguration.h"
+#include "DummyTcpInst.h"
 #include "DummyTcpDataLink.h"
 #include "DummyTcpSynchResource.h"
 #include "DummyTcpConnection.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/AssociationData.h"
 
 
-OpenDDS::DCPS::DummyTcpTransport::DummyTcpTransport()
+OpenDDS::DCPS::DummyTcpTransport::DummyTcpTransport(const TransportInst_rch& inst)
   : acceptor_(new DummyTcpAcceptor (this)),
     connections_updated_(this->connections_lock_),
     con_checker_ (new DummyTcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("DummyTcpTransport","DummyTcpTransport",5);
+  if (!inst.is_nil()) {
+    configure(inst.in());
+  }
 }
 
 
@@ -51,22 +55,17 @@ OpenDDS::DCPS::DummyTcpTransport::~DummyTcpTransport()
 /// due to an add_subscriptions() call on a TransportInterface object.
 /// This means true (1).  It *is* connecting as a publisher.
 OpenDDS::DCPS::DataLink*
-OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
-  RepoId                  /*local_id*/,
-  const AssociationData*  remote_association,
-  CORBA::Long             /*priority*/,
-  bool                    active)
+OpenDDS::DCPS::DummyTcpTransport::find_datalink_i(
+  const RepoId& /*local_id*/,
+  const RepoId& /*remote_id*/,
+  const TransportBLOB& remote_data,
+  CORBA::Long /*priority*/,
+  bool /*active*/)
 {
-  DBG_ENTRY_LVL("DummyTcpTransport","find_or_create_datalink",5);
+  DBG_ENTRY_LVL("DummyTcpTransport","find_datalink",5);
 
-  const TransportInterfaceInfo& remote_info = remote_association->remote_data_;
-
-  // Get the remote address from the "blob" in the remote_info struct.
-  NetworkAddress* network_order_address =
-    (NetworkAddress*)(remote_info.data.get_buffer());
-
-  ACE_INET_Addr remote_address;
-  network_order_address->to_addr(remote_address);
+  ACE_INET_Addr remote_address =
+    AssociationData::get_remote_address(remote_data);
 
   DummyTcpDataLink_rch link;
 
@@ -76,18 +75,18 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
     // First, we have to try to find an existing (connected) DataLink
     // that suits the caller's needs.
 
-    if (this->links_.find(remote_address,link) == 0)
+    if (this->links_.find(remote_address, link) == 0)
       {
-        DummyTcpConnection_rch con = link->get_connection ();
-        if (con->is_connector () && ! con->is_connected ())
+        DummyTcpConnection_rch con = link->get_connection();
+        if (con->is_connector() && ! con->is_connected())
           {
             bool on_new_association = true;
-            if (con->reconnect (on_new_association) == -1)
+            if (con->reconnect(on_new_association) == -1)
               {
                 ACE_ERROR_RETURN ((LM_ERROR,
                                    "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
-                                   remote_address.get_host_addr (),
-                                   remote_address.get_port_number ()),
+                                   remote_address.get_host_addr(),
+                                   remote_address.get_port_number()),
                                   0);
               }
           }
@@ -95,7 +94,7 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
   // Thus we need more checks.
   else
   {
-    if(!con->is_connector () && !con->is_connected ())
+    if(!con->is_connector() && !con->is_connected())
     {
       // The passive connecting side will wait for the connection establishment.
     }
@@ -110,6 +109,22 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
   // The "find" part of the find_or_create_datalink has been attempted, and
   // we failed to find a suitable DataLink.  This means we need to move on
   // and attempt the "create" part of "find_or_create_datalink".
+  return 0;
+}
+
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::DummyTcpTransport::connect_datalink_i(
+  const RepoId& /*local_id*/,
+  const RepoId& /*remote_id*/,
+  const TransportBLOB& remote_data,
+  CORBA::Long /*priority*/)
+{
+  DBG_ENTRY_LVL("DummyTcpTransport","create_datalink",5);
+
+  ACE_INET_Addr remote_address =
+    AssociationData::get_remote_address(remote_data);
+
+  DummyTcpDataLink_rch link;
 
   // Here is where we actually create the DataLink.
   link = new DummyTcpDataLink(remote_address, this);
@@ -129,30 +144,7 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
   }
 
   // Now we need to attempt to establish a connection for the DataLink.
-  int result;
-
-  // Active or passive connection establishment is based upon the value
-  // on the connect_as_publisher argument.
-  if (active)
-    {
-      result = this->make_active_connection(remote_address, link.in());
-
-      if (result != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Failed to make active connection.\n"));
-        }
-    }
-  else
-    {
-      result = this->make_passive_connection(remote_address, link.in());
-
-      if (result != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) ERROR: Failed to make passive connection.\n"));
-        }
-    }
+  int result = this->make_active_connection(remote_address, link.in());
 
   if (result != 0)
     {
@@ -173,23 +165,76 @@ OpenDDS::DCPS::DummyTcpTransport::find_or_create_datalink(
   return link._retn();
 }
 
+OpenDDS::DCPS::DataLink*
+OpenDDS::DCPS::DummyTcpTransport::accept_datalink(ConnectionEvent& ce)
+{
+  ACE_INET_Addr remote_address = AssociationData::get_remote_address(
+                                   ce.remote_association_.remote_data_[0].data);
 
-int
-OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
+  DummyTcpDataLink_rch link;
+
+  // Here is where we actually create the DataLink.
+  link = new DummyTcpDataLink(remote_address, this);
+
+  { // guard scope
+    GuardType guard(this->links_lock_);
+
+    // Attempt to bind the DummyTcpDataLink to our links_ map.
+    if (this->links_.bind(remote_address,link) != 0)
+      {
+        // We failed to bind the new DataLink into our links_ map.
+        // On error, we return a NULL pointer.
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "(%P|%t) ERROR: Unable to bind new DummyTcpDataLink to "
+                          "DummyTcpTransport in links_ map.\n"), 0);
+      }
+  }
+
+  // Now we need to attempt to establish a connection for the DataLink.
+  int result = this->make_passive_connection(remote_address, link.in());
+
+  if (result != 0) {
+    ACE_ERROR((LM_ERROR,
+             "(%P|%t) ERROR: Failed to make passive connection.\n"));
+    GuardType guard(this->links_lock_);
+    // Make sure that we unbind the link (that failed to establish a
+    // connection) from our links_ map.  We intentionally ignore the
+    // return code from the unbind() call since we know that we just
+    // did the bind() moments ago - and with the links_lock_ acquired
+    // the whole time.
+    this->links_.unbind(remote_address);
+
+    // On error, return a NULL pointer.
+    return 0;
+  }
+
+  // That worked.  Return a reference to the DataLink that the caller will
+  // be responsible for.
+  return link._retn();
+}
+
+void
+OpenDDS::DCPS::DummyTcpTransport::stop_accepting(ConnectionEvent& /*ce*/)
+{
+  // no-op
+}
+
+bool
+OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportInst* config)
 {
   DBG_ENTRY_LVL("DummyTcpTransport","configure_i",5);
 
-  // Downcast the config argument to a DummyTcpConfiguration*
-  DummyTcpConfiguration* tcp_config =
-    static_cast<DummyTcpConfiguration*>(config);
+  // Downcast the config argument to a DummyTcpInst*
+  DummyTcpInst* tcp_config =
+    static_cast<DummyTcpInst*>(config);
 
   if (tcp_config == 0)
     {
       // The downcast failed.
       ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Failed downcast from TransportConfiguration "
-                        "to DummyTcpConfiguration.\n"),
-                       -1);
+                        "(%P|%t) ERROR: Failed downcast from TransportInst "
+                        "to DummyTcpInst.\n"),
+                       false);
     }
 
   // Ask our base class for a "copy" of the reference to the reactor task.
@@ -197,12 +242,17 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
 
   if (this->reactor_task_.is_nil())
     {
-      // It looks like our base class has either been shutdown, or it has
-      // erroneously never been supplied with the reactor task.
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: DummyTcpTransport requires a reactor in "
-                        "order to open its acceptor_.\n"),
-                       -1);
+      this->create_reactor_task();
+      this->reactor_task_ = reactor_task();
+      if (this->reactor_task_.is_nil())
+        {
+          // It looks like our base class has either been shutdown, or it has
+          // erroneously never been supplied with the reactor task.
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "(%P|%t) ERROR: DummyTcpTransport requires a reactor in "
+                            "order to open its acceptor_.\n"),
+                           false);
+        }
     }
 
   // Make a "copy" of the reference for ourselves.
@@ -226,7 +276,7 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
         ACE_ERROR_RETURN((LM_ERROR,
                           "(%P|%t) ERROR: DummyTcpTransport::configure_i"
                           " could not get host name!!\n"),
-                         -1);
+                         false);
       this->tcp_config_->local_address_ = new_addr;
     }
 
@@ -236,7 +286,7 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: connection checker failed to open : %p\n",
                         ACE_TEXT("open")),
-                       -1);
+                       false);
     }
 
   // Open our acceptor object so that we can accept passive connections
@@ -248,14 +298,14 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
       // Remember to drop our reference to the tcp_config_ object since
       // we are about to return -1 here, which means we are supposed to
       // keep a copy after all.
-      DummyTcpConfiguration_rch cfg = this->tcp_config_._retn();
+      DummyTcpInst_rch cfg = this->tcp_config_._retn();
 
       ACE_ERROR_RETURN((LM_ERROR,
                         "(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n",
                         cfg->local_address_.get_host_addr (),
                         cfg->local_address_.get_port_number (),
                         ACE_TEXT("open")),
-                       -1);
+                       false);
     }
 
   // update the port number (incase port zero was given).
@@ -284,7 +334,7 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
   tcp_config->local_address_.set_port_number (port);
 
   // Ahhh...  The sweet smell of success!
-  return 0;
+  return true;
 }
 
 void
@@ -347,7 +397,7 @@ OpenDDS::DCPS::DummyTcpTransport::shutdown_i()
     this->links_.unbind_all();
   }
 
-  // Drop our reference to the DummyTcpConfiguration object.
+  // Drop our reference to the DummyTcpInst object.
   this->tcp_config_ = 0;
 
   // Drop our reference to the TransportReactorTask
@@ -359,9 +409,9 @@ OpenDDS::DCPS::DummyTcpTransport::shutdown_i()
 }
 
 
-int
+bool
 OpenDDS::DCPS::DummyTcpTransport::connection_info_i
-(TransportInterfaceInfo& local_info) const
+(TransportLocator& local_info) const
 {
   DBG_ENTRY_LVL("DummyTcpTransport","connection_info_i",5);
   VDBG_LVL ((LM_DEBUG, "(%P|%t) DummyTcpTransport::connection_info_i %C:%d\n",
@@ -371,8 +421,8 @@ OpenDDS::DCPS::DummyTcpTransport::connection_info_i
   NetworkAddress network_order_address(this->tcp_config_->local_address_str_);
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
-  local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.
-  local_info.data = OpenDDS::DCPS::TransportInterfaceBLOB
+  local_info.transport_type = "dummy_tcp";
+  local_info.data = OpenDDS::DCPS::TransportBLOB
     (sizeof(NetworkAddress),
      sizeof(NetworkAddress),
      (CORBA::Octet*)(&network_order_address));
@@ -417,7 +467,7 @@ OpenDDS::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link,
 }
 
 
-OpenDDS::DCPS::DummyTcpConfiguration*
+OpenDDS::DCPS::DummyTcpInst*
 OpenDDS::DCPS::DummyTcpTransport::get_configuration()
 {
   return this->tcp_config_.in();

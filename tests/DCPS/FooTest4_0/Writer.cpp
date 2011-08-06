@@ -14,8 +14,6 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-extern ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds;
-
 Writer::Writer(::DDS::DomainParticipant_ptr dp,
                ::DDS::Topic_ptr topic,
                int history_depth,
@@ -32,27 +30,6 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
                 ACE_TEXT("(%P|%t) create_publisher failed.\n")));
     throw TestException() ;
   }
-
-  // Initialize the transport
-  if (0 != init_transport() )
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) init_transport failed!\n")));
-    throw TestException() ;
-  }
-
-  // Attach the publisher to the transport.
-  OpenDDS::DCPS::PublisherImpl* pub_impl
-    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub_.in ());
-
-  if (0 == pub_impl)
-  {
-    ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")));
-    throw TestException() ;
-  }
-
-  pub_impl->attach_transport(writer_transport_impl.in());
 
   // Create the datawriter
   ::DDS::DataWriterQos dw_qos;
@@ -332,25 +309,7 @@ Writer::test6 ()
 
 int Writer::init_transport ()
 {
-  int status = 0;
-
-  OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
-
-  OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->get_or_create_configuration (transportId, ACE_TEXT("SimpleTcp"));
-
-  writer_transport_impl
-    = TheTransportFactory->create_transport_impl(transportId, 0);
-
-  if (writer_transport_impl->configure(writer_config.in()) != 0)
-    {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ::init_writer_tranport: ")
-                 ACE_TEXT("Failed to configure the transport.\n")));
-      status = 1;
-    }
-
-  return status;
+  return 0;
 }
 
 Writer::~Writer()

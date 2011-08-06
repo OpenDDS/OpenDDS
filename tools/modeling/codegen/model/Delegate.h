@@ -24,7 +24,7 @@ namespace DDS {
 } // End of namespace DDS
 
 namespace OpenDDS { namespace DCPS {
-  class TransportConfiguration;
+  class TransportInst;
   class TransportImpl;
 } } // End of namespace OpenDDS::DCPS
 
@@ -38,7 +38,8 @@ namespace OpenDDS { namespace Model {
       createParticipant(
         unsigned long             domain,
         DDS::DomainParticipantQos participantQos,
-        DDS::StatusMask           mask
+        DDS::StatusMask           mask,
+        const std::string&        transportConfig
       );
 
       DDS::Topic*
@@ -55,7 +56,7 @@ namespace OpenDDS { namespace Model {
         DDS::DomainParticipant*       participant,
         DDS::PublisherQos             publisherQos,
         DDS::StatusMask               mask,
-        OpenDDS::DCPS::TransportIdType transport_id
+        const std::string&            transportConfig
       );
 
       DDS::Subscriber*
@@ -63,7 +64,7 @@ namespace OpenDDS { namespace Model {
         DDS::DomainParticipant*       participant,
         DDS::SubscriberQos            subscriberQos,
         DDS::StatusMask               mask,
-        OpenDDS::DCPS::TransportIdType transport_id
+        const std::string&            transportConfig
       );
 
       DDS::DataWriter*
@@ -73,15 +74,17 @@ namespace OpenDDS { namespace Model {
         DDS::Topic*        topic,
         DDS::DataWriterQos writerQos,
         DDS::StatusMask    mask,
+        const std::string& transportConfig,
         bool               copyQosFromTopic
       );
 
       DDS::DataWriter*
       createWriter(
-        DDS::Publisher*    publisher,
-        DDS::Topic*        topic,
-        DDS::DataWriterQos writerQos,
-        DDS::StatusMask    mask
+        DDS::Publisher*        publisher,
+        DDS::Topic*            topic,
+        DDS::DataWriterQos     writerQos,
+        DDS::StatusMask        mask,
+        const std::string&     transportConfig
       );
 
       DDS::DataReader*
@@ -91,6 +94,7 @@ namespace OpenDDS { namespace Model {
         DDS::TopicDescription* topic,
         DDS::DataReaderQos     readerQos,
         DDS::StatusMask        mask,
+        const std::string&     transportConfig,
         bool                   copyQosFromTopic
       );
 
@@ -99,13 +103,20 @@ namespace OpenDDS { namespace Model {
         DDS::Subscriber*       subscriber,
         DDS::TopicDescription* topic,
         DDS::DataReaderQos     readerQos,
-        DDS::StatusMask        mask
+        DDS::StatusMask        mask,
+        const std::string&     transportConfig
       );
 
       CopyQos*& service();
 
     private:
       CopyQos* service_;
+
+      bool override_autoenabled_qos(DDS::Publisher* publisher);
+      bool override_autoenabled_qos(DDS::Subscriber* subscriber);
+      
+      void restore_autoenabled_qos(DDS::Publisher* publisher);
+      void restore_autoenabled_qos(DDS::Subscriber* subscriber);
   };
 
 } } // End of namespace OpenDDS::Model

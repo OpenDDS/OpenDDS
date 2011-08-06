@@ -33,9 +33,7 @@ import DDS.Topic;
 import DDS._DataReaderListenerLocalBase;
 import DDS._DataWriterListenerLocalBase;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
-import OpenDDS.DCPS.transport.AttachStatus;
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
+import OpenDDS.DCPS.transport.TheTransportRegistry;
 
 import MultiRepo.Message;
 import MultiRepo.MessageDataReader;
@@ -56,7 +54,8 @@ public class MultiRepoWorker {
     private DomainParticipant participant;
 
     private Topic topic;
-    private TransportImpl transport;
+
+    private String transportConfig;
 
     private boolean read;
 
@@ -73,10 +72,9 @@ public class MultiRepoWorker {
         topic = participant.create_topic("MultiRepo::Topic", typeSupport.get_type_name(),
                                          TOPIC_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
-        transport = TheTransportFactory.create_transport_impl(++transportId, TheTransportFactory.AUTO_CONFIG);
+        transportConfig = "" + ++transportId;
 
         assert (topic != null);
-        assert (transport != null);
     }
 
     public DomainParticipant getParticipant() {
@@ -89,10 +87,7 @@ public class MultiRepoWorker {
 
         assert (publisher != null);
 
-        AttachStatus status = transport.attach_to_publisher(publisher);
-        if(status.value() != AttachStatus._ATTACH_OK) {
-            throw new IllegalStateException("Unable to attach publisher to transport!");
-        }
+        TheTransportRegistry.bind_config(transportConfig, publisher);
 
         publisher.create_datawriter(topic, DATAWRITER_QOS_DEFAULT.get(),
             new _DataWriterListenerLocalBase() {
@@ -129,10 +124,7 @@ public class MultiRepoWorker {
 
         assert (subscriber != null);
 
-        AttachStatus status = transport.attach_to_subscriber(subscriber);
-        if (status.value() != AttachStatus._ATTACH_OK) {
-            throw new IllegalStateException("Unable to attach subscriber to transport!");
-        }
+        TheTransportRegistry.bind_config(transportConfig, subscriber);
 
         subscriber.create_datareader(topic, DATAREADER_QOS_DEFAULT.get(),
             new _DataReaderListenerLocalBase () {

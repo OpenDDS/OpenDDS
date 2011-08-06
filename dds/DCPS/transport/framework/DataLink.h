@@ -17,12 +17,12 @@
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
-#include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 #include "TransportReceiveStrategy.h"
 #include "TransportReceiveStrategy_rch.h"
 #include "TransportSendControlElement.h"
 #include "TransportSendListener.h"
+#include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
 #include "ace/Synch.h"
@@ -70,7 +70,6 @@ class  ThreadPerConnectionSendTask;
  */
 class OpenDDS_Dcps_Export DataLink
   : public RcObject<ACE_SYNCH_MUTEX>,
-    public TransportSendListener,
     public ACE_Event_Handler {
 
   friend class DataLinkCleanupTask;
@@ -95,8 +94,7 @@ public:
   void stop();
 
   /// The resume_send is used in the case of reconnection
-  /// on the subscriber's side, e.g.,to send
-  /// out the FULLY_ASSOCIATED message to publisher.
+  /// on the subscriber's side.
   void resume_send();
 
   // ciju: Called by TransportImpl
@@ -123,14 +121,14 @@ public:
                             RepoId          local_id,
                             DataLinkSetMap& released_locals);
 
-  /// A hook for the concrete transport to do something special on
-  /// subscriber side after both add_associations is received and
-  /// the connection is established.
-  virtual void fully_associated();
+  /// Either send or receive listener for this local_id should be
+  /// removed from internal DataLink structures so it no longer
+  /// receives events.
+  void remove_listener(const RepoId& local_id);
 
   // ciju: Called by LinkSet with locks held
-  /// Called by the TransportInterface objects that reference this
-  /// DataLink.  Used by the TransportInterface to send a sample,
+  /// Called by the TransportClient objects that reference this
+  /// DataLink.  Used by the TransportClient to send a sample,
   /// or to send a control message. These functions either give the
   /// request to the PerThreadConnectionSendTask when thread_per_connection
   /// configuration is true or just simply delegate to the send strategy.
@@ -171,17 +169,13 @@ public:
   /// Notify the datawriters and datareaders that the connection is
   /// disconnected, lost, or reconnected. The datareader/datawriter
   /// will notify the corresponding listener.
-  void notify(enum ConnectionNotice notice);
+  void notify(ConnectionNotice notice);
 
   void notify_connection_deleted();
 
   /// Called before release the datalink or before shutdown to let
   /// the concrete DataLink to do anything necessary.
   virtual void pre_stop_i();
-
-  /// This is called on subscriber side to serialize the
-  /// associated publication and subscriptions.
-  ACE_Message_Block* marshal_acks(bool byte_order);
 
   // Call-back from the concrete transport object.
   // The connection has been broken. No locks are being held.
@@ -247,18 +241,20 @@ public:
   /// DataLink's control.
   SendControlStatus send_control(ACE_Message_Block* data);
 
-  // TransportSendListener callbacks for transport control samples:
-  virtual void control_delivered(ACE_Message_Block* message);
-
-  virtual void control_dropped(ACE_Message_Block* message,
-                               bool dropped_by_transport);
-
   /// Return the subset of the input set which are also targets of
   /// this DataLink (see is_target()).
   GUIDSeq* target_intersection(const GUIDSeq& in);
 
   CORBA::ULong num_targets() const;
   RepoIdSet_rch get_targets() const;
+
+  TransportImpl_rch impl() const;
+
+  /// A second thread may try to use this DataLink before the creating thread
+  /// has completed the start() method.  In this case, call wait_for_start()
+  /// to block the current thread until start() completes.
+  void wait_for_start();
+  void unblock_wait_for_start();
 
 protected:
 
@@ -309,7 +305,7 @@ protected:
 private:
 
   /// Helper function to output the enum as a string to help debugging.
-  const char* connection_notice_as_str(enum ConnectionNotice notice);
+  const char* connection_notice_as_str(ConnectionNotice notice);
 
   /// Used by release_reservations() once it has determined that the
   /// remote_id/local_id being released is, in fact,
@@ -328,17 +324,14 @@ private:
    ReceiveListenerSet_rch& listener_set,
    DataLinkSetMap&      released_subscribers);
 
+  TransportSendListener* send_listener_for(const RepoId& pub_id) const;
+  TransportReceiveListener* recv_listener_for(const RepoId& sub_id) const;
+
   /// Save current sub and pub association maps for releasing and create
   /// empty maps for new associations.
   void prepare_release();
 
   typedef ACE_SYNCH_MUTEX     LockType;
-
-  /// The lock_ protects the pub_map_ and sub_map_ data members.
-  /// We need this becuase this DataLink object could be called from
-  /// more than one TransportInterface (and each could be driven by
-  /// a different thread).
-  //LockType lock_;
 
   /// Convenience function for diagnostic information.
   friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
@@ -350,6 +343,10 @@ private:
   /// Map publication Id value to TransportSendListener.
   typedef std::map<RepoId, TransportSendListener*, GUID_tKeyLessThan> IdToSendListenerMap;
   IdToSendListenerMap send_listeners_;
+
+  /// Map subscription Id value to TransportReceieveListener.
+  typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> IdToRecvListenerMap;
+  IdToRecvListenerMap recv_listeners_;
 
   /// Map associating each publisher_id with a set of
   /// TransportReceiveListener objects (each with an associated
@@ -398,6 +395,7 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
+  ACE_SYNCH_CONDITION strategy_condition_;
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.
@@ -416,6 +414,7 @@ protected:
   bool is_loopback_;
   /// Is pub or sub ?
   bool is_active_;
+  bool start_failed_;
 };
 
 } // namespace DCPS

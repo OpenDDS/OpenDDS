@@ -11,7 +11,6 @@
 #include "monitorTypeSupportImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace OpenDDS {
@@ -36,12 +35,9 @@ PublisherMonitorImpl::report() {
     report.handle = pub_->get_instance_handle();
     DDS::DomainParticipant_var dp = pub_->get_participant();
     report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
-    TransportImpl_rch ti = pub_->get_transport_impl();
-    if (ti != 0) {
-      report.transport_id = ti->get_transport_id();
-    } else {
-      report.transport_id = 0;
-    }
+    TransportImpl_rch ti; //TODO: transport    = pub_->get_transport_impl();
+    // TODO: remove/replace
+    report.transport_id = 0;
     PublisherImpl::PublicationIdVec writers;
     pub_->get_publication_ids(writers);
     CORBA::ULong length = 0;

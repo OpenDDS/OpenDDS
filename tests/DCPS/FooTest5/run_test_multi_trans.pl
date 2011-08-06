@@ -32,8 +32,6 @@ $write_interval_ms=0;
 $writer_blocking_ms=0;
 $read_interval_ms=0;
 $mixed_trans=0;
-$repo_bit_conf = " -ORBSvcConf ../../tcp.conf";
-$app_bit_conf = " -ORBSvcConf ../../tcp.conf";
 
 $arg_idx = 0;
 
@@ -111,31 +109,17 @@ unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
 
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
-$tcp_svc_config = $use_svc_config ? $repo_bit_conf : '';
-
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$tcp_svc_config -o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config = $use_svc_config ? $app_bit_conf : '';
-if ($use_udp == 1) {
-  $svc_config .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '');
-}
-elsif ($mixed_trans == 1) {
-  $svc_config .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '');
-}
-elsif ($use_multicast == 1) {
-  $svc_config .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '');
-}
-
 # test multiple cases
-$sub_parameters = "$svc_config -u $use_udp -c $use_multicast -r $num_readers -t $use_take"
+$sub_parameters = "-DCPSConfigFile all.ini -u $use_udp -c $use_multicast -r $num_readers -t $use_take"
               . " -m $num_instances_per_writer -i $num_samples_per_instance"
               . " -w $num_writers -z $sequence_length"
               . " -k $no_key -y $read_interval_ms -f $mixed_trans -b 1";
 
-$pub_parameters = "$svc_config -u $use_udp -c $use_multicast -w $num_writers "
+$pub_parameters = "-DCPSConfigFile all.ini -u $use_udp -c $use_multicast -w $num_writers "
               . " -m $num_instances_per_writer -i $num_samples_per_instance "
               . " -n $max_samples_per_instance -z $sequence_length"
               . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"

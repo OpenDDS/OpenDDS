@@ -25,7 +25,6 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 {
   ACE_UNUSED_ARG(max_samples_per_instance);
   ACE_UNUSED_ARG(history_depth);
-  ACE_UNUSED_ARG(using_udp);
   ACE_UNUSED_ARG(num_ops_per_thread);
 
   ::DDS::DataWriterQos dw_qos;

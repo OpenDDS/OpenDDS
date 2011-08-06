@@ -11,14 +11,13 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/WaitSet.h>
 
 #include "DataReaderListenerImpl.h"
 #include "FooTypeTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+# include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 namespace
@@ -88,28 +87,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" create_subscriber failed!\n")), 2);
-
-    // Attach Transport
-    OpenDDS::DCPS::TransportImpl_rch transport =
-      TheTransportFactory->create_transport_impl(
-          OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID,
-          "SimpleTcp");
-
-    OpenDDS::DCPS::SubscriberImpl* subscriber_i =
-      dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in());
-
-    if (subscriber_i == 0)
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" dynamic_cast failed!\n")), 3);
-
-    OpenDDS::DCPS::AttachStatus status =
-      subscriber_i->attach_transport(transport.in());
-
-    if (status != OpenDDS::DCPS::ATTACH_OK)
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" attach_transport failed!\n")), 4);
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
@@ -188,7 +165,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
 
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e)

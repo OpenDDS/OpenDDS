@@ -36,10 +36,8 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 print $DCPSREPO->CommandLine(), "\n";
 
-$svc_config=" -ORBSvcConf ../../tcp.conf ";
-$sub_parameters = "-DCPSConfigFile conf.ini -DcpsBit 0"
+$sub_parameters = "-DcpsBit 0"
 #              . " -DCPSDebugLevel 6"
-   . "$svc_config"
               . "  -p $num_writers"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
@@ -59,9 +57,8 @@ print $Sub4->CommandLine(), "\n";
 
 
 #NOTE: above 1000 queue samples does not give any better performance.
-$pub_parameters = "-DCPSConfigFile conf.ini -DcpsBit 0"
+$pub_parameters = "-DcpsBit 0"
 #              . " -DCPSDebugLevel 6"
-   . "$svc_config"
               . " -p 1 -i $pub_writer_id"
               . " -r $num_readers"
               . " -n $num_messages -d $data_size"

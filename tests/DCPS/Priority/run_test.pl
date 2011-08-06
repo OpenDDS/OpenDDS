@@ -127,13 +127,13 @@ $REPO = PerlDDS::create_process (
 
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
-$subArgs .= "-t $transportType ";
+$subArgs .= "-DCPSGlobalTransportConfig $transportType ";
 $subArgs .= "-c " . (2 * $samples) . " ";
 $SUB = PerlDDS::create_process ( "subscriber", $subArgs);
 
 my $pubArgs = "$appOpts ";
 $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
-$pubArgs .= "-t $transportType ";
+$pubArgs .= "-DCPSGlobalTransportConfig $transportType ";
 $pubArgs .= "-c $samples ";
 $pubArgs .= "-p " . $priority . " ";
 $PUB = PerlDDS::create_process ( "publisher", $pubArgs);

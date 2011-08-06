@@ -13,10 +13,9 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/monitor/MonitorFactoryImpl.h>
 #endif
 
@@ -26,8 +25,6 @@
 int send_interval = 0;
 
 namespace {
-
-OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 } // namespace
 
@@ -124,18 +121,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    // Initialize and attach Transport
-    OpenDDS::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create_transport_impl(transport_impl_id,
-                                                 OpenDDS::DCPS::AUTO_CONFIG);
-
-    if (transport_impl->attach(pub.in()) != OpenDDS::DCPS::ATTACH_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: attach failed!\n")),
-                       -1);
-    }
-
     // Create DataWriter
     DDS::DataWriter_var dw =
       pub->create_datawriter(topic.in(),
@@ -166,7 +151,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
 
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

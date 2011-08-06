@@ -32,8 +32,9 @@ DataWriterRemoteImpl::detach_parent()
 }
 
 void
-DataWriterRemoteImpl::add_associations(const RepoId& yourId,
-                                       const ReaderAssociationSeq& readers)
+DataWriterRemoteImpl::add_association(const RepoId& yourId,
+                                      const ReaderAssociation& reader,
+                                      bool active)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* parent = 0;
@@ -44,7 +45,23 @@ ACE_THROW_SPEC((CORBA::SystemException))
     parent = this->parent_;
   }
   if (parent) {
-    parent->add_associations(yourId, readers);
+    parent->add_association(yourId, reader, active);
+  }
+}
+
+void
+DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
+  ACE_THROW_SPEC((CORBA::SystemException))
+{
+  DataWriterImpl* parent = 0;
+  DDS::DataWriter_var dwv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->association_complete(remote_id);
   }
 }
 

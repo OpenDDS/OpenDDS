@@ -26,9 +26,8 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 my $opts = $use_svc_config ? "-ORBSvcConf $ENV{DDS_ROOT}/tests/tcp.conf" : '';
 
-my $TEST = PerlDDS::create_process ('MultiTopicTest',
-                                    "-DCPSConfigFile dcps.ini -DCPSBit 0 ".
-                                    $opts);
+my $TEST = PerlDDS::create_process ('MultiTopicTest', '-DCPSBit 0');
+
 my $result = $TEST->SpawnWaitKill(60);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";

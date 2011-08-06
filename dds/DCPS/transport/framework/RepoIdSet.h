@@ -39,12 +39,7 @@ public:
   MapType& map();
   const MapType& map() const;
 
-  /// Serialize the map. The data order in the serialized
-  /// stream: size of map, list of keys in the map.
-  void serialize(OpenDDS::DCPS::Serializer & serializer);
-
-  bool exist(const RepoId& remote_id,
-             bool& last);
+  bool exist(const RepoId& remote_id, bool& last);
 
   void clear();
 

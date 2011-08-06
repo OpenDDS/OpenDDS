@@ -135,7 +135,7 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
 
   /// Pointer to object that will be informed when the data has
   /// been delivered.  This needs to be set prior to using the
-  /// TransportInterface to send().
+  /// TransportClient to send().
   TransportSendListener* send_listener_;
 
   /// The flag indicates space availability for this waiting DataSample.

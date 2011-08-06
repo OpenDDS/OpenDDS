@@ -12,13 +12,13 @@ import org.omg.CORBA.SystemException;
 import OpenDDS.DCPS.TheServiceParticipant;
 import OpenDDS.DCPS.TheParticipantFactory;
 
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportImpl;
+import OpenDDS.DCPS.transport.TheTransportRegistry;
+import OpenDDS.DCPS.transport.TransportConfig;
 import OpenDDS.DCPS.transport.TransportException;
-import OpenDDS.DCPS.transport.TransportConfiguration;
-import OpenDDS.DCPS.transport.SimpleTcpConfiguration;
-import OpenDDS.DCPS.transport.UdpConfiguration;
-import OpenDDS.DCPS.transport.MulticastConfiguration;
+import OpenDDS.DCPS.transport.TransportInst;
+import OpenDDS.DCPS.transport.TcpInst;
+import OpenDDS.DCPS.transport.UdpInst;
+import OpenDDS.DCPS.transport.MulticastInst;
 
 public class TransportConfigTest {
 
@@ -28,11 +28,6 @@ public class TransportConfigTest {
         //    OpenDDS.DCPS.TheParticipantFactory.loadNativeLib();
         //    System.out.println("READY");
         //    try {System.in.read();} catch (java.io.IOException ioe) {}
-
-        // We need to load the SimpleTcp lib before initializing the
-        // ParticipantFactory, because it will read and parse the config file.
-        TheTransportFactory.get_or_create_configuration(99 /*bogus ID*/,
-            TheTransportFactory.TRANSPORT_TCP);
         TheParticipantFactory.WithArgs(new StringSeqHolder(args));
     }
 
@@ -43,107 +38,110 @@ public class TransportConfigTest {
         testModifyTransportFromFileTCP();
         testCreateNewTransportUdp();
         testCreateNewTransportMulticast();
+        testConfigCreation();
 
         tearDown();
     }
 
 
     protected static void testModifyTransportFromFileTCP() throws Exception {
-        final int ID = 1; //matches .ini file
-        TransportConfiguration tc =
-            TheTransportFactory.get_or_create_configuration(ID,
-                TheTransportFactory.TRANSPORT_TCP);
+        final String ID = "tcp1"; //matches .ini file
+        TransportInst ti = TheTransportRegistry.get_inst(ID);
         // Verify the values were read in from the ini file
-        assert tc.isSwapBytes();
-        assert tc.getMaxSamplesPerPacket() == 5;
-        SimpleTcpConfiguration tc_tcp = (SimpleTcpConfiguration) tc;
-        assert tc_tcp.getConnRetryAttempts() == 42;
+        assert ti.getMaxSamplesPerPacket() == 5;
+        TcpInst ti_tcp = (TcpInst) ti;
+        assert ti_tcp.getConnRetryAttempts() == 42;
 
-        tc.setSwapBytes(false);
+        ti.setMaxSamplesPerPacket(6);
+        ti_tcp.setConnRetryAttempts(49);
 
-        TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
-            TheTransportFactory.TRANSPORT_TCP,
-            TheTransportFactory.DONT_AUTO_CONFIG);
-        ti.configure(tc);
+        TransportInst ti2 = TheTransportRegistry.get_inst(ID);
+        assert ti2.getMaxSamplesPerPacket() == 6;
+        TcpInst ti_tcp2 = (TcpInst) ti2;
+        assert ti_tcp2.getConnRetryAttempts() == 49;
 
-        tc = TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_TCP);
-        assert !tc.isSwapBytes();
-        assert tc.getMaxSamplesPerPacket() == 5;
-
-        TheTransportFactory.release(ID);
+        TheTransportRegistry.remove_inst(ti);
     }
 
 
     protected static void testCreateNewTransportUdp() throws Exception {
-        final int ID = 2;
-        TransportConfiguration tc =
-            TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_UDP);
-        tc.setSendThreadStrategy(TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH);
-        UdpConfiguration suc = (UdpConfiguration) tc;
-        suc.setLocalAddress("0.0.0.0:1234");
+        final String ID = "Udp2";
+        TransportInst ti =
+            TheTransportRegistry.create_inst(ID,
+                                             TheTransportRegistry.TRANSPORT_UDP);
+        ti.setMaxPacketSize(999);
+        UdpInst sui = (UdpInst) ti;
+        sui.setLocalAddress("0.0.0.0:1234");
 
-        TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
-            TheTransportFactory.TRANSPORT_UDP,
-            TheTransportFactory.DONT_AUTO_CONFIG);
-        ti.configure(tc);
-
-        tc = TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_UDP);
-        assert tc.getSendThreadStrategy() == TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH;
-        suc = (UdpConfiguration) tc;
+        TransportInst ti2 = TheTransportRegistry.get_inst(ID);
+        assert ti2.getMaxPacketSize() == 999;
+        UdpInst sui2 = (UdpInst) ti2;
         //Only checking endsWith here b/c the 0.0.0.0 is resolved to a hostname
-        assert suc.getLocalAddress().endsWith(":1234");
-
-        TheTransportFactory.release(ID);
+        assert sui2.getLocalAddress().endsWith(":1234");
     }
 
 
     protected static void testCreateNewTransportMulticast() throws Exception {
-        final int ID = 3;
-        TransportConfiguration tc =
-            TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_MULTICAST);
-        tc.setSendThreadStrategy(TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH);
-        MulticastConfiguration mc = (MulticastConfiguration) tc;
-        mc.setDefaultToIPv6(true);
-        mc.setPortOffset((short) 9000);
-        mc.setGroupAddress("224.0.0.1:1234");
-        mc.setReliable(false);
-        mc.setSynBackoff(0.5);
-        mc.setSynInterval(100);
-        mc.setSynTimeout(100);
-        mc.setNakDepth(16);
-        mc.setNakInterval(100);
-        mc.setNakTimeout(100);
+        final String ID = "multicast3";
+        TransportInst ti =
+            TheTransportRegistry.create_inst(ID,
+                                             TheTransportRegistry.TRANSPORT_MULTICAST);
+        ti.setOptimumPacketSize(999);
+        MulticastInst mi = (MulticastInst) ti;
+        mi.setDefaultToIPv6(true);
+        mi.setPortOffset((short) 9000);
+        mi.setGroupAddress("224.0.0.1:1234");
+        mi.setReliable(false);
+        mi.setSynBackoff(0.5);
+        mi.setSynInterval(100);
+        mi.setSynTimeout(100);
+        mi.setNakDepth(16);
+        mi.setNakInterval(100);
+        mi.setNakDelayInterval(123);
+        mi.setNakMax(5);
+        mi.setNakTimeout(100);
+        mi.setTimeToLive(21);
+        mi.setRcvBufferSize(1023);
 
-        TransportImpl ti = TheTransportFactory.create_transport_impl(ID,
-            TheTransportFactory.TRANSPORT_MULTICAST,
-            TheTransportFactory.DONT_AUTO_CONFIG);
-        ti.configure(tc);
-
-        tc = TheTransportFactory.get_or_create_configuration(ID,
-                 TheTransportFactory.TRANSPORT_MULTICAST);
-        assert tc.getSendThreadStrategy() == TransportConfiguration.ThreadSynchStrategy.NULL_SYNCH;
-        mc = (MulticastConfiguration) tc;
-        assert mc.getDefaultToIPv6() == true;
-        assert mc.getPortOffset() == 9000;
-        assert mc.getGroupAddress().equals("224.0.0.1:1234");
-        assert mc.getReliable() == false;
-        assert mc.getSynBackoff() == 0.5;
-        assert mc.getSynInterval() == 100;
-        assert mc.getSynTimeout() == 100;
-        assert mc.getNakDepth() == 16;
-        assert mc.getNakInterval() == 100;
-        assert mc.getNakTimeout() == 100;
-
-        TheTransportFactory.release(ID);
+        TransportInst ti2 = TheTransportRegistry.get_inst(ID);
+        assert ti2.getOptimumPacketSize() == 999;
+        MulticastInst mi2 = (MulticastInst) ti2;
+        assert mi2.getDefaultToIPv6() == true;
+        assert mi2.getPortOffset() == 9000;
+        assert mi2.getGroupAddress().equals("224.0.0.1:1234");
+        assert mi2.getReliable() == false;
+        assert mi2.getSynBackoff() == 0.5;
+        assert mi2.getSynInterval() == 100;
+        assert mi2.getSynTimeout() == 100;
+        assert mi2.getNakDepth() == 16;
+        assert mi2.getNakInterval() == 100;
+        assert mi2.getNakDelayInterval() == 123;
+        assert mi2.getNakMax() == 5;
+        assert mi2.getNakTimeout() == 100;
+        assert mi2.getTimeToLive() == 21;
+        assert mi2.getRcvBufferSize() == 1023;
     }
 
+    protected static void testConfigCreation() throws Exception {
+        TransportConfig transport_config =
+            TheTransportRegistry.create_config("Config");
+        assert (transport_config != null);
+
+        TransportInst transport_inst =
+            TheTransportRegistry.create_inst("mytcp",
+                                             TheTransportRegistry.TRANSPORT_TCP);
+        assert (transport_inst != null);
+
+        transport_config.addLast(transport_inst);
+        transport_config.setSwapBytes(true);
+        transport_config.setPassiveConnectDuration(20000);
+        assert (transport_config.countInstances() == 1);
+        assert (transport_config.getInstance(0).getName().equals("mytcp"));
+        assert (transport_config.getSwapBytes());
+        assert (transport_config.getPassiveConnectDuration() == 20000);
+    }
 
     protected static void tearDown() {
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
 }

@@ -23,7 +23,7 @@ extern "C" {
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfoC.h"
 
 #include "ace/Synch.h"
 #include "ace/Hash_Map_Manager.h"

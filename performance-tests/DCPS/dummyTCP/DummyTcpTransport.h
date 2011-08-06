@@ -7,7 +7,7 @@
 #include "DummyTcp_export.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "DummyTcpConfiguration_rch.h"
+#include "DummyTcpInst_rch.h"
 #include "DummyTcpDataLink_rch.h"
 #include "DummyTcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
@@ -38,10 +38,10 @@ namespace OpenDDS
     {
       public:
 
-        DummyTcpTransport();
+        DummyTcpTransport(const TransportInst_rch& inst = 0);
         virtual ~DummyTcpTransport();
 
-        DummyTcpConfiguration* get_configuration();
+        DummyTcpInst* get_configuration();
 
         int fresh_link (const ACE_INET_Addr&    remote_addr,
                         DummyTcpConnection_rch connection);
@@ -51,19 +51,27 @@ namespace OpenDDS
         /// Either find a suitable DataLink that already exists (and is
         /// connected), or create one, connect it, save it off for reuse,
         /// and return it.
-        virtual DataLink* find_or_create_datalink(
-          RepoId                  local_id,
-          const AssociationData*  remote_association,
-          CORBA::Long             priority,
-          bool                    active);
+        virtual DataLink* find_datalink_i(const RepoId& local_id,
+                                          const RepoId& remote_id,
+                                          const TransportBLOB& remote_data,
+                                          CORBA::Long priority,
+                                          bool active);
 
-        virtual int configure_i(TransportConfiguration* config);
+        virtual DataLink* connect_datalink_i(const RepoId& local_id,
+                                             const RepoId& remote_id,
+                                             const TransportBLOB& remote_data,
+                                             CORBA::Long priority);
+
+        virtual DataLink* accept_datalink(ConnectionEvent& ce);
+        virtual void stop_accepting(ConnectionEvent& ce);
+        virtual std::string transport_type() const { return "dummy_tcp"; }
+
+        virtual bool configure_i(TransportInst* config);
 
         virtual void shutdown_i();
         virtual void pre_shutdown_i();
 
-        virtual int connection_info_i
-                                 (TransportInterfaceInfo& local_info) const;
+        virtual bool connection_info_i(TransportLocator& local_info) const;
 
         /// Called by the DataLink to release itself.
         virtual void release_datalink_i(DataLink* link,
@@ -137,7 +145,7 @@ namespace OpenDDS
         DummyTcpAcceptor* acceptor_;
 
         /// Our configuration object, supplied to us in config_i().
-        DummyTcpConfiguration_rch tcp_config_;
+        DummyTcpInst_rch tcp_config_;
 
         /// This is the map of connected DataLinks.
         AddrLinkMap links_;

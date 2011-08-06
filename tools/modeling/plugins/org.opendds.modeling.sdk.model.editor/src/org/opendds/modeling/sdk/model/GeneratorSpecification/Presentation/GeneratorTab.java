@@ -303,8 +303,13 @@ public class GeneratorTab extends StructuredViewer {
 				// user canceled
 				return;
 			}
-
 			IStatusLineManager statusLineManager = editor.getActionBars().getStatusLineManager();
+
+			String msg = generator.validate();
+			if (msg != null) {
+				statusLineManager.setErrorMessage("Code Generation: " + msg);			   
+				return;
+			}
 
 			// This is the progress monitor on the status line.
 			// IProgressMonitor progressMonitor
@@ -420,7 +425,7 @@ public class GeneratorTab extends StructuredViewer {
 				targetDir.setToolTipText(null);
 				targetLabel.setImage(null);
 			} else {
-				targetDir.setToolTipText(text + " does not yet exists");
+				targetDir.setToolTipText(text + " does not yet exist");
 				targetLabel.setImage(ExtendedImageRegistry.INSTANCE.getImage(warningimage));
 			}
 		} else {

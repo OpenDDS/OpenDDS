@@ -11,7 +11,6 @@
 #include "monitorTypeSupportImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace OpenDDS {
@@ -36,12 +35,9 @@ SubscriberMonitorImpl::report() {
     report.handle = sub_->get_instance_handle();
     DDS::DomainParticipant_var dp = sub_->get_participant();
     report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
-    TransportImpl_rch ti = sub_->get_transport_impl();
-    if (ti != 0) {
-      report.transport_id = ti->get_transport_id();
-    } else {
-      report.transport_id = 0;
-    }
+    TransportImpl_rch ti; //TODO: transport    = sub_->get_transport_impl();
+    // TODO: remove transport_id and replace with name
+    report.transport_id = 0;
     SubscriberImpl::SubscriptionIdVec readers;
     sub_->get_subscription_ids(readers);
     CORBA::ULong length = 0;

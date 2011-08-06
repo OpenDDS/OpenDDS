@@ -4,8 +4,8 @@
 #ifndef OPENDDS_DCPS_DUMMYTCPCONNECTION_H
 #define OPENDDS_DCPS_DUMMYTCPCONNECTION_H
 
-#include "DummyTcpConfiguration.h"
-#include "DummyTcpConfiguration_rch.h"
+#include "DummyTcpInst.h"
+#include "DummyTcpInst_rch.h"
 #ifdef __BORLANDC__
 #  include "DummyTcpDataLink.h"
 #endif
@@ -52,7 +52,7 @@ namespace OpenDDS
         /// identify ourselves to the remote side.
         int active_establishment(const ACE_INET_Addr& remote_address,
                                  const ACE_INET_Addr& local_address,
-                                 DummyTcpConfiguration_rch tcp_config);
+                                 DummyTcpInst_rch tcp_config);
 
         /// This will be called by the DataLink (that "owns" us) when
         /// the DummyTcpTransport has been told to shutdown(), or when
@@ -80,7 +80,7 @@ namespace OpenDDS
         virtual int close(u_long);
         virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
-        void set_sock_options (DummyTcpConfiguration* tcp_config);
+        void set_sock_options (DummyTcpInst* tcp_config);
 
         int reconnect (bool on_new_association = false);
 
@@ -142,7 +142,7 @@ namespace OpenDDS
         /// Local address.
         ACE_INET_Addr local_address_;
         /// The configuration used by this connection.
-        DummyTcpConfiguration_rch tcp_config_;
+        DummyTcpInst_rch tcp_config_;
         /// Datalink object which is needed for connection lost callback.
         DummyTcpDataLink_rch      link_;
         /// TODO: This can be removed since we do not need it for checking the

@@ -247,7 +247,7 @@ public:
    * This method is called by the transport to notify the sample
    * is dropped.  Which the transport was told to do by the
    * publication code by calling
-   * TransportInterface::remove_sample(). If the sample was
+   * TransportClient::remove_sample(). If the sample was
    * "sending" the it is moved to "unsent" list. If the sample was
    * "released" then the sample is released. If there are any
    * threads waiting for available space then it needs wake up

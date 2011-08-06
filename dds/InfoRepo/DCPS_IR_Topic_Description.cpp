@@ -399,15 +399,8 @@ void DCPS_IR_Topic_Description::associate(DCPS_IR_Publication* publication,
   // Note: the client thread may process the add_associations() oneway
   //       call instead of the ORB thread because it is currently
   //       in a two-way call to the Repo.
-  publication->add_associated_subscription(subscription);
-  subscription->add_associated_publication(publication);
-
-  //TBD - these called methods currently tell the associated publication and
-  //      subscription about the association immediately.
-  //      It would be better if the associations were sent after all
-  //      associations were added.  This way the publication(s) and
-  //      subscription(s) could recieve a list of assocations instead
-  //      of multiple one at a time associations.
+  publication->add_associated_subscription(subscription, true);
+  subscription->add_associated_publication(publication, false);
 }
 
 void DCPS_IR_Topic_Description::reevaluate_associations(DCPS_IR_Subscription* subscription)

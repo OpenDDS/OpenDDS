@@ -21,15 +21,13 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
 
 OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
 OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
-
-ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds(0);
 
 int max_samples_per_instance = 10 ;
 int history_depth = 10 ;
@@ -446,7 +444,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       writer_transport_impl = 0;
       reader_transport_impl = 0;
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

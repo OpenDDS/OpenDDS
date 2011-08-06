@@ -5,7 +5,7 @@
 #include "DummyTcp_pch.h"
 #include "DummyTcpConnection.h"
 #include "DummyTcpTransport.h"
-#include "DummyTcpConfiguration.h"
+#include "DummyTcpInst.h"
 #include "DummyTcpDataLink.h"
 #include "DummyTcpReceiveStrategy.h"
 #include "DummyTcpSendStrategy.h"
@@ -139,9 +139,9 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
                        -1);
     }
 
-  DummyTcpConfiguration* tcp_config = acceptor->get_configuration();
+  DummyTcpInst* tcp_config = acceptor->get_configuration();
 
-  // Keep a "copy" of the reference to DummyTcpConfiguration object
+  // Keep a "copy" of the reference to DummyTcpInst object
   // for ourselves.
   tcp_config->_add_ref ();
   this->tcp_config_ = tcp_config;
@@ -158,7 +158,7 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
                           sizeof(network_order_address)) == -1)
     {
       ACE_ERROR_RETURN((LM_ERROR,
-         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("(%P|%t) ERROR: TcpConnection::open() - ")
          ACE_TEXT("unable to receive the length of address string ")
          ACE_TEXT("from the remote (active) side of the connection. ")
          ACE_TEXT("%p\n"),
@@ -251,7 +251,7 @@ OpenDDS::DCPS::DummyTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 }
 
 void
-OpenDDS::DCPS::DummyTcpConnection::set_sock_options (DummyTcpConfiguration* tcp_config)
+OpenDDS::DCPS::DummyTcpConnection::set_sock_options (DummyTcpInst* tcp_config)
 {
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -305,7 +305,7 @@ int
 OpenDDS::DCPS::DummyTcpConnection::active_establishment
                                     (const ACE_INET_Addr& remote_address,
                                      const ACE_INET_Addr& local_address,
-                                     DummyTcpConfiguration_rch tcp_config)
+                                     DummyTcpInst_rch tcp_config)
 {
   DBG_ENTRY_LVL("DummyTcpConnection","active_establishment",5);
 
@@ -452,7 +452,7 @@ OpenDDS::DCPS::DummyTcpConnection::passive_reconnect_i ()
         {
           this->_remove_ref ();
           ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::passive_reconnect_i")
+            ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
             ACE_TEXT(", %p.\n"), ACE_TEXT("schedule_timer")),
                             -1);
         }
@@ -649,7 +649,7 @@ OpenDDS::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
       if (rs->get_reactor()->cancel_timer(this) == -1)
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::transfer, ")
+          ACE_TEXT("(%P|%t) ERROR: TcpConnection::transfer, ")
           ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
       }
       this->_remove_ref ();

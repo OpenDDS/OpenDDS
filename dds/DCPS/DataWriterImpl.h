@@ -14,12 +14,12 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleList.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
-#include "AssociationData.h"
 #include "Qos_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
@@ -50,6 +50,7 @@ class PublisherImpl;
 class DomainParticipantImpl;
 class OfferedDeadlineWatchdog;
 class Monitor;
+struct AssociationData;
 
 /**
 * @class DataWriterImpl
@@ -75,11 +76,9 @@ class Monitor;
 class OpenDDS_Dcps_Export DataWriterImpl
   : public virtual DDS::DataWriter,
     public virtual EntityImpl,
+    public virtual TransportClient,
     public virtual TransportSendListener,
     public virtual ACE_Event_Handler
-    // DataWriterLocal is conceptual - no need to implement - just
-    // use DataWriterImpl
-    // public virtual OpenDDS::DCPS::DataWriterLocal
 {
 public:
   friend class WriteDataContainer;
@@ -189,11 +188,14 @@ public:
   virtual DDS::ReturnCode_t enable()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  void add_associations(OpenDDS::DCPS::RepoId yourId,
-                        const ReaderAssociationSeq & readers);
+  void add_association(const RepoId& yourId,
+                       const ReaderAssociation& reader,
+                       bool active);
+
+  void association_complete(const RepoId& remote_id);
 
   void remove_associations(const ReaderIdSeq & readers,
-                           CORBA::Boolean callback);
+                           bool callback);
 
   void update_incompatible_qos(const IncompatibleQosStatus& status);
 
@@ -282,12 +284,6 @@ public:
   DataSampleList get_resend_data();
 
   /**
-   * Cache the publication repository id after adding
-   * datawriter/publication to repository.
-   */
-  void set_publication_id(RepoId publication_id);
-
-  /**
    * Accessor of the repository id of this datawriter/publication.
    */
   RepoId get_publication_id();
@@ -334,6 +330,8 @@ public:
   /// Deliver a requested SAMPLE_ACK message to this writer.
   virtual void deliver_ack(const DataSampleHeader& header, DataSample* data);
 
+  virtual bool check_transport_qos(const TransportInst& inst);
+
   /// Are coherent changes pending?
   bool coherent_changes_pending();
 
@@ -351,22 +349,7 @@ public:
   /**
    * Get associated topic type name.
    */
-  char const * get_type_name() const;
-
-  /**
-   * This method is called when there is no more space in the
-   * instance sample list for a non-blocking write. It requests
-   * the transport to drop the oldest sample.
-   *
-   * The dropped_by_transport parameter will be passed all way to
-   * the transport and is used when the data_dropped() is called
-   * back.
-   *
-   * @see WriterDataContainer::data_dropped() comment for the
-   *      dropped_by_transport parameter.
-   */
-  void remove_sample(DataSampleListElement* element,
-                     bool dropped_by_transport = false);
+  char const* get_type_name() const;
 
   /**
    * This mothod is called by transport to notify the instance
@@ -382,13 +365,6 @@ public:
    */
   void control_dropped(ACE_Message_Block* sample,
                        bool dropped_by_transport);
-
-  /**
-   * Tell transport to remove all messages requested
-   * by this datawriter.
-   * This is called during datawriter shutdown.
-   */
-  int remove_all_msgs();
 
   /**
    * Accessor of the WriterDataContainer's lock.
@@ -427,6 +403,10 @@ public:
   virtual int handle_close(ACE_HANDLE,
                            ACE_Reactor_Mask);
 
+  /// Called by the PublisherImpl to indicate that the Publisher is now
+  /// resumed and any data collected while it was suspended should now be sent.
+  void send_suspended_data();
+
   void remove_all_associations();
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
@@ -440,12 +420,6 @@ public:
   int         data_delivered_count_;
   int         control_dropped_count_;
   int         control_delivered_count_;
-
-  /// Called by transport after transport received the
-  /// FULLY_ASSOCIATED ack from the associated subscriber.
-  void fully_associated(OpenDDS::DCPS::RepoId   yourId,
-                        size_t                  num_remote_associations,
-                        const AssociationData*  remote_associations);
 
   /**
    * This method create a header message block and chain with
@@ -475,6 +449,8 @@ public:
    * Get an instance handle for a new instance.
    */
   DDS::InstanceHandle_t get_next_handle();
+  
+  virtual EntityImpl* parent() const;
 
 protected:
 
@@ -553,7 +529,14 @@ private:
 
   /// Lookup the instance handles by the subscription repo ids
   bool lookup_instance_handles(const ReaderIdSeq& ids,
-                               DDS::InstanceHandleSeq & hdls);
+                               DDS::InstanceHandleSeq& hdls);
+
+
+  const RepoId& get_repo_id() const { return this->publication_id_; }
+
+  CORBA::Long get_priority_value(const AssociationData&) const {
+    return this->qos_.transport_priority.value;
+  }
 
   friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_
 
@@ -666,6 +649,9 @@ private:
   RepoIdToSequenceMap idToSequence_;
 
   IdSet                      pending_readers_;
+
+  /// The cached available data while suspending.
+  DataSampleList             available_data_list_;
 
   /// Monitor object for this entity
   Monitor* monitor_;

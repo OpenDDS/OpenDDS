@@ -12,7 +12,7 @@
         <attribute name="DCPSPersistentDataDir">${jboss.server.data.dir}/opendds</attribute>
         <attribute name="ORBListenEndpoints">iiop://:6667</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/opendds.log</attribute>
-        <attribute name="TransportType">SimpleTcp</attribute>
+        <attribute name="TransportType">tcp</attribute>
         <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.4.rar'</depends>
     </mbean>
 
@@ -42,7 +42,7 @@
         <rar-name>opendds-jms-2.4.rar</rar-name>
         <connection-definition>javax.jms.ConnectionFactory</connection-definition>
         <config-property name="DomainID" type="java.lang.Integer">1</config-property>
-        <config-property name="TransportType" type="java.lang.String">SimpleTcp</config-property>
+        <config-property name="TransportType" type="java.lang.String">tcp</config-property>
         <config-property name="PersistenceManager" type="java.lang.String">DDS/PersistenceManager</config-property>
         <min-pool-size>5</min-pool-size>
         <max-pool-size>20</max-pool-size>

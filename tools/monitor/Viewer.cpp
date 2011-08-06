@@ -21,7 +21,6 @@
 #include "NodeGenerator.h"
 
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #ifdef DEVELOPMENT
 #include <iostream>
@@ -551,7 +550,6 @@ namespace Monitor {
     ));
 
     // Clean up the service resources.
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
 
