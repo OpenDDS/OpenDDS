@@ -1,3 +1,9 @@
+Sun Aug  7 23:47:42 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+          Fix some static build issues.
+
 Sat Aug  6 00:47:30 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
           Merged the branch "sbir_transport" which includes a
