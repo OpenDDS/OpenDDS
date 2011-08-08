@@ -455,15 +455,15 @@ TransportClient::MultiReservLock::action_rev(
 int
 TransportClient::MultiReservLock::acquire()
 {
-  return action_fwd(&TransportImpl::ReservationLockType::acquire,
-                    &TransportImpl::ReservationLockType::release);
+  typedef TransportImpl::ReservationLockType Lock;
+  return action_fwd(&Lock::acquire, &Lock::release);
 }
 
 int
 TransportClient::MultiReservLock::tryacquire()
 {
-  return action_fwd(&TransportImpl::ReservationLockType::tryacquire,
-                    &TransportImpl::ReservationLockType::release);
+  typedef TransportImpl::ReservationLockType Lock;
+  return action_fwd(&Lock::tryacquire, &Lock::release);
 }
 
 int

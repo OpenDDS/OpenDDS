@@ -1,3 +1,9 @@
+Mon Aug  8 21:57:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fix for vc71 crash when optimization is enabled.
+
 Mon Aug  8 21:55:54 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/migrations/v1tov2.rb:
