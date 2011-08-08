@@ -22,6 +22,12 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+# include "dds/DCPS/transport/tcp/Tcp.h"
+# include "dds/DCPS/transport/udp/Udp.h"
+# include "dds/DCPS/transport/multicast/Multicast.h"
+#endif
+
 #include "ace/SString.h"
 #include "ace/Arg_Shifter.h"
 

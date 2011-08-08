@@ -1,3 +1,14 @@
+Mon Aug  8 21:42:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+
+          Fixes for static builds.
+
 Mon Aug  8 21:24:11 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
