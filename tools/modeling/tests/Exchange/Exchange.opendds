@@ -3,13 +3,13 @@
   <libs xsi:type="opendds:DcpsLib" xmi:id="_TdSxoDSOEeCQdY7V0enm4Q" name="ExchangeLib">
     <domains xmi:id="_bIimEDSOEeCQdY7V0enm4Q" name="Exchange" domainId="0"/>
     <participants xmi:id="_d-BlcDSOEeCQdY7V0enm4Q" name="FeedDistribution" domain="_bIimEDSOEeCQdY7V0enm4Q">
-      <publishers xsi:type="opendds:publisher" xmi:id="_lH6ZQDSOEeCQdY7V0enm4Q" name="QuotesPub" transportId="1">
+      <publishers xsi:type="opendds:publisher" xmi:id="_lH6ZQDSOEeCQdY7V0enm4Q" name="QuotesPub" transportConfig="trans1">
         <writers xmi:id="_lH8OcDSOEeCQdY7V0enm4Q" name="QuotesWriter" copyFromTopicQos="true" topic="_niUmMDSOEeCQdY7V0enm4Q"/>
         <writers xmi:id="_-vcNETSOEeCQdY7V0enm4Q" name="TradesWriter" copyFromTopicQos="true" topic="_TExugDSPEeCQdY7V0enm4Q"/>
       </publishers>
     </participants>
     <participants xmi:id="_Y_XdoDSPEeCQdY7V0enm4Q" name="FeedConsumption" domain="_bIimEDSOEeCQdY7V0enm4Q">
-      <subscribers xsi:type="opendds:subscriber" xmi:id="_arK4IDSPEeCQdY7V0enm4Q" name="MatchingSub" transportId="3">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_arK4IDSPEeCQdY7V0enm4Q" name="MatchingSub" transportConfig="trans3">
         <readers xmi:id="_arK4ITSPEeCQdY7V0enm4Q" name="MatchReader" copyFromTopicQos="false" topic="_iQ1B8DSPEeCQdY7V0enm4Q"/>
       </subscribers>
     </participants>

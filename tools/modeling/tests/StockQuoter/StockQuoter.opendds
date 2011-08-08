@@ -3,10 +3,10 @@
   <libs xsi:type="opendds:DcpsLib" xmi:id="_APxNsGH9EeC_I986asR8iw" name="StockQuoter">
     <domains xmi:id="_EzwWQGH9EeC_I986asR8iw" name="abc" domainId="987987"/>
     <participants xmi:id="_GO9I8GH9EeC_I986asR8iw" name="part1" domain="_EzwWQGH9EeC_I986asR8iw">
-      <publishers xsi:type="opendds:publisher" xmi:id="_KDX1wGH9EeC_I986asR8iw" name="pub" transportId="1">
+      <publishers xsi:type="opendds:publisher" xmi:id="_KDX1wGH9EeC_I986asR8iw" name="pub" transportConfig="trans1">
         <writers xmi:id="_KDX1wWH9EeC_I986asR8iw" name="writer" copyFromTopicQos="false" topic="_LXkokGH9EeC_I986asR8iw"/>
       </publishers>
-      <subscribers xsi:type="opendds:subscriber" xmi:id="_JAuF8GH9EeC_I986asR8iw" name="sub" transportId="1">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_JAuF8GH9EeC_I986asR8iw" name="sub" transportConfig="trans1">
         <readers xmi:id="_JAutAGH9EeC_I986asR8iw" name="reader" copyFromTopicQos="false" topic="_LXkokGH9EeC_I986asR8iw"/>
       </subscribers>
     </participants>

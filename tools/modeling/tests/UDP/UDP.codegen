@@ -1,39 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0">
+<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <source name="UDP.opendds"/>
   <target name="model"/>
   <instances>
     <instance name="default">
-      <transportOffset value="0"/>
-      <transport transportIndex="6">
-        <UDPTransport>
-          <swap_bytes value="false"/>
-          <queue_messages_per_pool value="10"/>
-          <queue_initial_pools value="10"/>
-          <max_packet_size value="65533"/>
-          <max_samples_per_packet value="10"/>
-          <optimum_packet_size value="4096"/>
-          <thread_per_connection value="false"/>
-          <datalink_release_delay value="10000"/>
-          <datalink_control_chunks value="32"/>
-          <local_address_str value="&quot;localhost:52000&quot;"/>
-        </UDPTransport>
-      </transport>
-      <transport transportIndex="8">
-        <UDPTransport>
-          <swap_bytes value="false"/>
-          <queue_messages_per_pool value="10"/>
-          <queue_initial_pools value="10"/>
-          <max_packet_size value="65533"/>
-          <max_samples_per_packet value="10"/>
-          <optimum_packet_size value="4096"/>
-          <thread_per_connection value="false"/>
-          <datalink_release_delay value="10000"/>
-          <datalink_control_chunks value="32"/>
-          <local_address_str value="localhost:52001"/>
-        </UDPTransport>
-      </transport>
+      <config name="trans6">
+        <transportRef transport="041132e0-a42e-012e-9624-0017a4e90546"/>
+        <swap_bytes value="false"/>
+      </config>
+      <config name="trans8">
+        <transportRef transport="04113ca0-a42e-012e-9625-0017a4e90546"/>
+        <swap_bytes value="false"/>
+      </config>
     </instance>
   </instances>
   <searchPaths/>
+  <transports>
+    <transport xsi:type="generator:UdpTransport" xmi:id="041132e0-a42e-012e-9624-0017a4e90546" name="trans6">
+      <queue_messages_per_pool value="10"/>
+      <queue_initial_pools value="10"/>
+      <max_packet_size value="65533"/>
+      <max_samples_per_packet value="10"/>
+      <optimum_packet_size value="4096"/>
+      <thread_per_connection value="false"/>
+      <datalink_release_delay value="10000"/>
+      <datalink_control_chunks value="32"/>
+      <local_address_str value="&quot;localhost:52000&quot;"/>
+    </transport>
+    <transport xsi:type="generator:UdpTransport" xmi:id="04113ca0-a42e-012e-9625-0017a4e90546" name="trans8">
+      <queue_messages_per_pool value="10"/>
+      <queue_initial_pools value="10"/>
+      <max_packet_size value="65533"/>
+      <max_samples_per_packet value="10"/>
+      <optimum_packet_size value="4096"/>
+      <thread_per_connection value="false"/>
+      <datalink_release_delay value="10000"/>
+      <datalink_control_chunks value="32"/>
+      <local_address_str value="localhost:52001"/>
+    </transport>
+  </transports>
 </generator:CodeGen>

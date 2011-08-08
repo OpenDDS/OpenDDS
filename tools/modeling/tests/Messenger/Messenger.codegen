@@ -41,4 +41,6 @@
       <local_address_str xmi:id="_2GVvkL4SEeCtlIIkuP1-1g" value="127.0.0.1"/>
     </transport>
   </transports>
+  <transports>
+  </transports>
 </generator:CodeGen>

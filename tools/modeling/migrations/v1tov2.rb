@@ -66,7 +66,7 @@ class GeneratorMigrator
     @transports = []
 
     @transport_offset_re = /<transportOffset/
-    @transport_open_re = /<transport transportIndex=['"]([^'"])*['"]/
+    @transport_open_re = /<transport transportIndex=['"]([^'"]*)['"]/
     @transport_close_re = /<\/transport>/
     @tcp_open_re = /<TCPTransport>/
     @tcp_close_re = /<\/TCPTransport>/
@@ -105,6 +105,7 @@ class GeneratorMigrator
       # do nothing - removed from model
     elsif results = @transport_open_re.match(line)
       @current_transport_id = "trans" + results[1] # remember for later
+      $stderr.puts "got name #{ @current_transport_id} from #{results[0]}"
     elsif line =~ @transport_close_re
       puts line if @transports.empty? # already migrated
     elsif line =~ @swap_bytes_re || line =~ @passive_connect_duration_re
