@@ -1,3 +1,9 @@
+Mon Aug  8 20:20:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.h:
+
+          Added a needed #include.
+
 Mon Aug  8 19:17:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
