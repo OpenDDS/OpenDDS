@@ -14,7 +14,7 @@ Sat Aug  6 00:47:30 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
           and all existing transport configuration code and config
           files will need to be updated.  For additional details
           see the branch-specific change log at
-          docs/history/ChangeLog-multitopic.
+          docs/history/ChangeLog-sbir_transport.
 
 Fri Jul 29 18:17:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
