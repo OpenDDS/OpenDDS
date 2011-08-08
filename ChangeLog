@@ -1,3 +1,15 @@
+Mon Aug  8 19:07:36 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Added test support for .codegen files to XML Validation tool. Also fixed some outstanding bugs
+          and improved the build for the external validation tool.
+
 Mon Aug  8 17:40:48 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

@@ -24,11 +24,15 @@ public class OpenDDSValidationUtilTest {
 
 
 	static final String baseDir = "../../";
-	static String xsdDir = baseDir + "plugins/org.opendds.modeling.model/model/";
+	static String openddsXsdDir = baseDir + "plugins/org.opendds.modeling.model/model/";
+	static String generatorXsdDir = baseDir + "plugins/org.opendds.modeling.sdk.model/model/";
 	static String testsDir = baseDir + "tests/";
 	static String testDataDir = baseDir + "testdata/";
 	static final String TRANSFORMED_XSD_DIR = "build";
-	static final String XSD_FILE = "OpenDDSXMI.xsd";
+	static final String OPENDDS_XSD_FILE = "OpenDDSXMI.xsd";
+	static final String GENERATOR_XSD_FILE = "GeneratorXMI.xsd";
+	static final String OPENDDS_EXT = ".opendds";
+	static final String CODEGEN_EXT = ".codegen";
 
 	static final List<File> knownBadFiles = new ArrayList<File>() {{
 		add(new File(testDataDir + "DataLib/DataLibConstraintErrorsTest1.opendds"));
@@ -54,9 +58,33 @@ public class OpenDDSValidationUtilTest {
 	}
 
 	@Test
-	public void testTransform() throws Exception {
+	public void testTransformOpenDDSXMI() throws Exception {
 		String defaultXsltFilename = "Default.xslt";
-		File generatedXsdDir = new File(xsdDir);
+		File generatedXsdDir = new File(openddsXsdDir);
+		File transformedXsdDir = new File(TRANSFORMED_XSD_DIR);
+		File xslDir = new File("src/xsl");
+		FileFilter filter = new FileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return file.getName().toLowerCase().endsWith(".xsd");
+			}
+		};
+		for (File xsdFile: generatedXsdDir.listFiles(filter)) {
+			String xsdFilename = xsdFile.getName();
+			String xslFilename = xsdFilename.replaceAll("(.*)\\.[xX][sS][dD]", "$1.xslt");
+			File xslFile = new File(xslDir,xslFilename);
+			if (!xslFile.exists()) {
+				xslFile = new File(xslDir, defaultXsltFilename);
+			}
+			File transformedXsd = new File(transformedXsdDir, xsdFilename);
+			XMLUtil.transform(xsdFile, xslFile, transformedXsd);
+		}
+	}
+	
+	@Test
+	public void testTransformGeneratorXMI() throws Exception {
+		String defaultXsltFilename = "Default.xslt";
+		File generatedXsdDir = new File(generatorXsdDir);
 		File transformedXsdDir = new File(TRANSFORMED_XSD_DIR);
 		File xslDir = new File("src/xsl");
 		FileFilter filter = new FileFilter() {
@@ -81,7 +109,7 @@ public class OpenDDSValidationUtilTest {
 	@Test
 	public void testTransformAndValidate() throws Exception {
 		String defaultXsltFilename = "Default.xslt";
-		File generatedXsdDir = new File(xsdDir);
+		File generatedXsdDir = new File(openddsXsdDir);
 		File transformedXsdDir = new File(TRANSFORMED_XSD_DIR);
 		File idempotentXsdDir = new File("build/idempotent");
 		idempotentXsdDir.mkdirs();
@@ -109,12 +137,12 @@ public class OpenDDSValidationUtilTest {
 		}
 		String xsd = "build/idempotent/OpenDDSXMI.xsd";
 		File folder = new File(testsDir);
-        Collection<File> failures = validate(folder, xsd);
+        Collection<File> failures = validate(folder, xsd, OPENDDS_EXT);
         if (!failures.isEmpty()) {
             fail("validation falied for " + failures);
         }
         folder = new File(testDataDir);
-        failures = validate(folder, xsd);
+        failures = validate(folder, xsd, OPENDDS_EXT);
         if (!failures.isEmpty()) {
             fail("validation falied for " + failures);
         }
@@ -124,7 +152,7 @@ public class OpenDDSValidationUtilTest {
 	@Test
 	public void testValidate() throws Exception {
 		String xml = "test/data/satellite.opendds";
-		final String xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + XSD_FILE;
+		String xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + OPENDDS_XSD_FILE;
 		XMLUtil.validate(new File(xsd), new File(xml));
 		try {
 			XMLUtil.validate(new File("bogus.xsd"), new File(xml));
@@ -133,32 +161,44 @@ public class OpenDDSValidationUtilTest {
 
 		}
 		File folder = new File(testsDir);
-		Collection<File> failures = validate(folder, xsd);
+		Collection<File> failures = validate(folder, xsd, OPENDDS_EXT);
 		if (!failures.isEmpty()) {
-			fail("validation falied for " + failures);
+			fail("validation failed for " + failures);
 		}
 		folder = new File(testDataDir);
-		failures = validate(folder, xsd);
+		failures = validate(folder, xsd, OPENDDS_EXT);
 		if (!failures.isEmpty()) {
-			fail("validation falied for " + failures);
+			fail("validation failed for " + failures);
+		}
+		
+		xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + GENERATOR_XSD_FILE;
+		folder = new File(testsDir);
+		failures = validate(folder, xsd, CODEGEN_EXT);
+		if (!failures.isEmpty()) {
+			fail("validation failed for " + failures);
+		}
+		folder = new File(testDataDir);
+		failures = validate(folder, xsd, CODEGEN_EXT);
+		if (!failures.isEmpty()) {
+			fail("validation failed for " + failures);
 		}
 	}
 
 	@Test
 	public void testValidBadFails() throws SAXException, IOException {
-		final String xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + XSD_FILE;
+		final String xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + OPENDDS_XSD_FILE;
 		for (File badfile : knownBadFiles) {
 			List<SAXParseException> errors = XMLUtil.validate(new File(xsd), badfile);
 			assertFalse(errors.isEmpty());
 		}
 	}
 
-	Collection<File> validate(File parent, String xsdFile) throws SAXException, IOException {
+	Collection<File> validate(File parent, String xsdFile, String ext) throws SAXException, IOException {
 		Collection<File> failures = new ArrayList<File>();
 		for (File f: parent.listFiles()) {
 			if (f.isDirectory()) {
-			    failures.addAll(validate(f, xsdFile));
-			} else if (f.getName().toLowerCase().endsWith(".opendds")) {
+			    failures.addAll(validate(f, xsdFile, ext));
+			} else if (f.getName().toLowerCase().endsWith(ext)) {
 				if (!knownBadFiles.contains(f)) {
 					logger.debug("Validating " + f.getPath());
 					try {

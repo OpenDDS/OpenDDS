@@ -98,13 +98,18 @@ public class OpenDDSModelValidator {
                 logger.warn(file + " does not exist!");
                 continue;
             }
+            logger.debug("Checking file: " + file);
             if (file.isDirectory()) {
                 numInvalidFiles += validateDir(file);
             } else {
                 numInvalidFiles += validateFile(file) ? 0 : 1;
             }
         }
-        logger.info("Validation completed.");
+        if (numInvalidFiles == 0) {
+        	logger.info("Validation completed successfully.");
+		} else {
+			logger.error("Validation completed with errors in " + numInvalidFiles + " files.");
+		}
         return numInvalidFiles;
     }
 
@@ -157,7 +162,10 @@ public class OpenDDSModelValidator {
         };
 		for (File f: parent.listFiles(filter)) {
 			logger.debug("Checking " + f.getPath());
-			if (recursive && f.isDirectory()) {
+			if (f.isDirectory()) {
+				if (!recursive) {
+					continue;
+				}
 			    numInvalidFiles += validateDir(f);
 			} else {
 			    numInvalidFiles += validateFile(f) ? 0 : 1;

@@ -36,7 +36,7 @@ public class XMLUtil {
 	/**
 	 * @param sourceXML the XML file to transform
 	 * @param xslt the XSL stylesheet to use for transformation
-	 * @param targetXML the result of XSL transfomation
+	 * @param targetXML the result of XSL transformation
 	 * @throws TransformerException if an error occurs configuraing or applying the transformation
 	 */
 	public static void transform(final File sourceXML, final File xslt, final File targetXML) throws TransformerException {
@@ -53,23 +53,27 @@ public class XMLUtil {
 	 * @param schemaFile the XML Schema file to use for validation
 	 * @param xmlFile the XML file to validate
 	 * @return a list of SaxParseException objects if validation errors occur
-	 * @throws SAXException if a pasring error occurs
+	 * @throws SAXException if a parsing error occurs
 	 * @throws IOException if a file I/O error occurs
 	 */
-	public static List<SAXParseException> validate(final File schemaFile, final File xmlFile) throws SAXException, IOException {
+	public static List<SAXParseException> validate(File schemaFile, File xmlFile) throws SAXException, IOException {
 		logger.debug("schemaFile = " + schemaFile);
 		logger.debug("xmlFile = " + xmlFile);
 		Source schemaSource = new StreamSource(schemaFile);
     	Source xmlSource = new StreamSource(xmlFile);
-    	SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-    	Schema schema = factory.newSchema(schemaSource);
-    	Validator validator = schema.newValidator();
-    	ValidationErrorHandler veh = new ValidationErrorHandler();
-    	validator.setErrorHandler(veh);
-        validator.validate(xmlSource);
-        return veh.errors;
+        return validate(schemaSource, xmlSource);
 	}
 
+	public static List<SAXParseException> validate(Source schemaSource, Source xmlSource) throws SAXException, IOException {
+		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Schema schema = factory.newSchema(schemaSource);
+		Validator validator = schema.newValidator();
+		ValidationErrorHandler veh = new ValidationErrorHandler();
+		validator.setErrorHandler(veh);
+		validator.validate(xmlSource);
+		return veh.errors;
+	}
+	
 	/**
 	 * Error handler for XML schema validation. Errors are treated as validation errors to
 	 * report, fatal errors are unrecoverable problems, and warnings are logged and

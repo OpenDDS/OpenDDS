@@ -86,8 +86,6 @@
   <xsd:element name="Instances" type="generator:Instances"/>
   <xsd:complexType name="Instance">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element name="transportOffset" type="generator:TransportOffset"/>
-      <xsd:element name="transport" type="generator:Transport"/>
       <xsd:element name="config" type="generator:TransportConfig"/>
       <xsd:element ref="xmi:Extension"/>
     </xsd:choice>
@@ -96,44 +94,6 @@
     <xsd:attribute name="name" type="xsd:string" use="required"/>
   </xsd:complexType>
   <xsd:element name="Instance" type="generator:Instance"/>
-  <xsd:complexType name="TransportOffset">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
-    <xsd:attribute name="value" type="xsd:int" use="required"/>
-  </xsd:complexType>
-  <xsd:element name="TransportOffset" type="generator:TransportOffset"/>
-  <xsd:complexType name="Transport">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element name="TCPTransport" type="generator:TcpConfig"/>
-      <xsd:element name="UDPTransport" type="generator:UdpConfig"/>
-      <xsd:element name="MulticastTransport" type="generator:MulticastConfig"/>
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
-    <xsd:attribute name="transportIndex" type="xsd:int"/>
-  </xsd:complexType>
-  <xsd:element name="Transport" type="generator:Transport"/>
-  <xsd:complexType abstract="true" name="TransportNoLongerConfig">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element name="swap_bytes" type="generator:SwapBytes"/>
-      <xsd:element name="queue_messages_per_pool" type="generator:QueueMessagesPerPool"/>
-      <xsd:element name="queue_initial_pools" type="generator:QueueInitialPool"/>
-      <xsd:element name="max_packet_size" type="generator:MaxPacketSize"/>
-      <xsd:element name="max_samples_per_packet" type="generator:MaxSamplesPerPacket"/>
-      <xsd:element name="optimum_packet_size" type="generator:OptimumPacketSize"/>
-      <xsd:element name="thread_per_connection" type="generator:ThreadPerConnection"/>
-      <xsd:element name="datalink_release_delay" type="generator:DatalinkReleaseDelay"/>
-      <xsd:element name="datalink_control_chunks" type="generator:DatalinkControlChunks"/>
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
-  </xsd:complexType>
-  <xsd:element name="TransportNoLongerConfig" type="generator:TransportNoLongerConfig"/>
   <xsd:complexType name="SwapBytes">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
       <xsd:element ref="xmi:Extension"/>
@@ -215,23 +175,6 @@
     <xsd:attribute name="value" type="xsd:int"/>
   </xsd:complexType>
   <xsd:element name="DatalinkControlChunks" type="generator:DatalinkControlChunks"/>
-  <xsd:complexType name="TcpConfig">
-    <xsd:complexContent>
-      <xsd:extension base="generator:TransportNoLongerConfig">
-        <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="local_address_str" type="generator:LocalAddressString"/>
-          <xsd:element name="enable_nagle_algorithm" type="generator:EnableNagleAlgorithm"/>
-          <xsd:element name="conn_retry_initial_delay" type="generator:ConnRetryInitialDelay"/>
-          <xsd:element name="conn_retry_backoff_multiplier" type="generator:ConnRetryBackoffMultiplier"/>
-          <xsd:element name="conn_retry_attempts" type="generator:ConnRetryAttempts"/>
-          <xsd:element name="max_output_pause_period" type="generator:MaxOutputPausePeriod"/>
-          <xsd:element name="passive_reconnect_duration" type="generator:PassiveReconnectDuration"/>
-          <xsd:element name="passive_connect_duration" type="generator:PassiveConnectDuration"/>
-        </xsd:choice>
-      </xsd:extension>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="TcpConfig" type="generator:TcpConfig"/>
   <xsd:complexType name="LocalAddressString">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
       <xsd:element ref="xmi:Extension"/>
@@ -304,29 +247,6 @@
     <xsd:attribute name="value" type="xsd:int"/>
   </xsd:complexType>
   <xsd:element name="PassiveConnectDuration" type="generator:PassiveConnectDuration"/>
-  <xsd:complexType name="MulticastConfig">
-    <xsd:complexContent>
-      <xsd:extension base="generator:TransportNoLongerConfig">
-        <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="default_to_ipv6" type="generator:DefaultToIPv6"/>
-          <xsd:element name="port_offset" type="generator:PortOffset"/>
-          <xsd:element name="group_address" type="generator:GroupAddress"/>
-          <xsd:element name="reliable" type="generator:Reliable"/>
-          <xsd:element name="syn_backoff" type="generator:SynBackoff"/>
-          <xsd:element name="syn_interval" type="generator:SynInterval"/>
-          <xsd:element name="syn_timeout" type="generator:SynTimeout"/>
-          <xsd:element name="nak_depth" type="generator:NakDepth"/>
-          <xsd:element name="nak_interval" type="generator:NakInterval"/>
-          <xsd:element name="nak_max" type="generator:NakMax"/>
-          <xsd:element name="nak_timeout" type="generator:NakTimeout"/>
-          <xsd:element name="ttl" type="generator:TTL"/>
-          <xsd:element name="rcv_buffer_size" type="generator:RcvBufferSIze"/>
-        </xsd:choice>
-        <xsd:attribute name="nak_max" type="xsd:string"/>
-      </xsd:extension>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="MulticastConfig" type="generator:MulticastConfig"/>
   <xsd:complexType name="DefaultToIPv6">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
       <xsd:element ref="xmi:Extension"/>
@@ -444,30 +364,28 @@
     <xsd:attribute name="value" type="xsd:int"/>
   </xsd:complexType>
   <xsd:element name="RcvBufferSIze" type="generator:RcvBufferSIze"/>
-  <xsd:complexType name="UdpConfig">
-    <xsd:complexContent>
-      <xsd:extension base="generator:TransportNoLongerConfig">
-        <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="local_address_str" type="generator:LocalAddressString"/>
-        </xsd:choice>
-      </xsd:extension>
-    </xsd:complexContent>
-  </xsd:complexType>
-  <xsd:element name="UdpConfig" type="generator:UdpConfig"/>
   <xsd:complexType name="TransportConfig">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element name="swap_bytes" type="generator:SwapBytes"/>
       <xsd:element name="transportRef" type="generator:TransportRef"/>
+      <xsd:element name="passive_connect_duration" type="generator:PassiveConnectDuration"/>
+      <xsd:element name="swap_bytes" type="generator:SwapBytes"/>
       <xsd:element ref="xmi:Extension"/>
     </xsd:choice>
     <xsd:attribute ref="xmi:id"/>
     <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
     <xsd:attribute name="name" type="xsd:string"/>
-    <xsd:attribute name="swap_bytes" type="xsd:string"/>
   </xsd:complexType>
   <xsd:element name="TransportConfig" type="generator:TransportConfig"/>
   <xsd:complexType abstract="true" name="TransportInst">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="queue_messages_per_pool" type="generator:QueueMessagesPerPool"/>
+      <xsd:element name="queue_initial_pools" type="generator:QueueInitialPool"/>
+      <xsd:element name="max_packet_size" type="generator:MaxPacketSize"/>
+      <xsd:element name="max_samples_per_packet" type="generator:MaxSamplesPerPacket"/>
+      <xsd:element name="optimum_packet_size" type="generator:OptimumPacketSize"/>
+      <xsd:element name="thread_per_connection" type="generator:ThreadPerConnection"/>
+      <xsd:element name="datalink_release_delay" type="generator:DatalinkReleaseDelay"/>
+      <xsd:element name="datalink_control_chunks" type="generator:DatalinkControlChunks"/>
       <xsd:element ref="xmi:Extension"/>
     </xsd:choice>
     <xsd:attribute ref="xmi:id"/>
@@ -496,7 +414,6 @@
           <xsd:element name="conn_retry_attempts" type="generator:ConnRetryAttempts"/>
           <xsd:element name="max_output_pause_period" type="generator:MaxOutputPausePeriod"/>
           <xsd:element name="passive_reconnect_duration" type="generator:PassiveReconnectDuration"/>
-          <xsd:element name="passive_connect_duration" type="generator:PassiveConnectDuration"/>
         </xsd:choice>
       </xsd:extension>
     </xsd:complexContent>

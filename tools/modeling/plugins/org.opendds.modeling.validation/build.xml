@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="modelvalidation" default="test" basedir=".">
+<project name="org.opendds.modeling.validation" default="test" basedir=".">
 
   <property file="build.properties" />
 
@@ -118,21 +118,28 @@
  </target>
 
   <target name="dist.win" depends="test, staging" description="build zip distribution for windows">
-    <zip destfile="${dist.dir}/${app.name}.zip" basedir="${staging.dir}" excludes="**/*.sh" />
+    <delete includeemptydirs="true">
+         <fileset dir="${staging.dir}/" includes="**/*.sh"/>
+     </delete>
+    <zip destfile="${dist.dir}/${app.name}.zip">
+      <zipfileset dir="${dist.dir}" includes="${app.name}/**"/>
+    </zip>
     <delete dir="${staging.dir}" />
-    <echo message="windows distribution created at: ${dist.dir}/${app.name}.zip" />
+    <echo message="windows zip distribution created at: ${dist.dir}/${app.name}.zip" />
   </target>
 
   <target name="dist.nix" depends="test, staging" description="build tar.gz distribution for linux, unix">
 
+    <delete includeemptydirs="true">
+      <fileset dir="${staging.dir}/" includes="**/*.bat"/>
+      </delete>
     <tar destfile="${dist.dir}/${app.name}.tar.gz" compression="gzip">
-      <tarfileset dir="${staging.dir}" mode="755">
-        <include name="**/*.sh" />
+      <tarfileset dir="${dist.dir}" mode="755">
+        <include name="${app.name}/${app.name}.sh" />
       </tarfileset>
-      <tarfileset dir="${staging.dir}">
-        <include name="**/*" />
-        <exclude name="**/*.sh" />
-        <exclude name="**/*.bat" />
+      <tarfileset dir="${dist.dir}">
+        <include name="${app.name}/**" />
+        <exclude name="${app.name}/${app.name}.sh" />
       </tarfileset>
     </tar>
     <delete dir="${staging.dir}" />
