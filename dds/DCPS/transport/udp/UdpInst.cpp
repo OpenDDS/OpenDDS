@@ -36,8 +36,8 @@ UdpInst::load(ACE_Configuration_Heap& cf,
   TransportInst::load(cf, sect); // delegate to parent
 
   ACE_TString local_address_s;
-  GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("local_address"),
-                          local_address_s)
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
+                           local_address_s)
   this->local_address_.set(local_address_s.c_str());
 
   return 0;
@@ -48,8 +48,8 @@ UdpInst::dump(std::ostream& os)
 {
   TransportInst::dump(os);
 
-  os << formatNameForDump(ACE_TEXT("local_address")) << this->local_address_.get_host_addr()
-                                                     << ":" << this->local_address_.get_port_number() << std::endl;
+  os << formatNameForDump("local_address") << this->local_address_.get_host_addr()
+                                           << ":" << this->local_address_.get_port_number() << std::endl;
 }
 
 } // namespace DCPS

@@ -171,7 +171,7 @@ OpenDDS::Model::Delegate::createWriter(
   const std::string& transportConfig
 )
 {
-  // If we specify a transport and have autoenable modeled, 
+  // If we specify a transport and have autoenable modeled,
   // temporarily turn off autoenabling
   bool overridden = false;
   bool transportSpecified = !transportConfig.empty();
@@ -254,7 +254,7 @@ OpenDDS::Model::Delegate::createReader(
   const std::string&     transportConfig
 )
 {
-  // If we specify a transport and have autoenable modeled, 
+  // If we specify a transport and have autoenable modeled,
   // temporarily turn off autoenabling
   bool overridden = false;
   bool transportSpecified = !transportConfig.empty();

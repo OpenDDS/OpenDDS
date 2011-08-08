@@ -114,7 +114,7 @@ namespace OpenDDS { namespace Model {
 
       bool override_autoenabled_qos(DDS::Publisher* publisher);
       bool override_autoenabled_qos(DDS::Subscriber* subscriber);
-      
+
       void restore_autoenabled_qos(DDS::Publisher* publisher);
       void restore_autoenabled_qos(DDS::Subscriber* subscriber);
   };

@@ -88,6 +88,35 @@ class ACE_Data_Block;
     }                                                                            \
   }
 
+#define GET_CONFIG_TSTRING_VALUE(CF, SECT, KEY, VALUE)                           \
+  {                                                                              \
+    ACE_TString stringvalue;                                                     \
+    if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
+    {                                                                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
+      {                                                                          \
+        ACE_DEBUG ((LM_NOTICE,                                                   \
+                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is not defined in config ") \
+                    ACE_TEXT ("file - using code default.\n"),                   \
+                    KEY));                                                       \
+      }                                                                          \
+    }                                                                            \
+    else if (stringvalue == ACE_TEXT(""))                                        \
+    {                                                                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
+      {                                                                          \
+        ACE_DEBUG ((LM_WARNING,                                                  \
+                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
+                    ACE_TEXT ("file, but is missing value - using code default.\n"), \
+                    KEY));                                                       \
+      }                                                                          \
+    }                                                                            \
+    else                                                                         \
+    {                                                                            \
+      VALUE = stringvalue;                                                       \
+    }                                                                            \
+  }
+
 #define GET_CONFIG_DOUBLE_VALUE(CF, SECT, KEY, VALUE)                            \
   {                                                                              \
     ACE_TString stringvalue;                                                     \

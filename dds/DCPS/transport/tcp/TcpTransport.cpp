@@ -222,7 +222,7 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
         this->blob_to_key(ce.remote_association_.remote_data_[idx].data,
                           ce.priority_, false /*active == false*/);
 
-      TcpDataLink_rch link = 
+      TcpDataLink_rch link =
         new TcpDataLink(key.address(), this, ce.priority_,
                         key.is_loopback(), false /*active == false*/);
       {

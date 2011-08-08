@@ -177,7 +177,7 @@ private:
                            const AssociationData& remote_association,
                            CORBA::Long priority, bool active, bool connect);
 
-protected:
+public:
   typedef ACE_SYNCH_MUTEX                ReservationLockType;
   typedef ACE_Guard<ReservationLockType> ReservationGuardType;
   /// Called by our friends, the TransportClient, and the DataLink.
@@ -194,7 +194,6 @@ protected:
   void create_reactor_task();
 
 private:
-
   /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference
   /// to a TransportInterfaceInfo object that will be "populated"

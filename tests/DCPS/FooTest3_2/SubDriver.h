@@ -41,7 +41,7 @@ class SubDriver
     ::DDS::DataReader_var        datareader_;
     ::Xyz::FooDataReader_var     foo_datareader_;
 
-    DataReaderListenerImpl*      listener_;    
+    DataReaderListenerImpl*      listener_;
 };
 
 #endif

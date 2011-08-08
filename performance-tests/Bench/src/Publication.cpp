@@ -298,7 +298,7 @@ Publication::enable(
   }
 
   // Attach the transport
-  TheTransportRegistry->bind_config(transport, publisher_); 
+  TheTransportRegistry->bind_config(transport, publisher_);
 
   if (this->verbose_) {
     ACE_DEBUG((LM_DEBUG,

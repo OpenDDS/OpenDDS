@@ -50,7 +50,7 @@ class SubDriver
     ::Xyz::FooDataReader_var     foo_datareader_;
 
     DataReaderListenerImpl*      listener_;
-    
+
 };
 
 #endif

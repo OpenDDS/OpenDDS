@@ -224,7 +224,8 @@ PubDriver::run()
   subscription.remote_data_.length(1);
   subscription.remote_data_[0].transport_type = "tcp";
 
-  OpenDDS::DCPS::NetworkAddress network_order_address(this->sub_addr_str_.c_str());
+  OpenDDS::DCPS::NetworkAddress network_order_address(
+    ACE_TEXT_ALWAYS_CHAR(this->sub_addr_str_.c_str()));
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;

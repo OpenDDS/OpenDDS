@@ -98,7 +98,7 @@ Service_Participant::Service_Participant()
 #endif
     ),
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
-    global_transport_config_(""),
+    global_transport_config_(ACE_TEXT("")),
     monitor_factory_(0),
     monitor_(0),
     federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
@@ -1152,7 +1152,7 @@ Service_Participant::init_bit_transport_config()
   TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
 
   tcp_inst->datalink_release_delay_ = 0;
-  if (this->bit_transport_ip_ == "") {
+  if (this->bit_transport_ip_ == ACE_TEXT("")) {
     tcp_inst->local_address_.set_port_number(this->bit_transport_port_);
   } else {
     tcp_inst->local_address_ = ACE_INET_Addr(this->bit_transport_port_,
@@ -1288,10 +1288,11 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = TransportRegistry::instance()->load_transport_configuration(config_fname.c_str(), this->cf_);
-  if (this->global_transport_config_ != "") {
-    TransportConfig_rch config =
-      TransportRegistry::instance()->get_config(this->global_transport_config_.c_str());
+  status = TransportRegistry::instance()->load_transport_configuration(
+             ACE_TEXT_ALWAYS_CHAR(config_fname.c_str()), this->cf_);
+  if (this->global_transport_config_ != ACE_TEXT("")) {
+    TransportConfig_rch config = TransportRegistry::instance()->get_config(
+      ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
     if (config == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
@@ -1344,7 +1345,7 @@ Service_Participant::load_common_configuration()
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSInfoRepo value from command option (overrides value if it's in config file).\n")));
     } else {
       ACE_TString value;
-      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSInfoRepo"), value)
+      GET_CONFIG_TSTRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSInfoRepo"), value)
       if (!value.empty()) {
         this->set_repo_ior(value.c_str(), DEFAULT_REPO);
       }
@@ -1375,7 +1376,7 @@ Service_Participant::load_common_configuration()
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSBitTransportIPAddress value from command option (overrides value if it's in config file).\n")));
     } else {
-      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bit_transport_ip_)
+      GET_CONFIG_TSTRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bit_transport_ip_)
     }
 
     if (got_liveliness_factor) {
@@ -1396,7 +1397,7 @@ Service_Participant::load_common_configuration()
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSGlobalTransportConfig value from command option (overrides value if it's in config file).\n")));
     } else {
-      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSGlobalTransportConfig"), this->global_transport_config_);
+      GET_CONFIG_TSTRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSGlobalTransportConfig"), this->global_transport_config_);
       if (this->global_transport_config_ == ACE_TEXT("$file")) {
         // When the special string of "$file" is used, substitute the file name
         this->global_transport_config_ = config_fname;
@@ -1422,7 +1423,7 @@ Service_Participant::load_common_configuration()
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSPersistentDataDir value from command option (overrides value if it's in config file).\n")));
     } else {
       ACE_TString value;
-      GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSPersistentDataDir"), value)
+      GET_CONFIG_TSTRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSPersistentDataDir"), value)
       this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(value.c_str());
     }
 
@@ -1454,7 +1455,7 @@ Service_Participant::load_common_configuration()
     //
     // Establish the scheduler if specified.
     //
-    GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
+    GET_CONFIG_TSTRING_VALUE(this->cf_, sect, ACE_TEXT("scheduler"), this->schedulerString_)
 
     suseconds_t usec(0);
 

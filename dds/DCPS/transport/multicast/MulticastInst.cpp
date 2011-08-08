@@ -83,8 +83,8 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
                    this->port_offset_, u_short)
 
   ACE_TString group_address_s;
-  GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("group_address"),
-                          group_address_s)
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("group_address"),
+                           group_address_s)
   if (group_address_s.is_empty()) {
     // TODO: Passing 0 instead of transport id.  Does this cause complications?
     default_group_address(this->group_address_, 0);

@@ -32,7 +32,7 @@ OpenDDS::Model::Entities::registerTypes( const std::string& participant,
     return;
   }
 
-  DDS::DomainParticipant_var p = this->participant(participant, 
+  DDS::DomainParticipant_var p = this->participant(participant,
                                                    transportConfig);
   if( !p) {
     return;
@@ -127,7 +127,7 @@ OpenDDS::Model::Entities::topic(
   TopicProfile* profile = where->second;
 
   // Find the containing participant.
-  DDS::DomainParticipant_var p = this->participant(participant, 
+  DDS::DomainParticipant_var p = this->participant(participant,
                                                    transportConfig);
   if( !p) {
     ACE_ERROR((LM_ERROR,
@@ -325,7 +325,7 @@ OpenDDS::Model::Entities::writer(
   WriterProfile* profile = where->second;
 
   // Find the containing Publisher.
-  DDS::Publisher_var publisher = this->publisher(profile->publisher, 
+  DDS::Publisher_var publisher = this->publisher(profile->publisher,
                                                  transportConfig);
   if( !publisher) {
     ACE_ERROR((LM_ERROR,
@@ -355,7 +355,7 @@ OpenDDS::Model::Entities::writer(
 
   // Find the Topic.
   DDS::Topic_var topic
-    = this->topic( profile->topic, 
+    = this->topic( profile->topic,
                    publisherProfile->participant,
                    transportConfig);
   if( !topic) {
@@ -454,7 +454,7 @@ OpenDDS::Model::Entities::reader(
 
   // Find the Topic.
   DDS::Topic_var topic
-    = this->topic(profile->topic, 
+    = this->topic(profile->topic,
                   subscriberProfile->participant,
                   transportConfig);
   if( !topic) {

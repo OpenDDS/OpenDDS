@@ -27,7 +27,7 @@
 #include <sstream>
 
 namespace {
-  const ACE_TString OLD_TRANSPORT_PREFIX = "transport_";
+  const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
 
   /// Helper types and functions for config file parsing
   typedef std::map<std::string, std::string> ValueMap;
@@ -71,7 +71,8 @@ namespace {
       ACE_TString value;
       if (type == ACE_Configuration::STRING) {
         cf.get_string_value( key, name.c_str(), value );
-        values[name.c_str()] = value.c_str();
+        values[ACE_TEXT_ALWAYS_CHAR(name.c_str())] =
+          ACE_TEXT_ALWAYS_CHAR(value.c_str());
       } else {
         ACE_DEBUG((LM_WARNING, "Unexpected value type in config file (ignored): "
                    "name=%s, type=%d\n", name.c_str(), type));
@@ -106,8 +107,8 @@ namespace {
     while (cf.enumerate_sections( key, index, name ) == 0) {
       ACE_Configuration_Section_Key subkey;
       cf.open_section( key, name.c_str(), 0, subkey );
-      subsections.push_back( SubsectionPair( name.c_str(), subkey ) );
-
+      subsections.push_back( SubsectionPair( ACE_TEXT_ALWAYS_CHAR(name.c_str()),
+                                             subkey ) );
       int subindex = 0;
       ACE_TString subname;
       if (cf.enumerate_sections( subkey, subindex, subname ) == 0) {
@@ -491,7 +492,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
 }
 
 
-TransportConfig_rch 
+TransportConfig_rch
 TransportRegistry::fix_empty_default()
 {
   DBG_ENTRY_LVL("TransportRegistry", "fix_empty_default", 6);

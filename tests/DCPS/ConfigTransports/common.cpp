@@ -30,19 +30,19 @@
 
 Options::Options() :
         test_duration(40),
-        test_duration_str(ACE_TEXT("40")),
-        LEASE_DURATION_STR(ACE_TEXT("infinite")),
+        test_duration_str("40"),
+        LEASE_DURATION_STR("infinite"),
         reliability_kind(::DDS::BEST_EFFORT_RELIABILITY_QOS),
-        reliability_kind_str(ACE_TEXT("best_effort")),
+        reliability_kind_str("best_effort"),
         durability_kind(::DDS::TRANSIENT_LOCAL_DURABILITY_QOS),
-        durability_kind_str(ACE_TEXT("transient_local")),
+        durability_kind_str("transient_local"),
         liveliness_kind(::DDS::AUTOMATIC_LIVELINESS_QOS),
-        liveliness_kind_str(ACE_TEXT("automatic")),
+        liveliness_kind_str("automatic"),
         compatible(false),
         entity_autoenable(true),
-        entity_str(ACE_TEXT("none")),
-        collocation_str(ACE_TEXT("none")),
-        configuration_str(ACE_TEXT("none"))
+        entity_str("none"),
+        collocation_str("none"),
+        configuration_str("none")
 {
   LEASE_DURATION.sec = ::DDS::DURATION_INFINITE_SEC;
   LEASE_DURATION.nanosec = ::DDS::DURATION_INFINITE_NSEC;
@@ -65,18 +65,18 @@ Options::Options() :
 
 Options::Options(int argc, ACE_TCHAR *argv[]) :
         test_duration(40),
-        test_duration_str(ACE_TEXT("40")),
+        test_duration_str("40"),
         reliability_kind(::DDS::BEST_EFFORT_RELIABILITY_QOS),
-        reliability_kind_str(ACE_TEXT("best_effort")),
+        reliability_kind_str("best_effort"),
         durability_kind(::DDS::TRANSIENT_LOCAL_DURABILITY_QOS),
-        durability_kind_str(ACE_TEXT("transient_local")),
+        durability_kind_str("transient_local"),
         liveliness_kind(::DDS::AUTOMATIC_LIVELINESS_QOS),
-        liveliness_kind_str(ACE_TEXT("automatic")),
+        liveliness_kind_str("automatic"),
         compatible(false),
         entity_autoenable(true),
-        entity_str(ACE_TEXT("none")),
-        collocation_str(ACE_TEXT("none")),
-        configuration_str(ACE_TEXT("none"))
+        entity_str("none"),
+        collocation_str("none"),
+        configuration_str("none")
 {
   u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
@@ -94,27 +94,27 @@ Options::Options(int argc, ACE_TCHAR *argv[]) :
 
       if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
         {
-          this->protocol_str.push_back(currentArg);
+          this->protocol_str.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
         {
-          this->entity_autoenable = this->get_entity_autoenable_kind(currentArg);
+          this->entity_autoenable = this->get_entity_autoenable_kind(ACE_TEXT_ALWAYS_CHAR(currentArg));
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-e"))) != 0)
         {
-          this->entity_str = this->get_entity_kind(currentArg);
+          this->entity_str = this->get_entity_kind(ACE_TEXT_ALWAYS_CHAR(currentArg));
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
         {
-          this->collocation_str = this->get_collocation_kind(currentArg);
+          this->collocation_str = this->get_collocation_kind(ACE_TEXT_ALWAYS_CHAR(currentArg));
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
         {
-          this->configuration_str = currentArg;
+          this->configuration_str = ACE_TEXT_ALWAYS_CHAR(currentArg);
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
@@ -125,25 +125,25 @@ Options::Options(int argc, ACE_TCHAR *argv[]) :
       else if (0 == arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-d")))
         {
 
-          this->durability_kind_str = arg_shifter.get_the_parameter(ACE_TEXT("-d"));
+          this->durability_kind_str = ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_the_parameter(ACE_TEXT("-d")));
           this->durability_kind = this->get_durability_kind(this->durability_kind_str);
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0)
         {
-          this->liveliness_kind_str = currentArg;
+          this->liveliness_kind_str = ACE_TEXT_ALWAYS_CHAR(currentArg);
           this->liveliness_kind = this->get_liveliness_kind(this->liveliness_kind_str);
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
         {
-          this->LEASE_DURATION_STR = currentArg;
+          this->LEASE_DURATION_STR = ACE_TEXT_ALWAYS_CHAR(currentArg);
           this->LEASE_DURATION = this->get_lease_duration(this->LEASE_DURATION_STR);
           arg_shifter.consume_arg();
         }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
         {
-          this->reliability_kind_str = currentArg;
+          this->reliability_kind_str = ACE_TEXT_ALWAYS_CHAR(currentArg);
           this->reliability_kind = this->get_reliability_kind(this->reliability_kind_str);
           arg_shifter.consume_arg();
         }
@@ -166,19 +166,19 @@ Options::~Options() { }
 const std::string&
 Options::get_collocation_kind(const std::string& argument)
 {
-  if (argument == ACE_TEXT("none"))
+  if (argument == "none")
     {
       return argument;
     }
-  else if (argument == ACE_TEXT("process"))
+  else if (argument == "process")
     {
       return argument;
     }
-  else if (argument == ACE_TEXT("participant"))
+  else if (argument == "participant")
     {
       return argument;
     }
-  else if (argument == ACE_TEXT("pubsub"))
+  else if (argument == "pubsub")
     {
       return argument;
     }
@@ -188,19 +188,19 @@ Options::get_collocation_kind(const std::string& argument)
 const std::string&
 Options::get_entity_kind(const std::string& argument)
 {
-  if (argument == ACE_TEXT("none"))
+  if (argument == "none")
     {
       return argument;
     }
-  else if (argument == ACE_TEXT("rw"))
+  else if (argument == "rw")
     {
       return argument;
     }
-  else if (argument == ACE_TEXT("pubsub"))
+  else if (argument == "pubsub")
     {
       return argument;
     }
-  else if (argument == ACE_TEXT("participant"))
+  else if (argument == "participant")
     {
       return argument;
     }
@@ -210,19 +210,19 @@ Options::get_entity_kind(const std::string& argument)
 bool
 Options::get_entity_autoenable_kind(const std::string& argument)
 {
-  if (argument == ACE_TEXT("yes"))
+  if (argument == "yes")
     {
       return true;
     }
-  else if (argument == ACE_TEXT("true"))
+  else if (argument == "true")
     {
       return true;
     }
-  else if (argument == ACE_TEXT("no"))
+  else if (argument == "no")
     {
       return false;
     }
-  else if (argument == ACE_TEXT("false"))
+  else if (argument == "false")
     {
       return false;
     }
@@ -232,15 +232,15 @@ Options::get_entity_autoenable_kind(const std::string& argument)
 ::DDS::LivelinessQosPolicyKind
 Options::get_liveliness_kind(const std::string& argument)
 {
-  if (argument == ACE_TEXT("automatic"))
+  if (argument == "automatic")
     {
       return ::DDS::AUTOMATIC_LIVELINESS_QOS;
     }
-  else if (argument == ACE_TEXT("participant"))
+  else if (argument == "participant")
     {
       return ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
     }
-  else if (argument == ACE_TEXT("topic"))
+  else if (argument == "topic")
     {
       return ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
     }
@@ -250,19 +250,19 @@ Options::get_liveliness_kind(const std::string& argument)
 ::DDS::DurabilityQosPolicyKind
 Options::get_durability_kind(const std::string& argument)
 {
-  if (argument == ACE_TEXT("volatile"))
+  if (argument == "volatile")
     {
       return ::DDS::VOLATILE_DURABILITY_QOS;
     }
-  else if (argument == ACE_TEXT("transient_local"))
+  else if (argument == "transient_local")
     {
       return ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
-  else if (argument == ACE_TEXT("transient"))
+  else if (argument == "transient")
     {
       return ::DDS::TRANSIENT_DURABILITY_QOS;
     }
-  else if (argument == ACE_TEXT("persistent"))
+  else if (argument == "persistent")
     {
       return ::DDS::PERSISTENT_DURABILITY_QOS;
     }
@@ -274,11 +274,11 @@ Options::get_durability_kind(const std::string& argument)
 ::DDS::ReliabilityQosPolicyKind
 Options::get_reliability_kind(const std::string& argument)
 {
-  if (argument == ACE_TEXT("best_effort"))
+  if (argument == "best_effort")
     {
       return ::DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
-  else if (argument == ACE_TEXT("reliable"))
+  else if (argument == "reliable")
     {
       return ::DDS::RELIABLE_RELIABILITY_QOS;
     }
@@ -289,7 +289,7 @@ Options::get_reliability_kind(const std::string& argument)
 Options::get_lease_duration(const std::string& argument)
 {
   ::DDS::Duration_t lease;
-  if (argument == ACE_TEXT("infinite"))
+  if (argument == "infinite")
     {
       lease.sec = ::DDS::DURATION_INFINITE_SEC;
       lease.nanosec = ::DDS::DURATION_INFINITE_NSEC;

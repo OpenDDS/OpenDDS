@@ -449,7 +449,7 @@ public:
    * Get an instance handle for a new instance.
    */
   DDS::InstanceHandle_t get_next_handle();
-  
+
   virtual EntityImpl* parent() const;
 
 protected:

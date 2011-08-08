@@ -279,7 +279,7 @@ TransportClient::send(const DataSampleList& samples)
     // DataSampleListElement (pointer) from the current element now,
     // while it is safe.
     DataSampleListElement* next_elem = cur->next_send_sample_;
-    DataLinkSet_rch pub_links = 
+    DataLinkSet_rch pub_links =
       (cur->num_subs_ > 0)
       ? links_.select_links(cur->subscription_ids_, cur->num_subs_)
       : DataLinkSet_rch(&links_, false);

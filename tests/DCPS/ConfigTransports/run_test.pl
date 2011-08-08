@@ -347,7 +347,7 @@ sub run($$$$) {
 
 sub command($$$) {
 
-  my ($pub_process, $pub_parameters, $debug) = @_; 
+  my ($pub_process, $pub_parameters, $debug) = @_;
 
   if ($debug != 0) {
     open(FF1, '>/tmp/$pub_process.gdb');
@@ -408,7 +408,7 @@ for my $hasbuiltins (undef, true) {
     }
 
     if (0 != finalize($DCPSREPO)) {
-      $failed++; 
+      $failed++;
     }
 }
 
