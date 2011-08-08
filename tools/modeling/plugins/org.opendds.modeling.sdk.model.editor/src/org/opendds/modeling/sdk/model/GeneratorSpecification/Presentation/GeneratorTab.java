@@ -305,6 +305,7 @@ public class GeneratorTab extends StructuredViewer {
 			}
 			IStatusLineManager statusLineManager = editor.getActionBars().getStatusLineManager();
 
+                        generator.setSourceName(editor.getPartName());
 			String msg = generator.validate();
 			if (msg != null) {
 				statusLineManager.setErrorMessage("Code Generation: " + msg);			   
