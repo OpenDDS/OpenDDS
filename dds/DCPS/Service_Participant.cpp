@@ -1169,7 +1169,6 @@ Service_Participant::init_bit_transport_config()
   return 0;
 
 #else
-  ACE_UNUSED_ARG(domain);
   return -1;
 #endif // DDS_HAS_MINIMUM_BIT
 }

@@ -250,7 +250,9 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
 
   if (ready_link.is_nil()) {
     for (size_t i = 0; i < keys.size(); ++i) {
-      this->pending_connections_.insert(std::make_pair(&ce, keys[i]));
+      this->pending_connections_.insert(
+        std::pair<ConnectionEvent* const, PriorityKey>(&ce, keys[i]));
+      // SunCC doesn't like using make_pair() here.
     }
     return 0; // no link ready, passive_connection will signal the event later
   }

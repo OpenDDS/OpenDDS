@@ -1,3 +1,14 @@
+Mon Aug  8 19:17:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+
+          Fixed for built_in_topics=0.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed for SunCC.
+
 Mon Aug  8 19:07:36 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
