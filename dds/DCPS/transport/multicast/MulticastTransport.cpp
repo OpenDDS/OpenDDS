@@ -135,31 +135,38 @@ MulticastTransport::make_datalink(const RepoId& local_id,
     this->config_i_->group_address_.addr_to_string(str, sizeof(str));
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
+                      ACE_TEXT("MulticastTransport::make_datalink: ")
                       ACE_TEXT("failed to join multicast group: %C!\n"),
                       str),
                      0);
   }
+  return link._retn();
+}
 
+bool
+MulticastTransport::start_session(const MulticastDataLink_rch& link,
+                                  MulticastPeer remote_peer, bool active)
+{
   MulticastSession_rch session = link->find_or_create_session(remote_peer);
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::find_or_create_datalink: ")
+                      ACE_TEXT("MulticastTransport::start_session: ")
                       ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     0);
+                     false);
   }
 
   if (!session->start(active)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticasTransport::find_or_create_datalink: ")
+                      ACE_TEXT("MulticastTransport::start_session: ")
                       ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     0);
+                     false);
   }
-  return link._retn();
+
+  return true;
 }
 
 DataLink*
@@ -168,9 +175,15 @@ MulticastTransport::connect_datalink_i(const RepoId& local_id,
                                        const TransportBLOB& /*remote_data*/,
                                        CORBA::Long priority)
 {
-  MulticastDataLink_rch link =
-    this->make_datalink(local_id, remote_id, priority, true /*active*/);
-  this->client_link_ = link;
+  MulticastDataLink_rch link;
+  if (this->client_link_.is_nil()) {
+    link = this->make_datalink(local_id, remote_id, priority, true /*active*/);
+    this->client_link_ = link;
+  }
+  if (!this->start_session(link, RepoIdConverter(remote_id).participantId(),
+                           true /*active*/)) {
+    return 0; // already logged in start_session()
+  }
   return link._retn();
 }
 
@@ -179,14 +192,21 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
 {
   const std::string ttype = "multicast";
   const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
+  const RepoId& remote_id = ce.remote_association_.remote_id_;
+  MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
 
   for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
     if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
 
-      MulticastDataLink_rch link =
-        this->make_datalink(ce.local_id_, ce.remote_association_.remote_id_,
-                            ce.priority_, false /*!active*/);
-      this->server_link_ = link;
+      MulticastDataLink_rch link;
+      if (this->server_link_.is_nil()) {
+        link = this->make_datalink(ce.local_id_, remote_id,
+                                   ce.priority_, false /*!active*/);
+        this->server_link_ = link;
+      }
+      if (!this->start_session(link, remote_peer, false /*!active*/)) {
+        return 0; // already logged in start_session()
+      }
       return link._retn();
     }
   }

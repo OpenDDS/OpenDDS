@@ -1,3 +1,11 @@
+Tue Aug  9 22:03:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Use a separate method for start_session() instead of starting
+          the session inside make_datalink().
+
 Tue Aug  9 20:41:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.h:

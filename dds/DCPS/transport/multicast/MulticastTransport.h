@@ -60,6 +60,9 @@ private:
                                    CORBA::Long priority,
                                    bool active);
 
+  bool start_session(const MulticastDataLink_rch& link,
+                     MulticastPeer remote_peer, bool active);
+
   RcHandle<MulticastInst> config_i_;
 
   /// link for pubs.
