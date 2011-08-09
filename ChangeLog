@@ -1,3 +1,9 @@
+Tue Aug  9 19:41:29 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Prefix config name and transport inst name with model name.
+
 Tue Aug  9 18:54:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/migrations/v1tov2.rb:
