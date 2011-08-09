@@ -1,3 +1,9 @@
+Tue Aug  9 17:07:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Traits - don't assume TransportConfig has not been registered.
+
 Tue Aug  9 15:40:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedGeneratorFile.java:

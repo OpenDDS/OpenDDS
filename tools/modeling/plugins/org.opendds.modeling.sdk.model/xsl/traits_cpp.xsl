@@ -128,22 +128,33 @@
     <xsl:variable name="config-varname" select="concat(@name, '_cfg')"/>
     <xsl:value-of select="concat(
         '  OpenDDS::DCPS::TransportConfig_rch ', $config-varname, ' =', $newline,
-        '      TheTransportRegistry->create_config(&quot;', $config-name, 
+        '      TheTransportRegistry->get_config(&quot;', $config-name, 
+        '&quot;);', $newline
+    )"/>
+    <xsl:value-of select="concat(
+        '  if (', $config-varname, '.is_nil()) {', $newline
+    )"/>
+    <xsl:value-of select="concat(
+        '    ', $config-varname,
+        ' = TheTransportRegistry->create_config(&quot;', $config-name, 
         '&quot;);', $newline
     )"/>
     <xsl:for-each select="*[name() != 'transportRef']">
-      <xsl:value-of select="concat('  ', $config-varname, '->', name(), '_ = ', 
+      <xsl:value-of select="concat('    ', $config-varname, '->', name(), '_ = ', 
                                    @value, ';', $newline)"/>
     </xsl:for-each>
 
     <xsl:for-each select="transportRef">
       <xsl:variable name="ref-varname" select="concat(
           $transportInsts[@xmi:id = current()/@transport]/@name, '_inst')"/>
-      <xsl:value-of select="concat('  ', $config-varname, 
+      <xsl:value-of select="concat('    ', $config-varname, 
                                  '->instances_.push_back(', $ref-varname, 
                                  ');', $newline
       )"/>
     </xsl:for-each>
+    <xsl:value-of select="concat(
+        '  }', $newline
+    )"/>
   </xsl:for-each>
 <xsl:text>
 }
@@ -196,29 +207,12 @@
 
 </xsl:template>
 
-<!-- Transports for the instance, output case which creates and
-     registers configuration... -->
-<xsl:template match="transport">
-  <xsl:variable name="type">
-    <xsl:call-template name="transport-type"/>
-  </xsl:variable>
-
-  <xsl:variable name="label" select="../transportOffset/@value + @transportIndex"/>
-  <xsl:value-of select="concat('      case ', $label, ':', $newline)"/>
-  <!--
-  <xsl:call-template name="loadTransportLibraries"/>
-  -->
-  <xsl:value-of select="concat('        transport_type = ACE_TEXT(&quot;', $type, '&quot;);', $newline)"/>
-  <xsl:text>        config = TheTransportFactory->create_configuration(id, transport_type);
-</xsl:text>
-  <xsl:apply-templates/>
-  <xsl:value-of select="concat('        break;', $newline, $newline)"/>
-</xsl:template>
-
+<!--
 <xsl:template match="swap_bytes">
-  <xsl:value-of select="concat('    child_inst->swap_bytes_ = ', 
+  <xsl:value-of select="concat('      child_inst->swap_bytes_ = ', 
                                @value, ';', $newline)"/>
 </xsl:template>
+-->
 
 <!-- Output general configuration settings -->
 <xsl:template match="queue_messages_per_pool 
