@@ -28,6 +28,9 @@ class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
 public:
   explicit UdpTransport(const TransportInst_rch& inst);
 
+  void passive_connection(const ACE_INET_Addr& remote_address,
+                          ACE_Message_Block* data);
+
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,

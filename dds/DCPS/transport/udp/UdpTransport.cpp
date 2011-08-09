@@ -217,5 +217,19 @@ UdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
   }
 }
 
+void
+UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
+                                 ACE_Message_Block* data)
+{
+  //TODO: Demarshal 'data' to recover the remote side's PriorityKey
+  //      and update local data structures.
+
+  // Send an ack so that the active side can return from connect_datalink_i().
+  // This is just a single byte of arbitrary data, the remote side is not yet
+  // using the framework (TransportHeader, DataSampleHeader, ReceiveStrategy).
+  const char ack_data = 23;
+  this->server_link_->socket().send(&ack_data, 1, remote_address);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

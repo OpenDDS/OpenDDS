@@ -44,11 +44,15 @@ UdpReceiveStrategy::receive_bytes(iovec iov[],
 
 void
 UdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
-                                   const ACE_INET_Addr& /*remote_address*/)
+                                   const ACE_INET_Addr& remote_address)
 {
-  switch(sample.header_.message_id_) {
+  switch (sample.header_.message_id_) {
   case SAMPLE_ACK:
     this->link_->ack_received(sample);
+    break;
+
+  case TRANSPORT_CONTROL:
+    this->link_->control_received(sample, remote_address);
     break;
 
   default:

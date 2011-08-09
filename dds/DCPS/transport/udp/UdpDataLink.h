@@ -27,6 +27,7 @@ namespace DCPS {
 
 class UdpInst;
 class UdpTransport;
+class ReceivedDataSample;
 
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
@@ -52,6 +53,9 @@ public:
   ACE_SOCK_Dgram& socket();
 
   bool open(const ACE_INET_Addr& remote_address);
+
+  void control_received(ReceivedDataSample& sample,
+                        const ACE_INET_Addr& remote_address);
 
 protected:
   bool active_;

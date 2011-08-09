@@ -1,3 +1,15 @@
+Tue Aug  9 15:28:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Allow for receipt of TRANSPORT_CONTROL messages in Udp.
+          Pass the data back up to UdpTransport and send an ack.
+          This feature is not used until Paul commits the sending side.
+
 Tue Aug  9 14:59:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:

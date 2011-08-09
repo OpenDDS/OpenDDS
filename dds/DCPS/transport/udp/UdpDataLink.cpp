@@ -126,6 +126,19 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 }
 
 void
+UdpDataLink::control_received(ReceivedDataSample& sample,
+                              const ACE_INET_Addr& remote_address)
+{
+  TransportImpl_rch impl = this->impl();
+  RcHandle<UdpTransport> ut = static_rchandle_cast<UdpTransport>(impl);
+  // At this time, the TRANSPORT_CONTROL messages in Udp are only used for
+  // the connection handshaking, so receiving one is an indication of the
+  // passive_connection event.  In the future the submessage_id_ could be used
+  // to allow different types of messages here.
+  ut->passive_connection(remote_address, sample.sample_);
+}
+
+void
 UdpDataLink::stop_i()
 {
   this->socket_.close();
