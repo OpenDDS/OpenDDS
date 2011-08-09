@@ -168,6 +168,8 @@ jobject constructTransportInst(JNIEnv *jni,
       instClazz = findClass(jni, "OpenDDS/DCPS/transport/UdpInst");
     } else if (inst->transport_type_ == "multicast") {
       instClazz = findClass(jni, "OpenDDS/DCPS/transport/MulticastInst");
+    } else {
+      throw_java_exception(jni, OpenDDS::DCPS::Transport::UnableToCreate());
     }
     jmethodID ctor = jni->GetMethodID(instClazz, "<init>", "(J)V");
     return jni->NewObject(instClazz, ctor,

@@ -38,7 +38,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == participant) {
+    if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_participant failed!\n")), -1);
@@ -63,7 +63,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                 0,
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == topic) {
+    if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_topic failed!\n")), -1);
@@ -75,7 +75,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                      0,
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == subscriber) {
+    if (!subscriber) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_subscriber failed!\n")), -1);
@@ -90,7 +90,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                              listener,
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == reader) {
+    if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_datareader failed!\n")), -1);
@@ -99,7 +99,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Messenger::MessageDataReader_var reader_i =
       Messenger::MessageDataReader::_narrow(reader);
 
-    if (0 == reader_i) {
+    if (!reader_i) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),

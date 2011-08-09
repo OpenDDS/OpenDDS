@@ -571,7 +571,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
   GuardType guard(this->connections_lock_);
   TcpDataLink_rch link;
-  ConnectionEvent* evt;
+  ConnectionEvent* evt = 0;
   typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
   for (iter_t iter = this->pending_connections_.begin();
        iter != pending_connections_.end(); ++iter) {

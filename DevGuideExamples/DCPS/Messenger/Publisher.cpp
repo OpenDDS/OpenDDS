@@ -37,7 +37,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == participant) {
+    if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_participant failed!\n")),
@@ -64,7 +64,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                 0,
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == topic) {
+    if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_topic failed!\n")),
@@ -77,7 +77,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                     0,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == publisher) {
+    if (!publisher) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_publisher failed!\n")),
@@ -91,7 +91,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                    0,
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (0 == writer) {
+    if (!writer) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_datawriter failed!\n")),
@@ -101,7 +101,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Messenger::MessageDataWriter_var message_writer =
       Messenger::MessageDataWriter::_narrow(writer);
 
-    if (0 == message_writer) {
+    if (!message_writer) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),

@@ -77,9 +77,9 @@ namespace { // anonymous namespace for file scope.
                 transportInfo;
 
   } transportTypeArgMappings[] = {
-    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, "tcp1") },
-    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, "udp1") },
-    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  "mcast1") }
+    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, std::string("tcp1")) },
+    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, std::string("udp1")) },
+    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  std::string("mcast1")) }
   };
 
 } // end of anonymous namespace.

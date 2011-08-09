@@ -1430,7 +1430,7 @@ Service_Participant::load_common_configuration()
       ACE_DEBUG((LM_NOTICE,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSPendingTimeout value from command option (overrides value if it's in config file).\n")));
     } else {
-      int timeout;
+      int timeout = 0;
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSPendingTimeout"), timeout, int)
       this->pending_timeout_ = timeout;
     }
