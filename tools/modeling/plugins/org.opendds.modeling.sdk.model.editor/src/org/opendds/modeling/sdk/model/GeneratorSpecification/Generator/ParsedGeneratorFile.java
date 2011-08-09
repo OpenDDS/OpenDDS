@@ -4,7 +4,6 @@ import javax.xml.transform.Source;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.IErrorHandler.Severity;
 import org.w3c.dom.NodeList;
 
 public class ParsedGeneratorFile extends ParsedXmlFile implements IGeneratorModel {
