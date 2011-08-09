@@ -1,3 +1,11 @@
+Tue Aug  9 18:18:56 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+
+	  Change that should have been part of "Tue Aug  9 14:45:00 UTC 2011"
+	  commit. Thanks to Adam Mitz for pointing out the unexpected
+	  diffs after code generation.
+
 Tue Aug  9 17:07:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
