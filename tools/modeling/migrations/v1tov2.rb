@@ -38,7 +38,7 @@ class Transport
   attr_accessor :transport_id
   def initialize id, type 
     @transport_id = id
-    @xmi_id = UUID.new.generate
+    @xmi_id = "_" + UUID.new.generate
     @text = []
     @type = type
   end
@@ -68,6 +68,8 @@ class GeneratorMigrator
     @transport_offset_re = /<transportOffset/
     @transport_open_re = /<transport transportIndex=['"]([^'"]*)['"]/
     @transport_close_re = /<\/transport>/
+    @new_transport_open_re = /<transport .*xmi:id=['"]([^'"]*)['"]/
+    @new_transport_ref_re = /<transportRef.*transport=['"]([^'"]*)['"]/
     @tcp_open_re = /<TCPTransport>/
     @tcp_close_re = /<\/TCPTransport>/
     @udp_open_re = /<UDPTransport>/
@@ -134,6 +136,19 @@ class GeneratorMigrator
     elsif line =~ @generator_close_re
       output_transports unless @has_transports # output transportInsts
       puts line
+    elsif results = @new_transport_open_re.match(line)
+      if results[1][0,1] == '_'
+        puts line # line is fine, leading underscore in NCName
+      else
+        puts line.sub(/xmi:id=['"][^'"]*['"]/, "xmi:id=\"_#{results[1]}\"")
+      end
+    elsif results = @new_transport_ref_re.match(line)
+      if results[1][0,1] == '_'
+        puts line # line is fine, leading underscore in NCName
+      else
+        puts line.sub(/transport=['"][^'"]*['"]/, "transport=\"_#{results[1]}\"")
+      end
+      
     elsif @current_transport
       @current_transport << line # save text for later output
     else

@@ -5,18 +5,18 @@
   <instances>
     <instance name="default">
       <config name="trans6">
-        <transportRef transport="041132e0-a42e-012e-9624-0017a4e90546"/>
+        <transportRef transport="_041132e0-a42e-012e-9624-0017a4e90546"/>
         <swap_bytes value="false"/>
       </config>
       <config name="trans8">
-        <transportRef transport="04113ca0-a42e-012e-9625-0017a4e90546"/>
+        <transportRef transport="_04113ca0-a42e-012e-9625-0017a4e90546"/>
         <swap_bytes value="false"/>
       </config>
     </instance>
   </instances>
   <searchPaths/>
   <transports>
-    <transport xsi:type="generator:UdpTransport" xmi:id="041132e0-a42e-012e-9624-0017a4e90546" name="trans6">
+    <transport xsi:type="generator:UdpTransport" xmi:id="_041132e0-a42e-012e-9624-0017a4e90546" name="trans6">
       <queue_messages_per_pool value="10"/>
       <queue_initial_pools value="10"/>
       <max_packet_size value="65533"/>
@@ -27,7 +27,7 @@
       <datalink_control_chunks value="32"/>
       <local_address_str value="&quot;localhost:52000&quot;"/>
     </transport>
-    <transport xsi:type="generator:UdpTransport" xmi:id="04113ca0-a42e-012e-9625-0017a4e90546" name="trans8">
+    <transport xsi:type="generator:UdpTransport" xmi:id="_04113ca0-a42e-012e-9625-0017a4e90546" name="trans8">
       <queue_messages_per_pool value="10"/>
       <queue_initial_pools value="10"/>
       <max_packet_size value="65533"/>

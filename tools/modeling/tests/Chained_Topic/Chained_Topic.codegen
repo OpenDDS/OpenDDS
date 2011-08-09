@@ -5,21 +5,21 @@
   <instances>
     <instance name="default">
       <config name="trans1">
-        <transportRef transport="02137630-a42e-012e-95d7-0017a4e90546"/>
+        <transportRef transport="_02137630-a42e-012e-95d7-0017a4e90546"/>
         <swap_bytes value="false"/>
         <passive_connect_duration value="0"/>
       </config>
       <config name="trans2">
-        <transportRef transport="02138340-a42e-012e-95d8-0017a4e90546"/>
+        <transportRef transport="_02138340-a42e-012e-95d8-0017a4e90546"/>
         <swap_bytes value="false"/>
       </config>
       <config name="trans3">
-        <transportRef transport="02138f80-a42e-012e-95d9-0017a4e90546"/>
+        <transportRef transport="_02138f80-a42e-012e-95d9-0017a4e90546"/>
         <swap_bytes value="false"/>
         <passive_connect_duration value="0"/>
       </config>
       <config name="trans4">
-        <transportRef transport="02139a70-a42e-012e-95da-0017a4e90546"/>
+        <transportRef transport="_02139a70-a42e-012e-95da-0017a4e90546"/>
         <swap_bytes value="false"/>
       </config>
     </instance>
@@ -39,7 +39,7 @@
     </searchLocation>
   </searchPaths>
   <transports>
-    <transport xsi:type="generator:TcpTransport" xmi:id="02137630-a42e-012e-95d7-0017a4e90546" name="trans1">
+    <transport xsi:type="generator:TcpTransport" xmi:id="_02137630-a42e-012e-95d7-0017a4e90546" name="trans1">
       <queue_messages_per_pool value="10"/>
       <queue_initial_pools value="10"/>
       <max_packet_size value="65536"/>
@@ -56,7 +56,7 @@
       <max_output_pause_period value="0"/>
       <passive_reconnect_duration value="2000"/>
     </transport>
-    <transport xsi:type="generator:MulticastTransport" xmi:id="02138340-a42e-012e-95d8-0017a4e90546" name="trans2">
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_02138340-a42e-012e-95d8-0017a4e90546" name="trans2">
       <queue_messages_per_pool value="10"/>
       <queue_initial_pools value="10"/>
       <max_packet_size value="65536"/>
@@ -78,7 +78,7 @@
       <ttl value="1"/>
       <rcv_buffer_size value="0"/>
     </transport>
-    <transport xsi:type="generator:TcpTransport" xmi:id="02138f80-a42e-012e-95d9-0017a4e90546" name="trans3">
+    <transport xsi:type="generator:TcpTransport" xmi:id="_02138f80-a42e-012e-95d9-0017a4e90546" name="trans3">
       <queue_messages_per_pool value="10"/>
       <queue_initial_pools value="10"/>
       <max_packet_size value="65536"/>
@@ -95,7 +95,7 @@
       <max_output_pause_period value="0"/>
       <passive_reconnect_duration value="2000"/>
     </transport>
-    <transport xsi:type="generator:MulticastTransport" xmi:id="02139a70-a42e-012e-95da-0017a4e90546" name="trans4">
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_02139a70-a42e-012e-95da-0017a4e90546" name="trans4">
       <queue_messages_per_pool value="10"/>
       <queue_initial_pools value="10"/>
       <max_packet_size value="65536"/>
