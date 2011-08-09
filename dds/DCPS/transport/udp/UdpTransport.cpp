@@ -192,17 +192,6 @@ UdpTransport::get_connection_addr(const TransportBLOB& data) const
   return local_address;
 }
 
-bool
-UdpTransport::acked(RepoId /*local_id*/, RepoId /*remote_id*/)
-{
-  return true;
-}
-
-void
-UdpTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
-{
-}
-
 void
 UdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
 {

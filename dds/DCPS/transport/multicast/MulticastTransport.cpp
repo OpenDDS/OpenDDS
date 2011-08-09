@@ -63,15 +63,12 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
 
     MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
 
-    MulticastSession_rch session = link->find_or_create_session(remote_peer);
+    MulticastSession_rch session = link->find_session(remote_peer);
 
     if (session.is_nil()) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("MulticastTransport::find_datalink: ")
-                        ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
-                        remote_peer),
-                       0);
+      // From the framework's point-of-view, no DataLink was found.
+      // This way we will progress to the connect/accept stage for handshaking.
+      return 0;
     }
 
     if (!session->start(active)) {
@@ -247,37 +244,6 @@ MulticastTransport::connection_info_i(TransportLocator& info) const
   info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
 
   return true;
-}
-
-bool
-MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
-{
-  bool is_client = ! (this->client_link_.is_nil());
-  bool is_server = ! (this->server_link_.is_nil());
-  bool acked = false;
-
-  if (is_client || is_server) {
-    MulticastPeer remote_peer =
-      RepoIdConverter(remote_id).participantId();
-
-     if (is_client) {
-       acked = acked || this->client_link_->acked(remote_peer);
-     }
-     if (is_server) {
-       acked = acked || this->server_link_->acked(remote_peer);
-     }
-
-    return acked;
-  }
-
-  return false;
-}
-
-void
-MulticastTransport::remove_ack(RepoId /*local_id*/, RepoId /*remote_id*/)
-{
-  // Association acks are managed by our MulticastDataLink; there
-  // is no state that needs to be removed in MulticastTransport.
 }
 
 void

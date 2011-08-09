@@ -53,9 +53,6 @@ protected:
   virtual bool connection_info_i(TransportLocator& info) const;
   ACE_INET_Addr get_connection_addr(const TransportBLOB& data) const;
 
-  virtual bool acked(RepoId local_id, RepoId remote_id);
-  virtual void remove_ack(RepoId local_id, RepoId remote_id);
-
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 
   virtual std::string transport_type() const { return "udp"; }

@@ -22,16 +22,10 @@ public:
   BestEffortSession(MulticastDataLink* link,
                     MulticastPeer remote_peer);
 
-  virtual bool acked();
-
   virtual bool check_header(const TransportHeader& header);
   virtual bool check_header(const DataSampleHeader& header);
 
-  virtual void control_received(char submessage_id,
-                                ACE_Message_Block* control);
-
   virtual bool start(bool active);
-  virtual void stop();
 
 private:
   SequenceNumber last_received_;

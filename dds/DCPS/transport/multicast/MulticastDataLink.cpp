@@ -39,8 +39,7 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
     session_factory_(session_factory, false),
     local_peer_(local_peer),
     config_(0),
-    reactor_task_(0),
-    check_fully_association_ (false)
+    reactor_task_(0)
 {
 }
 
@@ -155,12 +154,25 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
 }
 
 MulticastSession*
+MulticastDataLink::find_session(MulticastPeer remote_peer)
+{
+  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
+                   guard,
+                   this->session_lock_,
+                   0);
+
+  MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
+  if (it != this->sessions_.end()) return it->second.in();
+  else return 0;
+}
+
+MulticastSession*
 MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
                    this->session_lock_,
-                   false);
+                   0);
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) return it->second.in();  // already exists
@@ -173,7 +185,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
                       ACE_TEXT("MulticastDataLink::find_or_create_session: ")
                       ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     false);
+                     0);
   }
 
   std::pair<MulticastSessionMap::iterator, bool> pair = this->sessions_.insert(
@@ -184,24 +196,10 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
                       ACE_TEXT("MulticastDataLink::find_or_create_session: ")
                       ACE_TEXT("failed to insert session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     false);
+                     0);
   }
 
   return session._retn();
-}
-
-bool
-MulticastDataLink::acked(MulticastPeer remote_peer)
-{
-  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
-                   guard,
-                   this->session_lock_,
-                   false);
-
-  MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
-  if (it == this->sessions_.end()) return false;  // unknown peer
-
-  return it->second->acked();
 }
 
 bool
@@ -257,14 +255,10 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       for (MulticastSessionMap::iterator it(this->sessions_.begin());
           it != this->sessions_.end(); ++it) {
         it->second->control_received(sample.header_.submessage_id_,
-                                    sample.sample_);
+                                     sample.sample_);
         // reset read pointer
         sample.sample_->rd_ptr(ptr);
       }
-    }
-    if (this->check_fully_association_) {
-      //TODO: this->transport_->check_fully_association();
-      this->check_fully_association_ = false;
     }
   } break;
 
@@ -293,11 +287,5 @@ MulticastDataLink::stop_i()
   this->socket_.close();
 }
 
-
-void
-MulticastDataLink::set_check_fully_association ()
-{
-  this->check_fully_association_ = true;
-}
 } // namespace DCPS
 } // namespace OpenDDS

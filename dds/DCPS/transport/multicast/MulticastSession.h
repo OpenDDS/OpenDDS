@@ -19,9 +19,31 @@
 
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
+#include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
+
+class ACE_Reactor;
 
 namespace OpenDDS {
 namespace DCPS {
+
+class MulticastSession;
+
+class OpenDDS_Multicast_Export SynWatchdog
+  : public DataLinkWatchdog<ACE_SYNCH_MUTEX> {
+public:
+  explicit SynWatchdog(MulticastSession* session);
+
+protected:
+  virtual ACE_Time_Value next_interval();
+  virtual void on_interval(const void* arg);
+
+  virtual ACE_Time_Value next_timeout();
+  virtual void on_timeout(const void* arg);
+
+private:
+  MulticastSession* session_;
+  size_t retries_;
+};
 
 class OpenDDS_Multicast_Export MulticastSession
   : public RcObject<ACE_SYNCH_MUTEX> {
@@ -32,15 +54,22 @@ public:
 
   MulticastPeer remote_peer() const;
 
-  virtual bool acked() = 0;
+  bool acked();
+
+  void syn_received(ACE_Message_Block* control);
+  void send_syn();
+
+  void synack_received(ACE_Message_Block* control);
+  void send_synack();
+  virtual void send_nakack(SequenceNumber /*low*/) {}
 
   virtual bool check_header(const TransportHeader& header) = 0;
 
-  virtual void control_received(char submessage_id,
-                                ACE_Message_Block* control) = 0;
+  virtual bool control_received(char submessage_id,
+                                ACE_Message_Block* control);
 
   virtual bool start(bool active) = 0;
-  virtual void stop() = 0;
+  virtual void stop();
 
 protected:
   MulticastDataLink* link_;
@@ -52,6 +81,27 @@ protected:
 
   void send_control(char submessage_id,
                     ACE_Message_Block* data);
+
+  bool start_syn(ACE_Reactor* reactor);
+
+  virtual void syn_hook(const SequenceNumber& /*seq*/) {}
+
+  ACE_SYNCH_MUTEX start_lock_;
+  bool started_;
+
+  // A session must be for a publisher
+  // or subscriber.  Implementation doesn't
+  // support being for both.
+  // As to control message,
+  // only subscribers receive syn, send synack, send naks, receive nakack,
+  // and publisher only send syn, receive synack, receive naks, send nakack.
+  bool active_;
+
+private:
+  ACE_SYNCH_MUTEX ack_lock_;
+  bool acked_;
+
+  SynWatchdog syn_watchdog_;
 };
 
 } // namespace DCPS
