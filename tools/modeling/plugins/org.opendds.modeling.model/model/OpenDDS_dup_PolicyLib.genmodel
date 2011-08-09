@@ -94,7 +94,9 @@
   <genPackages prefix="Domain" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Domain.ecore#/">
     <genClasses ecoreClass="Domain.ecore#//QosProperty"/>
-    <genClasses ecoreClass="Domain.ecore#//DomainEntity"/>
+    <genClasses ecoreClass="Domain.ecore#//DomainEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Domain.ecore#//DomainEntity/transportConfig"/>
+    </genClasses>
   </genPackages>
   <genPackages prefix="QoS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="QoS.ecore#/">

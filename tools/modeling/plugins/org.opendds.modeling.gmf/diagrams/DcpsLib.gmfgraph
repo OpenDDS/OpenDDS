@@ -34,7 +34,7 @@
             text="&lt;...>"/>
         <children
             xsi:type="gmfgraph:Label"
-            name="PubSubTransportIdFigure"
+            name="PubSubTransportConfigFigure"
             text="&lt;...>"/>
       </actualFigure>
       <accessors
@@ -65,6 +65,10 @@
             xsi:type="gmfgraph:Label"
             name="DataReaderWriterCopyFromTopicQosFigure"
             text=""/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DataReaderWriterTransportConfigFigure"
+            text="&lt;...>"/>
       </actualFigure>
       <accessors
           figure="//@figures.0/@descriptors.1/@actualFigure/@children.0"/>
@@ -72,6 +76,8 @@
           figure="//@figures.0/@descriptors.1/@actualFigure/@children.1"/>
       <accessors
           figure="//@figures.0/@descriptors.1/@actualFigure/@children.2"/>
+      <accessors
+          figure="//@figures.0/@descriptors.1/@actualFigure/@children.3"/>
     </descriptors>
     <descriptors
         name="StructFigure">
@@ -171,6 +177,35 @@
       <accessors
           figure="//@figures.0/@descriptors.5/@actualFigure/@children.2"/>
     </descriptors>
+    <descriptors
+        name="DomainParticipantFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="DomainParticipantFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DomainParticipantStereotypeFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DomainParticipantNameFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DomainParticipantTransportConfigFigure"
+            text="&lt;...>"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.6/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.6/@actualFigure/@children.1"/>
+      <accessors
+          figure="//@figures.0/@descriptors.6/@actualFigure/@children.2"/>
+    </descriptors>
   </figures>
   <nodes
       name="PubSub"
@@ -190,6 +225,9 @@
   <nodes
       name="Domain"
       figure="DomainFigure"/>
+  <nodes
+      name="DomainParticipant"
+      figure="DomainParticipantFigure"/>
   <compartments
       name="DataWriters"
       collapsible="true"
@@ -222,6 +260,10 @@
   <labels
       name="PubSubTransportId"
       figure="PubSubFigure"
+      elementIcon="false"/>
+  <labels
+      name="PubSubTransportConfig"
+      figure="PubSubFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.0/@accessors.2"/>
   <labels
@@ -240,6 +282,11 @@
       figure="DataReaderWriterFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.1/@accessors.2"/>
+  <labels
+      name="DataReaderWriterTransportConfig"
+      figure="DataReaderWriterFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.1/@accessors.3"/>
   <labels
       name="StructTypeName"
       figure="StructFigure"
@@ -291,4 +338,18 @@
       figure="DomainFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.5/@accessors.2"/>
+  <labels
+      name="DomainParticipantStereotype"
+      figure="DomainParticipantFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.6/@accessors.0"/>
+  <labels
+      name="DomainParticipantName"
+      figure="DomainParticipantFigure"
+      accessor="//@figures.0/@descriptors.6/@accessors.1"/>
+  <labels
+      name="DomainParticipantTransportConfig"
+      figure="DomainParticipantFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.6/@accessors.2"/>
 </gmfgraph:Canvas>

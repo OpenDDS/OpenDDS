@@ -11,6 +11,9 @@
     <nodeLabelTraces
         visualID="5004"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5274"
+        queryText="true"/>
     <compartmentTraces
         visualID="7001"
         queryText="true"/>
@@ -869,6 +872,9 @@
     <nodeLabelTraces
         visualID="5254"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5272"
+        queryText="true"/>
     <compartmentTraces
         visualID="7041"
         queryText="true"/>
@@ -887,6 +893,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5257"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5273"
         queryText="true"/>
     <compartmentTraces
         visualID="7043"
