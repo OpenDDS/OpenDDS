@@ -1,3 +1,10 @@
+Wed Aug 10 20:52:54 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+
+          Make sure we have a content provider before setting input.  Was
+          causing exception.
+
 Wed Aug 10 18:01:03 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

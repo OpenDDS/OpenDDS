@@ -78,6 +78,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -1366,8 +1367,11 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 					// Set the input to the widget.
 					//
 					if (currentViewerPane.getViewer().getInput() != selectedElement) {
-						currentViewerPane.getViewer().setInput(selectedElement);
-						currentViewerPane.setTitle(selectedElement);
+						ContentViewer viewer = (ContentViewer)currentViewerPane.getViewer();
+						if (viewer.getContentProvider() != null) {
+							viewer.setInput(selectedElement);
+							currentViewerPane.setTitle(selectedElement);
+						}
 					}
 				}
 			}
