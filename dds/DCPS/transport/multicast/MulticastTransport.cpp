@@ -143,10 +143,18 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   return link._retn();
 }
 
-bool
+MulticastSession*
 MulticastTransport::start_session(const MulticastDataLink_rch& link,
                                   MulticastPeer remote_peer, bool active)
 {
+  if (link.is_nil()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastTransport::start_session: ")
+                      ACE_TEXT("link is nil\n")),
+                     0);
+  }
+
   MulticastSession_rch session = link->find_or_create_session(remote_peer);
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -154,7 +162,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                       ACE_TEXT("MulticastTransport::start_session: ")
                       ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     false);
+                     0);
   }
 
   if (!session->start(active)) {
@@ -163,10 +171,10 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                       ACE_TEXT("MulticastTransport::start_session: ")
                       ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
                       remote_peer),
-                     false);
+                     0);
   }
 
-  return true;
+  return session._retn();
 }
 
 DataLink*
@@ -175,16 +183,24 @@ MulticastTransport::connect_datalink_i(const RepoId& local_id,
                                        const TransportBLOB& /*remote_data*/,
                                        CORBA::Long priority)
 {
-  MulticastDataLink_rch link;
-  if (this->client_link_.is_nil()) {
+  MulticastDataLink_rch link = this->client_link_;
+  if (link.is_nil()) {
     link = this->make_datalink(local_id, remote_id, priority, true /*active*/);
     this->client_link_ = link;
   }
-  if (!this->start_session(link, RepoIdConverter(remote_id).participantId(),
-                           true /*active*/)) {
+
+  MulticastSession_rch session =
+    this->start_session(link, RepoIdConverter(remote_id).participantId(),
+                        true /*active*/);
+  if (session.is_nil()) {
     return 0; // already logged in start_session()
   }
-  return link._retn();
+
+  if (session->wait_for_ack()) {
+    return link._retn();
+  }
+
+  return 0;
 }
 
 DataLink*
@@ -195,28 +211,64 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
   const RepoId& remote_id = ce.remote_association_.remote_id_;
   MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
 
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->connections_lock_, 0);
+
   for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
     if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
 
-      MulticastDataLink_rch link;
-      if (this->server_link_.is_nil()) {
+      MulticastDataLink_rch link = this->server_link_;
+      if (link.is_nil()) {
         link = this->make_datalink(ce.local_id_, remote_id,
                                    ce.priority_, false /*!active*/);
         this->server_link_ = link;
       }
-      if (!this->start_session(link, remote_peer, false /*!active*/)) {
+
+      if (this->connections_.count(remote_peer)) {
+        // remote_peer has already completed the handshake
+        return link._retn();
+      }
+
+      MulticastSession_rch session = this->start_session(link, remote_peer,
+                                                         false /*!active*/);
+      if (session.is_nil()) {
         return 0; // already logged in start_session()
       }
-      return link._retn();
+
+      this->pending_connections_.insert(std::make_pair(&ce, remote_peer));
+      return 0; // can't return link to framework until handshaking is done
     }
   }
   return 0;
 }
 
 void
-MulticastTransport::stop_accepting(ConnectionEvent& /*ce*/)
+MulticastTransport::stop_accepting(ConnectionEvent& ce)
 {
-  // nothing needed here, since accept_datalink doesn't store the event
+  ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->connections_lock_);
+  typedef std::multimap<ConnectionEvent*, MulticastPeer>::iterator iter_t;
+  std::pair<iter_t, iter_t> range = this->pending_connections_.equal_range(&ce);
+  this->pending_connections_.erase(range.first, range.second);
+}
+
+void
+MulticastTransport::passive_connection(MulticastPeer peer)
+{
+  ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->connections_lock_);
+
+  typedef std::multimap<ConnectionEvent*, MulticastPeer>::iterator iter_t;
+  for (iter_t iter = this->pending_connections_.begin();
+       iter != this->pending_connections_.end(); ++iter) {
+    if (iter->second == peer) {
+      DataLink_rch link = static_rchandle_cast<DataLink>(this->server_link_);
+      iter->first->complete(link);
+      std::pair<iter_t, iter_t> range =
+        this->pending_connections_.equal_range(iter->first);
+      this->pending_connections_.erase(range.first, range.second);
+      break;
+    }
+  }
+
+  this->connections_.insert(peer);
 }
 
 bool
@@ -274,27 +326,6 @@ MulticastTransport::release_datalink_i(DataLink* /*link*/,
   this->server_link_ = 0;  // release ownership
 }
 
-PriorityKey
-MulticastTransport::blob_to_key(const TransportBLOB& remote,
-                                CORBA::Long priority,
-                                bool active)
-{
-  NetworkAddress network_order_address;
-  ACE_InputCDR cdr((const char*)remote.get_buffer(), remote.length());
-
-  if (cdr >> network_order_address == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: MulticastTransport::blob_to_key")
-               ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
-  }
-
-  ACE_INET_Addr remote_address;
-  network_order_address.to_addr(remote_address);
-  // TODO: Figure out if this is correct.
-  const bool is_loopback = remote_address == this->config_i_->group_address_;
-
-  return PriorityKey(priority, remote_address, is_loopback, active);
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -55,6 +55,7 @@ public:
   MulticastPeer remote_peer() const;
 
   bool acked();
+  bool wait_for_ack();
 
   void syn_received(ACE_Message_Block* control);
   void send_syn();
@@ -99,6 +100,7 @@ protected:
 
 private:
   ACE_SYNCH_MUTEX ack_lock_;
+  ACE_SYNCH_CONDITION ack_cond_;
   bool acked_;
 
   SynWatchdog syn_watchdog_;

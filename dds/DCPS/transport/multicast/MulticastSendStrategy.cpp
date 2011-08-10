@@ -20,6 +20,9 @@ MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
                           new NullSynchStrategy),
     link_(link)
 {
+  // Multicast will send a SYN (TRANSPORT_CONTROL) before any reservations
+  // are made on the DataLink, if the link is "release" it will be dropped.
+  this->link_released(false);
 }
 
 void

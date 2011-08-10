@@ -73,6 +73,7 @@ MulticastSession::MulticastSession(MulticastDataLink* link,
   , remote_peer_(remote_peer)
   , started_(false)
   , active_(true)
+  , ack_cond_(ack_lock_)
   , acked_(false)
   , syn_watchdog_(this)
 {
@@ -87,6 +88,20 @@ MulticastSession::acked()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->ack_lock_, false);
   return this->acked_;
+}
+
+bool
+MulticastSession::wait_for_ack()
+{
+  ACE_Time_Value abs_timeout = ACE_OS::gettimeofday() +
+    this->link_->config()->syn_timeout_;
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->ack_lock_, false);
+  while (!this->acked_) {
+    if (this->ack_cond_.wait(&abs_timeout) == -1) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool
@@ -171,6 +186,7 @@ MulticastSession::syn_received(ACE_Message_Block* control)
 
     if (!this->acked_) {
       this->acked_ = true;
+      this->ack_cond_.broadcast();
 
       syn_hook(header.sequence_);
     }
@@ -179,6 +195,8 @@ MulticastSession::syn_received(ACE_Message_Block* control)
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
   send_synack();
+
+  this->link_->transport()->passive_connection(this->remote_peer_);
 }
 
 void
@@ -226,6 +244,7 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 
     this->syn_watchdog_.cancel();
     this->acked_ = true;
+    this->ack_cond_.broadcast();
   }
 }
 

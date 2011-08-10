@@ -44,17 +44,17 @@ public:
   bool reliable_;
 
   /// The exponential base used during handshake retries; smaller
-  /// values yield shorter delays between attempts (reliable only).
+  /// values yield shorter delays between attempts.
   /// The default value is: 2.0.
   double syn_backoff_;
 
   /// The minimum number of milliseconds to wait between handshake
-  /// attempts during association (reliable only).
+  /// attempts during association.
   /// The default value is: 250.
   ACE_Time_Value syn_interval_;
 
   /// The maximum number of milliseconds to wait before giving up
-  /// on a handshake response during association (reliable only).
+  /// on a handshake response during association.
   /// The default value is: 30000 (30 seconds).
   ACE_Time_Value syn_timeout_;
 

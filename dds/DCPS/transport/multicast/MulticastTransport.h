@@ -22,11 +22,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MulticastInst;
+class MulticastSession;
 
 class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
   explicit MulticastTransport(const TransportInst_rch& inst);
   ~MulticastTransport();
+
+  void passive_connection(MulticastPeer peer);
 
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
@@ -54,17 +57,19 @@ protected:
 
   virtual std::string transport_type() const { return "multicast"; }
 
-  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
-                                  CORBA::Long priority,
-                                  bool active);
+  virtual PriorityKey blob_to_key(const TransportBLOB& /*remote*/,
+                                  CORBA::Long /*priority*/,
+                                  bool /*active*/) { return PriorityKey(); }
+          // blob_to_key() is not called for Multicast transports
+
 private:
   MulticastDataLink* make_datalink(const RepoId& local_id,
                                    const RepoId& remote_id,
                                    CORBA::Long priority,
                                    bool active);
 
-  bool start_session(const MulticastDataLink_rch& link,
-                     MulticastPeer remote_peer, bool active);
+  MulticastSession* start_session(const MulticastDataLink_rch& link,
+                                  MulticastPeer remote_peer, bool active);
 
   RcHandle<MulticastInst> config_i_;
 
@@ -72,6 +77,16 @@ private:
   MulticastDataLink_rch client_link_;
   /// link for subs.
   MulticastDataLink_rch server_link_;
+
+  // Used by the passive side to track the virtual "connections" to remote
+  // peers: the pending_connections_ are potentential peers that the framework
+  // has already informed us about (in accept_datalink) but have not yet sent
+  // a SYN TRANSPORT_CONTROL message; the connections_ are remote peers that
+  // have already sent the SYN message -- we can consider these "complete"
+  // from the framework's point of view.
+  ACE_SYNCH_MUTEX connections_lock_;
+  std::multimap<ConnectionEvent*, MulticastPeer> pending_connections_;
+  std::set<MulticastPeer> connections_;
 };
 
 } // namespace DCPS

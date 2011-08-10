@@ -56,6 +56,7 @@ while ($arg_ind <= $#ARGV) {
             usage("Missing param for -p");
         }
         $num_writers = $ARGV[$arg_ind];
+        $write_throttle = 300000 * $num_writers;
     }
     elsif ($ARGV[$arg_ind] eq '-s') {
         $arg_ind++;
