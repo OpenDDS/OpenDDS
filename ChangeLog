@@ -1,3 +1,12 @@
+Wed Aug 10 14:35:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Fixed warnings and errors.
+
 Tue Aug  9 22:03:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.h:

@@ -17,7 +17,6 @@
 
 #include "dds/DCPS/Serializer.h"
 
-#include <cmath>
 #include <cstdlib>
 
 namespace OpenDDS {

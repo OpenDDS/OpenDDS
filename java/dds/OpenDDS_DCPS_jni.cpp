@@ -161,7 +161,7 @@ CppClass* recoverCppObj(JNIEnv *jni, jobject jThis)
 jobject constructTransportInst(JNIEnv *jni,
                                OpenDDS::DCPS::TransportInst_rch inst)
 {
-    jclass instClazz;
+    jclass instClazz = 0;
     if (inst->transport_type_ == "tcp") {
       instClazz = findClass(jni, "OpenDDS/DCPS/transport/TcpInst");
     } else if (inst->transport_type_ == "udp") {

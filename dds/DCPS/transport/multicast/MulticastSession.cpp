@@ -9,6 +9,7 @@
 #include "MulticastSession.h"
 
 #include "ace/Log_Msg.h"
+#include <cmath>
 
 #ifndef __ACE_INLINE__
 # include "MulticastSession.inl"

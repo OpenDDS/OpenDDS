@@ -806,12 +806,12 @@ PubDriver::listener_test ()
 
   ::OpenDDS::DCPS::ReaderIdSeq reader_id_seq;
   reader_id_seq.length(reader_id_set.size());
-  int i = 0;
+  int index = 0;
   for (DataWriterImpl::IdSet::iterator iter = reader_id_set.begin();
        iter != reader_id_set.end();
        ++iter) {
-    reader_id_seq[i] = *iter;
-    i++;
+    reader_id_seq[index] = *iter;
+    index++;
   }
   CORBA::Boolean dont_notify_lost = 0;
   datawriter_servant_->remove_associations (reader_id_seq, dont_notify_lost);
