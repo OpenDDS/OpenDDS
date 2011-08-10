@@ -658,3 +658,18 @@ OpenDDS::DCPS::DummyTcpTransport::fresh_link (const ACE_INET_Addr&    remote_add
 
   return 0;
 }
+
+OpenDDS::DCPS::PriorityKey
+OpenDDS::DCPS::DummyTcpTransport::blob_to_key(const TransportBLOB& remote,
+                                              CORBA::Long priority,
+                                              bool active)
+{
+  NetworkAddress network_order_address =
+    *((NetworkAddress*)remote.get_buffer());
+
+  ACE_INET_Addr remote_address;
+  network_order_address.to_addr(remote_address);
+  const bool is_loopback = false; // = remote_address == this->config_i_->local_address_;
+
+  return PriorityKey(priority, remote_address, is_loopback, active);
+}

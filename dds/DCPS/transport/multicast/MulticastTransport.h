@@ -54,6 +54,9 @@ protected:
 
   virtual std::string transport_type() const { return "multicast"; }
 
+  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
+                                  CORBA::Long priority,
+                                  bool active);
 private:
   MulticastDataLink* make_datalink(const RepoId& local_id,
                                    const RepoId& remote_id,

@@ -21,6 +21,7 @@
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
+#include "PriorityKey.h"
 #include "ace/Synch.h"
 #include <map>
 #include <set>
@@ -67,6 +68,12 @@ public:
   /// we can do.
   TransportInst* config() const;
 
+  /// Called by our connection_info() method to allow the concrete
+  /// TransportImpl subclass to do the dirty work since it really
+  /// is the one that knows how to populate the supplied
+  /// TransportLocator object.
+  virtual bool connection_info_i(TransportLocator& local_info) const = 0;
+
   /// Diagnostic aid.
   void dump();
   void dump(ostream& os);
@@ -103,19 +110,48 @@ protected:
     DataLink_rch link_;
   };
 
+  /// accept_datalink() is called from TransportClient::associate()
+  /// for each TransportImpl on the passive side.  Any datalink
+  /// returned should be a fully connected datalink matching this
+  /// connection event.  Otherwise, this operation should return
+  /// 0 and passively wait for physical connection from the active
+  /// side (either in the form of a connection event or handshaking
+  /// message).  Upon completion of the physical connection, the
+  /// transport should signal the connection event, as
+  /// TransportClient::associate() is waiting on this.
   virtual DataLink* accept_datalink(ConnectionEvent& ce) = 0;
+
+  /// connect_datalink_i() is called from TransportClient::associate()
+  /// (via TransportImpl::connect_datalink()) for each TransportImpl
+  /// on the active side, until a valid datalink is returned.  Any
+  /// datalink returned should be a fully connected datalink matching
+  /// this connection event.  This method should block and wait for
+  /// the physical connection (either in the form of a connection
+  /// event or handshaking message).  If the connection is unable to
+  /// be completed, returning 0 causes TransportClient::associate()
+  /// to try the next TransportImpl in the current configuration.
+  virtual DataLink* connect_datalink_i(const RepoId& local_id,
+                                       const RepoId& remote_id,
+                                       const TransportBLOB& remote_data,
+                                       CORBA::Long priority) = 0;
+
+  /// stop_accepting() is called from TransportClient::associate()
+  /// to terminate the accepting process begun by accept_datalink().
+  /// This allows the TransportImpl to clean up any resources
+  /// asssociated with this ConnectionEvent.
   virtual void stop_accepting(ConnectionEvent& ce) = 0;
 
+  /// find_datalink_i() attempts to return a DataLink that was
+  /// previously created via either accept_datalink() or
+  /// connect_datalink_i().  If one is not available,
+  /// the transport framework proceeds with creating a new
+  /// datalink.
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
                                     CORBA::Long priority,
                                     bool active) = 0;
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       CORBA::Long priority) = 0;
 
   /// Concrete subclass gets a shot at the config object.  The subclass
   /// will likely downcast the TransportInst object to a
@@ -131,16 +167,14 @@ protected:
   /// concrete transport to do anything necessary.
   virtual void pre_shutdown_i();
 
-  /// Called by our connection_info() method to allow the concrete
-  /// TransportImpl subclass to do the dirty work since it really
-  /// is the one that knows how to populate the supplied
-  /// TransportInterfaceInfo object.
-  virtual bool connection_info_i(TransportLocator& local_info) const = 0;
-
   /// Called by our release_datalink() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when
   /// the release_datalink "event" occurs.
   virtual void release_datalink_i(DataLink* link, bool release_pending) = 0;
+
+  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
+                                  CORBA::Long priority,
+                                  bool active) = 0;
 
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is

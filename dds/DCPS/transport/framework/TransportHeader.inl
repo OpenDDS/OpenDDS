@@ -52,7 +52,6 @@ ACE_INLINE
 size_t
 OpenDDS::DCPS::TransportHeader::max_marshaled_size()
 {
-  DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",6);
   // Representation takes no extra space for encoding.
   TransportHeader hdr(no_init);
   return sizeof(hdr.protocol_) +

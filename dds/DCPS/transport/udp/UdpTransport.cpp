@@ -59,7 +59,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address, bool active)
   if (!link->open(remote_address)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpTransport::find_or_create_datalink: ")
+                      ACE_TEXT("UdpTransport::make_datalink: ")
                       ACE_TEXT("failed to open DataLink!\n")),
                      0);
   }
@@ -80,12 +80,19 @@ UdpTransport::find_datalink_i(const RepoId& /*local_id*/,
   PriorityKey key(priority, remote_address, is_loopback, active);
 
   if (active) {
+    GuardType guard(this->client_links_lock_);
     UdpDataLinkMap::iterator it(this->client_links_.find(key));
     if (it != this->client_links_.end()) {
       return UdpDataLink_rch(it->second)._retn(); // found
     }
   } else {
-    return UdpDataLink_rch(this->server_link_)._retn(); // found
+    GuardType guard(this->connections_lock_);
+    if (this->server_link_keys_.find(key) == this->server_link_keys_.end()) {
+      return 0;
+    } else {
+      // return a reference to the one and only server data link
+      return UdpDataLink_rch(this->server_link_)._retn();
+    }
   }
 
   return 0;
@@ -100,25 +107,60 @@ UdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
   ACE_INET_Addr remote_address = get_connection_addr(remote_data);
   const bool active = true;
 
-  bool is_loopback = remote_address == this->config_i_->local_address_;
-  PriorityKey key(priority, remote_address, is_loopback, active);
+  PriorityKey key = this->blob_to_key(remote_data, priority, active);
 
   // Create new DataLink for logical connection:
   UdpDataLink_rch link = make_datalink(remote_address, active);
+  GuardType guard(this->client_links_lock_);
   this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
+
   return link._retn();
 }
 
 DataLink*
-UdpTransport::accept_datalink(ConnectionEvent& /*ce*/)
+UdpTransport::accept_datalink(ConnectionEvent& ce)
 {
-  return UdpDataLink_rch(this->server_link_)._retn();
+  const std::string ttype = "udp";
+  const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
+
+  std::vector<PriorityKey> keys;
+  GuardType guard(this->connections_lock_);
+
+  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
+    if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
+      const PriorityKey key =
+        this->blob_to_key(ce.remote_association_.remote_data_[idx].data,
+                          ce.priority_, false /*active == false*/);
+
+      keys.push_back(key);
+    }
+  }
+
+  for (size_t i = 0; i < keys.size(); ++i) {
+    if (this->pending_server_link_keys_.find(keys[i]) !=
+        this->pending_server_link_keys_.end()) {
+      // Handshake already seen, add to server_link_keys_ and
+      // return server_link_
+      this->pending_server_link_keys_.erase(keys[i]);
+      this->server_link_keys_.insert(keys[i]);
+      return UdpDataLink_rch(this->server_link_)._retn();
+    } else {
+      // Add to pending and wait for handshake
+      this->pending_connections_.insert(std::make_pair(&ce, keys[i]));
+    }
+  }
+
+  // Let TransportClient::associate() wait for the handshake
+  return 0;
 }
 
 void
-UdpTransport::stop_accepting(ConnectionEvent& /*ce*/)
+UdpTransport::stop_accepting(ConnectionEvent& ce)
 {
-  // nothing needed here, since accept_datalink doesn't store the event
+  GuardType guard(this->connections_lock_);
+  typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
+  std::pair<iter_t, iter_t> range = this->pending_connections_.equal_range(&ce);
+  this->pending_connections_.erase(range.first, range.second);
 }
 
 bool
@@ -149,6 +191,7 @@ void
 UdpTransport::shutdown_i()
 {
   // Shutdown reserved datalinks and release configuration:
+  GuardType guard(this->client_links_lock_);
   for (UdpDataLinkMap::iterator it(this->client_links_.begin());
        it != this->client_links_.end(); ++it) {
     it->second->transport_shutdown();
@@ -195,6 +238,7 @@ UdpTransport::get_connection_addr(const TransportBLOB& data) const
 void
 UdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
 {
+  GuardType guard(this->client_links_lock_);
   for (UdpDataLinkMap::iterator it(this->client_links_.begin());
        it != this->client_links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
@@ -206,18 +250,83 @@ UdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
   }
 }
 
+PriorityKey
+UdpTransport::blob_to_key(const TransportBLOB& remote,
+                          CORBA::Long priority,
+                          bool active)
+{
+  NetworkAddress network_order_address;
+  ACE_InputCDR cdr((const char*)remote.get_buffer(), remote.length());
+
+  if ((cdr >> network_order_address) == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: UdpTransport::blob_to_key")
+               ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+  }
+
+  ACE_INET_Addr remote_address;
+  network_order_address.to_addr(remote_address);
+  const bool is_loopback = remote_address == this->config_i_->local_address_;
+
+  return PriorityKey(priority, remote_address, is_loopback, active);
+}
+
 void
 UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  ACE_Message_Block* data)
 {
-  //TODO: Demarshal 'data' to recover the remote side's PriorityKey
-  //      and update local data structures.
+  size_t octet_size = data->length() - sizeof(CORBA::Long);
+  CORBA::Long priority;
+  Serializer serializer(data);
+  serializer >> priority;
+  TransportBLOB blob(octet_size);
+  blob.length(octet_size);
+  serializer.read_octet_array(blob.get_buffer(), octet_size);
 
-  // Send an ack so that the active side can return from connect_datalink_i().
-  // This is just a single byte of arbitrary data, the remote side is not yet
-  // using the framework (TransportHeader, DataSampleHeader, ReceiveStrategy).
-  const char ack_data = 23;
-  this->server_link_->socket().send(&ack_data, 1, remote_address);
+  PriorityKey key = this->blob_to_key(blob, priority, false /* passive */);
+
+  // Use the key to find this connection in pending connections_ and
+  // to locate the ConnectionEvent
+  ConnectionEvent* evt = 0;
+  {
+    GuardType guard(this->connections_lock_);
+    typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
+    for (iter_t iter = this->pending_connections_.begin();
+         iter != pending_connections_.end(); ++iter) {
+      if (iter->second == key) {
+        evt = iter->first;
+        break;
+      }
+    }
+
+    // Send an ack so that the active side can return from
+    // connect_datalink_i().  This is just a single byte of
+    // arbitrary data, the remote side is not yet using the
+    // framework (TransportHeader, DataSampleHeader,
+    // ReceiveStrategy).
+    const char ack_data = 23;
+    this->server_link_->socket().send(&ack_data, 1, remote_address);
+
+    if (evt != 0) { // found in pending_connections_
+      // remove other entries for this ConnectionEvent in pending_connections_
+      std::pair<iter_t, iter_t> range =
+        this->pending_connections_.equal_range(evt);
+      this->pending_connections_.erase(range.first, range.second);
+
+      // Signal TransportClient::associate() via the ConnectionEvent
+      // to let it know that we found a good connection.
+      evt->complete(this->server_link_.in());
+
+      // Add an entry to server_link_keys_ so we can find the
+      // "connection" for that key.
+      this->server_link_keys_.insert(key);
+    } else {
+
+      // Add an entry to pending_server_link_keys_ so we can finish
+      // associating in accept_datalink().
+      this->pending_server_link_keys_.insert(key);
+    }
+  }
 }
 
 } // namespace DCPS

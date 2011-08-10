@@ -19,6 +19,29 @@
 # include "UdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
+namespace {
+  int makeIovec(const ACE_Message_Block* block, iovec iov[], int size) {
+    int num_blocks = 0;
+
+#ifdef _MSC_VER
+#pragma warning(push)
+// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+// since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
+    while (block != 0 && num_blocks < size) {
+      iov[num_blocks].iov_len  = block->length();
+      iov[num_blocks].iov_base = block->rd_ptr();
+      ++num_blocks;
+      block = block->cont();
+    }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+    return num_blocks;
+  }
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -113,6 +136,96 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                      false);
   }
 #endif /* ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
+
+  if (this->active_) {
+    // For the active side, send the blob and wait for a 1 byte ack.
+
+    TransportLocator info;
+    this->impl()->connection_info_i(info);
+    ACE_Message_Block* data_block;
+    ACE_NEW_RETURN(data_block,
+                   ACE_Message_Block(info.data.length()+sizeof(CORBA::Long),
+                                     ACE_Message_Block::MB_DATA,
+                                     0, //cont
+                                     0, //data
+                                     0, //allocator_strategy
+                                     0, //locking_strategy
+                                     ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                     ACE_Time_Value::zero,
+                                     ACE_Time_Value::max_time,
+                                     0,
+                                     0),
+                   0);
+
+    Serializer serializer(data_block);
+    serializer << this->transport_priority();
+    serializer.write_octet_array(info.data.get_buffer(),
+                                 info.data.length());
+
+    DataSampleHeader sample_header;
+    sample_header.message_id_ = TRANSPORT_CONTROL;
+    sample_header.message_length_ = data_block->length();
+    ACE_Message_Block* sample_header_block;
+    ACE_NEW_RETURN(sample_header_block,
+                   ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                                     ACE_Message_Block::MB_DATA,
+                                     0, //cont
+                                     0, //data
+                                     0, //allocator_strategy
+                                     0, //locking_strategy
+                                     ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                     ACE_Time_Value::zero,
+                                     ACE_Time_Value::max_time,
+                                     0,
+                                     0),
+                   0);
+    *sample_header_block << sample_header;
+    sample_header_block->cont(data_block);
+
+    ACE_Message_Block* transport_header_block;
+    TransportHeader transport_header;
+    ACE_NEW_RETURN(transport_header_block,
+                   ACE_Message_Block(TransportHeader::max_marshaled_size(),
+                                     ACE_Message_Block::MB_DATA,
+                                     0,
+                                     0,
+                                     0,
+                                     0,
+                                     ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                     ACE_Time_Value::zero,
+                                     ACE_Time_Value::max_time,
+                                     0,
+                                     0),
+                   0);
+
+    transport_header.length_ = data_block->length()
+                             + sample_header_block->length();
+    *transport_header_block << transport_header;
+    transport_header_block->cont(sample_header_block);
+
+    iovec iov[MAX_SEND_BLOCKS];
+    int num_blocks = makeIovec(transport_header_block, iov, MAX_SEND_BLOCKS);
+    this->socket().send(iov, num_blocks, remote_address);
+    transport_header_block->release();
+
+    // Need to wait for the 1 byte ack from the passive side before returning
+    // the link (and indicating success).
+    const size_t size = 32;
+    char buff[size];
+    ACE_Time_Value tv(60);
+    if (this->socket().recv(buff, size, this->remote_address_, 0, &tv) == 1) {
+      // Expected value
+      VDBG_LVL((LM_DEBUG,
+                ACE_TEXT("(%P|%t) UdpDataLink::open received handshake ack\n")),
+               2);
+    } else {
+      // Not a handshake ack, something is wrong
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("UdpDataLink::open: failed to receive handshake ack\n")),
+                       false);
+    }
+  }
 
   if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     stop_i();

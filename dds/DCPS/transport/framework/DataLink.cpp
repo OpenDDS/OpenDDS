@@ -823,8 +823,6 @@ OpenDDS::DCPS::DataLink::get_next_datalink_id()
   static ACE_UINT64 next_id = 0;
   static LockType lock;
 
-  DBG_ENTRY_LVL("DataLink","get_next_datalink_id",6);
-
   ACE_UINT64 id;
   {
     GuardType guard(lock);

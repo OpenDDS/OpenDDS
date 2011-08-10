@@ -28,8 +28,6 @@ const TransportHeader::no_init_t TransportHeader::no_init = {};
 
 bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 {
-  DBG_ENTRY_LVL("TransportHeader", "operator<<" ,6);
-
   Serializer writer(&buffer);
 
   writer.write_octet_array(value.protocol_, sizeof(value.protocol_));

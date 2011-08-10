@@ -274,5 +274,27 @@ MulticastTransport::release_datalink_i(DataLink* /*link*/,
   this->server_link_ = 0;  // release ownership
 }
 
+PriorityKey
+MulticastTransport::blob_to_key(const TransportBLOB& remote,
+                                CORBA::Long priority,
+                                bool active)
+{
+  NetworkAddress network_order_address;
+  ACE_InputCDR cdr((const char*)remote.get_buffer(), remote.length());
+
+  if (cdr >> network_order_address == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: MulticastTransport::blob_to_key")
+               ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+  }
+
+  ACE_INET_Addr remote_address;
+  network_order_address.to_addr(remote_address);
+  // TODO: Figure out if this is correct.
+  const bool is_loopback = remote_address == this->config_i_->group_address_;
+
+  return PriorityKey(priority, remote_address, is_loopback, active);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

@@ -77,6 +77,9 @@ namespace OpenDDS
         virtual void release_datalink_i(DataLink* link,
                                         bool release_pending);
 
+      virtual PriorityKey blob_to_key(const TransportBLOB& remote,
+                                      CORBA::Long priority,
+                                      bool active);
       private:
 
         /// The DummyTcpConnection is our friend.  It tells us when it

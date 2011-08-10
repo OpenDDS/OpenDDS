@@ -682,7 +682,7 @@ int
 TcpTransport::connect_tcp_datalink(TcpDataLink* link,
                                    TcpConnection* connection)
 {
-  DBG_ENTRY_LVL("TcpTransport","connect_datalink",6);
+  DBG_ENTRY_LVL("TcpTransport","connect_tcp_datalink",6);
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
