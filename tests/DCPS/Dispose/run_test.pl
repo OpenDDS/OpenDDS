@@ -12,21 +12,16 @@ use PerlDDS::Run_Test;
 
 PerlDDS::add_lib_path('../FooType');
 
-$opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf tcp.conf";
-$test_opts = "$opts ";
-
 $status = 0;
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior ");
+                                    "-o $dcpsrepo_ior ");
 
-$Test = PerlDDS::create_process("test", "$test_opts");
+$Test = PerlDDS::create_process("test", "");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn();

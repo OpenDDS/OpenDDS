@@ -13,25 +13,18 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$repo_bit_opt = "-ORBSvcConf tcp.conf";
 
-if ($ARGV[0] eq 'udp') {
-  $svc_conf = " -ORBSvcConf udp.conf ";
-}
-else {
-    $svc_conf = " -ORBSvcConf tcp.conf";
-}
 
 
 my($port1) = PerlACE::random_port();
 $dcpsrepo_ior = "repo.ior";
-$common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
-    . " $svc_conf";
+$common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo";
+
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_opt -o $dcpsrepo_ior "
+                                  "-o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = PerlDDS::create_process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");

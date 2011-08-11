@@ -12,16 +12,12 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
 $status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
-
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
 
 $debuglevel = 0;
 $debug_opts = "-ORBDebugLevel $debuglevel -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -DCPSTransportDebugLevel $debuglevel";
 
-$pub_opts = "$opts $debug_opts -DCPSConfigFile pub.ini";
-$sub_opts = "$opts $debug_opts -DCPSConfigFile sub.ini";
+$pub_opts = "$debug_opts -DCPSConfigFile pub.ini";
+$sub_opts = "$debug_opts -DCPSConfigFile sub.ini";
 $shutdown_pub = 0;
 $sub_deadline = "";
 $pub1_deadline = "";
@@ -59,7 +55,7 @@ unlink $dcpsrepo_ior;
 unlink <*.log>;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$debug_opts -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
+                                  "$debug_opts -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
 
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
 

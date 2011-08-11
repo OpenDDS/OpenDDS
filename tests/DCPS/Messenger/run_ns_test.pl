@@ -13,14 +13,13 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$svc_conf = '';
 $repo_bit_opt = '';
 
 my($port1) = PerlACE::random_port();
 $ns_ior = "ns.ior";
 $dcpsrepo_ior = "repo.ior";
 $arg_ns_ref = "-ORBInitRef NameService=file://$ns_ior";
-$common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo $svc_conf";
+$common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo";
 
 unlink $ns_ior;
 unlink $dcpsrepo_ior;

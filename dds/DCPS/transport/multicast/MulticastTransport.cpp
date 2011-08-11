@@ -234,7 +234,8 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
         return 0; // already logged in start_session()
       }
 
-      this->pending_connections_.insert(std::make_pair(&ce, remote_peer));
+      this->pending_connections_.insert(
+        std::pair<ConnectionEvent* const, MulticastPeer>(&ce, remote_peer));
       return 0; // can't return link to framework until handshaking is done
     }
   }

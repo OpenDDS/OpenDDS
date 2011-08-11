@@ -16,27 +16,21 @@ use PerlDDS::Cross_Sync;
 
 $| = 1;
 my $status = 0;
-my $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
 my $file_prefix = "$ENV{DDS_ROOT}/tests/DCPS/Messenger";
 my $pub_config_file = "$file_prefix/pub.ini";
 my $sub_config_file = "$file_prefix/sub.ini";
-my $opts = $use_svc_config ? "-ORBSvcConf $file_prefix/tcp.conf" : '';
+my $opts = "";
 my $pub_opts = "";
 my $sub_opts = "";
-my $repo_bit_opt = $opts;
 
 if ($ARGV[0] eq 'udp') {
-    $opts .= ($use_svc_config ?
-                  " -ORBSvcConf $file_prefix/udp.conf " : '')
-        . "-t udp";
+    $opts .= "-t udp";
     $pub_config_file = "$file_prefix/pub_udp.ini";
     $sub_config_file = "$file_prefix/sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
-    $opts .= ($use_svc_config ?
-                  " -ORBSvcConf $file_prefix/multicast.conf " : '')
-        . "-t multicast";
+    $opts .= "-t multicast";
     $pub_config_file = "$file_prefix/pub_multicast.ini";
     $sub_config_file = "$file_prefix/sub_multicast.ini";
 }
@@ -85,7 +79,7 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     unlink $dcpsrepo_ior;
     $DCPSREPO = PerlDDS::create_process
           ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-           "$repo_bit_opt -o $dcpsrepo_ior "
+           "-o $dcpsrepo_ior "
            . "-ORBEndpoint iiop://:$port1");
 
     print $DCPSREPO->CommandLine(). "\n";

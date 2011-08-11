@@ -16,13 +16,11 @@ my $debug = 0 ;
 
 $dcpsrepo_ior = "dcps_ir.ior";
 
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config -NOBITS -o $dcpsrepo_ior ");
+                                     "-NOBITS -o $dcpsrepo_ior");
 
 $PUBLISHER = PerlDDS::create_process ("publisher",
                               "-k file://$dcpsrepo_ior -q");

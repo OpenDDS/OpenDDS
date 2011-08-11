@@ -1,3 +1,226 @@
+Thu Aug 11 18:53:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * contrib/wrapper/OpenDDS/OpenDDS_Domain_Manager.h:
+        * contrib/wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * contrib/wrapper/OpenDDS/OpenDDS_Publication_Manager.h:
+        * contrib/wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * contrib/wrapper/OpenDDS/OpenDDS_Subscription_Manager.h:
+        * contrib/wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+
+          Updated 'wrapper' code to compile with the new transport APIs.
+          This is still essentially unmaintained.
+
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          Log the transport name along with the rest of the details.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Work-arounds for SunCC's deficient standard C++ library.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+          Whitespace changes only.  These should match what EMF generates.
+
+        * etc/monitor.conf:
+        * java/jms/compat/conf/tcp.conf:
+        * tools/monitor/monitor.conf:
+
+          These service configurator files no longer need to
+          load the Tcp transport library.
+
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Dispose/run_test.pl:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/GroupPresentation/run_test.pl:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+        * tests/DCPS/Messenger/run_ns_test.pl:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopic/run_test.pl:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/Presentation/run_test.pl:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/Thrasher/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/WaitForAck/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tools/modeling/tests/Arrays/run_test.pl:
+        * tools/modeling/tests/CfTopic/run_test.pl:
+        * tools/modeling/tests/Chained/run_test.pl:
+        * tools/modeling/tests/Chained_Topic/run_test.pl:
+        * tools/modeling/tests/Codegen/run_test.pl:
+        * tools/modeling/tests/Comments/run_test.pl:
+        * tools/modeling/tests/CompositeKey/run_test.pl:
+        * tools/modeling/tests/CopyTopicQos/run_test.pl:
+        * tools/modeling/tests/DataLibRef/run_test.pl:
+        * tools/modeling/tests/Deep/Down/Reference/run_test.pl:
+        * tools/modeling/tests/DomainZero/run_test.pl:
+        * tools/modeling/tests/EmptyLibs/run_test.pl:
+        * tools/modeling/tests/Exchange/run_test.pl:
+        * tools/modeling/tests/ExternalPolicies/run_test.pl:
+        * tools/modeling/tests/InvalidNames/run_test.pl:
+        * tools/modeling/tests/Looped/run_test.pl:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/MessengerDpQos/run_test.pl:
+        * tools/modeling/tests/MessengerGlobalNs/run_test.pl:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+        * tools/modeling/tests/MessengerMixed/run_test.pl:
+        * tools/modeling/tests/MessengerMulti/run_test.pl:
+        * tools/modeling/tests/MessengerNoPub/run_test.pl:
+        * tools/modeling/tests/MessengerNoSub/run_test.pl:
+        * tools/modeling/tests/MessengerPubQos/run_test.pl:
+        * tools/modeling/tests/MessengerSimpleTypes/run_test.pl:
+        * tools/modeling/tests/MessengerSplit/run_test.pl:
+        * tools/modeling/tests/MessengerWriterQos/run_test.pl:
+        * tools/modeling/tests/ModuleNameConflict/run_test.pl:
+        * tools/modeling/tests/MultiDCPS/run_test.pl:
+        * tools/modeling/tests/MultiInstance/run_test.pl:
+        * tools/modeling/tests/MultiTopic/run_test.pl:
+        * tools/modeling/tests/PolicyLib/run_test.pl:
+        * tools/modeling/tests/ReaderQos/run_test.pl:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/RemoteInstHandles/run_test.pl:
+        * tools/modeling/tests/ReusedExtTypes/run_test.pl:
+        * tools/modeling/tests/ReusedTypes/run_test.pl:
+        * tools/modeling/tests/Sequences/run_test.pl:
+        * tools/modeling/tests/StockQuoter/run_test.pl:
+        * tools/modeling/tests/SubscriberQos/run_test.pl:
+        * tools/modeling/tests/TopicQos/run_test.pl:
+        * tools/modeling/tests/UDP/run_test.pl:
+        * tools/monitor/start_repos.pl:
+
+          Removed references to *.conf files that are no longer.
+
+        * contrib/wrapper/example/tcp.conf:
+        * contrib/wrapper/example/udp.conf:
+        * etc/multicast.conf:
+        * etc/tcp.conf:
+        * etc/udp.conf:
+        * examples/DCPS/DistributedContent/tcp.conf:
+        * examples/DCPS/IntroductionToOpenDDS/tcp.conf:
+        * examples/DCPS/IntroductionToOpenDDS/udp.conf:
+        * performance-tests/tcp.conf:
+        * tests/DCPS/BidirMessenger/multicast.conf:
+        * tests/DCPS/BidirMessenger/tcp.conf:
+        * tests/DCPS/BidirMessenger/udp.conf:
+        * tests/DCPS/BuiltInTopicTest/tcp.conf:
+        * tests/DCPS/DPFactoryQos/tcp.conf:
+        * tests/DCPS/Deadline/tcp.conf:
+        * tests/DCPS/Dispose/tcp.conf:
+        * tests/DCPS/FooTest5/multicast.conf:
+        * tests/DCPS/FooTest5/udp.conf:
+        * tests/DCPS/FooTest5_0/udp.conf:
+        * tests/DCPS/GroupPresentation/tcp.conf:
+        * tests/DCPS/LatencyBudget/tcp.conf:
+        * tests/DCPS/Lifespan/tcp.conf:
+        * tests/DCPS/LivelinessTest/udp.conf:
+        * tests/DCPS/ManualAssertLiveliness/tcp.conf:
+        * tests/DCPS/NotifyTest/tcp.conf:
+        * tests/DCPS/Ownership/tcp.conf:
+        * tests/DCPS/Partition/tcp.conf:
+        * tests/DCPS/PersistentDurability/tcp.conf:
+        * tests/DCPS/Presentation/tcp.conf:
+        * tests/DCPS/Priority/services.conf:
+        * tests/DCPS/Prst_delayed_subscriber/tcp.conf:
+        * tests/DCPS/ReaderDataLifecycle/tcp.conf:
+        * tests/DCPS/SetQosDeadline/tcp.conf:
+        * tests/DCPS/SetQosPartition/tcp.conf:
+        * tests/DCPS/StringKey/tcp.conf:
+        * tests/DCPS/Thrasher/tcp.conf:
+        * tests/DCPS/TimeBasedFilter/tcp.conf:
+        * tests/DCPS/TransientDurability/tcp.conf:
+        * tests/DCPS/TransientLocalTest/tcp.conf:
+        * tests/DCPS/WaitForAck/tcp.conf:
+        * tests/tcp.conf:
+        * tests/transport/simple/tcp.conf:
+        * tools/modeling/tests/Arrays/tcp.conf:
+        * tools/modeling/tests/CfTopic/tcp.conf:
+        * tools/modeling/tests/Chained/tcp.conf:
+        * tools/modeling/tests/Chained_Data/tcp.conf:
+        * tools/modeling/tests/Chained_Topic/tcp.conf:
+        * tools/modeling/tests/Codegen/svc.conf:
+        * tools/modeling/tests/Comments/tcp.conf:
+        * tools/modeling/tests/CompositeKey/tcp.conf:
+        * tools/modeling/tests/CopyTopicQos/tcp.conf:
+        * tools/modeling/tests/DataLibRef/tcp.conf:
+        * tools/modeling/tests/Deep/Down/Reference/tcp.conf:
+        * tools/modeling/tests/DomainZero/tcp.conf:
+        * tools/modeling/tests/EmptyLibs/tcp.conf:
+        * tools/modeling/tests/Exchange/tcp.conf:
+        * tools/modeling/tests/ExternalPolicies/tcp.conf:
+        * tools/modeling/tests/InvalidNames/tcp.conf:
+        * tools/modeling/tests/Looped/tcp.conf:
+        * tools/modeling/tests/Messenger/tcp.conf:
+        * tools/modeling/tests/MessengerDpQos/tcp.conf:
+        * tools/modeling/tests/MessengerGlobalNs/tcp.conf:
+        * tools/modeling/tests/MessengerMC/multicast.conf:
+        * tools/modeling/tests/MessengerMC/tcp.conf:
+        * tools/modeling/tests/MessengerMixed/tcp.conf:
+        * tools/modeling/tests/MessengerMulti/tcp.conf:
+        * tools/modeling/tests/MessengerNoPub/tcp.conf:
+        * tools/modeling/tests/MessengerNoSub/tcp.conf:
+        * tools/modeling/tests/MessengerPubQos/tcp.conf:
+        * tools/modeling/tests/MessengerSimpleTypes/tcp.conf:
+        * tools/modeling/tests/MessengerSplit/tcp.conf:
+        * tools/modeling/tests/MessengerWriterQos/tcp.conf:
+        * tools/modeling/tests/ModuleNameConflict/tcp.conf:
+        * tools/modeling/tests/MultiDCPS/tcp.conf:
+        * tools/modeling/tests/MultiInstance/tcp.conf:
+        * tools/modeling/tests/MultiTopic/tcp.conf:
+        * tools/modeling/tests/PolicyLib/tcp.conf:
+        * tools/modeling/tests/ReaderQos/tcp.conf:
+        * tools/modeling/tests/ReferExternalProj/tcp.conf:
+        * tools/modeling/tests/RemoteInstHandles/tcp.conf:
+        * tools/modeling/tests/ReusedExtTypes/tcp.conf:
+        * tools/modeling/tests/ReusedTypes/tcp.conf:
+        * tools/modeling/tests/Sequences/tcp.conf:
+        * tools/modeling/tests/StockQuoter/tcp.conf:
+        * tools/modeling/tests/SubscriberQos/tcp.conf:
+        * tools/modeling/tests/TopicQos/tcp.conf:
+        * tools/modeling/tests/UDP/tcp.conf:
+        * tools/modeling/tests/UDP/udp.conf:
+
+          Removed these files.
+
 Thu Aug 11 16:57:51 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.properties:

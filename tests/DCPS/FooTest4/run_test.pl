@@ -57,19 +57,17 @@ else {
 
 $dcpsrepo_ior = "repo.ior";
 
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : " -ORBSvcConf ../../tcp.conf ";
 
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
 # test multiple cases
-$parameters = "$svc_config -r $num_readers -t $use_take"
+$parameters = "-r $num_readers -t $use_take"
               . " -m $multiple_instance -i $num_samples_per_reader " ;
 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_config -o $dcpsrepo_ior ");
+                                    "-o $dcpsrepo_ior ");
 
 $FooTest4 = PerlDDS::create_process ("FooTest4", $parameters);
 

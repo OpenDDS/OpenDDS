@@ -32,19 +32,17 @@ if ($#ARGV >= 0)
         $common_opts = $common_opts." -v";
     }
 }
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : " -ORBSvcConf ../../tcp.conf ";
 
 $DCPSREPO = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-       , " $svc_config -o $dcpsrepo_ior"
+       , "-o $dcpsrepo_ior"
        . " -ORBSvcConf repo.conf");
 $Subscriber = PerlDDS::create_process
       ("subscriber"
-       , " -v $svc_config -DCPSConfigFile sub.ini".$common_opts);
+       , " -v -DCPSConfigFile sub.ini".$common_opts);
 $Publisher = PerlDDS::create_process
       ("publisher"
-       , " $svc_config -DCPSConfigFile pub.ini".$common_opts);
+       , "-DCPSConfigFile pub.ini".$common_opts);
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();

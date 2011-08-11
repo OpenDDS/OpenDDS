@@ -102,22 +102,22 @@ public class TransportRefItemProvider extends ItemProviderAdapter implements
 	 */
 	@Override
 	public String getText(Object object) {
-		
+
 		TransportInst t = ((TransportRef) object).getTransport();
-		
+
 		// Dangling reference?
 		if (t == null) {
 			EClass cl = ((TransportRef) object).eClass();
 			return getTextGen(object) + " <Dangling " + cl.getName() + ">";
 		}
-		
+
 		// Unnamed transport instance?
 		if (t != null && t.getName() == null) {
 			EClass cl = t.eClass();
 			return getTextGen(object) + " <Unnamed " + cl.getName() + ">";
 		}
-		
-		return getTextGen(object) + " [" + t.getName()	+ "]";
+
+		return getTextGen(object) + " [" + t.getName() + "]";
 	}
 
 	/**

@@ -12,15 +12,10 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
 $status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
-
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
-
 $debuglevel = 0;
 
-$pub_opts = "$opts -ORBDebugLevel $debuglevel -DCPSConfigFile pub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
-$sub_opts = "$opts -DCPSTransportDebugLevel $debuglevel -ORBDebugLevel $debuglevel -DCPSConfigFile sub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
+$pub_opts = "-ORBDebugLevel $debuglevel -DCPSConfigFile pub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
+$sub_opts = "-DCPSTransportDebugLevel $debuglevel -ORBDebugLevel $debuglevel -DCPSConfigFile sub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
 $testcase = "";
 
 if ($ARGV[0] eq 'group') {
@@ -44,7 +39,7 @@ unlink $dcpsrepo_ior;
 unlink <*.log>;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-ORBDebugLevel 10 -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior -NOBITS");
+                                     "-ORBDebugLevel 10 -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior -NOBITS");
 
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBVerboseLogging 1 $testcase");
 

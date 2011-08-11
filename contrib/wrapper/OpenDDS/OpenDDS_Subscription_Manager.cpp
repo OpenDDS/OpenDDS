@@ -14,13 +14,6 @@
 #include <dds/DdsDcpsDomainC.h>
 #include <ace/streams.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/tcp/Tcp.h>
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#endif
 
 #include "OpenDDS_Subscription_Manager.h"
 #include "Domain_Manager.h"
@@ -33,13 +26,10 @@
 
 OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
   const Domain_Manager & dm,
-  OpenDDS::DCPS::TransportIdType transport_impl_id,
   const DDS::SubscriberQos & qos)
   : dm_ (dm)
 {
   this->init (qos);
-
-  this->register_transport (transport_impl_id);
 }
 
 OpenDDS_Subscription_Manager::OpenDDS_Subscription_Manager (
@@ -67,51 +57,6 @@ OpenDDS_Subscription_Manager::init (const DDS::SubscriberQos & qos)
     throw Manager_Exception ("Failed to create subscriber.");
 }
 
-void
-OpenDDS_Subscription_Manager::register_transport (
-  OpenDDS::DCPS::TransportIdType transport_id)
-{
-  // Initialize the transport
-  OpenDDS::DCPS::TransportImpl_rch transport_impl =
-    OpenDDS::DCPS::TransportFactory::instance ()->obtain (
-      transport_id);
-
-  // Attach the subscriber to the transport.
-  OpenDDS::DCPS::SubscriberImpl* sub_impl =
-    dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub_.in ());
-
-  if (0 == sub_impl) {
-    throw Manager_Exception ("Failed to obtain subscriber servant");
-  }
-
-  OpenDDS::DCPS::AttachStatus status =
-    sub_impl->attach_transport(transport_impl.in());
-
-  if (status != OpenDDS::DCPS::ATTACH_OK)
-    {
-      std::string status_str;
-      switch (status) {
-      case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-        status_str = "ATTACH_BAD_TRANSPORT";
-        break;
-      case OpenDDS::DCPS::ATTACH_ERROR:
-        status_str = "ATTACH_ERROR";
-        break;
-      case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-        status_str = "ATTACH_INCOMPATIBLE_QOS";
-        break;
-      default:
-        status_str = "Unknown Status";
-        break;
-      }
-
-      std::string error_msg (
-        "Failed to attach subscriber to the transport. Status == ");
-      error_msg += status_str.c_str();
-
-      throw Manager_Exception (error_msg);
-    }
-}
 
 void
 OpenDDS_Subscription_Manager::access_topic (

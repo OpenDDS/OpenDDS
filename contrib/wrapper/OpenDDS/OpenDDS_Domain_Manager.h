@@ -15,7 +15,6 @@
 
 #include <string>
 #include <ace/Thread_Semaphore.h>
-#include <dds/DCPS/transport/framework/TransportDefs.h>
 #include "Exit_Signal_Handler.h"
 #include "Domain_Manager_Impl.h"
 
@@ -86,9 +85,6 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
  private:
   /// reference to the internally used domain participant
   DDS::DomainParticipant_var dp_;
-
-  /// used transport implementation id in this domain participant
-  OpenDDS::DCPS::TransportIdType transport_impl_id_;
 
   /// this semaphore is used in the run and shutdown methods
   ACE_Thread_Semaphore shutdown_lock_;

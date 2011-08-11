@@ -25,11 +25,10 @@ $debugOpts .= "-DCPSDebugLevel $debug " if $debug;
 $debugOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportDebug);
 
-$opts = new PerlACE::ConfigList->check_config ('STATIC')
-    ? '' : '-ORBSvcConf ../../tcp.conf';
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_opt = $opts eq '' ? '' : '-ORBSvcConf tcp.conf';
+$opts = '';
+$repo_bit_opt = '';
 
 $opts         .= " " . $debugOpts if $debug or $transportDebug;
 $repo_bit_opt .= " " . $debugOpts if $debug or $transportDebug;

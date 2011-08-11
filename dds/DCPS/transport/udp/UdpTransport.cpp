@@ -146,7 +146,8 @@ UdpTransport::accept_datalink(ConnectionEvent& ce)
       return UdpDataLink_rch(this->server_link_)._retn();
     } else {
       // Add to pending and wait for handshake
-      this->pending_connections_.insert(std::make_pair(&ce, keys[i]));
+      this->pending_connections_.insert(
+        std::pair<ConnectionEvent* const, PriorityKey>(&ce, keys[i]));
     }
   }
 
@@ -275,7 +276,8 @@ void
 UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  ACE_Message_Block* data)
 {
-  size_t octet_size = data->length() - sizeof(CORBA::Long);
+  CORBA::ULong octet_size =
+    static_cast<CORBA::ULong>(data->length() - sizeof(CORBA::Long));
   CORBA::Long priority;
   Serializer serializer(data);
   serializer >> priority;

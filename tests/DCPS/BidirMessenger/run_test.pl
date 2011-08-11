@@ -12,9 +12,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
 $status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
+$opts = '';
 $repo_bit_opt = $opts;
 
 $pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pubsub.ini -DCPSDebugLevel 10";
@@ -22,13 +21,13 @@ $sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.
 
 if ($ARGV[0] eq 'udp') {
     shift @ARGV;
-    $opts .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '') . "-t udp";
+    $opts .= "-t udp";
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
     shift @ARGV;
-    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '') . "-t multicast";
+    $opts .= "-t multicast";
     $pub_opts = "$opts -DCPSConfigFile pubsub_multicast.ini";
     $sub_opts = "$opts -DCPSConfigFile pubsub_multicast.ini";
 }

@@ -16,20 +16,17 @@ use PerlDDS::Run_Test;
 PerlDDS::add_lib_path("./model");
 
 $status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf svc.conf" : '';
-$repo_bit_opt = $opts;
 
-$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
-$sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
+$pub_opts = "-ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
+$sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
 
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
+                                  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
 
 $Subscriber = PerlDDS::create_process ("aSubscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("aPublisher", " $pub_opts");

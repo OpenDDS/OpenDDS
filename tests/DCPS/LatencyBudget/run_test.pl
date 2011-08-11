@@ -13,10 +13,8 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf tcp.conf"; # -DCPSDebugLevel 5";
-$pub_opts = "$opts -DCPSConfigFile pub.ini"; # -DCPSDebugLevel 10";
-$sub_opts = "$opts -DCPSConfigFile sub.ini"; # -DCPSDebugLevel 10";
+$pub_opts = "-DCPSConfigFile pub.ini"; # -DCPSDebugLevel 10";
+$sub_opts = "-DCPSConfigFile sub.ini"; # -DCPSDebugLevel 10";
 
 if ($ARGV[0] eq 'late') {
     $pub_opts = "$pub_opts -o 10";
@@ -24,7 +22,6 @@ if ($ARGV[0] eq 'late') {
 }
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
@@ -32,7 +29,7 @@ $data_file = "test_run.data";
 unlink $data_file;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", "$pub_opts " .
                                      "-ORBLogFile $data_file");

@@ -38,20 +38,18 @@ unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
 
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : " -ORBSvcConf ../../tcp.conf ";
 
 # test multiple cases
-$sub_parameters = "$svc_config -s $sub_addr1 -s $sub_addr2 "
+$sub_parameters = "-s $sub_addr1 -s $sub_addr2 "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
 
-$pub_parameters = "$svc_config -p $pub_addr "
+$pub_parameters = "-p $pub_addr "
               . " -m $num_instances_per_writer -i $num_samples_per_instance";
 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
   #                                 . " -ORBDebugLevel 1"
-                                    "$svc_config -o $dcpsrepo_ior ");
+                                    "-o $dcpsrepo_ior ");
 print $DCPSREPO->CommandLine(), "\n";
 
 $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);

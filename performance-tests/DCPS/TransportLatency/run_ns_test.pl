@@ -13,21 +13,12 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$repo_bit_opt = "-ORBSvcConf tcp.conf";
-
-if ($ARGV[0] eq 'udp') {
-  $svc_conf = " -ORBSvcConf udp.conf ";
-}
-else {
-    $svc_conf = " -ORBSvcConf tcp.conf";
-}
-
 
 my($port1) = PerlACE::random_port();
 $ns_ior = "ns.ior";
 $dcpsrepo_ior = "repo.ior";
 $arg_ns_ref = "-ORBInitRef NameService=file://$ns_ior";
-$common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo $svc_conf";
+$common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo";
 
 unlink $ns_ior;
 unlink $dcpsrepo_ior;
@@ -35,7 +26,7 @@ unlink $dcpsrepo_ior;
 my %orbsvcs = PerlDDS::orbsvcs();
 $NS = PerlDDS::create_process ($orbsvcs{'Naming_Service'}, "-o $ns_ior");
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_opt -o $dcpsrepo_ior "
+                                  "-o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = PerlDDS::create_process ("subscriber",
                                     "-DCPSConfigFile sub.ini $common_args");

@@ -28,11 +28,7 @@ my $port=29804;
 
 my $sub_time = $pub_time;
 my $sub_addr = "localhost:16701";
-#my $use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
-my $use_svc_conf = undef;
 
-my $svc_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf " : '';
-my $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 my $dcpsrepo_ior = "repo.ior";
 
@@ -252,7 +248,7 @@ sub parse($$$) {
   my $config = "-DCPSConfigFile transports.ini" if $pub_configuration;
 
   $pub_configuration = $pub_configuration || 'none';
-  my $result = "$svc_conf $pub_builtins $level $config"
+  my $result = "$pub_builtins $level $config"
          . " -c " . $compatibility
          . " -e " . join (' -e ', $pub_entity)
          . $pub_autoenable
@@ -278,8 +274,7 @@ sub initialize($) {
   my $pub_builtins = "-NOBITS" unless $hasbuiltins;
 
   my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                                         "$repo_bit_conf $pub_builtins "
-                                                   . "-o $dcpsrepo_ior ");
+                                          "$pub_builtins -o $dcpsrepo_ior");
   print $DCPSREPO->CommandLine() . "\n";
   $DCPSREPO->Spawn ();
   print "Repository PID: " . $DCPSREPO->{PROCESS} . "\n" if $DCPSREPO->{PROCESS};

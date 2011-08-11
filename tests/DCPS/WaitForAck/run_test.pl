@@ -78,8 +78,6 @@ my $confFile  = PerlACE::LocalFile( "tcp.conf");
 unlink $repo_ior;
 unlink $debugFile if $debugFile;
 
-my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf $confFile";
 
 my $common_opts;
 $common_opts .= "-v " if $verbose;
@@ -97,13 +95,13 @@ $appDebug  = $debug if $debug;
 my $verboseDebug;
 $verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
 
-my $repoOpts = "$svc_config ";
+my $repoOpts = "";
 $repoOpts .= $verboseDebug if $verboseDebug;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
 
-my $appOpts = "$svc_config $common_opts ";
+my $appOpts = "$common_opts ";
 $appOpts .= $verboseDebug if $verboseDebug;
 $appOpts .= "-DCPSDebugLevel $appDebug " if $appDebug;
 $appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;

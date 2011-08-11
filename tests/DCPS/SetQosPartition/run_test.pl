@@ -22,8 +22,7 @@ $debugOpts .= "-DCPSDebugLevel $debug " if $debug;
 $debugOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportDebug);
 
-$opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf tcp.conf";
+my $opts;
 
 $opts .= " " . $debugOpts if $debug or $transportDebug;
 

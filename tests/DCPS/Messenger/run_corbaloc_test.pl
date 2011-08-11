@@ -13,13 +13,11 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$svc_conf = '';
 $repo_bit_opt = '';
 $corbaloc_prefix = 'corbaloc:iiop:';
 $corbaloc_suffix = '/DCPSInfoRepo';
 $pub_ini = '-DCPSConfigFile pub.ini';
 $sub_ini = '-DCPSConfigFile sub.ini';
-if (!new PerlACE::ConfigList->check_config ('STATIC')) {
   if ($ARGV[0] eq 'udp' || $ARGV[1] eq 'udp') {
     $pub_ini = '-DCPSConfigFile pub_udp.ini';
     $sub_ini = '-DCPSConfigFile sub_udp.ini';
@@ -29,12 +27,12 @@ if (!new PerlACE::ConfigList->check_config ('STATIC')) {
     $corbaloc_prefix = '';
     $corbaloc_suffix = '';
   }
-}
+
 
 my($port1) = PerlACE::random_port();
 $dcpsrepo_ior = "repo.ior";
 $common_args = "-DCPSInfoRepo " . "$corbaloc_prefix" . "localhost:$port1"
-    . "$corbaloc_suffix". " $svc_conf";
+    . $corbaloc_suffix;
 
 unlink $dcpsrepo_ior;
 

@@ -54,8 +54,6 @@ my $appOpts = "";
 $appOpts  = "-DCPSDebugLevel $appDebug "                if $appDebug;
 $appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 
-$dynamic_tcp = new PerlACE::ConfigList->check_config ('STATIC')
-    ? '' : '-ORBSvcConf ../../tcp.conf';
 
 $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                 "$repoOpts -o $iorfile $dynamic_tcp ");
