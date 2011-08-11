@@ -12,6 +12,7 @@ import java.util.List;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.ResourceLocator;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
 import org.eclipse.emf.edit.provider.IChildCreationExtender;
@@ -101,9 +102,22 @@ public class TransportRefItemProvider extends ItemProviderAdapter implements
 	 */
 	@Override
 	public String getText(Object object) {
+		
 		TransportInst t = ((TransportRef) object).getTransport();
-		return getTextGen(object) + " [" + ((t == null) ? "null" : t.getName())
-				+ "]";
+		
+		// Dangling reference?
+		if (t == null) {
+			EClass cl = ((TransportRef) object).eClass();
+			return getTextGen(object) + " <Dangling " + cl.getName() + ">";
+		}
+		
+		// Unnamed transport instance?
+		if (t != null && t.getName() == null) {
+			EClass cl = t.eClass();
+			return getTextGen(object) + " <Unnamed " + cl.getName() + ">";
+		}
+		
+		return getTextGen(object) + " [" + t.getName()	+ "]";
 	}
 
 	/**

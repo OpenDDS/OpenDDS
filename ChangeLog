@@ -1,3 +1,10 @@
+Thu Aug 11 15:40:21 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+
+          Introducing better handling of special cases: unnamed transports and dangling
+          references.
+
 Wed Aug 10 21:37:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastInst.h:
