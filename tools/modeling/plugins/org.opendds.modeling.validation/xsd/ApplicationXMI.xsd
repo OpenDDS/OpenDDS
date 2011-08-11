@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:application="http://www.opendds.org/modeling/schemas/Application/1.0" xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:dcps="http://www.opendds.org/modeling/schemas/DCPS/1.0" targetNamespace="http://www.opendds.org/modeling/schemas/Application/1.0">
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/DCPS/1.0" schemaLocation="DCPSXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="CoreXMI.xsd"/>
+  <xsd:simpleType name="LanguageType">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="CXX"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="PlatformType">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="MPC_CDT"/>
+      <xsd:enumeration value="MPC_GNUACE"/>
+      <xsd:enumeration value="MPC_NMAKE"/>
+      <xsd:enumeration value="MPC_VC71"/>
+      <xsd:enumeration value="MPC_VC8"/>
+      <xsd:enumeration value="MPC_VC9"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="ComponentType">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="EXECUTABLE"/>
+      <xsd:enumeration value="STATIC_LIBRARY"/>
+      <xsd:enumeration value="SHARED_LIBRARY"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:complexType name="ApplicationTarget">
+    <xsd:complexContent>
+      <xsd:extension base="core:Entity">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="participant" type="dcps:DomainParticipant"/>
+        </xsd:choice>
+        <xsd:attribute name="language" type="application:LanguageType"/>
+        <xsd:attribute name="platform" type="application:PlatformType"/>
+        <xsd:attribute name="component_type" type="application:ComponentType"/>
+        <xsd:attribute name="participant" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+</xsd:schema>

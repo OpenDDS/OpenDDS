@@ -22,6 +22,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -31,7 +32,9 @@ import org.xml.sax.SAXParseException;
  * XML Schema validations.
  */
 public class XMLUtil {
-	private static final Logger logger = Logger.getLogger(XMLUtil.class.getName());
+	private static final Logger logger = Logger.getLogger(XMLUtil.class);
+	
+	public static final String XSD_DIR = "/xsd";
 
 	/**
 	 * @param sourceXML the XML file to transform
@@ -57,15 +60,24 @@ public class XMLUtil {
 	 * @throws IOException if a file I/O error occurs
 	 */
 	public static List<SAXParseException> validate(File schemaFile, File xmlFile) throws SAXException, IOException {
+		return validate(schemaFile, xmlFile, null);
+	}
+	public static List<SAXParseException> validate(File schemaFile, File xmlFile, LSResourceResolver resolver) throws SAXException, IOException {
 		logger.debug("schemaFile = " + schemaFile);
 		logger.debug("xmlFile = " + xmlFile);
 		Source schemaSource = new StreamSource(schemaFile);
     	Source xmlSource = new StreamSource(xmlFile);
-        return validate(schemaSource, xmlSource);
+        return validate(schemaSource, xmlSource, resolver);
 	}
-
+	
 	public static List<SAXParseException> validate(Source schemaSource, Source xmlSource) throws SAXException, IOException {
+		return validate(schemaSource, xmlSource, null);
+	}
+	public static List<SAXParseException> validate(Source schemaSource, Source xmlSource, LSResourceResolver resolver) throws SAXException, IOException {
 		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		if (resolver != null) {
+			factory.setResourceResolver(resolver);
+		}
 		Schema schema = factory.newSchema(schemaSource);
 		Validator validator = schema.newValidator();
 		ValidationErrorHandler veh = new ValidationErrorHandler();

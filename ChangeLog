@@ -1,3 +1,37 @@
+Thu Aug 11 15:53:53 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/AbstractValidateXMLFileAction.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/ValidateCodegenFileAction.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/ValidateOpenDDSFileAction.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.validation/.project:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/docs/README:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/CoreXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/EnumerationsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/TypesXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/XMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/dev_readme.txt:
+
+          Converted validation project to a proper eclipse plugin, and added support
+          for XML Schema validation of .opendds and .codegen files via popup menus
+          in the project tree of the Modeling SDK eclipse UI.
+
 Thu Aug 11 15:40:21 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:

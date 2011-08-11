@@ -59,7 +59,7 @@
    </extension>
 
    <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
-      <?gmfgen generated="true"?>
+      <?gmfgen generated="false"?>
       <objectContribution
             id="org.opendds.modeling.diagram.main.InitDiagram"
             nameFilter="*.opendds"
@@ -70,6 +70,28 @@
                menubarPath="additions"
                enablesFor="1"
                id="org.opendds.modeling.diagram.main.InitDiagramAction">
+         </action>
+      </objectContribution>
+      <objectContribution
+            id="org.opendds.modeling.diagram.main.ValidateOpenDDSFile"
+            nameFilter="*.opendds"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="org.opendds.modeling.diagram.main.part.ValidateOpenDDSFileAction"
+               id="org.opendds.modeling.diagram.main.ValidateOpenDDSFileAction"
+               label="%validateOpenDDSFileActionLabel"
+               menubarPath="additions">
+         </action>
+      </objectContribution>
+      <objectContribution
+            id="org.opendds.modeling.diagram.main.ValidateCodegenFile"
+            nameFilter="*.codegen"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="org.opendds.modeling.diagram.main.part.ValidateCodegenFileAction"
+               id="org.opendds.modeling.diagram.main.ValidateCodegenFileAction"
+               label="%validateCodegenFileActionLabel"
+               menubarPath="additions">
          </action>
       </objectContribution>
    </extension>

@@ -1,4 +1,16 @@
-usage:  __APPNAME__.sh/.bat
- -f,--file <arg>   opendds file(s) and/or directory(s) to validate
+usage:  openddsvalidate.sh/.bat
+ -f,--file <arg>   .opendds/.codegen file(s) and/or directory(s) contain those files to validate
  -q,--quiet        suppress output except for error reporting
- -r,--recursive    search directory recursively for opendds files
+ -r,--recursive    search directory(ies) recursively for opendds files
+
+If there are errors the output will list each error with line and column number, along
+with the error message emitted by the schema validation engine.
+
+BUILDING
+
+There are two ant targets for building runnable console/shell applications.
+
+UNIX/LINUX/OSX
+Use the ant target dist.nix to build the application for Linux or Unix systems,
+inlcuding Mac OS. This results in a archive file openddsvalidate.tar.gz. The
+unpack the applacation, use the command tar -zxf openddsvalidate.tar.gz

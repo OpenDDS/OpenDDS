@@ -2,6 +2,7 @@
 <project name="org.opendds.modeling.validation" default="test" basedir=".">
 
   <property file="build.properties" />
+  <property name="subdir" value=""/>
 
   <!--
 
@@ -43,9 +44,10 @@
      Transform generated xsd files
     ******************************************************/ -->
   <target name="transform-xsd" depends="compile">
-    <delete dir="${gen.xsd.dir}" />
-    <mkdir dir="${gen.xsd.dir}" />
-
+    <delete>
+      <fileset dir="${gen.xsd.dir}" includes="*.xsd"/>
+    </delete>
+  	
     <java classname="${app.package}.OpenDDSXMISchemaTransformer" fork="yes">
       <arg value="-src" />
       <arg value="${opendds.src.xsd.dir}" />
@@ -64,7 +66,7 @@
 
   <target name="staging" depends="clean" description="setup distribution">
     <antcall target="compile" />
-    <antcall target="transform-xsd" />
+    <!--antcall target="transform-xsd" /-->
     <delete dir="${staging.dir}" />
     <mkdir dir="${staging.dir}" />
     <mkdir dir="${staging.dir}/xsd" />
@@ -174,7 +176,7 @@
     </javac>
   </target>
 
-  <target name="run.tests" depends="test, staging">
+  <target name="run.tests" depends="staging">
     <exec osfamily="unix" dir="${staging.dir}" executable="/bin/sh">
       <arg line="${app.name}.sh"/>
       <arg line="-rqf"/>
