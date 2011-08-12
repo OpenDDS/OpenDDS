@@ -5,6 +5,5 @@ Bundle-SymbolicName: org.opendds.modeling.validation
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .,
  lib/commons-cli-1.2.jar
-Require-Bundle: org.apache.log4j;bundle-version="1.2.13"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.ociweb.xml.util

@@ -93,7 +93,7 @@
     </replace>
     <jar destfile="${staging.jar}">
       <fileset dir="${build.dir}" excludes="**/Test.class" />
-      <zipfileset src="${lib.dir}/log4j-1.2.16.jar" excludes="META-INF/*" />
+      <!--zipfileset src="${lib.dir}/log4j-1.2.16.jar" excludes="META-INF/*" /-->
       <zipfileset src="${lib.dir}/commons-cli-1.2.jar" excludes="META-INF/*" />
       <manifest>
         <attribute name="Main-Class" value="${app.package}.OpenDDSModelValidator" />

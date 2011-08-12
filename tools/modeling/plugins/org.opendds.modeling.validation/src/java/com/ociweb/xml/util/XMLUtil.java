@@ -21,7 +21,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -32,7 +31,6 @@ import org.xml.sax.SAXParseException;
  * XML Schema validations.
  */
 public class XMLUtil {
-	private static final Logger logger = Logger.getLogger(XMLUtil.class);
 	
 	public static final String XSD_DIR = "/xsd";
 
@@ -43,9 +41,9 @@ public class XMLUtil {
 	 * @throws TransformerException if an error occurs configuraing or applying the transformation
 	 */
 	public static void transform(final File sourceXML, final File xslt, final File targetXML) throws TransformerException {
-		logger.debug("sourceXML = " + sourceXML);
-		logger.debug("xslt = " + xslt);
-		logger.debug("targetXML = " + targetXML);
+//		logger.debug("sourceXML = " + sourceXML);
+//		logger.debug("xslt = " + xslt);
+//		logger.debug("targetXML = " + targetXML);
 		Transformer transformer = createTransformer(xslt, Collections.<String,String>emptyMap());
 		Source source = new StreamSource(sourceXML);
 		Result result = new StreamResult(targetXML);
@@ -63,8 +61,8 @@ public class XMLUtil {
 		return validate(schemaFile, xmlFile, null);
 	}
 	public static List<SAXParseException> validate(File schemaFile, File xmlFile, LSResourceResolver resolver) throws SAXException, IOException {
-		logger.debug("schemaFile = " + schemaFile);
-		logger.debug("xmlFile = " + xmlFile);
+//		logger.debug("schemaFile = " + schemaFile);
+//		logger.debug("xmlFile = " + xmlFile);
 		Source schemaSource = new StreamSource(schemaFile);
     	Source xmlSource = new StreamSource(xmlFile);
         return validate(schemaSource, xmlSource, resolver);
@@ -96,18 +94,18 @@ public class XMLUtil {
 		@Override
 		public void error(SAXParseException exception) throws SAXException {
 			errors.add(exception);
-			logger.debug(exception.getMessage());
+//			logger.debug(exception.getMessage());
 		}
 		@Override
 		public void fatalError(SAXParseException exception) throws SAXException {
 			// the parser might throw anyway
-			logger.error(exception.getMessage());
+			exception.printStackTrace();
 			throw exception;
 		}
 		@Override
 		public void warning(SAXParseException exception) throws SAXException {
 			// these can be safely ignored
-			logger.debug(exception.getMessage());
+//			logger.debug(exception.getMessage());
 		}
 	}
 
@@ -132,7 +130,7 @@ public class XMLUtil {
             }
 			return transformer;
 		} catch (TransformerConfigurationException e) {
-			logger.error(e.getMessage());
+			e.printStackTrace();
 			throw e;
 		}
 	}

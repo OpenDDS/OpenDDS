@@ -11,12 +11,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.apache.log4j.Logger;
 
 import com.ociweb.xml.util.XMLUtil;
 
 public class OpenDDSXMISchemaTransformer {
-	private static final Logger logger = Logger.getLogger(OpenDDSXMISchemaTransformer.class.getName());
 
 	public static final String SRC_DIR_ARG = "src";
 	public static final String DEST_DIR_ARG = "dest";
@@ -49,9 +47,9 @@ public class OpenDDSXMISchemaTransformer {
 			}
 			transform(srcDir, destDir);
 		} catch (ParseException  e) {
-			logger.error( "Unexpected exception:" + e.getMessage() );
+			e.printStackTrace();
 		} catch (TransformerException e) {
-			logger.error( "Unexpected exception:" + e.getMessage() );
+			e.printStackTrace();
 		}
 	}
 
@@ -63,8 +61,8 @@ public class OpenDDSXMISchemaTransformer {
 	}
 
 	static void transform(final File sourceDir, final File destDir) throws TransformerException {
-		logger.debug("source dir = " + sourceDir);
-		logger.debug("dest dir = " + destDir);
+//		logger.debug("source dir = " + sourceDir);
+//		logger.debug("dest dir = " + destDir);
 		File xslDir = new File(XSL_DIR);
 		FileFilter filter = new FileFilter() {
 			@Override
@@ -80,8 +78,8 @@ public class OpenDDSXMISchemaTransformer {
 				xslFile = new File(xslDir, DEFAULT_XSL_FILE);
 			}
 			File transformedXsd = new File(destDir, xsdFilename);
-			logger.debug("XSL = " + xslFile);
-			logger.debug("XSD = " + xsdFile);
+//			logger.debug("XSL = " + xslFile);
+//			logger.debug("XSD = " + xsdFile);
 			XMLUtil.transform(xsdFile, xslFile, transformedXsd);
 		}
 	}

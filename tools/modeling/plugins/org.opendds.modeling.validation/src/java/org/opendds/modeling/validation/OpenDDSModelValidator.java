@@ -14,13 +14,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.apache.log4j.Logger;
 import org.xml.sax.SAXParseException;
 
 import com.ociweb.xml.util.XMLUtil;
 
+// TODO utilize eclipse built-in logging framework
 public class OpenDDSModelValidator {
-	private static final Logger logger = Logger.getLogger(OpenDDSModelValidator.class.getName());
 
 	static final String OPENDDS_XSD_FILE_PROPERTY = "opendds.xsd.file";
 	static final String OPENDDS_FILE_EXT = ".opendds";
@@ -82,23 +81,23 @@ public class OpenDDSModelValidator {
 			int numErrs = validator.validate();
 			System.exit(numErrs);
 		} catch (ParseException exp) {
-			logger.error("Encountered an unexpected error:" + exp.getMessage());
+			System.err.println("Encountered an unexpected error:" + exp.getMessage());
 		}
 	}
 
     public int validate() {
         if (quiet) {
-            logger.info("Starting validation in quiet mode (error reporting only)...");
+            System.out.println("Starting validation in quiet mode (error reporting only)...");
         } else {
-            logger.info("Starting validation...");
+            System.out.println("Starting validation...");
         }
         int numInvalidFiles = 0;
         for (File file : files) {
             if (!file.exists()) {
-                logger.warn(file + " does not exist!");
+            	System.err.println(file + " does not exist!");
                 continue;
             }
-            logger.debug("Checking file: " + file);
+//            logger.debug("Checking file: " + file);
             if (file.isDirectory()) {
                 numInvalidFiles += validateDir(file);
             } else {
@@ -106,9 +105,9 @@ public class OpenDDSModelValidator {
             }
         }
         if (numInvalidFiles == 0) {
-        	logger.info("Validation completed successfully.");
+        	System.out.println("Validation completed successfully.");
 		} else {
-			logger.error("Validation completed with errors in " + numInvalidFiles + " files.");
+			System.err.println("Validation completed with errors in " + numInvalidFiles + " files.");
 		}
         return numInvalidFiles;
     }
@@ -116,34 +115,35 @@ public class OpenDDSModelValidator {
 	private boolean validateFile(File xml) {
 	    boolean valid = false;
 		try {
-		    logger.debug("xml = " + xml);
+//		    logger.debug("xml = " + xml);
 		    String ext = xml.getName().replaceAll(".+(\\..+)", "$1");
 		    String xsdFile = schemas.get(ext);
-		    logger.debug("xsdFile = " + xsdFile);
+//		    logger.debug("xsdFile = " + xsdFile);
 		    File xsd = new File(xsdFile);
 		    if (!xsd.exists()) {
-		        logger.debug("working dir = " + System.getProperty("user.dir"));
+//		        logger.debug("working dir = " + System.getProperty("user.dir"));
                 throw new IllegalStateException(xsd + " does not exist");
             }
 			List<SAXParseException> errors = XMLUtil.validate(xsd, xml);
 			if (!errors.isEmpty()) {
-				logger.error("ERROR: while validating " + xml + " the following errors were found:");
+				System.err.println("ERROR: while validating " + xml + " the following errors were found:");
 				for (SAXParseException se : errors) {
-					logger.error("    Line " + se.getLineNumber() + " Column " +
+					System.err.println("    Line " + se.getLineNumber() + " Column " +
 					        se.getColumnNumber() + ": " + se.getMessage());
 				}
 			} else {
 			    if (!quiet) {
-			        logger.info("Validated " + xml);
+			        System.out.println("Validated " + xml);
 			    }
 			    valid = true;
 			}
 			return valid;
 		} catch (RuntimeException e) {
-			logger.fatal("Unexpected error",e);
+			System.err.println("Unexpected error");
+			e.printStackTrace();
 			throw e;
 		} catch (Exception e) {
-		    logger.error("Fatal validation Error: " + e.getMessage());
+		    System.err.println("Fatal validation Error: " + e.getMessage());
 		    return false;
 		}
 	}
@@ -161,7 +161,7 @@ public class OpenDDSModelValidator {
             }
         };
 		for (File f: parent.listFiles(filter)) {
-			logger.debug("Checking " + f.getPath());
+//			logger.debug("Checking " + f.getPath());
 			if (f.isDirectory()) {
 				if (!recursive) {
 					continue;

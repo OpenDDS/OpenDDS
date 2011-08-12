@@ -13,14 +13,13 @@ import java.util.List;
 
 import javax.xml.transform.Transformer;
 
-import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+// TODO utilize eclipse built-in logging framework
 public class OpenDDSValidationUtilTest {
-	private static final Logger logger = Logger.getLogger(OpenDDSValidationUtilTest.class);
 
 
 	static final String baseDir = "../../";
@@ -130,8 +129,8 @@ public class OpenDDSValidationUtilTest {
 			}
 			File transformedXsd = new File(transformedXsdDir, xsdFilename);
 			File idempotentXsd = new File(idempotentXsdDir, xsdFilename);
-			logger.debug("XSL = " + xslFile);
-			logger.debug("XSD = " + xsdFile);
+//			logger.debug("XSL = " + xslFile);
+//			logger.debug("XSD = " + xsdFile);
 			XMLUtil.transform(xsdFile, xslFile, transformedXsd);
 			XMLUtil.transform(transformedXsd, xslFile, idempotentXsd);
 		}
@@ -200,21 +199,21 @@ public class OpenDDSValidationUtilTest {
 			    failures.addAll(validate(f, xsdFile, ext));
 			} else if (f.getName().toLowerCase().endsWith(ext)) {
 				if (!knownBadFiles.contains(f)) {
-					logger.debug("Validating " + f.getPath());
+//					logger.debug("Validating " + f.getPath());
 					try {
 						List<SAXParseException> errors = XMLUtil.validate(new File(xsdFile), f);
 						if (!errors.isEmpty()) {
-							logger.error(f + " has the following validation errors:");
+							System.err.println(f + " has the following validation errors:");
 							for (SAXParseException se : errors) {
-								logger.error("Line " + se.getLineNumber() + " Column " + se.getColumnNumber() + ": " + se.getMessage());
+								System.err.println("Line " + se.getLineNumber() + " Column " + se.getColumnNumber() + ": " + se.getMessage());
 							}
 							failures.add(f);
 						}
 					} catch (SAXException e) {
-						logger.error(e);
+						e.printStackTrace();
 						throw e;
 					} catch (IOException e) {
-						logger.error(e);
+						e.printStackTrace();
 						throw e;
 					}
 				}
