@@ -27,9 +27,8 @@ public:
   /// The default value is: false.
   bool default_to_ipv6_;
 
-  /// The offset used to determine default port numbers; this value
-  /// will be added to the transport ID for the actual port number.
-  /// The default value is: 49400 [IANA 2009-11-16].
+  /// The default port number (when group_address is not set)
+  /// The default value is: 49152 [IANA 2009-11-16].
   u_short port_offset_;
 
   /// The multicast group to join to send/receive data.
@@ -104,8 +103,7 @@ private:
   friend class MulticastType;
   explicit MulticastInst(const std::string& name);
 
-  void default_group_address(ACE_INET_Addr& group_address,
-                             ACE_UINT32 id);
+  void default_group_address(ACE_INET_Addr& group_address);
 
   MulticastTransport* new_impl(const TransportInst_rch& inst);
 };

@@ -1,3 +1,18 @@
+Fri Aug 12 16:55:15 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Change the semantics of the port_offset config option.
+          It is no longer an offset but simply the port # when a 
+          group_address is not set.  The default is changed to
+          49152.
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Tweak the handshake ack timeout to 30 seconds (was 60).
+
 Fri Aug 12 12:59:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Entities.cpp:

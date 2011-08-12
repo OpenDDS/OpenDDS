@@ -20,7 +20,7 @@ namespace {
 
 const bool DEFAULT_TO_IPV6(false);
 
-const u_short DEFAULT_PORT_OFFSET(49400);
+const u_short DEFAULT_PORT_OFFSET(49152);
 
 const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.0.128");
 const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01::80");
@@ -61,7 +61,7 @@ MulticastInst::MulticastInst(const std::string& name)
     rcv_buffer_size_(0)
 #endif
 {
-  default_group_address(this->group_address_, 0xFFFFFF08);
+  default_group_address(this->group_address_);
 
   this->syn_interval_.msec(DEFAULT_SYN_INTERVAL);
   this->syn_timeout_.msec(DEFAULT_SYN_TIMEOUT);
@@ -87,7 +87,7 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
                            group_address_s)
   if (group_address_s.is_empty()) {
     // TODO: Passing 0 instead of transport id.  Does this cause complications?
-    default_group_address(this->group_address_, 0);
+    default_group_address(this->group_address_);
   } else {
     this->group_address_.set(group_address_s.c_str());
   }
@@ -122,15 +122,12 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
 }
 
 void
-MulticastInst::default_group_address(ACE_INET_Addr& group_address,
-                                     ACE_UINT32 id)
+MulticastInst::default_group_address(ACE_INET_Addr& group_address)
 {
-  u_short port_number(this->port_offset_ + id);
-
   if (this->default_to_ipv6_) {
-    group_address.set(port_number, DEFAULT_IPV6_GROUP_ADDRESS);
+    group_address.set(this->port_offset_, DEFAULT_IPV6_GROUP_ADDRESS);
   } else {
-    group_address.set(port_number, DEFAULT_IPV4_GROUP_ADDRESS);
+    group_address.set(this->port_offset_, DEFAULT_IPV4_GROUP_ADDRESS);
   }
 }
 
