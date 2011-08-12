@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>262</width>
-    <height>310</height>
+    <width>266</width>
+    <height>383</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -37,13 +37,35 @@
      <x>10</x>
      <y>10</y>
      <width>241</width>
-     <height>291</height>
+     <height>361</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
+       <widget class="QCheckBox" name="parentChild">
+        <property name="text">
+         <string>Hide Parent/Child Lines</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_6">
+      <item>
+       <widget class="QCheckBox" name="pubSub">
+        <property name="text">
+         <string>Hide Pub/Sub Lines</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
        <widget class="QCheckBox" name="abbrGUIDs">
         <property name="text">
          <string>Abbreviated GUIDs</string>

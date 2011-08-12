@@ -1,3 +1,26 @@
+Fri Aug 12 19:28:42 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * NEWS:
+
+          Added text about the Node View
+
+        * tools/monitor/Edge.h:
+        * tools/monitor/Edge.cpp:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/GvOptions.ui:
+        * tools/monitor/Monitor.mpc:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.ui:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/Viewer.cpp:
+
+          Added Node View options, layout and edge connection logic.
+
 Fri Aug 12 19:08:42 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.validation/.classpath:

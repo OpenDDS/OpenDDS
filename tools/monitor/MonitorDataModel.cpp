@@ -12,8 +12,6 @@
 #include <QtCore/QStringList>
 #include <QtGui/QTreeView>
 
-#include <stdio.h>
-
 namespace Monitor {
 
 MonitorDataModel::MonitorDataModel( QObject* parent)

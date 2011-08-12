@@ -46,27 +46,30 @@ namespace Monitor {
     // Initialize the GUI and connect the signals and slots.
     this->ui.setupUi( this);
 
+    // no rendering artifacts
+    this->ui.nodeView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
     // context menu creation
-    // TODO: Uncomment NodeView actions when NodeView implementation is complete.
     treeMenu.setTitle("Tree View");
     treeMenu.addAction(EXPAND_ACTION);
-//    treeMenu.addAction(SELECTION_TO_NODE_VIEW);
+    treeMenu.addAction(SELECTION_TO_NODE_VIEW);
     treeMenu.addAction(SELECTION_TO_GRAPH_VIEW);
-//    treeMenu.addAction(NODE_VIEW_OPTIONS_ACTION);
+    treeMenu.addAction(NODE_VIEW_OPTIONS_ACTION);
     treeMenu.addAction(GRAPH_OPTIONS_ACTION);
 
     nodeViewMenu.setTitle("Node View");
-//    nodeViewMenu.addAction(NODE_VIEW_UPDATE_ACTION);
-//    nodeViewMenu.addAction(NODE_VIEW_OPTIONS_ACTION);
-//    nodeViewMenu.addAction(NODE_VIEW_TO_FILE);
+    nodeViewMenu.addAction(NODE_VIEW_UPDATE_ACTION);
+    nodeViewMenu.addAction(NODE_VIEW_OPTIONS_ACTION);
+    nodeViewMenu.addAction(NODE_VIEW_TO_FILE);
 
     nodeMenu.setTitle("Node Options");
-//    nodeMenu.addAction(NODE_EXPAND);
-//    nodeMenu.addAction(NODE_COLLAPSE);
-//    nodeMenu.addAction(NODE_DELETE);
-//    nodeMenu.addAction(NODE_CONNECT);
-//    nodeMenu.addAction(NODE_DISCONNECT);
-//    nodeMenu.addAction(NODE_RESTORE_CONNECTIONS);
+    // TODO: implement node options
+    //nodeMenu.addAction(NODE_EXPAND);
+    //nodeMenu.addAction(NODE_COLLAPSE);
+    //nodeMenu.addAction(NODE_DELETE);
+    //nodeMenu.addAction(NODE_CONNECT);
+    //nodeMenu.addAction(NODE_DISCONNECT);
+    //nodeMenu.addAction(NODE_RESTORE_CONNECTIONS);
 
     graphMenu.setTitle("Graph View");
     graphMenu.addAction(GRAPH_UPDATE_ACTION);

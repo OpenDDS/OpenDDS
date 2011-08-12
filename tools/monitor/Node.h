@@ -8,29 +8,35 @@
 
 #include <QtGui/QGraphicsTextItem>
 #include <QtGui/QPainter>
+#include <vector>
 
 #include "TreeNode.h"
 
 #ifndef NODE_H
 #define NODE_H
 
-#define NODE_EDIT "Edit"
-#define NODE_DELETE "Delete"
-
 namespace Monitor {
+
+class Edge;
 
 class Node : public QGraphicsTextItem
 {
 public:
   Node (QString& text, qreal x, qreal y, TreeNode *t, QGraphicsItem * parent = 0);
 
+  void addEdge(Edge* edge);
+
   // override
   void paint(QPainter *painter,const QStyleOptionGraphicsItem *option,QWidget *widget);
 
+protected:
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
 private:
-  // connection info
-  std::vector<Node *>parents_;
-  std::vector<Node *>children_;
+
+  void updateEdges();
+
+  std::vector<Edge *> edges_;
 
   // the model
   TreeNode* treeNode_;

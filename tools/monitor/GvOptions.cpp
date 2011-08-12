@@ -7,6 +7,7 @@
  */
 
 #include <QtGui/QtGui>
+#include <QtCore/QDir>
 #include "GvOptions.h"
 
 // Note calls to QObject::toStdString() have been replaced with QObject::toLocal8Bit().constData()
@@ -18,6 +19,10 @@ GvOptionsDialog::GvOptionsDialog( QWidget* parent)
  : QDialog( parent)
 {
   ui.setupUi( this);
+
+  // tmp dirs are platform specific.
+  ui.dotLocEdit->setText(QDir::tempPath() + QDir::separator() + "monitor.dot");
+  ui.pngLocEdit->setText(QDir::tempPath() + QDir::separator() + "monitor.png");
 
 }
 

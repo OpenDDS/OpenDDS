@@ -98,7 +98,7 @@
       <item>
        <widget class="QLineEdit" name="gvLocEdit">
         <property name="text">
-         <string>/usr/bin/dot</string>
+         <string>dot</string>
         </property>
        </widget>
       </item>

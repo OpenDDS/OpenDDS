@@ -24,6 +24,8 @@ NodeOptionsDialog::dialogAction(QWidget *parent, NodeOptionsData &nodeOpt, bool*
   NodeOptionsDialog dialog( parent);
 
   // set current gvOptions
+  dialog.ui.parentChild->setChecked(nodeOpt.parentChild_);
+  dialog.ui.pubSub->setChecked(nodeOpt.pubSub_);
   dialog.ui.abbrGUIDs->setChecked(nodeOpt.abbrGUIDs_);
   dialog.ui.ignoreBuiltinTopics->setChecked(nodeOpt.ignoreBuiltinTopics_);
   dialog.ui.hideTopics->setChecked(nodeOpt.hideTopics_);
@@ -36,6 +38,8 @@ NodeOptionsDialog::dialogAction(QWidget *parent, NodeOptionsData &nodeOpt, bool*
 
   switch( dialog.exec()) {
     case Accepted:
+      nodeOpt.parentChild_ = dialog.ui.parentChild->isChecked();
+      nodeOpt.pubSub_ = dialog.ui.pubSub->isChecked();
       nodeOpt.abbrGUIDs_ = dialog.ui.abbrGUIDs->isChecked();
       nodeOpt.ignoreBuiltinTopics_ = dialog.ui.ignoreBuiltinTopics->isChecked();
       nodeOpt.hideTopics_ = dialog.ui.hideTopics->isChecked();
@@ -62,6 +66,9 @@ NodeOptionsDialog::getNodeData(QWidget *parent, NodeOptionsData &nodeOpt)
 {
   NodeOptionsDialog dialog( parent);
 
+  nodeOpt.parentChild_ = dialog.ui.parentChild->isChecked();
+  nodeOpt.pubSub_ = dialog.ui.pubSub->isChecked();
+
   nodeOpt.abbrGUIDs_ = dialog.ui.abbrGUIDs->isChecked();
   nodeOpt.ignoreBuiltinTopics_ = dialog.ui.ignoreBuiltinTopics->isChecked();
   nodeOpt.hideTopics_ = dialog.ui.hideTopics->isChecked();
@@ -73,7 +80,9 @@ NodeOptionsDialog::getNodeData(QWidget *parent, NodeOptionsData &nodeOpt)
 
 }
 
-NodeOptionsData::NodeOptionsData() : abbrGUIDs_(false)
+NodeOptionsData::NodeOptionsData() : parentChild_(false)
+, pubSub_(false)
+, abbrGUIDs_(false)
 , ignoreBuiltinTopics_(false)
 , hideTopics_(false)
 , ignoreHosts_(false)

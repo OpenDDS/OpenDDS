@@ -19,6 +19,8 @@ class NodeOptionsDialog;
 
 class NodeOptionsData {
   public:
+    bool hideParentChild() { return parentChild_; };
+    bool hidePubSub() { return pubSub_; };
     bool abbrGUIDs() { return abbrGUIDs_; };
     bool ignoreBuiltinTopics() { return ignoreBuiltinTopics_; };
     bool hideTopics() { return hideTopics_; };
@@ -34,6 +36,8 @@ class NodeOptionsData {
   private:
     friend class NodeOptionsDialog;
 
+    bool parentChild_;
+    bool pubSub_;
     bool abbrGUIDs_;
     bool ignoreBuiltinTopics_;
     bool hideTopics_;
