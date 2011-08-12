@@ -530,23 +530,6 @@ Elements::Data::loadMaps()
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
-
-  <!-- Assign Transport ID -->
-  <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n'
-  <xsl:for-each select="$lib-publishers">
-    <xsl:text>  this->publisherTransports_[ Publishers::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
-    <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
-  </xsl:for-each>
-  <xsl:value-of select="$newline"/>
- -->
-  <!-- Assign Transport ID -->
-  <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n'
-  <xsl:for-each select="$lib-subscribers">
-    <xsl:text>  this->subscriberTransports_[ Subscribers::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
-    <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
-  </xsl:for-each> -->
   <xsl:text>}
 
 inline

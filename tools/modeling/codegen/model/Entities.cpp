@@ -202,17 +202,6 @@ OpenDDS::Model::Entities::publisher(
     return 0;
   }
 
-  /*OpenDDS::DCPS::TransportImpl_rch transport
-    = this->transport( profile->transport);
-  if( transport.is_nil()) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Entities::publisher() - ")
-      ACE_TEXT("unable to find transport: [%d] for publisher [%C].\n"),
-      profile->transport, name.c_str()
-    ));
-    return 0;
-  }*/
-
   if( OpenDDS::DCPS::DCPS_debug_level>1) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Entities::publisher() - ")
@@ -268,17 +257,6 @@ OpenDDS::Model::Entities::subscriber(
     ));
     return 0;
   }
-
-  /*OpenDDS::DCPS::TransportImpl_rch transport
-    = this->transport( profile->transport);
-  if( transport.is_nil()) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Entities::subscriber() - ")
-      ACE_TEXT("unable to find transport: %d for subscriber [%C].\n"),
-      profile->transport, name.c_str()
-    ));
-    return 0;
-  }*/
 
   if( OpenDDS::DCPS::DCPS_debug_level>1) {
     ACE_DEBUG((LM_DEBUG,
@@ -496,22 +474,3 @@ OpenDDS::Model::Entities::reader(
 
   return this->readerByString_[ name];
 }
-
-/*
-OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::Model::Entities::transport( OpenDDS::DCPS::TransportIdType key)
-{
-  // Find an existing transport.
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->obtain( key);
-  if( !transport.is_nil()) {
-    return transport;
-  }
-
-  // Create a new transport.
-  return TheTransportFactory->create_transport_impl(
-           key,
-           OpenDDS::DCPS::AUTO_CONFIG
-         );
-}
-*/

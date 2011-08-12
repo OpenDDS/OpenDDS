@@ -83,7 +83,6 @@ namespace OpenDDS { namespace Model {
 </xsl:text>
   <xsl:value-of select="concat('#include &quot;', $modelname, 'TypeSupportImpl.h&quot;', $newline)"/>
 <xsl:text>
-#include "model/DefaultInstanceTraits.h"
 #include "model/Service_T.h"
 
 #endif /* </xsl:text>
@@ -948,52 +947,6 @@ inline
 </xsl:choose>
 <xsl:text>}
 
-<!--
-inline
-OpenDDS::DCPS::TransportIdType
-</xsl:text>
-  <xsl:value-of select="$data-qname"/>
-  <xsl:text>::transport(Publishers::Values which)
-{
-  if(which &lt; 0 || which >= Publishers::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$lib-publishers">
-    <xsl:text>  return this->publisherTransports_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no publishers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
--->
-<!--
-inline
-OpenDDS::DCPS::TransportIdType
-</xsl:text>
-  <xsl:value-of select="$data-qname"/>
-  <xsl:text>::transport(Subscribers::Values which)
-{
-  if(which &lt; 0 || which >= Subscribers::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$lib-subscribers">
-    <xsl:text>  return this->subscriberTransports_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0;  //  not valid when no subscribers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-    <xsl:text>}
--->
 </xsl:text>
 </xsl:template>
 <!-- Output enumeration within Elements class -->
@@ -1017,16 +970,6 @@ OpenDDS::DCPS::TransportIdType
     <xsl:call-template name="generate-enum-value">
       <xsl:with-param name="values" select="$values"/>
     </xsl:call-template>
-    <!--
-    <xsl:for-each select="$values">
-      <xsl:call-template name="output-comment">
-        <xsl:with-param name="indent" select="'          '"/>
-      </xsl:call-template>
-      <xsl:text>          </xsl:text>
-      <xsl:call-template name="normalize-identifier"/>
-      <xsl:value-of select="concat(',', $newline)"/>
-    </xsl:for-each>
-    -->
     <xsl:text>          LAST_INDEX
         };
       };

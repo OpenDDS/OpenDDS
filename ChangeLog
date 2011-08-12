@@ -1,3 +1,21 @@
+Fri Aug 12 12:59:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Removed code to get transport impl given a transport id
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Remove commented-out code related to tranport ids
+          Remove refereces to DefaultInstanceTraits.h
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/DefaultInstanceTraits.h:
+
+          Removed DefaultInstanceTraits
+
 Thu Aug 11 18:53:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * contrib/wrapper/OpenDDS/OpenDDS_Domain_Manager.h:

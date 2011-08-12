@@ -11,7 +11,6 @@
 
 #include "CopyQos.h"
 #include "Entities.h"
-#include "DefaultInstanceTraits.h"
 #include "TransportDirectives.h"
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -22,7 +21,7 @@ namespace OpenDDS { namespace Model {
 
   class Application;
 
-  template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
+  template< typename ModelName, class InstanceTraits>
   class Service : public CopyQos, public Entities, public InstanceTraits {
     public:
       typedef typename ModelName::Data Data;

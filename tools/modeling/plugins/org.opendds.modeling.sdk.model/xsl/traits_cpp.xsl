@@ -178,34 +178,6 @@
   return result;
 }
 </xsl:text>
-  <!--
-  <xsl:value-of select="concat('void ', $classname)"/>
-  <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
-</xsl:text>
-      <xsl:text>  OpenDDS::DCPS::TransportInst_rch config;
-  ACE_TString transport_type;
-
-  try {
-    config = TheTransportFactory->get_configuration(id);
-  } catch (OpenDDS::DCPS::Transport::NotConfigured&amp;) {
-    // Create configuration for this transport ID
-    switch (id) {
-</xsl:text>
-      <xsl:apply-templates/>
-      <xsl:text>      default:
-        throw std::runtime_error("Invalid transport ID in configuration");
-    };
-  }
-</xsl:text>
-<xsl:text>  // Create the impl
-  OpenDDS::DCPS::TransportImpl_rch impl = TheTransportFactory->obtain(id);
-  if (!impl.in()) {
-    impl = TheTransportFactory->create_transport_impl(id, true);
-  }
-}
-</xsl:text>
--->
-
 </xsl:template>
 
 <!-- Output general configuration settings -->
