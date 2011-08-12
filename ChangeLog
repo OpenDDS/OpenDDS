@@ -1,3 +1,10 @@
+Fri Aug 12 21:22:17 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation:
+
+          Removed this file.
+          It is no longer used since the validation was moved to plugins.
+
 Fri Aug 12 19:28:42 UTC 2011  Chip Jones  <jonesc@ociweb.com>
 
         * NEWS:
