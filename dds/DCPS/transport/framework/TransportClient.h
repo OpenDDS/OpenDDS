@@ -113,6 +113,9 @@ private:
     int tryacquire();
     int release();
     int remove();
+    // not called but needed for template instantiations:
+    int acquire_read() { return 0; }
+    int acquire_write() { return 0; }
   private:
     typedef int (TransportImpl::ReservationLockType::*PMF)();
     int action_fwd(PMF function, PMF undo);

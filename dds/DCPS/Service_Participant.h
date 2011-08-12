@@ -335,15 +335,15 @@ public:
     bit_enabled_ = b;
   }
 
-  ///Create the TransportConfig for all builtin topics.
-  int init_bit_transport_config();
-
   /// Get the data durability cache corresponding to the given
   /// DurabilityQosPolicy and sample list depth.
   DataDurabilityCache * get_data_durability_cache(
     DDS::DurabilityQosPolicy const & durability);
 
 private:
+
+  /// Create the TransportConfig for all builtin topics.
+  int init_bit_transport_config();
 
   /// Initalize default qos.
   void initialize();
@@ -481,6 +481,9 @@ private:
 
   /// The builtin topic transport configuration
   TransportConfig_rch bit_transport_config_;
+
+  /// Prevent concurrent attempts to initialize built-in topics
+  ACE_Thread_Mutex bit_config_lock_;
 
   /// The builtin topic transport port number.
   int bit_transport_port_;

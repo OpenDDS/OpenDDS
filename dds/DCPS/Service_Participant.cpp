@@ -1176,6 +1176,7 @@ Service_Participant::init_bit_transport_config()
 TransportConfig_rch
 Service_Participant::bit_transport_config()
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->bit_config_lock_, 0);
   if (this->bit_transport_config_ == 0) {
     this->init_bit_transport_config();
   }

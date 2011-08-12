@@ -57,7 +57,7 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$-o $dcpsrepo_ior ");
+                                    "-o $dcpsrepo_ior");
 
 $Subscriber = PerlDDS::create_process("subscriber", "$sub_opts");
 

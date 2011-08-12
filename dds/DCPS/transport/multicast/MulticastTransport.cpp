@@ -74,11 +74,15 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
     if (!session->start(active)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("MulticastTransport::find_datalink: ")
+                        ACE_TEXT("MulticastTransport::find_datalink_i: ")
                         ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
                         remote_peer),
                        0);
     }
+
+    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::find_datalink_i "
+              "started session for remote peer: 0x%x\n",
+              remote_peer), 2);
   }
 
   return link._retn();
@@ -104,8 +108,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::make_datalink "
             "remote peer \"%d priority %d is_loopback %d active %d\"\n",
-            remote_peer, priority, is_loopback, active),
-            2);
+            remote_peer, priority, is_loopback, active), 2);
 
   MulticastDataLink_rch link;
   ACE_NEW_RETURN(link,
@@ -189,17 +192,33 @@ MulticastTransport::connect_datalink_i(const RepoId& local_id,
     this->client_link_ = link;
   }
 
+  MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
+
   MulticastSession_rch session =
-    this->start_session(link, RepoIdConverter(remote_id).participantId(),
-                        true /*active*/);
+    this->start_session(link, remote_peer, true /*active*/);
   if (session.is_nil()) {
     return 0; // already logged in start_session()
   }
 
-  if (session->wait_for_ack()) {
+  if (remote_peer == RepoIdConverter(local_id).participantId()) {
+    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
+              "loopback on peer: 0x%x, skipping wait_for_ack\n",
+              remote_peer), 2);
     return link._retn();
   }
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
+            "waiting for ack from: 0x%x\n%?\n",
+            remote_peer), 2);
+
+  if (session->wait_for_ack()) {
+    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
+              "done waiting for ack\n"), 2);
+    return link._retn();
+  }
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
+            "wait for ack failed\n"), 2);
   return 0;
 }
 
@@ -225,18 +244,25 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
 
       if (this->connections_.count(remote_peer)) {
         // remote_peer has already completed the handshake
+        VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink "
+                  "peer 0x%x already completed handshake\n", remote_peer), 2);
         return link._retn();
-      }
-
-      MulticastSession_rch session = this->start_session(link, remote_peer,
-                                                         false /*!active*/);
-      if (session.is_nil()) {
-        return 0; // already logged in start_session()
       }
 
       this->pending_connections_.insert(
         std::pair<ConnectionEvent* const, MulticastPeer>(&ce, remote_peer));
-      return 0; // can't return link to framework until handshaking is done
+
+      guard.release(); // start_session() called without connections_lock_,
+      // at this point we know we will return and not need the lock again.
+
+      VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink "
+                "starting session for peer 0x%x\n", remote_peer), 2);
+
+      MulticastSession_rch session = this->start_session(link, remote_peer,
+                                                         false /*!active*/);
+      // Can't return link to framework until handshaking is done, which will
+      // result in a call to MulticastTransport::passive_connection().
+      return 0;
     }
   }
   return 0;
@@ -255,12 +281,16 @@ void
 MulticastTransport::passive_connection(MulticastPeer peer)
 {
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->connections_lock_);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection "
+                      "from peer 0x%x\n", peer), 2);
 
   typedef std::multimap<ConnectionEvent*, MulticastPeer>::iterator iter_t;
   for (iter_t iter = this->pending_connections_.begin();
        iter != this->pending_connections_.end(); ++iter) {
     if (iter->second == peer) {
       DataLink_rch link = static_rchandle_cast<DataLink>(this->server_link_);
+      VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection "
+                          "completing accept\n"), 2);
       iter->first->complete(link);
       std::pair<iter_t, iter_t> range =
         this->pending_connections_.equal_range(iter->first);

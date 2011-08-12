@@ -1,3 +1,38 @@
+Fri Aug 12 22:03:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Need a mutex for Built-In Topic transport setup since multiple
+          threads could be creating DomainParticipants at the same time.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Extended management of the reservation lock(s):
+          - Temporarily unlock during an accept_datalink() wait.
+          - Need to lock during the DataLink's release_reservations().
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed formatting of trnasport details for logging.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+          Null send_buffer is OK here (BestEffortSession doesn't use one).
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added debug logging.  Handle the loopback case.
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+
+          Key field must be initialized.
+
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Fixed typo in automatic run_test.pl changes.
+
 Fri Aug 12 21:22:17 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/validation:

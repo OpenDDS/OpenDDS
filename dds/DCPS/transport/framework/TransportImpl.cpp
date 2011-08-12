@@ -149,7 +149,7 @@ TransportImpl::configure(TransportInst* config)
     dump(os);
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("\n(%P|%t) TransportImpl::configure()\n%C"),
+               ACE_TEXT("(%P|%t) TransportImpl::configure()\n%C"),
                os.str().c_str()));
   }
 
@@ -296,20 +296,16 @@ TransportImpl::dump()
   dump(os);
 
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("\n(%P|%t) TransportImpl::dump() -\n%C"),
+             ACE_TEXT("(%P|%t) TransportImpl::dump() -\n%C"),
              os.str().c_str()));
 }
 
 void
 TransportImpl::dump(ostream& os)
 {
-  os << TransportInst::formatNameForDump("name")
-     << config()->name();
-
   if (this->config_.is_nil()) {
     os << " (not configured)" << std::endl;
   } else {
-    os << std::endl;
     this->config_->dump(os);
   }
 }

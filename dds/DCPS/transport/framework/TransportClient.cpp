@@ -23,6 +23,8 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/AssociationData.h"
 
+#include "ace/Reverse_Lock_T.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -180,6 +182,12 @@ TransportClient::associate(const AssociationData& data, bool active)
       }
     }
     if (ce.link_.is_nil()) {
+      // Reservation lock must be released for the loopback case, since the peer
+      // may be one of these impls, and it may need to make progress on the
+      // active side in order for this wait to complete.
+      ACE_Reverse_Lock<MultiReservLock> rev(mrl);
+      ACE_GUARD_RETURN(ACE_Reverse_Lock<MultiReservLock>, rguard, rev, false);
+
       ce.wait(passive_connect_duration_);
     }
     for (size_t i = 0; i < impls_.size(); ++i) {
@@ -228,6 +236,10 @@ TransportClient::disassociate(const RepoId& peerId)
   }
 
   DataLink_rch link = found->second;
+
+  MultiReservLock mrl(impls_);
+  ACE_GUARD(MultiReservLock, guard2, mrl);
+
   DataLinkSetMap released;
   link->release_reservations(peerId, repo_id_, released);
 
