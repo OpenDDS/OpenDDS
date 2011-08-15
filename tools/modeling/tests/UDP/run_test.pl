@@ -17,8 +17,8 @@ $status = 0;
 
 $udp_opts = '';
 
-$pub_opts = "$udp_opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
-$sub_opts = "$udp_opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
+$pub_opts = "$udp_opts -ORBDebugLevel 1 -ORBLogFile publisher.log -DCPSDebugLevel 10";
+$sub_opts = "$udp_opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 1 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
 
 $dcpsrepo_ior = "repo.ior";
 
@@ -27,7 +27,7 @@ unlink $dcpsrepo_ior;
 PerlDDS::add_lib_path("./model");
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
+                                  "-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
 
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");

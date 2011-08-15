@@ -16,8 +16,8 @@ use PerlDDS::Run_Test;
 $status = 0;
 
 
-$pub_opts = "-ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
-$sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
+$pub_opts = "-ORBDebugLevel 1 -ORBLogFile publisher.log -DCPSDebugLevel 10";
+$sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 1 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
 
 $dcpsrepo_ior = "repo.ior";
 
