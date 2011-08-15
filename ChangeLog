@@ -1,3 +1,9 @@
+Mon Aug 15 15:57:40 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Additional fixes to correct problems with automated build.
+
 Mon Aug 15 15:07:02 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
