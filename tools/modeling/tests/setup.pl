@@ -22,7 +22,7 @@ if (defined $ENV{'ANT_HOME'}) {
   if (!-r $ant) {
     $ant = 'ant';
   }
-  my $status = system("\"$ant\" run.tests");
+  my $status = system("\"$ant\" -f build-external.xml run.tests");
   if ($status > 0) {
     print "ERROR: ant invocation failed with $status\n";
   }

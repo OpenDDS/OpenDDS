@@ -1,3 +1,18 @@
+Mon Aug 15 15:07:02 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Removed build source locations that are no longer valid.
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/docs/README:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/dev_readme.txt:
+        * tools/modeling/tests/setup.pl:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build-external.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+
+          Renamed build.xml to build-external.xml to resolve file name
+          conflict with automated build, and updated references to build file.
+
 Fri Aug 12 22:03:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

@@ -8,9 +8,9 @@ with the error message emitted by the schema validation engine.
 
 BUILDING
 
-There are two ant targets for building runnable console/shell applications.
+There are two ant targets in build-external.xml for building runnable console/shell applications.
 
 UNIX/LINUX/OSX
 Use the ant target dist.nix to build the application for Linux or Unix systems,
 inlcuding Mac OS. This results in a archive file openddsvalidate.tar.gz. The
-unpack the applacation, use the command tar -zxf openddsvalidate.tar.gz
+unpack the application, use the command tar -zxf openddsvalidate.tar.gz
