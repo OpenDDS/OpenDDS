@@ -1,3 +1,16 @@
+Mon Aug 15 22:31:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Delayed notifications need to be sent on the same thread that
+          originated them, to avoid deadlocking on the WriteDataContainer.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed a log message that should have just been for local debugging.
+
 Mon Aug 15 19:35:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/Arrays/run_test.pl:

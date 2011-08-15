@@ -208,7 +208,7 @@ MulticastTransport::connect_datalink_i(const RepoId& local_id,
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
-            "waiting for ack from: 0x%x\n%?\n",
+            "waiting for ack from: 0x%x\n",
             remote_peer), 2);
 
   if (session->wait_for_ack()) {
