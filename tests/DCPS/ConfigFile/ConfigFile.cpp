@@ -63,7 +63,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(tcp_inst->queue_messages_per_pool_ == 9);
   TEST_CHECK(tcp_inst->queue_initial_pools_ == 2);
   TEST_CHECK(tcp_inst->max_packet_size_ == 2000000000);
-  TEST_CHECK(tcp_inst->max_samples_per_packet_ == 9);
+  TEST_CHECK(tcp_inst->max_samples_per_packet_ == 3);
   TEST_CHECK(tcp_inst->optimum_packet_size_ == 2048);
   TEST_CHECK(tcp_inst->thread_per_connection_ == true);
   TEST_CHECK(tcp_inst->datalink_release_delay_ == 5000);
@@ -106,6 +106,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TransportConfig_rch global_config =
     TransportRegistry::instance()->global_config();
   TEST_CHECK(global_config->name() == "myconfig");
+
+  TheServiceParticipant->shutdown();
 
   return 0;
 }

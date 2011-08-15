@@ -443,7 +443,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getInstance
   OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
                                             false); // Don't take ownership
   if (index < static_cast<jlong>(config->instances_.size())) {
-    OpenDDS::DCPS::TransportInst_rch inst = config->instances_[index];
+    OpenDDS::DCPS::TransportInst_rch inst = config->instances_[static_cast<std::size_t>(index)];
     return constructTransportInst(jni, inst);
   }
   return 0;

@@ -1,3 +1,29 @@
+Mon Aug 15 19:17:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added logging for some of the datalink creation functions.
+          If a link gets re-used, need to release and reacquire the links_lock_
+          so that another thread can handle the passive_connection().
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Fixed a warning for 64-bit to 32-bit truncation when size_t is 32-bit.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Use a smaller arbitrary value for max_samples_per_packet because
+          Solaris hosts limit how large this can get.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
+
+          Whitespace fix only.  This should match what EMF generates.
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Removed test/src from source dirs for plugin build.
+
 Mon Aug 15 15:57:40 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
@@ -65,7 +91,7 @@ Fri Aug 12 19:44:28 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
 
-          Fixing an annoying bug that caused only partial updates when the name of 
+          Fixing an annoying bug that caused only partial updates when the name of
           a transport instance changes. Thanks to Byron Harris for the idea: using
           the single argument ctor for ViewerNotification which causes full view
           refresh.

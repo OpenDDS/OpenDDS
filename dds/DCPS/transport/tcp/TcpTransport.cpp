@@ -70,7 +70,7 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
   const PriorityKey key = this->blob_to_key(remote_data, priority, active);
 
   VDBG_LVL((LM_DEBUG,
-            ACE_TEXT("(%P|%t) TcpTransport::find_datalink ")
+            ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
             ACE_TEXT("remote_address \"%C:%d priority %d ")
             ACE_TEXT("is_loopback %d\"\n"),
             key.address().get_host_name(),
@@ -86,7 +86,15 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
 
   if (this->links_.find(key, link) == 0) {
 
-    link->wait_for_start();
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+              ACE_TEXT("link found, waiting for start.\n")), 2);
+
+    {
+      ACE_Reverse_Lock<LockType> rev(this->links_lock_);
+      ACE_GUARD_RETURN(ACE_Reverse_Lock<LockType>, rev_guard, rev, 0);
+      link->wait_for_start();
+    }
 
     TcpConnection_rch con = link->get_connection();
 
@@ -98,6 +106,10 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
                         key.address().get_port_number()),
                        0);
     }
+
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+              ACE_TEXT("done waiting for start.\n")), 2);
 
     if (con->is_connector() && !con->is_connected()) {
       bool on_new_association = true;
@@ -144,6 +156,10 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
       }
     }
   }
+
+  VDBG_LVL((LM_DEBUG,
+            ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+            ACE_TEXT("no datalink found.\n")), 2);
 
   return 0;
 }
@@ -254,6 +270,10 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
         std::pair<ConnectionEvent* const, PriorityKey>(&ce, keys[i]));
       // SunCC doesn't like using make_pair() here.
     }
+
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TcpTransport::accept_datalink ")
+              ACE_TEXT("no existing connection.\n")), 2);
     return 0; // no link ready, passive_connection will signal the event later
   }
 
@@ -658,7 +678,7 @@ TcpTransport::make_active_connection(const ACE_INET_Addr& remote_address,
     std::stringstream buffer;
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::make_active connection() - ")
+               ACE_TEXT("(%P|%t) TcpTransport::make_active_connection() - ")
                ACE_TEXT("established with %C:%d and priority %d.\n%C"),
                remote_address.get_host_name(),
                remote_address.get_port_number(),
