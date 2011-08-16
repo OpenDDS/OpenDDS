@@ -120,13 +120,13 @@ sub wait {
         if ($verbose) {
             print "client> Received \"$buf\"\n";
         }
-        my @argv = split (/ +/g, $buf);
+        my @argv = split (/ +/, $buf);
 
-        if ((scalar(@argv) >= 3) && (@argv[0] =~ /$self->{PEER}/)) {
+        if ((scalar(@argv) >= 3) && ($argv[0] =~ /$self->{PEER}/)) {
             if ($verbose) {
-                print "client> Peer from @argv[0]:@argv[1] just checked in.\n";
+                print "client> Peer from $argv[0]:$argv[1] just checked in.\n";
             }
-            $self->{SERVER_PORT} = @argv[1];
+            $self->{SERVER_PORT} = $argv[1];
 
             if ($verbose) {
                 print "client> sending \"$buf\"\n";
@@ -197,11 +197,11 @@ sub wait {
                     if ($verbose) {
                         print "server> received \"$buf\"\n";
                     }
-                    my @argv = split (/ +/g, $buf);
+                    my @argv = split (/ +/, $buf);
                     if (($buf =~ /$self->{PEER}/) && (scalar(@argv) >= 2)) {
-                        $self->{CLIENT_PORT} = @argv [1];
+                        $self->{CLIENT_PORT} = $argv[1];
                         if ($verbose) {
-                            print "server> Peer from @argv[0]:@argv[1] just checked in.\n";
+                            print "server> Peer from $argv[0]:$argv[1] just checked in.\n";
                         }
                         return 1;
                     } else {
@@ -317,7 +317,7 @@ sub _parse_schedule {
     while(<$in_fh>) {
         if (!/ +\#/) {
             @argv = split ();
-            if (@argv[0] == $self->{TEST_INSTANCE}) {
+            if ($argv[0] == $self->{TEST_INSTANCE}) {
                 last;
             }
         }
@@ -331,7 +331,7 @@ sub _parse_schedule {
         return -1;
     }
 
-    if (@argv[0] != $self->{TEST_INSTANCE}) {
+    if ($argv[0] != $self->{TEST_INSTANCE}) {
         if ($verbose) {
             print "Failed to find the group instance in the schedule.\n";
         }
@@ -339,15 +339,15 @@ sub _parse_schedule {
     }
 
     my $my_name = hostname();
-    $my_name =~ s/(.*?)\..*/\1/; # get just the machine name
-    if (@argv[1] =~ /$my_name/) {
+    $my_name =~ s/(.*?)\..*/$1/; # get just the machine name
+    if ($argv[1] =~ /$my_name/) {
         $self->{ROLE} = CLIENT;
-        $self->{PEER} = @argv[2];
-        $self->{SELF} = @argv[1];
-    } elsif (@argv[2] =~ /$my_name/) {
+        $self->{PEER} = $argv[2];
+        $self->{SELF} = $argv[1];
+    } elsif ($argv[2] =~ /$my_name/) {
         $self->{ROLE} = SERVER;
-        $self->{PEER} = @argv[1];
-        $self->{SELF} = @argv[2];
+        $self->{PEER} = $argv[1];
+        $self->{SELF} = $argv[2];
     } else {
         return -1;
     }

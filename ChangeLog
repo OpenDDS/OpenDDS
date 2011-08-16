@@ -1,3 +1,18 @@
+Tue Aug 16 21:43:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+
+          Fixed Perl warnings.
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+
+          Added a mechanism for running udp and multicast (best-effort) tests
+          without the DataReader's RELIABLE QoS.
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+
+          Need an "after" to avoid building overlapping projects in parallel.
+
 Tue Aug 16 21:17:12 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/performance_tests.lst:

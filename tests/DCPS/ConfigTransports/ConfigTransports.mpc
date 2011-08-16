@@ -23,7 +23,7 @@ project(*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   libpaths += ../FooType4
   libpaths += ../common
   libs     +=  common DcpsFooType4
-  after    += DcpsFooType4 common
+  after    += DcpsFooType4 common *Publisher
 
   Source_Files {
     common.cpp
