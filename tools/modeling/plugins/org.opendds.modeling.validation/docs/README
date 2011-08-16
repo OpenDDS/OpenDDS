@@ -1,10 +1,10 @@
 usage:  openddsvalidate.sh/.bat
- -f,--file <arg>   .opendds/.codegen file(s) and/or directory(s) contain those files to validate
+ -f,--file <args>  .opendds/.codegen file(s), and/or directory(s) contain those files to validate
  -q,--quiet        suppress output except for error reporting
  -r,--recursive    search directory(ies) recursively for opendds files
 
-If there are errors the output will list each error with line and column number, along
-with the error message emitted by the schema validation engine.
+If there are errors the output will list each error with line and column number, 
+along with the error message emitted by the schema validation engine.
 
 BUILDING
 
@@ -14,3 +14,14 @@ UNIX/LINUX/OSX
 Use the ant target dist.nix to build the application for Linux or Unix systems,
 inlcuding Mac OS. This results in a archive file openddsvalidate.tar.gz. The
 unpack the application, use the command tar -zxf openddsvalidate.tar.gz
+
+  Example:
+  $ ant -f build-external.xml dist.nix
+  $ cd dist
+  $ tar -zxf openddsvalidate.tar.gz
+  $ cd openddsvalidate
+  $ openddsvalidate.sh -rqf /some/path/to/directory/
+  
+WIN32/64
+Everything is similar. The build target is dist.win and the resulting archive is a zip file.
+The contents of the zip contains openddsvalidate.bat instead of the .sh file.

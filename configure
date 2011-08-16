@@ -180,8 +180,8 @@ if (!exists $platforminfo{$opts{'host'}}) {
 print "host system is: $opts{'host'}\n" if $opts{'verbose'};
 if ($opts{'host'} eq 'macosx') {
   my $vers = `sw_vers -productVersion`;
-  $vers =~ /10\.(\d+)\./;
-  my %versToName = (5 => 'leopard', 6 => 'snowleopard');
+  $vers =~ /10\.(\d+)\.?/;
+  my %versToName = (5 => 'leopard', 6 => 'snowleopard', 7 => 'lion');
   if (!exists $versToName{$1}) {
     die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
   }
