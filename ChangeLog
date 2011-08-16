@@ -1,3 +1,93 @@
+Tue Aug 16 22:17:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/Arrays/publisher.cpp:
+        * tools/modeling/tests/Arrays/subscriber.cpp:
+        * tools/modeling/tests/CfTopic/publisher.cpp:
+        * tools/modeling/tests/CfTopic/subscriber.cpp:
+        * tools/modeling/tests/Chained/publisher.cpp:
+        * tools/modeling/tests/Chained/subscriber.cpp:
+        * tools/modeling/tests/Chained_Data/publisher.cpp:
+        * tools/modeling/tests/Chained_Data/subscriber.cpp:
+        * tools/modeling/tests/Chained_Topic/publisher.cpp:
+        * tools/modeling/tests/Chained_Topic/subscriber.cpp:
+        * tools/modeling/tests/Comments/publisher.cpp:
+        * tools/modeling/tests/Comments/subscriber.cpp:
+        * tools/modeling/tests/CompositeKey/publisher.cpp:
+        * tools/modeling/tests/CompositeKey/subscriber.cpp:
+        * tools/modeling/tests/CopyTopicQos/publisher.cpp:
+        * tools/modeling/tests/CopyTopicQos/subscriber.cpp:
+        * tools/modeling/tests/DataLibRef/publisher.cpp:
+        * tools/modeling/tests/DataLibRef/subscriber.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/publisher.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/subscriber.cpp:
+        * tools/modeling/tests/DomainZero/publisher.cpp:
+        * tools/modeling/tests/DomainZero/subscriber.cpp:
+        * tools/modeling/tests/EmptyLibs/publisher.cpp:
+        * tools/modeling/tests/EmptyLibs/subscriber.cpp:
+        * tools/modeling/tests/Exchange/publisher.cpp:
+        * tools/modeling/tests/Exchange/subscriber.cpp:
+        * tools/modeling/tests/ExternalPolicies/publisher.cpp:
+        * tools/modeling/tests/ExternalPolicies/subscriber.cpp:
+        * tools/modeling/tests/InvalidNames/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+        * tools/modeling/tests/Looped/publisher.cpp:
+        * tools/modeling/tests/Looped/subscriber.cpp:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/publisher.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+        * tools/modeling/tests/MessengerMC/publisher.cpp:
+        * tools/modeling/tests/MessengerMC/subscriber.cpp:
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/MessengerMulti/publisher.cpp:
+        * tools/modeling/tests/MessengerMulti/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerSimpleTypes/publisher.cpp:
+        * tools/modeling/tests/MessengerSimpleTypes/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+        * tools/modeling/tests/ModuleNameConflict/publisher.cpp:
+        * tools/modeling/tests/ModuleNameConflict/subscriber.cpp:
+        * tools/modeling/tests/MultiDCPS/publisher.cpp:
+        * tools/modeling/tests/MultiDCPS/subscriber.cpp:
+        * tools/modeling/tests/MultiInstance/publisher.cpp:
+        * tools/modeling/tests/MultiInstance/subscriber.cpp:
+        * tools/modeling/tests/MultiTopic/publisher.cpp:
+        * tools/modeling/tests/MultiTopic/subscriber.cpp:
+        * tools/modeling/tests/PolicyLib/publisher.cpp:
+        * tools/modeling/tests/PolicyLib/subscriber.cpp:
+        * tools/modeling/tests/ReaderQos/publisher.cpp:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+        * tools/modeling/tests/ReferExternalProj/publisher.cpp:
+        * tools/modeling/tests/ReferExternalProj/subscriber.cpp:
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+        * tools/modeling/tests/ReusedExtTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedExtTypes/subscriber.cpp:
+        * tools/modeling/tests/ReusedTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedTypes/subscriber.cpp:
+        * tools/modeling/tests/Sequences/publisher.cpp:
+        * tools/modeling/tests/Sequences/subscriber.cpp:
+        * tools/modeling/tests/StockQuoter/publisher.cpp:
+        * tools/modeling/tests/StockQuoter/subscriber.cpp:
+        * tools/modeling/tests/SubscriberQos/publisher.cpp:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+        * tools/modeling/tests/TopicQos/publisher.cpp:
+        * tools/modeling/tests/TopicQos/subscriber.cpp:
+        * tools/modeling/tests/UDP/publisher.cpp:
+        * tools/modeling/tests/UDP/subscriber.cpp:
+
+          Fixed the #include of Tcp.h (only used in static builds) to use
+          the new directory and file name.
+
 Tue Aug 16 21:43:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Cross_Sync_Common.pm:

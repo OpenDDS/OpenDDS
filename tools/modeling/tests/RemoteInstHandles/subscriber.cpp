@@ -6,7 +6,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include "model/RemoteInstHandlesTraits.h"
