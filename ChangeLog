@@ -1,3 +1,10 @@
+Tue Aug 16 21:01:45 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Corrected build problem where xsl directory was not packaged in plugin jar.
+
 Tue Aug 16 20:13:00 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/DDSTEST.h:
