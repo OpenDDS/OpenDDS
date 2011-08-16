@@ -1,6 +1,8 @@
 #ifndef DATAWRITER_LISTENER_IMPL
 #define DATAWRITER_LISTENER_IMPL
 
+#include "DataReaderListener.h"
+
 #include "dds/DdsDcpsPublicationS.h"
 #include "dds/DCPS/Definitions.h"
 

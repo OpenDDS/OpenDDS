@@ -2,37 +2,48 @@
 //
 // $Id$
 
-#include "Writer.h"
-#include "common.h"
+#include "Pusher.h"
+#include "Factory.h"
 #include "../common/TestSupport.h"
 
 
-Writer::Writer(const Factory& f, DDS::DomainParticipantFactory_ptr factory, DDS::DomainParticipant_ptr participant, DDS::DataWriterListener_ptr listener) :
-        dpf(DDS::DomainParticipantFactory::_duplicate(factory)),
-        dp(DDS::DomainParticipant::_duplicate(participant)),
-        pub(f.publisher(dp.in())),
-        topic(f.topic(dp.in())),
-        writer_(f.writer(pub.in(), topic.in(), listener)) { }
-
-Writer::Writer(const Factory& f, DDS::DomainParticipantFactory_ptr factory, DDS::DomainParticipant_ptr participant, DDS::Publisher_ptr publisher, DDS::DataWriterListener_ptr listener) :
-        dpf(DDS::DomainParticipantFactory::_duplicate(factory)),
-        dp(DDS::DomainParticipant::_duplicate(participant)),
-        pub(DDS::Publisher::_duplicate(publisher)),
-        topic(f.topic(dp.in())),
-        writer_(f.writer(pub.in(), topic.in(), listener)) { }
-
-Writer::~Writer()
+Pusher::Pusher(const Factory& f,
+               const DDS::DomainParticipantFactory_var& factory,
+               const DDS::DomainParticipant_var& participant,
+               const DDS::DataWriterListener_var& listener) :
+        dpf(factory),
+        dp(participant),
+        pub(f.publisher(dp)),
+        topic(f.topic(dp)),
+        writer_(f.writer(pub, topic, listener))
 {
-  // Clean up subscriber objects
+}
+
+Pusher::Pusher(const Factory& f,
+               const DDS::DomainParticipantFactory_var& factory,
+               const DDS::DomainParticipant_var& participant,
+               const DDS::Publisher_var& publisher,
+               const DDS::DataWriterListener_var& listener) :
+        dpf(factory),
+        dp(participant),
+        pub(publisher),
+        topic(f.topic(dp)),
+        writer_(f.writer(pub, topic, listener))
+{
+}
+
+
+Pusher::~Pusher()
+{
+  // Clean up and shut down DDS objects
   pub->delete_contained_entities();
-  dp->delete_publisher(pub.in());
-  dp->delete_topic(topic.in());
+  dp->delete_contained_entities();
   dpf->delete_participant(dp.in());
 }
 
 
-//const int default_key = 101010;
-//
+const int default_key = 101010;
+
 //
 //Worker::Worker(::DDS::Entity_ptr writer)
 //: writer_ (::DDS::Entity::_duplicate (writer))
@@ -40,10 +51,11 @@ Writer::~Writer()
 //}
 //
 //int
-//Worker::run_test (const ACE_Time_Value& duration)
+//Writer::run_test (const ACE_Time_Value& duration)
 //{
 //  ACE_DEBUG((LM_DEBUG,
 //              ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));
+//
 //
 //  ACE_Time_Value started = ACE_OS::gettimeofday ();
 //  unsigned int pass = 0;

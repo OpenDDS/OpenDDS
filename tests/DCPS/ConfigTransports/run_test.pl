@@ -213,6 +213,18 @@ my @explicit_configuration_collocated = (
 );
 
 
+my @test_configuration = (
+
+  {
+    entity        => none,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+);
 
 @scenario = (
 
@@ -220,6 +232,7 @@ my @explicit_configuration_collocated = (
   @without_configuration_file,
   @configuration_file_unused,
   @explicit_configuration,
+#  @test_configuration,
 
 );
 
@@ -340,22 +353,29 @@ sub run($$$$) {
   return $status;
 }
 
-sub command($$$) {
+sub command($$$$) {
 
-  my ($pub_process, $pub_parameters, $debug) = @_;
+  my ($pub_process, $pub_parameters, $pub_time, $debug) = @_;
 
   if ($debug != 0) {
-    open(FF1, '>/tmp/$pub_process.gdb');
-    print FF1 <<EOF;
-break main
-run $pub_parameters
-EOF
-    close(FF1);
-
-    return ('/usr/bin/xterm', '-T $pub_process -e gdb -x /tmp/$pub_process.gdb $pub_process');
+    return ('/usr/bin/nemiver', $pub_process . ' ' . $pub_parameters);
   }
 
-    return ($pub_process, $pub_parameters);
+#  {
+#
+#    my $gdbrc = "/tmp/$pub_process.gdb";
+#
+#    open(FF1, ">$gdbrc");
+#    print FF1 <<EOF;
+#break main
+#run $pub_parameters -x $pub_time
+#EOF
+#    close(FF1);
+#
+#    return ('/usr/bin/xterm', '-T ' . $pub_process . ' -e gdb -x ' . $gdbrc . ' ' . $pub_process);
+#  }
+
+    return ($pub_process, $pub_parameters . ' -x ' . $pub_time);
 }
 
 
@@ -363,8 +383,8 @@ EOF
 my $count = 0;
 my $failed = 0;
 
-for my $hasbuiltins (undef, true) {
-#for my $hasbuiltins (undef) {
+#for my $hasbuiltins (undef, true) {
+for my $hasbuiltins (undef) {
 #for my $hasbuiltins (true) {
 
     my $DCPSREPO = initialize($hasbuiltins);
@@ -379,12 +399,12 @@ for my $hasbuiltins (undef, true) {
         my $status = 0;
 
         my $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
-        my ($process, $parameters) = command('publisher', $pub_parameters, $debug);
-        my $S = PerlDDS::create_process ($process, '-x ' . $pub_time . ' ' . $parameters);
+        my ($process, $parameters) = command('publisher', $pub_parameters, $pub_time, $debug);
+        my $S = PerlDDS::create_process ($process, $parameters);
 
         my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
-        my ($process, $parameters) = command('subscriber', $sub_parameters, $debug);
-        my $P = PerlDDS::create_process ($process, '-x ' . $pub_time . ' ' . $parameters);
+        my ($process, $parameters) = command('subscriber', $sub_parameters, $sub_time, $debug);
+        my $P = PerlDDS::create_process ($process, $parameters);
 
         if (0 != run($P, $pub_time, $S, $sub_time)) {
           $status++;

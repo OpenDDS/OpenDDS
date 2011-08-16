@@ -10,7 +10,9 @@
 // ============================================================================
 
 #include "common.h"
-#include "Reader.h"
+#include "Options.h"
+#include "Factory.h"
+#include "Puller.h"
 #include "DataReaderListener.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -21,6 +23,7 @@
 #endif
 
 #include "../common/TestSupport.h"
+#include "../FooType4/FooDefTypeSupportImpl.h"
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -29,104 +32,107 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     {
       DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
+      OpenDDS::DCPS::TypeSupport_var typsup = new Xyz::FooTypeSupportImpl;
+
       Options configopt(argc, argv);
-      Factory fconfig(configopt);
+      Factory fconfig(configopt, typsup);
 
       Options plainopt;
-      Factory fplain(plainopt);
+      Factory fplain(plainopt, typsup);
 
       DDS::DataReaderListener_var drl1(new DataReaderListenerImpl);
       DDS::DataReaderListener_var drl2(new DataReaderListenerImpl);
 
       if (configopt.collocation_str == "none")
         {
-          DDS::DomainParticipant_var participant(fconfig.participant(dpf.in()));
-          Reader r(fconfig, dpf.in(), participant.in(), drl1.in());
+          DDS::DomainParticipant_var participant(fconfig.participant(dpf));
+          Puller r(fconfig, dpf, participant, drl1);
           TEST_ASSERT(wait_publication_matched_status(configopt, r.reader_.in()));
           TEST_ASSERT(assert_supports_all(configopt, r.reader_.in()));
         }
       else if (configopt.collocation_str == "process")
         {
-          DDS::DomainParticipant_var participant1(fconfig.participant(dpf.in()));
-          Reader r1(fconfig, dpf.in(), participant1.in(), drl1.in());
+          DDS::DomainParticipant_var participant1(fconfig.participant(dpf));
+          Puller r1(fconfig, dpf, participant1, drl1);
           TEST_ASSERT(wait_publication_matched_status(configopt, r1.reader_.in()));
 
-          DDS::DomainParticipant_var participant2(fplain.participant(dpf.in()));
-          Reader r2(fplain, dpf.in(), participant2.in(), drl2.in());
+          DDS::DomainParticipant_var participant2(fplain.participant(dpf));
+          Puller r2(fplain, dpf, participant2, drl2);
           TEST_ASSERT(wait_publication_matched_status(configopt, r2.reader_.in()));
 
-          TEST_ASSERT (participant1.in() != participant2.in());
+          TEST_ASSERT (participant1 != participant2);
 
 
           // Wait for things to settle ?!
           ACE_OS::sleep(configopt.test_duration);
 
-          TEST_ASSERT(assert_supports_all(configopt, r1.reader_.in()));
+          TEST_ASSERT(assert_supports_all(configopt, r1.reader_));
           if (configopt.entity_str == "none")
             {
-              TEST_ASSERT(assert_supports_all(configopt, r2.reader_.in()));
+              TEST_ASSERT(assert_supports_all(configopt, r2.reader_));
             }
           else
             {
-              TEST_ASSERT(!assert_supports_all(configopt, r2.reader_.in()));
+              TEST_ASSERT(!assert_supports_all(configopt, r2.reader_));
             }
         }
       else if (configopt.collocation_str == "participant")
         {
-          DDS::DomainParticipant_var participant1(fconfig.participant(dpf.in()));
+          DDS::DomainParticipant_var participant1(fconfig.participant(dpf));
           DDS::DomainParticipant_var participant2(participant1);
 
-          Reader r1(fconfig, dpf.in(), participant1.in(), drl1.in());
+          Puller r1(fconfig, dpf, participant1, drl1);
 
-          Reader r2(fplain, dpf.in(), participant2.in(), drl2.in());
+          Puller r2(fplain, dpf, participant2, drl2);
 
           // Wait for things to settle ?!
           ACE_OS::sleep(configopt.test_duration);
 
-          TEST_ASSERT(assert_supports_all(configopt, r1.reader_.in()));
-          TEST_ASSERT(assert_supports_all(configopt, r2.reader_.in()));
+          TEST_ASSERT(assert_supports_all(configopt, r1.reader_));
+          TEST_ASSERT(assert_supports_all(configopt, r2.reader_));
 
         }
 
       else if (configopt.collocation_str == "pubsub")
         {
-          DDS::DomainParticipant_var participant1(fconfig.participant(dpf.in()));
+          DDS::DomainParticipant_var participant1(fconfig.participant(dpf));
           DDS::DomainParticipant_var participant2(participant1);
 
-          DDS::Subscriber_var subscriber1(fconfig.subscriber(participant1.in()));
-          Reader r1(fconfig, dpf.in(), participant1.in(), subscriber1.in(), drl1.in());
+          DDS::Subscriber_var subscriber1(fconfig.subscriber(participant1));
+          Puller r1(fconfig, dpf, participant1, subscriber1, drl1);
 
-          DDS::Subscriber_var subscriber2(fplain.subscriber(participant2.in()));
-          Reader r2(fplain, dpf.in(), participant2.in(), subscriber2.in(), drl1.in());
+          DDS::Subscriber_var subscriber2(fplain.subscriber(participant2));
+          Puller r2(fplain, dpf, participant2, subscriber2, drl1);
 
           // Wait for things to settle ?!
           ACE_OS::sleep(configopt.test_duration);
 
-          TEST_ASSERT(assert_supports_all(configopt, r1.reader_.in()));
-          TEST_ASSERT(assert_supports_all(configopt, r2.reader_.in()));
+          TEST_ASSERT(assert_supports_all(configopt, r1.reader_));
+          TEST_ASSERT(assert_supports_all(configopt, r2.reader_));
 
         }
 
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting it all down ...\n")));
       TheServiceParticipant->shutdown();
 
       if (configopt.collocation_str == "none")
         {
-          TEST_ASSERT(assert_subscription_matched(configopt, drl1.in()));
+          TEST_ASSERT(assert_subscription_matched(configopt, drl1));
         }
       else if (configopt.collocation_str == "process")
         {
-          TEST_ASSERT(assert_subscription_matched(configopt, drl1.in())
-                      && assert_subscription_matched(configopt, drl2.in()));
+          TEST_ASSERT(assert_subscription_matched(configopt, drl1)
+                      && assert_subscription_matched(configopt, drl2));
         }
       else if (configopt.collocation_str == "participant")
         {
-          TEST_ASSERT(assert_subscription_matched(configopt, drl1.in())
-                      && assert_subscription_matched(configopt, drl2.in()));
+          TEST_ASSERT(assert_subscription_matched(configopt, drl1)
+                      && assert_subscription_matched(configopt, drl2));
         }
       else if (configopt.collocation_str == "pubsub")
         {
-          TEST_ASSERT(assert_subscription_matched(configopt, drl1.in())
-                      && assert_subscription_matched(configopt, drl2.in()));
+          TEST_ASSERT(assert_subscription_matched(configopt, drl1)
+                      && assert_subscription_matched(configopt, drl2));
         }
     }
   catch (const CORBA::Exception &ex)

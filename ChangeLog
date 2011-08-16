@@ -1,3 +1,33 @@
+Tue Aug 16 16:57:49 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.h:
+        * tests/DCPS/ConfigTransports/Factory.h:
+        * tests/DCPS/ConfigTransports/Factory.cpp:
+        * tests/DCPS/ConfigTransports/Options.h:
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Refactored the test innards to pull out independent classes.
+
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Reader.cpp:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+
+          Renamed these files to ...
+
+        * tests/DCPS/ConfigTransports/Puller.h:
+        * tests/DCPS/ConfigTransports/Puller.cpp:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
+
+          ... these files.
+
 Tue Aug 16 14:41:38 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * NEWS:

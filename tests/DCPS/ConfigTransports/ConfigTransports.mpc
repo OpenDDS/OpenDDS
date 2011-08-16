@@ -8,7 +8,9 @@ project(*Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   Source_Files {
     common.cpp
     publisher.cpp
-    Writer.cpp
+    Options.cpp
+    Factory.cpp
+    Pusher.cpp
     DDSTEST.cpp
     DataWriterListenerImpl.cpp
     DataReaderListener.cpp
@@ -26,7 +28,9 @@ project(*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   Source_Files {
     common.cpp
     subscriber.cpp
-    Reader.cpp
+    Options.cpp
+    Factory.cpp
+    Puller.cpp
     DDSTEST.cpp
     DataWriterListenerImpl.cpp
     DataReaderListener.cpp

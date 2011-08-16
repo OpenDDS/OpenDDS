@@ -16,13 +16,21 @@
 
 class Factory;
 
-class Reader
+class Puller
 {
 public:
-  Reader(const Factory& f, DDS::DomainParticipantFactory_ptr factory, DDS::DomainParticipant_ptr participant, DDS::DataReaderListener_ptr listener);
-  Reader(const Factory& f, DDS::DomainParticipantFactory_ptr factory, DDS::DomainParticipant_ptr participant, DDS::Subscriber_ptr subscriber, DDS::DataReaderListener_ptr listener);
+  Puller(const Factory& f,
+         const DDS::DomainParticipantFactory_var& factory,
+         const DDS::DomainParticipant_var& participant,
+         const DDS::DataReaderListener_var& listener);
 
-  virtual ~Reader();
+  Puller(const Factory& f,
+         const DDS::DomainParticipantFactory_var& factory,
+         const DDS::DomainParticipant_var& participant,
+         const DDS::Subscriber_var& subscriber,
+         const DDS::DataReaderListener_var& listener);
+
+  virtual ~Puller();
 
   const DDS::DomainParticipantFactory_var dpf;
   const DDS::DomainParticipant_var dp;
