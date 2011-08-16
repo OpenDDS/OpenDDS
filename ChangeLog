@@ -1,3 +1,40 @@
+Tue Aug 16 14:41:38 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * NEWS:
+
+          Add some news for 3.0.
+
+        * docs/OpenDDS_3.0_Transition.txt:
+
+          Add a transition guide for the new Transport Configuration
+          approach in OpenDDS 3.0.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Make a better error message when finding obsolete configs.
+
+        * tests/DCPS/BidirMessenger/pub_udp.ini:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BidirMessenger/pubsub.ini:
+        * tests/DCPS/BidirMessenger/pubsub_ipv6.ini:
+        * tests/DCPS/BidirMessenger/pubsub_multicast.ini:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BidirMessenger/sub_udp.ini:
+
+          Converted to use new transport config scheme.
+          This test does still not run properly but I don't
+          think it is in any worse shape than it was before
+          the refactoring of the transport.  There are at
+          least two issues involved: TCP and possibly UDP
+          suffer from issues in sending data from multiple
+          threads concurrently (and quickly).  Multicast
+          appears to have some connection-related issues
+          when many connections are happening quickly.
+
+        * tests/DCPS/BidirMessenger/publisher.cpp:
+
+          Removed this file.
+
 Mon Aug 15 22:31:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:

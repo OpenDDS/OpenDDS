@@ -340,7 +340,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
     } else if (ACE_OS::strncmp(sect_name.c_str(), OLD_TRANSPORT_PREFIX.c_str(),
                                OLD_TRANSPORT_PREFIX.length()) == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
+                        ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("Obsolete transport configuration found (%s).\n"),
                         sect_name.c_str()),
                        -1);

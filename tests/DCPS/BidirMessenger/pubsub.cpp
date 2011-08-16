@@ -55,7 +55,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
     switch (c) {
     case 'p':
       num_processes = ACE_OS::atoi(get_opts.opt_arg());
-      std::cout << "num_procsses = " << num_processes << std::endl;
+      std::cout << "num_processes = " << num_processes << std::endl;
       break;
 
     case 'w':
@@ -206,7 +206,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos (dr_qos);
-    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
     for (int i = 0; i < num_topics; ++i) {
       listener[i] = new DataReaderListenerImpl;
@@ -249,9 +249,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       } while (matches.current_count < num_processes);
     }
-
-    // TODO: shouldn't need this
-    ACE_OS::sleep(5);
 
     int expected_num_reads = num_samples_per_topic * num_processes;
 
