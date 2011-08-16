@@ -50,7 +50,7 @@ my $sub1_udp_ini   = PerlACE::LocalFile ("sub_udp_conf.ini");
 my $sub2_udp_ini   = PerlACE::LocalFile ("sub2_udp_conf.ini");
 
 # Change how test is configured according to which test we are.
-my $common_opts    = "-ORBSvcConf ./tcp.conf ";
+my $common_opts    = "";
    $common_opts   .= "-DCPSDebugLevel $debug " if $debug;
    $common_opts   .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
    $common_opts   .= "-ORBLogFile $debugFile " if $debugFile;
@@ -60,7 +60,6 @@ my $sub1_opts      = "-DCPSConfigFile $publisher_ini ";
 my $sub2_opts      = "-DCPSConfigFile $subscriber_ini ";
 
 if( $udp) {
-  $common_opts    .= "-ORBSvcConf ./udp.conf ";
   $publisher_opts  = "-DCPSConfigFile $pub_udp_ini ";
   $sub1_opts       = "-DCPSConfigFile $sub1_udp_ini ";
   $sub2_opts       = "-DCPSConfigFile $sub2_udp_ini ";

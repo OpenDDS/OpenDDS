@@ -1,3 +1,107 @@
+Tue Aug 16 21:17:12 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/performance_tests.lst:
+
+          Updates to this list that were already made to dcps_tests.lst.
+
+        * contrib/wrapper/example/dds_tcp_conf.ini:
+        * contrib/wrapper/example/pub_udp_conf.ini:
+        * contrib/wrapper/example/run_test.pl:
+        * contrib/wrapper/example/sub2_udp_conf.ini:
+        * contrib/wrapper/example/sub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/dds_tcp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/README:
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * performance-tests/Bench/tests/spray/transport.ini:
+
+          Conversion to new transport config scheme.
+
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+
+          Remove unused .ini files.
+
+        * performance-tests/DCPS/TransportLatency:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.cpp:
+        * performance-tests/DCPS/TransportLatency/Messenger.idl:
+        * performance-tests/DCPS/TransportLatency/README:
+        * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:
+        * performance-tests/DCPS/TransportLatency/TransportLatency_export.h:
+        * performance-tests/DCPS/TransportLatency/Writer.h:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+        * performance-tests/DCPS/TransportLatency/dummy_tcp.conf:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/pub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/sub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/dummyTCP:
+        * performance-tests/DCPS/dummyTCP/DummyTcp.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp.mpc:
+        * performance-tests/DCPS/dummyTCP/DummyTcp.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpAcceptor.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpAcceptor.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnectionReplaceTask.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnectionReplaceTask.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpLoader.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpLoader.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReconnectTask.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReconnectTask.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSynchResource.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSynchResource.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp_export.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp_pch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp_pch.cpp:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.h:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+
+          Removed these files.  Remove the TransportLatency
+          performance test and associated dummyTcp transport.
+          This has not worked for a while and the real solution
+          is to now implement a true collocated transport.
+
 Tue Aug 16 21:01:45 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:

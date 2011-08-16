@@ -34,11 +34,10 @@ my $implrepo_server = $orbsvcs{'ImplRepo_Service'};
 my $imr_activator = $orbsvcs{'ImR_Activator'};
 my $tao_imr = "$ENV{ACE_ROOT}/bin/tao_imr";
 my $RepoPort = PerlACE::random_port();
-my $tcpConf = "../../../tests/tcp.conf";
-my $RepoOpts = "-ORBSvcConf $tcpConf -o $dcpsrepo_ior $OBJ_REF_STYLE "
+my $RepoOpts = "-o $dcpsrepo_ior $OBJ_REF_STYLE "
     . "-ORBEndPoint iiop://:$RepoPort";
 my $repo_port = PerlACE::random_port();
-my $RepoOpts2 = "-ORBSvcConf $tcpConf -o $dcpsrepo_ior2 $OBJ_REF_STYLE "
+my $RepoOpts2 = "-o $dcpsrepo_ior2 $OBJ_REF_STYLE "
     . "-ORBEndPoint iiop://:$repo_port";
 if ($useImr == 1) {
     $RepoOpts = $RepoOpts . " -ORBuseimr 1 $imr_init_ref";
@@ -55,7 +54,7 @@ my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $Repo
 my $DCPSREPO2 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts2);
 my $imr_util = PerlDDS::create_process ("$tao_imr");
 
-my $opts =  "-ORBSvcConf $tcpConf";
+my $opts =  "";
 my $pub_port = PerlACE::random_port();
 my $sub_port = PerlACE::random_port();
 my $pub_opts = "$opts -DCPSConfigFile pub.ini -orbendpoint iiop://:$pub_port";
