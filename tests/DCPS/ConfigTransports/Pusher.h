@@ -31,7 +31,7 @@ public:
          const DDS::DataWriterListener_var& listener);
 
   virtual ~Pusher();
-  int run_test(const ACE_Time_Value& duration);
+  int push(const ACE_Time_Value& duration);
 
   const DDS::DomainParticipantFactory_var dpf;
   const DDS::DomainParticipant_var dp;

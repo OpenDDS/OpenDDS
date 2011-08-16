@@ -16,7 +16,7 @@ use Data::Dumper;
 use vars qw/ $opt_d /;
 getopts('d:');
 my $debug = 1 if $opt_d;
-
+my $debugger = 'gdb';
 
 
 PerlDDS::add_lib_path('../FooType4');
@@ -130,6 +130,99 @@ my @explicit_configuration = (
 
 );
 
+my @explicit_configuration_and_negotiation = (
+
+  {
+    entity        => none,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
+    compatibility => true,
+    negotiated => [_OPENDDS_0300_UDP],
+    # The hash referred-to by qos ...
+    publisher     => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
+    subscriber    => {%$qos, negotiated => [_OPENDDS_0500_TCP],},
+  },
+
+  {
+    entity        => participant,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => true,
+    negotiated => [udp1],
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    entity        => participant,
+    collocation   => none,
+    configuration => Tcp_Only,
+    protocol      => [mytcp1],
+    compatibility => true,
+    negotiated => [mytcp1],
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    entity        => pubsub,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    negotiated => [udp1],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    entity        => pubsub,
+    collocation   => none,
+    configuration => Tcp_Only,
+    protocol      => [mytcp1],
+    negotiated => [mytcp1],
+    compatibility => true,
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+  {
+    # Note that without disabling the 'autoenable' policy, the new RW will kick off the
+    # transport negotiation and a transport will be selected *before* one has the chance
+    # to specify which transport configuration must be used.
+    autoenable    => false,
+    entity        => rw,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [udp1],
+    compatibility => true,
+    negotiated => [udp1],
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+ {
+    # Note that without disabling the 'autoenable' policy, the new RW will kick off the
+    # transport negotiation and a transport will be selected *before* one has the chance
+    # to specify which transport configuration must be used.
+    autoenable    => false,
+    entity        => rw,
+    collocation   => none,
+    configuration => Tcp_Only,
+    protocol      => [mytcp1],
+    compatibility => true,
+    negotiated => [mytcp1],
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+
+);
+
+##print "Test " . Dumper(\@explicit_configuration_and_negotiation) . "\n";
+
 my @configuration_file_unused = (
 
   # The effective default configuration contains a transport of the same type,
@@ -220,6 +313,7 @@ my @test_configuration = (
     collocation   => none,
     configuration => Udp_Only,
     protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
+#    negotiated => [_OPENDDS_0300_UDP],
     compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
@@ -233,6 +327,7 @@ my @test_configuration = (
   @configuration_file_unused,
   @explicit_configuration,
 #  @test_configuration,
+  @explicit_configuration_and_negotiation,
 
 );
 
@@ -246,6 +341,7 @@ sub parse($$$) {
   my $pub_autoenable = $$s{autoenable} ? " -n " . $$s{autoenable} : "" ;
 
   my $pub_protocol = $$s{$pubsub}{protocol} || $$s{protocol};
+  my $pub_negotiated = $$s{$pubsub}{negotiated} || $$s{negotiated};
   my $pub_entity = $$s{$pubsub}{entity} || $$s{entity};
   my $pub_collocation = $$s{$pubsub}{collocation} || $$s{collocation};
   my $pub_configuration = $$s{$pubsub}{configuration} || $$s{configuration};
@@ -268,6 +364,7 @@ sub parse($$$) {
          . " -a " . $pub_collocation
          . " -s " . $pub_configuration
          . " -t " . join (' -t ', @$pub_protocol)
+         . " -f " . join (' -f ', @$pub_negotiated)
          . " -d " . $pub_durability_kind
          . " -k " . $pub_liveliness_kind
          . " -r " . $pub_reliability_kind
@@ -357,23 +454,21 @@ sub command($$$$) {
 
   my ($pub_process, $pub_parameters, $pub_time, $debug) = @_;
 
-  if ($debug != 0) {
+  if ($debug != 0 and $debugger == 'nemiver') {
     return ('/usr/bin/nemiver', $pub_process . ' ' . $pub_parameters);
   }
 
-#  {
-#
-#    my $gdbrc = "/tmp/$pub_process.gdb";
-#
-#    open(FF1, ">$gdbrc");
-#    print FF1 <<EOF;
-#break main
-#run $pub_parameters -x $pub_time
-#EOF
-#    close(FF1);
-#
-#    return ('/usr/bin/xterm', '-T ' . $pub_process . ' -e gdb -x ' . $gdbrc . ' ' . $pub_process);
-#  }
+  if ($debug != 0 and $debugger == 'gdb') {
+    my $gdbrc = "/tmp/$pub_process.gdb";
+    open(FF1, ">$gdbrc");
+    print FF1 <<EOF;
+break main
+run $pub_parameters -x $pub_time
+EOF
+    close(FF1);
+
+    return ('/usr/bin/xterm', '-T ' . $pub_process . ' -e /usr/bin/gdb -x ' . $gdbrc . ' ' . $pub_process);
+  }
 
     return ($pub_process, $pub_parameters . ' -x ' . $pub_time);
 }
@@ -383,9 +478,10 @@ sub command($$$$) {
 my $count = 0;
 my $failed = 0;
 
-#for my $hasbuiltins (undef, true) {
-for my $hasbuiltins (undef) {
-#for my $hasbuiltins (true) {
+# Only run with the built-in topics when not debugging
+my @builtinscases = $debug ? (undef) : (undef, true);
+
+for my $hasbuiltins (@builtinscases) {
 
     my $DCPSREPO = initialize($hasbuiltins);
 

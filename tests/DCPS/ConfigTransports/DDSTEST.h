@@ -27,7 +27,7 @@ class DDS_TEST {
 public:
 
     static bool supports(const OpenDDS::DCPS::TransportClient* tc, const std::string& name);
-    static bool supports(const OpenDDS::DCPS::EntityImpl* entity, const std::string& protocol_name);
+    static bool negotiated(const OpenDDS::DCPS::TransportClient* tc, const std::string& name);
 
 protected:
 

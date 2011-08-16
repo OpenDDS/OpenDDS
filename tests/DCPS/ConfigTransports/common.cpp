@@ -103,29 +103,42 @@ assert_supports_all(const Options& opts, const OpenDDS::DCPS::TransportClient* t
   for (std::vector < std::string>::const_iterator proto = transporti.begin();
           proto < transporti.end(); proto++)
     {
-      bool issupported = ::DDS_TEST::supports(tc, *proto);
-      ACE_ERROR((LM_INFO,
-                 ACE_TEXT("(%P|%t) Validating that '%C' entity supports protocol '%C': %C\n"),
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Entity '%C' supports protocol '%C'?\n"),
                  opts.entity_str.c_str(),
-                 proto->c_str(),
-                 issupported ? "true" : "false"));
+                 proto->c_str()));
 
-      if (issupported) left--;
+      if (::DDS_TEST::supports(tc, *proto)) left--;
     }
 
   return (0 == left);
 }
 
-//bool
-//wait_publication_matched_status(const Options& opts, const DDS::DataWriter_var& /*writer_*/)
-//{
-//
-//  int duration = opts.test_duration;
-//
-//  ACE_OS::sleep(duration);
-//  return true;
-//}
-//
+bool
+assert_negotiated(const Options& opts, const DDS::Entity_ptr e)
+{
+  TEST_ASSERT(e != 0);
+  OpenDDS::DCPS::TransportClient* tc = dynamic_cast<OpenDDS::DCPS::TransportClient*> (e);
+  TEST_ASSERT(tc != 0);
+
+  const std::vector<std::string>& transporti = opts.negotiated_str;
+
+  // Assert negotiated transport protocols
+  size_t left = transporti.size();
+  for (std::vector < std::string>::const_iterator proto = transporti.begin();
+          proto < transporti.end(); proto++)
+    {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Entity '%C' negotiated protocol '%C'?\n"),
+                 opts.entity_str.c_str(),
+                 proto->c_str()));
+
+      if (::DDS_TEST::negotiated(tc, *proto)) left--;
+    }
+
+  return (0 == left);
+}
+
 bool
 wait_publication_matched_status(const Options& opts, const DDS::Entity_ptr /*reader_*/)
 {

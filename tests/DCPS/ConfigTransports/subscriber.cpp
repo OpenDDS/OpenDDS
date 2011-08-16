@@ -49,6 +49,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           Puller r(fconfig, dpf, participant, drl1);
           TEST_ASSERT(wait_publication_matched_status(configopt, r.reader_.in()));
           TEST_ASSERT(assert_supports_all(configopt, r.reader_.in()));
+
+
         }
       else if (configopt.collocation_str == "process")
         {
@@ -134,6 +136,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           TEST_ASSERT(assert_subscription_matched(configopt, drl1)
                       && assert_subscription_matched(configopt, drl2));
         }
+    }
+  catch (char const *ex)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("(%P|%t) Assertion failed.\n"), ex), -1);
     }
   catch (const CORBA::Exception &ex)
     {

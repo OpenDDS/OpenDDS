@@ -39,3 +39,5 @@ bool assert_subscription_matched(const Options& opts, const DDS::DataReaderListe
 bool assert_supports_all(const Options& opts, const DDS::Entity_ptr e);
 
 bool assert_supports_all(const Options& opts, const OpenDDS::DCPS::TransportClient* tc, const std::vector<std::string>& transporti);
+
+bool assert_negotiated(const Options& options, const DDS::Entity_ptr e);

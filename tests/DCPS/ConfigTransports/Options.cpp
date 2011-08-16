@@ -71,6 +71,11 @@ Options::Options(int argc, ACE_TCHAR *argv[]) :
           this->protocol_str.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
           arg_shifter.consume_arg();
         }
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
+        {
+          this->negotiated_str.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
+          arg_shifter.consume_arg();
+        }
       else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
         {
           this->entity_autoenable = this->get_entity_autoenable_kind(ACE_TEXT_ALWAYS_CHAR(currentArg));

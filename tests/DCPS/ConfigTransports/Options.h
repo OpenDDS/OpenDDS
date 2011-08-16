@@ -51,6 +51,7 @@ public:
   std::string collocation_str;
   std::string configuration_str;
   std::vector<std::string> protocol_str;
+  std::vector<std::string> negotiated_str;
 
 };
 #endif

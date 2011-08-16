@@ -10,8 +10,6 @@
 // ============================================================================
 
 
-#include <sys/syslog.h>
-
 #include "common.h"
 #include "Options.h"
 #include "Factory.h"
@@ -51,7 +49,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           TEST_ASSERT(wait_publication_matched_status(configopt, w.writer_));
           TEST_ASSERT(assert_supports_all(configopt, w.writer_));
 
-          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) End of writer ...\n")));
+          w.push(ACE_Time_Value(1));
+          TEST_ASSERT(assert_negotiated(configopt, w.writer_));
         }
       else if (configopt.collocation_str == "process")
         {
@@ -73,6 +72,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               TEST_ASSERT(!assert_supports_all(configopt, w2.writer_));
               TEST_ASSERT(assert_supports_all(plainopt, w2.writer_));
             }
+
+          w1.push(ACE_Time_Value(1));
+          TEST_ASSERT(assert_negotiated(configopt, w1.writer_));
+
+          w2.push(ACE_Time_Value(1));
+          TEST_ASSERT(assert_negotiated(configopt, w2.writer_));
         }
       else if (configopt.collocation_str == "participant")
         {
@@ -87,6 +92,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
           TEST_ASSERT(assert_supports_all(configopt, w1.writer_));
           TEST_ASSERT(assert_supports_all(configopt, w2.writer_));
+
+          w1.push(ACE_Time_Value(1));
+          TEST_ASSERT(assert_negotiated(configopt, w1.writer_));
+
+          w2.push(ACE_Time_Value(1));
+          TEST_ASSERT(assert_negotiated(configopt, w2.writer_));
         }
       else if (configopt.collocation_str == "pubsub")
         {
@@ -100,6 +111,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
           TEST_ASSERT(assert_supports_all(configopt, w1.writer_));
           TEST_ASSERT(assert_supports_all(configopt, w2.writer_));
+
+          w1.push(ACE_Time_Value(1));
+          TEST_ASSERT(assert_negotiated(configopt, w1.writer_));
+
+          w2.push(ACE_Time_Value(1));
+          TEST_ASSERT(assert_negotiated(configopt, w2.writer_));
         }
 
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting it all down ...\n")));
@@ -124,6 +141,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           TEST_ASSERT(assert_publication_matched(configopt, drl1)
                       && assert_publication_matched(configopt, drl2));
         }
+    }
+  catch (char const *ex)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("(%P|%t) Assertion failed.\n"), ex), -1);
     }
   catch (const CORBA::Exception& ex)
     {

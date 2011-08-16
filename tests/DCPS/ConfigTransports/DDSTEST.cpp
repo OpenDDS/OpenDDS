@@ -15,45 +15,11 @@
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DdsDcpsDomainC.h"
 
+#include "dds/DCPS/transport/framework/DataLinkSet.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportConfig.h"
 
 #include <vector>
-
-bool
-::DDS_TEST::supports(const OpenDDS::DCPS::EntityImpl* entity, const std::string& protocol_name)
-{
-
-  const OpenDDS::DCPS::TransportConfig_rch tc = entity->transport_config();
-
-  if (tc.is_nil())
-    {
-      ACE_ERROR_RETURN((LM_INFO,
-                        ACE_TEXT("(%P|%t) Null transport config for entity %@.\n"),
-                        entity),
-                       0);
-    }
-
-  for (std::vector<OpenDDS::DCPS::TransportInst_rch>::const_iterator it = tc->instances_.begin(); it != tc->instances_.end(); ++it)
-    {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Checking '%C' == '%C' ...\n"),
-                 protocol_name.c_str(),
-                 (*it)->name().c_str()));
-
-      if ((*it)->name() == protocol_name)
-        {
-          ACE_ERROR_RETURN((LM_INFO,
-                            ACE_TEXT("(%P|%t) Found transport '%C'\n."), protocol_name.c_str()),
-                           true);
-        }
-    }
-
-  ACE_ERROR_RETURN((LM_INFO,
-                    ACE_TEXT("(%P|%t) Unable to find transport %C.\n"),
-                    protocol_name.c_str()),
-                   false);
-}
 
 bool
 ::DDS_TEST::supports(const OpenDDS::DCPS::TransportClient* tc, const std::string& name)
@@ -69,22 +35,69 @@ bool
           it != tc->impls_.end(); ++it)
     {
 
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Checking '%C' == '%C' ...\n"),
-                 name.c_str(),
-                 (*it)->config()->name().c_str()));
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Check if supported '%C' matches '%C'?\n"),
+                 (*it)->config()->name().c_str(),
+                 name.c_str()));
 
       if ((*it)->config()->name() == name)
         {
           ACE_ERROR_RETURN((LM_INFO,
-                            ACE_TEXT("(%P|%t) Found transport '%C'.\n"), name.c_str()),
-                           1);
+                            ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),
+                            name.c_str()),
+                           true);
         }
     }
 
   ACE_ERROR_RETURN((LM_INFO,
-                    ACE_TEXT("(%P|%t) Unable to find transport %C.\n"),
+                    ACE_TEXT("(%P|%t) No. Transport '%C' is not supported.\n"),
                     name.c_str()),
-                   0);
+                   false);
+}
+
+bool
+::DDS_TEST::negotiated(const OpenDDS::DCPS::TransportClient* ctc, const std::string& name)
+{
+  if (ctc == 0)
+    {
+      ACE_ERROR_RETURN((LM_INFO,
+                        ACE_TEXT("(%P|%t) Null transport client.\n")),
+                       false);
+    }
+
+  OpenDDS::DCPS::TransportClient* tc = const_cast<OpenDDS::DCPS::TransportClient*> (ctc);
+  if (tc == 0)
+    {
+      ACE_ERROR_RETURN((LM_INFO,
+                        ACE_TEXT("(%P|%t) Null transport client.\n")),
+                       false);
+    }
+
+
+  for (OpenDDS::DCPS::DataLinkSet::MapType::iterator iter = tc->links_.map().begin(),
+          end = tc->links_.map().end(); iter != end; ++iter)
+    {
+
+      const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
+
+
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) Check if negotiated '%C' matches '%C'?\n"),
+                 datalink->impl()->config()->name().c_str(),
+                 name.c_str()));
+
+      if (datalink->impl()->config()->name() == name)
+        {
+          ACE_ERROR_RETURN((LM_INFO,
+                            ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
+                            name.c_str()),
+                           true);
+        }
+    }
+
+  ACE_ERROR_RETURN((LM_INFO,
+                    ACE_TEXT("(%P|%t) No. Transport '%C' was not negotiated.\n"),
+                    name.c_str()),
+                   false);
 }
 

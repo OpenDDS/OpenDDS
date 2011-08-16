@@ -1,3 +1,24 @@
+Tue Aug 16 20:13:00 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/Options.h:
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+        * tests/DCPS/ConfigTransports/transports.ini:
+
+          Adding the ability to test the negotiated transports.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Adding several tests that assert which protocol was negotiated
+          in various situations.
+
 Tue Aug 16 19:49:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
