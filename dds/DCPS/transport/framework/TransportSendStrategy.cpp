@@ -71,6 +71,9 @@ TransportSendStrategy::TransportSendStrategy
     start_counter_(0),
     mode_(MODE_DIRECT),
     mode_before_suspend_(MODE_NOT_SET),
+    delayed_delivered_notification_queue_(0),
+    delayed_notification_mode_(0),
+    num_delayed_notifications_(0),
     header_mb_allocator_(0),
     header_db_allocator_(0),
     synch_(0),
@@ -109,7 +112,8 @@ TransportSendStrategy::TransportSendStrategy
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
 
-  this->delayed_notification_queue_.reserve(this->max_samples_);
+  this->delayed_delivered_notification_queue_ = new TransportQueueElement* [max_samples_];
+  this->delayed_notification_mode_ = new SendMode[max_samples_];
 }
 
 TransportSendStrategy::~TransportSendStrategy()
@@ -117,6 +121,17 @@ TransportSendStrategy::~TransportSendStrategy()
   DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
 
   delete this->synch_;
+
+  if (this->delayed_delivered_notification_queue_) {
+    delete [] this->delayed_delivered_notification_queue_;
+    this->delayed_delivered_notification_queue_ = 0;
+  }
+
+  if (this->delayed_notification_mode_) {
+    delete [] this->delayed_notification_mode_;
+    this->delayed_notification_mode_ = 0;
+  }
+
   delete this->elems_;
   delete this->queue_;
 }
@@ -531,7 +546,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
           // Inform the element that the data has been delivered.
 
           if ((delay_notification == DELAY_NOTIFICATION) &&
-              (this->delayed_notification_queue_.size() < this->max_samples_)) {
+              (this->num_delayed_notifications_ < this->max_samples_)) {
             // If we can delay notification.
             this->add_delayed_notification(element);
 
@@ -684,102 +699,96 @@ TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
 
-  std::vector<DelayedNotification> notifications;
-  TransportQueueElement* found_element = 0;
-  TransportQueueElement* sample = 0;
+  TransportQueueElement* sample = NULL;
   SendMode mode = MODE_NOT_SET;
+
+  TransportQueueElement** samples = NULL;
+  SendMode* modes = NULL;
+
+  size_t num_delayed_notifications = 0;
+
+  TransportQueueElement* found_element = 0;
 
   {
     GuardType guard(this->lock_);
 
-    const size_t num_delayed_notifications =
-      this->delayed_notification_queue_.size();
+    num_delayed_notifications = this->num_delayed_notifications_;
 
-    if (num_delayed_notifications == 0) {
+    if (num_delayed_notifications <= 0) {
       return;
 
-    } else if (num_delayed_notifications == 1
-               && this->delayed_notification_queue_[0].sending_thread_
-                  == ACE_OS::thr_self()) {
+    } else if (num_delayed_notifications == 1) {
       // Optimization for the most common case.
-      sample = this->delayed_notification_queue_[0].element_;
-      mode = this->delayed_notification_queue_[0].mode_;
+      sample = delayed_delivered_notification_queue_ [0];
+      mode = delayed_notification_mode_ [0];
 
-      if ((element.sample() != 0) && (element.msg() == sample->msg())) {
+      if ((element.sample () != 0) && (element.msg () == sample->msg ()))
+      {
         found_element = sample;
       }
 
-      this->delayed_notification_queue_.clear();
-
-    } else if (num_delayed_notifications > 1) {
-      notifications.swap(this->delayed_notification_queue_);
-
-      size_t not_ours = 0;
-      for (size_t i = 0; i < num_delayed_notifications; i++) {
-
-        if (notifications[i].sending_thread_ != ACE_OS::thr_self()) {
-          this->delayed_notification_queue_.push_back(notifications[i]);
-          ++not_ours;
-
-        } else if ((element.sample() != 0) &&
-                   (element.msg() == notifications[i].element_->msg())) {
-          found_element = notifications[i].element_;
-        }
-
-      }
-
-      if (not_ours == num_delayed_notifications) {
-        return;
-      }
+      delayed_delivered_notification_queue_ [0] = NULL;
+      delayed_notification_mode_ [0] = MODE_NOT_SET;
 
     } else {
-      return;
+      samples = new TransportQueueElement* [num_delayed_notifications];
+      modes = new SendMode[num_delayed_notifications];
+
+      for (size_t i = 0; i < num_delayed_notifications; i++) {
+        samples[i] = delayed_delivered_notification_queue_[i];
+        modes[i] = delayed_notification_mode_[i];
+
+        if ((element.sample () != 0) && (element.msg () == samples[i]->msg ())) {
+          found_element = samples[i];
+        }
+
+        delayed_delivered_notification_queue_[i] = NULL;
+        delayed_notification_mode_[i] = MODE_NOT_SET;
+      }
     }
+
+    this->num_delayed_notifications_ = 0;
   }
 
-  if (notifications.empty()) {
+  if (modes == NULL) {
     // optimization for the common case
       if (mode == MODE_TERMINATED) {
-        if (! this->transport_shutdown_ || sample->owned_by_transport()) {
+        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
           bool deleted = sample->data_dropped(true);
           if (found_element == sample) {
-            element.released(deleted);
+            element.released (deleted);
           }
         }
       } else {
-        if (! this->transport_shutdown_ || sample->owned_by_transport()) {
+        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
           bool deleted = sample->data_delivered();
           if (found_element == sample) {
-            element.released(deleted);
+            element.released (deleted);
           }
         }
       }
 
   } else {
-    for (size_t i = 0; i < notifications.size(); ++i) {
-
-      if (notifications[i].sending_thread_ != ACE_OS::thr_self()) {
-        continue;
-      }
-
-      if (notifications[i].mode_ == MODE_TERMINATED) {
-        if (! this->transport_shutdown_
-            || notifications[i].element_->owned_by_transport()) {
-          bool deleted = notifications[i].element_->data_dropped(true);
-          if (found_element == notifications[i].element_) {
-            element.released(deleted);
+    for (size_t i = 0; i < num_delayed_notifications; i++) {
+      if (modes[i] == MODE_TERMINATED) {
+        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
+          bool deleted = samples[i]->data_dropped(true);
+          if (found_element == samples[i]) {
+            element.released (deleted);
           }
         }
       } else {
-        if (! this->transport_shutdown_
-            || notifications[i].element_->owned_by_transport()) {
-          bool deleted = notifications[i].element_->data_delivered();
-          if (found_element == notifications[i].element_) {
-            element.released(deleted);
+        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
+          bool deleted = samples[i]->data_delivered();
+          if (found_element == samples[i]) {
+            element.released (deleted);
           }
         }
       }
     }
+
+    delete [] samples;
+    delete [] modes;
   }
 }
 
@@ -965,8 +974,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
     GuardType guard(this->lock_);
 
     if (this->link_released_) {
-      VDBG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) TransportSendStrategy::send link_released_\n")));
       this->add_delayed_notification(element);
 
     } else {
@@ -1951,8 +1958,10 @@ TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
 void
 TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
 {
-  this->delayed_notification_queue_.push_back(
-    DelayedNotification(element, this->mode_, ACE_OS::thr_self()));
+  const size_t ndn = this->num_delayed_notifications_;
+  this->delayed_delivered_notification_queue_[ndn] = element;
+  this->delayed_notification_mode_[ndn] = this->mode_;
+  ++this->num_delayed_notifications_;
 }
 
 size_t

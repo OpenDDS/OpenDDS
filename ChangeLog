@@ -1,3 +1,16 @@
+Tue Aug 16 19:49:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Reverted change from Mon Aug 15 22:31:40 UTC 2011.  We will need a
+          more involved design effort to fix the issues.
+
+        * java/INSTALL:
+
+          Updated Java-specific install notes.
+
 Tue Aug 16 19:08:29 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * configure:

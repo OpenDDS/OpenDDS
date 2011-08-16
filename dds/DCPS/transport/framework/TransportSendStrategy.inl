@@ -63,7 +63,7 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
     this->start_counter_ = 0;
     this->mode_ = MODE_DIRECT;
     this->mode_before_suspend_ = MODE_NOT_SET;
-    this->delayed_notification_queue_.clear();
+    this->num_delayed_notifications_ = 0;
 
   } else if (this->mode_ == MODE_SUSPEND) {
     this->mode_ = this->mode_before_suspend_;

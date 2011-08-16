@@ -23,8 +23,6 @@
 
 #include "ace/Synch.h"
 
-#include <vector>
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -350,16 +348,9 @@ private:
   SendMode mode_before_suspend_;
 
   /// Used for delayed notifications when performing work.
-  struct DelayedNotification {
-    TransportQueueElement* element_;
-    SendMode mode_;
-    ACE_thread_t sending_thread_;
-
-    DelayedNotification(TransportQueueElement* element, SendMode mode, 
-                        ACE_thread_t thr)
-      : element_(element), mode_(mode), sending_thread_(thr) {}
-  };
-  std::vector<DelayedNotification> delayed_notification_queue_;
+  TransportQueueElement** delayed_delivered_notification_queue_;
+  SendMode* delayed_notification_mode_;
+  size_t num_delayed_notifications_;
 
   /// Allocator for header data block.
   TransportMessageBlockAllocator* header_mb_allocator_;
