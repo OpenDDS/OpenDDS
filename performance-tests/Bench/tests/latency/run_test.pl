@@ -118,31 +118,31 @@ my $run_time = 120;
 
 
 if ($ARGV[1] == 100) {
-    $pub_config_file = "$bench_location/tests/latency/p1-100.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-100.ini";
 }
 elsif ($ARGV[1] == 250) {
-    $pub_config_file = "$bench_location/tests/latency/p1-250.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-250.ini";
 }
 elsif ($ARGV[1] == 500) {
-    $pub_config_file = "$bench_location/tests/latency/p1-500.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-500.ini";
 }
 elsif ($ARGV[1] == 1000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-1000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-1000.ini";
 }
 elsif ($ARGV[1] == 2500) {
-    $pub_config_file = "$bench_location/tests/latency/p1-2500.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-2500.ini";
 }
 elsif ($ARGV[1] == 5000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-5000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-5000.ini";
 }
 elsif ($ARGV[1] == 8000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-8000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-8000.ini";
 }
 elsif ($ARGV[1] == 16000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-16000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-16000.ini";
 }
 elsif ($ARGV[1] == 32000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-32000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-32000.ini";
 }
 
 

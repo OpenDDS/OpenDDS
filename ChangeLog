@@ -1,3 +1,9 @@
+Wed Aug 17 14:58:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+
+          Fixed udp and best-effort multicast with non-default payload size.
+
 Wed Aug 17 14:47:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ConfigTransports/subscriber.cpp:
