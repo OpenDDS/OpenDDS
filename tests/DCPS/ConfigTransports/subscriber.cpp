@@ -62,7 +62,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           Puller r2(fplain, dpf, participant2, drl2);
           TEST_ASSERT(wait_publication_matched_status(configopt, r2.reader_.in()));
 
-          TEST_ASSERT (participant1 != participant2);
+          TEST_ASSERT (participant1.in() != participant2.in());
 
 
           // Wait for things to settle ?!

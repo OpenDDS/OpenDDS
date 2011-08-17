@@ -1,3 +1,9 @@
+Wed Aug 17 14:47:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fix for SunCC compile error.
+
 Tue Aug 16 22:17:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/Arrays/publisher.cpp:
