@@ -1,3 +1,13 @@
+Wed Aug 17 22:31:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * AUTHORS:
+
+          Updated for upcoming release.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Added section to describe changes in this release.
+
 Wed Aug 17 16:05:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
