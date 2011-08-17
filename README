@@ -100,9 +100,10 @@ on Unix and Linux systems.
 
 Perl is used for running the automated tests and examples included in this
 source tree, or if you will be generating Makefiles or Visual Studio project
-files.  In most cases you will *not* need to generate Makefiles/project files,
-but see the INSTALL file for details.  On Windows platforms, we recommend the
-use of ActiveState Perl.  The "configure" script also uses Perl.
+files.  In most cases you will *not* need to generate Makefiles/project files
+for OpenDDS itself (but see the INSTALL file for details), but doing so for
+your own application code that uses OpenDDS is recommended.  On Windows we
+recommend the use of ActiveState Perl.  The "configure" script also uses Perl.
 
 * Build Targets
 
@@ -142,7 +143,7 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 7.1 with SP1 (Visual Studio .NET 2003)
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
-** Microsoft Visual C++ 10 (Visual Studio 2010)
+** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
 ** gcc 3.3.2
 ** gcc 4.1.1 (Red Hat 4.1.1-30) (Red Hat 4.1.1-52)
 ** gcc 4.1.2 (Red Hat 4.1.2-14)
@@ -249,11 +250,6 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
   Note: When more than resource_limits.max_samples are queued
   in the DataReader the heap will be used instead of pre-allocated
   memory.
-
-----------------------------------------------------------------------
-) There is no check that the Transport implementation supports the
-  given QoS.  The user should not use the udp transport with
-  RELIABILITY.kind = RELIABLE.
 
 ----------------------------------------------------------------------
 ) The DURABILITY_SERVICE service_cleanup_delay support is currently

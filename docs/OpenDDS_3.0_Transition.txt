@@ -29,9 +29,9 @@ Remove all of the transport-related code from your C++ source
 code files:
   - Any #includes under dds/DCPS/transport
   - Any code involving TransportImpl
-  - Any code involving TransportRegistry or TheTransportRegistry
+  - Any code involving TransportFactory or TheTransportFactory
   - Any code involving TransportConfiguration
-  - Any attach calls on the TransportImpl
+  - Any attach calls on the TransportImpl (and the AttachStatus enum type)
   - Any attach_transport calls on the PublisherImpl or SubscriberImpl
 
 Convert (or create) an OpenDDS configuration file (*.ini) containing
@@ -50,7 +50,7 @@ If you have existing files, make the following changes to them:
   - Change any sections of the form [transport_impl*] sections
     to be of the form [transport/<transport_name>].
   - Add a [config/<config_name>] section
-  - Add the propert "transports=<transport_name> to your config
+  - Add the property "transports=<transport_name> to your config
     section.
   - Add the DCPSGlobalTransportConfig=<config_name> property to
     the [common] section.
@@ -131,8 +131,8 @@ For example, code such as this:
     // Get the transport_impl for [transport_impl_1]
     OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
     OpenDDS::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create_transport_impl (transport_impl_id,
-                                                  OpenDDS::DCPS::AUTO_CONFIG);
+      TheTransportFactory->create_transport_impl(transport_impl_id,
+                                                 OpenDDS::DCPS::AUTO_CONFIG);
 
     // Attach the current publisher "pub" to this transport
     OpenDDS::DCPS::AttachStatus status = transport_impl->attach(pub.in());
@@ -150,7 +150,7 @@ should change to:
 Other differences
 -----------------
 
-* The name of the tcp transport has been changed from "simpleTcp"
+* The name of the tcp transport has been changed from "SimpleTcp"
   to "tcp".
 * The passive_connect_duration option no longer applies to
   individual transports.  You can now set this option on the
@@ -158,6 +158,7 @@ Other differences
 * The semantics of the multicast port_offset option have changed.
   This option is no longer an offset, but is now simply the port
   number to use when group_address is not set.
-* Entities setting Reliability Qos to Reliable, can no longer use
-  the UDP transport.  Either remove this QoS setting or select a
-  transport (multicast or tcp) that is reliable.
+* Entities setting Reliability QoS to Reliable, can no longer use
+  the UDP transport or Multicast transport in best-effort mode.
+  Either remove this QoS setting or select a transport (multicast
+  or tcp) that is reliable.

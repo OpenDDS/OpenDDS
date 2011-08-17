@@ -1,3 +1,11 @@
+Wed Aug 17 16:05:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+        * docs/OpenDDS_3.0_Transition.txt:
+
+          Updated docs for basic typos, formatting, clarifications, etc.
+
 Wed Aug 17 14:58:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/Bench/tests/latency/run_test.pl:
