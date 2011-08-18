@@ -36,8 +36,6 @@ $repo_bit_opt .= " " . $debugOpts if $debug or $transportDebug;
 $info_prst_file = "info.pr";
 $num_messages = 60;
 $pub_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
-$pub2_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
-$num_messages += 10;
 $sub_opts = "$opts -DCPSConfigFile sub.ini -n $num_messages";
 $SRV_PORT = PerlACE::random_port();
 $synch_file = "monitor1_done";
@@ -59,7 +57,6 @@ $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 $Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 5");
 $Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
-$Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts");
 
 $data_file = "test_run_prst.data";
 unlink $data_file;
@@ -134,13 +131,7 @@ if ($MonitorResult != 0) {
     $status = 1;
 }
 
-print "Spawning second publisher.\n";
-print $Publisher2->CommandLine() . "\n";
-$Publisher2->Spawn ();
-
-sleep (5);
-
-$SubscriberResult = $Subscriber->WaitKill (60);
+$SubscriberResult = $Subscriber->TerminateWaitKill (10);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
@@ -149,12 +140,6 @@ if ($SubscriberResult != 0) {
 $PublisherResult = $Publisher->TerminateWaitKill (10);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-$Publisher2Result = $Publisher2->TerminateWaitKill (10);
-if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher 2 returned $Publisher2Result \n";
     $status = 1;
 }
 

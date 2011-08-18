@@ -111,10 +111,6 @@ public:
   CORBA::Boolean is_bit();
   void set_bit_status(CORBA::Boolean isBIT);
 
-  /// Try to associate all the current publications.
-  /// This is used to reconnect Built in Topics after a persistent restart.
-  void reassociate_all_publications();
-
 private:
   OpenDDS::DCPS::RepoId id_;
   DDS::TopicQos qos_;

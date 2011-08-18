@@ -415,18 +415,6 @@ void DCPS_IR_Topic::reevaluate_associations(DCPS_IR_Subscription* subscription)
   }
 }
 
-
-void DCPS_IR_Topic::reassociate_all_publications()
-{
-  DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin();
-  DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
-
-  for ( ; iter != end; ++iter)
-  {
-    description_->try_associate_publication(*iter);
-  }
-}
-
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
 template class ACE_Node<DCPS_IR_Publication*>;

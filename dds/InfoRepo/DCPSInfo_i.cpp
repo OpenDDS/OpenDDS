@@ -2124,17 +2124,6 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                ACE_TEXT("processing persistent data.\n")));
   }
 
-  // Ensure that new BIT participants do not reuse an id
-  for (Update::UImage::ParticipantSeq::const_iterator
-       iter = image.participants.begin();
-       iter != image.participants.end(); iter++) {
-    const Update::UParticipant* part = *iter;
-    OpenDDS::DCPS::RepoIdConverter converter(part->participantId);
-    if (converter.federationId() == this->federation_) {
-      participantIdGenerator_.last(converter.participantId());
-    }
-  }
-
   for (Update::UImage::ParticipantSeq::const_iterator
        iter = image.participants.begin();
        iter != image.participants.end(); iter++) {
@@ -2246,16 +2235,6 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                  std::string(part_converter).c_str()));
     }
   }
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  // reassociate the bit publisher and subscribers
-  for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
-       currentDomain != domains_.end();
-       ++currentDomain) {
-
-    currentDomain->second->reassociate_built_in_topic_pubs();
-  }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   return true;
 }

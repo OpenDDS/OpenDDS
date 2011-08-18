@@ -12,12 +12,11 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
@@ -198,14 +197,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       {
         ::DDS::InstanceHandleSeq handles;
-        if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK)
+        if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
+          || handles.length () == 0)
         {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant test failed to retrieve handles.\n"));
-          return 1;
-        }
-        if (handles.length () == 0)
-        {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant test failed to retrieve any handles.\n"));
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant test failed.\n"));
           return 1;
         }
 
@@ -594,7 +589,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       dpf->delete_participant(participant.in ());
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
       if (CUR_PART_USER_DATA == PART_USER_DATA)

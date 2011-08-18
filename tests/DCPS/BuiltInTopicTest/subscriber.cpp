@@ -15,7 +15,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include "dds/DCPS/BuiltInTopicUtils.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 # include "dds/DCPS/transport/tcp/Tcp.h"
@@ -66,7 +65,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int result = 0;
   ACE_DEBUG ((LM_DEBUG, "(%P|%t) subscriber main\n"));
   try
     {
@@ -150,11 +148,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DataReaderListenerImpl* listener_servant =
         dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
-      DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
-      DDS::DataReader_var bitdr =
-        builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
-      listener_servant->set_builtin_datareader(bitdr.in());
-
       if (CORBA::is_nil (listener.in ())) {
         cerr << "subscriber: listener is nil." << endl;
         exit(1);
@@ -227,11 +220,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
-      if (listener_servant->builtin_read_errors()) {
-        cerr << "subscriber: Built in topic read failure." << endl;
-        result = 1;
-      }
-
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
       }
@@ -247,5 +235,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  return result;
+  return 0;
 }
