@@ -54,7 +54,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   Messenger::MessageDataReader_var reader_i =
     Messenger::MessageDataReader::_narrow(reader);
 
-  if (CORBA::is_nil(reader_i.in())) {
+  if (!reader_i) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("ERROR: %N:%l: on_data_available() -")
                ACE_TEXT(" _narrow failed!\n")));

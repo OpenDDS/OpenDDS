@@ -1,3 +1,9 @@
+Thu Aug 18 19:44:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.cpp:
+
+          Simplify the is_nil() check to match how Subscriber.cpp does it.
+
 Thu Aug 18 19:08:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
