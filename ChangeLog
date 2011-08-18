@@ -1,3 +1,22 @@
+Thu Aug 18 16:05:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/AAA_README.txt:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/dds_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp_bit_off.bat:
+
+          Collapse udp config files into a single udp config
+          file.  Update the various scripts and docs that
+          reference them.
+
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+
+          Removed these files.
+
 Thu Aug 18 01:47:27 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/DDSTEST.cpp:
@@ -12,8 +31,8 @@ Thu Aug 18 01:47:27 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
         * tests/DCPS/ConfigTransports/publisher.cpp:
         * tests/DCPS/ConfigTransports/run_test.pl:
 
-          Improved support for testing autonegotiation. Added publishing 
-          and receip of samples. Added ability to detect the 
+          Improved support for testing autonegotiation. Added publishing
+          and receip of samples. Added ability to detect the
           negotiated transport. Additional tests cases added.
 
 Wed Aug 17 22:31:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
