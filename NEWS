@@ -18,6 +18,10 @@ Version 3.0 of OpenDDS.
   configured.  If not specified, the property defaults to a value
   selected by the operating system (similar to the tcp transport).
 
+- Details of the OpenDDS Modeling SDK changes in this release are documented
+  in the Eclipse-based help, see OpenDDS Modeling SDK Guide -> Getting
+  Started -> Introduction to the OpenDDS Modeling SDK.
+
 - First release of OpenDDS Real-Time Data (RTD) for Excel an Excel Add-in
   and RTD Server.  It allows visualization of an operating OpenDDS system
   from within Excel. It gives a tree view of a repository that mirrors the
