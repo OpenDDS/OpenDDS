@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: EMF Utililties for OpenDDS Modeling SDK
 Bundle-SymbolicName: com.ociweb.emf.util
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 3.0.0.qualifier
 Bundle-Vendor: Object Computing, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.emf.common.util,

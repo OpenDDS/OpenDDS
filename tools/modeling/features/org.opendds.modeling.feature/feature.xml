@@ -2,7 +2,7 @@
 <feature
       id="org.opendds.modeling.feature"
       label="OpenDDS Modeling SDK Feature Bundle"
-      version="1.1.0.qualifier"
+      version="3.0.0.qualifier"
       provider-name="Object Computing, Inc."
       plugin="org.opendds.modeling.common">
 

@@ -6794,7 +6794,7 @@
       iD="org.opendds.modeling.diagram.dcpslib"
       name="OpenDDS DcpsLib Plugin"
       provider="Object Computing, Inc."
-      version="1.1.0.qualifier"
+      version="3.0.0.qualifier"
       printingEnabled="true">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
     <requiredPlugins>org.eclipse.gmf.runtime.draw2d.ui</requiredPlugins>
