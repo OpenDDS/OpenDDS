@@ -1,3 +1,9 @@
+Thu Aug 18 16:15:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Set version number.
+
 Thu Aug 18 16:05:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS/AAA_README.txt:
