@@ -9,14 +9,15 @@
  */
 // ============================================================================
 
+
 #include "common.h"
 #include "Options.h"
 #include "Factory.h"
+
 #include "Puller.h"
 #include "DataReaderListener.h"
 
 #include "dds/DCPS/Service_Participant.h"
-#include "tao/Object.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
@@ -40,43 +41,38 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       Options plainopt;
       Factory fplain(plainopt, typsup);
 
-      DDS::DataReaderListener_var drl1(new DataReaderListenerImpl);
-      DDS::DataReaderListener_var drl2(new DataReaderListenerImpl);
+      DDS::DataReaderListener_var drl1(new DataReaderListenerImpl(configopt));
+      DDS::DataReaderListener_var drl2(new DataReaderListenerImpl(plainopt));
 
       if (configopt.collocation_str == "none")
         {
           DDS::DomainParticipant_var participant(fconfig.participant(dpf));
           Puller r(fconfig, dpf, participant, drl1);
-          TEST_ASSERT(wait_publication_matched_status(configopt, r.reader_.in()));
-          TEST_ASSERT(assert_supports_all(configopt, r.reader_.in()));
-
+          TEST_ASSERT(assert_supported(configopt, r.reader_.in()));
+          r.pull(ACE_Time_Value(1));
 
         }
       else if (configopt.collocation_str == "process")
         {
           DDS::DomainParticipant_var participant1(fconfig.participant(dpf));
           Puller r1(fconfig, dpf, participant1, drl1);
-          TEST_ASSERT(wait_publication_matched_status(configopt, r1.reader_.in()));
 
           DDS::DomainParticipant_var participant2(fplain.participant(dpf));
           Puller r2(fplain, dpf, participant2, drl2);
-          TEST_ASSERT(wait_publication_matched_status(configopt, r2.reader_.in()));
 
           TEST_ASSERT (participant1.in() != participant2.in());
 
-
-          // Wait for things to settle ?!
-          ACE_OS::sleep(configopt.test_duration);
-
-          TEST_ASSERT(assert_supports_all(configopt, r1.reader_));
+          TEST_ASSERT(assert_supported(configopt, r1.reader_));
           if (configopt.entity_str == "none")
             {
-              TEST_ASSERT(assert_supports_all(configopt, r2.reader_));
+              TEST_ASSERT(assert_supported(configopt, r1.reader_));
             }
           else
             {
-              TEST_ASSERT(!assert_supports_all(configopt, r2.reader_));
+              TEST_ASSERT(!assert_supported(configopt, r2.reader_));
             }
+
+          r1.pull(ACE_Time_Value(1));
         }
       else if (configopt.collocation_str == "participant")
         {
@@ -87,12 +83,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
           Puller r2(fplain, dpf, participant2, drl2);
 
-          // Wait for things to settle ?!
-          ACE_OS::sleep(configopt.test_duration);
+          TEST_ASSERT(assert_supported(configopt, r1.reader_));
+          TEST_ASSERT(assert_supported(configopt, r2.reader_));
 
-          TEST_ASSERT(assert_supports_all(configopt, r1.reader_));
-          TEST_ASSERT(assert_supports_all(configopt, r2.reader_));
-
+          r1.pull(ACE_Time_Value(1));
         }
 
       else if (configopt.collocation_str == "pubsub")
@@ -106,15 +100,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           DDS::Subscriber_var subscriber2(fplain.subscriber(participant2));
           Puller r2(fplain, dpf, participant2, subscriber2, drl1);
 
-          // Wait for things to settle ?!
-          ACE_OS::sleep(configopt.test_duration);
+          TEST_ASSERT(assert_supported(configopt, r1.reader_));
+          TEST_ASSERT(assert_supported(configopt, r2.reader_));
 
-          TEST_ASSERT(assert_supports_all(configopt, r1.reader_));
-          TEST_ASSERT(assert_supports_all(configopt, r2.reader_));
-
+          r1.pull(ACE_Time_Value(1));
         }
 
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting it all down ...\n")));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting subscriber down ...\n")));
       TheServiceParticipant->shutdown();
 
       if (configopt.collocation_str == "none")
