@@ -1,3 +1,11 @@
+Thu Aug 18 16:30:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/dds_tcp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/dds_udp_conf.ini:
+
+          Remove the local_address from the udp config file and
+          normalize the formatting a little.
+
 Thu Aug 18 16:28:19 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
 
         * tests/DCPS/ConfigTransports/subscriber.cpp:
