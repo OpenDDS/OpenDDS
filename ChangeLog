@@ -1,3 +1,21 @@
+Thu Aug 18 01:47:27 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/DataReaderListener.h:
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ConfigTransports/Puller.h:
+        * tests/DCPS/ConfigTransports/Puller.cpp:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Improved support for testing autonegotiation. Added publishing 
+          and receip of samples. Added ability to detect the 
+          negotiated transport. Additional tests cases added.
+
 Wed Aug 17 22:31:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * AUTHORS:

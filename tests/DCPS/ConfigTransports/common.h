@@ -28,16 +28,13 @@ namespace OpenDDS
 
 class Options;
 
-//bool wait_publication_matched_status(const Options& opts, const DDS::DataReader_var& e);
-
-bool wait_publication_matched_status(const Options& opts, const DDS::Entity_ptr e);
+bool wait_subscription_matched_status(const Options& opts, const DDS::DataReader_ptr r);
+bool wait_publication_matched_status(const Options& opts, const DDS::DataWriter_ptr e);
 
 bool assert_publication_matched(const Options& opts, const DDS::DataWriterListener_var& dwl);
 
 bool assert_subscription_matched(const Options& opts, const DDS::DataReaderListener_var& drl);
 
-bool assert_supports_all(const Options& opts, const DDS::Entity_ptr e);
+bool assert_supported(const Options& opts, const DDS::Entity_ptr e);
 
-bool assert_supports_all(const Options& opts, const OpenDDS::DCPS::TransportClient* tc, const std::vector<std::string>& transporti);
-
-bool assert_negotiated(const Options& options, const DDS::Entity_ptr e);
+bool assert_negotiated(const Options& opts, const DDS::Entity_ptr e);

@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef READER_H
-#define READER_H
+#ifndef PULLER_H
+#define PULLER_H
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
@@ -31,6 +31,8 @@ public:
          const DDS::DataReaderListener_var& listener);
 
   virtual ~Puller();
+  int pull(const ACE_Time_Value& duration);
+
 
   const DDS::DomainParticipantFactory_var dpf;
   const DDS::DomainParticipant_var dp;

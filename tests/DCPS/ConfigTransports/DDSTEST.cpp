@@ -31,28 +31,42 @@ bool
                        0);
     }
 
+  std::string supported;
+  for (std::vector<OpenDDS::DCPS::TransportImpl_rch>::const_iterator it = tc->impls_.begin(),
+          end = tc->impls_.end();
+          it != end;)
+    {
+      supported += (*it)->config()->name();
+      if (++it != end)
+        {
+          supported += ", ";
+        }
+    }
+
+  ACE_DEBUG((LM_INFO,
+             ACE_TEXT("(%P|%t) Check if '%C' is among supported [%s]?\n"),
+             name.c_str(),
+             supported.c_str()));
+
   for (std::vector<OpenDDS::DCPS::TransportImpl_rch>::const_iterator it = tc->impls_.begin();
           it != tc->impls_.end(); ++it)
     {
 
-      ACE_DEBUG((LM_INFO,
-                 ACE_TEXT("(%P|%t) Check if supported '%C' matches '%C'?\n"),
-                 (*it)->config()->name().c_str(),
-                 name.c_str()));
-
       if ((*it)->config()->name() == name)
         {
-          ACE_ERROR_RETURN((LM_INFO,
-                            ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),
-                            name.c_str()),
-                           true);
+//          ACE_ERROR_RETURN((LM_DEBUG,
+//                            ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),
+//                            name.c_str()),
+//                           true);
+          return true;
         }
     }
 
-  ACE_ERROR_RETURN((LM_INFO,
-                    ACE_TEXT("(%P|%t) No. Transport '%C' is not supported.\n"),
-                    name.c_str()),
-                   false);
+//  ACE_ERROR_RETURN((LM_DEBUG,
+//                    ACE_TEXT("(%P|%t) No. Transport '%C' is not supported.\n"),
+//                    name.c_str()),
+//                   false);
+  return false;
 }
 
 bool
@@ -73,6 +87,30 @@ bool
                        false);
     }
 
+  if (tc->links_.map().size() == 0)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) No negotiated protocols?!.\n")),
+                       false);
+    }
+
+
+  std::string negotiated;
+  for (OpenDDS::DCPS::DataLinkSet::MapType::iterator iter = tc->links_.map().begin(),
+          end = tc->links_.map().end(); iter != end;)
+    {
+      const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
+      negotiated += datalink->impl()->config()->name();
+      if (++iter != end)
+        {
+          negotiated += ", ";
+        }
+    }
+
+  ACE_DEBUG((LM_INFO,
+             ACE_TEXT("(%P|%t) Check if '%C' is among negotiated [%s]?\n"),
+             name.c_str(),
+             negotiated.c_str()));
 
   for (OpenDDS::DCPS::DataLinkSet::MapType::iterator iter = tc->links_.map().begin(),
           end = tc->links_.map().end(); iter != end; ++iter)
@@ -80,24 +118,20 @@ bool
 
       const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
 
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Check if negotiated '%C' matches '%C'?\n"),
-                 datalink->impl()->config()->name().c_str(),
-                 name.c_str()));
-
       if (datalink->impl()->config()->name() == name)
         {
-          ACE_ERROR_RETURN((LM_INFO,
-                            ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
-                            name.c_str()),
-                           true);
+//          ACE_ERROR_RETURN((LM_DEBUG,
+//                            ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
+//                            name.c_str()),
+//                           true);
+          return true;
         }
     }
 
-  ACE_ERROR_RETURN((LM_INFO,
-                    ACE_TEXT("(%P|%t) No. Transport '%C' was not negotiated.\n"),
-                    name.c_str()),
-                   false);
+//  ACE_ERROR_RETURN((LM_DEBUG,
+//                    ACE_TEXT("(%P|%t) No. Transport '%C' was not negotiated.\n"),
+//                    name.c_str()),
+//                   false);
+  return false;
 }
 

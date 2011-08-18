@@ -13,16 +13,15 @@ use PerlDDS::Run_Test;
 use Getopt::Std;
 use Data::Dumper;
 
-use vars qw/ $opt_d /;
-getopts('d:');
-my $debug = 1 if $opt_d;
-my $debugger = 'gdb';
-
+use vars qw/ $opt_d, $opt_t /;
+getopts('d:t:');
+my $debug = $opt_d;
 
 PerlDDS::add_lib_path('../FooType4');
 PerlDDS::add_lib_path('../common');
 
-my $pub_time = 5;
+# An hour should be enough of a timeout for debugging ...
+my $pub_time = $opt_t || ($debug ? 3600 : 5);
 my $pub_addr = "localhost:";
 my $port=29804;
 
@@ -138,13 +137,12 @@ my @explicit_configuration_and_negotiation = (
     configuration => Udp_Only,
     protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
     compatibility => true,
-    negotiated => [_OPENDDS_0300_UDP],
     # The hash referred-to by qos ...
     publisher     => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
-    subscriber    => {%$qos, negotiated => [_OPENDDS_0500_TCP],},
+    subscriber    => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
   },
 
-  {
+    {
     entity        => participant,
     collocation   => none,
     configuration => Udp_Only,
@@ -308,20 +306,43 @@ my @explicit_configuration_collocated = (
 
 my @test_configuration = (
 
-  {
-    entity        => none,
+
+{
+    entity        => participant,
     collocation   => none,
     configuration => Udp_Only,
-    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
-#    negotiated => [_OPENDDS_0300_UDP],
+    protocol      => [udp1],
     compatibility => true,
     publisher     => $qos,
     subscriber    => $qos
   },
+
+{
+    entity        => participant,
+    collocation   => none,
+    configuration => Tcp_Only,
+    protocol      => [mytcp1],
+    compatibility => true,
+    negotiated => [mytcp1],
+    publisher     => $qos,
+    subscriber    => $qos
+  },
+
+ {
+    entity        => none,
+    collocation   => none,
+    configuration => Udp_Only,
+    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
+    compatibility => true,
+    # The hash referred-to by qos ...
+    publisher     => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
+    subscriber     => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
+#    subscriber    => {%$qos, negotiated => [_OPENDDS_0500_TCP],},
+  },
+
 );
 
 @scenario = (
-
   @explicit_configuration_collocated,
   @without_configuration_file,
   @configuration_file_unused,
@@ -341,7 +362,11 @@ sub parse($$$) {
   my $pub_autoenable = $$s{autoenable} ? " -n " . $$s{autoenable} : "" ;
 
   my $pub_protocol = $$s{$pubsub}{protocol} || $$s{protocol};
+  my $pub_protocol_args = " -t " . join (' -t ', @$pub_protocol) if $pub_protocol;
+
   my $pub_negotiated = $$s{$pubsub}{negotiated} || $$s{negotiated};
+  my $pub_negotiated_args = " -f " . join (' -f ', @$pub_negotiated) if $pub_negotiated;
+
   my $pub_entity = $$s{$pubsub}{entity} || $$s{entity};
   my $pub_collocation = $$s{$pubsub}{collocation} || $$s{collocation};
   my $pub_configuration = $$s{$pubsub}{configuration} || $$s{configuration};
@@ -363,8 +388,8 @@ sub parse($$$) {
          . $pub_autoenable
          . " -a " . $pub_collocation
          . " -s " . $pub_configuration
-         . " -t " . join (' -t ', @$pub_protocol)
-         . " -f " . join (' -f ', @$pub_negotiated)
+         . $pub_protocol_args
+         . $pub_negotiated_args
          . " -d " . $pub_durability_kind
          . " -k " . $pub_liveliness_kind
          . " -r " . $pub_reliability_kind
@@ -420,28 +445,28 @@ sub run($$$$) {
 
   print $Subscriber->CommandLine() . "\n";
 
+  my $sublife = ($sub_time + 30);
   my $SubscriberResult = $Subscriber->Spawn();
-  print "Subscriber PID: " . $Subscriber->{PROCESS} . "\n" if $Subscriber->{PROCESS};
+  print "Subscriber PID: " . $Subscriber->{PROCESS} . ". Killing in " . $sublife . " seconds ...\n" if $Subscriber->{PROCESS};
 
   if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
   }
 
-  sleep 3;
-
   print $Publisher->CommandLine() . "\n";
 
-  my $PublisherResult = $Publisher->SpawnWaitKill ($pub_time + 20);
-  print "Publisher PID: " . $Publisher->{PROCESS} . "\n" if $Publisher->{PROCESS};
+  my $publife = ($pub_time + 30);
+  my $PublisherResult = $Publisher->Spawn();
+  print "Publisher PID: " . $Publisher->{PROCESS} . ". Killing in " . $publife . " seconds ...\n" if $Publisher->{PROCESS};
 
+  $PublisherResult = $Publisher->WaitKill ($publife);
   if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
   }
 
-  $SubscriberResult = $Subscriber->WaitKill($sub_time);
-
+  $SubscriberResult = $Subscriber->WaitKill($sublife);
   if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
@@ -454,11 +479,11 @@ sub command($$$$) {
 
   my ($pub_process, $pub_parameters, $pub_time, $debug) = @_;
 
-  if ($debug != 0 and $debugger == 'nemiver') {
+  if ($debug eq 'nemiver') {
     return ('/usr/bin/nemiver', $pub_process . ' ' . $pub_parameters);
   }
 
-  if ($debug != 0 and $debugger == 'gdb') {
+  if ($debug eq 'gdb') {
     my $gdbrc = "/tmp/$pub_process.gdb";
     open(FF1, ">$gdbrc");
     print FF1 <<EOF;
@@ -483,14 +508,8 @@ my @builtinscases = $debug ? (undef) : (undef, true);
 
 for my $hasbuiltins (@builtinscases) {
 
-    my $DCPSREPO = initialize($hasbuiltins);
-
     for my $i (@scenario) {
-
-        if ($debug) {
-          # You've got an hour ...
-          $pub_time = $sub_time = 3600;
-        }
+        my $DCPSREPO = initialize($hasbuiltins);
 
         my $status = 0;
 
@@ -516,11 +535,11 @@ for my $hasbuiltins (@builtinscases) {
             print "Test FAILED " . Dumper(\%$i) . "\n";
         }
 
+        if (0 != finalize($DCPSREPO)) {
+          #$failed++;
+        }
     }
 
-    if (0 != finalize($DCPSREPO)) {
-      $failed++;
-    }
 }
 
 

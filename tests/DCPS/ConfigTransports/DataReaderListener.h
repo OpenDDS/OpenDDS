@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+class Options;
 
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
@@ -18,7 +19,7 @@ class DataReaderListenerImpl
 {
 public:
   //Constructor
-  DataReaderListenerImpl (void);
+  DataReaderListenerImpl (const Options&);
 
   //Destructor
   virtual ~DataReaderListenerImpl (void);
@@ -124,6 +125,7 @@ public:
 
 private:
   bool subscription_matched_;
+  const Options& configopt_;
   ::DDS::SampleInfo last_si_ ;
 };
 

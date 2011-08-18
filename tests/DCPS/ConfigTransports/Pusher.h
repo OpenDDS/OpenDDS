@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef WRITER_H
-#define WRITER_H
+#ifndef PUSHER_H
+#define PUSHER_H
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
