@@ -5,13 +5,17 @@
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include <ace/streams.h>
 
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
-    publication_handle_ (::DDS::HANDLE_NIL)
+    publication_handle_ (::DDS::HANDLE_NIL),
+    post_restart_publication_handle_ (::DDS::HANDLE_NIL),
+    builtin_read_error_(false),
+    builtin_(::DDS::HANDLE_NIL)
 {
 }
 
@@ -41,9 +45,12 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       if (si.valid_data)
       {
         if (si.publication_handle == ::DDS::HANDLE_NIL
-          || si.publication_handle != this->publication_handle_)
+          || (si.publication_handle != this->publication_handle_
+            && si.publication_handle != this->post_restart_publication_handle_))
         {
           cerr << "DataReaderListener: ERROR: publication_handle validate failed." << endl;
+cerr << "DataReaderListener: ERROR: publication_handle_=" << this->publication_handle_
+<< " si.publication_handle=" << si.publication_handle << endl;
           exit(1);
         }
 
@@ -103,9 +110,43 @@ void DataReaderListenerImpl::on_subscription_matched (
     const DDS::SubscriptionMatchedStatus & status)
   throw (CORBA::SystemException)
 {
-  this->publication_handle_ = status.last_publication_handle;
-  cerr << "DataReaderListenerImpl::on_subscription_matched handle="
-    << publication_handle_ << endl;
+  if (this->publication_handle_ == ::DDS::HANDLE_NIL) {
+    this->publication_handle_ = status.last_publication_handle;
+    cerr << "DataReaderListenerImpl::on_subscription_matched handle="
+      << publication_handle_ << endl;
+  }
+  else {
+    this->post_restart_publication_handle_ = status.last_publication_handle;
+    cerr << "DataReaderListenerImpl::on_subscription_matched handle="
+      << post_restart_publication_handle_ << endl;
+  }
+
+  DDS::PublicationBuiltinTopicDataDataReader_var rdr =
+    DDS::PublicationBuiltinTopicDataDataReader::_narrow(builtin_);
+  DDS::PublicationBuiltinTopicDataSeq data;
+  DDS::SampleInfoSeq infos;
+  DDS::ReturnCode_t ret = rdr->read_instance(data, infos, 1,
+                                    status.last_publication_handle,
+                                    DDS::NOT_READ_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ALIVE_INSTANCE_STATE);
+
+  switch (ret)
+  {
+  case ::DDS::RETCODE_OK:
+    cerr << "read bit instance returned ok" << endl;
+    break;
+  case ::DDS::RETCODE_NO_DATA:
+    cerr << "read bit instance returned no data" << endl;
+    break;
+  case ::DDS::RETCODE_BAD_PARAMETER:
+    cerr << "ERROR read bit instance returned bad parameter" << endl;
+    builtin_read_error_ = true;
+    break;
+  default:
+    cerr << "read bit instance returned " << ret << endl;
+    builtin_read_error_ = true;
+  };
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
@@ -153,4 +194,10 @@ void DataReaderListenerImpl::on_connection_deleted (
   throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_connection_deleted" << endl;
+}
+
+void DataReaderListenerImpl::set_builtin_datareader (
+  DDS::DataReader_ptr builtin)
+{
+  builtin_ = DDS::DataReader::_duplicate(builtin);
 }

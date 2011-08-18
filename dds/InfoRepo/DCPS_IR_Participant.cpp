@@ -193,6 +193,10 @@ int DCPS_IR_Participant::add_publication(DCPS_IR_Publication* pub)
     this->publications_.insert(
       where, DCPS_IR_Publication_Map::value_type(pubId, pub));
 
+    if (isBitPublisher_) {
+      pub->set_bit_status(isBitPublisher_);
+    }
+
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
       OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
@@ -313,6 +317,10 @@ int DCPS_IR_Participant::add_subscription(DCPS_IR_Subscription* sub)
     this->subscriptions_.insert(
       where, DCPS_IR_Subscription_Map::value_type(subId, sub));
 
+    if (isBitPublisher_) {
+      sub->set_bit_status(isBitPublisher_);
+    }
+
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
       OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
@@ -432,6 +440,10 @@ int DCPS_IR_Participant::add_topic_reference(DCPS_IR_Topic* topic)
   if (where == this->topicRefs_.end()) {
     this->topicRefs_.insert(
       where, DCPS_IR_Topic_Map::value_type(topicId, topic));
+
+    if (isBitPublisher_) {
+      topic->set_bit_status(isBitPublisher_);
+    }
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
