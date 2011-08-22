@@ -3,15 +3,15 @@ Fri Aug 19 16:10:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
         * NEWS:
         * README:
 
-	  Updated to set up for next release (3.1?)
+          Updated to set up for next release (3.1?)
 
         * docs/history/ChangeLog-3.0:
 
-	  Archived old changelog.
+          Archived old changelog.
 
-	* tools/modeling/features/org.opendds.modeling.site/README.txt:
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
 
-	  Noted new script for updating Eclipse plugin version numbers.
+          Noted new script for updating Eclipse plugin version numbers.
 
 Local Variables:
 mode: change-log
