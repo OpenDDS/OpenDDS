@@ -235,8 +235,8 @@ namespace OpenDDS { namespace Model {
           Topics::Values       topic(DataWriters::Values which);
           Topics::Values       topic(DataReaders::Values which);
           ContentFilteredTopics::Values contentFilteredTopic(Topics::Values which);
-          char*                filterExpression(ContentFilteredTopics::Values which);
-          char*                topicExpression(MultiTopics::Values which);
+          const char*          filterExpression(ContentFilteredTopics::Values which);
+          const char*          topicExpression(MultiTopics::Values which);
           MultiTopics::Values  multiTopic(Topics::Values which);
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
@@ -318,12 +318,12 @@ namespace OpenDDS { namespace Model {
 <xsl:if test="$cf-topics">
 <xsl:text>
           Topics::Values relatedTopics_    [ContentFilteredTopics::LAST_INDEX];
-          char*          filterExpressions_[ContentFilteredTopics::LAST_INDEX];
+          const char* filterExpressions_[ContentFilteredTopics::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$multitopics">
 <xsl:text>
-          char*          topicExpressions_[MultiTopics::LAST_INDEX];
+          const char* topicExpressions_[MultiTopics::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:text>
@@ -856,7 +856,7 @@ inline
 <xsl:text>}
 
 inline
-char* 
+const char* 
 </xsl:text>
   <xsl:value-of select="$data-qname"/>
   <xsl:text>::filterExpression(ContentFilteredTopics::Values which)
@@ -878,7 +878,7 @@ char*
 <xsl:text>}
 
 inline
-char* 
+const char* 
 </xsl:text>
   <xsl:value-of select="$data-qname"/>
   <xsl:text>::topicExpression(MultiTopics::Values which)

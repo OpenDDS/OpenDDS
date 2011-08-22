@@ -132,39 +132,15 @@ Elements::Data::Data()
 
 inline
 Elements::Data::~Data()
-{ </xsl:text>
+{</xsl:text>
 <xsl:if test="$topics">
   <xsl:text>
   for(int index = 0;
       index &lt; Elements::Types::LAST_INDEX;
       ++index) {
     if(this->typeNames_[index]) {
-      free(this->typeNames_[index]); // Created by CORBA::string_dup()
+      CORBA::string_free(this->typeNames_[index]); // Created by CORBA::string_dup()
       this->typeNames_[index] = 0;
-    }
-  }
-</xsl:text>
-</xsl:if>
-<xsl:if test="$cf-topics">
-  <xsl:text>
-  for(int index = 0;
-      index &lt; Elements::ContentFilteredTopics::LAST_INDEX;
-      ++index) {
-    if( this->filterExpressions_[index]) {
-      free(this->filterExpressions_[index]); // Created by CORBA::string_dup()
-      this->filterExpressions_[ index] = 0;
-    }
-  }
-</xsl:text>
-</xsl:if>
-<xsl:if test="$multitopics">
-  <xsl:text>
-  for(int index = 0;
-      index &lt; Elements::MultiTopics::LAST_INDEX;
-      ++index) {
-    if( this->topicExpressions_[index]) {
-      free(this->topicExpressions_[index]); // Created by CORBA::string_dup()
-      this->topicExpressions_[ index] = 0;
     }
   }
 </xsl:text>
@@ -268,9 +244,8 @@ Elements::Data::loadTopics()
     </xsl:variable>
     <xsl:value-of select="concat('  this->filterExpressions_[',
                                  'ContentFilteredTopics::',
-                                 $enum, '] = ', 
-                                 'CORBA::string_dup(&quot;',
-                                 @filter_expression, '&quot;);', $newline)"/>
+                                 $enum, '] = &quot;',
+                                 @filter_expression, '&quot;;', $newline)"/>
   </xsl:for-each>
   <xsl:for-each select="$multitopics">
     <xsl:variable name="enum">
@@ -278,9 +253,8 @@ Elements::Data::loadTopics()
     </xsl:variable>
     <xsl:value-of select="concat('  this->topicExpressions_[',
                                  'MultiTopics::',
-                                 $enum, '] = ', 
-                                 'CORBA::string_dup(&quot;',
-                                 @subscription_expression, '&quot;);', $newline)"/>
+                                 $enum, '] = &quot;',
+                                 @subscription_expression, '&quot;;', $newline)"/>
   </xsl:for-each>
   <xsl:text>}
 
@@ -988,7 +962,7 @@ Elements::Data::copySubscriptionQos(
         }
 
         if( this->typeNames_[ type]) {
-          free( this->typeNames_[ type]); // Was created by CORBA::string_dup()
+          CORBA::string_free( this->typeNames_[ type]); // Was created by CORBA::string_dup()
         }
         this->typeNames_[ type] = typeSupport->get_type_name();
       }

@@ -1,3 +1,15 @@
+Mon Aug 22 19:01:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          make char* const char* to reflect xsl changes.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          remove CORBA::string_dup of literals, and keep them in const char* 
+          arrays.
+
 Fri Aug 19 16:10:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
