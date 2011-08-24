@@ -1,3 +1,10 @@
+Wed Aug 24 16:20:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/KeyTest:
+
+          Re-added from trunk.  Merging this directory didn't work so it was
+          removed in the last commit.
+
 Wed Aug 24 16:01:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4455 through r4906.

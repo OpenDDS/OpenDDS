@@ -1,0 +1,95 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include "tao/StringSeq.pidl"
+#include "tao/FloatSeq.pidl"
+
+// Struct with all simple bounded fields
+module Bound {
+
+  // Bounded sequence of bounded type
+#pragma DCPS_DATA_TYPE "Bound::BoundedSequenceOfBoundedMessage"
+
+  typedef sequence<float, 20> BoundedFloatSeq;
+
+  struct BoundedSequenceOfBoundedMessage {
+    BoundedFloatSeq float_seq;
+  };
+
+  // Unbounded sequence of bounded type
+#pragma DCPS_DATA_TYPE "Bound::UnboundedSequenceOfBoundedMessage"
+
+  typedef sequence<float> UnboundedFloatSeq;
+
+  struct UnboundedSequenceOfBoundedMessage {
+    UnboundedFloatSeq float_seq;
+  };
+
+  // Bounded sequence of unbounded type
+#pragma DCPS_DATA_TYPE "Bound::BoundedSequenceOfUnboundedMessage"
+
+  typedef sequence<string, 20> BoundedStringSeq;
+
+  struct BoundedSequenceOfUnboundedMessage {
+    BoundedStringSeq string_seq;
+  };
+
+  // Unbounded sequence of unbounded type
+#pragma DCPS_DATA_TYPE "Bound::UnboundedSequenceOfUnboundedMessage"
+
+  typedef sequence<string> UnboundedStringSeq;
+
+  struct UnboundedSequenceOfUnboundedMessage {
+    UnboundedStringSeq string_seq;
+  };
+
+  // Union of bounded types
+#pragma DCPS_DATA_TYPE "Bound::BoundedUnionMessage"
+
+  union BoundedUnion switch (short) {
+  case 1: float float_field;
+  case 2: long long_field;
+  default: short short_field;
+  };
+
+  struct BoundedUnionMessage {
+    BoundedUnion union_field;
+  };
+
+  // Union of unbounded types
+#pragma DCPS_DATA_TYPE "Bound::UnboundedUnionMessage"
+
+  union UnboundedUnion switch (short) {
+  case 1: string string_field;
+  case 2: long long_field;
+  default: short short_field;
+  };
+
+  struct UnboundedUnionMessage {
+    UnboundedUnion union_field;
+  };
+
+  // Recursive type definition (unbounded)
+#pragma DCPS_DATA_TYPE "Bound::RecursiveMessage"
+
+  struct RecursiveMessage;
+
+  typedef sequence<RecursiveMessage, 1> SingleMessageSeq;
+
+  union NestedMessageUnion switch (short) {
+  case 1: SingleMessageSeq message;
+  case 2: long long_field;
+  default: short short_field;
+  };
+
+  struct RecursiveMessage {
+    NestedMessageUnion union_field;
+    float float_field;
+  };
+
+};
