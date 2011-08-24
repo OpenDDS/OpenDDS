@@ -1,3 +1,16 @@
+Wed Aug 24 21:59:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+
+          Fixed wstring serialization to always use a byte count and not
+          a character count.  wstring (and wchar) are still not CDR-compliant.
+
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+
+          Fixed ACE logging format characters and output a message for wchar.
+
 Wed Aug 24 18:59:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS:

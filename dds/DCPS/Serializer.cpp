@@ -168,8 +168,9 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
   //
   // Extract the string length.
   //
-  ACE_CDR::ULong length;
-  this->buffer_read(reinterpret_cast<char*>(&length), sizeof(ACE_CDR::ULong), this->swap_bytes());
+  ACE_CDR::ULong bytecount = 0;
+  this->buffer_read(reinterpret_cast<char*>(&bytecount),
+                    sizeof(ACE_CDR::ULong), this->swap_bytes());
 
   if (this->good_bit() == false) {
     return;
@@ -180,11 +181,13 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
   //       done here before the allocation even though it will be
   //       checked during the actual read as well.
   //
-  if (length * sizeof (ACE_CDR::WChar) <= this->current_->total_length()) {
+  if (bytecount <= this->current_->total_length()) {
+
+    const ACE_CDR::ULong length = bytecount / sizeof(ACE_CDR::WChar);
     //
     // Allocate the destination.
     //
-    ACE_NEW_NORETURN(dest, ACE_CDR::WChar[ length+1]);
+    ACE_NEW_NORETURN(dest, ACE_CDR::WChar[length+1]);
 
     if (dest == 0) {
       this->good_bit_ = false;
@@ -200,7 +203,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
       //
       // Null terminate the string.
       //
-      dest[length] = '\x00';
+      dest[length] = L'\0';
 
     } else {
       delete [] dest;

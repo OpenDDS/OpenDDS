@@ -727,8 +727,9 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wstring x)
 
   if (x.val_ != 0) {
     stringlen = static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x.val_));
-    s << stringlen;
-    s.buffer_write(reinterpret_cast<char*>(x.val_), stringlen, false);
+    const ACE_CDR::ULong bytecount = stringlen * sizeof(ACE_CDR::WChar);
+    s << bytecount;
+    s.buffer_write(reinterpret_cast<char*>(x.val_), bytecount, false);
 
   } else {
     s << ACE_CDR::ULong(0);
