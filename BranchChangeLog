@@ -1,3 +1,9 @@
+Wed Aug 24 18:59:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS:
+
+          Copied the trunk version -- it didn't come over in the merge.
+
 Wed Aug 24 18:36:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Serializer.h:
