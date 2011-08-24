@@ -75,8 +75,14 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
   //
   // Move to the next chained block if this one is spent.
   //
-  (this->current_->length() == 0) ? this->current_ = this->current_->cont() : 0;
+  if (this->current_->length() == 0) {
 
+    if (this->alignment_ == ALIGN_NONE) {
+      this->current_ = this->current_->cont();
+    } else {
+      this->align_cont_r();
+    }
+  }
   //
   // Return the current location in the read.
   //
@@ -154,7 +160,14 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
   //
   // Move to the next chained block if this one is spent.
   //
-  (this->current_->space() == 0) ? this->current_ = this->current_->cont() : 0;
+  if (this->current_->space() == 0) {
+
+    if (this->alignment_ == ALIGN_NONE) {
+      this->current_ = this->current_->cont();
+    } else {
+      this->align_cont_w();
+    }
+  }
 
   //
   // Return the current location in the write.
@@ -172,14 +185,6 @@ Serializer::buffer_write(const char* src, size_t size, bool swap)
   }
 }
 
-ACE_INLINE ACE_Message_Block*
-Serializer::add_chain(ACE_Message_Block* chain)
-{
-  ACE_Message_Block* previous = this->start_;
-  this->current_ = this->start_ = chain;
-  return previous;
-}
-
 ACE_INLINE void
 Serializer::swap_bytes(bool do_swap)
 {
@@ -190,6 +195,18 @@ ACE_INLINE bool
 Serializer::swap_bytes() const
 {
   return this->swap_bytes_;
+}
+
+ACE_INLINE void
+Serializer::alignment(Serializer::Alignment align)
+{
+  this->alignment_ = align;
+}
+
+ACE_INLINE Serializer::Alignment
+Serializer::alignment() const
+{
+  return this->alignment_;
 }
 
 ACE_INLINE bool
@@ -254,395 +271,278 @@ Serializer::write_array(const char* x, size_t size, ACE_CDR::ULong length)
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_boolean_array(ACE_CDR::Boolean* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_boolean_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Boolean), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_char_array(ACE_CDR::Char* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_char_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Char), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_wchar_array(ACE_CDR::WChar* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_wchar_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::WChar), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_octet_array(ACE_CDR::Octet* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_octet_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Octet), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_short_array(ACE_CDR::Short* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_short_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Short));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Short), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_ushort_array(ACE_CDR::UShort* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_ushort_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::UShort));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::UShort), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_long_array(ACE_CDR::Long* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_long_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Long));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Long), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_ulong_array(ACE_CDR::ULong* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_ulong_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::ULong), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_longlong_array(ACE_CDR::LongLong* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_longlong_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::LongLong));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::LongLong), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_ulonglong_array(ACE_CDR::ULongLong* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_ulonglong_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULongLong));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::ULongLong), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_float_array(ACE_CDR::Float* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_float_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Float));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Float), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_double_array(ACE_CDR::Double* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_double_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Double));
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Double), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::read_longdouble_array(ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_InputCDR input(current_);
-  ACE_CDR::Boolean status = input.read_longdouble_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(8);
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::LongDouble), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_boolean_array(const ACE_CDR::Boolean* x,
                                 ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_boolean_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Boolean), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_char_array(const ACE_CDR::Char* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_char_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Char), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_wchar_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_wchar_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::WChar), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_octet_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_octet_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Octet), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_short_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_short_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Short));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Short), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_ushort_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_ushort_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::UShort));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::UShort), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_long_array(const ACE_CDR::Long* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_long_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Long));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Long), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_ulong_array(const ACE_CDR::ULong* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_ulong_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::ULong));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::ULong), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_longlong_array(const ACE_CDR::LongLong* x,
                                  ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_longlong_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::LongLong));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::LongLong), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_ulonglong_array(const ACE_CDR::ULongLong* x,
                                   ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_ulonglong_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::ULongLong));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::ULongLong), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_float_array(const ACE_CDR::Float* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_float_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Float));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Float), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_double_array(const ACE_CDR::Double* x, ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_double_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Double));
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Double), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
 }
 
 ACE_INLINE ACE_CDR::Boolean
 Serializer::write_longdouble_array(const ACE_CDR::LongDouble* x,
                                    ACE_CDR::ULong length)
 {
-#ifdef RTPS
-  ACE_OutputCDR output(current_);
-  ACE_CDR::Boolean status = output.write_longdouble_array(x, length);
-
-  this->good_bit_ = static_cast<bool>(status) ;
-  return status;
-#else
+  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(8);
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::LongDouble), length);
   return static_cast<ACE_CDR::Boolean>(this->good_bit());
-#endif
+}
+
+ACE_INLINE int
+Serializer::align_r(size_t al)
+{
+  size_t len =
+    (al - ptrdiff_t(this->current_->rd_ptr()) + this->align_rshift_) % al;
+  while (len) {
+    const size_t cur_len = this->current_->length();
+    if (cur_len <= len) {
+      len -= cur_len;
+      this->current_->rd_ptr(this->current_->wr_ptr());
+      this->align_cont_r();
+    } else {
+      this->current_->rd_ptr(len);
+      len = 0;
+    }
+  }
+  return 0;
+}
+
+ACE_INLINE int
+Serializer::align_w(size_t al)
+{
+  size_t len =
+    (al - ptrdiff_t(this->current_->wr_ptr()) + this->align_wshift_) % al;
+  while (len) {
+    const size_t cur_spc = this->current_->space();
+    if (cur_spc <= len) {
+      len -= cur_spc;
+      if (this->alignment_ == ALIGN_INITIALIZE) {
+        this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, cur_spc);
+      }
+      this->current_->wr_ptr(cur_spc);
+      this->align_cont_w();
+    } else {
+      if (this->alignment_ == ALIGN_INITIALIZE) {
+        this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, len);
+      }
+      this->current_->wr_ptr(len);
+      len = 0;
+    }
+  }
+  return 0;
+}
+
+
+ACE_INLINE void
+Serializer::align_cont_r()
+{
+  const size_t thisblock =
+    (ptrdiff_t(this->current_->rd_ptr()) - this->align_rshift_) % MAX_ALIGN;
+
+  this->current_ = this->current_->cont();
+
+  if (this->current_) {
+    this->align_rshift_ =
+      (ptrdiff_t(this->current_->rd_ptr()) - thisblock) % MAX_ALIGN;
+  }
+}
+
+ACE_INLINE void
+Serializer::align_cont_w()
+{
+  const size_t thisblock =
+    (ptrdiff_t(this->current_->wr_ptr()) - this->align_wshift_) % MAX_ALIGN;
+
+  this->current_ = this->current_->cont();
+
+  if (this->current_) {
+    this->align_wshift_ =
+      (ptrdiff_t(this->current_->wr_ptr()) - thisblock) % MAX_ALIGN;
+  }
 }
 
 //
@@ -663,6 +563,7 @@ operator<<(Serializer& s, ACE_CDR::Char x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::Short x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Short));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Short), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -670,6 +571,7 @@ operator<<(Serializer& s, ACE_CDR::Short x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::UShort x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::UShort));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::UShort), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -677,6 +579,7 @@ operator<<(Serializer& s, ACE_CDR::UShort x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::Long x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Long));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Long), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -684,6 +587,7 @@ operator<<(Serializer& s, ACE_CDR::Long x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::ULong x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::ULong));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULong), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -691,6 +595,7 @@ operator<<(Serializer& s, ACE_CDR::ULong x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::LongLong x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::LongLong));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongLong), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -698,6 +603,7 @@ operator<<(Serializer& s, ACE_CDR::LongLong x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::ULongLong x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::ULongLong));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULongLong), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -705,6 +611,7 @@ operator<<(Serializer& s, ACE_CDR::ULongLong x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::LongDouble x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(8);
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongDouble), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -712,6 +619,7 @@ operator<<(Serializer& s, ACE_CDR::LongDouble x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::Float x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Float));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Float), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -719,6 +627,7 @@ operator<<(Serializer& s, ACE_CDR::Float x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_CDR::Double x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Double));
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Double), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -727,13 +636,14 @@ ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, const ACE_CDR::Char* x)
 {
   if (x != 0) {
-    // Included the null termination in the serialized data.
-    ACE_CDR::ULong stringlen = static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x));
+    // Include the null termination in the serialized data.
+    const ACE_CDR::ULong stringlen =
+      1 + static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x));
     s << stringlen;
     s.buffer_write(reinterpret_cast<const char*>(x), stringlen, false);
 
   } else {
-    s << 0;
+    s << ACE_CDR::ULong(0);
   }
 
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
@@ -742,14 +652,17 @@ operator<<(Serializer& s, const ACE_CDR::Char* x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, const ACE_CDR::WChar* x)
 {
+  //FUTURE: wchar serialization doesn't match CDR, and doing so would require
+  // us to have a TCS-W, but DDS/RTPS has no notion of one (default UTF-16BE?)
   if (x != 0) {
-    // Included the null termination in the serialized data.
-    ACE_CDR::ULong stringlen = static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x));
-    s << stringlen;
-    s.buffer_write(reinterpret_cast<const char*>(x), stringlen * sizeof (ACE_CDR::WChar), false);
+    // Do not included the null terminatator in the serialized data.
+    const ACE_CDR::ULong bytecount =
+      static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x)) * sizeof(ACE_CDR::WChar);
+    s << bytecount;
+    s.buffer_write(reinterpret_cast<const char*>(x), bytecount, false);
 
   } else {
-    s << 0;
+    s << ACE_CDR::ULong(0);
   }
 
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
@@ -772,6 +685,8 @@ operator<<(Serializer& s, ACE_OutputCDR::from_char x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
 {
+  //FUTURE: wchar serialization doesn't match CDR, and doing so would require
+  // us to have a TCS-W, but DDS/RTPS has no notion of one (default UTF-16BE?)
   s.buffer_write(reinterpret_cast<char*>(&x.val_), sizeof(ACE_CDR::WChar), false);
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -786,16 +701,16 @@ operator<<(Serializer& s, ACE_OutputCDR::from_octet x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_OutputCDR::from_string x)
 {
-  // Included the null termination in the serialized data.
+  // Include the null termination in the serialized data.
   ACE_CDR::ULong stringlen = 0;
 
   if (x.val_ != 0) {
-    stringlen = static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x.val_));
+    stringlen = 1 + static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x.val_));
     s << stringlen;
     s.buffer_write(reinterpret_cast<char*>(x.val_), stringlen, false);
 
   } else {
-    s << 0;
+    s << ACE_CDR::ULong(0);
   }
 
   return static_cast<ACE_CDR::Boolean>(s.good_bit()) && ((x.bound_ == 0) || (stringlen <= x.bound_));
@@ -804,7 +719,10 @@ operator<<(Serializer& s, ACE_OutputCDR::from_string x)
 ACE_INLINE ACE_CDR::Boolean
 operator<<(Serializer& s, ACE_OutputCDR::from_wstring x)
 {
-  // Included the null termination in the serialized data.
+  //FUTURE: wchar serialization doesn't match CDR, and doing so would require
+  // us to have a TCS-W, but DDS/RTPS hvs no notion of one (default UTF-16BE?)
+
+  // Do not include the null termination in the serialized data.
   ACE_CDR::ULong stringlen = 0;
 
   if (x.val_ != 0) {
@@ -813,7 +731,7 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wstring x)
     s.buffer_write(reinterpret_cast<char*>(x.val_), stringlen, false);
 
   } else {
-    s << 0;
+    s << ACE_CDR::ULong(0);
   }
 
   return static_cast<ACE_CDR::Boolean>(s.good_bit()) && ((x.bound_ == 0) || (stringlen <= x.bound_));
@@ -837,6 +755,7 @@ operator>>(Serializer& s, ACE_CDR::Char& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::Short& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Short));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Short), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -844,6 +763,7 @@ operator>>(Serializer& s, ACE_CDR::Short& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::UShort& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::UShort));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::UShort), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -851,6 +771,7 @@ operator>>(Serializer& s, ACE_CDR::UShort& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::Long& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Long));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Long), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -858,6 +779,7 @@ operator>>(Serializer& s, ACE_CDR::Long& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::ULong& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::ULong));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULong), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -865,6 +787,7 @@ operator>>(Serializer& s, ACE_CDR::ULong& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::LongLong& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::LongLong));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongLong), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -872,6 +795,7 @@ operator>>(Serializer& s, ACE_CDR::LongLong& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::ULongLong& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::ULongLong));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULongLong), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -879,6 +803,7 @@ operator>>(Serializer& s, ACE_CDR::ULongLong& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::LongDouble& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(8);
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongDouble), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -886,6 +811,7 @@ operator>>(Serializer& s, ACE_CDR::LongDouble& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::Float& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Float));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Float), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }
@@ -893,6 +819,7 @@ operator>>(Serializer& s, ACE_CDR::Float& x)
 ACE_INLINE ACE_CDR::Boolean
 operator>>(Serializer& s, ACE_CDR::Double& x)
 {
+  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Double));
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Double), s.swap_bytes());
   return static_cast<ACE_CDR::Boolean>(s.good_bit());
 }

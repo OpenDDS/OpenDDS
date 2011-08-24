@@ -4,7 +4,7 @@
 #include <map>
 #include "tao/CDR.h"
 
-// this test tests the -Gdcps generated code for type XyZ::Foo from idl_test1_lib.
+// this test tests the opendds_idl generated code for type XyZ::Foo from idl_test1_lib.
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   int failed = false;
@@ -15,9 +15,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   {
   Xyz::StructAUnion sau;
   sau.sau_f1._d(Xyz::redx);
-  sau.sau_f1.rsv((const char*) "joe");
-  // size = union descr/4 + string length/4 + string contents/3
-  if (OpenDDS::DCPS::gen_find_size(sau) != 4+4+3)
+  sau.sau_f1.rsv("joe");
+  // size = union descr/4 + string length/4 + string contents/4
+  if (OpenDDS::DCPS::gen_find_size(sau) != 4+4+4)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("StructAUnion find_size failed with = %d\n"),
@@ -28,13 +28,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   {
   Xyz::AStringSeq ass;
   ass.length(2); //4 for seq length
-  ass[0] = CORBA::string_dup ("four"); //4+4 strlen & string
-  ass[1] = CORBA::string_dup ("five5"); //4+5 strlen + string
+  ass[0] = "four"; //4+5 strlen + string
+  ass[1] = "five5"; //4+6 strlen + string
   size_t size_ass = OpenDDS::DCPS::gen_find_size(ass);
-  if (size_ass != 21)
+  if (size_ass != 23)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("AStringSeq find_size failed with = %d ; expecting 21\n"),
+        ACE_TEXT("AStringSeq find_size failed with = %d ; expecting 23\n"),
         size_ass));
     }
   }
@@ -109,14 +109,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       failed = true;
     }
 
-  // Reset the chain back to the beginning.
-  // This is needed when the buffer size = find_size(my_foo) because
-  // the the serialize method set current_ the next block in the chain
-  // which is nil; so deserializing will fail.
-  ss.add_chain(mb) ;
+  OpenDDS::DCPS::Serializer ss2(mb);
 
   Xyz::StructOfArrayOfArrayOfShorts2 aas2;
-  if (false == ss >> aas2)
+  if (false == ss2 >> aas2)
     {
       ACE_ERROR((LM_ERROR, "Deserializing StructOfArrayOfArrayOfShorts2 failed\n"));
       failed = true;
@@ -174,13 +170,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   my_foo.ushrtseq.length(2); //+4+2*2 >> 28
   my_foo.ushrtseq[0] = 7;
   my_foo.ushrtseq[1] = 11;
-  my_foo.theString = CORBA::string_dup ("four");
+  my_foo.theString = "four";
 
-  // seq lenghts theStruct +4+4 theStructSeq +4 theString +4 + structArray3*8 = 40
+  // seq length theStruct +4+4 theStructSeq +4 theString +4 + structArray3*8 = 40
   // theUnion defaults to short so +4+2 = 6
 
   const size_t expected_max_marshaled_size = 135;
-  const size_t expected_find_size = 28+40+6 + 4 /*string assigned */;
+  const size_t expected_find_size = 28+40+6 + 5 /*string assigned */;
   const CORBA::Boolean expected_bounded = false;
 
   Xyz::Foo foo2;
@@ -196,7 +192,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   foo2.ushrtseq.length(2);
   foo2.ushrtseq[0] = 7;
   foo2.ushrtseq[1] = 11;
-  foo2.theString = CORBA::string_dup ("four");
+  foo2.theString = "four";
 
   std::map<Xyz::Foo, Xyz::Foo*, Xyz::OpenDDSGenerated::Foo_KeyLessThan> foomap;
 
@@ -309,14 +305,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         mb->length(), ebuffer));
     }
 
-  // Reset the chain back to the beginning.
-  // This is needed when the buffer size = find_size(my_foo) because
-  // the the serialize method set current_ the next block in the chain
-  // which is nil; so deserializing will fail.
-  ss.add_chain(mb) ;
+  OpenDDS::DCPS::Serializer ss2(mb);
 
   Xyz::Foo ss_foo;
-  if (false == ss >> ss_foo)
+  if (false == ss2 >> ss_foo)
     {
       ACE_ERROR((LM_ERROR, "Deserializing failed\n"));
       failed = true;

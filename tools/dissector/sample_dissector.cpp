@@ -160,7 +160,7 @@ namespace OpenDDS
           }
         case String:
           {
-            len = 4 + *(reinterpret_cast< guint32 * >(data));
+            len = 5 + *(reinterpret_cast< guint32 * >(data));
             break;
           }
         case WString:
@@ -269,7 +269,7 @@ namespace OpenDDS
           {
             guint32 len = *(reinterpret_cast< guint32 * >(data));
             data += 4;
-            guint8 *last = data + len;
+            guint8 *last = data + len - 1 /*len included the trailing null*/;
             while (data != last)
               s << *(data++);
             break;

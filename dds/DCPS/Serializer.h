@@ -16,7 +16,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-class ACE_Message_Block ;
+class ACE_Message_Block;
 
 namespace OpenDDS {
 namespace DCPS {
@@ -32,6 +32,17 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export Serializer {
 public:
+
+  enum Alignment {
+    ALIGN_NONE,           // no alignment needed
+    ALIGN_INITIALIZE,     // align to CDR rules and zero-out padding
+    ALIGN_CDR             // align to CDR rules with uninitialized padding
+#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
+      = ALIGN_INITIALIZE  // if the above macro is set, always init padding
+#endif
+  };
+
+
   /**
    * Constructor with a message block chain.  This installs the
    * message block chain and sets the current block to the first in
@@ -46,24 +57,26 @@ public:
    * reponsibility of the owner of this object to determine whether
    * this should be performed or not.
    */
-  Serializer(ACE_Message_Block* chain = 0,
-             bool               swap_bytes = false);
+  explicit Serializer(ACE_Message_Block* chain,
+                      bool swap_bytes = false,
+                      Alignment align = ALIGN_NONE);
 
-  /// Destructor
   virtual ~Serializer();
-
-  /// Add the new chain as the contained chain, return any
-  /// previously held chain.
-  ACE_Message_Block* add_chain(ACE_Message_Block* chain);
 
   /// Establish byte swaping behavior.
   void swap_bytes(bool do_swap);
 
   /// Examine byte swaping behavior.
-  bool swap_bytes() const ;
+  bool swap_bytes() const;
+
+  /// Establish alignment behavior.
+  void alignment(Alignment align);
+
+  /// Examine alignment behavior.
+  Alignment alignment() const;
 
   /// Examine the state of the stream abstraction.
-  bool good_bit() const ;
+  bool good_bit() const;
 #ifndef RTPS
   void good_bit(bool b) { good_bit_ = b; }
 #endif
@@ -82,27 +95,27 @@ public:
   //@{ @name Read basic IDL types arrays
   ACE_CDR::Boolean read_boolean_array(ACE_CDR::Boolean* x,
                                       ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_char_array(ACE_CDR::Char *x,
+  ACE_CDR::Boolean read_char_array(ACE_CDR::Char* x,
                                    ACE_CDR::ULong length);
   ACE_CDR::Boolean read_wchar_array(ACE_CDR::WChar* x,
                                     ACE_CDR::ULong length);
   ACE_CDR::Boolean read_octet_array(ACE_CDR::Octet* x,
                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_short_array(ACE_CDR::Short *x,
+  ACE_CDR::Boolean read_short_array(ACE_CDR::Short* x,
                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_ushort_array(ACE_CDR::UShort *x,
+  ACE_CDR::Boolean read_ushort_array(ACE_CDR::UShort* x,
                                      ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_long_array(ACE_CDR::Long *x,
+  ACE_CDR::Boolean read_long_array(ACE_CDR::Long* x,
                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_ulong_array(ACE_CDR::ULong *x,
+  ACE_CDR::Boolean read_ulong_array(ACE_CDR::ULong* x,
                                     ACE_CDR::ULong length);
   ACE_CDR::Boolean read_longlong_array(ACE_CDR::LongLong* x,
                                        ACE_CDR::ULong length);
   ACE_CDR::Boolean read_ulonglong_array(ACE_CDR::ULongLong* x,
                                         ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_float_array(ACE_CDR::Float *x,
+  ACE_CDR::Boolean read_float_array(ACE_CDR::Float* x,
                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_double_array(ACE_CDR::Double *x,
+  ACE_CDR::Boolean read_double_array(ACE_CDR::Double* x,
                                      ACE_CDR::ULong length);
   ACE_CDR::Boolean read_longdouble_array(ACE_CDR::LongDouble* x,
                                          ACE_CDR::ULong length);
@@ -112,29 +125,29 @@ public:
   ///    at x + length.
   /// The length is *NOT* stored into the CDR stream.
   //@{ @name Array write operations
-  ACE_CDR::Boolean write_boolean_array(const ACE_CDR::Boolean *x,
+  ACE_CDR::Boolean write_boolean_array(const ACE_CDR::Boolean* x,
                                        ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_char_array(const ACE_CDR::Char *x,
+  ACE_CDR::Boolean write_char_array(const ACE_CDR::Char* x,
                                     ACE_CDR::ULong length);
   ACE_CDR::Boolean write_wchar_array(const ACE_CDR::WChar* x,
                                      ACE_CDR::ULong length);
   ACE_CDR::Boolean write_octet_array(const ACE_CDR::Octet* x,
                                      ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_short_array(const ACE_CDR::Short *x,
+  ACE_CDR::Boolean write_short_array(const ACE_CDR::Short* x,
                                      ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_ushort_array(const ACE_CDR::UShort *x,
+  ACE_CDR::Boolean write_ushort_array(const ACE_CDR::UShort* x,
                                       ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_long_array(const ACE_CDR::Long *x,
+  ACE_CDR::Boolean write_long_array(const ACE_CDR::Long* x,
                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_ulong_array(const ACE_CDR::ULong *x,
+  ACE_CDR::Boolean write_ulong_array(const ACE_CDR::ULong* x,
                                      ACE_CDR::ULong length);
   ACE_CDR::Boolean write_longlong_array(const ACE_CDR::LongLong* x,
                                         ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_ulonglong_array(const ACE_CDR::ULongLong *x,
+  ACE_CDR::Boolean write_ulonglong_array(const ACE_CDR::ULongLong* x,
                                          ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_float_array(const ACE_CDR::Float *x,
+  ACE_CDR::Boolean write_float_array(const ACE_CDR::Float* x,
                                      ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_double_array(const ACE_CDR::Double *x,
+  ACE_CDR::Boolean write_double_array(const ACE_CDR::Double* x,
                                       ACE_CDR::ULong length);
   ACE_CDR::Boolean write_longdouble_array(const ACE_CDR::LongDouble* x,
                                           ACE_CDR::ULong length);
@@ -161,13 +174,22 @@ public:
   ///       method.  If padding exists in the array, it will be
   ///       written when _not_ swapping, and will _not_ be written
   ///       when swapping, resulting in corrupted data.
-  void write_array(const char *x,
+  void write_array(const char* x,
                    size_t size,
                    ACE_CDR::ULong length);
  
 #ifdef RTPS 
   ACE_Message_Block* Current() { return current_ ; }
 #endif
+
+  /// Align for reading: moves current_->rd_ptr() past the alignment padding.
+  /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
+  int align_r(size_t alignment);
+
+  /// Align for writing: moves current_->wr_ptr() past the padding, possibly
+  /// zero-filling the pad bytes (based on the alignment_ setting).
+  /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
+  int align_w(size_t alignment);
 
 private:
   /// Efficient straight copy for quad words and shorter.  This is
@@ -184,18 +206,31 @@ private:
   /// Implementation of the actual write to the chain.
   size_t dowrite(const char* dest, size_t size, bool swap, size_t offset);
 
-  /// Start of message block chain.
-  ACE_Message_Block* start_ ;
+  void align_cont_r();
+  void align_cont_w();
 
   /// Currently active message block in chain.
-  ACE_Message_Block* current_ ;
+  ACE_Message_Block* current_;
 
   /// Indicates whether bytes will be swapped for this stream.
-  bool swap_bytes_ ;
+  bool swap_bytes_;
 
   /// Indicates the current state of the stream abstraction.
-  bool good_bit_ ;
+  bool good_bit_;
 
+  /// Current alignment mode, see Alignment enum above.
+  Alignment alignment_;
+
+  /// Number of bytes off of max alignment (8) that the current_ block's
+  /// rd_ptr() started at.
+  unsigned char align_rshift_;
+
+  /// Number of bytes off of max alignment (8) that the current_ block's
+  /// wr_ptr() started at.
+  unsigned char align_wshift_;
+
+  static const size_t MAX_ALIGN = 8;
+  static const char ALIGN_PAD[MAX_ALIGN];
 };
 
 template<typename T> struct KeyOnly {

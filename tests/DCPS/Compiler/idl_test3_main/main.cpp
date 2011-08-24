@@ -103,13 +103,9 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
         name, mb->length(), ebuffer));
     }
 
-  // Reset the chain back to the beginning.
-  // This is needed when the buffer size = find_size(my_foo) because
-  // the the serialize method set current_ the next block in the chain
-  // which is nil; so deserializing will fail.
-  ss.add_chain(mb) ;
+  OpenDDS::DCPS::Serializer ss2(mb);
 
-  if (false == ss >> out_foo)
+  if (false == ss2 >> out_foo)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%C: Deserializing failed\n"), name));
@@ -163,7 +159,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     val.f[4] = CORBA::string_dup("");
     Xyz::StructOfArrayOfString val_out;
     if (try_marshaling<Xyz::StructOfArrayOfString>(val, val_out,
-                            DONT_CHECK_MS, ARRAY_LEN*4+14, "Xyz::StructOfArrayOfString"))
+                            DONT_CHECK_MS, ARRAY_LEN*5+14, "Xyz::StructOfArrayOfString"))
       {
         for (CORBA::ULong ii =0; ii < ARRAY_LEN;ii++)
           {
@@ -325,7 +321,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     val.field[4] = CORBA::string_dup("");
     Xyz::StructOfSeqOfString val_out;
     if (try_marshaling<Xyz::StructOfSeqOfString>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*4+14, "Xyz::StructOfSeqOfString"))
+                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*5+14, "Xyz::StructOfSeqOfString"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
           {
@@ -495,10 +491,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     Xyz::StructAUnion val;
     val.sau_f1._d(Xyz::redx);
     val.sau_f1.rv(CORBA::string_dup("joe"));
-    // size = union descr/4 + string length/4 + string contents/3
+    // size = union descr/4 + string length/4 + string contents/4
     Xyz::StructAUnion val_out;
     if (try_marshaling<Xyz::StructAUnion>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+4+3, "Xyz::StructAUnion"))
+                            DONT_CHECK_MS, 4+4+4, "Xyz::StructAUnion"))
       {
          if (strcmp(val.sau_f1.rv (), val_out.sau_f1.rv ()))
            {
@@ -512,11 +508,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   { //=====================================================================
     Xyz::StructOfSeqOfString val;
     val.field.length(2); //4 for seq length
-    val.field[0] = CORBA::string_dup("four"); //4+4 strlen & string
-    val.field[1] = CORBA::string_dup("five5"); //4+5 strlen + string
+    val.field[0] = CORBA::string_dup("four"); //4+5 strlen + string
+    val.field[1] = CORBA::string_dup("five5"); //4+6 strlen + string
     Xyz::StructOfSeqOfString val_out;
     if (try_marshaling<Xyz::StructOfSeqOfString>(val, val_out,
-                            DONT_CHECK_MS, 21, "Xyz::StructOfSeqOfString"))
+                            DONT_CHECK_MS, 23, "Xyz::StructOfSeqOfString"))
       {
          if (strcmp(val.field[1], val_out.field[1]))
            {
@@ -559,7 +555,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   as.f2 = 3.14F;
   my_foo.theSeqOfUnion[1].gv(as);
 
-  // seq lenghts theStruct +4+4 theStructSeq +4 theString +4 + structArray3*8 = 40
+  // seq lengths theStruct +4+4 theStructSeq +4 theString +4 + structArray3*8 = 40
   // theUnion defaults to short so +4+2 = 6
 
   //const size_t expected_max_marshaled_size = 135;

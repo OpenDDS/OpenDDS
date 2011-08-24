@@ -213,7 +213,8 @@ namespace {
           be_global->impl_ <<
             "    length += max_marshaled_size_ulong() + "
             "(seq[i] ? ACE_OS::strlen(seq[i]) : 0)"
-            << ((elem_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar);\n" : ";\n");
+            << ((elem_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar);\n"
+                                     : " + 1;\n");
         } else if (elem_cls & CL_ARRAY) {
           be_global->impl_ <<
             "    " << cxx_elem << "_var tmp_var = " << cxx_elem
@@ -364,7 +365,7 @@ namespace {
               indent << "length += max_marshaled_size_ulong() + "
               "ACE_OS::strlen(arr" << nfl.index_ << ")"
               << ((elem_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar);\n"
-              : ";\n");
+                                       : " + 1;\n");
           } else if (elem_cls & CL_ARRAY) {
             be_global->impl_ <<
               indent << cxx_elem << "_var tmp_var = " << cxx_elem
@@ -637,6 +638,9 @@ namespace {
     case AST_Decl::NT_wstring: {
         AST_String* string_node = dynamic_cast<AST_String*>(type);
         size += string_node->width() * string_node->max_size()->ev ()->u.ulval;
+        if (type->node_type() == AST_Decl::NT_string) {
+          size += 1; // narrow string includes the null terminator
+        }
         break;
       }
     case AST_Decl::NT_struct: {
@@ -719,7 +723,7 @@ namespace {
       return "max_marshaled_size_ulong()";
     } else if (fld_cls & CL_STRING) {
       return "max_marshaled_size_ulong() + ACE_OS::strlen(" + qual + ")"
-        + ((fld_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar)": "");
+        + ((fld_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar)" : " + 1");
     } else if (fld_cls & CL_PRIMITIVE) {
       return "gen_max_marshaled_size(" + getWrapper(qual, type, WD_OUTPUT)
         + ')';

@@ -18,18 +18,19 @@
 namespace OpenDDS {
 namespace DCPS {
 
-// Default constructor
-Serializer::Serializer(
-  ACE_Message_Block* chain,
-  bool               swap_bytes)
-  : start_(chain)
-  , current_(chain)
+const char Serializer::ALIGN_PAD[] = {0};
+
+Serializer::Serializer(ACE_Message_Block* chain,
+                       bool swap_bytes, Alignment align)
+  : current_(chain)
   , swap_bytes_(swap_bytes)
   , good_bit_(true)
+  , alignment_(align)
+  , align_rshift_(chain ? ptrdiff_t(chain->rd_ptr()) % MAX_ALIGN : 0)
+  , align_wshift_(chain ? ptrdiff_t(chain->wr_ptr()) % MAX_ALIGN : 0)
 {
 }
 
-// Default destructor
 Serializer::~Serializer()
 {
 }
@@ -100,6 +101,7 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
 void
 Serializer::read_string(ACE_CDR::Char*& dest)
 {
+  this->alignment_ == ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
   //
   // Ensure no bad values leave the routine.
   //
@@ -157,6 +159,7 @@ Serializer::read_string(ACE_CDR::Char*& dest)
 void
 Serializer::read_string(ACE_CDR::WChar*& dest)
 {
+  this->alignment_ == ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
   //
   // Ensure no bad values leave the routine.
   //

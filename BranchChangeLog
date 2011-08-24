@@ -1,3 +1,44 @@
+Wed Aug 24 18:36:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+
+          - Strings (narrow only) are now CDR-compliant: they include the null
+            terminator byte even though there is no reason to have it.
+          - Alignment (CDR rules) can be enabled with an optional 3rd
+            constructor argument.
+          - Removed unused methods and data members.
+
+        * dds/idl/marshal_generator.cpp:
+
+          gen_max_marshaled_size() and gen_find_size() need to know about the
+          modified string serialization.
+          Note that these are not yet updated for alignment.
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Updated expected sizes now that strings are CDR-compliant.
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Test that the Serializer with alignment options enabled still
+          generates a byte stream that can be de-serialized correctly.
+          Still need to test that all CDR alignment rules were followed.
+
+        * tools/dissector/sample_dissector.cpp:
+
+          Updated to account for changed string serialization.  Needs testing.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+
+          Fixed an artifact of svn merge (duplicated lines).
+
+        * tests/DCPS/Serializer/.cvsignore:
+
+          Removed this file.
+
 Wed Aug 24 16:20:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/KeyTest:

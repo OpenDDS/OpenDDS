@@ -29,9 +29,6 @@ public:
 
 private:
   SequenceNumber last_received_;
-
-private:
-  SequenceNumber last_received_;
 };
 
 } // namespace DCPS
