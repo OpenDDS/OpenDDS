@@ -86,11 +86,20 @@ public:
     return num_reads_;
   }
 
+  void set_builtin_datareader (DDS::DataReader_ptr builtin);
+
+  bool builtin_read_errors () const {
+    return builtin_read_error_;
+  }
+
 private:
 
-  DDS::DataReader_var reader_;
-  long                  num_reads_;
+  DDS::DataReader_var     reader_;
+  long                    num_reads_;
   ::DDS::InstanceHandle_t publication_handle_;
+  ::DDS::InstanceHandle_t post_restart_publication_handle_;
+  bool                    builtin_read_error_;
+  DDS::DataReader_var     builtin_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

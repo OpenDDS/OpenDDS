@@ -1,3 +1,23 @@
+Wed Aug 24 22:29:27 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Added reassociation of built in topic datawriters and datareaders
+          for reincarnating InfoRepo with persistence.
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Changed test to detect missing bit connection after a persistent
+          restart of the InfoRepo.
+
 Mon Aug 22 19:01:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:
