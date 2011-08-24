@@ -51,13 +51,17 @@ public:
 
 
 
-  virtual void add_associations (
+  virtual void add_association (
       const ::OpenDDS::DCPS::RepoId& yourId,
-      const OpenDDS::DCPS::ReaderAssociationSeq & readers
+      const OpenDDS::DCPS::ReaderAssociation& reader,
+      bool active
     )
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+  virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/)
+    ACE_THROW_SPEC((CORBA::SystemException)) {}
 
   virtual void remove_associations (
       const OpenDDS::DCPS::ReaderIdSeq & readers,

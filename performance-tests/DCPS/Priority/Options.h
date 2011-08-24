@@ -37,7 +37,7 @@ namespace Test {
  *
  *   -t [ tcp | udp | mc ]
  *      Establish the transport implementation for data.  The values are:
- *        tcp - use the SimpleTcp transport
+ *        tcp - use the Tcp transport
  *        udp - use the udp transport
  *        mc  - use the multicast transport
  *
@@ -102,7 +102,7 @@ class Options  {
     /// Types of transport implementations supported.
     enum TransportType {
       TRANSPORT_NONE,     // Unsupported (NONE is a macro on VxWorks)
-      TCP,      // SimpleTcp
+      TCP,      // Tcp
       UDP,      // udp
       MC        // multicast
     };
@@ -133,8 +133,8 @@ class Options  {
     public:    TransportType  transportType() const;
 
     /// Transport Key value, translated from the type.
-    protected: unsigned int& transportKey();
-    public:    unsigned int  transportKey() const;
+    protected: std::string& transportKey();
+    public:    std::string  transportKey() const;
 
     /// Test topic name.
     protected: std::string& topicName();
@@ -175,7 +175,7 @@ class Options  {
     TransportType transportType_;
 
     /// Transport Key value.
-    unsigned int transportKey_;
+    std::string transportKey_;
 
     /// Topic name for test.
     std::string topicName_;

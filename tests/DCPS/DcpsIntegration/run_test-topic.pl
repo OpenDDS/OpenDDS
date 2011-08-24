@@ -14,19 +14,17 @@ use PerlDDS::Run_Test;
 $status = 0;
 
 $dcpsrepo_ior = "dcps_ir.ior";
-$bit_conf = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf ../../tcp.conf";
 
 unlink $dcpsrepo_ior;
 
 PerlDDS::add_lib_path('../FooType');
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                              "$bit_conf  -o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior ");
 
 
 $Topic = PerlDDS::create_process ("topic_test",
-                                 "$bit_conf  -DCPSInfoRepo file://$dcpsrepo_ior");
+                                  "-DCPSInfoRepo file://$dcpsrepo_ior");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

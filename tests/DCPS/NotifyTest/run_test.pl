@@ -12,22 +12,19 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
 $status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
 $pub_conf = "-DCPSConfigFile pub.ini";
 $sub_conf = "-DCPSConfigFile sub.ini";
-$pub_opts = "$opts $pub_conf -d -u";
-$sub_opts = "$opts $sub_conf -d -u";
+$pub_opts = "$pub_conf -d -u";
+$sub_opts = "$sub_conf -d -u";
 
 if ($ARGV[0] eq 'unregister') {
-    $pub_opts = "$opts $pub_conf -u";
-    $sub_opts = "$opts $sub_conf -u";
+    $pub_opts = "$pub_conf -u";
+    $sub_opts = "$sub_conf -u";
 }
 elsif ($ARGV[0] eq 'dispose') {
-    $pub_opts = "$opts $pub_conf -d";
-    $sub_opts = "$opts $sub_conf -d";
+    $pub_opts = "$pub_conf -d";
+    $sub_opts = "$sub_conf -d";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
@@ -39,7 +36,7 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_opt -o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 

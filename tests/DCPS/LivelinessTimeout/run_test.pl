@@ -22,13 +22,10 @@ $use_udp = 0;
 $sub_addr = "localhost:16701";
 $pub_addr = "localhost:";
 $port=29804;
-$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
-$svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $arg_idx = 0;
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 my $debug ;# = 10;
 my $repoDebug;
@@ -49,7 +46,7 @@ $pubTransportDebug  = $transportDebug if not $pubTransportDebug  and $transportD
 
 unlink $dcpsrepo_ior;
 
-my $repoArgs = "$repo_bit_conf ";
+my $repoArgs = "";
 $repoArgs .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoArgs .= "-DCPSTransportDebugLevel $repoTransportDebug " if $repoTransportDebug;
 $repoArgs .= "-ORBLogFile $debugFile "     if $repoDebug and $debugFile;
@@ -68,14 +65,14 @@ $sub_lease_time = $pub_lease_time * 2;
 # this is the threshold number of publishers we would expect to fail the liveliness tests with a 70% fudge factor
 $threshold_liveliness_lost = ($overlap_time / $sub_lease_time) * 0.6;
 
-my $subArgs = "$svc_conf ";
+my $subArgs = "";
 $subArgs .= "-DCPSDebugLevel $subDebug " if $subDebug;
 $subArgs .= "-DCPSTransportDebugLevel $subTransportDebug " if $subTransportDebug;
 $subArgs .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
 $subArgs .= "-s $sub_addr -t $threshold_liveliness_lost -l $sub_lease_time -x $sub_time ";
 $Subscriber = PerlDDS::create_process ("subscriber", $subArgs);
 
-$pub_parameters = "$svc_conf $common_parameters" ;
+$pub_parameters = "$common_parameters" ;
 
 for($i = 0; $i < $numPubs; ++$i)
 {
@@ -89,7 +86,7 @@ for($i = 0; $i < $numPubs; ++$i)
     $liveliness_factor = "-DCPSLivelinessFactor $factor ";
   }
 
-  my $pubArgs = "$svc_conf ";
+  my $pubArgs = "";
   $pubArgs .= "-DCPSDebugLevel $pubDebug " if $pubDebug;
   $pubArgs .= "-DCPSTransportDebugLevel $pubTransportDebug " if $pubTransportDebug;
   $pubArgs .= "-ORBLogFile $debugFile "    if $pubDebug and $debugFile;

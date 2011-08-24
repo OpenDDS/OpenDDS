@@ -11,7 +11,7 @@
 
 #include "Multicast_Export.h"
 
-#include "MulticastConfiguration.h"
+#include "MulticastInst.h"
 #include "MulticastSendStrategy.h"
 #include "MulticastSendStrategy_rch.h"
 #include "MulticastReceiveStrategy.h"
@@ -51,7 +51,7 @@ public:
 
   MulticastPeer local_peer() const;
 
-  void configure(MulticastConfiguration* config,
+  void configure(MulticastInst* config,
                  TransportReactorTask* reactor_task);
 
   void send_strategy(MulticastSendStrategy* send_strategy);
@@ -62,7 +62,7 @@ public:
 
   TransportSendBuffer* send_buffer();
 
-  MulticastConfiguration* config();
+  MulticastInst* config();
 
   TransportReactorTask* reactor_task();
   ACE_Reactor* get_reactor();
@@ -72,14 +72,11 @@ public:
   bool join(const ACE_INET_Addr& group_address);
 
   MulticastSession* find_or_create_session(MulticastPeer remote_peer);
-
-  bool acked(MulticastPeer remote_peer);
+  MulticastSession* find_session(MulticastPeer remote_peer);
 
   bool check_header(const TransportHeader& header);
   bool check_header(const DataSampleHeader& header);
   void sample_received(ReceivedDataSample& sample);
-
-  void set_check_fully_association();
 
 private:
   MulticastTransport* transport_;
@@ -88,7 +85,7 @@ private:
 
   MulticastPeer local_peer_;
 
-  MulticastConfiguration* config_;
+  MulticastInst* config_;
 
   TransportReactorTask* reactor_task_;
 
@@ -105,8 +102,6 @@ private:
   MulticastSessionMap sessions_;
 
   virtual void stop_i();
-
-  bool check_fully_association_;
 };
 
 } // namespace DCPS

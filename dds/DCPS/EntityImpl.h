@@ -13,6 +13,7 @@
 #include "ace/Atomic_Op_T.h"
 #include "dds/DCPS/LocalObject.h"
 #include "Definitions.h"
+#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -62,6 +63,11 @@ public:
   /// flag" is enabled so that any waiting waitsets can be unblocked.
   void notify_status_condition();
 
+  virtual void transport_config(const TransportConfig_rch& cfg);
+  TransportConfig_rch transport_config() const;
+
+  virtual EntityImpl* parent() const { return 0; }
+
 protected:
   /// The flag indicates the entity is enabled.
   ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;
@@ -78,7 +84,9 @@ private:
   DDS::StatusMask status_changes_;
   DDS::StatusCondition_var status_condition_;
 
-  ACE_Thread_Mutex lock_;
+  TransportConfig_rch transport_config_;
+
+  mutable ACE_Thread_Mutex lock_;
 };
 
 } // namespace DCPS

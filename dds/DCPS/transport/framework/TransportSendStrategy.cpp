@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportSendStrategy.h"
 #include "RemoveAllVisitor.h"
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
 #include "ThreadSynchStrategy.h"
 #include "ThreadSynchResource.h"
 #include "TransportQueueElement.h"
@@ -54,17 +54,18 @@ namespace {
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy
-(TransportConfiguration* config,
+(TransportInst*          transport_inst,
  ThreadSynchResource*    synch_resource,
- CORBA::Long             priority)
-  : max_samples_(config->max_samples_per_packet_),
-    optimum_size_(config->optimum_packet_size_),
-    max_size_(config->max_packet_size_),
-    queue_(new QueueType(config->queue_messages_per_pool_,
-                         config->queue_initial_pools_)),
+ CORBA::Long             priority,
+ ThreadSynchStrategy_rch thread_sync_strategy)
+  : max_samples_(transport_inst->max_samples_per_packet_),
+    optimum_size_(transport_inst->optimum_packet_size_),
+    max_size_(transport_inst->max_packet_size_),
+    queue_(new QueueType(transport_inst->queue_messages_per_pool_,
+                         transport_inst->queue_initial_pools_)),
     max_header_size_(0),
     header_block_(0),
-    elems_(new QueueType(1, config->max_samples_per_packet_)),
+    elems_(new QueueType(1, transport_inst->max_samples_per_packet_)),
     pkt_chain_(0),
     header_complete_(false),
     start_counter_(0),
@@ -88,12 +89,12 @@ TransportSendStrategy::TransportSendStrategy
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
-  config->_add_ref();
-  this->config_ = config;
+  transport_inst->_add_ref();
+  this->transport_inst_ = transport_inst;
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper(priority);
-  this->synch_ = config->send_thread_strategy()->create_synch_object(
+  this->synch_ = thread_sync_strategy->create_synch_object(
                    synch_resource,
 #ifdef ACE_WIN32
                    ACE_DEFAULT_THREAD_PRIORITY,
@@ -151,6 +152,7 @@ TransportSendStrategy::perform_work()
   DBG_ENTRY_LVL("TransportSendStrategy","perform_work",6);
 
   SendPacketOutcome outcome;
+  bool no_more_work = false;
 
   { // scope for the guard(this->lock_);
     GuardType guard(this->lock_);
@@ -271,6 +273,7 @@ TransportSendStrategy::perform_work()
 
       // Revert back to MODE_DIRECT mode.
       this->mode_ = MODE_DIRECT;
+      no_more_work = true;
     }
   } // End of scope for guard(this->lock_);
 
@@ -283,7 +286,7 @@ TransportSendStrategy::perform_work()
 
   // If we sent the whole packet (eg, partial_send is false), and the queue_
   // is now empty, then we've cleared the backpressure situation.
-  if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_->size() == 0)) {
+  if (no_more_work) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
               "We sent the whole packet, and there is nothing left on "
               "the queue now.\n"), 5);
@@ -851,10 +854,10 @@ TransportSendStrategy::clear(SendMode mode)
     }
 
     elems = this->elems_;
-    this->elems_ = new QueueType(1, this->config_->max_samples_per_packet_);
+    this->elems_ = new QueueType(1, this->transport_inst_->max_samples_per_packet_);
     queue = this->queue_;
-    this->queue_ = new QueueType(this->config_->queue_messages_per_pool_,
-                                 this->config_->queue_initial_pools_);
+    this->queue_ = new QueueType(this->transport_inst_->queue_messages_per_pool_,
+                                 this->transport_inst_->queue_initial_pools_);
 
     this->header_.length_ = 0;
     this->pkt_chain_ = 0;
@@ -1541,7 +1544,7 @@ TransportSendStrategy::direct_send(bool relink)
     // lock and try to call data_delivered since the
     // DataWriterImpl::remove_sample() might hold the locks in reverse order
     // and cause datalock.
-    if (this->config_->thread_per_connection_) {
+    if (this->transport_inst_->thread_per_connection_) {
       when = DELAY_NOTIFICATION;
     }
 
@@ -1562,7 +1565,6 @@ TransportSendStrategy::direct_send(bool relink)
 
       // We encountered backpressure, or only sent part of the packet.
       this->mode_ = MODE_QUEUE;
-      this->synch_->work_available();
 
     } else if ((outcome == OUTCOME_PEER_LOST) ||
                (outcome == OUTCOME_SEND_ERROR)) {
@@ -1573,7 +1575,7 @@ TransportSendStrategy::direct_send(bool relink)
                    ACE_TEXT("send_bytes")));
 
         if (Transport_debug_level > 0) {
-          this->config_->dump();
+          this->transport_inst_->dump();
         }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "

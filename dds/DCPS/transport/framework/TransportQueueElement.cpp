@@ -51,7 +51,7 @@ OpenDDS::DCPS::TransportQueueElement::fragment(size_t size)
     TransportCustomizedElement::alloc(this, true);
   rest->set_msg(tail);
 
-  return std::make_pair(frag, rest);
+  return ElementPair(frag, rest);
 }
 
 ACE_Message_Block*

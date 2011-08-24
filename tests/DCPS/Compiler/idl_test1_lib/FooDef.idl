@@ -1,5 +1,11 @@
 #include "tao/ShortSeq.pidl"
 
+const long tao_version = __TAO_IDL;
+
+#ifdef __OPENDDS_IDL  // need to hide this from tao_idl
+const long dds_version = __OPENDDS_IDL;
+#endif
+
 module Xyz {
 
 

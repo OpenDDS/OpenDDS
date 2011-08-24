@@ -8,12 +8,11 @@
 #include <ace/OS_NS_stdlib.h>
 
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 #include "ParticipantTask.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+# include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 namespace
@@ -66,7 +65,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     task.wait();
 
     // Clean-up!
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e)

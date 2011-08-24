@@ -80,8 +80,9 @@ struct OpenDDS_Dcps_Export TransportHeader {
   void init(ACE_Message_Block* buffer);
 
 private:
-  struct no_init {};
-  explicit TransportHeader(const no_init&);
+  struct no_init_t {};
+  static const no_init_t no_init;
+  explicit TransportHeader(const no_init_t&);
 };
 
 OpenDDS_Dcps_Export

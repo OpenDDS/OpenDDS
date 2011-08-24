@@ -3,8 +3,8 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src"
     creationIcons="false" modelPluginID="org.opendds.modeling.model" templateDirectory="org.opendds.modeling.common/templates"
-    dynamicTemplates="true" modelName="OpenDDSDataLib" codeFormatting="true" importerID="org.eclipse.emf.importer.ecore"
-    complianceLevel="6.0" copyrightFields="false">
+    dynamicTemplates="true" modelName="OpenDDSDataLib" generateSchema="true" codeFormatting="true"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0" copyrightFields="false">
   <foreignModel>OpenDDS.ecore</foreignModel>
   <genPackages prefix="OpenDDS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       ecorePackage="OpenDDS.ecore#/">
@@ -13,7 +13,6 @@
     <genClasses ecoreClass="OpenDDS.ecore#//qosProperty"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//qosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//topic"/>
-    <genClasses image="false" ecoreClass="OpenDDS.ecore#//topicField"/>
     <genClasses ecoreClass="OpenDDS.ecore#//domainParticipant"/>
     <genClasses ecoreClass="OpenDDS.ecore#//publisher"/>
     <genClasses ecoreClass="OpenDDS.ecore#//subscriber"/>
@@ -95,7 +94,9 @@
   <genPackages prefix="Domain" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Domain.ecore#/">
     <genClasses ecoreClass="Domain.ecore#//QosProperty"/>
-    <genClasses ecoreClass="Domain.ecore#//DomainEntity"/>
+    <genClasses ecoreClass="Domain.ecore#//DomainEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Domain.ecore#//DomainEntity/transportConfig"/>
+    </genClasses>
   </genPackages>
   <genPackages prefix="QoS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="QoS.ecore#/">
@@ -206,77 +207,6 @@
     <genClasses ecoreClass="Topics.ecore#//MultiTopic">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Topics.ecore#//MultiTopic/subscription_expression"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//MultiTopic/datatype"/>
-    </genClasses>
-  </genPackages>
-  <genPackages prefix="Types" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
-      generateExampleClass="false" generateModelWizard="false" ecorePackage="Types.ecore#/">
-    <genClasses ecoreClass="Types.ecore#//Array">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Array/subtype"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Boolean"/>
-    <genClasses ecoreClass="Types.ecore#//Branch">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Branch/field"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Branch/cases"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Case">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Case/literal"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Char"/>
-    <genClasses image="false" ecoreClass="Types.ecore#//Collection">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Collection/length"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Double"/>
-    <genClasses ecoreClass="Types.ecore#//Enum">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Enum/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Enum/literals"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Field">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Field/name"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Field/type"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Float"/>
-    <genClasses image="false" ecoreClass="Types.ecore#//FloatingPoint"/>
-    <genClasses image="false" ecoreClass="Types.ecore#//Int"/>
-    <genClasses ecoreClass="Types.ecore#//Key">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Key/field"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Long"/>
-    <genClasses ecoreClass="Types.ecore#//LongDouble"/>
-    <genClasses ecoreClass="Types.ecore#//LongLong"/>
-    <genClasses ecoreClass="Types.ecore#//Octet"/>
-    <genClasses ecoreClass="Types.ecore#//Sequence">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Sequence/subtype"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//Short"/>
-    <genClasses image="false" ecoreClass="Types.ecore#//SignedInt"/>
-    <genClasses image="false" ecoreClass="Types.ecore#//Simple"/>
-    <genClasses ecoreClass="Types.ecore#//String"/>
-    <genClasses ecoreClass="Types.ecore#//Struct">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Struct/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Struct/fields"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Struct/keys"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Struct/isDcpsDataType"/>
-    </genClasses>
-    <genClasses image="false" ecoreClass="Types.ecore#//Type"/>
-    <genClasses ecoreClass="Types.ecore#//Typedef">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Typedef/type"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Typedef/name"/>
-    </genClasses>
-    <genClasses ecoreClass="Types.ecore#//ULong"/>
-    <genClasses ecoreClass="Types.ecore#//ULongLong"/>
-    <genClasses ecoreClass="Types.ecore#//UShort"/>
-    <genClasses ecoreClass="Types.ecore#//Union">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Union/branches"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Union/name"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Union/switch"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Union/default"/>
-    </genClasses>
-    <genClasses image="false" ecoreClass="Types.ecore#//UnsignedInt"/>
-    <genClasses ecoreClass="Types.ecore#//WChar"/>
-    <genClasses ecoreClass="Types.ecore#//WString"/>
-    <genClasses ecoreClass="Types.ecore#//DataLib">
-      <genFeatures property="None" children="true" createChild="true" propertySortChoices="true"
-          ecoreFeature="ecore:EReference Types.ecore#//DataLib/types"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="DCPS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
@@ -393,6 +323,77 @@
     <genClasses ecoreClass="Enumerations.ecore#//Period">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Enumerations.ecore#//Period/nanosecond"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Enumerations.ecore#//Period/second"/>
+    </genClasses>
+  </genPackages>
+  <genPackages prefix="Types" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
+      generateExampleClass="false" generateModelWizard="false" ecorePackage="Types.ecore#/">
+    <genClasses ecoreClass="Types.ecore#//Array">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Array/subtype"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Boolean"/>
+    <genClasses ecoreClass="Types.ecore#//Branch">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Branch/field"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Branch/cases"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Case">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Case/literal"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Char"/>
+    <genClasses image="false" ecoreClass="Types.ecore#//Collection">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Collection/length"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Double"/>
+    <genClasses ecoreClass="Types.ecore#//Enum">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Enum/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Enum/literals"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Field">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Field/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Field/type"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Float"/>
+    <genClasses image="false" ecoreClass="Types.ecore#//FloatingPoint"/>
+    <genClasses image="false" ecoreClass="Types.ecore#//Int"/>
+    <genClasses ecoreClass="Types.ecore#//Key">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Key/field"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Long"/>
+    <genClasses ecoreClass="Types.ecore#//LongDouble"/>
+    <genClasses ecoreClass="Types.ecore#//LongLong"/>
+    <genClasses ecoreClass="Types.ecore#//Octet"/>
+    <genClasses ecoreClass="Types.ecore#//Sequence">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Sequence/subtype"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//Short"/>
+    <genClasses image="false" ecoreClass="Types.ecore#//SignedInt"/>
+    <genClasses image="false" ecoreClass="Types.ecore#//Simple"/>
+    <genClasses ecoreClass="Types.ecore#//String"/>
+    <genClasses ecoreClass="Types.ecore#//Struct">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Struct/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Struct/fields"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Struct/keys"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Struct/isDcpsDataType"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="Types.ecore#//Type"/>
+    <genClasses ecoreClass="Types.ecore#//Typedef">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Typedef/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Typedef/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Types.ecore#//ULong"/>
+    <genClasses ecoreClass="Types.ecore#//ULongLong"/>
+    <genClasses ecoreClass="Types.ecore#//UShort"/>
+    <genClasses ecoreClass="Types.ecore#//Union">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Union/branches"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Union/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Union/switch"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Union/default"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="Types.ecore#//UnsignedInt"/>
+    <genClasses ecoreClass="Types.ecore#//WChar"/>
+    <genClasses ecoreClass="Types.ecore#//WString"/>
+    <genClasses ecoreClass="Types.ecore#//DataLib">
+      <genFeatures property="None" children="true" createChild="true" propertySortChoices="true"
+          ecoreFeature="ecore:EReference Types.ecore#//DataLib/types"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

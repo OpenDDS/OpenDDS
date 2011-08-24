@@ -5,6 +5,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 #ifndef MONITORDATA_H
 #define MONITORDATA_H
 
@@ -55,7 +56,7 @@ class TreeNode;
 class MonitorData {
   public:
     /// Construct with an IOR only.
-    MonitorData( const Options& options, MonitorDataModel* model);
+    MonitorData( const Options& options, MonitorDataModel* model, bool mapExistingIORKeys = true);
 
     /// Virtual destructor.
     virtual ~MonitorData();

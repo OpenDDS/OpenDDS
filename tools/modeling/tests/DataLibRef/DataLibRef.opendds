@@ -3,12 +3,12 @@
   <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="DataLibRef">
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
-      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportId="1">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportConfig="trans1">
         <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
-      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
@@ -30,7 +30,7 @@
       <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
       <types xsi:type="types:Typedef" xmi:id="_nMvY4B0CEeC07OZrGTNj1A" type="_q4a14B0BEeC07OZrGTNj1A" name="JU"/>
     </libs>
-    <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data4">
+    <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOx" name="data4">
       <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw4" name="CountType" isDcpsDataType="true">
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw2" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       </types>
@@ -58,7 +58,7 @@
     <libs xsi:type="types:DataLib" xmi:id="_1xaiIBmzEeCiwqO3ASSQ8g" name="data2">
       <types xsi:type="types:Double" xmi:id="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
       <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g2" name="LongType" isDcpsDataType="true">
-        <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gc" name="value" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gd" name="value" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g" name="Position" isDcpsDataType="true">
         <fields xmi:id="_5khAUBmzEeCiwqO3ASSQ8g" name="lat" type="_4C6qsBmzEeCiwqO3ASSQ8g3"/>

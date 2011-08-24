@@ -1,6 +1,6 @@
 // $Id$
 
-project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_optional_features, dds4ccm_opendds, dcps_ts_defaults, dds_macros, install {
+project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_optional_features, dds4ccm_opendds, dcps_ts_defaults, dds_macros, dds_suppress_any_support, install {
 
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -64,6 +64,7 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_option
   TypeSupport_Files {
     dcps_ts_flags += -SI
     DdsDcpsGuid.idl
+    DdsDcpsInfoUtils.idl
   }
 
   InstallData_Files {

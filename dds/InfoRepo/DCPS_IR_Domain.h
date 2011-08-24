@@ -22,9 +22,8 @@
 #include /**/ "dds/DdsDcpsInfrastructureTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
+#include "dds/DCPS/transport/framework/TransportConfig.h"
+#include "dds/DCPS/transport/tcp/TcpTransport.h"
 
 #include /**/ "ace/Unbounded_Set.h"
 
@@ -214,9 +213,10 @@ private:
   DDS::DomainParticipant_var                       bitParticipant_;
   DDS::DomainParticipantListener_var               bitParticipantListener_;
   DDS::Publisher_var                               bitPublisher_;
-  OpenDDS::DCPS::TransportImpl_rch                       transportImpl_;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
+  OpenDDS::DCPS::TransportConfig_rch               transportConfig_;
+
   DDS::Topic_var                                   bitParticipantTopic_;
   DDS::ParticipantBuiltinTopicDataDataWriter_var   bitParticipantDataWriter_;
 

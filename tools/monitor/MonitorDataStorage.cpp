@@ -567,17 +567,17 @@ Monitor::MonitorDataStorage::manageTransportLink(
   }
 
   // Transport Id display.
-  QString label( QObject::tr( "Transport Id"));
+  QString label( QObject::tr( "Transport"));
   int row = node->indexOf( 0, label);
   if( row == -1) {
     // New entry, add a reference to the actual transport node.
     QList<QVariant> list;
     list << label << QString( QObject::tr("<error>"));;
     TreeNode* idNode = new TreeNode( list, node);
-idNode->setColor( 1, QColor("#bfbfff"));
+    idNode->setColor( 1, QColor("#bfbfff"));
     node->append( idNode);
     transportNode->addValueRef( idNode);
-transportNode->setColor( 1, QColor("#bfffbf"));
+    transportNode->setColor( 1, QColor("#bfffbf"));
     create = true;
   }
 }
@@ -666,10 +666,10 @@ Monitor::MonitorDataStorage::manageTopicLink(
     QList<QVariant> list;
     list << topicLabel << QString( QObject::tr("<error>"));
     TreeNode* idNode = new TreeNode( list, node);
-idNode->setColor( 1, QColor("#bfbfff"));
+    idNode->setColor( 1, QColor("#bfbfff"));
     node->append( idNode);
     refNode->addValueRef( idNode);
-refNode->setColor( 1, QColor("#bfffbf"));
+    refNode->setColor( 1, QColor("#bfffbf"));
     create = true;
   }
 }
@@ -1481,4 +1481,12 @@ Monitor::MonitorDataStorage::manageSubscriptionQos(
     dataChanged = true;
   }
 }
+
+//testing -- there's a qos problem. after several update calls
+//readbuiltintopics returns false which leads to qos not being populated. these
+//statics ensure qos stays if it was once valid. this is a NOT a fix!!!
+bool Monitor::MonitorDataStorage::b1 = false;
+bool Monitor::MonitorDataStorage::b2 = false;
+bool Monitor::MonitorDataStorage::b3 = false;
+bool Monitor::MonitorDataStorage::b4 = false;
 

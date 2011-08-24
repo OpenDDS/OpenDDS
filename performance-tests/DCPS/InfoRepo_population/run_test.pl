@@ -35,10 +35,7 @@ if( $intermittent) {
   $stackdumpcmd = "grabstacks";
 }
 
-$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
-
-$opts = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
-$opts .= "-ORBDebugLevel $orbdebuglevel " if $orbdebuglevel;
+$opts = "-ORBDebugLevel $orbdebuglevel " if $orbdebuglevel;
 $opts .= "-DCPSDebugLevel $debuglevel "   if $debuglevel;
 $opts .= "-ORBVerboseLogging 1 "          if $verbose;
 $opts .= "-ORBLogFile $debugfile "        if $debugfile;
@@ -56,10 +53,10 @@ $repo_bit_opt = "$opts -NOBITS";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_opt -o $dcpsrepo_ior ");
+                                     "$repo_bit_opt -o $dcpsrepo_ior");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
-$Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts"." -i2");
+$Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts");
 $SyncServer = PerlDDS::create_process ("syncServer"
                                     , "$syncopts -p2 -s1");
 

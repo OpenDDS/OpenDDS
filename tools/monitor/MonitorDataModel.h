@@ -5,10 +5,12 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 #ifndef MONITORDATAMODEL_H
 #define MONITORDATAMODEL_H
 
 #include <QtCore/QAbstractItemModel>
+#include <vector>
 
 namespace Monitor {
 
@@ -42,7 +44,7 @@ class MonitorDataModel : public QAbstractItemModel {
     QModelIndex index( TreeNode* node, int column) const;
 
     /// Obtain a node from an index.
-    TreeNode* getNode( const QModelIndex &index) const;
+    TreeNode* getNode( const QModelIndex &index, bool defaultToRoot = true) const;
 
     /* Model update methods. */
 

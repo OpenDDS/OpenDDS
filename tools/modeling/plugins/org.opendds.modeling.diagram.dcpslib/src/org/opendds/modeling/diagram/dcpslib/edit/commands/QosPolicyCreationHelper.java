@@ -6,14 +6,14 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.opendds.modeling.model.opendds.DcpsLib;
 import org.opendds.modeling.model.opendds.OpenDDSPackage;
-import org.opendds.modeling.model.opendds.qosPolicy;
+import org.opendds.modeling.model.qos.QosPolicy;
 
 /**
  * generated NOT
  */
 class QosPolicyCreationHelper {
 
-	static <PolicyType extends qosPolicy> void addPolicy(PolicyType newElement, String policyAssociationName, EObject referrer) {
+	static <PolicyType extends QosPolicy> void addPolicy(PolicyType newElement, String policyAssociationName, EObject referrer) {
 
 		// Add to owner, which we know must be a DcpsLib
 		DcpsLib owner = (DcpsLib) com.ociweb.emf.util.ObjectsFinder.findObjectInContainmentTree(referrer, getDcpsLibClass());

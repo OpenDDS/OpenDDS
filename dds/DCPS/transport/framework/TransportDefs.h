@@ -72,9 +72,38 @@ class ACE_Data_Block;
                     KEY));                                                       \
       }                                                                          \
     }                                                                            \
-    else  if (stringvalue == ACE_TEXT(""))                                       \
+    else if (stringvalue == ACE_TEXT(""))                                       \
     {                                                                            \
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
+      {                                                                          \
+        ACE_DEBUG ((LM_WARNING,                                                  \
+                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
+                    ACE_TEXT ("file, but is missing value - using code default.\n"), \
+                    KEY));                                                       \
+      }                                                                          \
+    }                                                                            \
+    else                                                                         \
+    {                                                                            \
+      VALUE = ACE_TEXT_ALWAYS_CHAR(stringvalue.c_str());                         \
+    }                                                                            \
+  }
+
+#define GET_CONFIG_TSTRING_VALUE(CF, SECT, KEY, VALUE)                           \
+  {                                                                              \
+    ACE_TString stringvalue;                                                     \
+    if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
+    {                                                                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
+      {                                                                          \
+        ACE_DEBUG ((LM_NOTICE,                                                   \
+                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is not defined in config ") \
+                    ACE_TEXT ("file - using code default.\n"),                   \
+                    KEY));                                                       \
+      }                                                                          \
+    }                                                                            \
+    else if (stringvalue == ACE_TEXT(""))                                        \
+    {                                                                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
                     ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
@@ -127,44 +156,15 @@ class ACE_Data_Block;
     if (tv != -1) VALUE.msec(tv);                                                \
   }
 
-// The transport section name prefix.
-static const ACE_TCHAR  TRANSPORT_SECTION_NAME_PREFIX[] =
-  ACE_TEXT("transport_impl_");
-// The transport section name prefix is "transport_impl_" so the length is 15.
-static const size_t TRANSPORT_SECTION_NAME_PREFIX_LEN =
-  ACE_OS::strlen(TRANSPORT_SECTION_NAME_PREFIX);
+// The transport and configuration section name used in the config file format
+static const ACE_TCHAR TRANSPORT_SECTION_NAME[] = ACE_TEXT("transport");
+static const ACE_TCHAR CONFIG_SECTION_NAME[] = ACE_TEXT("config");
 
 namespace OpenDDS {
 namespace DCPS {
 
-// Values used in TransportFactory::create_transport_impl () call.
-// ciju: Doesn't add any value. Removing.
-const bool AUTO_CONFIG = 1;
-const bool DONT_AUTO_CONFIG = 0;
-
-/// The TransportImplFactory instance ID type.
-typedef ACE_TString FactoryIdType;
-
-/// The TransportImpl instance ID type.
-typedef ACE_UINT32 TransportIdType;
-typedef std::vector <TransportIdType> TransportIdList;
-
 /// Identifier type for DataLink objects.
 typedef ACE_UINT64  DataLinkIdType;
-
-// Note: The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for transport
-//       DEFAULT_<transport>_ID values. If a new transport is
-//       implemented, the default ID of the new transport must be
-//       defined here.
-const TransportIdType DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00;
-const TransportIdType DEFAULT_DUMMY_TCP_ID = 0xFFFFFF01;
-
-const TransportIdType DEFAULT_UDP_ID = 0xFFFFFF04;
-
-// The default multicast ID forces the group address selection
-// heuristic to resolve port number 49152; this is the minimal
-// port defined in the dynamic/private range [IANA 2009-11-16].
-const TransportIdType DEFAULT_MULTICAST_ID = 0xFFFFFF08;
 
 /// Return code type for send_control() operations.
 enum SendControlStatus {
@@ -211,7 +211,7 @@ typedef Cached_Allocator_With_Overflow<
 char[RECEIVE_DATA_BUFFER_SIZE],
 RECEIVE_SYNCH>                  TransportDataAllocator ;
 
-/// Default TransportConfiguration settings
+/// Default TransportInst settings
 enum {
   DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL   = 10,
   DEFAULT_CONFIG_QUEUE_INITIAL_POOLS    = 5,

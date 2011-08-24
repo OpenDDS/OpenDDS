@@ -132,7 +132,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::DataWriterQos_var dwq = new ::DDS::DataWriterQos;
       dwq->reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
-      OpenDDS::DCPS::TransportInterfaceInfo_var tii = new OpenDDS::DCPS::TransportInterfaceInfo;
+      OpenDDS::DCPS::TransportLocatorSeq tii;
+      tii.length(1);
+      tii[0].transport_type = "fake transport for test";
+
       ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
 
       OpenDDS::DCPS::RepoId pubId = info->add_publication(domainId,
@@ -140,7 +143,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                           topicId,
                                                           dw.in(),
                                                           dwq.in(),
-                                                          tii.in(),
+                                                          tii,
                                                           pQos.in());
       if (OpenDDS::DCPS::GUID_UNKNOWN == pubId)
         {
@@ -246,7 +249,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                             topicIdAlmost,
                                             dwAlmost.in(),
                                             dwqAlmost.in(),
-                                            tii.in(),
+                                            tii,
                                             pQos.in());
         if( OpenDDS::DCPS::GUID_UNKNOWN == pubId)
           {

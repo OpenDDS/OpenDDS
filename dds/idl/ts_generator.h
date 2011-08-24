@@ -50,8 +50,7 @@ public:
 
   bool gen_union(UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
                  AST_Type*, AST_Expression::ExprType,
-                 const AST_Union::DefaultValue&, const char*)
-  { return true; }
+                 const AST_Union::DefaultValue&, const char*);
 
 private:
   std::string idl_template_, h_template_, cpp_template_;

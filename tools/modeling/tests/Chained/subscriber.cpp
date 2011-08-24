@@ -5,10 +5,10 @@
 #include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
-#include "model/MessengerTraits.h"
+#include "Chained_TopicTraits.h"
 #include <model/NullReaderListener.h>
 #include <model/Sync.h>
 
@@ -24,8 +24,8 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  data1::MessageDataReader_var reader_i =
-    data1::MessageDataReader::_narrow(reader);
+  MTMdata2::MTM_MessageDataReader_var reader_i =
+    MTMdata2::MTM_MessageDataReader::_narrow(reader);
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
@@ -34,7 +34,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  data1::Message message;
+  MTMdata2::MTM_Message message;
   DDS::SampleInfo info;
 
   DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
@@ -65,19 +65,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);
-    MessengerLib::DefaultMessengerType model(application, argc, argv);
+    Chained_TopicLib::DefaultChained_TopicType model(application, argc, argv);
 
-    using OpenDDS::Model::MessengerLib::Elements;
+    using OpenDDS::Model::Chained_TopicLib::Elements;
 
-    DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
+    DDS::DataReader_var reader = model.reader( Elements::DataReaders::chained_cfreader);
 
     DDS::DataReaderListener_var listener(new ReaderListener);
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data1::MessageDataReader_var reader_i =
-      data1::MessageDataReader::_narrow(reader);
+    MTMdata2::MTM_MessageDataReader_var reader_i =
+      MTMdata2::MTM_MessageDataReader::_narrow(reader);
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,

@@ -94,8 +94,6 @@ unlink $debugFile if $debugFile;
 
 # Configure the repositories.
 
-my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf ../../tcp.conf ";
 
 
 my @REPO;
@@ -115,7 +113,7 @@ $transportDebug = $transport if $transport;
 my $verboseDebug;
 $verboseDebug = "-ORBVerboseLogging 1 " if $verbose;
 
-my $repoOpts = "$svc_config ";
+my $repoOpts = "";
 $repoOpts .= $verboseDebug if $verboseDebug;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
@@ -136,12 +134,11 @@ for my $index ( 1 .. $repoCount) {
   print "Established repository $index.\n" if $debug;
 }
 
+my $appOpts;
 if ($for_monitor_test == 1) {
-    $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
+    $appOpts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
       : "-ORBSvcConf ../../../tools/monitor/monitor.conf ";
 }
-
-my $appOpts = "$svc_config ";
 
 $appOpts .= $verboseDebug if $verboseDebug;
 $appOpts .= "-DCPSDebugLevel $appDebug "                if $appDebug;

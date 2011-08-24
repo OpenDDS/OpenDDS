@@ -11,7 +11,10 @@
     -->
 <xsl:include href="common.xsl"/>
 
-<xsl:variable name="policy-refs" select="//*[not(name() = 'datatype')]/@href"/>
+<xsl:variable name="policy-refs" select="//*[not(name() = 'datatype' or 
+                                                 name() = 'type' or
+                                                 name() = 'topic' or
+                                                 name() = 'related_topic')]/@href"/>
 
 <!-- Copy the model element, adding external-refs subelelement -->
 <xsl:template match="opendds:OpenDDSModel">
@@ -19,7 +22,11 @@
     <xsl:apply-templates select="@*"/>
     <xsl:apply-templates/>
     <external-refs>
-      <xsl:call-template name="process-external-refs"/>
+      <xsl:call-template name="process-external-refs">
+        <xsl:with-param name="refs">
+          <xsl:call-template name="build-refs-param"/>
+        </xsl:with-param>
+      </xsl:call-template>
     </external-refs>
   </xsl:copy>
 </xsl:template>
@@ -66,6 +73,16 @@
     </xsl:when>
     <xsl:when test="name() = 'type'">
       <xsl:attribute name="type">
+        <xsl:value-of select="substring-after(@href, '#')"/>
+      </xsl:attribute>
+    </xsl:when>
+    <xsl:when test="name() = 'topic'">
+      <xsl:attribute name="topic">
+        <xsl:value-of select="substring-after(@href, '#')"/>
+      </xsl:attribute>
+    </xsl:when>
+    <xsl:when test="name() = 'related_topic'">
+      <xsl:attribute name="related_topic">
         <xsl:value-of select="substring-after(@href, '#')"/>
       </xsl:attribute>
     </xsl:when>
@@ -181,41 +198,119 @@
   </xsl:choose>
 </xsl:template>
 
+<xsl:template name="build-refs-param">
+  <xsl:param name="hrefs" select="//@href"/>
+  <xsl:param name="current-refs" select="''"/>
+
+  <xsl:choose>
+    <xsl:when test="$hrefs">
+      <xsl:call-template name="build-refs-param">
+        <xsl:with-param name="hrefs" select="$hrefs[position() &gt; 1]"/>
+        <xsl:with-param name="current-refs" 
+                      select="concat($current-refs, string($hrefs[1]), ' ')"/>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="$current-refs"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
 <!-- Copy external elements into the result set, with the following
      changes:
      1) make name a qualified name
      2) add the name of model in a new model attribute.
 -->
 <xsl:template name="process-external-refs">
-  <xsl:param name="refs" select="//@href"/>
+  <xsl:param name="refs" />
   <xsl:param name="complete-refs" select="' '"/>
   
-  <xsl:if test="$refs">
-    <xsl:variable name="ref" select="$refs[1]"/>
+  <xsl:if test="contains($refs, '#')">
+    <xsl:variable name="ref"
+    select="substring-before($refs, ' ')"/>
     <xsl:variable name="model" select="substring-before($ref, '#')"/>
     <xsl:variable name="id" select="substring-after($ref, '#')"/>
-    <xsl:if test="not(contains($complete-refs, $id))">
-      <xsl:for-each select="document($model)//*[@xmi:id = $id]">
-        <xsl:copy>
-          <xsl:attribute name="model">
-            <xsl:call-template name="modelname"/>
-          </xsl:attribute>
-          <xsl:if test="@name">
-            <xsl:variable name="scopename">
-              <xsl:call-template name="scopename"/>
-            </xsl:variable>
-            <xsl:attribute name="name">
-              <xsl:value-of select="concat($scopename, @name)"/>
+    <xsl:choose>
+      <xsl:when test="not(contains($complete-refs, concat(' ',$id,' ')))">
+        <xsl:variable name="ref-doc" select="document($model)/opendds:OpenDDSModel"/>
+        <xsl:for-each select="$ref-doc//*[@xmi:id = $id]">
+          <xsl:variable name="ref-doc-policies" select="$ref-doc//policies"/>
+          <xsl:copy>
+            <xsl:attribute name="model">
+              <xsl:call-template name="modelname"/>
             </xsl:attribute>
-          </xsl:if>
-          <xsl:apply-templates select="@*[name() != 'name'] | node()"/>
-        </xsl:copy>
-      </xsl:for-each>
-    </xsl:if>
-    <xsl:call-template name="process-external-refs">
-      <xsl:with-param name="refs" select="$refs[position() &gt; 1]"/>
-      <xsl:with-param name="complete-refs" select="concat($complete-refs, ' ', $id, ' ')"/>
-    </xsl:call-template>
+            <xsl:if test="name(.) = 'types'">
+              <xsl:attribute name="scope">
+                <xsl:call-template name="scopename"/>
+              </xsl:attribute>
+            </xsl:if>
+            <xsl:if test="name(.) = 'topicDescriptions'">
+              <xsl:attribute name="scope">
+                <xsl:call-template name="scopename"/>
+              </xsl:attribute>
+            </xsl:if>
+            <!-- Replace HREFs as we do in local element -->
+            <xsl:apply-templates select="@*"/>
+            <xsl:for-each select="*[@href]">
+              <xsl:call-template name="replace-href"/>
+            </xsl:for-each>
+            <xsl:apply-templates select="node()"/>
+          </xsl:copy>
+          <!-- if we just copied a topic, 
+               add its types 
+                   and related topics 
+                   and QOS policies to the refs param -->
+          <xsl:variable name="model-dirname">
+            <xsl:call-template name="substring-before-last">
+              <xsl:with-param name="value" select="$model"/>
+              <xsl:with-param name="to-find" select="'/'"/>
+            </xsl:call-template>
+          </xsl:variable>
+          <xsl:variable name="internaldatatype">
+            <xsl:if test="name(.) = 'topicDescriptions' and @datatype">
+              <xsl:value-of select="concat($model, '#', @datatype, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="externaldatatype">
+            <xsl:if test="name(.) = 'topicDescriptions' and datatype">
+              <xsl:value-of select="concat($model-dirname, '/', datatype/@href, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="internalreltopic">
+            <xsl:if test="name(.) = 'topicDescriptions' and @related_topic">
+              <xsl:value-of select="concat($model, '#', @related_topic, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="externalreltopic">
+            <xsl:if test="name(.) = 'topicDescriptions' and related_topic">
+              <xsl:value-of select="concat($model-dirname, '/', related_topic/@href, ' ')"/>
+            </xsl:if>
+          </xsl:variable>
+          <xsl:variable name="internalpolicies">
+            <xsl:for-each select="$ref-doc-policies[@xmi:id = current()/@*]">
+              <xsl:value-of select="concat($model, '#', @xmi:id, ' ')"/>
+            </xsl:for-each>
+          </xsl:variable>
+          <xsl:variable name="newrefswithspace" 
+                      select="concat($internaldatatype, 
+                                     $externaldatatype, 
+                                     $internalreltopic, 
+                                     $externalreltopic,
+                                     $internalpolicies)"/>
+          <xsl:call-template name="process-external-refs">
+            <xsl:with-param name="refs" select="concat($newrefswithspace, 
+                                                substring-after($refs, ' '))"/>
+            <xsl:with-param name="complete-refs" select="concat($complete-refs, $id, ' ')"/>
+          </xsl:call-template>
+        </xsl:for-each>
+      </xsl:when>
+      <xsl:otherwise>
+        <!-- we skipped processing, don't add id to complete refs -->
+        <xsl:call-template name="process-external-refs">
+          <xsl:with-param name="refs" select="substring-after($refs, ' ')"/>
+          <xsl:with-param name="complete-refs" select="$complete-refs"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:if>
 </xsl:template>
 

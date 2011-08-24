@@ -12,18 +12,15 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
 $status = 0;
-$use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
 $pub_conf = "-DCPSConfigFile pub.ini";
 $sub_conf = "-DCPSConfigFile sub.ini";
-$pub_opts = "$opts $pub_conf ";
-$sub_opts = "$opts $sub_conf ";
+$pub_opts = "$pub_conf ";
+$sub_opts = "$sub_conf ";
 
 if ($ARGV[0] eq 'lost') {
-    $pub_opts = "$opts $pub_conf -l -n 4 -t 10 -c 8";
-    $sub_opts = "$opts $sub_conf -l -n 4 -c 16";
+    $pub_opts = "$pub_conf -l -n 4 -t 10 -c 8";
+    $sub_opts = "$sub_conf -l -n 4 -c 16";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
@@ -35,7 +32,7 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_opt -o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 

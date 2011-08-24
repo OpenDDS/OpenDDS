@@ -11,7 +11,6 @@
 #include "monitorTypeSupportImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 namespace OpenDDS {
 namespace DCPS {

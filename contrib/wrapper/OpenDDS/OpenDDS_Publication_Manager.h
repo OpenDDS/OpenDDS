@@ -13,7 +13,6 @@
 #ifndef DDS_WRAPPER_OPEN_DDS_PUBLICATION_MANAGER_H_
 #define DDS_WRAPPER_OPEN_DDS_PUBLICATION_MANAGER_H_
 
-#include <dds/DCPS/transport/framework/TransportDefs.h>
 #include "Publication_Manager_Impl.h"
 #include "Domain_Manager.h"
 
@@ -27,7 +26,6 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
  public:
   /// ctor with transport impl registration
   OpenDDS_Publication_Manager (const Domain_Manager & dm,
-                               OpenDDS::DCPS::TransportIdType transport_id,
                                const DDS::PublisherQos & qos);
 
   /// dtor
@@ -54,9 +52,6 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
  private:
   /// initializes the publication manager
   void init (const DDS::PublisherQos & qos);
-
-  /// registers a transport implementation based on the passed id
-  void register_transport (OpenDDS::DCPS::TransportIdType transport_id);
 
   /// reference to the domain manager
   Domain_Manager dm_;

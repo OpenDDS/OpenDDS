@@ -8,11 +8,12 @@
 
 #include "OpenDDS_DCPS_TheParticipantFactory.h"
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
-#include "OpenDDS_DCPS_transport_TheTransportFactory.h"
-#include "OpenDDS_DCPS_transport_TransportImpl.h"
-#include "OpenDDS_DCPS_transport_SimpleTcpConfiguration.h"
-#include "OpenDDS_DCPS_transport_UdpConfiguration.h"
-#include "OpenDDS_DCPS_transport_MulticastConfiguration.h"
+#include "OpenDDS_DCPS_transport_TheTransportRegistry.h"
+#include "OpenDDS_DCPS_transport_TransportConfig.h"
+#include "OpenDDS_DCPS_transport_TcpInst.h"
+#include "OpenDDS_DCPS_transport_UdpInst.h"
+#include "OpenDDS_DCPS_transport_MulticastInst.h"
+#include "OpenDDS_DCPS_transport_TransportInst.h"
 #include "DDS_WaitSet.h"
 #include "DDS_GuardCondition.h"
 
@@ -21,18 +22,21 @@
 
 #include "dds/DCPS/Service_Participant.h"
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 #include "dds/DCPS/transport/framework/PoolSynchStrategy.h"
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
+#include "dds/DCPS/transport/tcp/TcpInst_rch.h"
+#include "dds/DCPS/transport/udp/UdpInst_rch.h"
+#include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
+#include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/GuardCondition.h"
 
@@ -143,404 +147,110 @@ void throw_java_exception(JNIEnv *jni,
 
 } // namespace
 
-// TheTransportFactory
+// Helper functions for transport configuration
 
-jobject JNICALL
-Java_OpenDDS_DCPS_transport_TheTransportFactory_create_1transport_1impl__IZ
-(JNIEnv *jni, jclass, jint id, jboolean auto_configure)
-{
-  try {
-    OpenDDS::DCPS::TransportImpl_rch transport =
-      TheTransportFactory->create_transport_impl(id, auto_configure);
-    jclass implClazz =
-      findClass(jni, "OpenDDS/DCPS/transport/TransportImpl");
-    jmethodID ctor = jni->GetMethodID(implClazz, "<init>", "(J)V");
-    return jni->NewObject(implClazz, ctor,
-                          reinterpret_cast<jlong>(transport._retn()));
-
-  } catch (const CORBA::SystemException &se) {
-    throw_java_exception(jni, se);
-    return 0;
-
-  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
-    throw_java_exception(jni, te);
-    return 0;
-  }
-}
-
-jobject JNICALL
-Java_OpenDDS_DCPS_transport_TheTransportFactory_create_1transport_1impl__ILjava_lang_String_2Z
-(JNIEnv *jni, jclass, jint id, jstring type, jboolean auto_configure)
-{
-  JStringMgr jsm(jni, type);
-  ACE_TString typeCxx(ACE_TEXT_CHAR_TO_TCHAR(jsm.c_str()));
-
-  try {
-    OpenDDS::DCPS::TransportImpl_rch transport =
-      TheTransportFactory->create_transport_impl(id, typeCxx,
-                                                 auto_configure);
-    jclass implClazz =
-      findClass(jni, "OpenDDS/DCPS/transport/TransportImpl");
-    jmethodID ctor = jni->GetMethodID(implClazz, "<init>", "(J)V");
-    return jni->NewObject(implClazz, ctor,
-                          reinterpret_cast<jlong>(transport._retn()));
-
-  } catch (const CORBA::SystemException &se) {
-    throw_java_exception(jni, se);
-    return 0;
-
-  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
-    throw_java_exception(jni, te);
-    return 0;
-  }
-}
-
-// Descriptions of Configuration object mapping
-//   (TheTransportFactory continues below)
-
-namespace BaseConfig {
-
-typedef OpenDDS::DCPS::TransportConfiguration Cfg;
-const char *jclassName = "OpenDDS/DCPS/transport/TransportConfiguration";
-
-// sendThreadStrategy is written as a special case
-const char *strategySig =
-  "LOpenDDS/DCPS/transport/TransportConfiguration$ThreadSynchStrategy;";
-const char *strategyClass =
-  "OpenDDS/DCPS/transport/TransportConfiguration$ThreadSynchStrategy";
-
-BoolField<Cfg> sb("swapBytes", &Cfg::swap_bytes_);
-SizetField<Cfg> qmpp("queueMessagesPerPool", &Cfg::queue_messages_per_pool_);
-SizetField<Cfg> qip("queueInitialPools", &Cfg::queue_initial_pools_);
-Uint32Field<Cfg> mps("maxPacketSize", &Cfg::max_packet_size_);
-SizetField<Cfg> mspp("maxSamplesPerPacket", &Cfg::max_samples_per_packet_);
-Uint32Field<Cfg> ops("optimumPacketSize", &Cfg::optimum_packet_size_);
-BoolField<Cfg> tpc("threadPerConnection", &Cfg::thread_per_connection_);
-
-BaseField<Cfg> *fields[] = {&sb, &qmpp, &qip, &mps, &mspp, &ops, &tpc};
-
-} // namespace BaseConfig
-
-namespace TcpConfig {
-
-typedef OpenDDS::DCPS::SimpleTcpConfiguration Tcp;
-const char *jclassName = "OpenDDS/DCPS/transport/SimpleTcpConfiguration";
-const ACE_TCHAR *configName = ACE_TEXT("SimpleTcp");
-
-const ACE_TCHAR *svcName = ACE_TEXT("DCPS_SimpleTcpLoader");
-const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
-  ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"");
-
-InetAddrField<Tcp> la("localAddress",
-                      &Tcp::local_address_str_, &Tcp::local_address_);
-BoolField<Tcp> ena("enableNagleAlgorithm",
-                   &Tcp::enable_nagle_algorithm_);
-IntField<Tcp> crid("connRetryInitialDelay",
-                   &Tcp::conn_retry_initial_delay_);
-DoubleField<Tcp> crbm("connRetryBackoffMultiplier",
-                      &Tcp::conn_retry_backoff_multiplier_);
-IntField<Tcp> cra("connRetryAttempts",
-                  &Tcp::conn_retry_attempts_);
-IntField<Tcp> mopp("maxOutputPausePeriod",
-                   &Tcp::max_output_pause_period_);
-IntField<Tcp> prd("passiveReconnectDuration",
-                  &Tcp::passive_reconnect_duration_);
-UlongField<Tcp> pcd("passiveConnectDuration",
-                    &Tcp::passive_connect_duration_);
-
-BaseField<Tcp> *fields[] = {&la, &ena, &crid, &crbm, &cra, &mopp, &prd, &pcd};
-
-} // namespace TcpConfig
-
-namespace UdpConfig {
-
-typedef OpenDDS::DCPS::UdpConfiguration config;
-const char *jclassName =
-  "OpenDDS/DCPS/transport/UdpConfiguration";
-
-const char *jclassNameUdp = "OpenDDS/DCPS/transport/UdpConfiguration";
-const ACE_TCHAR *configName = ACE_TEXT("udp");
-
-const ACE_TCHAR *svcName =
-  ACE_TEXT("OpenDDS_DCPS_Udp_Service");
-const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic OpenDDS_DCPS_Udp_Service Service_Object *")
-  ACE_TEXT(" OpenDDS_Udp:_make_UdpLoader()");
-
-InetAddrField<config> local_address("localAddress",
-                                    0 /*UNUSED*/, &config::local_address_);
-
-BaseField<config> *fields[] = {
-  &local_address,
-};
-
-} // namespace TcpConfig
-
-namespace MulticastConfig {
-
-typedef OpenDDS::DCPS::MulticastConfiguration config;
-const char *jclassName =
-  "OpenDDS/DCPS/transport/MulticastConfiguration";
-
-const char *jclassNameUdp = "OpenDDS/DCPS/transport/MulticastConfiguration";
-const ACE_TCHAR *configName = ACE_TEXT("multicast");
-
-const ACE_TCHAR *svcName =
-  ACE_TEXT("OpenDDS_DCPS_Multicast_Service");
-const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic OpenDDS_DCPS_Multicast_Service Service_Object *")
-  ACE_TEXT(" OpenDDS_Multicast:_make_MulticastLoader()");
-
-BoolField<config> default_to_ipv6("defaultToIPv6", &config::default_to_ipv6_);
-
-UshortField<config> port_offset("portOffset", &config::port_offset_);
-
-InetAddrField<config> group_address("groupAddress",
-                                    0 /*UNUSED*/, &config::group_address_);
-
-BoolField<config> reliable("reliable", &config::reliable_);
-
-DoubleField<config> syn_backoff("synBackoff", &config::syn_backoff_);
-
-TimeField<config> syn_interval("synInterval", &config::syn_interval_);
-
-TimeField<config> syn_timeout("synTimeout", &config::syn_timeout_);
-
-SizetField<config> nak_depth("nakDepth", &config::nak_depth_);
-
-TimeField<config> nak_interval("nakInterval", &config::nak_interval_);
-
-TimeField<config> nak_timeout("nakTimeout", &config::nak_timeout_);
-
-BaseField<config> *fields[] = {
-  &default_to_ipv6,
-  &port_offset,
-  &group_address,
-  &reliable,
-  &syn_backoff,
-  &syn_interval,
-  &syn_timeout,
-  &nak_depth,
-  &nak_interval,
-  &nak_timeout
-};
-
-} // namespace MulticastConfig
-
-namespace {
-
-void loadLibIfNeeded(const ACE_TCHAR *svcname, const ACE_TCHAR *svcconf)
-{
-  ACE_Service_Gestalt *asg = ACE_Service_Config::current();
-
-  if (asg->find(svcname) == -1 /*not found*/) {
-    ACE_Service_Config::process_directive(svcconf);
-  }
-}
-
-} // namespace
-
-jobject get_or_create_impl(JNIEnv *jni, jint id, const ACE_TString &typeCxx)
-{
-  using namespace OpenDDS::DCPS;
-
-  jclass clazz_specific = 0;
-
-  if (typeCxx == TcpConfig::configName) {
-    clazz_specific = findClass(jni, TcpConfig::jclassName);
-    loadLibIfNeeded(TcpConfig::svcName, TcpConfig::svcConfDir);
-
-  } else if (typeCxx == UdpConfig::configName) {
-    clazz_specific = findClass(jni, UdpConfig::jclassNameUdp);
-    loadLibIfNeeded(UdpConfig::svcName, UdpConfig::svcConfDir);
-
-  } else if (typeCxx == MulticastConfig::configName) {
-    clazz_specific = findClass(jni, MulticastConfig::jclassNameUdp);
-    loadLibIfNeeded(MulticastConfig::svcName, MulticastConfig::svcConfDir);
-  }
-
-  //unknown type, let OpenDDS find out and throw its exception from get_or_...
-
-  TransportConfiguration_rch tc =
-    TheTransportFactory->get_or_create_configuration(id, typeCxx);
-
-  jmethodID mid_ctor = jni->GetMethodID(clazz_specific, "<init>", "(I)V");
-  jobject jConf = jni->NewObject(clazz_specific, mid_ctor, id);
-
-  // Configure common properties (TransportConfiguration)
-  jclass clazz_tc = findClass(jni, BaseConfig::jclassName);
-  toJava(jni, clazz_tc, *tc.in(), jConf, BaseConfig::fields);
-  //   private ThreadSynchStrategy sendThreadStrategy;
-  {
-    ThreadSynchStrategy *tss = tc->send_thread_strategy();
-    jclass enumClazz = findClass(jni, BaseConfig::strategyClass);
-    jfieldID enumFid;
-
-    if (dynamic_cast<PerConnectionSynchStrategy *>(tss)) {
-      enumFid = jni->GetStaticFieldID(enumClazz, "PER_CONNECTION_SYNCH",
-                                      BaseConfig::strategySig);
-
-    } else if (dynamic_cast<PoolSynchStrategy *>(tss)) {
-      enumFid = jni->GetStaticFieldID(enumClazz, "POOL_SYNCH",
-                                      BaseConfig::strategySig);
-
-    } else {
-      enumFid = jni->GetStaticFieldID(enumClazz, "NULL_SYNCH",
-                                      BaseConfig::strategySig);
-    }
-
-    jfieldID fid = jni->GetFieldID(clazz_tc, "sendThreadStrategy",
-                                   BaseConfig::strategySig);
-    jobject enumVal = jni->GetStaticObjectField(enumClazz, enumFid);
-    jni->SetObjectField(jConf, fid, enumVal);
-    jni->DeleteLocalRef(enumVal);
-  }
-
-  // Configure transport-specific properties
-  jmethodID mid_cfg = jni->GetMethodID(clazz_tc, "loadSpecificConfig", "(J)V");
-  jni->CallVoidMethod(jConf, mid_cfg, reinterpret_cast<jlong>(tc.in()));
-
-  return jConf;
-}
-
-jobject JNICALL
-Java_OpenDDS_DCPS_transport_TheTransportFactory_get_1or_1create_1configuration
-(JNIEnv *jni, jclass, jint id, jstring type)
-{
-  JStringMgr jsm(jni, type);
-  ACE_TString typeCxx(ACE_TEXT_CHAR_TO_TCHAR(jsm.c_str()));
-
-  try {
-    return get_or_create_impl(jni, id, typeCxx);
-
-  } catch (const CORBA::SystemException &se) {
-    throw_java_exception(jni, se);
-    return 0;
-
-  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
-    throw_java_exception(jni, te);
-    return 0;
-  }
-}
-
-void JNICALL Java_OpenDDS_DCPS_transport_TheTransportFactory_release__
-(JNIEnv *, jclass)
-{
-  TheTransportFactory->release();
-}
-
-void JNICALL Java_OpenDDS_DCPS_transport_TheTransportFactory_release__I
-(JNIEnv *, jclass, jint id)
-{
-  TheTransportFactory->release(id);
-}
-
-// TransportImpl
-
-namespace {
-
-OpenDDS::DCPS::TransportImpl *recoverTransportImpl(JNIEnv *jni,
-                                                   jobject jThis)
+template <typename CppClass>
+CppClass* recoverCppObj(JNIEnv *jni, jobject jThis)
 {
   jclass thisClass = jni->GetObjectClass(jThis);
   jfieldID jptr = jni->GetFieldID(thisClass, "_jni_pointer", "J");
   jlong ptr = jni->GetLongField(jThis, jptr);
-  return reinterpret_cast<OpenDDS::DCPS::TransportImpl *>(ptr);
+  return reinterpret_cast<CppClass*>(ptr);
 }
 
-} // namespace
-
-void JNICALL Java_OpenDDS_DCPS_transport_TransportImpl__1jni_1fini
-(JNIEnv *jni, jobject jThis)
+jobject constructTransportInst(JNIEnv *jni,
+                               OpenDDS::DCPS::TransportInst_rch inst)
 {
-  OpenDDS::DCPS::TransportImpl *ti = recoverTransportImpl(jni, jThis);
-  ti->_remove_ref();
-}
-
-jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1publisher
-(JNIEnv *jni, jobject jThis, jobject jPub)
-{
-  OpenDDS::DCPS::TransportImpl *ti = recoverTransportImpl(jni, jThis);
-  DDS::Publisher_var pub;
-  copyToCxx(jni, pub, jPub);
-  OpenDDS::DCPS::PublisherImpl *pub_impl =
-    dynamic_cast<OpenDDS::DCPS::PublisherImpl *>(pub.in());
-  OpenDDS::DCPS::AttachStatus stat = pub_impl->attach_transport(ti);
-  jclass clazz = findClass(jni, "OpenDDS/DCPS/transport/AttachStatus");
-  jmethodID mid = jni->GetStaticMethodID(clazz, "from_int",
-                                         "(I)LOpenDDS/DCPS/transport/AttachStatus;");
-  return jni->CallStaticObjectMethod(clazz, mid, static_cast<jint>(stat));
-}
-
-jobject JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_attach_1to_1subscriber
-(JNIEnv *jni, jobject jThis, jobject jSub)
-{
-  OpenDDS::DCPS::TransportImpl *ti = recoverTransportImpl(jni, jThis);
-  DDS::Subscriber_var sub;
-  copyToCxx(jni, sub, jSub);
-  OpenDDS::DCPS::SubscriberImpl *sub_impl =
-    dynamic_cast<OpenDDS::DCPS::SubscriberImpl *>(sub.in());
-  OpenDDS::DCPS::AttachStatus stat = sub_impl->attach_transport(ti);
-  jclass clazz = findClass(jni, "OpenDDS/DCPS/transport/AttachStatus");
-  jmethodID mid = jni->GetStaticMethodID(clazz, "from_int",
-                                         "(I)LOpenDDS/DCPS/transport/AttachStatus;");
-  return jni->CallStaticObjectMethod(clazz, mid, static_cast<jint>(stat));
-}
-
-jint config_impl(JNIEnv *jni, jobject jThis, jobject jConf)
-{
-  using namespace OpenDDS::DCPS;
-  TransportImpl *ti = recoverTransportImpl(jni, jThis);
-
-  jclass clazz_tc = findClass(jni, BaseConfig::jclassName);
-  jfieldID fid_id = jni->GetFieldID(clazz_tc, "id", "I");
-  jint id = jni->GetIntField(jConf, fid_id);
-  TransportConfiguration_rch tc =
-    TheTransportFactory->get_configuration(id);
-
-  // Configure common properties (TransportConfiguration)
-  toCxx(jni, clazz_tc, jConf, *tc.in(), BaseConfig::fields);
-  //   private ThreadSynchStrategy sendThreadStrategy;
-  {
-    jfieldID fid = jni->GetFieldID(clazz_tc, "sendThreadStrategy",
-                                   BaseConfig::strategySig);
-    jobject enumVal = jni->GetObjectField(jConf, fid);
-    jclass enumClazz = findClass(jni, BaseConfig::strategyClass);
-    jfieldID fid_pc = jni->GetStaticFieldID(enumClazz, "PER_CONNECTION_SYNCH",
-                                            BaseConfig::strategySig);
-    jobject perConnection = jni->GetStaticObjectField(enumClazz, fid_pc);
-
-    if (jni->IsSameObject(enumVal, perConnection)) {
-      tc->send_thread_strategy(new PerConnectionSynchStrategy);
-
+    jclass instClazz = 0;
+    if (inst->transport_type_ == "tcp") {
+      instClazz = findClass(jni, "OpenDDS/DCPS/transport/TcpInst");
+    } else if (inst->transport_type_ == "udp") {
+      instClazz = findClass(jni, "OpenDDS/DCPS/transport/UdpInst");
+    } else if (inst->transport_type_ == "multicast") {
+      instClazz = findClass(jni, "OpenDDS/DCPS/transport/MulticastInst");
     } else {
-      jfieldID fid_ps = jni->GetStaticFieldID(enumClazz, "POOL_SYNCH",
-                                              BaseConfig::strategySig);
-      jobject poolSynch = jni->GetStaticObjectField(enumClazz, fid_ps);
-      tc->send_thread_strategy(
-        jni->IsSameObject(enumVal, poolSynch)
-        ? static_cast<ThreadSynchStrategy *>(new PoolSynchStrategy)
-        : static_cast<ThreadSynchStrategy *>(new NullSynchStrategy));
-      jni->DeleteLocalRef(poolSynch);
+      throw_java_exception(jni, OpenDDS::DCPS::Transport::UnableToCreate());
     }
-
-    jni->DeleteLocalRef(perConnection);
-    jni->DeleteLocalRef(enumVal);
-  }
-
-  // Configure transport-specific properties
-  jmethodID mid_cfg = jni->GetMethodID(clazz_tc, "saveSpecificConfig", "(J)V");
-  jni->CallVoidMethod(jConf, mid_cfg, reinterpret_cast<jlong>(tc.in()));
-
-  return ti->configure(tc.in());
+    jmethodID ctor = jni->GetMethodID(instClazz, "<init>", "(J)V");
+    return jni->NewObject(instClazz, ctor,
+                          reinterpret_cast<jlong>(inst._retn()));
 }
 
-jint JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_configure
-(JNIEnv *jni, jobject jThis, jobject jConf)
+// TheTransportRegistry
+
+// TheTransportRegistry::create_inst
+jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_create_1inst
+(JNIEnv * jni, jclass, jstring name, jstring transport_type)
+{
+  JStringMgr jsm_name(jni, name);
+  JStringMgr jsm_tt(jni, transport_type);
+
+  try {
+    OpenDDS::DCPS::TransportInst_rch inst =
+      TheTransportRegistry->create_inst(jsm_name.c_str(), jsm_tt.c_str());
+    return constructTransportInst(jni, inst);
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+    return 0;
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+    return 0;
+  }
+}
+
+// TheTransportRegistry::get_inst
+jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_get_1inst
+(JNIEnv * jni, jclass, jstring name)
+{
+  JStringMgr jsm_name(jni, name);
+
+  try {
+    OpenDDS::DCPS::TransportInst_rch inst =
+      TheTransportRegistry->get_inst(jsm_name.c_str());
+    return constructTransportInst(jni, inst);
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+    return 0;
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+    return 0;
+  }
+}
+
+// TheTransportRegistry::remove_inst
+void JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_remove_1inst
+(JNIEnv * jni, jclass, jobject jobj)
 {
   try {
-    return config_impl(jni, jThis, jConf);
+    OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jobj),
+                                          false);  // Don't take ownership
+    if (inst != 0) {
+      TheTransportRegistry->remove_inst(inst);
+    }
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+  }
+}
+
+// TheTransportRegistry::create_config
+jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_create_1config
+(JNIEnv * jni, jclass, jstring name)
+{
+  JStringMgr jsm_name(jni, name);
+
+  try {
+    OpenDDS::DCPS::TransportConfig_rch config =
+      TheTransportRegistry->create_config(jsm_name.c_str());
+    jclass configClazz =
+      findClass(jni, "OpenDDS/DCPS/transport/TransportConfig");
+    jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
+    return jni->NewObject(configClazz, ctor,
+                          reinterpret_cast<jlong>(config._retn()));
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(jni, se);
@@ -552,82 +262,808 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportImpl_configure
   }
 }
 
-namespace {
-
-template <typename T>
-void narrowTransportConfig(T *&transportConfig, jlong javaPtr)
+// TheTransportRegistry::get_config
+jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_get_1config
+(JNIEnv * jni, jclass, jstring name)
 {
-  OpenDDS::DCPS::TransportConfiguration *tc =
-    reinterpret_cast<OpenDDS::DCPS::TransportConfiguration *>(javaPtr);
-  transportConfig = static_cast<T *>(tc);
+  JStringMgr jsm_name(jni, name);
+
+  try {
+    OpenDDS::DCPS::TransportConfig_rch config =
+      TheTransportRegistry->get_config(jsm_name.c_str());
+    jclass configClazz =
+      findClass(jni, "OpenDDS/DCPS/transport/TransportConfig");
+    jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
+    return jni->NewObject(configClazz, ctor,
+                          reinterpret_cast<jlong>(config._retn()));
+
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+    return 0;
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+    return 0;
+  }
 }
 
-} // namespace
-
-// SimpleTcpConfiguration
-
-void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_saveSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
+// TheTransportRegistry::remove_config
+void JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_remove_1config
+(JNIEnv * jni, jclass, jobject jobj)
 {
-  OpenDDS::DCPS::SimpleTcpConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, TcpConfig::jclassName);
-  toCxx(jni, clazz, jThis, *tc, TcpConfig::fields);
+  try {
+    OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jobj),
+                                              false);  // Don't take ownership
+    if (config != 0) {
+      TheTransportRegistry->remove_config(config);
+    }
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+  }
 }
 
-void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_loadSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
+// TheTransportRegistry::global_config
+jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_global_1config__
+(JNIEnv * jni, jclass)
 {
-  OpenDDS::DCPS::SimpleTcpConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, TcpConfig::jclassName);
-  toJava(jni, clazz, *tc, jThis, TcpConfig::fields);
+  try {
+    OpenDDS::DCPS::TransportConfig_rch config =
+      TheTransportRegistry->global_config();
+    jclass configClazz =
+      findClass(jni, "OpenDDS/DCPS/transport/TransportConfig");
+    jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
+    return jni->NewObject(configClazz, ctor,
+                          reinterpret_cast<jlong>(config._retn()));
+
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+    return 0;
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+    return 0;
+  }
 }
 
-// UdpConfiguration
-
-void JNICALL
-Java_OpenDDS_DCPS_transport_UdpConfiguration_saveSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
+// TheTransportRegistry::global_config
+void JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_global_1config__LOpenDDS_DCPS_transport_TransportConfig_2
+(JNIEnv * jni, jclass, jobject jobj)
 {
-  OpenDDS::DCPS::UdpConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, UdpConfig::jclassName);
-  toCxx(jni, clazz, jThis, *tc, UdpConfig::fields);
+  try {
+    OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jobj),
+                                              false); // Don't take ownership
+    if (config != 0) {
+      TheTransportRegistry->global_config(config);
+    }
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+  }
 }
 
-void JNICALL
-Java_OpenDDS_DCPS_transport_UdpConfiguration_loadSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
+// TheTransportRegistry::bind_config
+void JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_bind_1config__Ljava_lang_String_2LDDS_Entity_2
+(JNIEnv * jni, jclass, jstring name, jobject entity_jobj)
 {
-  OpenDDS::DCPS::UdpConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, UdpConfig::jclassName);
-  toJava(jni, clazz, *tc, jThis, UdpConfig::fields);
+  JStringMgr jsm_name(jni, name);
+
+  try {
+    DDS::Entity_var entity;
+    copyToCxx(jni, entity, entity_jobj);
+
+    TheTransportRegistry->bind_config(jsm_name.c_str(), entity.in());
+
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+  }
 }
 
-// MulticastConfiguration
-
-void JNICALL
-Java_OpenDDS_DCPS_transport_MulticastConfiguration_saveSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
+// TheTransportRegistry::bind_config
+void JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_bind_1config__LOpenDDS_DCPS_transport_TransportConfig_2LDDS_Entity_2
+(JNIEnv * jni, jclass, jobject config_jobj, jobject entity_jobj)
 {
-  OpenDDS::DCPS::MulticastConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, MulticastConfig::jclassName);
-  toCxx(jni, clazz, jThis, *tc, MulticastConfig::fields);
+  try {
+    OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, config_jobj),
+                                              false); // Don't take ownership
+
+    DDS::Entity_var entity;
+    copyToCxx(jni, entity, entity_jobj);
+
+    TheTransportRegistry->bind_config(config, entity.in());
+
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
+  }
 }
 
-void JNICALL
-Java_OpenDDS_DCPS_transport_MulticastConfiguration_loadSpecificConfig
-(JNIEnv *jni, jobject jThis, jlong ptr)
+// TheTransportRegistry::release
+void JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_release
+(JNIEnv *, jclass)
 {
-  OpenDDS::DCPS::MulticastConfiguration *tc;
-  narrowTransportConfig(tc, ptr);
-  jclass clazz = findClass(jni, MulticastConfig::jclassName);
-  toJava(jni, clazz, *tc, jThis, MulticastConfig::fields);
+  TheTransportRegistry->release();
+}
+
+// TransportConfig
+
+// TransportConfig::_jni_fini
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig__1jni_1fini
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  config->_remove_ref();
+}
+
+// TransportConfig::getName
+jstring JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getName
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  std::string name = config->name();
+  jstring retStr = jni->NewStringUTF(name.c_str());
+  return retStr;
+}
+
+// TransportConfig::addLast
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_addLast
+(JNIEnv * jni, jobject jthis, jobject inst_jobj)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, inst_jobj),
+                                        false); // Don't take ownership
+  config->instances_.push_back(inst);
+}
+
+// TransportConfig::countInstances
+jlong JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_countInstances
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  return config->instances_.size();
+}
+
+// TransportConfig::getInstance
+jobject JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getInstance
+(JNIEnv * jni, jobject jthis, jlong index)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  if (index < static_cast<jlong>(config->instances_.size())) {
+    OpenDDS::DCPS::TransportInst_rch inst = config->instances_[static_cast<std::size_t>(index)];
+    return constructTransportInst(jni, inst);
+  }
+  return 0;
+}
+
+// TransportConfig::getSwapBytes
+jboolean JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getSwapBytes
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  return config->swap_bytes_;
+}
+
+// TransportConfig::setSwapBytes
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_setSwapBytes
+(JNIEnv * jni, jobject jthis, jboolean val)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  config->swap_bytes_ = val;
+}
+
+// TransportConfig::getPassiveConnectDuration
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getPassiveConnectDuration
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  return config->passive_connect_duration_;
+}
+
+// TransportConfig::setPassiveConnectDuration
+void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_setPassiveConnectDuration
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportConfig_rch config(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis),
+                                            false); // Don't take ownership
+  config->passive_connect_duration_ = val;
+}
+
+// TransportInst
+
+//_TransportInst::jni_fini
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst__1jni_1fini
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->_remove_ref();
+
+}
+
+// TransportInst::getName
+jstring JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getName
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  jstring retStr = jni->NewStringUTF(inst->name().c_str());
+  return retStr;
+}
+
+// TransportInst::getQueueMessagesPerPool
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueMessagesPerPool
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->queue_messages_per_pool_);
+}
+
+// TransportInst::setQueueMessagesPerPool
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setQueueMessagesPerPool
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->queue_messages_per_pool_ = val;
+}
+
+// TransportInst::getQueueInitialPools
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getQueueInitialPools
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->queue_initial_pools_);
+}
+
+// TransportInst::setQueueInitialPools
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setQueueInitialPools
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->queue_initial_pools_ = val;
+}
+
+// TransportInst::getMaxPacketSize
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getMaxPacketSize
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->max_packet_size_;
+}
+
+// TransportInst::setMaxPacketSize
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setMaxPacketSize
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->max_packet_size_ = val;
+}
+
+// TransportInst::getMaxSamplesPerPacket
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getMaxSamplesPerPacket
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->max_samples_per_packet_);
+}
+
+// TransportInst::setMaxSamplesPerPacket
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setMaxSamplesPerPacket
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->max_samples_per_packet_ = val;
+}
+
+// TransportInst::getOptimumPacketSize
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getOptimumPacketSize
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->optimum_packet_size_;
+}
+
+// TransportInst::setOptimumPacketSize
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setOptimumPacketSize
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->optimum_packet_size_ = val;
+}
+
+// TransportInst::isThreadPerConnection
+jboolean JNICALL Java_OpenDDS_DCPS_transport_TransportInst_isThreadPerConnection
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->thread_per_connection_;
+}
+
+// TransportInst::setThreadPerConnection
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setThreadPerConnection
+(JNIEnv * jni, jobject jthis, jboolean val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->thread_per_connection_ = val;
+}
+
+// TransportInst::getDatalinkReleaseDelay
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getDatalinkReleaseDelay
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->datalink_release_delay_;
+}
+
+// TransportInst::setDatalinkReleaseDelay
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setDatalinkReleaseDelay
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->datalink_release_delay_ = val;
+}
+
+// TransportInst::getDatalinkControlChunks
+jint JNICALL Java_OpenDDS_DCPS_transport_TransportInst_getDatalinkControlChunks
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->datalink_control_chunks_);
+}
+
+// TransportInst::setDatalinkControlChunks
+void JNICALL Java_OpenDDS_DCPS_transport_TransportInst_setDatalinkControlChunks
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TransportInst_rch inst(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->datalink_control_chunks_ = val;
+}
+
+// TcpInst
+
+// TcpInst::getLocalAddress
+jstring JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getLocalAddress
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  jstring retStr = jni->NewStringUTF(inst->local_address_str_.c_str());
+  return retStr;
+}
+
+// TcpInst::setLocalAddress
+void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setLocalAddress
+(JNIEnv * jni, jobject jthis, jstring val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  JStringMgr jsm_val(jni, val);
+  inst->local_address_str_ = jsm_val.c_str();
+  inst->local_address_.set(inst->local_address_str_.c_str());
+}
+
+// TcpInst::isEnableNagleAlgorithm
+jboolean JNICALL Java_OpenDDS_DCPS_transport_TcpInst_isEnableNagleAlgorithm
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  return inst->enable_nagle_algorithm_;
+}
+
+// TcpInst::setEnableNagleAlgorithm
+void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setEnableNagleAlgorithm
+(JNIEnv * jni, jobject jthis, jboolean val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  inst->enable_nagle_algorithm_ = val;
+}
+
+// TcpInst::getConnRetryInitialDelay
+jint JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getConnRetryInitialDelay
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  return inst->conn_retry_initial_delay_;
+}
+
+// TcpInst::setConnRetryInitialDelay
+void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setConnRetryInitialDelay
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  inst->conn_retry_initial_delay_ = val;
+}
+
+// TcpInst::getConnRetryBackoffMultiplier
+jdouble JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getConnRetryBackoffMultiplier
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  return inst->conn_retry_backoff_multiplier_;
+}
+
+// TcpInst::setConnRetryBackoffMultiplier
+void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setConnRetryBackoffMultiplier
+(JNIEnv * jni, jobject jthis, jdouble val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  inst->conn_retry_backoff_multiplier_ = val;
+}
+
+// TcpInst::getConnRetryAttempts
+jint JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getConnRetryAttempts
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  return inst->conn_retry_attempts_;
+}
+
+// TcpInst::setConnRetryAttempts
+void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setConnRetryAttempts
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  inst->conn_retry_attempts_ = val;
+}
+
+// TcpInst::getMaxOutputPausePeriod
+jint JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getMaxOutputPausePeriod
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  return inst->max_output_pause_period_;
+}
+
+// TcpInst::setMaxOutputPausePeriod
+void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setMaxOutputPausePeriod
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  inst->max_output_pause_period_ = val;
+}
+
+// TcpInst::getPassiveReconnectDuration
+jint JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getPassiveReconnectDuration
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  return inst->passive_reconnect_duration_;
+}
+
+// TcpInst::setPassiveReconnectDuration
+void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setPassiveReconnectDuration
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  inst->passive_reconnect_duration_ = val;
+}
+
+// UdpInst
+
+// UdpInst::getLocalAddress
+jstring JNICALL Java_OpenDDS_DCPS_transport_UdpInst_getLocalAddress
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::UdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::UdpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  ACE_TCHAR buffer[1024];
+  inst->local_address_.addr_to_string(buffer, 1024, 1);
+  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
+  jstring retStr = jni->NewStringUTF(addr_str.c_str());
+  return retStr;
+}
+
+// UdpInst::setLocalAddress
+void JNICALL Java_OpenDDS_DCPS_transport_UdpInst_setLocalAddress
+(JNIEnv * jni, jobject jthis, jstring val)
+{
+  OpenDDS::DCPS::UdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::UdpInst>(jni, jthis),
+                                  false); // Don't take ownership
+  JStringMgr jsm_val(jni, val);
+  inst->local_address_.set(jsm_val.c_str());
+}
+
+// MulticastInst
+
+// MulticastInst::getDefaultToIPv6
+jboolean JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getDefaultToIPv6
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->default_to_ipv6_;
+}
+
+// MulticastInst::setDefaultToIPv6
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setDefaultToIPv6
+(JNIEnv * jni, jobject jthis, jboolean val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->default_to_ipv6_ = val;
+}
+
+// MulticastInst::getPortOffset
+jshort JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getPortOffset
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->port_offset_;
+}
+
+// MulticastInst::setPortOffset
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setPortOffset
+(JNIEnv * jni, jobject jthis, jshort val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->port_offset_ = val;
+}
+
+// MulticastInst::getGroupAddress
+jstring JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getGroupAddress
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  ACE_TCHAR buffer[1024];
+  inst->group_address_.addr_to_string(buffer, 1024, 1);
+  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
+  jstring retStr = jni->NewStringUTF(addr_str.c_str());
+  return retStr;
+}
+
+// MulticastInst::setGroupAddress
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setGroupAddress
+(JNIEnv * jni, jobject jthis, jstring val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  JStringMgr jsm_val(jni, val);
+  inst->group_address_.set(jsm_val.c_str());
+}
+
+// MulticastInst::getReliable
+jboolean JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getReliable
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->reliable_;
+}
+
+// MulticastInst::setReliable
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setReliable
+(JNIEnv * jni, jobject jthis, jboolean val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->reliable_ = val;
+}
+
+// MulticastInst::getSynBackoff
+jdouble JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynBackoff
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->syn_backoff_;
+}
+
+// MulticastInst::setSynBackoff
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynBackoff
+(JNIEnv * jni, jobject jthis, jdouble val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->syn_backoff_ = val;
+}
+
+// MulticastInst::getSynInterval
+jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynInterval
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->syn_interval_.msec();
+}
+
+// MulticastInst::setSynInterval
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynInterval
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->syn_interval_.msec(long(val));
+}
+
+// MulticastInst::getSynTimeout
+jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynTimeout
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->syn_timeout_.msec();
+}
+
+// MulticastInst::setSynTimeout
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynTimeout
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->syn_timeout_.msec(long(val));
+}
+
+// MulticastInst::getNakDepth
+jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakDepth
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->nak_depth_);
+}
+
+// MulticastInst::setNakDepth
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakDepth
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->nak_depth_ = val;
+}
+
+// MulticastInst::getNakInterval
+jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakInterval
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->nak_interval_.msec();
+}
+
+// MulticastInst::setNakInterval
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakInterval
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->nak_interval_.msec(long(val));
+}
+
+// MulticastInst::getNakDelayInterval
+jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakDelayInterval
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->nak_delay_intervals_);
+}
+
+// MulticastInst::setNakDelayInterval
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakDelayInterval
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->nak_delay_intervals_ = val;
+}
+
+// MulticastInst::getNakMax
+jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakMax
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->nak_max_);
+}
+
+// MulticastInst::setNakMax
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakMax
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->nak_max_ = val;
+}
+
+// MulticastInst::getNakTimeout
+jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakTimeout
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->nak_timeout_.msec();
+}
+
+// MulticastInst::setNakTimeout
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakTimeout
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->nak_timeout_.msec(long(val));
+}
+
+// MulticastInst::getTimeToLive
+jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getTimeToLive
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return inst->ttl_;
+}
+
+// MulticastInst::setTimeToLive
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setTimeToLive
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->ttl_ = static_cast<char>(val);
+}
+
+// MulticastInst::getRcvBufferSize
+jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getRcvBufferSize
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  return static_cast<jint>(inst->rcv_buffer_size_);
+}
+
+// MulticastInst::setRcvBufferSize
+void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setRcvBufferSize
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
+                                        false); // Don't take ownership
+  inst->rcv_buffer_size_ = val;
 }
 
 // WaitSet and GuardCondition

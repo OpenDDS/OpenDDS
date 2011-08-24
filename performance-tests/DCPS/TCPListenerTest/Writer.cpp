@@ -208,4 +208,3 @@ Writer::is_finished () const
 {
   return finished_sending_;
 }
-

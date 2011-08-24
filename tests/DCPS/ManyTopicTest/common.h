@@ -10,10 +10,9 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -40,8 +39,6 @@ static const int LEASE_DURATION_SEC = 5 ; // seconds
 static int num_ops_per_thread = 10;
 static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 static int history_depth = 100 ;
-// default to using TCP
-static int using_udp = 0;
 
 // These files need to be unlinked in the run test script before and
 // after running.

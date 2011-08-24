@@ -36,6 +36,7 @@ endif
 built_in_topics ?= 1
 tao_orbsvcs ?= 1
 content_subscription ?= 1
+exceptions ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow
 # applications dependent on libraries, with same version numbers (major,

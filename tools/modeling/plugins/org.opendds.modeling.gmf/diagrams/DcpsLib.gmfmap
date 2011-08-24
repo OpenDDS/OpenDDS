@@ -15,7 +15,7 @@
           xsi:type="gmfmap:FeatureLabelMapping"
           viewPattern="">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
+            href="DcpsLib.gmfgraph#DomainParticipantName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -24,15 +24,25 @@
           readOnly="true"
           viewPattern="«domainParticipant»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
+            href="DcpsLib.gmfgraph#DomainParticipantStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="transportConfig: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#DomainParticipantTransportConfig"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Domain.ecore#//DomainEntity/transportConfig"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DcpsLib.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
+          href="DcpsLib.gmfgraph#DomainParticipant"/>
       <children
           compartment="//@nodes.0/@ownedChild/@compartments.0"
           referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild">
@@ -80,13 +90,13 @@
           </labelMappings>
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping"
-              viewPattern="transportId: {0}"
+              viewPattern="transportConfig: {0}"
               editorPattern="{0}"
               editPattern="{0}">
             <diagramLabel
-                href="DcpsLib.gmfgraph#PubSubTransportId"/>
+                href="DcpsLib.gmfgraph#PubSubTransportConfig"/>
             <features
-                href="../../org.opendds.modeling.model/model/DCPS.ecore#//PublisherSubscriber/transportId"/>
+                href="../../org.opendds.modeling.model/model/Domain.ecore#//DomainEntity/transportConfig"/>
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
@@ -127,6 +137,16 @@
                 <features
                     href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataReaderWriter/copyFromTopicQos"/>
               </labelMappings>
+              <labelMappings
+                  xsi:type="gmfmap:FeatureLabelMapping"
+                  viewPattern="transportConfig: {0}"
+                  editorPattern="{0}"
+                  editPattern="{0}">
+                <diagramLabel
+                    href="DcpsLib.gmfgraph#DataReaderWriterTransportConfig"/>
+                <features
+                    href="../../org.opendds.modeling.model/model/Domain.ecore#//DomainEntity/transportConfig"/>
+              </labelMappings>
               <tool
                   xsi:type="gmftool:CreationTool"
                   href="DcpsLib.gmftool#//@palette/@tools.0/@tools.7"/>
@@ -153,7 +173,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                         <initializers
                             xsi:type="gmfmap:FeatureValueSpec">
@@ -161,7 +181,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                       </newElementInitializers>
                     </initializers>
@@ -557,7 +577,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                         <initializers
                             xsi:type="gmfmap:FeatureValueSpec">
@@ -565,7 +585,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                       </newElementInitializers>
                     </initializers>
@@ -647,7 +667,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                         <initializers
                             xsi:type="gmfmap:FeatureValueSpec">
@@ -655,7 +675,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                       </newElementInitializers>
                     </initializers>
@@ -821,7 +841,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                         <initializers
                             xsi:type="gmfmap:FeatureValueSpec">
@@ -829,7 +849,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                       </newElementInitializers>
                     </initializers>
@@ -1158,13 +1178,19 @@
                 <containmentFeature
                     href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
               </children>
+              <children
+                  compartment="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@compartments.1"
+                  referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.12/@ownedChild">
+                <containmentFeature
+                    href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+              </children>
               <compartments
                   children="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.0 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.1 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.2 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.3 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.4 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.5 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.6 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.7 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.8 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.9 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.10 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.11 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.12 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.13 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.14">
                 <compartment
                     href="QosPolicies.gmfgraph#QoS Policies- Custom"/>
               </compartments>
               <compartments
-                  children="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.15 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.16 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.17 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.18 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.19 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.20 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.21 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.22 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.23 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.24 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.25 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.26 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.27 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.28">
+                  children="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.15 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.16 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.17 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.18 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.19 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.20 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.21 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.22 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.23 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.24 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.25 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.26 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.27 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.28 //@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.29">
                 <compartment
                     href="QosPolicies.gmfgraph#QoS Policies- Shared"/>
               </compartments>
@@ -1383,13 +1409,13 @@
           </labelMappings>
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping"
-              viewPattern="transportId: {0}"
+              viewPattern="transportConfig: {0}"
               editorPattern="{0}"
               editPattern="{0}">
             <diagramLabel
-                href="DcpsLib.gmfgraph#PubSubTransportId"/>
+                href="DcpsLib.gmfgraph#PubSubTransportConfig"/>
             <features
-                href="../../org.opendds.modeling.model/model/DCPS.ecore#//PublisherSubscriber/transportId"/>
+                href="../../org.opendds.modeling.model/model/Domain.ecore#//DomainEntity/transportConfig"/>
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
@@ -1429,6 +1455,16 @@
                     href="DcpsLib.gmfgraph#DataReaderWriterCopyFromTopicQos"/>
                 <features
                     href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataReaderWriter/copyFromTopicQos"/>
+              </labelMappings>
+              <labelMappings
+                  xsi:type="gmfmap:FeatureLabelMapping"
+                  viewPattern="transportConfig: {0}"
+                  editorPattern="{0}"
+                  editPattern="{0}">
+                <diagramLabel
+                    href="DcpsLib.gmfgraph#DataReaderWriterTransportConfig"/>
+                <features
+                    href="../../org.opendds.modeling.model/model/Domain.ecore#//DomainEntity/transportConfig"/>
               </labelMappings>
               <tool
                   xsi:type="gmftool:CreationTool"
@@ -1498,7 +1534,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                         <initializers
                             xsi:type="gmfmap:FeatureValueSpec">
@@ -1506,7 +1542,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                       </newElementInitializers>
                     </initializers>
@@ -1522,7 +1558,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                         <initializers
                             xsi:type="gmfmap:FeatureValueSpec">
@@ -1530,7 +1566,7 @@
                               xsi:type="ecore:EAttribute"
                               href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
                           <value
-                              body="0"/>
+                              body="2147483647"/>
                         </initializers>
                       </newElementInitializers>
                     </initializers>

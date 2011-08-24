@@ -4,7 +4,7 @@
 #include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include "model/ReferExternalProjTraits.h"
@@ -18,12 +18,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     using OpenDDS::Model::ReferExternalProj::Elements;
 
-    DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
+    DDS::DataWriter_var writer = model.writer( Elements::DataWriters::local_topic_writer);
+    DDS::DataWriter_var writer2 = model.writer( Elements::DataWriters::remote_topic_writer);
+    DDS::DataWriter_var writer3 = model.writer( Elements::DataWriters::transitive_topic_writer);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data2::MessageDataWriter_var message_writer =
-      data2::MessageDataWriter::_narrow(writer.in());
+    MTMdata2::MTM_MessageDataWriter_var message_writer =
+      MTMdata2::MTM_MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -35,7 +37,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     OpenDDS::Model::WriterSync ws(writer);
     {
       // Write samples
-      data2::Message message;
+      MTMdata2::MTM_Message message;
       message.subject_id = 99;
 
       message.from       = CORBA::string_dup("Comic Book Guy");

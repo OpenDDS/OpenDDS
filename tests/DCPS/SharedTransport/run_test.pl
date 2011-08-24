@@ -13,19 +13,29 @@ use PerlDDS::Run_Test;
 PerlDDS::add_lib_path('../FooType');
 PerlDDS::add_lib_path('../TestFramework');
 
-$opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf svc.conf";
-$test_opts = "$opts -DCPSConfigFile test.ini @ARGV";
+$arg_idx = 0;
+$transport = "tcp.ini";
+
+if ($ARGV[$arg_idx] eq 'udp') {
+  $transport = "udp.ini";
+  $arg_idx = $arg_idx + 1;
+}
+
+if ($ARGV[$arg_idx] eq 'multicast') {
+  $transport = "multicast.ini";
+  $arg_idx = $arg_idx + 1;
+}
+
+$test_opts = "-DCPSConfigFile $transport @ARGV";
 
 $status = 0;
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior ");
+                                    "-o $dcpsrepo_ior ");
 
 $Test = PerlDDS::create_process("test", "$test_opts");
 

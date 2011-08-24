@@ -97,6 +97,11 @@ public class Plugin extends EMFPlugin {
 		imageMappings.put("TransportOffset",            NUMBER_IMAGE_NAME);
 		imageMappings.put("TTL",                        NUMBER_IMAGE_NAME);
 		imageMappings.put("UdpConfig",                  PACKAGE_IMAGE_NAME);
+		imageMappings.put("TransportConfig", NODE_IMAGE_NAME);
+		imageMappings.put("TransportImpl", NODE_IMAGE_NAME);
+		imageMappings.put("TcpTransport", NODE_IMAGE_NAME);
+		imageMappings.put("UdpTransport", NODE_IMAGE_NAME);
+		imageMappings.put("MulticastTransport", NODE_IMAGE_NAME);
 		
 		// org.opendds.modeling.sdk.model.editor		
 		imageMappings.put("GeneratorModelFile",         GENERATOR_IMAGE_NAME);

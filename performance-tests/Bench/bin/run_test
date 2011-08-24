@@ -158,7 +158,6 @@ $killDelay += $duration if $duration;
 my $repo_ior  = PerlACE::LocalFile("repo.ior");
 my $debugFile;
    $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
-my $confFile  = $projectRoot . "/etc/svc.conf";
 
 # Clean out leftovers.
 unlink $repo_ior if $startRepo;
@@ -167,8 +166,7 @@ unlink $debugFile if $debugFile;
 my $verboseDebug;
 $verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
 
-my $common_opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf $confFile ";
+my $common_opts = '';
 $common_opts .= $verboseDebug if $verboseDebug;
 $common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 

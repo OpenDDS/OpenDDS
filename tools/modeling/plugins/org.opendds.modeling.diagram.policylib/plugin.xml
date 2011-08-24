@@ -78,18 +78,7 @@
             </ElementType>
          </ViewId>
       </GlobalActionHandlerProvider>
-      <GlobalActionHandlerProvider
-            class="org.eclipse.gmf.runtime.diagram.ui.render.providers.DiagramUIRenderGlobalActionHandlerProvider"
-            id="OpenDDS PolicyLibRender">
-         <Priority name="Lowest"/>
-         <ViewId id="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID">
-            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
-               <GlobalActionId actionId="cut"/>
-               <GlobalActionId actionId="copy"/>
-               <GlobalActionId actionId="paste"/>
-            </ElementType>
-         </ViewId>
-      </GlobalActionHandlerProvider>
+      <!-- Copy and paste disabled because of issues found in GMF 2.2.2 -->
    </extension>
 
 
@@ -662,7 +651,6 @@
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
             <contentExtension pattern="org.opendds.modeling.diagram.policylib.resourceContent"/>
-			<contentExtension pattern="org.opendds.modeling.diagram.policylib.domainResourceContent"/>
             <contentExtension pattern="org.opendds.modeling.diagram.policylib.navigatorLinkHelper"/>
          </includes>
       </viewerContentBinding>
@@ -710,27 +698,6 @@
                </or>
             </parentExpression>
          </commonSorter>
-      </navigatorContent>
-      <navigatorContent
-            id="org.opendds.modeling.diagram.policylib.domainResourceContent" 
-            name="%domainNavigatorContentName" 
-            priority="normal" 
-            contentProvider="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorLabelProvider"
-            icon="icons/obj16/PolicyLib.gif"
-            activeByDefault="true">
-         <triggerPoints>
-            <or>
-	           <and>
-    	          <instanceof value="org.eclipse.core.resources.IFile"/>
-        	      <test property="org.eclipse.core.resources.extension" value="opendds"/>
-               </and>
-               <instanceof value="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorItem"/>
-            </or>
-         </triggerPoints>
-         <possibleChildren>
-            <instanceof value="org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorItem"/>
-         </possibleChildren>
       </navigatorContent>
       <actionProvider
             id="org.opendds.modeling.diagram.policylib.navigatorActionProvider"
@@ -837,23 +804,213 @@
             <category id="org.opendds.modeling.model.qospolicies.validations" mandatory="false" name="PolicyLib Validations">
          <![CDATA[Detects incorrect or questionable semantic constructs for elements in a PolicyLib diagram.]]>
       </category>
-      <category id="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.qospolicies.validation.errors" mandatory="false" name="PolicyLib Errors">
-         <![CDATA[Detects modeling constructs that would result in invalid generated OpenDDS code.]]>
+      <category id="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors" mandatory="false" name="PolicyLib Errors">
+         <![CDATA[Detects PolicyLib elements that would result in invalid generated OpenDDS code.]]>
+      </category>
+      <category id="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors" mandatory="false" name="QoS Policy Errors">
+         <![CDATA[Detects QoS Policy members that would result in invalid generated OpenDDS code.]]>
+      </category>
+      <category id="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors.length_fields" mandatory="false" name="QoS Policy Length Field Errors">
+         <![CDATA[Qos Policy length field validation]]>
+      </category>
+      <category id="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors.durations" mandatory="false" name="QoS Policy Duration Errors">
+         <![CDATA[QoS Policy duration validation]]>
       </category>
       <constraintProvider cache="true">
          <package namespaceUri="http://www.opendds.org/modeling/schemas/QoS/1.0"/>
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/OpenDDS/1.0"/>
                <constraints categories="org.opendds.modeling.model.qospolicies.validations">
                   </constraints>
-         <constraints categories="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.qospolicies.validation.errors">
+         <constraints categories="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors">
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors">
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors.length_fields">
                   <constraint id="org.opendds.modeling.model.qospolicies.validation.error.name_blank"
             lang="OCL"
-            name="Policy Name Emtpy"
+            name="Policy Name Validation"
             mode="Batch"
             severity="ERROR" statusCode="200">
             <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
             <description><![CDATA[Policy names should not be empty]]></description>
             <message><![CDATA[Policy name is empty]]></message>
             <target class="qos.QosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples"
+            lang="OCL"
+            name="dsQosPolicy max_samples validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples = -1 or
+self.max_samples > 0
+]]>
+            <description><![CDATA[dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_instances"
+            lang="OCL"
+            name="dsQosPolicy max_instances validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_instances = -1 or
+self.max_instances > 0
+]]>
+            <description><![CDATA[dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples_per_instance"
+            lang="OCL"
+            name="dsQosPolicy max_samples_per_instance validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples_per_instance = -1 or
+self.max_samples_per_instance > 0
+]]>
+            <description><![CDATA[dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.history_depth"
+            lang="OCL"
+            name="dsQosPolicy history_depth validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.history_depth = -1 or
+self.history_depth > 0
+]]>
+            <description><![CDATA[dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples"
+            lang="OCL"
+            name="rlQosPolicy max_samples validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples = -1 or
+self.max_samples > 0
+]]>
+            <description><![CDATA[rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.ResourceLimitsQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_instances"
+            lang="OCL"
+            name="rlQosPolicy max_instances validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_instances = -1 or
+self.max_instances > 0
+]]>
+            <description><![CDATA[rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.ResourceLimitsQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples_per_instance"
+            lang="OCL"
+            name="rlQosPolicy max_samples_per_instance validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples_per_instance = -1 or
+self.max_samples_per_instance > 0
+]]>
+            <description><![CDATA[rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.ResourceLimitsQosPolicy"/>
+         </constraint>
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.policylib.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors/org.opendds.modeling.model.qospolicies.validation.errors.durations">
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.deadlineQosPolicy.period"
+            lang="OCL"
+            name="deadlineQosPolicy period validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.period.second >= 0 and ( self.period.nanosecond < 1000000000 or self.period.nanosecond = 2147483647 )]]>
+            <description><![CDATA[deadlineQosPolicy period second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[deadlineQosPolicy period second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.deadlineQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.service_cleanup_delay"
+            lang="OCL"
+            name="dsQosPolicy service_cleanup_delay validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.service_cleanup_delay.second >= 0 and ( self.service_cleanup_delay.nanosecond < 1000000000 or self.service_cleanup_delay.nanosecond = 2147483647 )]]>
+            <description><![CDATA[dsQosPolicy service_cleanup_delay second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[dsQosPolicy service_cleanup_delay second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.dsQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.lbQosPolicy.duration"
+            lang="OCL"
+            name="lbQosPolicy duration validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.duration.second >= 0 and ( self.duration.nanosecond < 1000000000 or self.duration.nanosecond = 2147483647 )]]>
+            <description><![CDATA[lbQosPolicy duration second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[lbQosPolicy duration second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.lbQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.lifespanQosPolicy.duration"
+            lang="OCL"
+            name="lifespanQosPolicy duration validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.duration.second >= 0 and ( self.duration.nanosecond < 1000000000 or self.duration.nanosecond = 2147483647 )]]>
+            <description><![CDATA[lifespanQosPolicy duration second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[lifespanQosPolicy duration second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.lifespanQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.livelinessQosPolicy.lease_duration"
+            lang="OCL"
+            name="livelinessQosPolicy lease_duration validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.lease_duration.second >= 0 and ( self.lease_duration.nanosecond < 1000000000 or self.lease_duration.nanosecond = 2147483647 )]]>
+            <description><![CDATA[livelinessQosPolicy lease_duration second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[livelinessQosPolicy lease_duration second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.livelinessQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rdlQosPolicy.autopurge_disposed_samples_delay"
+            lang="OCL"
+            name="rdlQosPolicy autopurge_disposed_samples_delay validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.autopurge_disposed_samples_delay.second >= 0 and ( self.autopurge_disposed_samples_delay.nanosecond < 1000000000 or self.autopurge_disposed_samples_delay.nanosecond = 2147483647 )]]>
+            <description><![CDATA[rdlQosPolicy autopurge_disposed_samples_delay second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[rdlQosPolicy autopurge_disposed_samples_delay second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.rdlQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rdlQosPolicy.autopurge_nowriter_samples_delay"
+            lang="OCL"
+            name="rdlQosPolicy autopurge_nowriter_samples_delay validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.autopurge_nowriter_samples_delay.second >= 0 and ( self.autopurge_nowriter_samples_delay.nanosecond < 1000000000 or self.autopurge_nowriter_samples_delay.nanosecond = 2147483647 )]]>
+            <description><![CDATA[rdlQosPolicy autopurge_nowriter_samples_delay second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[rdlQosPolicy autopurge_nowriter_samples_delay second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.rdlQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.reliabilityQosPolicy.max_blocking_time"
+            lang="OCL"
+            name="reliabilityQosPolicy max_blocking_time validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_blocking_time.second >= 0 and ( self.max_blocking_time.nanosecond < 1000000000 or self.max_blocking_time.nanosecond = 2147483647 )]]>
+            <description><![CDATA[reliabilityQosPolicy max_blocking_time second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[reliabilityQosPolicy max_blocking_time second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.reliabilityQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.tbfQosPolicy.minimum_separation"
+            lang="OCL"
+            name="tbfQosPolicy minimum_separation validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.minimum_separation.second >= 0 and ( self.minimum_separation.nanosecond < 1000000000 or self.minimum_separation.nanosecond = 2147483647 )]]>
+            <description><![CDATA[tbfQosPolicy minimum_separation second must be non-negative and nanosecond < 1 sec]]></description>
+            <message><![CDATA[tbfQosPolicy minimum_separation second must be non-negative and nanosecond < 1 sec]]></message>
+            <target class="opendds.tbfQosPolicy"/>
          </constraint>
                   </constraints>
       </constraintProvider>
@@ -866,6 +1023,22 @@
       </clientContext>
       <binding context="org.opendds.modeling.diagram.policylibDefaultCtx">
                   <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.error.name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_instances"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples_per_instance"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.history_depth"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_instances"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples_per_instance"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.deadlineQosPolicy.period"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.service_cleanup_delay"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.lbQosPolicy.duration"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.lifespanQosPolicy.duration"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.livelinessQosPolicy.lease_duration"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rdlQosPolicy.autopurge_disposed_samples_delay"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rdlQosPolicy.autopurge_nowriter_samples_delay"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.reliabilityQosPolicy.max_blocking_time"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.tbfQosPolicy.minimum_separation"/>
                </binding>
 
    </extension>

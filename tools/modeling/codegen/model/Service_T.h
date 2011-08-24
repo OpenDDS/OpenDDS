@@ -11,7 +11,7 @@
 
 #include "CopyQos.h"
 #include "Entities.h"
-#include "DefaultInstanceTraits.h"
+#include "TransportDirectives.h"
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/Service_Participant.h"
 
@@ -21,7 +21,7 @@ namespace OpenDDS { namespace Model {
 
   class Application;
 
-  template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
+  template< typename ModelName, class InstanceTraits>
   class Service : public CopyQos, public Entities, public InstanceTraits {
     public:
       typedef typename ModelName::Data Data;
@@ -36,7 +36,7 @@ namespace OpenDDS { namespace Model {
       typedef typename ModelName::DataWriters  DataWriters;
       typedef typename ModelName::DataReaders  DataReaders;
 
-      Service(const Application& application, int& argc, char** argv);
+      Service(const Application& application, int& argc, ACE_TCHAR* argv[]);
       ~Service();
 
       ///{ @name DDS API Entity accessors.
@@ -85,6 +85,10 @@ namespace OpenDDS { namespace Model {
              typename DataReaders::Values reader
            );
       ///}
+
+      /// @brief load a transport libray
+      virtual void loadTransportLibraryIfNeeded(
+             typename Transport::Type::Values transport_type);
 
       ///{ @name Delegate Callbacks
       virtual void copyPublicationQos(

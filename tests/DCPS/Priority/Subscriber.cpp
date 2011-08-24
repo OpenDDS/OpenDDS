@@ -12,13 +12,12 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #endif
@@ -35,7 +34,6 @@ Subscriber::~Subscriber()
     this->participant_->delete_contained_entities(); // Also deletes listener.
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 
@@ -64,32 +62,6 @@ Subscriber::Subscriber( const Options& options)
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created participant in domain %d.\n"),
       this->options_.domain()
-    ));
-  }
-
-  // Create the transport.
-  this->transport_
-    = TheTransportFactory->create_transport_impl(
-        this->options_.transportKey(),
-        OpenDDS::DCPS::AUTO_CONFIG
-      );
-  if( this->transport_.is_nil()) {
-    std::stringstream buffer;
-    buffer << this->options_.transportType();
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to create %C transport.\n"),
-      buffer.str().c_str()
-    ));
-    throw BadTransportException();
-
-  } else if( this->options_.verbose()) {
-    std::stringstream buffer;
-    buffer << this->options_.transportType();
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created %C transport.\n"),
-      buffer.str().c_str()
     ));
   }
 
@@ -163,32 +135,6 @@ Subscriber::Subscriber( const Options& options)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created subscriber.\n")
-    ));
-  }
-
-  // Attach the transport to the subscriber.
-  ::OpenDDS::DCPS::SubscriberImpl* servant
-    = dynamic_cast< ::OpenDDS::DCPS::SubscriberImpl*>( this->subscriber_.in());
-  if( 0 == servant) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to narrow subscriber servant.\n")
-    ));
-    throw BadServantException();
-  }
-
-  if( ::OpenDDS::DCPS::ATTACH_OK
-   != servant->attach_transport( this->transport_.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to attach transport to subscriber.\n")
-    ));
-    throw BadAttachException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("attached transport to subscriber.\n")
     ));
   }
 

@@ -19,11 +19,8 @@ PerlDDS::add_lib_path('../common');
 $sub_addr = "localhost:16701";
 $pub_addr = "localhost:";
 $port=29804;
-$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
-$svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
 unlink $dcpsrepo_ior;
 
@@ -45,11 +42,11 @@ sub run_compatibility_tests {
 
   $sub_time = 5;
   $pub_time = $sub_time;
-  $sub_parameters = "$svc_conf -s $sub_addr -l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -ORBDebugLevel $level";
+  $sub_parameters = "-s $sub_addr -l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -ORBDebugLevel $level";
 
   $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 
-  $pub_parameters = "$svc_conf -c $compatibility -d $pub_durability_kind -k $pub_liveliness_kind -r $pub_reliability_kind -l $pub_lease_time -x $pub_time -ORBDebugLevel $level -p $pub_addr$port" ;
+  $pub_parameters = "-c $compatibility -d $pub_durability_kind -k $pub_liveliness_kind -r $pub_reliability_kind -l $pub_lease_time -x $pub_time -ORBDebugLevel $level -p $pub_addr$port" ;
 
   $Publisher = PerlDDS::create_process ("publisher", "$pub_parameters");
 
@@ -83,9 +80,7 @@ sub run_compatibility_tests {
 }
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                                         "$repo_bit_conf "
-#                           . "-ORBDebugLevel 1 "
-                                                   . "-o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior");
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 print "Repository PID: " . $DCPSREPO->{PROCESS} . "\n" if $DCPSREPO->{PROCESS};

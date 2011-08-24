@@ -13,23 +13,13 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$svc_conf = '';
 $repo_bit_opt = '';
-if (!new PerlACE::ConfigList->check_config ('STATIC')) {
-  $repo_bit_opt = "-ORBSvcConf tcp.conf";
-  if ($ARGV[0] eq 'udp') {
-    $svc_conf = " -ORBSvcConf udp.conf ";
-  }
-  else {
-    $svc_conf = " -ORBSvcConf tcp.conf";
-  }
-}
 
 my($port1) = PerlACE::random_port();
 $ns_ior = "ns.ior";
 $dcpsrepo_ior = "repo.ior";
 $arg_ns_ref = "-ORBInitRef NameService=file://$ns_ior";
-$common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo $svc_conf";
+$common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo";
 
 unlink $ns_ior;
 unlink $dcpsrepo_ior;

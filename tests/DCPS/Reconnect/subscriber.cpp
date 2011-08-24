@@ -15,18 +15,16 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
 
-const OpenDDS::DCPS::TransportIdType TCP_IMPL_ID = 1;
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* pub_finished_filename = "publisher_finished.txt";
 const char* sub_ready_filename    = "subscriber_ready.txt";
@@ -40,12 +38,11 @@ int expected_lost_sub_notification = 0;
 int actual_lost_sub_notification = 0;
 int end_with_publisher = 0;
 int verify_lost_sub_notification = 1;
-ACE_TString local_address;
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("vn:a:r:i:l:e:c:x:"));
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("vn:a:r:i:l:e:c:"));
   int c;
 
   while ((c = get_opts ()) != -1)
@@ -75,9 +72,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       case 'e':
         end_with_publisher = ACE_OS::atoi (get_opts.opt_arg ());
         break;
-      case 'x':
-        local_address = get_opts.opt_arg ();
-        break;
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -89,7 +83,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
                            "-i <read_delay_ms> "
                            "-l <expected_lost_sub_notification> "
                            "-e <end_with_publisher> "
-                           "-x <local_address> "
                            "-v "
                            "\n",
                            argv [0]),
@@ -109,6 +102,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     dpf = TheParticipantFactoryWithArgs(argc, argv);
     if( parse_args(argc, argv) != 0)
       return 1;
+
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) subscriber.cpp main()\n"));
 
     participant =
       dpf->create_participant(411,
@@ -144,29 +139,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       exit(1);
     }
 
-    // Initialize the transport
-    OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                  ACE_TEXT ("SimpleTcp"),
-                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-    OpenDDS::DCPS::TransportConfiguration_rch reader_config
-      = TheTransportFactory->create_configuration (TCP_IMPL_ID, ACE_TEXT ("SimpleTcp"));
-
-    OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
-
-    reader_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
-    reader_tcp_config->local_address_str_ = local_address;
-    // This is needed to get the connection deletion callback.
-    reader_tcp_config->datalink_release_delay_ = 0;
-
-    if (tcp_impl->configure(reader_config.in()) != 0)
-    {
-      cerr << "Failed to configure the transport." << endl;
-      exit(1);
-    }
-
     // Create the subscriber and attach to the corresponding
     // transport.
     DDS::Subscriber_var sub =
@@ -175,36 +147,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (sub.in ())) {
       cerr << "Failed to create_subscriber." << endl;
-      exit(1);
-    }
-
-    // Attach the subscriber to the transport.
-    OpenDDS::DCPS::SubscriberImpl* sub_impl =
-      dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
-    if (0 == sub_impl) {
-      cerr << "Failed to obtain subscriber servant\n" << endl;
-      exit(1);
-    }
-
-    OpenDDS::DCPS::AttachStatus status = sub_impl->attach_transport(tcp_impl.in());
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      std::string status_str;
-      switch (status) {
-        case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-          status_str = "ATTACH_BAD_TRANSPORT";
-          break;
-        case OpenDDS::DCPS::ATTACH_ERROR:
-          status_str = "ATTACH_ERROR";
-          break;
-        case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-          status_str = "ATTACH_INCOMPATIBLE_QOS";
-          break;
-        default:
-          status_str = "Unknown Status";
-          break;
-      }
-      cerr << "Failed to attach to the transport. Status == "
-           << status_str.c_str() << endl;
       exit(1);
     }
 
@@ -305,7 +247,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     if (!CORBA::is_nil (dpf.in ())) {
       dpf->delete_participant(participant.in ());
     }
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown ();
 
   } catch (CORBA::Exception& e) {

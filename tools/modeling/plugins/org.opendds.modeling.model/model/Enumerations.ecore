@@ -13,8 +13,16 @@
     <eLiterals name="GROUP" value="2"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Period">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nanosecond" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="second" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nanosecond" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="ELong closest to CORBA unsigned long used in DDS spec."/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="second" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="EInt corresponds to CORBA long used in DDS spec."/>
+      </eAnnotations>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="OwnershipQosPolicyKind">
     <eLiterals name="SHARED"/>

@@ -7,14 +7,27 @@
  */
 
 #include "UdpLoader.h"
-#include "UdpGenerator.h"
+#include "UdpInst.h"
 
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
+
+namespace {
+  const char UDP_NAME[] = "udp";
+}
 
 namespace OpenDDS {
 namespace DCPS {
 
-const ACE_TCHAR* UDP_TRANSPORT_TYPE(ACE_TEXT("udp"));
+class UdpType : public TransportType {
+public:
+  const char* name() { return UDP_NAME; }
+
+  TransportInst* new_inst(const std::string& name)
+  {
+    return new UdpInst(name);
+  }
+};
 
 int
 UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
@@ -23,11 +36,14 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TransportGenerator *generator;
-  ACE_NEW_RETURN(generator, UdpGenerator, -1);
+  TransportRegistry* registry = TheTransportRegistry;
+  registry->register_type(new UdpType);
+  TransportInst_rch default_inst =
+    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX + "0300_UDP",
+                          UDP_NAME);
+  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
+    ->sorted_insert(default_inst);
 
-  TheTransportFactory->register_generator(UDP_TRANSPORT_TYPE,
-                                          generator);
   initialized = true;
 
   return 0;
@@ -36,7 +52,7 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 ACE_FACTORY_DEFINE(OpenDDS_Udp, UdpLoader);
 ACE_STATIC_SVC_DEFINE(
   UdpLoader,
-  ACE_TEXT("UdpLoader"),
+  ACE_TEXT("OpenDDS_Udp"),
   ACE_SVC_OBJ_T,
   &ACE_SVC_NAME(UdpLoader),
   ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,

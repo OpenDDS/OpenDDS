@@ -5,26 +5,26 @@
 #include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
-#include "model/MessengerTraits.h"
+#include "Chained_TopicTraits.h"
 #include <model/Sync.h>
 
 int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);
-    MessengerLib::DefaultMessengerType model(application, argc, argv);
+    Chained_TopicLib::DefaultChained_TopicType model(application, argc, argv);
 
-    using OpenDDS::Model::MessengerLib::Elements;
+    using OpenDDS::Model::Chained_TopicLib::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data1::MessageDataWriter_var message_writer =
-      data1::MessageDataWriter::_narrow(writer.in());
+    MTMdata2::MTM_MessageDataWriter_var message_writer =
+      MTMdata2::MTM_MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -36,7 +36,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     OpenDDS::Model::WriterSync ws(writer);
     {
       // Write samples
-      data1::Message message;
+      MTMdata2::MTM_Message message;
       message.subject_id = 99;
 
       message.from       = CORBA::string_dup("Comic Book Guy");

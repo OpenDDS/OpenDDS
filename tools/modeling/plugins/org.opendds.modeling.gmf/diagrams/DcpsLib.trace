@@ -11,6 +11,9 @@
     <nodeLabelTraces
         visualID="5004"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5274"
+        queryText="true"/>
     <compartmentTraces
         visualID="7001"
         queryText="true"/>
@@ -869,6 +872,9 @@
     <nodeLabelTraces
         visualID="5254"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5272"
+        queryText="true"/>
     <compartmentTraces
         visualID="7041"
         queryText="true"/>
@@ -888,11 +894,27 @@
     <nodeLabelTraces
         visualID="5257"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5273"
+        queryText="true"/>
     <compartmentTraces
         visualID="7043"
         queryText="true"/>
     <compartmentTraces
         visualID="7044"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3061"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'wdlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5269"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5270"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5271"
         queryText="true"/>
   </childNodeTraces>
   <linkTraces

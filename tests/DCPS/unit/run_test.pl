@@ -30,14 +30,12 @@ if ($ARGV[0] eq "-client_orb") {
  $client_orb = 1;
 }
 
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf ../../tcp.conf";
 
 $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-                              , "$debugOpts -o $iorfile $svc_config");
+                              , "$debugOpts -o $iorfile");
 
 $CL = PerlDDS::create_process ("DdsDcps_UnitTest",
-                              "$debugOpts -DCPSInfoRepo file://$iorfile $svc_config " .
+                              "$debugOpts -DCPSInfoRepo file://$iorfile" .
                               "-c $client_orb ");
 
 print $REPO->CommandLine() . "\n";

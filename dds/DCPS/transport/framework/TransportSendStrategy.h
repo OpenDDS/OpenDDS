@@ -18,7 +18,8 @@
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
-#include "TransportConfiguration_rch.h"
+#include "TransportInst_rch.h"
+#include "ThreadSynchStrategy_rch.h"
 
 #include "ace/Synch.h"
 
@@ -63,19 +64,19 @@ public:
   void stop();
 
   /// Invoked prior to one or more send() invocations from a particular
-  /// TransportInterface.
+  /// TransportClient.
   void send_start();
 
   /// Our DataLink has been requested by some particular
-  /// TransportInterface to send the element.
+  /// TransportClient to send the element.
   void send(TransportQueueElement* element, bool relink = true);
 
   /// Invoked after one or more send() invocations from a particular
-  /// TransportInterface.
+  /// TransportClient.
   void send_stop();
 
   /// Our DataLink has been requested by some particular
-  /// TransportInterface to remove the supplied sample
+  /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
   /// A -1 is returned if some fatal error was encountered while
   /// attempting to remove the sample.  Otherwise, a 0 is returned.
@@ -134,9 +135,10 @@ public:
 
 protected:
 
-  TransportSendStrategy(TransportConfiguration* config,
+  TransportSendStrategy(TransportInst*          transport_inst,
                         ThreadSynchResource*    synch_resource,
-                        CORBA::Long             priority);
+                        CORBA::Long             priority,
+                        ThreadSynchStrategy_rch thread_sync_strategy);
 
   // Only our subclass knows how to do this.
   // Third arg is the "back-pressure" flag.  If send_bytes() returns
@@ -332,7 +334,7 @@ private:
   /// and decremented once for each call to our send_stop() method.
   /// We only care about the transitions of the start_counter_
   /// value from 0 to 1, and from 1 to 0.  This accomodates the
-  /// case where more than one TransportInterface is sending to
+  /// case where more than one TransportClient is sending to
   /// us at the same time.  We use this counter to enable a
   /// "composite" send_start() and send_stop().
   unsigned start_counter_;
@@ -373,7 +375,7 @@ private:
   /// is created in start if the transport needs it.
   TransportRetainedElementAllocator* retained_element_allocator_;
 
-  TransportConfiguration_rch config_;
+  TransportInst_rch transport_inst_;
 
   bool graceful_disconnecting_;
 

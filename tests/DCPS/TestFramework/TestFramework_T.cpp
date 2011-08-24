@@ -99,15 +99,6 @@ TestPublisher<Writer>::init_i()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   this->publisher_ = create_publisher();
-  this->transport_ = find_or_create_transport();
-
-  // Attach transport to Publisher
-  if (this->transport_->attach(this->publisher_.in()) != OpenDDS::DCPS::ATTACH_OK) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: %N:%l: init_i() -")
-               ACE_TEXT(" attach failed!\n")));
-    ACE_OS::exit(-1);
-  }
 
   this->writer_ = create_datawriter();
 
@@ -237,15 +228,6 @@ TestSubscriber<Reader>::init_i()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   this->subscriber_ = create_subscriber();
-  this->transport_ = find_or_create_transport();
-
-  // Attach transport to Subscriber
-  if (this->transport_->attach(this->subscriber_.in()) != OpenDDS::DCPS::ATTACH_OK) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: %N:%l: init_i() -")
-               ACE_TEXT(" attach failed!\n")));
-    ACE_OS::exit(-1);
-  }
 
   this->reader_ = create_datareader();
 

@@ -14,6 +14,7 @@
 
 namespace DDS {
   class DomainParticipant;
+  class DomainParticipantFactory;
   class Topic;
   class Publisher;
   class Subscriber;
@@ -22,7 +23,7 @@ namespace DDS {
 } // End of namespace DDS
 
 namespace OpenDDS { namespace DCPS {
-  class TransportConfiguration;
+  class TransportInst;
   class TransportImpl;
 } } // End of namespace OpenDDS::DCPS
 
@@ -32,6 +33,8 @@ namespace OpenDDS { namespace Model {
     public:
       Application(int& argc, ACE_TCHAR *argv[]);
       ~Application();
+    private:
+      DDS::DomainParticipantFactory* factory_;
   };
 
 } } // End of namespace OpenDDS::Model

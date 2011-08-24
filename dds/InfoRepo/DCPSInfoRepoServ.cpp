@@ -19,7 +19,7 @@
 
 //If we need BIT support, pull in TCP so that static builds will have it.
 #if !defined(DDS_HAS_MINIMUM_BIT)
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #include "PersistenceUpdater.h"
 #include "UpdateManager.h"
 #endif
@@ -88,7 +88,8 @@ InfoRepo::finalize()
     return;
   }
 
-  TheTransportFactory->release();
+  // TODO: Do we need this?
+  // TheTransportRegistry->release();
   TheServiceParticipant->shutdown();
 
   if (!CORBA::is_nil(this->orb_)) {
@@ -158,7 +159,7 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 
   while (arg_shifter.is_anything_left()) {
     if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0) {
-      this->listen_address_str_ = current_arg;
+      this->listen_address_str_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
       this->listen_address_given_ = 1;
       arg_shifter.consume_arg();
 

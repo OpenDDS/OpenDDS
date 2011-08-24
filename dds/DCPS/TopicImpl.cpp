@@ -14,6 +14,7 @@
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
 #include "MonitorFactory.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -175,6 +176,12 @@ const char*
 TopicImpl::type_name() const
 {
   return this->type_name_.c_str();
+}
+
+void
+TopicImpl::transport_config(const TransportConfig_rch&)
+{
+  throw Transport::MiscProblem();
 }
 
 } // namespace DCPS

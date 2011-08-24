@@ -23,8 +23,6 @@ module simple {
   typedef sequence<TestSeqTypedef> LongSeqSeq;
   typedef sequence<LongSeqSeq> LongSeqSeqSeq;
 
-  //native SampleInfoSeq; //TODO: We'll have to deal with these at some point.
-
   struct TestStruct {
     long m1;
     unsigned long m2;

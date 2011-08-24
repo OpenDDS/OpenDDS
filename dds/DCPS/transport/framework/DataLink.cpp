@@ -14,7 +14,9 @@
 #include "ReceivedDataSample.h"
 
 #include "TransportImpl.h"
-#include "TransportConfiguration.h"
+#include "TransportInst.h"
+#include "SendResponseListener.h"
+
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -43,11 +45,13 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl,
   : stopped_(false),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
+    strategy_condition_(strategy_lock_),
     send_control_allocator_(0),
     mb_allocator_(0),
     db_allocator_(0),
     is_loopback_(is_loopback),
-    is_active_(is_active)
+    is_active_(is_active),
+    start_failed_(false)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 
@@ -105,6 +109,22 @@ OpenDDS::DCPS::DataLink::~DataLink()
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->close(1);
     delete this->thr_per_con_send_task_;
+  }
+}
+
+OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::DataLink::impl() const
+{
+  return impl_;
+}
+
+void
+OpenDDS::DCPS::DataLink::wait_for_start()
+{
+  GuardType guard(this->strategy_lock_);
+  while ((this->send_strategy_.is_nil() || this->receive_strategy_.is_nil())
+         && !this->start_failed_) {
+    this->strategy_condition_.wait();
   }
 }
 
@@ -305,7 +325,9 @@ OpenDDS::DCPS::DataLink::make_reservation
     first_sub = this->sub_map_.size() == 0; // empty
 
     // Update our sub_map_.
-    sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
+    sub_result = this->sub_map_.insert(subscriber_id ,publisher_id);
+
+    this->recv_listeners_[subscriber_id] = receive_listener;
   }
 
   if (sub_result == 0) {
@@ -392,10 +414,10 @@ OpenDDS::DCPS::DataLink::make_reservation
   return -1;
 }
 
-/// This gets invoked when a TransportInterface::remove_associations()
+/// This gets invoked when a TransportClient::remove_associations()
 /// call has been made.  Because this DataLink can be shared amongst
-/// different TransportInterface objects, and different threads could
-/// be "managing" the different TransportInterface objects, we need
+/// different TransportClient objects, and different threads could
+/// be "managing" the different TransportClient objects, we need
 /// to make sure that this release_reservations() works in conjunction
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
@@ -538,23 +560,6 @@ OpenDDS::DCPS::DataLink::stop_i()
   DBG_ENTRY_LVL("DataLink","stop_i",6);
 }
 
-void
-OpenDDS::DCPS::DataLink::control_delivered(ACE_Message_Block* message)
-{
-  DBG_ENTRY_LVL("DataLink","control_delivered",6);
-
-  message->release();
-}
-
-void
-OpenDDS::DCPS::DataLink::control_dropped(ACE_Message_Block* message,
-                                         bool /*dropped_by_transport*/)
-{
-  DBG_ENTRY_LVL("DataLink","control_dropped",6);
-
-  message->release();
-}
-
 ACE_Message_Block*
 OpenDDS::DCPS::DataLink::create_control(char submessage_id,
                                         ACE_Message_Block* data)
@@ -563,8 +568,7 @@ OpenDDS::DCPS::DataLink::create_control(char submessage_id,
 
   DataSampleHeader header;
 
-  header.byte_order_ = this->impl_->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER
-                                                 : TAO_ENCAP_BYTE_ORDER;
+  header.byte_order_ = TAO_ENCAP_BYTE_ORDER;
   header.message_id_ = TRANSPORT_CONTROL;
   header.submessage_id_ = submessage_id;
   header.message_length_ = static_cast<ACE_UINT32>(data->total_length());
@@ -595,6 +599,7 @@ OpenDDS::DCPS::SendControlStatus
 OpenDDS::DCPS::DataLink::send_control(ACE_Message_Block* message)
 {
   DBG_ENTRY_LVL("DataLink","send_control",6);
+  SendResponseListener listener;
 
   TransportSendControlElement* elem;
 
@@ -603,7 +608,7 @@ OpenDDS::DCPS::DataLink::send_control(ACE_Message_Block* message)
                           this->send_control_allocator_->malloc()),
                         TransportSendControlElement(1,  // initial_count
                                                     GUID_UNKNOWN,
-                                                    this,
+                                                    &listener,
                                                     message,
                                                     this->send_control_allocator_),
                         SEND_CONTROL_ERROR);
@@ -818,8 +823,6 @@ OpenDDS::DCPS::DataLink::get_next_datalink_id()
   static ACE_UINT64 next_id = 0;
   static LockType lock;
 
-  DBG_ENTRY_LVL("DataLink","get_next_datalink_id",6);
-
   ACE_UINT64 id;
   {
     GuardType guard(lock);
@@ -855,7 +858,7 @@ OpenDDS::DCPS::DataLink::transport_shutdown()
 }
 
 void
-OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
+OpenDDS::DCPS::DataLink::notify(ConnectionNotice notice)
 {
   DBG_ENTRY_LVL("DataLink","notify",6);
 
@@ -869,14 +872,14 @@ OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
 
     ReceiveListenerSetMap::MapType & map = this->pub_map_.map();
 
-    // Notify the datawriters registered with TransportImpl
+    // Notify the datawriters
     // the lost publications due to a connection problem.
     for (ReceiveListenerSetMap::MapType::iterator itr = map.begin();
          itr != map.end();
          ++itr) {
-      DataWriterImpl* dw = this->impl_->find_publication(itr->first);
 
-      if (dw != 0) {
+      TransportSendListener* tsl = send_listener_for(itr->first);
+      if (tsl != 0) {
         if (OpenDDS::DCPS::Transport_debug_level > 0) {
           RepoIdConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
@@ -893,18 +896,18 @@ OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
 
         switch (notice) {
         case DISCONNECTED:
-          dw->notify_publication_disconnected(subids);
+          tsl->notify_publication_disconnected(subids);
           break;
         case RECONNECTED:
-          dw->notify_publication_reconnected(subids);
+          tsl->notify_publication_reconnected(subids);
           break;
         case LOST:
-          dw->notify_publication_lost(subids);
+          tsl->notify_publication_lost(subids);
           break;
         default:
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: DataLink::notify: ")
-                     ACE_TEXT("unknown notice to datawriter\n")));
+                     ACE_TEXT("unknown notice to TransportSendListener\n")));
           break;
         }
 
@@ -932,10 +935,9 @@ OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
     for (RepoIdSetMap::MapType::iterator itr = map.begin();
          itr != map.end();
          ++itr) {
-      // subscription_handles
-      DataReaderImpl* dr = this->impl_->find_subscription(itr->first);
 
-      if (dr != 0) {
+      TransportReceiveListener* trl = recv_listener_for(itr->first);
+      if (trl != 0) {
         if (OpenDDS::DCPS::Transport_debug_level > 0) {
           RepoIdConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
@@ -960,13 +962,13 @@ OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
 
         switch (notice) {
         case DISCONNECTED:
-          dr->notify_subscription_disconnected(pubids);
+          trl->notify_subscription_disconnected(pubids);
           break;
         case RECONNECTED:
-          dr->notify_subscription_reconnected(pubids);
+          trl->notify_subscription_reconnected(pubids);
           break;
         case LOST:
-          dr->notify_subscription_lost(pubids);
+          trl->notify_subscription_lost(pubids);
           break;
         default:
           ACE_ERROR((LM_ERROR,
@@ -994,14 +996,22 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
 {
   GuardType guard(this->released_local_lock_);
 
+  if (OpenDDS::DCPS::Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
+               ACE_TEXT("pmap %d smap %d\n"),
+               released_local_pubs_.map().size(),
+               released_local_subs_.map().size()));
+  }
+
   RepoIdSet::MapType& pmap = released_local_pubs_.map();
 
   for (RepoIdSet::MapType::iterator itr = pmap.begin();
        itr != pmap.end();
        ++itr) {
-    DataWriterImpl* dw = this->impl_->find_publication(itr->first);
 
-    if (dw != 0) {
+    TransportSendListener* tsl = send_listener_for(itr->first);
+    if (tsl != 0) {
       if (OpenDDS::DCPS::Transport_debug_level > 0) {
         RepoIdConverter converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
@@ -1010,7 +1020,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
                    std::string(converter).c_str()));
       }
 
-      dw->notify_connection_deleted();
+      tsl->notify_connection_deleted();
     }
   }
 
@@ -1019,9 +1029,10 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
   for (RepoIdSet::MapType::iterator itr2 = smap.begin();
        itr2 != smap.end();
        ++itr2) {
-    DataReaderImpl* dr = this->impl_->find_subscription(itr2->first);
 
-    if (dr != 0) {
+    TransportReceiveListener* trl = recv_listener_for(itr2->first);
+
+    if (trl != 0) {
       if (OpenDDS::DCPS::Transport_debug_level > 0) {
         RepoIdConverter converter(itr2->first);
         ACE_DEBUG((LM_DEBUG,
@@ -1030,7 +1041,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
                    std::string(converter).c_str()));
       }
 
-      dr->notify_connection_deleted();
+      trl->notify_connection_deleted();
     }
   }
 }
@@ -1043,17 +1054,10 @@ OpenDDS::DCPS::DataLink::pre_stop_i()
   }
 }
 
-ACE_Message_Block*
-OpenDDS::DCPS::DataLink::marshal_acks(bool byte_order)
-{
-  DBG_ENTRY_LVL("DataLink","marshal_acks",6);
-  return this->sub_map_.marshal(byte_order);
-}
-
 bool
 OpenDDS::DCPS::DataLink::release_resources()
 {
-  DBG_ENTRY_LVL("DataLink", "release_resources",6);
+  DBG_ENTRY_LVL("DataLink", "release_resources", 6);
 
   this->prepare_release();
 
@@ -1178,7 +1182,7 @@ void OpenDDS::DCPS::DataLink::clear_associations()
 
     // Each pub_id (may)has an associated DataWriter
     // Dependends upon whether we are an actual pub or sub.
-    DataWriterImpl *dw = this->impl_->find_publication(pub_id, true);
+    TransportSendListener* tsl = send_listener_for(pub_id);
 
     ReceiveListenerSet_rch sub_id_set = pub_map_iter->second;
     // The iterator seems to get corrupted if the element currently
@@ -1186,7 +1190,7 @@ void OpenDDS::DCPS::DataLink::clear_associations()
     ++pub_map_iter;
 
     // Check is DataWriter exists (could have been deleted before we got here.
-    if (dw != NULL) {
+    if (tsl != NULL) {
       // Each pub-id is mapped to a bunch of sub-id's
       //ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
       ReaderIdSeq sub_ids;
@@ -1196,10 +1200,7 @@ void OpenDDS::DCPS::DataLink::clear_associations()
       // I believe the 'notify_lost' should be set to false, since
       // it doesn't look like we meet any of the conditions for setting
       // it true. Check interface documentations.
-      dw->remove_associations(sub_ids, false);
-
-      // Since we requested a safe copy, we now need to remove the local reference.
-      dw->_remove_ref();
+      tsl->remove_associations(sub_ids, false);
     }
   }
 
@@ -1213,7 +1214,7 @@ void OpenDDS::DCPS::DataLink::clear_associations()
     RepoId sub_id = sub_map_iter->first;
     // Each sub_id (may)has an associated DataReader
     // Dependends upon whether we are an actual pub or sub.
-    DataReaderImpl *dr = this->impl_->find_subscription(sub_id, true);
+    TransportReceiveListener* trl = recv_listener_for(sub_id);
 
     RepoIdSet_rch pub_id_set = sub_map_iter->second;
     // The iterator seems to get corrupted if the element currently
@@ -1221,7 +1222,7 @@ void OpenDDS::DCPS::DataLink::clear_associations()
     ++sub_map_iter;
 
     // Check id DataReader exists (could have been deleted before we got here.)
-    if (dr != NULL) {
+    if (trl != NULL) {
       // Each sub-id is mapped to a bunch of pub-id's
       CORBA::ULong pub_ids_count =
         static_cast<CORBA::ULong>(pub_id_set->size());
@@ -1240,10 +1241,7 @@ void OpenDDS::DCPS::DataLink::clear_associations()
       // I believe the 'notify_lost' should be set to false, since
       // it doesn't look like we meet any of the conditions for setting
       // it true. Check interface documentations.
-      dr->remove_associations(pub_ids, false);
-
-      // Since we requested a safe copy, we now need to remove the local reference.
-      dr->_remove_ref();
+      trl->remove_associations(pub_ids, false);
     }
   }
 

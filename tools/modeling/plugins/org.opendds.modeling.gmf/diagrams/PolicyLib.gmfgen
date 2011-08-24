@@ -15,18 +15,34 @@
         description="Detects incorrect or questionable semantic constructs for elements in a PolicyLib diagram."
         path="//@audits/@categories.0"/>
     <categories
-        id="org.opendds.modeling.model.qospolicies.validation.errors"
+        id="org.opendds.modeling.model.policylib.validation.errors"
         name="PolicyLib Errors"
-        description="Detects modeling constructs that would result in invalid generated OpenDDS code."
-        path="//@audits/@categories.0 //@audits/@categories.1"
-        audits="//@audits/@rules.0"/>
+        description="Detects PolicyLib elements that would result in invalid generated OpenDDS code."
+        path="//@audits/@categories.0 //@audits/@categories.1"/>
+    <categories
+        id="org.opendds.modeling.model.qospolicies.validation.errors"
+        name="QoS Policy Errors"
+        description="Detects QoS Policy members that would result in invalid generated OpenDDS code."
+        path="//@audits/@categories.0 //@audits/@categories.1 //@audits/@categories.2"/>
+    <categories
+        id="org.opendds.modeling.model.qospolicies.validation.errors.length_fields"
+        name="QoS Policy Length Field Errors"
+        description="Qos Policy length field validation"
+        path="//@audits/@categories.0 //@audits/@categories.1 //@audits/@categories.2 //@audits/@categories.3"
+        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4 //@audits/@rules.5 //@audits/@rules.6 //@audits/@rules.7"/>
+    <categories
+        id="org.opendds.modeling.model.qospolicies.validation.errors.durations"
+        name="QoS Policy Duration Errors"
+        description="QoS Policy duration validation"
+        path="//@audits/@categories.0 //@audits/@categories.1 //@audits/@categories.2 //@audits/@categories.4"
+        audits="//@audits/@rules.8 //@audits/@rules.9 //@audits/@rules.10 //@audits/@rules.11 //@audits/@rules.12 //@audits/@rules.13 //@audits/@rules.14 //@audits/@rules.15 //@audits/@rules.16"/>
     <rules
-        name="Policy Name Emtpy"
+        name="Policy Name Validation"
         description="Policy names should not be empty"
         id="org.opendds.modeling.model.qospolicies.validation.error.name_blank"
         rule="//@expressionProviders/@providers.0/@expressions.18"
         message="Policy name is empty"
-        category="//@audits/@categories.1">
+        category="//@audits/@categories.3">
       <target
           xsi:type="gmfgen:GenDomainElementTarget"
           contextSelector="//@audits/@clientContexts.0">
@@ -34,8 +50,232 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/QosPolicy"/>
       </target>
     </rules>
+    <rules
+        name="dsQosPolicy max_samples validation"
+        description="dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples"
+        rule="//@expressionProviders/@providers.0/@expressions.19"
+        message="dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.3">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="dsQosPolicy max_instances validation"
+        description="dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_instances"
+        rule="//@expressionProviders/@providers.0/@expressions.20"
+        message="dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.3">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="dsQosPolicy max_samples_per_instance validation"
+        description="dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples_per_instance"
+        rule="//@expressionProviders/@providers.0/@expressions.21"
+        message="dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.3">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="dsQosPolicy history_depth validation"
+        description="dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.history_depth"
+        rule="//@expressionProviders/@providers.0/@expressions.22"
+        message="dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.3">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rlQosPolicy max_samples validation"
+        description="rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples"
+        rule="//@expressionProviders/@providers.0/@expressions.23"
+        message="rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.3">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/ResourceLimitsQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rlQosPolicy max_instances validation"
+        description="rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_instances"
+        rule="//@expressionProviders/@providers.0/@expressions.24"
+        message="rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.3">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/ResourceLimitsQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rlQosPolicy max_samples_per_instance validation"
+        description="rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples_per_instance"
+        rule="//@expressionProviders/@providers.0/@expressions.25"
+        message="rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.3">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/ResourceLimitsQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="deadlineQosPolicy period validation"
+        description="deadlineQosPolicy period second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.deadlineQosPolicy.period"
+        rule="//@expressionProviders/@providers.0/@expressions.26"
+        message="deadlineQosPolicy period second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/deadlineQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="dsQosPolicy service_cleanup_delay validation"
+        description="dsQosPolicy service_cleanup_delay second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.service_cleanup_delay"
+        rule="//@expressionProviders/@providers.0/@expressions.27"
+        message="dsQosPolicy service_cleanup_delay second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/dsQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="lbQosPolicy duration validation"
+        description="lbQosPolicy duration second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.lbQosPolicy.duration"
+        rule="//@expressionProviders/@providers.0/@expressions.28"
+        message="lbQosPolicy duration second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/lbQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="lifespanQosPolicy duration validation"
+        description="lifespanQosPolicy duration second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.lifespanQosPolicy.duration"
+        rule="//@expressionProviders/@providers.0/@expressions.29"
+        message="lifespanQosPolicy duration second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/lifespanQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="livelinessQosPolicy lease_duration validation"
+        description="livelinessQosPolicy lease_duration second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.livelinessQosPolicy.lease_duration"
+        rule="//@expressionProviders/@providers.0/@expressions.30"
+        message="livelinessQosPolicy lease_duration second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/livelinessQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rdlQosPolicy autopurge_disposed_samples_delay validation"
+        description="rdlQosPolicy autopurge_disposed_samples_delay second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.rdlQosPolicy.autopurge_disposed_samples_delay"
+        rule="//@expressionProviders/@providers.0/@expressions.31"
+        message="rdlQosPolicy autopurge_disposed_samples_delay second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/rdlQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rdlQosPolicy autopurge_nowriter_samples_delay validation"
+        description="rdlQosPolicy autopurge_nowriter_samples_delay second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.rdlQosPolicy.autopurge_nowriter_samples_delay"
+        rule="//@expressionProviders/@providers.0/@expressions.32"
+        message="rdlQosPolicy autopurge_nowriter_samples_delay second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/rdlQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="reliabilityQosPolicy max_blocking_time validation"
+        description="reliabilityQosPolicy max_blocking_time second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.reliabilityQosPolicy.max_blocking_time"
+        rule="//@expressionProviders/@providers.0/@expressions.33"
+        message="reliabilityQosPolicy max_blocking_time second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/reliabilityQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="tbfQosPolicy minimum_separation validation"
+        description="tbfQosPolicy minimum_separation second must be non-negative and nanosecond &lt; 1 sec"
+        id="org.opendds.modeling.model.qospolicies.validation.tbfQosPolicy.minimum_separation"
+        rule="//@expressionProviders/@providers.0/@expressions.34"
+        message="tbfQosPolicy minimum_separation second must be non-negative and nanosecond &lt; 1 sec"
+        category="//@audits/@categories.4">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//opendds/tbfQosPolicy"/>
+      </target>
+    </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target //@audits/@rules.6/@target //@audits/@rules.7/@target //@audits/@rules.8/@target //@audits/@rules.9/@target //@audits/@rules.10/@target //@audits/@rules.11/@target //@audits/@rules.12/@target //@audits/@rules.13/@target //@audits/@rules.14/@target //@audits/@rules.15/@target //@audits/@rules.16/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -3165,13 +3405,14 @@
       iD="org.opendds.modeling.diagram.policylib"
       name="OpenDDS PolicyLib Plugin"
       provider="Object Computing, Inc."
-      version="1.0.1.qualifier">
+      version="3.0.0.qualifier">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
   </plugin>
   <editor
       iconPath="icons/obj16/PolicyLib.gif"
       iD="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"/>
-  <navigator>
+  <navigator
+      generateDomainModelNavigator="false">
     <childReferences
         child="//@diagram"/>
     <childReferences
@@ -3303,7 +3544,9 @@
     <providers
         xsi:type="gmfgen:GenExpressionInterpreter">
       <expressions
-          body="0"/>
+          body="2147483647"/>
+      <expressions
+          body="2147483647"/>
       <expressions
           body="0"/>
       <expressions
@@ -3313,27 +3556,25 @@
       <expressions
           body="0"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
-          body="0"/>
-      <expressions
-          body="0"/>
+          body="2147483647"/>
       <expressions
           body="0"/>
       <expressions
@@ -3341,6 +3582,54 @@
       <expressions
           xsi:type="gmfgen:GenConstraint"
           body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples = -1 or&#xA;self.max_samples > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_instances = -1 or&#xA;self.max_instances > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples_per_instance = -1 or&#xA;self.max_samples_per_instance > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.history_depth = -1 or&#xA;self.history_depth > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples = -1 or&#xA;self.max_samples > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_instances = -1 or&#xA;self.max_instances > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples_per_instance = -1 or&#xA;self.max_samples_per_instance > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.period.second >= 0 and ( self.period.nanosecond &lt; 1000000000 or self.period.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.service_cleanup_delay.second >= 0 and ( self.service_cleanup_delay.nanosecond &lt; 1000000000 or self.service_cleanup_delay.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.duration.second >= 0 and ( self.duration.nanosecond &lt; 1000000000 or self.duration.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.duration.second >= 0 and ( self.duration.nanosecond &lt; 1000000000 or self.duration.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.lease_duration.second >= 0 and ( self.lease_duration.nanosecond &lt; 1000000000 or self.lease_duration.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.autopurge_disposed_samples_delay.second >= 0 and ( self.autopurge_disposed_samples_delay.nanosecond &lt; 1000000000 or self.autopurge_disposed_samples_delay.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.autopurge_nowriter_samples_delay.second >= 0 and ( self.autopurge_nowriter_samples_delay.nanosecond &lt; 1000000000 or self.autopurge_nowriter_samples_delay.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_blocking_time.second >= 0 and ( self.max_blocking_time.nanosecond &lt; 1000000000 or self.max_blocking_time.nanosecond = 2147483647 )"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.minimum_separation.second >= 0 and ( self.minimum_separation.nanosecond &lt; 1000000000 or self.minimum_separation.nanosecond = 2147483647 )"/>
     </providers>
   </expressionProviders>
   <labelParsers

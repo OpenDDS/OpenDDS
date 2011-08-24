@@ -12,6 +12,7 @@ be incremented (per-plugin) -- the "qualifier" change is not enough.
   * Our policy is to increment the version numbers of all plugins together in
     lock step, even though some plugins may not be changing.  This reduces
     the potential for user confusion by keeping a single version number.
+  * see $DDS_ROOT/tools/modeling/update_version.pl
 
 3. Open site.xml from org.opendds.modeling.site and click the "Build All" button
 inside the site.xml editor.
@@ -19,7 +20,7 @@ inside the site.xml editor.
 4. Create a zip file for offline updates.
 cd $DDS_ROOT/tools/modeling/features/org.opendds.modeling.site
 rm content.jar artifacts.jar   # these are for an older Eclipse site format
-zip -r opendds_modeling_site . -x README.txt .svn .project
+zip -r opendds_modeling_site . -x README.txt '*.svn/*' .project
 
 5. Update the opendds.org web site.  Run the following commands with
 $WEBSITE replaced by the root of the opendds.org subversion checkout.

@@ -20,65 +20,24 @@ module OpenDDS
     // They are also the InstanceHandle_t in Sample_Info for built-in Topics
     typedef GUID_t RepoId;
 
-    // Information returned from call to add_domain_participant()
-    struct AddDomainStatus {
-      RepoId  id;
-      boolean federated;
-    };
+    typedef CORBA::OctetSeq TransportBLOB;
 
-    typedef long TransportInterfaceId;
-    typedef CORBA::OctetSeq TransportInterfaceBLOB;
-
-    struct TransportInterfaceInfo {
-      /// The transport type (.e.g SimpleTcp or udp)
-      TransportInterfaceId   transport_id;
-      /// Informationn about the transport instance that is opaque to all but
+    struct TransportLocator {
+      /// The transport type (e.g. tcp or udp)
+      string transport_type;
+      /// Information about the transport instance that is opaque to all but
       /// code specific to that transport implementation.
-      TransportInterfaceBLOB data;
-
-      /// This encodes the TRANSPORT_PRIORITY DataWriter Qos policy value
-      /// for publications.  The value is set to 0 for subscriptions.
-      long publication_transport_priority;
+      TransportBLOB data;
     };
 
-    // Status returned by a topic operation
-    enum TopicStatus {
-      CREATED,
-      ENABLED,
-      FOUND,
-      NOT_FOUND,
-      REMOVED,
-      CONFLICTING_TYPENAME,
-      INTERNAL_ERROR
-    };
-
-    // thrown when operation receives an
-    // invalid domain id
-    exception Invalid_Domain {};
-
-    // thrown when operation receives an
-    // invalid domain participant id
-    exception Invalid_Participant {};
-
-    // thrown when operation receives an
-    // invalid publication id
-    exception Invalid_Publication {};
-
-    // thrown when operation receives an
-    // invalid subscription id
-    exception Invalid_Subscription {};
-
-    // thrown when operation receives an
-    // invalid topic id
-    exception Invalid_Topic {};
-
+    typedef sequence<TransportLocator> TransportLocatorSeq;
 
     struct IncompatibleQosStatus {
-                  long total_count;
-                  long count_since_last_send;
+      long total_count;
+      long count_since_last_send;
       DDS::QosPolicyId_t last_policy_id;
       DDS::QosPolicyCountSeq policies;
-                };
+    };
 
 
   }; // module DDS

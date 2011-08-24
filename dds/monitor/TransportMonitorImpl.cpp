@@ -11,7 +11,6 @@
 #include "monitorTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -40,9 +39,9 @@ TransportMonitorImpl::report() {
   TransportReport report;
   report.host = this->hostname_.c_str();
   report.pid  = this->pid_;
-  report.transport_id  = this->transport_->get_transport_id();
-  report.transport_type =
-    ACE_TEXT_ALWAYS_CHAR(this->transport_->get_factory_id().c_str());
+  // TODO: remove/replace
+  report.transport_id  = 0;
+  report.transport_type = "";
   // ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, queue_lock_);
   if (!CORBA::is_nil(this->transport_writer_.in())) {
     if (this->queue_.size()) {

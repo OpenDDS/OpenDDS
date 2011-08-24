@@ -91,6 +91,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
       //is hidden from the user.  Thus we need to make the sequence
       //single-copy at this point.
       make_single_copy(length);
+      sc_length_ = length;
     }
 
   } else {

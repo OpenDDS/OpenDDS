@@ -24,6 +24,8 @@
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include <sstream>
 
@@ -85,8 +87,7 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
       OpenDDS::DCPS::RepoIdConverter(this->dp_id_).participantId(),
       OpenDDS::DCPS::KIND_PUBLISHER)
 {
-  DDS::ReturnCode_t ret;
-  ret = this->set_listener(a_listener, mask);
+  (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
 }
 
@@ -369,7 +370,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       if (DCPS_debug_level > 3) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("DomainParticipantImpl::create_topic, ")
-          ACE_TEXT("can't create a Topic due to name \"%C\" already in use")
+          ACE_TEXT("can't create a Topic due to name \"%C\" already in use ")
           ACE_TEXT("by a TopicDescription.\n"), topic_name));
       }
       return 0;
@@ -1804,6 +1805,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
     OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in(),type_name);
 
   if (0 == type_support) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::create_topic_i, ")
+                 ACE_TEXT("can't create a Topic: type_name \"%C\"")
+                 ACE_TEXT("is not registered.\n"), type_name));
+    }
+
     return DDS::Topic::_nil();
   }
 
@@ -1820,7 +1828,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
                            this),
                  DDS::Topic::_nil());
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1)) {
+  if ((enabled_ == true)
+      && (qos_.entity_factory.autoenable_created_entities == 1)) {
     topic_servant->enable();
   }
 
@@ -2195,44 +2204,11 @@ DomainParticipantImpl::attach_bit_transport()
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   try {
-    // Attach the Subscriber with the TransportImpl.
-    OpenDDS::DCPS::SubscriberImpl* sub_servant
-    = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(bit_subscriber_.in());
+    TransportConfig_rch config = TheServiceParticipant->bit_transport_config();
 
-    TransportImpl_rch impl = TheServiceParticipant->bit_transport_impl(this->domain_id_);
+    TransportRegistry::instance()->bind_config(config, bit_subscriber_.in());
 
-    OpenDDS::DCPS::AttachStatus status
-    = sub_servant->attach_transport(impl.in());
-
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      // We failed to attach to the transport for some reason.
-      const ACE_TCHAR* status_str = ACE_TEXT("");
-
-      switch (status) {
-      case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-        status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-        break;
-      case OpenDDS::DCPS::ATTACH_ERROR:
-        status_str = ACE_TEXT("ATTACH_ERROR");
-        break;
-      case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-        status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-        break;
-      default:
-        status_str = ACE_TEXT("Unknown Status");
-        break;
-      }
-
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::init_bit_transport, "),
-                        ACE_TEXT("Failed to attach to the transport. ")
-                        ACE_TEXT("AttachStatus == %s\n"), status_str),
-                       DDS::RETCODE_ERROR);
-    }
-
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception(
-      "ERROR: Exception caught in DomainParticipantImpl::init_bit_transport.");
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
     return DDS::RETCODE_ERROR;
   }
 

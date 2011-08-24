@@ -87,8 +87,6 @@ if ("solaris" eq $OSNAME) {
 unlink $repo_ior;
 unlink $debugFile if $debugFile;
 
-my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf $confFile";
 
 my $common_opts = "-DCPSConfigFile $iniFile ";
 $common_opts .= "-v " if $verbose;
@@ -106,13 +104,13 @@ $appDebug  = $debug if $debug;
 my $verboseDebug;
 $verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
 
-my $repoOpts = "$svc_config ";
+my $repoOpts = "";
 $repoOpts .= $verboseDebug if $verboseDebug;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
 
-my $appOpts = "$svc_config $common_opts ";
+my $appOpts = "$common_opts ";
 $appOpts .= $verboseDebug if $verboseDebug;
 $appOpts .= "-DCPSDebugLevel $appDebug " if $appDebug;
 $appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
@@ -127,13 +125,13 @@ $REPO = PerlDDS::create_process (
 
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
-$subArgs .= "-t $transportType ";
+$subArgs .= "-DCPSGlobalTransportConfig $transportType ";
 $subArgs .= "-c " . (2 * $samples) . " ";
 $SUB = PerlDDS::create_process ( "subscriber", $subArgs);
 
 my $pubArgs = "$appOpts ";
 $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
-$pubArgs .= "-t $transportType ";
+$pubArgs .= "-DCPSGlobalTransportConfig $transportType ";
 $pubArgs .= "-c $samples ";
 $pubArgs .= "-p " . $priority . " ";
 $PUB = PerlDDS::create_process ( "publisher", $pubArgs);

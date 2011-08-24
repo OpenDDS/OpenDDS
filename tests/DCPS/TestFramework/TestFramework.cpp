@@ -13,10 +13,6 @@
 const DDS::DomainId_t TestBase::DEFAULT_DOMAIN = 42;
 const char*           TestBase::DEFAULT_TOPIC = "TestFramework";
 const DDS::Duration_t TestBase::DEFAULT_TIMEOUT = { 30, 0 }; // 30 seconds
-const ACE_TCHAR*      TestBase::DEFAULT_TRANSPORT = ACE_TEXT("SimpleTcp");
-
-const OpenDDS::DCPS::TransportIdType
-      TestBase::DEFAULT_TRANSPORT_ID = 0xFFFFFFFF;
 
 TestBase::TestBase()
 {
@@ -45,12 +41,6 @@ TestBase::init_topic(const char*& /*name*/,
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t
-TestBase::init_transport(OpenDDS::DCPS::TransportIdType& /*transport_id*/,
-                         ACE_TString& /*transport_type*/)
-{
-  return DDS::RETCODE_OK;
-}
 
 int
 TestBase::run(int& argc, ACE_TCHAR* argv[])
@@ -68,7 +58,6 @@ TestBase::run(int& argc, ACE_TCHAR* argv[])
     return -1;
   }
 
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 
   return error;
@@ -185,37 +174,3 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return topic;
 }
 
-OpenDDS::DCPS::TransportImpl_rch
-TestBase::find_or_create_transport()
-ACE_THROW_SPEC((CORBA::SystemException))
-{
-  OpenDDS::DCPS::TransportIdType transport_id(DEFAULT_TRANSPORT_ID);
-  ACE_TString transport_type(DEFAULT_TRANSPORT);
-
-  if (init_transport(transport_id, transport_type) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: %N:%l: find_or_create_transport() -")
-               ACE_TEXT(" init_transport failed!\n")));
-    ACE_OS::exit(-1);
-  }
-
-  // Assign a valid transport ID if not specified:
-  if (transport_id == DEFAULT_TRANSPORT_ID) {
-    transport_id = next_transport_id();
-  }
-
-  OpenDDS::DCPS::TransportImpl_rch result =
-    TheTransportFactory->obtain(transport_id);
-  if (result.is_nil()) {
-    TheTransportFactory->get_or_create_configuration(transport_id, transport_type);
-    result = TheTransportFactory->create_transport_impl(transport_id);
-  }
-  return result;
-}
-
-OpenDDS::DCPS::TransportIdType
-TestBase::next_transport_id()
-{
-  static ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> transport_ids(1);
-  return transport_ids++;
-}

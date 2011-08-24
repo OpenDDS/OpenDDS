@@ -4,7 +4,7 @@
 #include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include "model/ReferExternalProjTraits.h"
@@ -27,8 +27,8 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  data2::MessageDataReader_var reader_i =
-    data2::MessageDataReader::_narrow(reader);
+  MTMdata2::MTM_MessageDataReader_var reader_i =
+    MTMdata2::MTM_MessageDataReader::_narrow(reader);
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
@@ -37,7 +37,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  data2::Message msg;
+  MTMdata2::MTM_Message msg;
   DDS::SampleInfo info;
 
   while (true) {
@@ -77,7 +77,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     using OpenDDS::Model::ReferExternalProj::Elements;
 
-    DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
+    DDS::DataReader_var reader = model.reader( Elements::DataReaders::local_topic_reader);
+    DDS::DataReader_var reader2 = model.reader( Elements::DataReaders::remote_topic_reader);
+    DDS::DataReader_var reader3 = model.reader( Elements::DataReaders::transitive_topic_reader);
 
     ACE_SYNCH_MUTEX lock;
     ACE_Condition<ACE_SYNCH_MUTEX> condition(lock);
@@ -90,8 +92,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data2::MessageDataReader_var reader_i =
-      data2::MessageDataReader::_narrow(reader);
+    MTMdata2::MTM_MessageDataReader_var reader_i =
+      MTMdata2::MTM_MessageDataReader::_narrow(reader);
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,

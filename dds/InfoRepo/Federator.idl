@@ -121,19 +121,7 @@ module OpenDDS { module Federator {
       DDS::PublisherQos                   publisher_qos;
       DDS::DataWriterQos                  datawriter_qos;
 
-      // The following are the components of
-      // OpenDDS::DCPS::TransportInterfaceInfo
-      // which do not have TypeSupport created for them.
-
-      // The transport type (.e.g SimpleTCP or udp)
-      OpenDDS::DCPS::TransportInterfaceId transport_id;
-
-      // Information about the transport instance that is opaque to all but
-      // code specific to that transport implementation.
-      CORBA::OctetSeq                     transport_blob;
-
-      // The publication TRANSPORT_PRIORITY value.
-      long                                publication_transport_priority;
+      OpenDDS::DCPS::TransportLocatorSeq  transport_info;
     };
 
     // Constant values.
@@ -159,16 +147,7 @@ module OpenDDS { module Federator {
       DDS::SubscriberQos                  subscriber_qos;
       DDS::DataReaderQos                  datareader_qos;
 
-      // The following are the components of
-      // OpenDDS::DCPS::TransportInterfaceInfo
-      // which do not have TypeSupport created for them.
-
-      // The transport type (.e.g SimpleTCP or SimpleUDP)
-      OpenDDS::DCPS::TransportInterfaceId transport_id;
-
-      // Information about the transport instance that is opaque to all but
-      // code specific to that transport implementation.
-      CORBA::OctetSeq                     transport_blob;
+      OpenDDS::DCPS::TransportLocatorSeq  transport_info;
 
       // The following are for Content-Subscription Profile
       string                              filter_expression;

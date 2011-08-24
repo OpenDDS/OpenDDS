@@ -1,4 +1,4 @@
-This directory contains throughput performace tests for 
+This directory contains throughput performace tests for
 the Data Distribution Service implementation in TAO.
 
 These tests are meant to be apples-to-apples comparison test with
@@ -10,12 +10,12 @@ The topologies are 1-1 1-4, 4-1 and 2-3  (publishers-subscribers).
 The tests support samples of 128, 512, 2048 and 8192 floats.
 
 - TypeNoKeyBounded
-        Sample data types.
+    Sample data types.
 
 - TCPListenerTest
-    Uses the SimpleTcp transport.
+    Uses the tcp transport.
     Subscriber reads after N calls to on_data_available.
-    
+
 - UDPListenerTest
     Uses the udp transport.
     Must throttle the publisher to avoid having too many dropped packets.
@@ -24,10 +24,10 @@ The tests support samples of 128, 512, 2048 and 8192 floats.
 
 - UDPNoKeyTest
 - SimpleE2ETest
-  These tests are equivalent to the TCPListenerTest and UDPListenerTest
-  but the subscriber polls calling read.  
-  These tests are less efficient than the Listener variants (because
-  of thread context switching).
+   These tests are equivalent to the TCPListenerTest and UDPListenerTest
+   but the subscriber polls calling read.
+   These tests are less efficient than the Listener variants (because
+   of thread context switching).
 
 - TCPProfilingTest
     Uses the SimpleTCPTransport.

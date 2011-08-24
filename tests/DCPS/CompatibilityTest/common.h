@@ -10,8 +10,7 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
 
 #include "ace/SString.h"
 

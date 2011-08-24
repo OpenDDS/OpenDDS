@@ -14,8 +14,23 @@
 <body>
   <h2>Working with Topics</h2>
 
-  <p>A DCPS library should have at least one Topic defined. A Topic
-  can be created by selecting topic from the palette.</p>
+  <p>A Dcpslib should define at least one Topic or reference a Topic
+  defined in another DcpsLib.</p>
+  
+  <p>A Topic
+  can be created by selecting topic from the palette. Alternative, a Topic defined
+  in another DcpsLib can be referenced. This avoids needing to duplicate a Topic in
+  multiple DcpsLibs. To place a Topic from another
+  DcpsLib onto the current diagram:</p>
+  <ol>
+  	<li>In the Project Explorer view, expand the .opendds
+  	file associated with the .opendds_diagram file and select the Topic to share.</li>
+  	<li>Drag the Topic onto the canvas.</li>
+  </ol>
+  <p>These steps are illustrated below:</p>
+  <img src="../../images/dcpslib_topic_shared.png">
+  
+  <p>You can now link to this Topic as if it were defined within the original DcpsLib.</p>
 
   <p>A Struct needs to be specified for the Topic's DataType. To
   pick from the allowed Structs, right click on the Topic to bring

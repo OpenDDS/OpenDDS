@@ -22,34 +22,32 @@ For TCP pub/sub:
 
 1)  Run the DCPSInfo server
 
-       $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo -ORBSvcConf tcp.conf -ORBEndpoint iiop://localhost:12345 -d domain_ids
+       $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo -ORBEndpoint iiop://localhost:12345 -d domain_ids
 
 2)  Run the Subscriber
 
-       ./subscriber -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini
+       ./subscriber -DCPSConfigFile dds_tcp_conf.ini
 
 
 3)  Run the Publisher
 
-       ./publisher -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini
+       ./publisher -DCPSConfigFile dds_tcp_conf.ini
 
 
 For UDP pub/sub:
 
 1)  Run the DCPSInfo server
 
-       $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo -ORBSvcConf tcp.conf -ORBEndpoint iiop://localhost:12345 -d domain_ids
+       $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo -ORBEndpoint iiop://localhost:12345 -d domain_ids
 
 2)  Run the Subscriber
 
-       ./subscriber -ORBSvcConf udp.conf -ORBSvcConf tcp.conf
-                    -DCPSConfigFile sub_udp_conf.ini
+       ./subscriber -DCPSConfigFile dds_udp_conf.ini
 
 
 3)  Run the Publisher
 
-       ./publisher -ORBSvcConf udp.conf -ORBSvcConf tcp.conf
-                   -DCPSConfigFile pub_udp_conf.ini
+       ./publisher -DCPSConfigFile dds_udp_conf.ini
 
 
 

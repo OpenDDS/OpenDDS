@@ -29,7 +29,7 @@ class Options  {
     /// Types of transport implementations supported.
     enum TransportType {
       TRANSPORT_NONE,     // Unsupported (NONE is a macro on VxWorks)
-      TCP,      // SimpleTcp
+      TCP,      // Tcp
       UDP,      // udp
       MC        // multicast
     };

@@ -53,9 +53,7 @@ project(*Publisher) : dcpsexe, svc_utils {
     README.txt
     domain_ids
     dds_tcp_conf.ini
-    pub_udp_conf.ini
-    sub2_udp_conf.ini
-    sub_udp_conf.ini
+    dds_udp_conf.ini
   }
 }
 
@@ -89,8 +87,6 @@ project(*Subscriber) : dcpsexe {
     README.txt
     domain_ids
     dds_tcp_conf.ini
-    pub_udp_conf.ini
-    sub2_udp_conf.ini
-    sub_udp_conf.ini
+    dds_udp_conf.ini
   }
 }

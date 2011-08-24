@@ -2,7 +2,7 @@
 # $Id$
 #
 
-[transport_impl_1]
+[transport/multicast1]
 transport_type=multicast
 
 # Enables IPv6 default group address selection.

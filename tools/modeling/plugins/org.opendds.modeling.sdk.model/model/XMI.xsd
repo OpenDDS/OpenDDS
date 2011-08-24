@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xmi="http://www.omg.org/XMI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.omg.org/XMI">
+  <xsd:attribute name="id" type="xsd:ID"/>
+  <xsd:attributeGroup name="IdentityAttribs">
+    <xsd:attribute form="qualified" name="label" type="xsd:string" use="optional"/>
+    <xsd:attribute form="qualified" name="uuid" type="xsd:string" use="optional"/>
+  </xsd:attributeGroup>
+  <xsd:attributeGroup name="LinkAttribs">
+    <xsd:attribute name="href" type="xsd:string" use="optional"/>
+    <xsd:attribute form="qualified" name="idref" type="xsd:IDREF" use="optional"/>
+  </xsd:attributeGroup>
+  <xsd:attributeGroup name="ObjectAttribs">
+    <xsd:attributeGroup ref="xmi:IdentityAttribs"/>
+    <xsd:attributeGroup ref="xmi:LinkAttribs"/>
+    <xsd:attribute fixed="2.0" form="qualified" name="version" type="xsd:string" use="optional"/>
+    <xsd:attribute form="qualified" name="type" type="xsd:QName" use="optional"/>
+  </xsd:attributeGroup>
+  <xsd:complexType name="XMI">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:any processContents="strict"/>
+    </xsd:choice>
+    <xsd:attributeGroup ref="xmi:IdentityAttribs"/>
+    <xsd:attributeGroup ref="xmi:LinkAttribs"/>
+    <xsd:attribute form="qualified" name="type" type="xsd:QName" use="optional"/>
+    <xsd:attribute fixed="2.0" form="qualified" name="version" type="xsd:string" use="required"/>
+  </xsd:complexType>
+  <xsd:element name="XMI" type="xmi:XMI"/>
+  <xsd:complexType name="PackageReference">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="name" type="xsd:string"/>
+      <xsd:element name="version" type="xsd:string"/>
+    </xsd:choice>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  <xsd:element name="PackageReference" type="xmi:PackageReference"/>
+  <xsd:complexType name="Model">
+    <xsd:complexContent>
+      <xsd:extension base="xmi:PackageReference"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Model" type="xmi:Model"/>
+  <xsd:complexType name="Import">
+    <xsd:complexContent>
+      <xsd:extension base="xmi:PackageReference"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Import" type="xmi:Import"/>
+  <xsd:complexType name="MetaModel">
+    <xsd:complexContent>
+      <xsd:extension base="xmi:PackageReference"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="MetaModel" type="xmi:MetaModel"/>
+  <xsd:complexType name="Documentation">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="contact" type="xsd:string"/>
+      <xsd:element name="exporter" type="xsd:string"/>
+      <xsd:element name="exporterVersion" type="xsd:string"/>
+      <xsd:element name="longDescription" type="xsd:string"/>
+      <xsd:element name="shortDescription" type="xsd:string"/>
+      <xsd:element name="notice" type="xsd:string"/>
+      <xsd:element name="owner" type="xsd:string"/>
+    </xsd:choice>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="contact" type="xsd:string" use="optional"/>
+    <xsd:attribute name="exporter" type="xsd:string" use="optional"/>
+    <xsd:attribute name="exporterVersion" type="xsd:string" use="optional"/>
+    <xsd:attribute name="longDescription" type="xsd:string" use="optional"/>
+    <xsd:attribute name="shortDescription" type="xsd:string" use="optional"/>
+    <xsd:attribute name="notice" type="xsd:string" use="optional"/>
+    <xsd:attribute name="owner" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  <xsd:element name="Documentation" type="xmi:Documentation"/>
+  <xsd:complexType name="Extension">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:any processContents="lax"/>
+    </xsd:choice>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="extender" type="xsd:string" use="optional"/>
+    <xsd:attribute name="extenderID" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+  <xsd:element name="Extension" type="xmi:Extension"/>
+  <xsd:complexType name="Difference">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="target">
+        <xsd:complexType>
+          <xsd:choice maxOccurs="unbounded" minOccurs="0">
+            <xsd:any processContents="skip"/>
+          </xsd:choice>
+          <xsd:anyAttribute processContents="skip"/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="difference" type="xmi:Difference"/>
+      <xsd:element name="container" type="xmi:Difference"/>
+    </xsd:choice>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="target" type="xsd:IDREFS" use="optional"/>
+    <xsd:attribute name="container" type="xsd:IDREFS" use="optional"/>
+  </xsd:complexType>
+  <xsd:element name="Difference" type="xmi:Difference"/>
+  <xsd:complexType name="Add">
+    <xsd:complexContent>
+      <xsd:extension base="xmi:Difference">
+        <xsd:attribute name="position" type="xsd:string" use="optional"/>
+        <xsd:attribute name="addition" type="xsd:IDREFS" use="optional"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Add" type="xmi:Add"/>
+  <xsd:complexType name="Replace">
+    <xsd:complexContent>
+      <xsd:extension base="xmi:Difference">
+        <xsd:attribute name="position" type="xsd:string" use="optional"/>
+        <xsd:attribute name="replacement" type="xsd:IDREFS" use="optional"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Replace" type="xmi:Replace"/>
+  <xsd:complexType name="Delete">
+    <xsd:complexContent>
+      <xsd:extension base="xmi:Difference"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Delete" type="xmi:Delete"/>
+  <xsd:complexType name="Any">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:any processContents="skip"/>
+    </xsd:choice>
+    <xsd:anyAttribute processContents="skip"/>
+  </xsd:complexType>
+</xsd:schema>

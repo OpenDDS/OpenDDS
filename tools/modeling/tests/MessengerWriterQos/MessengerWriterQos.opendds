@@ -3,18 +3,18 @@
   <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="MessengerWriterQos">
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" user_data="_X64DcAJKEeCBAfl9GiYbGg">
-      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" transportId="1">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" transportConfig="trans1">
         <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_D9GgACfyEeCySrIVS40zlQ" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" ownership="_M2EAAALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" copyFromTopicQos="false" durability_service="_5HPvYAMTEeCrTdheTycPFA" ownership_strength="_IJFDICfwEeCySrIVS40zlQ" transport_priority="_qJC4cAMYEeCrTdheTycPFA" lifespan="_JIkhIAMYEeCrTdheTycPFA" topic="_mcVnwPDxEd-I4rwicuuPOw" writer_data_lifecycle="_7VgMgCf7EeCySrIVS40zlQ">
         </writers>
       </publishers>
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
-      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" deadline="_uvsboALlEeCRmKs-7z8NWA" durability="_D9GgACfyEeCySrIVS40zlQ" latency_budget="_WCHsACfvEeCySrIVS40zlQ" ownership="_M2EAAALrEeCRmKs-7z8NWA" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
     <participants xmi:id="_4VZKwQMKEeCrTdheTycPFA" name="part3" domain="_bs2RIPDvEd-I4rwicuuPOw">
-      <publishers xsi:type="opendds:publisher" xmi:id="_7YHU4AMKEeCrTdheTycPFA" name="pub3" transportId="-1">
+      <publishers xsi:type="opendds:publisher" xmi:id="_7YHU4AMKEeCrTdheTycPFA" name="pub3" transportConfig="trans-1">
         <writers xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>

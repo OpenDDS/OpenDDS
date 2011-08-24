@@ -4,10 +4,12 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
+
 #include "MessengerTypeSupportImpl.h"
 
 #include <cstdlib>
@@ -215,21 +217,18 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                            DEFAULT_STATUS_MASK);
-  TransportImpl_rch pub_tport =
-    TheTransportFactory->create_transport_impl(1, AUTO_CONFIG);
-  pub_tport->attach(pub);
+
+  TransportRegistry::instance()->bind_config("c1", pub);
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
-  TransportImpl_rch sub_tport =
-    TheTransportFactory->create_transport_impl(2, AUTO_CONFIG);
-  sub_tport->attach(sub);
+
+  TransportRegistry::instance()->bind_config("c2", sub);
 
   Subscriber_var sub2 = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                               DEFAULT_STATUS_MASK);
-  TransportImpl_rch sub2_tport =
-    TheTransportFactory->create_transport_impl(3, AUTO_CONFIG);
-  sub2_tport->attach(sub2);
+
+  TransportRegistry::instance()->bind_config("c3", sub2);
 
   bool passed = run_filtering_test(dp, ts, pub, sub, sub2);
 
@@ -244,7 +243,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int ret = run_test(argc, argv);
 
   // cleanup
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();
   return ret;

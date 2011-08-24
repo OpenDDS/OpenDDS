@@ -1,6 +1,13 @@
 // -*- C++ -*-
 //
-// $Id$
+
+/*
+* $Id$
+*
+*
+* Distributed under the OpenDDS License.
+* See: http://www.opendds.org/license.html
+*/
 
 #include "MonitorTask.h"
 #include "MonitorDataStorage.h"
@@ -13,7 +20,6 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
@@ -37,7 +43,8 @@ namespace { // Anonymous namespace for file scope.
 
 Monitor::MonitorTask::MonitorTask(
   MonitorDataStorage* data,
-  const Options&      options
+  const Options&      options,
+  bool                mapExistingIORKeys
 ) : opened_( false),
     done_( false),
     options_( options),
@@ -49,11 +56,13 @@ Monitor::MonitorTask::MonitorTask(
     lastKey_( 0)
 {
   // Find and map the current IOR strings to their IOR key values.
-  for( OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
-       location = TheServiceParticipant->keyIorMap().begin();
-       location != TheServiceParticipant->keyIorMap().end();
-       ++location) {
-    this->iorKeyMap_[ location->second] = location->first;
+  if (mapExistingIORKeys) {
+    for( OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
+         location = TheServiceParticipant->keyIorMap().begin();
+         location != TheServiceParticipant->keyIorMap().end();
+         ++location) {
+      this->iorKeyMap_[ location->second] = location->first;
+    }
   }
 }
 
@@ -62,10 +71,6 @@ Monitor::MonitorTask::~MonitorTask()
   // Terminate processing cleanly.
   this->stop();
   this->iorKeyMap_.clear();
-
-  // Clean up the service resources.
-  TheTransportFactory->release();
-  TheServiceParticipant->shutdown();
 }
 
 const Monitor::MonitorTask::IorKeyMap&
@@ -181,12 +186,6 @@ Monitor::MonitorTask::stopInstrumentation()
   }
 
   this->participant_ = DDS::DomainParticipant::_nil();
-
-  // Extract a transport index for this subscription.
-  OpenDDS::DCPS::TransportIdType transportKey
-    = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
-
-  TheTransportFactory->release (transportKey);
 }
 
 Monitor::MonitorTask::RepoKey
@@ -302,7 +301,7 @@ Monitor::MonitorTask::svc()
             condition->get_entity()->get_instance_handle()
           ));
         }
-        // Its a CommunicationStatus, process inbound data.
+        // It's a CommunicationStatus, process inbound data.
         DDS::DataReader_var reader
           = DDS::DataReader::_narrow( condition->get_entity());
         if( !CORBA::is_nil( reader.in())) {
@@ -407,44 +406,6 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
       ACE_TEXT("created subscriber.\n")
-    ));
-  }
-
-  // Extract a transport index for this subscription.
-  OpenDDS::DCPS::TransportIdType transportKey
-    = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
-
-  // Grab the transport itself.
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->obtain( transportKey);
-  if( transport.is_nil()) {
-    transport = TheTransportFactory->create_transport_impl(
-                  transportKey,
-                  ACE_TEXT("SimpleTcp"),
-                  OpenDDS::DCPS::AUTO_CONFIG
-                );
-    if( transport.is_nil()) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
-        ACE_TEXT("failed to create transport.\n")
-      ));
-      return false;
-    }
-  }
-
-  if( ::OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: MonitorTask::setActiveRepo() - ")
-      ACE_TEXT("failed to attach transport to subscriber.\n")
-    ));
-    return false;
-  }
-
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
-      ACE_TEXT("attached to transport with index %d.\n"),
-      transportKey
     ));
   }
 

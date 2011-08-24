@@ -11,6 +11,8 @@ import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.StackLayout;
 import org.eclipse.draw2d.ToolbarLayout;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
@@ -99,31 +101,37 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected IFigure createNodeShape() {
-		StereotypedElementFigure figure = new StereotypedElementFigure();
+		DomainParticipantFigure figure = new DomainParticipantFigure();
 		return primaryShape = figure;
 	}
 
 	/**
 	 * @generated
 	 */
-	public StereotypedElementFigure getPrimaryShape() {
-		return (StereotypedElementFigure) primaryShape;
+	public DomainParticipantFigure getPrimaryShape() {
+		return (DomainParticipantFigure) primaryShape;
 	}
 
 	/**
 	 * @generated
 	 */
 	protected boolean addFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantName2EditPart) {
-			((DomainParticipantName2EditPart) childEditPart)
+		if (childEditPart instanceof DomainParticipantTransportConfigEditPart) {
+			((DomainParticipantTransportConfigEditPart) childEditPart)
 					.setLabel(getPrimaryShape()
-							.getFigureStereotypedElementStereotypeFigure());
+							.getFigureDomainParticipantTransportConfigFigure());
 			return true;
 		}
 		if (childEditPart instanceof DomainParticipantNameEditPart) {
 			((DomainParticipantNameEditPart) childEditPart)
 					.setLabel(getPrimaryShape()
-							.getFigureStereotypedElementNameFigure());
+							.getFigureDomainParticipantNameFigure());
+			return true;
+		}
+		if (childEditPart instanceof DomainParticipantName2EditPart) {
+			((DomainParticipantName2EditPart) childEditPart)
+					.setLabel(getPrimaryShape()
+							.getFigureDomainParticipantStereotypeFigure());
 			return true;
 		}
 		return false;
@@ -133,10 +141,13 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected boolean removeFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantName2EditPart) {
+		if (childEditPart instanceof DomainParticipantTransportConfigEditPart) {
 			return true;
 		}
 		if (childEditPart instanceof DomainParticipantNameEditPart) {
+			return true;
+		}
+		if (childEditPart instanceof DomainParticipantName2EditPart) {
 			return true;
 		}
 		return false;
@@ -344,21 +355,38 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	/**
 	 * @generated
 	 */
-	public class StereotypedElementFigure extends RectangleFigure {
+	protected void handleNotificationEvent(Notification event) {
+		if (event.getNotifier() == getModel()
+				&& EcorePackage.eINSTANCE.getEModelElement_EAnnotations()
+						.equals(event.getFeature())) {
+			handleMajorSemanticChange();
+		} else {
+			super.handleNotificationEvent(event);
+		}
+	}
+
+	/**
+	 * @generated
+	 */
+	public class DomainParticipantFigure extends RectangleFigure {
 
 		/**
 		 * @generated
 		 */
-		private WrappingLabel fFigureStereotypedElementStereotypeFigure;
+		private WrappingLabel fFigureDomainParticipantStereotypeFigure;
 		/**
 		 * @generated
 		 */
-		private WrappingLabel fFigureStereotypedElementNameFigure;
+		private WrappingLabel fFigureDomainParticipantNameFigure;
+		/**
+		 * @generated
+		 */
+		private WrappingLabel fFigureDomainParticipantTransportConfigFigure;
 
 		/**
 		 * @generated
 		 */
-		public StereotypedElementFigure() {
+		public DomainParticipantFigure() {
 
 			ToolbarLayout layoutThis = new ToolbarLayout();
 			layoutThis.setStretchMinorAxis(false);
@@ -378,15 +406,20 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 		 */
 		private void createContents() {
 
-			fFigureStereotypedElementStereotypeFigure = new WrappingLabel();
-			fFigureStereotypedElementStereotypeFigure.setText("<...>");
+			fFigureDomainParticipantStereotypeFigure = new WrappingLabel();
+			fFigureDomainParticipantStereotypeFigure.setText("<...>");
 
-			this.add(fFigureStereotypedElementStereotypeFigure);
+			this.add(fFigureDomainParticipantStereotypeFigure);
 
-			fFigureStereotypedElementNameFigure = new WrappingLabel();
-			fFigureStereotypedElementNameFigure.setText("<...>");
+			fFigureDomainParticipantNameFigure = new WrappingLabel();
+			fFigureDomainParticipantNameFigure.setText("<...>");
 
-			this.add(fFigureStereotypedElementNameFigure);
+			this.add(fFigureDomainParticipantNameFigure);
+
+			fFigureDomainParticipantTransportConfigFigure = new WrappingLabel();
+			fFigureDomainParticipantTransportConfigFigure.setText("<...>");
+
+			this.add(fFigureDomainParticipantTransportConfigFigure);
 
 		}
 
@@ -412,15 +445,22 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 		/**
 		 * @generated
 		 */
-		public WrappingLabel getFigureStereotypedElementStereotypeFigure() {
-			return fFigureStereotypedElementStereotypeFigure;
+		public WrappingLabel getFigureDomainParticipantStereotypeFigure() {
+			return fFigureDomainParticipantStereotypeFigure;
 		}
 
 		/**
 		 * @generated
 		 */
-		public WrappingLabel getFigureStereotypedElementNameFigure() {
-			return fFigureStereotypedElementNameFigure;
+		public WrappingLabel getFigureDomainParticipantNameFigure() {
+			return fFigureDomainParticipantNameFigure;
+		}
+
+		/**
+		 * @generated
+		 */
+		public WrappingLabel getFigureDomainParticipantTransportConfigFigure() {
+			return fFigureDomainParticipantTransportConfigFigure;
 		}
 
 	}

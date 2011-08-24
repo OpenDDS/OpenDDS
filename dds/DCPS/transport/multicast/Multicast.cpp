@@ -19,7 +19,7 @@ MulticastInitializer::MulticastInitializer()
   ACE_Service_Config::process_directive(ace_svc_desc_MulticastLoader);
 
 #if (OPENDDS_MULTICAST_HAS_DLL == 0)
-  ACE_Service_Config::process_directive(ACE_TEXT("static MulticastLoader"));
+  ACE_Service_Config::process_directive(ACE_TEXT("static OpenDDS_Multicast"));
 #endif  /* OPENDDS_MULTICAST_HAS_DLL */
 }
 

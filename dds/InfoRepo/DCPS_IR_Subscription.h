@@ -43,7 +43,7 @@ public:
                        DCPS_IR_Topic* topic,
                        OpenDDS::DCPS::DataReaderRemote_ptr reader,
                        DDS::DataReaderQos qos,
-                       OpenDDS::DCPS::TransportInterfaceInfo info,
+                       const OpenDDS::DCPS::TransportLocatorSeq& info,
                        DDS::SubscriberQos subscriberQos,
                        const char* filterExpression,
                        const DDS::StringSeq& exprParams);
@@ -55,7 +55,17 @@ public:
   ///  publications and notifies datareader if successfully added
   /// This method can mark the participant dead
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_associated_publication(DCPS_IR_Publication* pub);
+  int add_associated_publication(DCPS_IR_Publication* pub, bool active);
+
+  /// The service participant that contains this Subscription has indicated
+  /// that the assocation to peer "remote" is complete.  This method will
+  /// locate the Publication object for "remote" in order to inform it
+  /// of the completed association.
+  void association_complete(const OpenDDS::DCPS::RepoId& remote);
+
+  /// Invoke the DataWriterRemote::association_complete() callback, passing
+  /// the "remote" parameter (Subscription) to the service participant.
+  void call_association_complete(const OpenDDS::DCPS::RepoId& remote);
 
   /// Remove the associated publication
   /// Removes the publication from the list of associated
@@ -140,11 +150,7 @@ public:
   // the new association will be added.
   bool reevaluate_association(DCPS_IR_Publication* publication);
 
-  /// get the transport ID of the transport implementation type.
-  OpenDDS::DCPS::TransportInterfaceId   get_transport_id() const;
-
-  /// Returns a copy of the TransportInterfaceInfo object
-  OpenDDS::DCPS::TransportInterfaceInfo get_transportInterfaceInfo() const;
+  OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
 
   /// Return pointer to the incompatible qos status
   /// Subscription retains ownership
@@ -191,7 +197,7 @@ private:
   /// the corresponding DataReaderRemote object
   OpenDDS::DCPS::DataReaderRemote_var reader_;
   DDS::DataReaderQos qos_;
-  OpenDDS::DCPS::TransportInterfaceInfo info_;
+  OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::SubscriberQos subscriberQos_;
   std::string filterExpression_;
   DDS::StringSeq exprParams_;

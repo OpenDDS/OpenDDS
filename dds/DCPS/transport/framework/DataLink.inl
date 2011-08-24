@@ -261,13 +261,24 @@ OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
 
     this->send_strategy_    = ss._retn();
     this->receive_strategy_ = rs._retn();
+
+    this->strategy_condition_.broadcast();
   }
   return 0;
 }
 
 ACE_INLINE
+void
+OpenDDS::DCPS::DataLink::unblock_wait_for_start()
+{
+  GuardType guard(this->strategy_lock_);
+  this->start_failed_ = true;
+  this->strategy_condition_.broadcast();
+}
+
+ACE_INLINE
 const char*
-OpenDDS::DCPS::DataLink::connection_notice_as_str(enum ConnectionNotice notice)
+OpenDDS::DCPS::DataLink::connection_notice_as_str(ConnectionNotice notice)
 {
   static const char* NoticeStr[] = { "DISCONNECTED",
                                      "RECONNECTED",
@@ -279,14 +290,49 @@ OpenDDS::DCPS::DataLink::connection_notice_as_str(enum ConnectionNotice notice)
 
 ACE_INLINE
 void
-OpenDDS::DCPS::DataLink::fully_associated()
+OpenDDS::DCPS::DataLink::terminate_send()
 {
-  //noop
+  this->send_strategy_->terminate_send(false);
 }
 
 ACE_INLINE
 void
-OpenDDS::DCPS::DataLink::terminate_send()
+OpenDDS::DCPS::DataLink::remove_listener(const OpenDDS::DCPS::RepoId& local_id)
 {
-  this->send_strategy_->terminate_send(false);
+  {
+    GuardType guard(this->pub_map_lock_);
+    if (this->send_listeners_.erase(local_id)) {
+      return;
+    }
+  }
+  GuardType guard(this->sub_map_lock_);
+  this->recv_listeners_.erase(local_id);
+}
+
+ACE_INLINE
+OpenDDS::DCPS::TransportSendListener*
+OpenDDS::DCPS::DataLink::send_listener_for(const RepoId& pub_id) const
+{
+  // pub_map_ (and send_listeners_) are already locked when entering this
+  // private method.
+  IdToSendListenerMap::const_iterator found =
+    this->send_listeners_.find(pub_id);
+  if (found == this->send_listeners_.end()) {
+    return 0;
+  }
+  return found->second;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::TransportReceiveListener*
+OpenDDS::DCPS::DataLink::recv_listener_for(const RepoId& sub_id) const
+{
+  // sub_map_ (and recv_listeners_) are already locked when entering this
+  // private method.
+  IdToRecvListenerMap::const_iterator found =
+    this->recv_listeners_.find(sub_id);
+  if (found == this->recv_listeners_.end()) {
+    return 0;
+  }
+  return found->second;
 }

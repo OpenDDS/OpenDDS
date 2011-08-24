@@ -42,5 +42,31 @@
   -&gt; Show View</b></a> <b>-&gt; Problems</b></p><img alt=
   "Validations in Problem View" src=
   "../images/validations_in_problem_view.png">
+
+  <br>
+  <div class="caution">
+  When validations are done for two or more libraries of the same type in the same model file,
+  the last validations done are the only ones that will remain. For example,
+  suppose you have a model with PolicyLibs PolicyLibA and PolicyLibB, both with validation errors. If you
+  open the model file and then
+  <ol>
+    <li>Open PolicyLibA</li>
+    <li>Perform validations</li>
+    <li>Open PolicyLibB</li>
+    <li>Perform validations</li>
+  </ol>
+  only the validation errors from PolicyLibB will be in the Problems view.
+  </div>
+  
+  <h3>Limiting Errors Shown in Problems View</h3>
+  
+  <p>By default, the scope of the validation messages that are shown in the Problems view
+  include all files in your workspace. If you have multiple models with validation
+  messages it may be difficult to find messages specific to the opened diagram.</p>
+  
+  <p>You can configure the Problem view to limit the scope of messages shown.
+  This is done by selecting Show from the view menu for the Problem view and
+  indicating the scope of the messages.</p>
+  <img src="../images/problems_view_menu.png">
 </body>
 </html>

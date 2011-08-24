@@ -15,14 +15,14 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/monitor/monitorC.h"
 
-Monitor::MonitorData::MonitorData( const Options& options, MonitorDataModel* model)
+Monitor::MonitorData::MonitorData( const Options& options, MonitorDataModel* model, bool mapExistingIORKeys)
  : enabled_( true),
    options_( options),
    model_( model),
    dataSource_( 0),
    storage_( new MonitorDataStorage( this))
 {
-  this->dataSource_ = new MonitorTask( this->storage_, this->options_);
+  this->dataSource_ = new MonitorTask( this->storage_, this->options_, mapExistingIORKeys);
   this->dataSource_->start();
 }
 

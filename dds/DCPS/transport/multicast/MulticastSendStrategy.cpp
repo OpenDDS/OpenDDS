@@ -8,6 +8,7 @@
 
 #include "MulticastSendStrategy.h"
 #include "MulticastDataLink.h"
+#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -15,9 +16,13 @@ namespace DCPS {
 MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
   : TransportSendStrategy(link->config(),
                           0,  // synch_resource
-                          link->transport_priority()),
+                          link->transport_priority(),
+                          new NullSynchStrategy),
     link_(link)
 {
+  // Multicast will send a SYN (TRANSPORT_CONTROL) before any reservations
+  // are made on the DataLink, if the link is "release" it will be dropped.
+  this->link_released(false);
 }
 
 void

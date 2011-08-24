@@ -39,7 +39,7 @@ MulticastDataLink::send_buffer()
   return this->send_buffer_.in();
 }
 
-ACE_INLINE MulticastConfiguration*
+ACE_INLINE MulticastInst*
 MulticastDataLink::config()
 {
   return this->config_;

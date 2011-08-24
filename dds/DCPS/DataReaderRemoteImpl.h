@@ -39,8 +39,12 @@ public:
 
   virtual ~DataReaderRemoteImpl();
 
-  virtual void add_associations(const RepoId& yourId,
-                                const WriterAssociationSeq & writers)
+  virtual void add_association(const RepoId& yourId,
+                               const WriterAssociation& writer,
+                               bool active)
+  ACE_THROW_SPEC((CORBA::SystemException));
+
+  virtual void association_complete(const RepoId& remote_id)
   ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual void remove_associations(const WriterIdSeq& writers,

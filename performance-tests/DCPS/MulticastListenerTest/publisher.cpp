@@ -18,8 +18,6 @@
 
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
-#include "dds/DCPS/transport/framework/EntryExit.h"
-
 #include "ace/Arg_Shifter.h"
 
 
@@ -44,7 +42,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     // -r  <num data readers>
     // -n  <num packets>
     // -d  <data size>
-    // -a  <transport address>
     // -t  <max blocking timeout in miliseconds>
     // -msi <max samples per instance>
     // -mxs <max samples>
@@ -75,16 +72,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       NUM_SAMPLES = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0)
-    {
-      writer_address_str = currentArg;
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-multicast"))) != 0)
-    {
-      multicast_group_address_str = currentArg;
-      arg_shifter.consume_arg ();
-    }
+
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-msi"))) != 0)
     {
       MAX_SAMPLES_PER_INSTANCE = ACE_OS::atoi (currentArg);
@@ -254,56 +242,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                           1);
       }
 
-      // Initialize the transport
-      if (0 != ::init_writer_tranport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) ERROR: init_transport failed!\n")),
-                           1);
-      }
-
-      // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl
-        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in());
-
-      if (0 == pub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
-                          1);
-      }
-
-      OpenDDS::DCPS::AttachStatus attach_status =
-        pub_impl->attach_transport(writer_transport_impl.in());
-
-      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-        {
-          // We failed to attach to the transport for some reason.
-          const ACE_TCHAR* status_str = ACE_TEXT("");
-
-          switch (attach_status)
-            {
-              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-                break;
-              case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = ACE_TEXT("ATTACH_ERROR");
-                break;
-              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-                break;
-              default:
-                status_str = ACE_TEXT("Unknown Status");
-                break;
-            }
-
-          ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: Failed to attach to the transport. ")
-                            ACE_TEXT("AttachStatus == %s\n"),
-                            status_str),
-                            1);
-        }
-
       // Create the datawriters
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
@@ -362,8 +300,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(10);
 
       // Clean up publisher objects
-      pub->delete_contained_entities() ;
-
       delete [] dws;
       for (int q = 0; q < num_datawriters; q ++)
       {
@@ -375,7 +311,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dp->delete_contained_entities();
       dpf->delete_participant(dp.in ());
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }
@@ -384,11 +319,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  writer_transport_impl = 0;
 
   return status;
 }

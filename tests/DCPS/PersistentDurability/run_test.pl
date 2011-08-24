@@ -14,12 +14,9 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$opts =
-  new PerlACE::ConfigList->check_config ('STATIC')
-  ? ''
-  : "-ORBSvcConf tcp.conf";
-$pub_opts = "$opts -DCPSConfigFile pub.ini -DCPSPersistentDataDir $DDS_ROOT/tests/DCPS/PersistentDurability/data";
-$sub_opts = "$opts -DCPSConfigFile sub.ini";
+
+$pub_opts = "-DCPSConfigFile pub.ini -DCPSPersistentDataDir $DDS_ROOT/tests/DCPS/PersistentDurability/data";
+$sub_opts = "-DCPSConfigFile sub.ini";
 
 
 sub rmtree {
@@ -39,7 +36,7 @@ unlink $data_file;
 
 $DCPSREPO =
   PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                           "$repo_bit_opt -o $dcpsrepo_ior ");
+                           "-o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
 $Publisher1 = PerlDDS::create_process ("publisher",
                                        "$pub_opts -w -ORBLogFile $data_file");

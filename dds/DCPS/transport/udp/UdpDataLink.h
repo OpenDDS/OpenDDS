@@ -11,7 +11,6 @@
 
 #include "Udp_Export.h"
 
-#include "UdpConfiguration.h"
 #include "UdpSendStrategy.h"
 #include "UdpSendStrategy_rch.h"
 #include "UdpReceiveStrategy.h"
@@ -26,7 +25,9 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class UdpInst;
 class UdpTransport;
+class ReceivedDataSample;
 
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
@@ -34,7 +35,7 @@ public:
   UdpDataLink(UdpTransport* transport,
               bool active);
 
-  void configure(UdpConfiguration* config,
+  void configure(UdpInst* config,
                  TransportReactorTask* reactor_task);
 
   void send_strategy(UdpSendStrategy* send_strategy);
@@ -42,7 +43,7 @@ public:
 
   bool active() const;
 
-  UdpConfiguration* config();
+  UdpInst* config();
   TransportReactorTask* reactor_task();
 
   ACE_Reactor* get_reactor();
@@ -53,10 +54,13 @@ public:
 
   bool open(const ACE_INET_Addr& remote_address);
 
+  void control_received(ReceivedDataSample& sample,
+                        const ACE_INET_Addr& remote_address);
+
 protected:
   bool active_;
 
-  UdpConfiguration* config_;
+  UdpInst* config_;
   TransportReactorTask* reactor_task_;
 
   UdpSendStrategy_rch send_strategy_;

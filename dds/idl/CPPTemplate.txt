@@ -482,35 +482,33 @@ ACE_Message_Block*
     // block.
 
     OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko_instance_data(instance_data);
-    ACE_NEW_RETURN (mb,
-                    ACE_Message_Block(key_marshaled_size_
-                                      ? key_marshaled_size_
-                                      : OpenDDS::DCPS::gen_find_size(ko_instance_data)),
-                    0);
-    ::OpenDDS::DCPS::Serializer serializer (mb,
-                                            this->get_publisher_servant()->swap_bytes());
+    ACE_NEW_RETURN(mb,
+                   ACE_Message_Block(key_marshaled_size_
+                                     ? key_marshaled_size_
+                                     : OpenDDS::DCPS::gen_find_size(ko_instance_data)),
+                   0);
+    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
     serializer << ko_instance_data;
   } else { // OpenDDS::DCPS::FULL_MARSHALING
-    ACE_NEW_MALLOC_RETURN (mb,
-                           static_cast<ACE_Message_Block*> (
-                               mb_allocator_->malloc (
-                               sizeof (ACE_Message_Block))),
-                           ACE_Message_Block(
-                               marshaled_size_ ? marshaled_size_ :
-                                   OpenDDS::DCPS::gen_find_size(instance_data),
-                               ACE_Message_Block::MB_DATA,
-                               0, //cont
-                               0, //data
-                               data_allocator_, //allocator_strategy
-                               db_lock_pool_->get_lock(), //data block locking_strategy
-                               ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                               ACE_Time_Value::zero,
-                               ACE_Time_Value::max_time,
-                               db_allocator_,
-                               mb_allocator_),
-                            0);
-    ::OpenDDS::DCPS::Serializer serializer (mb,
-                                            this->get_publisher_servant()->swap_bytes());
+    ACE_NEW_MALLOC_RETURN(mb,
+                          static_cast<ACE_Message_Block*>(
+                              mb_allocator_->malloc(
+                              sizeof(ACE_Message_Block))),
+                          ACE_Message_Block(
+                              marshaled_size_ ? marshaled_size_ :
+                                  OpenDDS::DCPS::gen_find_size(instance_data),
+                              ACE_Message_Block::MB_DATA,
+                              0, //cont
+                              0, //data
+                              data_allocator_, //allocator_strategy
+                              db_lock_pool_->get_lock(), //data block locking_strategy
+                              ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                              ACE_Time_Value::zero,
+                              ACE_Time_Value::max_time,
+                              db_allocator_,
+                              mb_allocator_),
+                           0);
+    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
     serializer << instance_data;
   }
 
@@ -1976,11 +1974,11 @@ void
         ++sample_rejected_status_.total_count_change;
         sample_rejected_status_.last_instance_handle = handle;
 
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
         if (listener != 0)
         {
           ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
@@ -2068,11 +2066,11 @@ void
 
         set_status_changed_flag(::DDS::SAMPLE_LOST_STATUS, true);
 
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
         if (listener)
         {
           ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
 
@@ -2104,11 +2102,11 @@ void
         ::DDS::DataReaderListener* listener =
           listener_for (::DDS::DATA_AVAILABLE_STATUS);
 
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
         if (listener != 0)
         {
           ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_data_available(dr.in ());
           set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
@@ -2142,8 +2140,8 @@ void
   // can be notified the dispose event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal (sample, instance, just_registered, filtered, 
-                       OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+  this->dds_demarshal(sample, instance, just_registered, filtered,
+                      OpenDDS::DCPS::KEY_ONLY_MARSHALING);
 }
 
 void

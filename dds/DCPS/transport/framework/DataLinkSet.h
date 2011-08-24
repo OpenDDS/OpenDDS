@@ -43,6 +43,8 @@ public:
   /// Returns the num elems in the set after attempting the operation.
   ssize_t remove_links(DataLinkSet* released_set);
 
+  void remove_link(const DataLink_rch& link);
+
   // ciju: Called with lock held in DataLinkSetMap
   /// Remove all reservations involving the remote_id from each
   /// DataLink in this set.  The supplied 'released' map will be
@@ -51,25 +53,20 @@ public:
   //void release_reservations(RepoId          remote_id,
   //                          DataLinkSetMap& released_locals);
 
-  // ciju: This method was called without any locks held from TransportInterface.
   /// Send to each DataLink in the set.
   void send(DataSampleListElement* sample);
 
   /// Send control message to each DataLink in the set.
-  // ciju: This is called without any locks held held from TransportInterface.
   SendControlStatus send_control(RepoId                 pub_id,
                                  TransportSendListener* listener,
                                  ACE_Message_Block*     msg);
 
   void send_response(RepoId sub_id, ACE_Message_Block* response);
 
-  // ciju: This method was called without any locks held held from TransportInterface.
   int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
 
-  // ciju: This method was called without any locks held held from TransportInterface.
   int remove_all_msgs(RepoId pub_id);
 
-  // ciju: This method was called without any locks held held from TransportInterface.
   /// This will do several things, including adding to the membership
   /// of the send_links_ set.  Any DataLinks added to the send_links_
   /// set will be also told about the send_start() event.  Those
@@ -79,7 +76,6 @@ public:
   /// send_links_ set.
   void send_start(DataLinkSet* link_set);
 
-  // ciju: This method was called without any locks held held from TransportInterface.
   /// This will inform each DataLink in the set about the send_stop()
   /// event.  It will then clear the send_links_ set.
   void send_stop();

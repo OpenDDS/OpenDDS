@@ -2,6 +2,7 @@
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsGuid.idl"
 #include "dds/DdsDcpsDataWriterRemote.idl"
+#include <tao/ULongSeq.pidl>
 
 module OpenDDS {
 
@@ -28,11 +29,6 @@ module OpenDDS {
       double                  variance;
     };
 
-    typedef sequence<unsigned long> ULongSeq;
-    typedef sequence<string>        StringSeq;
-
-    //typedef sequence<GUID_t> GUIDSeq;
-
     enum ValueEnumType { INTEGER_TYPE, DOUBLE_TYPE, STRING_TYPE,
                          STATISTICS_TYPE, STRING_LIST_TYPE };
     union ValueUnion switch (ValueEnumType) {
@@ -40,7 +36,7 @@ module OpenDDS {
       case DOUBLE_TYPE:      double     double_value;
       case STRING_TYPE:      string     string_value;
       case STATISTICS_TYPE:  Statistics stat_value;
-      case STRING_LIST_TYPE: StringSeq  string_seq_value;
+      case STRING_LIST_TYPE: DDS::StringSeq  string_seq_value;
     };
     struct NameValuePair {
       string     name;
@@ -57,7 +53,7 @@ module OpenDDS {
       string    host;
       long      pid;
       GUIDSeq   domain_participants;
-      ULongSeq  transports;
+      CORBA::ULongSeq  transports;
       NVPSeq    values;
     };
 

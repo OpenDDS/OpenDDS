@@ -97,7 +97,7 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* READERDATALIFECYCLE_KEYNAME                 = ACE_TEXT("ReaderDataLifecycle");
   const ACE_TCHAR* PARTICIPANT_KEYNAME                         = ACE_TEXT("Participant");
   const ACE_TCHAR* TOPIC_KEYNAME                               = ACE_TEXT("Topic");
-  const ACE_TCHAR* TRANSPORTINDEX_KEYNAME                      = ACE_TEXT("TransportIndex");
+  const ACE_TCHAR* TRANSPORTCONFIG_KEYNAME                     = ACE_TEXT("TransportConfig");
   const ACE_TCHAR* MESSAGESOURCE_KEYNAME                       = ACE_TEXT("MessageSource");
   const ACE_TCHAR* MESSAGERATETYPE_KEYNAME                     = ACE_TEXT("MessageRateType");
   const ACE_TCHAR* MESSAGERATE_KEYNAME                         = ACE_TEXT("MessageRate");
@@ -1847,18 +1847,18 @@ Options::loadPublication(
     }
   }
 
-  // TransportIndex   = <number> # Index into transport configurations
+  // TransportConfig         = <string> # Name of transport config
   valueString.clear();
-  heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
+  heap.get_string_value(sectionKey, TRANSPORTCONFIG_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->transport = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    profile->transportConfig = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
+    if (this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Options::loadPublication() - ")
-        ACE_TEXT("  [publication/%s] %s == %d.\n"),
+        ACE_TEXT("  [publication/%s] %s == %C.\n"),
         sectionName.c_str(),
-        TRANSPORTINDEX_KEYNAME,
-        profile->transport
+        TRANSPORTCONFIG_KEYNAME,
+        profile->transportConfig.c_str()
       ));
     }
   }
@@ -2784,18 +2784,18 @@ Options::loadSubscription(
     }
   }
 
-  // TransportIndex   = <number> # Index into transport configurations
+  // TransportConfig         = <string> # Name of transport config
   valueString.clear();
-  heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
+  heap.get_string_value(sectionKey, TRANSPORTCONFIG_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->transport = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    profile->transportConfig = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
+    if (this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
-        ACE_TEXT("  [subscription/%s] %s == %d.\n"),
+        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("  [subscription/%s] %s == %C.\n"),
         sectionName.c_str(),
-        TRANSPORTINDEX_KEYNAME,
-        profile->transport
+        TRANSPORTCONFIG_KEYNAME,
+        profile->transportConfig.c_str()
       ));
     }
   }

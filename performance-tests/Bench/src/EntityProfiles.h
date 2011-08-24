@@ -49,8 +49,7 @@ enum QosMaskBits {
  */
 struct ParticipantProfile  {
   int domainId;
-  DDS::DomainParticipantQos
-      qos;
+  DDS::DomainParticipantQos qos;
 };
 
 /**
@@ -69,7 +68,7 @@ struct TopicProfile {
  *   # DataWriter Qos Policy values
  *   # Test execution parameters
  *   Topic             = <string> # One of topic <name>
- *   TransportIndex    = <number> # Index into transport configurations
+ *   TransportConfig   = <string> # Name of transport config
  *   Associations      = <number> # Number of subscriptions to match before starting.
  *   StartAfterDelay   = <number> # Delay before writes start after matching.
  *   MessageSource     = <string> # One of subscription <name>
@@ -89,7 +88,7 @@ struct TopicProfile {
  */
 struct PublicationProfile {
   std::string               topic;
-  unsigned int              transport;
+  std::string               transportConfig;
   std::string               source;
   StatisticalValue<long>*   instances;
   StatisticalValue<long>*   size;
@@ -110,14 +109,14 @@ struct PublicationProfile {
  *   # DataReader Qos Policy values
  *   # Test execution parameters
  *   Topic                   = <string> # One of topic <name>
- *   TransportIndex          = <number> # Index into transport configurations
+ *   TransportConfig         = <string> # Name of transport config
  *   DataCollectionFile      = <string> # Filename for collected data
  *   DataCollectionBound     = <number>
  *   DataCollectionRetention = <string> # One of ALL, OLDEST, NEWEST
  */
 struct SubscriptionProfile {
   std::string        topic;
-  unsigned int       transport;
+  std::string        transportConfig;
   std::string        datafile;
   int                bound;
   OpenDDS::DCPS::DataCollector<double>::OnFull

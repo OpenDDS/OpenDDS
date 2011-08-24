@@ -1167,7 +1167,7 @@ If you wish to publish the contents of this document as static HTML web pages, t
 * [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
 * use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
 </div>
-<div title="Installation" modifier="MikeMartinez" created="201003022306" modified="201008122124" tags="publish" changecount="28">
+<div title="Installation" modifier="AdamMitz" created="201003022306" modified="201107261925" tags="publish" changecount="30">
 <pre>Once the OpenDDS core is built, the OpenDDS-Bench software can be built and installed.  This software is located relative to the OpenDDS root directory and is part of the OpenDDS download.  For purposes of this documentation, we assume that you have set the ~BENCH_ROOT environment variable to a value of //$~DDS_ROOT/performance-tests/Bench//.  In a bash shell this can be done as:
 &lt;&lt;&lt;
  shell&gt; export ~BENCH_ROOT=$~DDS_ROOT/performance-tests/Bench
@@ -1189,10 +1189,10 @@ If there are hosts which are participating in the test and can execute the OpenD
 |versioned Federator library |$~DDS_ROOT/lib |~|
 |versioned ~InfoRepoLib library |$~DDS_ROOT/lib |~|
 |versioned ~OpenDDS_Dcps library |$~DDS_ROOT/lib |core OpenDDS library |
-|versioned ~SimpleTcp library |$~DDS_ROOT/lib |OpenDDS transport implementations |
+|versioned ~OpenDDS_Tcp library |$~DDS_ROOT/lib |OpenDDS transport implementations |
 |versioned ~OpenDDS_Udp library |$~DDS_ROOT/lib |~|
 |versioned ~OpenDDS_Multicast library |$~DDS_ROOT/lib |~|
-|unversioned&lt;br&gt;~SimpleTcp library |link to versioned&lt;br&gt;~OpenDDS_SimpleTcp library |~|
+|unversioned&lt;br&gt;~OpenDDS_Tcp library |link to versioned&lt;br&gt;~OpenDDS_Tcp library |~|
 |unversioned&lt;br&gt;~OpenDDS_Udp library |link to versioned&lt;br&gt;~OpenDDS_Udp library |~|
 |unversioned&lt;br&gt;~OpenDDS_Multicast library |link to versioned&lt;br&gt;~OpenDDS_Multicast library |~|
 |versioned ACE library |$~ACE_ROOT/lib |core ACE library |
@@ -1234,7 +1234,6 @@ In addition to the software, there are configuration files that are available fo
 {{centeredTable{
 | ''Test Configuration Files'' |c
 | //Name// | //Location// | //Description// |
-|svc.conf |$~BENCH_ROOT/etc |Service configurator specifications for dynamically loaded libraries.  Typically this is restricted to transport libraries and the monitor service library. |
 |transport*.ini |$~BENCH_ROOT/etc |Transport configuration specifications used by all tests. |
 |*.ini |$~BENCH_ROOT/tests/scenarios |Preconfigured scenario tests.  These are old and should be considered deprecated. |
 |~|$~BENCH_ROOT/tests/latency |Preconfigured latency tests.|
@@ -1858,7 +1857,7 @@ The charts are:
 {{{ gnuplot&gt; call plot-latency.gpi 'data/latency.csv' 'images/transport-latency' }}}
 }}}</pre>
 </div>
-<div title="Publication Specifications" modifier="MikeMartinez" created="201003032056" modified="201003311608" tags="publish" changecount="12">
+<div title="Publication Specifications" modifier="AdamMitz" created="201003032056" modified="201107261925" tags="publish" changecount="15">
 <pre>The OpenDDS-Bench framework specifies publications, which consist of individual DDS Publisher and ~DataWriter Entities.  The combination of these Entities make up a complete publication.  A consequence of this is that any single DDS Publisher will contain only a single DDS ~DataWriter.  This should not affect any test results or capabilities.
 
 !Definable Parameters
@@ -1900,7 +1899,7 @@ The charts are:
 |~WriterDataLifecycle |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
 |&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
 |Topic |&lt;string&gt; |Must reference by name the identifier of a [topic] subsection within the file. |
-|~TransportIndex |&lt;number&gt; |Index into transport configurations |
+|~TransportConfig |&lt;string&gt; |Name of transport configuration |
 |~MessageSource |&lt;string&gt; |If present, this must reference by name the identifier of a [subscription] subsection within the file. |
 |~MessageRateType |&lt;string&gt; |Enumeration value of {{{FIXED}}} or {{{POISSON}}} |
 |~MessageRate |&lt;number&gt; |Samples per second, average for POISSON arrival times |
@@ -1951,7 +1950,7 @@ As an example a publication section like the following would result in a publica
 {{{
 [publication/move]
 Topic = joystick
-TransportIndex = 1
+TransportConfig = 1
 MessageSizeType = FIXED
 MessageSize = 1000
 MessageRateType = FIXED
@@ -3011,7 +3010,7 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
 </div>
-<div title="Subscription Specifications" modifier="BrianJohnson" created="201003032230" modified="201004221443" tags="publish" changecount="13">
+<div title="Subscription Specifications" modifier="AdamMitz" created="201003032230" modified="201107261925" tags="publish" changecount="15">
 <pre>!Definable Parameters
 {{centeredTable{
 | ''Subscription Section Keys'' |c
@@ -3042,15 +3041,15 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 |~ReaderDataLifecycle |&lt;bool&gt; |Booleans are represented with a numeric 0 or 1 |
 |&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
 |Topic |&lt;string&gt; |Must reference by name the identifier of a [topic] subsection within the file. |
-|~TransportIndex |&lt;number&gt; |Index into transport configurations |
+|~TransportConfig |&lt;string&gt; |Name of transport configuration |
 |~DataCollectionFile |&lt;string&gt; |Filename for collected data |
 |~DataCollectionBound |&lt;number&gt;&amp;nbsp; |
 |~DataCollectionRetention |&lt;string&gt; |Enumeration value of {{{ALL}}}, {{{OLDEST}}}, or {{{NEWEST}}} |
 }}}
 !Test Execution Parameters
 The test execution parameters allow specification of the transport used for by the subscription and the data collection during the test.
-;{{{TransportIndex}}}
-:this is specified as an index into the transport definitions.  The definitions are in the OpenDDS service configuration file read at startup.
+;{{{TransportConfig}}}
+:this is specified as a name looked-up in the transport definitions.  The definitions are in the OpenDDS configuration file read at startup (-DCPSConfigFile).
 Data collection is specified as a combination of where to store the results, how much data to store, and if not all which data to store.  The data collected during test operation consists of per hop latency data along with path latency data.  Summary statistics for all observed data are reported at the end of the test.  The internal collection buffers are flushed to the filesystem after the test completes as well.  This avoids writes to disk affecting the performance being measured.  Data collection specification consists of:
 ;{{{DataCollectionFile}}}
 :if specified, this is the output file where data will be stored at the end of the test.  It will contain summary data at the top and (per sample) detailed data after that.  If not specified, no detailed data collection will occur.
@@ -3063,7 +3062,7 @@ An example subscription section like the following would result in a subscriptio
 {{{
 [subscription/result]
 Topic = status
-TransportIndex = 2
+TransportConfig = 2
 Partition = link2
 DataCollectionFile = latency.data
 DataCollectionBound = 5000

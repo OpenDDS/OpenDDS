@@ -7,23 +7,25 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # This file is for running the run_test.pl scripts listed in
 # auto_run_tests.lst.
 
-use Env (DDS_ROOT);
 use lib "$ENV{ACE_ROOT}/bin";
 use lib "$ENV{DDS_ROOT}/bin";
-if (defined $ENV{srcdir}) {
-  use lib "$ENV{srcdir}/bin";
-}
 use PerlDDS::Run_Test;
 
-use English;
-use Getopt::Std;
+use Getopt::Long;
 use Cwd;
-
-use Env qw(DDS_ROOT ACE_ROOT PATH);
+use Env qw(DDS_ROOT PATH);
+use strict;
 
 ################################################################################
 
-if (!getopts ('das:l:') || $opt_h) {
+my ($opt_h, $opt_d, $opt_a, $opt_s, @opt_l);
+
+if (!GetOptions('h' => \$opt_h,
+                'd' => \$opt_d,
+                'a' => \$opt_a,
+                's=s' => \$opt_s,
+                'l=s' => \@opt_l)
+    || $opt_h) {
     print "auto_run_tests.pl [-a] [-h] [-s sandbox] [-o] [-t] [-l listfile]\n";
     print "\n";
     print "Runs the tests listed in dcps_tests.lst\n";
@@ -36,30 +38,33 @@ if (!getopts ('das:l:') || $opt_h) {
     print "    -a          Run all DDS (DCPS) tests (default unless -l)\n";
     print "    -l listfile Run the tests specified in list file\n";
     print "\n";
-    $dcps_config_list = new PerlACE::ConfigList;
-    $dcps_config_list->load ($DDS_ROOT."/bin/dcps_tests.lst");
-    print "DCPS Test Configs: " . $dcps_config_list->list_configs () . "\n";
-    exit (1);
+    my $dcps_config_list = new PerlACE::ConfigList;
+    $dcps_config_list->load($DDS_ROOT . "/bin/dcps_tests.lst");
+    print "DCPS Test Configs: " . $dcps_config_list->list_configs() . "\n";
+    exit 1;
 }
 
 my @file_list;
 
-push (@file_list, "$DDS_ROOT/bin/dcps_tests.lst") if ($opt_a || !$opt_l);
-if ($opt_l) {
-    push (@file_list, $opt_l);
+if ($opt_a || !scalar @opt_l) {
+    push(@file_list, "$DDS_ROOT/bin/dcps_tests.lst");
 }
 
-my $cwd = getcwd ();
+if (scalar @opt_l) {
+    push(@file_list, @opt_l);
+}
+
+my $cwd = getcwd();
 
 foreach my $test_lst (@file_list) {
 
     my $config_list = new PerlACE::ConfigList;
-    $config_list->load ($test_lst);
+    $config_list->load($test_lst);
 
     # Ensures that we search for stuff in the current directory.
     $PATH .= $Config::Config{path_sep} . '.';
 
-    foreach $test ($config_list->valid_entries ()) {
+    foreach my $test ($config_list->valid_entries()) {
         my $directory = ".";
         my $program = ".";
 
@@ -77,7 +82,7 @@ foreach my $test_lst (@file_list) {
 
         print "auto_run_tests: $test\n";
 
-        chdir ($DDS_ROOT."/$directory")
+        chdir($DDS_ROOT."/$directory")
             || die "Error: Cannot chdir to $DDS_ROOT/$directory";
 
         my $subdir = $PerlACE::Process::ExeSubDir;
@@ -101,11 +106,11 @@ foreach my $test_lst (@file_list) {
         ### Genrate the -ExeSubDir and -Config options
         my $inherited_options = " -ExeSubDir $subdir ";
 
-        foreach my $config ($config_list->my_config_list ()) {
+        foreach my $config ($config_list->my_config_list()) {
             $inherited_options .= " -Config $config ";
         }
 
-        $cmd = '';
+        my $cmd = '';
         $program = "perl $program" if ($progNoArgs =~ /\.pl$/);
         if ($opt_s) {
             $cmd = "$opt_s \"$program $inherited_options\"";
@@ -121,15 +126,16 @@ foreach my $test_lst (@file_list) {
             print "Running: $cmd\n";
         }
         else {
-            $start_time = time();
-            $result = system ($cmd);
-            $time = time() - $start_time;
+            my $start_time = time();
+            $result = system($cmd);
+            my $time = time() - $start_time;
 
             if ($result != 0) {
                 print "Error: $test returned with status $result\n";
             }
 
-            print "\nauto_run_tests_finished: $test Time:$time"."s Result:$result\n";
+            print "\nauto_run_tests_finished: $test Time:$time"
+                . "s Result:$result\n";
         }
     } #foreach $test
     chdir $cwd; #back to base dir

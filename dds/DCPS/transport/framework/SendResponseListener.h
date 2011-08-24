@@ -34,9 +34,14 @@ public:
                             bool dropped_by_transport);
 
   virtual void control_delivered(ACE_Message_Block* sample);
-  virtual void control_dropped(
-    ACE_Message_Block* sample,
-    bool dropped_by_transport);
+  virtual void control_dropped(ACE_Message_Block* sample,
+                               bool dropped_by_transport);
+
+  void notify_publication_disconnected(const ReaderIdSeq&) {}
+  void notify_publication_reconnected(const ReaderIdSeq&) {}
+  void notify_publication_lost(const ReaderIdSeq&) {}
+  void notify_connection_deleted() {}
+  void remove_associations(const ReaderIdSeq&, bool) {}
 };
 
 } // namespace DCPS

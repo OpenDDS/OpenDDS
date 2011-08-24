@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IContainer;
@@ -71,8 +70,8 @@ import org.opendds.modeling.sdk.model.GeneratorSpecification.Instances;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchPaths;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Transport;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportConfig;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Transports;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.ParsedModelFile;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
 
@@ -196,24 +195,24 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 		Instances instances = generatorFactory.createInstances();
 		codeGen.setInstances(instances);
-
+		
+		Transports transports = generatorFactory.createTransports();
+		codeGen.setTransports(transports);
+		
 		Instance instance = generatorFactory.createInstance();
-
-		TransportOffset transportOffset = generatorFactory.createTransportOffset();
-		transportOffset.setValue(0);
-		instance.setTransportOffset(transportOffset);
+		instances.getInstance().add(instance);
 
 		if( modelFileName != null) {
-			// Load the default instance with a transport for each index found in the model.
-			Set<Integer> transportIndices = parsedModelFile.getTransportIds();
-			for( Integer current : transportIndices) {
-				Transport transport = generatorFactory.createTransport();
-				transport.setTransportIndex(current);
-				instance.getTransport().add(transport);
+			
+			// Load the default instance with a transport for each
+			for( String name : parsedModelFile.getTransportNames()) {
+				
+				// The new way of doing things
+				TransportConfig newtransports = generatorFactory.createTransportConfig();
+				newtransports.setName(name);
+				instance.getConfig().add(newtransports);
 			}
 		}
-
-		instances.getInstance().add(instance);
 
 		SearchPaths searchPaths = generatorFactory.createSearchPaths();
 		codeGen.setSearchPaths(searchPaths);

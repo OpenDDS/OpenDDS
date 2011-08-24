@@ -1,0 +1,1685 @@
+Fri Aug 19 13:47:18 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * OpenDDS version 3.0 released.
+
+Thu Aug 18 22:25:59 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        Reverting Thu Aug 18 21:59:26 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+Thu Aug 18 20:06:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+          Updated version numbers.  We are now syncing the Modeling SDK
+          versions (at least the first two numbers) with the OpenDDS versions.
+          This will be Modeling SDK 3.0.0.
+
+        * tools/modeling/update_version.pl:
+
+          New script for updating version numbers.
+
+Thu Aug 18 19:44:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.cpp:
+
+          Simplify the is_nil() check to match how Subscriber.cpp does it.
+
+Thu Aug 18 19:08:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          More updates for the upcoming 3.0 release.
+
+Thu Aug 18 16:30:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/dds_tcp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/dds_udp_conf.ini:
+
+          Remove the local_address from the udp config file and
+          normalize the formatting a little.
+
+Thu Aug 18 16:28:19 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Changes missed with the commit from Thu Aug 18 01:47:27 UTC 2011.
+
+Thu Aug 18 16:15:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Set version number.
+
+Thu Aug 18 16:05:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/AAA_README.txt:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/dds_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp_bit_off.bat:
+
+          Collapse udp config files into a single udp config
+          file.  Update the various scripts and docs that
+          reference them.
+
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+
+          Removed these files.
+
+Thu Aug 18 01:47:27 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/DataReaderListener.h:
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ConfigTransports/Puller.h:
+        * tests/DCPS/ConfigTransports/Puller.cpp:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Improved support for testing autonegotiation. Added publishing
+          and receip of samples. Added ability to detect the
+          negotiated transport. Additional tests cases added.
+
+Wed Aug 17 22:31:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * AUTHORS:
+
+          Updated for upcoming release.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Added section to describe changes in this release.
+
+Wed Aug 17 16:05:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+        * docs/OpenDDS_3.0_Transition.txt:
+
+          Updated docs for basic typos, formatting, clarifications, etc.
+
+Wed Aug 17 14:58:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+
+          Fixed udp and best-effort multicast with non-default payload size.
+
+Wed Aug 17 14:47:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fix for SunCC compile error.
+
+Tue Aug 16 22:17:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/Arrays/publisher.cpp:
+        * tools/modeling/tests/Arrays/subscriber.cpp:
+        * tools/modeling/tests/CfTopic/publisher.cpp:
+        * tools/modeling/tests/CfTopic/subscriber.cpp:
+        * tools/modeling/tests/Chained/publisher.cpp:
+        * tools/modeling/tests/Chained/subscriber.cpp:
+        * tools/modeling/tests/Chained_Data/publisher.cpp:
+        * tools/modeling/tests/Chained_Data/subscriber.cpp:
+        * tools/modeling/tests/Chained_Topic/publisher.cpp:
+        * tools/modeling/tests/Chained_Topic/subscriber.cpp:
+        * tools/modeling/tests/Comments/publisher.cpp:
+        * tools/modeling/tests/Comments/subscriber.cpp:
+        * tools/modeling/tests/CompositeKey/publisher.cpp:
+        * tools/modeling/tests/CompositeKey/subscriber.cpp:
+        * tools/modeling/tests/CopyTopicQos/publisher.cpp:
+        * tools/modeling/tests/CopyTopicQos/subscriber.cpp:
+        * tools/modeling/tests/DataLibRef/publisher.cpp:
+        * tools/modeling/tests/DataLibRef/subscriber.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/publisher.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/subscriber.cpp:
+        * tools/modeling/tests/DomainZero/publisher.cpp:
+        * tools/modeling/tests/DomainZero/subscriber.cpp:
+        * tools/modeling/tests/EmptyLibs/publisher.cpp:
+        * tools/modeling/tests/EmptyLibs/subscriber.cpp:
+        * tools/modeling/tests/Exchange/publisher.cpp:
+        * tools/modeling/tests/Exchange/subscriber.cpp:
+        * tools/modeling/tests/ExternalPolicies/publisher.cpp:
+        * tools/modeling/tests/ExternalPolicies/subscriber.cpp:
+        * tools/modeling/tests/InvalidNames/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+        * tools/modeling/tests/Looped/publisher.cpp:
+        * tools/modeling/tests/Looped/subscriber.cpp:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/publisher.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+        * tools/modeling/tests/MessengerMC/publisher.cpp:
+        * tools/modeling/tests/MessengerMC/subscriber.cpp:
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/MessengerMulti/publisher.cpp:
+        * tools/modeling/tests/MessengerMulti/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerSimpleTypes/publisher.cpp:
+        * tools/modeling/tests/MessengerSimpleTypes/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+        * tools/modeling/tests/ModuleNameConflict/publisher.cpp:
+        * tools/modeling/tests/ModuleNameConflict/subscriber.cpp:
+        * tools/modeling/tests/MultiDCPS/publisher.cpp:
+        * tools/modeling/tests/MultiDCPS/subscriber.cpp:
+        * tools/modeling/tests/MultiInstance/publisher.cpp:
+        * tools/modeling/tests/MultiInstance/subscriber.cpp:
+        * tools/modeling/tests/MultiTopic/publisher.cpp:
+        * tools/modeling/tests/MultiTopic/subscriber.cpp:
+        * tools/modeling/tests/PolicyLib/publisher.cpp:
+        * tools/modeling/tests/PolicyLib/subscriber.cpp:
+        * tools/modeling/tests/ReaderQos/publisher.cpp:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+        * tools/modeling/tests/ReferExternalProj/publisher.cpp:
+        * tools/modeling/tests/ReferExternalProj/subscriber.cpp:
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+        * tools/modeling/tests/ReusedExtTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedExtTypes/subscriber.cpp:
+        * tools/modeling/tests/ReusedTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedTypes/subscriber.cpp:
+        * tools/modeling/tests/Sequences/publisher.cpp:
+        * tools/modeling/tests/Sequences/subscriber.cpp:
+        * tools/modeling/tests/StockQuoter/publisher.cpp:
+        * tools/modeling/tests/StockQuoter/subscriber.cpp:
+        * tools/modeling/tests/SubscriberQos/publisher.cpp:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+        * tools/modeling/tests/TopicQos/publisher.cpp:
+        * tools/modeling/tests/TopicQos/subscriber.cpp:
+        * tools/modeling/tests/UDP/publisher.cpp:
+        * tools/modeling/tests/UDP/subscriber.cpp:
+
+          Fixed the #include of Tcp.h (only used in static builds) to use
+          the new directory and file name.
+
+Tue Aug 16 21:43:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+
+          Fixed Perl warnings.
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+
+          Added a mechanism for running udp and multicast (best-effort) tests
+          without the DataReader's RELIABLE QoS.
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+
+          Need an "after" to avoid building overlapping projects in parallel.
+
+Tue Aug 16 21:17:12 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/performance_tests.lst:
+
+          Updates to this list that were already made to dcps_tests.lst.
+
+        * contrib/wrapper/example/dds_tcp_conf.ini:
+        * contrib/wrapper/example/pub_udp_conf.ini:
+        * contrib/wrapper/example/run_test.pl:
+        * contrib/wrapper/example/sub2_udp_conf.ini:
+        * contrib/wrapper/example/sub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/dds_tcp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_tcp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp.bat:
+        * examples/DCPS/IntroductionToOpenDDS/run_udp_bit_off.bat:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/README:
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * performance-tests/Bench/tests/spray/transport.ini:
+
+          Conversion to new transport config scheme.
+
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+
+          Remove unused .ini files.
+
+        * performance-tests/DCPS/TransportLatency:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.cpp:
+        * performance-tests/DCPS/TransportLatency/Messenger.idl:
+        * performance-tests/DCPS/TransportLatency/README:
+        * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:
+        * performance-tests/DCPS/TransportLatency/TransportLatency_export.h:
+        * performance-tests/DCPS/TransportLatency/Writer.h:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+        * performance-tests/DCPS/TransportLatency/dummy_tcp.conf:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/pub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/sub_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/dummyTCP:
+        * performance-tests/DCPS/dummyTCP/DummyTcp.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp.mpc:
+        * performance-tests/DCPS/dummyTCP/DummyTcp.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpAcceptor.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpAcceptor.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnectionReplaceTask.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnectionReplaceTask.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpLoader.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpLoader.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReconnectTask.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReconnectTask.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSynchResource.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSynchResource.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp_export.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp_pch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcp_pch.cpp:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.h:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+
+          Removed these files.  Remove the TransportLatency
+          performance test and associated dummyTcp transport.
+          This has not worked for a while and the real solution
+          is to now implement a true collocated transport.
+
+Tue Aug 16 21:01:45 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Corrected build problem where xsl directory was not packaged in plugin jar.
+
+Tue Aug 16 20:13:00 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/Options.h:
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+        * tests/DCPS/ConfigTransports/transports.ini:
+
+          Adding the ability to test the negotiated transports.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Adding several tests that assert which protocol was negotiated
+          in various situations.
+
+Tue Aug 16 19:49:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Reverted change from Mon Aug 15 22:31:40 UTC 2011.  We will need a
+          more involved design effort to fix the issues.
+
+        * java/INSTALL:
+
+          Updated Java-specific install notes.
+
+Tue Aug 16 19:08:29 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * configure:
+
+          Add support for OS X Lion 10.7
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/docs/README:
+
+          Update documentation
+
+Tue Aug 16 16:57:49 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.h:
+        * tests/DCPS/ConfigTransports/Factory.h:
+        * tests/DCPS/ConfigTransports/Factory.cpp:
+        * tests/DCPS/ConfigTransports/Options.h:
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Refactored the test innards to pull out independent classes.
+
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Reader.cpp:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+
+          Renamed these files to ...
+
+        * tests/DCPS/ConfigTransports/Puller.h:
+        * tests/DCPS/ConfigTransports/Puller.cpp:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
+
+          ... these files.
+
+Tue Aug 16 14:41:38 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * NEWS:
+
+          Add some news for 3.0.
+
+        * docs/OpenDDS_3.0_Transition.txt:
+
+          Add a transition guide for the new Transport Configuration
+          approach in OpenDDS 3.0.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Make a better error message when finding obsolete configs.
+
+        * tests/DCPS/BidirMessenger/pub_udp.ini:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BidirMessenger/pubsub.ini:
+        * tests/DCPS/BidirMessenger/pubsub_ipv6.ini:
+        * tests/DCPS/BidirMessenger/pubsub_multicast.ini:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BidirMessenger/sub_udp.ini:
+
+          Converted to use new transport config scheme.
+          This test does still not run properly but I don't
+          think it is in any worse shape than it was before
+          the refactoring of the transport.  There are at
+          least two issues involved: TCP and possibly UDP
+          suffer from issues in sending data from multiple
+          threads concurrently (and quickly).  Multicast
+          appears to have some connection-related issues
+          when many connections are happening quickly.
+
+        * tests/DCPS/BidirMessenger/publisher.cpp:
+
+          Removed this file.
+
+Mon Aug 15 22:31:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Delayed notifications need to be sent on the same thread that
+          originated them, to avoid deadlocking on the WriteDataContainer.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed a log message that should have just been for local debugging.
+
+Mon Aug 15 19:35:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/Arrays/run_test.pl:
+        * tools/modeling/tests/CfTopic/run_test.pl:
+        * tools/modeling/tests/Chained/run_test.pl:
+        * tools/modeling/tests/Chained_Topic/run_test.pl:
+        * tools/modeling/tests/Codegen/run_test.pl:
+        * tools/modeling/tests/Comments/run_test.pl:
+        * tools/modeling/tests/CompositeKey/run_test.pl:
+        * tools/modeling/tests/CopyTopicQos/run_test.pl:
+        * tools/modeling/tests/DataLibRef/run_test.pl:
+        * tools/modeling/tests/Deep/Down/Reference/run_test.pl:
+        * tools/modeling/tests/DomainZero/run_test.pl:
+        * tools/modeling/tests/EmptyLibs/run_test.pl:
+        * tools/modeling/tests/Exchange/run_test.pl:
+        * tools/modeling/tests/ExternalPolicies/run_test.pl:
+        * tools/modeling/tests/InvalidNames/run_test.pl:
+        * tools/modeling/tests/Looped/run_test.pl:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/MessengerDpQos/run_test.pl:
+        * tools/modeling/tests/MessengerGlobalNs/run_test.pl:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+        * tools/modeling/tests/MessengerMixed/run_test.pl:
+        * tools/modeling/tests/MessengerMulti/run_test.pl:
+        * tools/modeling/tests/MessengerNoPub/run_test.pl:
+        * tools/modeling/tests/MessengerNoSub/run_test.pl:
+        * tools/modeling/tests/MessengerPubQos/run_test.pl:
+        * tools/modeling/tests/MessengerSimpleTypes/run_test.pl:
+        * tools/modeling/tests/MessengerSplit/run_test.pl:
+        * tools/modeling/tests/MessengerWriterQos/run_test.pl:
+        * tools/modeling/tests/ModuleNameConflict/run_test.pl:
+        * tools/modeling/tests/MultiDCPS/run_test.pl:
+        * tools/modeling/tests/MultiInstance/run_test.pl:
+        * tools/modeling/tests/MultiTopic/run_test.pl:
+        * tools/modeling/tests/PolicyLib/run_test.pl:
+        * tools/modeling/tests/ReaderQos/run_test.pl:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/RemoteInstHandles/run_test.pl:
+        * tools/modeling/tests/ReusedExtTypes/run_test.pl:
+        * tools/modeling/tests/ReusedTypes/run_test.pl:
+        * tools/modeling/tests/Sequences/run_test.pl:
+        * tools/modeling/tests/StockQuoter/run_test.pl:
+        * tools/modeling/tests/SubscriberQos/run_test.pl:
+        * tools/modeling/tests/TopicQos/run_test.pl:
+        * tools/modeling/tests/UDP/run_test.pl:
+
+          Change ORBDebugLevel to 1 instead of 10 (10 is way too verbose).
+
+Mon Aug 15 19:17:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added logging for some of the datalink creation functions.
+          If a link gets re-used, need to release and reacquire the links_lock_
+          so that another thread can handle the passive_connection().
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Fixed a warning for 64-bit to 32-bit truncation when size_t is 32-bit.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Use a smaller arbitrary value for max_samples_per_packet because
+          Solaris hosts limit how large this can get.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
+
+          Whitespace fix only.  This should match what EMF generates.
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Removed test/src from source dirs for plugin build.
+
+Mon Aug 15 15:57:40 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Additional fixes to correct problems with automated build.
+
+Mon Aug 15 15:07:02 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+
+          Removed build source locations that are no longer valid.
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/docs/README:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/dev_readme.txt:
+        * tools/modeling/tests/setup.pl:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build-external.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+
+          Renamed build.xml to build-external.xml to resolve file name
+          conflict with automated build, and updated references to build file.
+
+Fri Aug 12 22:03:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Need a mutex for Built-In Topic transport setup since multiple
+          threads could be creating DomainParticipants at the same time.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Extended management of the reservation lock(s):
+          - Temporarily unlock during an accept_datalink() wait.
+          - Need to lock during the DataLink's release_reservations().
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed formatting of trnasport details for logging.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+          Null send_buffer is OK here (BestEffortSession doesn't use one).
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added debug logging.  Handle the loopback case.
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+
+          Key field must be initialized.
+
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Fixed typo in automatic run_test.pl changes.
+
+Fri Aug 12 21:22:17 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation:
+
+          Removed this file.
+          It is no longer used since the validation was moved to plugins.
+
+Fri Aug 12 19:44:28 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
+
+          Fixing an annoying bug that caused only partial updates when the name of
+          a transport instance changes. Thanks to Byron Harris for the idea: using
+          the single argument ctor for ViewerNotification which causes full view
+          refresh.
+
+Fri Aug 12 19:28:42 UTC 2011  Chip Jones  <jonesc@ociweb.com>
+
+        * NEWS:
+
+          Added text about the Node View
+
+        * tools/monitor/Edge.h:
+        * tools/monitor/Edge.cpp:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/GvOptions.ui:
+        * tools/monitor/Monitor.mpc:
+        * tools/monitor/MonitorDataModel.cpp:
+        * tools/monitor/Node.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeGenerator.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/NodeOptions.ui:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/Viewer.cpp:
+
+          Added Node View options, layout and edge connection logic.
+
+Fri Aug 12 19:08:42 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/org/opendds/modeling/validation/OpenDDSXMISchemaTransformer.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/lib/log4j-1.2.16.jar:
+
+          Removed this file.
+
+          Fixed a problem in the plugins caused by using Log4J for the standalone tool.
+          For now the standalone tool uses std out and err.
+
+Fri Aug 12 16:55:15 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Change the semantics of the port_offset config option.
+          It is no longer an offset but simply the port # when a
+          group_address is not set.  The default is changed to
+          49152.
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Tweak the handshake ack timeout to 30 seconds (was 60).
+
+Fri Aug 12 12:59:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Removed code to get transport impl given a transport id
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Remove commented-out code related to tranport ids
+          Remove refereces to DefaultInstanceTraits.h
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/DefaultInstanceTraits.h:
+
+          Removed DefaultInstanceTraits
+
+Thu Aug 11 18:53:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * contrib/wrapper/OpenDDS/OpenDDS_Domain_Manager.h:
+        * contrib/wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * contrib/wrapper/OpenDDS/OpenDDS_Publication_Manager.h:
+        * contrib/wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * contrib/wrapper/OpenDDS/OpenDDS_Subscription_Manager.h:
+        * contrib/wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+
+          Updated 'wrapper' code to compile with the new transport APIs.
+          This is still essentially unmaintained.
+
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          Log the transport name along with the rest of the details.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Work-arounds for SunCC's deficient standard C++ library.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+          Whitespace changes only.  These should match what EMF generates.
+
+        * etc/monitor.conf:
+        * java/jms/compat/conf/tcp.conf:
+        * tools/monitor/monitor.conf:
+
+          These service configurator files no longer need to
+          load the Tcp transport library.
+
+        * performance-tests/DCPS/TransportLatency/run_corbaloc_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Dispose/run_test.pl:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/GroupPresentation/run_test.pl:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+        * tests/DCPS/Messenger/run_ns_test.pl:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopic/run_test.pl:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/Presentation/run_test.pl:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/Thrasher/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/WaitForAck/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+        * tools/modeling/tests/Arrays/run_test.pl:
+        * tools/modeling/tests/CfTopic/run_test.pl:
+        * tools/modeling/tests/Chained/run_test.pl:
+        * tools/modeling/tests/Chained_Topic/run_test.pl:
+        * tools/modeling/tests/Codegen/run_test.pl:
+        * tools/modeling/tests/Comments/run_test.pl:
+        * tools/modeling/tests/CompositeKey/run_test.pl:
+        * tools/modeling/tests/CopyTopicQos/run_test.pl:
+        * tools/modeling/tests/DataLibRef/run_test.pl:
+        * tools/modeling/tests/Deep/Down/Reference/run_test.pl:
+        * tools/modeling/tests/DomainZero/run_test.pl:
+        * tools/modeling/tests/EmptyLibs/run_test.pl:
+        * tools/modeling/tests/Exchange/run_test.pl:
+        * tools/modeling/tests/ExternalPolicies/run_test.pl:
+        * tools/modeling/tests/InvalidNames/run_test.pl:
+        * tools/modeling/tests/Looped/run_test.pl:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/MessengerDpQos/run_test.pl:
+        * tools/modeling/tests/MessengerGlobalNs/run_test.pl:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+        * tools/modeling/tests/MessengerMixed/run_test.pl:
+        * tools/modeling/tests/MessengerMulti/run_test.pl:
+        * tools/modeling/tests/MessengerNoPub/run_test.pl:
+        * tools/modeling/tests/MessengerNoSub/run_test.pl:
+        * tools/modeling/tests/MessengerPubQos/run_test.pl:
+        * tools/modeling/tests/MessengerSimpleTypes/run_test.pl:
+        * tools/modeling/tests/MessengerSplit/run_test.pl:
+        * tools/modeling/tests/MessengerWriterQos/run_test.pl:
+        * tools/modeling/tests/ModuleNameConflict/run_test.pl:
+        * tools/modeling/tests/MultiDCPS/run_test.pl:
+        * tools/modeling/tests/MultiInstance/run_test.pl:
+        * tools/modeling/tests/MultiTopic/run_test.pl:
+        * tools/modeling/tests/PolicyLib/run_test.pl:
+        * tools/modeling/tests/ReaderQos/run_test.pl:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/RemoteInstHandles/run_test.pl:
+        * tools/modeling/tests/ReusedExtTypes/run_test.pl:
+        * tools/modeling/tests/ReusedTypes/run_test.pl:
+        * tools/modeling/tests/Sequences/run_test.pl:
+        * tools/modeling/tests/StockQuoter/run_test.pl:
+        * tools/modeling/tests/SubscriberQos/run_test.pl:
+        * tools/modeling/tests/TopicQos/run_test.pl:
+        * tools/modeling/tests/UDP/run_test.pl:
+        * tools/monitor/start_repos.pl:
+
+          Removed references to *.conf files that are no longer.
+
+        * contrib/wrapper/example/tcp.conf:
+        * contrib/wrapper/example/udp.conf:
+        * etc/multicast.conf:
+        * etc/tcp.conf:
+        * etc/udp.conf:
+        * examples/DCPS/DistributedContent/tcp.conf:
+        * examples/DCPS/IntroductionToOpenDDS/tcp.conf:
+        * examples/DCPS/IntroductionToOpenDDS/udp.conf:
+        * performance-tests/tcp.conf:
+        * tests/DCPS/BidirMessenger/multicast.conf:
+        * tests/DCPS/BidirMessenger/tcp.conf:
+        * tests/DCPS/BidirMessenger/udp.conf:
+        * tests/DCPS/BuiltInTopicTest/tcp.conf:
+        * tests/DCPS/DPFactoryQos/tcp.conf:
+        * tests/DCPS/Deadline/tcp.conf:
+        * tests/DCPS/Dispose/tcp.conf:
+        * tests/DCPS/FooTest5/multicast.conf:
+        * tests/DCPS/FooTest5/udp.conf:
+        * tests/DCPS/FooTest5_0/udp.conf:
+        * tests/DCPS/GroupPresentation/tcp.conf:
+        * tests/DCPS/LatencyBudget/tcp.conf:
+        * tests/DCPS/Lifespan/tcp.conf:
+        * tests/DCPS/LivelinessTest/udp.conf:
+        * tests/DCPS/ManualAssertLiveliness/tcp.conf:
+        * tests/DCPS/NotifyTest/tcp.conf:
+        * tests/DCPS/Ownership/tcp.conf:
+        * tests/DCPS/Partition/tcp.conf:
+        * tests/DCPS/PersistentDurability/tcp.conf:
+        * tests/DCPS/Presentation/tcp.conf:
+        * tests/DCPS/Priority/services.conf:
+        * tests/DCPS/Prst_delayed_subscriber/tcp.conf:
+        * tests/DCPS/ReaderDataLifecycle/tcp.conf:
+        * tests/DCPS/SetQosDeadline/tcp.conf:
+        * tests/DCPS/SetQosPartition/tcp.conf:
+        * tests/DCPS/StringKey/tcp.conf:
+        * tests/DCPS/Thrasher/tcp.conf:
+        * tests/DCPS/TimeBasedFilter/tcp.conf:
+        * tests/DCPS/TransientDurability/tcp.conf:
+        * tests/DCPS/TransientLocalTest/tcp.conf:
+        * tests/DCPS/WaitForAck/tcp.conf:
+        * tests/tcp.conf:
+        * tests/transport/simple/tcp.conf:
+        * tools/modeling/tests/Arrays/tcp.conf:
+        * tools/modeling/tests/CfTopic/tcp.conf:
+        * tools/modeling/tests/Chained/tcp.conf:
+        * tools/modeling/tests/Chained_Data/tcp.conf:
+        * tools/modeling/tests/Chained_Topic/tcp.conf:
+        * tools/modeling/tests/Codegen/svc.conf:
+        * tools/modeling/tests/Comments/tcp.conf:
+        * tools/modeling/tests/CompositeKey/tcp.conf:
+        * tools/modeling/tests/CopyTopicQos/tcp.conf:
+        * tools/modeling/tests/DataLibRef/tcp.conf:
+        * tools/modeling/tests/Deep/Down/Reference/tcp.conf:
+        * tools/modeling/tests/DomainZero/tcp.conf:
+        * tools/modeling/tests/EmptyLibs/tcp.conf:
+        * tools/modeling/tests/Exchange/tcp.conf:
+        * tools/modeling/tests/ExternalPolicies/tcp.conf:
+        * tools/modeling/tests/InvalidNames/tcp.conf:
+        * tools/modeling/tests/Looped/tcp.conf:
+        * tools/modeling/tests/Messenger/tcp.conf:
+        * tools/modeling/tests/MessengerDpQos/tcp.conf:
+        * tools/modeling/tests/MessengerGlobalNs/tcp.conf:
+        * tools/modeling/tests/MessengerMC/multicast.conf:
+        * tools/modeling/tests/MessengerMC/tcp.conf:
+        * tools/modeling/tests/MessengerMixed/tcp.conf:
+        * tools/modeling/tests/MessengerMulti/tcp.conf:
+        * tools/modeling/tests/MessengerNoPub/tcp.conf:
+        * tools/modeling/tests/MessengerNoSub/tcp.conf:
+        * tools/modeling/tests/MessengerPubQos/tcp.conf:
+        * tools/modeling/tests/MessengerSimpleTypes/tcp.conf:
+        * tools/modeling/tests/MessengerSplit/tcp.conf:
+        * tools/modeling/tests/MessengerWriterQos/tcp.conf:
+        * tools/modeling/tests/ModuleNameConflict/tcp.conf:
+        * tools/modeling/tests/MultiDCPS/tcp.conf:
+        * tools/modeling/tests/MultiInstance/tcp.conf:
+        * tools/modeling/tests/MultiTopic/tcp.conf:
+        * tools/modeling/tests/PolicyLib/tcp.conf:
+        * tools/modeling/tests/ReaderQos/tcp.conf:
+        * tools/modeling/tests/ReferExternalProj/tcp.conf:
+        * tools/modeling/tests/RemoteInstHandles/tcp.conf:
+        * tools/modeling/tests/ReusedExtTypes/tcp.conf:
+        * tools/modeling/tests/ReusedTypes/tcp.conf:
+        * tools/modeling/tests/Sequences/tcp.conf:
+        * tools/modeling/tests/StockQuoter/tcp.conf:
+        * tools/modeling/tests/SubscriberQos/tcp.conf:
+        * tools/modeling/tests/TopicQos/tcp.conf:
+        * tools/modeling/tests/UDP/tcp.conf:
+        * tools/modeling/tests/UDP/udp.conf:
+
+          Removed these files.
+
+Thu Aug 11 16:57:51 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.properties:
+
+          Missing from previous commit. Previous ignored as a generated file,
+          this now has properties supporting the XML validation in the eclipse UI.
+
+Thu Aug 11 15:53:53 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/AbstractValidateXMLFileAction.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/ValidateCodegenFileAction.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/ValidateOpenDDSFileAction.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.validation/.project:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/docs/README:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/CoreXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/EnumerationsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/TypesXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/XMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/xsd/dev_readme.txt:
+
+          Converted validation project to a proper eclipse plugin, and added support
+          for XML Schema validation of .opendds and .codegen files via popup menus
+          in the project tree of the Modeling SDK eclipse UI.
+
+Thu Aug 11 15:40:21 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+
+          Introducing better handling of special cases: unnamed transports and dangling
+          references.
+
+Wed Aug 10 21:37:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Defer returning a DataLink to the framework until the SYN/SYNACK
+          control messages are received.
+
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+
+          Update the write_throttle parameter when num_writers changes.
+
+Wed Aug 10 20:52:54 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+
+          Make sure we have a content provider before setting input.  Was
+          causing exception.
+
+Wed Aug 10 18:01:03 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Changes to allow "handshaking" of UDP connections to
+          support fully_associated() and multiple transports
+          on the same DataReader.
+
+Wed Aug 10 14:35:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Fixed warnings and errors.
+
+Tue Aug  9 22:03:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Use a separate method for start_session() instead of starting
+          the session inside make_datalink().
+
+Tue Aug  9 20:41:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Only return a datalink from find_datalink() if both the datalink
+          and the session already exist.  If the session doesn't exist yet,
+          need to fall through to connect_datalink() or accept_datalink().
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Removed old code for fully-associated.  Added find_session().
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Refactored SYN and SYNACK handling from the ReliableSession class to
+          the MulticastSession so those features are shared with BestEffort.
+          This will allow the SYN/SYNACK handshaking to be used by either kind
+          of session, to fit in the framework's transport autonegotiation.
+          Not yet hooked in to the framework.
+
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Removed methods that are no longer used in the framework.
+
+Tue Aug  9 19:41:29 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Prefix config name and transport inst name with model name.
+
+Tue Aug  9 18:54:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          add leading _ for xmi:id
+
+        * tools/modeling/tests/Arrays/Arrays.codegen:
+        * tools/modeling/tests/CfTopic/CfTopic.codegen:
+        * tools/modeling/tests/Chained/Chained.codegen:
+        * tools/modeling/tests/Chained_Data/Chained_Data.codegen:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.codegen:
+        * tools/modeling/tests/Codegen/Codegen.codegen:
+        * tools/modeling/tests/Comments/Comments.codegen:
+        * tools/modeling/tests/CompositeKey/CompositeKey.codegen:
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.codegen:
+        * tools/modeling/tests/DataLibRef/DataLibRef.codegen:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.codegen:
+        * tools/modeling/tests/DomainZero/DomainZero.codegen:
+        * tools/modeling/tests/EmptyLibs/ELTypes.codegen:
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.codegen:
+        * tools/modeling/tests/Exchange/Exchange.codegen:
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.codegen:
+        * tools/modeling/tests/InvalidNames/InvalidNames.codegen:
+        * tools/modeling/tests/Looped/Looped.codegen:
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.codegen:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.codegen:
+        * tools/modeling/tests/MessengerMC/MessengerMC.codegen:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.codegen:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.codegen:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.codegen:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.codegen:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.codegen:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.codegen:
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.codegen:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.codegen:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.codegen:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.codegen:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.codegen:
+        * tools/modeling/tests/MultiInstance/MultiInstance.codegen:
+        * tools/modeling/tests/MultiTopic/MultiTopic.codegen:
+        * tools/modeling/tests/PolicyLib/PolicyLib.codegen:
+        * tools/modeling/tests/ReaderQos/ReaderQos.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedData.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.codegen:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.codegen:
+        * tools/modeling/tests/Sequences/Sequences.codegen:
+        * tools/modeling/tests/StockQuoter/StockQuoter.codegen:
+        * tools/modeling/tests/SubscriberQos/SubQos.codegen:
+        * tools/modeling/tests/TopicQos/TopQos.codegen:
+        * tools/modeling/tests/UDP/UDP.codegen:
+
+          Regenerate with valid ids.
+
+Tue Aug  9 18:18:56 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+
+          Change that should have been part of "Tue Aug  9 14:45:00 UTC 2011"
+          commit. Thanks to Adam Mitz for pointing out the unexpected
+          diffs after code generation.
+
+Tue Aug  9 17:07:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Traits - don't assume TransportConfig has not been registered.
+
+Tue Aug  9 15:40:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedGeneratorFile.java:
+
+          Remove unused import.
+
+Tue Aug  9 15:28:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Allow for receipt of TRANSPORT_CONTROL messages in Udp.
+          Pass the data back up to UdpTransport and send an ack.
+          This feature is not used until Paul commits the sending side.
+
+Tue Aug  9 14:59:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Fixed use of operator== with TAO vars (vc71 didn't like it).
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Initialize DCPSPendingTimeout with the default value.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Add an un-needed initialization to silence compiler warnings.
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Throw an exception if the transport type string isn't recognized.
+
+        * performance-tests/DCPS/Priority/Options.cpp:
+
+          Assist SunCC's standard library implementation with explicit
+          construction of std::strings.
+
+Tue Aug  9 14:45:00 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Update to account for transportConfig being added to model.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgraph:
+
+          Added labels for transportConfig.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Incorporated transportConfig attribute.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+          GMF Auto generated updates based on inclusion of transportConfig.
+          Note there's currently an issue with
+          org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibUriEditorInputTester
+          not being generated by GMF. This results in a No property tester
+          error message being generated when editing DcpsLib diagrams, but
+          otherwise diagrams can be edited as expected.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts:
+
+          svn ignore transportConfig related edit part files.
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+          Update to account for transportConfig.
+
+Mon Aug  8 23:17:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MultiInstance/MultiInstance.codegen:
+
+          Migration fix.
+
+Mon Aug  8 21:57:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fix for vc71 crash when optimization is enabled.
+
+Mon Aug  8 21:55:54 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          get all of transport index.
+
+        * tools/modeling/tests/CfTopic/CfTopic.codegen:
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+        * tools/modeling/tests/Chained/Chained.codegen:
+        * tools/modeling/tests/Chained_Data/Chained_Data.codegen:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.codegen:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.opendds:
+        * tools/modeling/tests/Codegen/Codegen.codegen:
+        * tools/modeling/tests/Codegen/Codegen.opendds:
+        * tools/modeling/tests/Comments/Comments.codegen:
+        * tools/modeling/tests/Comments/Comments.opendds:
+        * tools/modeling/tests/CompositeKey/CompositeKey.codegen:
+        * tools/modeling/tests/CompositeKey/CompositeKey.opendds:
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.codegen:
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.opendds:
+        * tools/modeling/tests/DataLibRef/DataLibRef.codegen:
+        * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.codegen:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.opendds:
+        * tools/modeling/tests/DomainZero/DomainZero.codegen:
+        * tools/modeling/tests/DomainZero/DomainZero.opendds:
+        * tools/modeling/tests/EmptyLibs/ELTypes.codegen:
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.codegen:
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.opendds:
+        * tools/modeling/tests/Exchange/Exchange.codegen:
+        * tools/modeling/tests/Exchange/Exchange.opendds:
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.codegen:
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.opendds:
+        * tools/modeling/tests/InvalidNames/InvalidNames.codegen:
+        * tools/modeling/tests/InvalidNames/InvalidNames.opendds:
+        * tools/modeling/tests/Looped/Looped.codegen:
+        * tools/modeling/tests/Looped/Looped.opendds:
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.codegen:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.opendds:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.codegen:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.opendds:
+        * tools/modeling/tests/MessengerMC/MessengerMC.codegen:
+        * tools/modeling/tests/MessengerMC/MessengerMC.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.codegen:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.codegen:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.codegen:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.codegen:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.codegen:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.codegen:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.opendds:
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.codegen:
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.codegen:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.codegen:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.codegen:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.opendds:
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.codegen:
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.opendds:
+        * tools/modeling/tests/MultiInstance/MultiInstance.codegen:
+        * tools/modeling/tests/MultiInstance/MultiInstance.opendds:
+        * tools/modeling/tests/MultiTopic/MultiTopic.codegen:
+        * tools/modeling/tests/MultiTopic/MultiTopic.opendds:
+        * tools/modeling/tests/PolicyLib/PolicyLib.codegen:
+        * tools/modeling/tests/PolicyLib/PolicyLib.opendds:
+        * tools/modeling/tests/ReaderQos/ReaderQos.codegen:
+        * tools/modeling/tests/ReaderQos/ReaderQos.opendds:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.codegen:
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.opendds:
+        * tools/modeling/tests/ReusedExtTypes/ReusedData.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.opendds:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.codegen:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.opendds:
+        * tools/modeling/tests/Sequences/Sequences.codegen:
+        * tools/modeling/tests/Sequences/Sequences.opendds:
+        * tools/modeling/tests/StockQuoter/StockQuoter.codegen:
+        * tools/modeling/tests/StockQuoter/StockQuoter.opendds:
+        * tools/modeling/tests/SubscriberQos/SubQos.codegen:
+        * tools/modeling/tests/SubscriberQos/SubQos.opendds:
+        * tools/modeling/tests/TopicQos/TopQos.codegen:
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+        * tools/modeling/tests/UDP/UDP.codegen:
+        * tools/modeling/tests/UDP/UDP.opendds:
+
+          test migrations.
+
+Mon Aug  8 21:42:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+
+          Fixes for static builds.
+
+Mon Aug  8 21:24:11 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+
+          set source name prior to validating.
+
+Mon Aug  8 20:20:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.h:
+
+          Added a needed #include.
+
+Mon Aug  8 19:17:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+
+          Fixed for built_in_topics=0.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed for SunCC.
+
+Mon Aug  8 19:07:36 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/plugins/org.opendds.modeling.validation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Added test support for .codegen files to XML Validation tool. Also fixed some outstanding bugs
+          and improved the build for the external validation tool.
+
+Mon Aug  8 17:40:48 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Fixed scoreboard compiler and fuzz errors, corrected wchar support.
+
+Sun Aug  7 23:47:42 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+          Fix some static build issues.
+
+Sat Aug  6 00:47:30 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+          Merged the branch "sbir_transport" which includes a
+          refactoring of the transport configuration to simplify
+          configuration of transports and allow mixed transports
+          within a single topic as well as other advanced transport
+          configurations.  Note that this is not backward compatible
+          and all existing transport configuration code and config
+          files will need to be updated.  For additional details
+          see the branch-specific change log at
+          docs/history/ChangeLog-sbir_transport.
+
+Fri Jul 29 18:17:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Clean up warnings on the scoreboard.
+
+Thu Jul 28 16:02:02 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * NEWS:
+
+          Added paragraph on OpenDDS Real-Time Data (RTD) for Excel.
+
+Thu Jul 28 15:37:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/RTDMonitor.cpp:
+
+          Corrected command line argument conversion error.
+
+Thu Jul 28 14:44:43 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/idl/be_util.cpp:
+        * tools/dissector/README:
+
+          Added description of the new -Gws option in both the opendds_idl
+          help output and in the readme file.
+
+Thu Jul 28 14:40:40 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Added a tool tip and uncommented a line of code.
+
+        * tools/excelRTD/doc/userguide.html:
+        * tools/excelRTD/doc/images/openDDSTab.PNG:
+
+          Continued work on user guide.
+
+Wed Jul 27 21:55:27 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+
+          Finish the job started in my previous commit. :-/
+
+Wed Jul 27 21:30:42 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Refactored to remove redundant code. Generate sequence entities
+          for pre-defined CORBA types. This way we don't have to include
+          any *.pidl based ini files in order to use CORBA::typeSeq values.
+
+Wed Jul 27 21:14:17 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Fixed minor typo.
+
+        * tools/excelRTD/doc/userguide.html:
+        * tools/excelRTD/doc/images/OfficeButton.png:
+        * tools/excelRTD/doc/images/addIOR.PNG:
+        * tools/excelRTD/doc/images/addMonitorTree.PNG:
+        * tools/excelRTD/doc/images/monitorTree.PNG:
+        * tools/excelRTD/doc/images/openDDSTab.PNG:
+        * tools/excelRTD/doc/images/opendds.png:
+        * tools/excelRTD/doc/images/sgram.png:
+        * tools/excelRTD/doc/images/snapshotMonitorTree.PNG:
+        * tools/excelRTD/doc/images/splash.jpg:
+        * tools/excelRTD/doc/images/splash.psd:
+
+          Committed work to date on user guide for OpenDDS Real-Time Data for Excel.
+          Still some work to do.
+
+Wed Jul 27 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+
+          vc10 likes <%quote%> instead of <%equote%>, used MPC specific block.
+
+Wed Jul 27 17:06:14 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Changed splash screen to indicate OpenDDS Real-Time Data for Excel Version 1.0.
+
+Wed Jul 27 14:42:28 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * MPC/config/gen_dissector.mpb:
+
+          Added new base project to facilitate the generation of dissector
+          configuration files.
+
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Scoreboard cleanup.
+
+Wed Jul 27 14:09:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+
+          Use MPC's built-in support for generating an escaped quoted
+          that works with all MPC project types.
+
+Tue Jul 26 22:31:46 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+
+          Corrected generation directory of moc file and moved midl file to
+          Source_Files so MPC doesn't confuse it with a TAO IDL file.
+
+Tue Jul 26 21:30:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          Whitespace fix only.
+
+        * tools/excelRTD:
+        * tools/monitor:
+
+          Set svn:ignore for generated files.
+
+Tue Jul 26 19:06:14 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/wireshark_generator.h:
+        * dds/idl/wireshark_generator.cpp:
+
+          Added generator of wireshark dissector configuration files. To
+          run, add "-Gws" to the opendds_idl command line. Running on
+          <filename>.idl yields <filename>_ws.ini in the local directory.
+          This *_ws.ini file can then be used by the wireshark dissector
+          to process sample data messages.
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Fixed a couple of compiler warnings. Added decomposition of
+          content filter ID values, enabled the parsing of inforepo
+          messages without first storing the inforepo ior in "IOR.txt" for
+          wireshark.
+
+        * tools/dissector/sample_dissector.h:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/sample_manager.h:
+        * tools/dissector/sample_manager.cpp:
+
+          Added "CORBA::<typename>" as an alternative basic type id for
+          parsing. The idl compiler emits C++ mapped types rather than the
+          original CORBA IDL type name for predefined types. User
+          specified types are used as-is. Also, translations between string
+          types were simplified, favoring std::string where ever posible.
+
+Tue Jul 26 18:09:31 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Restored workbook open macro that was erroneously removed.
+
+Tue Jul 26 17:35:08 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/excelRTD/IRTDServer.idl:
+        * tools/excelRTD/RTDServer.def:
+
+          Added comments to top of files.
+
+Tue Jul 26 15:45:01 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Removed ":" following max_samples_per_packet dump heading to match other
+          parameter dump headings.
+
+        * tools/excelRTD/ExcelRTD.mpc:
+        * tools/excelRTD/IRTDServer.idl:
+        * tools/excelRTD/README:
+        * tools/excelRTD/RTDDataThread.h:
+        * tools/excelRTD/RTDDataThread.cpp:
+        * tools/excelRTD/RTDMonitor.h:
+        * tools/excelRTD/RTDMonitor.cpp:
+        * tools/excelRTD/RTDServer.h:
+        * tools/excelRTD/RTDServer.def:
+        * tools/excelRTD/RTDServer.cpp:
+        * tools/excelRTD/RTDServerDLL.h:
+        * tools/excelRTD/RTDServerDLL.cpp:
+        * tools/excelRTD/Script.rc:
+        * tools/excelRTD/resource.h:
+
+          Excel Real-Time Data (RTD) Server for OpenDDS.
+          Initial support is for repository monitor tree data that is supplied
+          to stand-alone monitor application.  The RTD server uses many of the same
+          files as the stand-alone monitor application.
+
+        * tools/excelRTD/OpenDDS.xlam:
+
+          Excel Add-in for OpenDDS.  Initial support is for repository monitor
+          tree view that mirrors the stand-alone repository monitor application, but
+          with support for:
+
+            + Monitoring multiple repositories (will also allow for filtered views in future)
+            + Automatically restarting monitoring when a previously saved workbook that
+              contains monitors is opened.
+            + Snapshoting of a monitor tree either in-place or to another location in the workbook.
+
+        * tools/monitor/MonitorData.h:
+        * tools/monitor/MonitorData.cpp:
+        * tools/monitor/MonitorTask.h:
+        * tools/monitor/MonitorTask.cpp:
+
+          Added optional constructor parameter so existing IOR keys aren't loaded.
+          This is to support running multiple instances of MonitorTask by the OpenDDS Excel RTD Server.
+
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/MonitorDataModel.cpp:
+
+          Added optional parameter to getNode(index) to control whether the root node or null is returned if the
+          node is invalid.
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Corrected typo in comment.
+
+        * tools/monitor/TreeNode.h:
+
+          Added accessor method to get children.
+
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Viewer.cpp:
+
+          Moved clean up of OpenDDS service resources to Viewer because the OpenDDS Excel RTD Server
+          can launch multiple MonitorTasks.
+
+Tue Jul 26 14:59:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+        * docs/history/ChangeLog-2.4:
+
+          Updated to set up for next release (3.0).
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

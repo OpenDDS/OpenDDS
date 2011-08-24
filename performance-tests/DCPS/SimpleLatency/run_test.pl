@@ -15,7 +15,7 @@ $status = 0;
 
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
-$app_bit_conf = "-ORBSvcConf ../../tcp.conf -DCPSBit 0";
+$app_bit_conf = "-DCPSBit 0";
 
 unlink $dcpsrepo_ior;
 

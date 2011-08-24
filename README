@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 2.4.
+This directory structure contains OpenDDS 3.1
 
 
 ======================================================================
@@ -62,10 +62,9 @@ but not identical, so carefully examine your use-cases before choosing
 one service over another.  Speed is not the only criterion.
 
 Currently OpenDDS does not support the Data Local Reconstruction Layer
-(DLRL) portion of the DDS specification.  In addition, support for some
-Quality of Service policies is not currently available in OpenDDS.  See
-the Developer's Guide for further information on OpenDDS compliance with
-the DDS specification.  This chapter is freely available as a PDF file
+(DLRL) portion of the DDS specification.  See the Developer's Guide for
+further information on OpenDDS compliance with the DDS specification. 
+This document is freely available as a PDF file
 from the same location where OpenDDS can be downloaded.  Some
 additional notes about compliance with the DDS specification can be
 found below.  If you would like have OCI add a feature to OpenDDS
@@ -85,11 +84,10 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-*** TAO 1.5a patch 22
-*** TAO 1.6a patch 10
-*** TAO 2.0.1 (DOC Group)
+*** TAO 1.6a patch 11
+*** TAO 2.0.3 (DOC Group)
 
-Note that the 1.5a and 1.6a releases are from OCI and can be obtained from
+Note that the 1.6a release is from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
 
@@ -102,9 +100,10 @@ on Unix and Linux systems.
 
 Perl is used for running the automated tests and examples included in this
 source tree, or if you will be generating Makefiles or Visual Studio project
-files.  In most cases you will *not* need to generate Makefiles/project files,
-but see the INSTALL file for details.  On Windows platforms, we recommend the
-use of ActiveState Perl.  The "configure" script also uses Perl.
+files.  In most cases you will *not* need to generate Makefiles/project files
+for OpenDDS itself (but see the INSTALL file for details), but doing so for
+your own application code that uses OpenDDS is recommended.  On Windows we
+recommend the use of ActiveState Perl.  The "configure" script also uses Perl.
 
 * Build Targets
 
@@ -117,8 +116,8 @@ Linux family:
 ** Fedora Core 6, x86
 ** Fedora 12, x86_64
 ** CentOS 5, x86_64
-** Ubuntu 8.04 LTS, x86_64
-** Ubuntu 8.10, x86
+** Ubuntu 10.04 LTS, x86_64 and x86
+** openSUSE 11.4, x86_64
 
 Windows family:
 ** Windows XP
@@ -132,7 +131,7 @@ Others:
 ** SunOS 5.10 (Solaris 10) (SPARC)
 ** SunOS 5.11 (OpenSolaris 2009.06) (x86)
 ** QNX Neutrino 6.3.2 (x86)
-** Macintosh OS X 10.5 "Leopard" (x86)
+** Macintosh OS X 10.6 "Snow Leopard" (x86)
 ** VxWorks 6.8 RTP (x86) -- compiled but not yet tested
 
 
@@ -144,14 +143,16 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 7.1 with SP1 (Visual Studio .NET 2003)
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
-** Microsoft Visual C++ 10 (Visual Studio 2010)
+** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
 ** gcc 3.3.2
-** gcc 4.0.1 (Apple Inc. build 5465)
 ** gcc 4.1.1 (Red Hat 4.1.1-30) (Red Hat 4.1.1-52)
 ** gcc 4.1.2 (Red Hat 4.1.2-14)
-** gcc 4.2.4 (Ubuntu 4.2.4-1ubuntu4)
-** gcc 4.3.2 (Ubuntu 4.3.2-1ubuntu11)
-** gcc 4.5.2
+** gcc 4.2.1 (Apple Inc. build 5646 dot 1)
+** gcc 4.4.3 (Ubuntu 4.4.3-4ubuntu5)
+** gcc 4.4.4 (Red Hat 4.4.4-4)
+** gcc 4.5.1 (20101208 SUSE)
+** gcc 4.5.3
+** gcc 4.6.1
 ** QNX gcc 3.3.5
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 ** Sun C++ 5.9 SunOS_i386 Patch 124864-07 2008/08/22
@@ -249,11 +250,6 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
   Note: When more than resource_limits.max_samples are queued
   in the DataReader the heap will be used instead of pre-allocated
   memory.
-
-----------------------------------------------------------------------
-) There is no check that the Transport implementation supports the
-  given QoS.  The user should not use the udp transport with
-  RELIABILITY.kind = RELIABLE.
 
 ----------------------------------------------------------------------
 ) The DURABILITY_SERVICE service_cleanup_delay support is currently

@@ -29,16 +29,13 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 unlink $pub_id_file;
 
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : " -ORBSvcConf ../../tcp.conf ";
-
 # test multiple cases
-$parameters = "$svc_config -DCPSLivelinessFactor 300 -z " ;
+$parameters = "-DCPSLivelinessFactor 300 -z " ;
 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      #. " -ORBDebugLevel 1 "
-                                    "$svc_config -o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior ");
 
 $FooTest4 = PerlDDS::create_process ("FooTest4_0", $parameters);
 print $FooTest4->CommandLine(), "\n";

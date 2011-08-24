@@ -123,12 +123,11 @@ bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
   writers_.erase(writer_id);
-  bool is_owner = false;
   if (this->exclusive_) {
-    // If unregisted by owner then the ownership should be transferred to another
+    // If unregistered by owner then the ownership should be transferred to another
     // writer.
-    is_owner = this->reader_->owner_manager_->remove_writer (
-                 this->handle_, writer_id);
+    (void) this->reader_->owner_manager_->remove_writer (
+             this->handle_, writer_id);
   }
 
   if (writers_.empty() && (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {

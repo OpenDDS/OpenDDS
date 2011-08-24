@@ -173,11 +173,11 @@
         </opendds:libfileset>
         <opendds:libfileset id="DDS.libs" debug="${native.debug}"
                             dir="${env.DDS_ROOT}/lib">
-            <include name="DCPSInfoRepoServ"/>
-            <include name="Federator"/>
-            <include name="InfoRepoLib"/>
+            <include name="OpenDDS_InfoRepoServ"/>
+            <include name="OpenDDS_Federator"/>
+            <include name="OpenDDS_InfoRepoLib"/>
             <include name="OpenDDS_Dcps"/>
-            <include name="SimpleTcp"/>
+            <include name="OpenDDS_Tcp"/>
             <include name="OpenDDS_Udp"/>
             <include name="OpenDDS_Multicast"/>
             <include name="OpenDDS_DCPS_Java"/>

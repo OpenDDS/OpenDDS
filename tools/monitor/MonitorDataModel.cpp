@@ -46,12 +46,8 @@ MonitorDataModel::updated(
 {
   QModelIndex topLeft     = this->index( left,  lcol);
   QModelIndex bottomRight = this->index( right, rcol);
-  emit dataChanged( topLeft, bottomRight);
 
-  QTreeView* viewer = static_cast<QTreeView*>(this->QObject::parent());
-  for( int column = lcol; column <= rcol; ++column) {
-    viewer->resizeColumnToContents( column);
-  }
+  emit dataChanged( topLeft, bottomRight);
 }
 
 void
@@ -59,9 +55,6 @@ MonitorDataModel::updated( TreeNode* node, int column)
 {
   QModelIndex index = this->index( node, column);
   emit dataChanged( index, index);
-
-  QTreeView* viewer = static_cast<QTreeView*>(this->QObject::parent());
-  viewer->resizeColumnToContents( column);
 }
 
 void
@@ -96,7 +89,7 @@ MonitorDataModel::index( TreeNode* node, int column) const
 }
 
 TreeNode*
-MonitorDataModel::getNode( const QModelIndex &index) const
+MonitorDataModel::getNode( const QModelIndex &index, bool defaultToRoot) const
 {
   if( index.isValid()) {
     TreeNode* node = static_cast< TreeNode*>( index.internalPointer());
@@ -104,7 +97,12 @@ MonitorDataModel::getNode( const QModelIndex &index) const
       return node;
     }
   }
-  return this->root_;
+
+  if (defaultToRoot) {
+    return this->root_;
+  } else {
+    return NULL;
+  }
 }
 
 QModelIndex
@@ -156,6 +154,9 @@ MonitorDataModel::data( const QModelIndex& index, int role) const
     case Qt::DisplayRole:
       return this->getNode( index)->column( index.column());
 
+    // for checkboxes in tree view
+    // case Qt::CheckStateRole:
+    //   return Qt::Checked;
     case Qt::ToolTipRole:
     case Qt::StatusTipRole:
     case Qt::WhatsThisRole:
@@ -182,12 +183,13 @@ MonitorDataModel::flags( const QModelIndex& index) const
   }
 
   return this->QAbstractItemModel::flags( index)
-         | Qt::ItemIsEnabled
-         | Qt::ItemIsSelectable
+       | Qt::ItemIsEnabled
+       | Qt::ItemIsSelectable
+  //     | Qt::ItemIsUserCheckable  // checkboxes in tree view
   //     | Qt::ItemIsEditable
   //     | Qt::ItemIsDragEnabled
   //     | Qt::ItemIsDropEnabled
-         ;
+  ;
 }
 
 QVariant
@@ -269,7 +271,8 @@ MonitorDataModel::setHeaderData(
     default: return false;
   }
 
-  emit dataChanged( QModelIndex(), QModelIndex());
+  emit
+  dataChanged( QModelIndex(), QModelIndex());
   return true;
 }
 
@@ -289,6 +292,7 @@ MonitorDataModel::insertRows(
               this->root_->width()
             );
   endInsertRows();
+
   emit layoutChanged();
 
   return success;

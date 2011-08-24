@@ -32,6 +32,9 @@
       <fields xmi:id="_H4X6sDLSEeCvDoTjiP9YbQ" name="count" type="_607H8zLQEeCvDoTjiP9YbQ"/>
     </types>
   </libs>
+  <libs xsi:type="opendds:DcpsLib" xmi:id="__tu9QbRyEeCeurkyoVQgLg" name="DcpsLibTestSharedTopic">
+    <topicDescriptions xsi:type="topics:Topic" xmi:id="_E-2RkLRzEeCeurkyoVQgLg" name="SharedTopic" datatype="_z3liYDLQEeCvDoTjiP9YbQ"/>
+  </libs>
   <basicTypes xmi:id="_606g4DLQEeCvDoTjiP9YbQ">
     <types xsi:type="types:Boolean" xmi:id="_606g4TLQEeCvDoTjiP9YbQ"/>
     <types xsi:type="types:Char" xmi:id="_607H8DLQEeCvDoTjiP9YbQ"/>

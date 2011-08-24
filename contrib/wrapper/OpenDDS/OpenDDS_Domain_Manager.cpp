@@ -14,7 +14,6 @@
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/transport/framework/TransportFactory.h>
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
@@ -33,7 +32,6 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
                                 ACE_TCHAR* argv[],
                                 DDS::DomainId_t domain_id)
   : dp_ (DDS::DomainParticipant::_nil ()),
-    transport_impl_id_ (1),
     shutdown_lock_ (0),
     exit_handler_ (shutdown_lock_)
 {
@@ -54,11 +52,6 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   if (CORBA::is_nil (dp_.in ()))
     throw Manager_Exception ("Failed to create domain participant.");
 
-  // create transport impl
-  OpenDDS::DCPS::TransportImpl_rch transport_impl =
-    OpenDDS::DCPS::TransportFactory::instance ()->create_transport_impl (
-      transport_impl_id_);
-
   // add a the handler for the SIGINT signal here
   ACE_Sig_Handler sig_handler;
   sig_handler.register_handler (SIGINT, &exit_handler_);
@@ -69,7 +62,6 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
                                 DDS::DomainId_t domain_id,
                                 const DDS::DomainParticipantQos & qos)
   : dp_ (DDS::DomainParticipant::_nil ()),
-    transport_impl_id_ (1),
     shutdown_lock_ (0),
     exit_handler_ (shutdown_lock_)
 {
@@ -90,11 +82,6 @@ OpenDDS_Domain_Manager::OpenDDS_Domain_Manager (int & argc,
   if (CORBA::is_nil (dp_.in ()))
     throw Manager_Exception ("Failed to create domain participant.");
 
-  // create transport impl
-  OpenDDS::DCPS::TransportImpl_rch transport_impl =
-    OpenDDS::DCPS::TransportFactory::instance ()->create_transport_impl (
-      transport_impl_id_);
-
   // add a the handler for the SIGINT signal here
   ACE_Sig_Handler sig_handler;
   sig_handler.register_handler (SIGINT, &exit_handler_);
@@ -112,9 +99,6 @@ OpenDDS_Domain_Manager::~OpenDDS_Domain_Manager ()
 
   if (!CORBA::is_nil (dpf.in ()))
     dpf->delete_participant(dp_.in ());
-
-  // clean up the transport implementations
-  OpenDDS::DCPS::TransportFactory::instance ()->release ();
 
   // shut down the service participant
   OpenDDS::DCPS::Service_Participant::instance ()->shutdown ();
@@ -143,7 +127,6 @@ OpenDDS_Domain_Manager::subscription_manager (
   return Subscription_Manager (
     Subscription_Manager_Ptr (
       new OpenDDS_Subscription_Manager (Domain_Manager (ref),
-                                        transport_impl_id_,
                                         qos)));
 }
 
@@ -165,7 +148,6 @@ OpenDDS_Domain_Manager::publication_manager (const Domain_Manager_Ptr & ref,
   return Publication_Manager (
     Publication_Manager_Ptr (
       new OpenDDS_Publication_Manager (Domain_Manager (ref),
-                                       transport_impl_id_,
                                        qos)));
 }
 
@@ -178,6 +160,8 @@ OpenDDS_Domain_Manager::parse_args (int & argc, ACE_TCHAR * argv [])
 
   // Ignore the command - argv[0].
   arg_shifter.ignore_arg ();
+
+  int transport_impl_id_; // transport switching not implemented for OpenDDS 3.x
 
   while (arg_shifter.is_anything_left ())
     {
@@ -195,17 +179,17 @@ OpenDDS_Domain_Manager::parse_args (int & argc, ACE_TCHAR * argv [])
             else if (ACE_OS::strcmp (current,
                                      ACE_TEXT("default_tcp")) == 0)
               {
-                transport_impl_id_ = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
+                transport_impl_id_ = 4; //OpenDDS::DCPS::DEFAULT_TCP_ID;
               }
             else if (ACE_OS::strcmp (current,
                                      ACE_TEXT("default_udp")) == 0)
               {
-                transport_impl_id_ = OpenDDS::DCPS::DEFAULT_UDP_ID;
+                transport_impl_id_ = 5; //OpenDDS::DCPS::DEFAULT_UDP_ID;
               }
             else if (ACE_OS::strcmp (current,
                                      ACE_TEXT("default_multicast")) == 0)
               {
-                transport_impl_id_ = OpenDDS::DCPS::DEFAULT_MULTICAST_ID;
+                transport_impl_id_ = 6; //OpenDDS::DCPS::DEFAULT_MULTICAST_ID;
               }
             else
               {

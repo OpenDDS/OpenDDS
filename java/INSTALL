@@ -33,10 +33,12 @@ general overview of OpenDDS.
     The following versions are supported:
     - Visual C++ 9 SP1 (part of Visual Studio 2008), Visual C++ 8 SP1 (part of
       Visual Studio 2005), Visual C++ 7.1 (part of Visual Studio .NET 2003)
-      VC++ 8 and 9 have free "express editions" -- these will work fine, see
-      <http://www.microsoft.com/express/vc/>.
-      If possible use the VC9 (VS2008) version because it fixes some annoying
+      VC++ 8, 9, and 10 have free "express editions" -- these will work fine,
+      see <http://www.microsoft.com/express/vc/>.
+      If possible, use the VC9 (VS2008) version because it fixes some annoying
       bugs with creating mixed-case directory names (which OpenDDS uses).
+      VC10 (VS2010) is also supported but there are some issues with
+      dependencies and parallel builds.
     - GCC 4.0.x or later (earlier versions may work but haven't been tested)
       Preferably, use the default gcc from your Linux or Mac OS X distribution.
     - Sun Studio 12 (SunCC 5.9) Earlier versions are known to have problems
@@ -59,8 +61,7 @@ general overview of OpenDDS.
 
     OpenDDS requires the use of TAO.  Three "branches" of TAO are supported as
     of this writing:
-    - OCI TAO 1.5a <http://download.ociweb.com/TAO-1.5a>
-    - OCI TAO 1.4a <http://download.ociweb.com/TAO-1.4a>
+    - OCI TAO 1.6a <http://download.ociweb.com/TAO-1.6a>
     - DOC Group    <http://download.dre.vanderbilt.edu>
 
     From each branch only the current patch release (OCI) or beta/micro release
@@ -71,7 +72,7 @@ general overview of OpenDDS.
     For responsive support from OCI it is recommended that the latest version
     of the OCI release of TAO used for OpenDDS development and testing be used.
 
-    The detailed instructions below are written assuming OCI TAO 1.5a is used.
+    The detailed instructions below are written assuming OCI TAO 1.6a is used.
 
 
 ======================================================================
@@ -127,6 +128,7 @@ general overview of OpenDDS.
        set PATH=%DDS_ROOT%\bin;%DDS_ROOT%\lib;%PATH%
        set JAVA_HOME=<full path to the Sun JDK>
        set JAVA_PLATFORM=win32
+                Note that 64-bit Windows (with a 64-bit JDK) still uses "win32"
 
   4. Configure TAO
 
@@ -182,7 +184,6 @@ general overview of OpenDDS.
                 Select the Naming_Service project in Solution Explorer
                 Build this project (right-click on it and select Build)
                   - All dependent projects will be built automatically
-                **TAO_ACE_vc8.sln is provided starting with 1.5a_p10
 
   6. Build the OpenDDS C++ libraries
 
@@ -240,7 +241,7 @@ general overview of OpenDDS.
              mwc.pl -type gnuace dds java
   Windows => cd %DDS_ROOT%
              mwc.pl -type [CompilerType] dds java
-             ** CompilerType options are: vc71, vc8, vc9, and nmake
+             ** CompilerType options are: vc71, vc8, vc9, vc10 and nmake
              This guide is not written with instructions for "nmake" -- if you
              generate NMake makefiles we assume you know how to run them.
              Make sure this is running ActiveState Perl.

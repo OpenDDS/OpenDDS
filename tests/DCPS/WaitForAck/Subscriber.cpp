@@ -13,13 +13,12 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include <sstream>
@@ -34,7 +33,6 @@ Subscriber::~Subscriber()
     this->participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant( this->participant_.in());
   }
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown();
 }
 
@@ -126,42 +124,6 @@ Subscriber::Subscriber( const Options& options)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created subscriber.\n")
-    ));
-  }
-
-  // Create the transport.
-  OpenDDS::DCPS::TransportImpl_rch transport
-    = TheTransportFactory->create_transport_impl(
-        this->options_.transportKey(),
-        OpenDDS::DCPS::AUTO_CONFIG
-      );
-  if( transport.is_nil()) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to create transport.\n")
-    ));
-    throw BadTransportException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created transport.\n")
-    ));
-  }
-
-  // Attach the transport.
-  if( ::OpenDDS::DCPS::ATTACH_OK
-   != transport->attach( subscriber.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to attach subscriber to transport.\n")
-    ));
-    throw BadAttachException();
-
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("attached subscriber to transport.\n")
     ));
   }
 

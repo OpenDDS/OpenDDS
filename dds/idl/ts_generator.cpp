@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <iostream>
 
 namespace {
   std::string read_template(const char* prefix)
@@ -123,7 +124,6 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
     "dds/DCPS/Qos_Helper.h", "dds/DCPS/PublicationInstance.h",
     "dds/DCPS/PublisherImpl.h", "dds/DCPS/SubscriberImpl.h",
     "dds/DCPS/ReceivedDataElementList.h", "dds/DCPS/RakeResults_T.h",
-    "dds/DCPS/transport/framework/TransportInterface.h",
     "dds/DCPS/BuiltInTopicUtils.h", "dds/DCPS/Util.h",
     "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h",
     "dds/DCPS/MultiTopicDataReader_T.h"
@@ -150,6 +150,18 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   std::string cpp = cpp_template_;
   replaceAll(cpp, replacements);
   be_global->impl_ << cpp;
+  return true;
+}
+
+bool ts_generator::gen_union(UTL_ScopedName* name,
+  const std::vector<AST_UnionBranch*>&, AST_Type*, AST_Expression::ExprType,
+  const AST_Union::DefaultValue&, const char*)
+{
+  if (idl_global->is_dcps_type(name)) {
+    std::cerr << "ERROR: union " << scoped(name) << " can not be used as a "
+      "DCPS_DATA_TYPE (only structs can be Topic types)" << std::endl;
+    return false;
+  }
   return true;
 }
 

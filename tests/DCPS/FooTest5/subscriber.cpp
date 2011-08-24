@@ -23,8 +23,7 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/SubscriberImpl.h"
@@ -51,7 +50,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -r num_datareaders          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
-    //  -s sub transport address    defaults to localhost:23456
     //  -u using_udp                defaults to 0 - using TCP
     //  -c using_multicast          defaults to 0 - using TCP
     //  -m num_instances_per_writer defaults to 1
@@ -86,12 +84,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
-    {
-      reader_address_str = currentArg;
-      reader_address_given = 1;
       arg_shifter.consume_arg ();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
@@ -210,61 +202,22 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the subscriber to the transport.
-      OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*> (sub.in ());
-
-      if (0 == sub_impl)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Failed to obtain subscriber servant\n")));
-          return ::DDS::Subscriber::_nil ();
-        }
-
-      OpenDDS::DCPS::AttachStatus attach_status;
-
       if (attach_to_udp)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp \n")));
-          attach_status = sub_impl->attach_transport(reader_udp_impl.in());
+          TheTransportRegistry->bind_config("udp", sub.in());
         }
       else if (attach_to_multicast)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast \n")));
-          attach_status = sub_impl->attach_transport(reader_multicast_impl.in());
+          TheTransportRegistry->bind_config("multicast", sub.in());
         }
       else
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
-          attach_status = sub_impl->attach_transport(reader_tcp_impl.in());
+          TheTransportRegistry->bind_config("tcp", sub.in());
         }
 
-      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-        {
-          // We failed to attach to the transport for some reason.
-          ACE_TString status_str;
-
-          switch (attach_status)
-            {
-              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-                break;
-              case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = ACE_TEXT("ATTACH_ERROR");
-                break;
-              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-                break;
-              default:
-                status_str = ACE_TEXT("Unknown Status");
-                break;
-            }
-
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
-                      ACE_TEXT("AttachStatus == %s\n"),
-                      status_str.c_str()));
-          return ::DDS::Subscriber::_nil ();
-        }
     }
   catch (const TestException&)
     {
@@ -406,14 +359,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             }
         }
 
-      // Initialize the transport
-      if (0 != ::init_reader_transport() )
-        {
-          ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("Failed to init_reader_transport.")));
-          throw TestException ();
-        }
-
       int attach_to_udp = using_udp;
       int attach_to_multicast = using_multicast;
 
@@ -449,7 +394,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Make it KEEP_ALL history so we can verify the received
       // data without dropping.
       dr_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
-      dr_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
+      dr_qos.reliability.kind =
+        (using_udp || mixed_trans)
+        ? ::DDS::BEST_EFFORT_RELIABILITY_QOS
+        : ::DDS::RELIABLE_RELIABILITY_QOS;
       dr_qos.resource_limits.max_samples_per_instance =
         max_samples_per_instance ;
       // The history depth is only used for KEEP_LAST.
@@ -627,13 +575,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = 1;
     }
 
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  reader_tcp_impl = 0;
-  reader_udp_impl = 0;
-  reader_multicast_impl = 0;
   return status;
 }

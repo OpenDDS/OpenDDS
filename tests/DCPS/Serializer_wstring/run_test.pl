@@ -13,25 +13,17 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$svc_conf = '';
 
-if (!new PerlACE::ConfigList->check_config ('STATIC')) {
-    if ($ARGV[0] eq 'udp') {
-        $svc_conf = " -ORBSvcConf udp.conf ";
-    }
-    else {
-        $svc_conf = " -ORBSvcConf ../../tcp.conf";
-    }
-}
+
 
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$svc_conf -NOBITS -o $dcpsrepo_ior ");
-$Subscriber = PerlDDS::create_process ("subscriber", "$svc_conf -DCPSBit 0 -DCPSConfigFile sub.ini");
-$Publisher = PerlDDS::create_process ("publisher", "$svc_conf -DCPSBit 0 -DCPSConfigFile pub.ini");
+                                    "-NOBITS -o $dcpsrepo_ior ");
+$Subscriber = PerlDDS::create_process ("subscriber", "-DCPSBit 0 -DCPSConfigFile sub.ini");
+$Publisher = PerlDDS::create_process ("publisher", "-DCPSBit 0 -DCPSConfigFile pub.ini");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

@@ -23,8 +23,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/Arg_Shifter.h"
 
@@ -81,12 +80,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
     {
       history_depth = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
-    {
-      writer_address_str = currentArg;
-      writer_address_given = 1;
       arg_shifter.consume_arg ();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
@@ -186,61 +179,22 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl
-        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in());
-
-      if (0 == pub_impl)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Failed to obtain publisher servant \n")));
-          return ::DDS::Publisher::_nil ();
-        }
-
-      OpenDDS::DCPS::AttachStatus attach_status;
-
       if (attach_to_udp)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp \n")));
-          attach_status = pub_impl->attach_transport(writer_udp_impl.in());
+          TheTransportRegistry->bind_config("udp", pub.in());
         }
       else if (attach_to_multicast)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast \n")));
-          attach_status = pub_impl->attach_transport(writer_multicast_impl.in());
+          TheTransportRegistry->bind_config("multicast", pub.in());
         }
       else
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
-          attach_status = pub_impl->attach_transport(writer_tcp_impl.in());
+          TheTransportRegistry->bind_config("tcp", pub.in());
         }
 
-      if (attach_status != OpenDDS::DCPS::ATTACH_OK)
-        {
-          // We failed to attach to the transport for some reason.
-          ACE_TString status_str;
-
-          switch (attach_status)
-            {
-              case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-                status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-                break;
-              case OpenDDS::DCPS::ATTACH_ERROR:
-                status_str = ACE_TEXT("ATTACH_ERROR");
-                break;
-              case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-                status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-                break;
-              default:
-                status_str = ACE_TEXT("Unknown Status");
-                break;
-            }
-
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
-                      ACE_TEXT("AttachStatus == %s\n"),
-                      status_str.c_str()));
-          return ::DDS::Publisher::_nil ();
-        }
     }
   catch (const TestException&)
     {
@@ -354,13 +308,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                 ACE_TEXT("(%P|%t) create_topic failed.\n")));
               throw TestException ();
             }
-        }
-      // Initialize the transport
-      if (0 != ::init_writer_transport() )
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) init_writer_transport failed.\n")));
-          throw TestException ();
         }
 
       int attach_to_udp = using_udp;
@@ -549,13 +496,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       status = 1;
     }
 
-  TheTransportFactory->release();
   TheServiceParticipant->shutdown ();
-  // Note: The TransportImpl reference SHOULD be deleted before exit from
-  //       main if the concrete transport libraries are loaded dynamically.
-  //       Otherwise cleanup after main() will encount access vilation.
-  writer_tcp_impl = 0;
-  writer_udp_impl = 0;
-  writer_multicast_impl = 0;
   return status;
 }

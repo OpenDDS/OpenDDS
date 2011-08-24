@@ -16,6 +16,9 @@
 
 <!-- Global node sets -->
 <xsl:variable name="types"        select="//types"/>
+<xsl:variable name="topics"       select="//topicDescriptions"/>
+<xsl:variable name="cf-topics"    select="$topics[@xsi:type='topics:ContentFilteredTopic']"/>
+<xsl:variable name="multitopics"  select="$topics[@xsi:type='topics:MultiTopic']"/>
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
@@ -80,7 +83,6 @@ namespace OpenDDS { namespace Model {
 </xsl:text>
   <xsl:value-of select="concat('#include &quot;', $modelname, 'TypeSupportImpl.h&quot;', $newline)"/>
 <xsl:text>
-#include "model/DefaultInstanceTraits.h"
 #include "model/Service_T.h"
 
 #endif /* </xsl:text>
@@ -108,9 +110,6 @@ namespace OpenDDS { namespace Model {
 </xsl:text>
   <!-- Match within the DCPSlib -->
   <xsl:variable name="lib-participants" select=".//participants"/>
-  <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
-  <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type='topics:ContentFilteredTopic']"/>
-  <xsl:variable name="lib-multitopics"  select=".//topicDescriptions[@xsi:type='topics:MultiTopic']"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
@@ -123,7 +122,7 @@ namespace OpenDDS { namespace Model {
 
   <xsl:value-of select="concat('      class Types {', $newline)"/>
   <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
-  <xsl:for-each select="$types[@xmi:id = $lib-topics/@datatype]">
+  <xsl:for-each select="$types[@xmi:id = $topics/@datatype]">
     <xsl:variable name="enum">
       <xsl:call-template name="type-enum"/>
     </xsl:variable>
@@ -133,21 +132,47 @@ namespace OpenDDS { namespace Model {
   <xsl:value-of select="concat('        };', $newline)"/>
   <xsl:value-of select="concat('      };', $newline)"/>
 
-  <xsl:call-template name="generate-enum">
-    <xsl:with-param name="class" select="'Topics'"/>
-    <xsl:with-param name="values" select="$lib-topics"/>
-  </xsl:call-template>
+  <xsl:value-of select="concat('      class Topics {', $newline)"/>
+  <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
+  <xsl:for-each select="$topics">
+    <!-- We reference topics with scope because we don't distinguish
+         ownership of topics any more.  All topics get processed.  -->
+    <xsl:variable name="enum">
+      <xsl:call-template name="topic-enum"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('          ', $enum, ',', $newline)"/>
+  </xsl:for-each>
+  <xsl:value-of select="concat('          LAST_INDEX', $newline)"/>
+  <xsl:value-of select="concat('        };', $newline)"/>
+  <xsl:value-of select="concat('      };', $newline)"/>
 
-  <xsl:call-template name="generate-enum">
-    <xsl:with-param name="class" select="'ContentFilteredTopics'"/>
-    <xsl:with-param name="values" select="$lib-cf-topics"/>
-  </xsl:call-template>
+  <xsl:value-of select="concat('      class ContentFilteredTopics {', $newline)"/>
+  <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
+  <xsl:for-each select="$cf-topics">
+    <!-- We reference topics with scope because we don't distinguish
+         ownership of topics any more.  All topics get processed.  -->
+    <xsl:variable name="enum">
+      <xsl:call-template name="topic-enum"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('          ', $enum, ',', $newline)"/>
+  </xsl:for-each>
+  <xsl:value-of select="concat('          LAST_INDEX', $newline)"/>
+  <xsl:value-of select="concat('        };', $newline)"/>
+  <xsl:value-of select="concat('      };', $newline)"/>
 
-  <xsl:call-template name="generate-enum">
-    <xsl:with-param name="class" select="'MultiTopics'"/>
-    <xsl:with-param name="values" select="$lib-multitopics"/>
-  </xsl:call-template>
-
+  <xsl:value-of select="concat('      class MultiTopics {', $newline)"/>
+  <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
+  <xsl:for-each select="$multitopics">
+    <!-- We reference topics with scope because we don't distinguish
+         ownership of topics any more.  All topics get processed.  -->
+    <xsl:variable name="enum">
+      <xsl:call-template name="topic-enum"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('          ', $enum, ',', $newline)"/>
+  </xsl:for-each>
+  <xsl:value-of select="concat('          LAST_INDEX', $newline)"/>
+  <xsl:value-of select="concat('        };', $newline)"/>
+  <xsl:value-of select="concat('      };', $newline)"/>
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Publishers'"/>
     <xsl:with-param name="values" select="$lib-publishers"/>
@@ -210,14 +235,17 @@ namespace OpenDDS { namespace Model {
           Topics::Values       topic(DataWriters::Values which);
           Topics::Values       topic(DataReaders::Values which);
           ContentFilteredTopics::Values contentFilteredTopic(Topics::Values which);
-          char*                filterExpression(ContentFilteredTopics::Values which);
-          char*                topicExpression(MultiTopics::Values which);
+          const char*          filterExpression(ContentFilteredTopics::Values which);
+          const char*          topicExpression(MultiTopics::Values which);
           MultiTopics::Values  multiTopic(Topics::Values which);
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
           Subscribers::Values  subscriber(DataReaders::Values which);
-          OpenDDS::DCPS::TransportIdType transport(Publishers::Values which);
-          OpenDDS::DCPS::TransportIdType transport(Subscribers::Values which);
+          std::string          transportConfigName(Participants::Values which);
+          std::string          transportConfigName(Publishers::Values which);
+          std::string          transportConfigName(Subscribers::Values which);
+          std::string          transportConfigName(DataWriters::Values which);
+          std::string          transportConfigName(DataReaders::Values which);
           ///}
 
         private:
@@ -226,6 +254,7 @@ namespace OpenDDS { namespace Model {
           void loadDomains();
           void loadTopics();
           void loadMaps();
+          void loadTransportConfigNames();
 
           void buildParticipantsQos();
           void buildTopicsQos();
@@ -241,20 +270,21 @@ namespace OpenDDS { namespace Model {
   <xsl:text>
           unsigned long             domains_[                Participants::LAST_INDEX];
           DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
+          std::string               participantTxCfgNames_[  Participants::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-publishers">
   <xsl:text>
           Participants::Values      publisherParticipants_[   Publishers::LAST_INDEX];
           DDS::PublisherQos         publishersQos_[           Publishers::LAST_INDEX];
-          OpenDDS::DCPS::TransportIdType publisherTransports_[Publishers::LAST_INDEX];
+          std::string               publisherTxCfgNames_[     Publishers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-subscribers">
   <xsl:text>
           Participants::Values      subscriberParticipants_[   Subscribers::LAST_INDEX];
           DDS::SubscriberQos        subscribersQos_[           Subscribers::LAST_INDEX];
-          OpenDDS::DCPS::TransportIdType subscriberTransports_[Subscribers::LAST_INDEX];
+          std::string               subscriberTxCfgNames_[     Subscribers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-writers">
@@ -263,6 +293,7 @@ namespace OpenDDS { namespace Model {
           Publishers::Values        publishers_[             DataWriters::LAST_INDEX];
           DDS::DataWriterQos        writersQos_[             DataWriters::LAST_INDEX];
           bool                      writerCopyTopicQos_[     DataWriters::LAST_INDEX];
+          std::string               writerTxCfgNames_[       DataWriters::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-readers">
@@ -271,9 +302,10 @@ namespace OpenDDS { namespace Model {
           Subscribers::Values       subscribers_[            DataReaders::LAST_INDEX];
           DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
           bool                      readerCopyTopicQos_[     DataReaders::LAST_INDEX];
+          std::string               readerTxCfgNames_[       DataReaders::LAST_INDEX];
 </xsl:text>
 </xsl:if>
-<xsl:if test="$lib-topics">
+<xsl:if test="$topics">
 <xsl:text>
           Types::Values                 types_[      Topics::LAST_INDEX];
           const char*                   topicNames_[ Topics::LAST_INDEX];
@@ -283,15 +315,15 @@ namespace OpenDDS { namespace Model {
           MultiTopics::Values           multiTopics_[Topics::LAST_INDEX];
 </xsl:text>
 </xsl:if>
-<xsl:if test="$lib-cf-topics">
+<xsl:if test="$cf-topics">
 <xsl:text>
           Topics::Values relatedTopics_    [ContentFilteredTopics::LAST_INDEX];
-          char*          filterExpressions_[ContentFilteredTopics::LAST_INDEX];
+          const char* filterExpressions_[ContentFilteredTopics::LAST_INDEX];
 </xsl:text>
 </xsl:if>
-<xsl:if test="$lib-multitopics">
+<xsl:if test="$multitopics">
 <xsl:text>
-          char*          topicExpressions_[MultiTopics::LAST_INDEX];
+          const char* topicExpressions_[MultiTopics::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:text>
@@ -304,9 +336,6 @@ namespace OpenDDS { namespace Model {
 <!-- Output the template implementations for the DCPSlib -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']" mode="define">
   <xsl:variable name="lib-participants" select=".//participants"/>
-  <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
-  <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type = 'topics:ContentFilteredTopic']"/>
-  <xsl:variable name="lib-multitopics"  select=".//topicDescriptions[@xsi:type = 'topics:MultiTopic']"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
@@ -353,7 +382,7 @@ DDS::TopicQos
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-topics">
+  <xsl:when test="$topics">
     <xsl:text>  return this->topicsQos_[ which];
 </xsl:text>
   </xsl:when>
@@ -601,7 +630,7 @@ const char*
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-topics">
+  <xsl:when test="$topics">
     <xsl:text>  return this->typeNames_[ which];
 </xsl:text>
   </xsl:when>
@@ -623,7 +652,7 @@ const char*
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-topics">
+  <xsl:when test="$topics">
     <xsl:text>  return this->topicNames_[ which];
 </xsl:text>
   </xsl:when>
@@ -695,7 +724,7 @@ inline
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-topics">
+  <xsl:when test="$topics">
     <xsl:text>  return this->types_[ which];
 </xsl:text>
   </xsl:when>
@@ -767,7 +796,7 @@ inline
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-topics">
+  <xsl:when test="$topics">
     <xsl:text>  return this->cfTopics_[which];
 </xsl:text>
   </xsl:when>
@@ -791,7 +820,7 @@ inline
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-topics">
+  <xsl:when test="$topics">
     <xsl:text>  return this->multiTopics_[which];
 </xsl:text>
   </xsl:when>
@@ -815,7 +844,7 @@ inline
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-cf-topics">
+  <xsl:when test="$cf-topics">
     <xsl:text>  return this->relatedTopics_[which];
 </xsl:text>
   </xsl:when>
@@ -827,7 +856,7 @@ inline
 <xsl:text>}
 
 inline
-char* 
+const char* 
 </xsl:text>
   <xsl:value-of select="$data-qname"/>
   <xsl:text>::filterExpression(ContentFilteredTopics::Values which)
@@ -837,7 +866,7 @@ char*
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-cf-topics">
+  <xsl:when test="$cf-topics">
     <xsl:text>  return this->filterExpressions_[which];
 </xsl:text>
   </xsl:when>
@@ -849,7 +878,7 @@ char*
 <xsl:text>}
 
 inline
-char* 
+const char* 
 </xsl:text>
   <xsl:value-of select="$data-qname"/>
   <xsl:text>::topicExpression(MultiTopics::Values which)
@@ -859,7 +888,7 @@ char*
   }
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$lib-multitopics">
+  <xsl:when test="$multitopics">
     <xsl:text>  return this->topicExpressions_[which];
 </xsl:text>
   </xsl:when>
@@ -918,52 +947,8 @@ inline
 </xsl:choose>
 <xsl:text>}
 
-inline
-OpenDDS::DCPS::TransportIdType
-</xsl:text>
-  <xsl:value-of select="$data-qname"/>
-  <xsl:text>::transport(Publishers::Values which)
-{
-  if(which &lt; 0 || which >= Publishers::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$lib-publishers">
-    <xsl:text>  return this->publisherTransports_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no publishers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
-
-inline
-OpenDDS::DCPS::TransportIdType
-</xsl:text>
-  <xsl:value-of select="$data-qname"/>
-  <xsl:text>::transport(Subscribers::Values which)
-{
-  if(which &lt; 0 || which >= Subscribers::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$lib-subscribers">
-    <xsl:text>  return this->subscriberTransports_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0;  //  not valid when no subscribers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-    <xsl:text>}
 </xsl:text>
 </xsl:template>
-
 <!-- Output enumeration within Elements class -->
 <xsl:template name="generate-enum">
   <xsl:param name="class" />
@@ -978,22 +963,39 @@ OpenDDS::DCPS::TransportIdType
 <!-- Output enumeration values within Elements class -->
 <xsl:template name="generate-enum-values">
   <xsl:param name="values" />
+
     <xsl:text>
         public: enum Values {
 </xsl:text>
-    <xsl:for-each select="$values">
-      <xsl:call-template name="output-comment">
-        <xsl:with-param name="indent" select="'          '"/>
-      </xsl:call-template>
-      <xsl:text>          </xsl:text>
-      <xsl:call-template name="normalize-identifier"/>
-      <xsl:value-of select="concat(',', $newline)"/>
-    </xsl:for-each>
+    <xsl:call-template name="generate-enum-value">
+      <xsl:with-param name="values" select="$values"/>
+    </xsl:call-template>
     <xsl:text>          LAST_INDEX
         };
       };
 
 </xsl:text>
+</xsl:template>
+
+<xsl:template name="generate-enum-value">
+  <xsl:param name="values" />
+  <xsl:param name="complete" select="' '" />
+  <xsl:for-each select="$values[1]">
+    <xsl:variable name="normalized">
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:if test="not(contains($complete, concat(' ', $normalized, ' ') ) )">
+      <xsl:call-template name="output-comment">
+        <xsl:with-param name="indent" select="'          '"/>
+      </xsl:call-template>
+      <xsl:text>          </xsl:text>
+      <xsl:value-of select="concat($normalized, ',', $newline)"/>
+    </xsl:if>
+    <xsl:call-template name="generate-enum-value">
+      <xsl:with-param name="values" select="$values[position() &gt; 1]"/>
+      <xsl:with-param name="complete" select="concat($complete, $normalized, ' ')" />
+    </xsl:call-template>
+  </xsl:for-each>
 </xsl:template>
 
 <!-- Ignore text -->

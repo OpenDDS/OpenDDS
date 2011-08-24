@@ -4,7 +4,7 @@
 #include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include "model/DeepDownReferenceTraits.h"
@@ -21,8 +21,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data2::MessageDataWriter_var message_writer =
-      data2::MessageDataWriter::_narrow(writer.in());
+    MTMdata2::MTM_MessageDataWriter_var message_writer =
+      MTMdata2::MTM_MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -62,7 +62,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ws->detach_condition(condition);
 
     // Write samples
-    data2::Message message;
+    MTMdata2::MTM_Message message;
     message.subject_id = 99;
 
     message.from       = CORBA::string_dup("Comic Book Guy");

@@ -54,7 +54,6 @@ my $system1_config = "";
 my $system2_config = "";
 my $system3_config = "";
 my $monitor_config = "";
-my $svc_conf = "../../tcp.conf ";
 
 if ($ARGV[0] eq 'fileconfig') {
   # File configuration test.
@@ -101,7 +100,6 @@ if ($ARGV[0] eq 'fileconfig') {
                   . "-InfoRepo file://$dcpsrepo3_ior "
                   . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain ";
 
-  $svc_conf = "../../../tools/monitor/monitor.conf ";
   $samples = 10000;
   $sample_interval = 5;
 }
@@ -117,23 +115,21 @@ unlink $dcpsrepo2_ior;
 unlink $dcpsrepo3_ior;
 
 # Configure the repositories.
-my $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf $svc_conf ";
-
-$svc_config .= "-DCPSDebugLevel $debug " if $debug;
+my $opt;
+$opt = "-DCPSDebugLevel $debug " if $debug;
 
 # Configure the subsystems.
-my $sys1_parameters = "$svc_config $system1_config "
+my $sys1_parameters = "$opt $system1_config "
                     .             "-WriterDomain $sys1_pub_domain -ReaderDomain $sys1_sub_domain "
                     .             "-WriterTopic  $sys1_pub_topic  -ReaderTopic  $sys1_sub_topic "
                     .             "-Address $sys1_addr ";
 
-my $sys2_parameters = "$svc_config $system2_config "
+my $sys2_parameters = "$opt $system2_config "
                     .             "-WriterDomain $sys2_pub_domain -ReaderDomain $sys2_sub_domain "
                     .             "-WriterTopic  $sys2_pub_topic  -ReaderTopic  $sys2_sub_topic "
                     .             "-Address $sys2_addr ";
 
-my $sys3_parameters = "$svc_config $system3_config "
+my $sys3_parameters = "$opt $system3_config "
                     .             "-WriterDomain $sys3_pub_domain -ReaderDomain $sys3_sub_domain "
                     .             "-WriterTopic  $sys3_pub_topic  -ReaderTopic  $sys3_sub_topic "
                     .             "-Address $sys3_addr ";
@@ -153,7 +149,7 @@ my $sys3_parameters = "$svc_config $system3_config "
 #   monitor reader [2]   <---    system3 writer
 #
 
-$monitor_parameters = "$svc_config -Samples $samples -SampleInterval $sample_interval $monitor_config "
+$monitor_parameters = "$opt -Samples $samples -SampleInterval $sample_interval $monitor_config "
                     . "-WriterTopic $sys1_sub_topic "
                     . "-WriterTopic $sys2_sub_topic "
                     . "-WriterTopic $sys3_sub_topic "
@@ -164,17 +160,17 @@ $monitor_parameters = "$svc_config -Samples $samples -SampleInterval $sample_int
 
 
 $DCPSREPO1 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "$svc_config -o $dcpsrepo1_ior "
+                                     "$opt -o $dcpsrepo1_ior "
   #                                  . " -ORBDebugLevel 1 "
                                      . "-FederationId 273 ");
 
 $DCPSREPO2 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "$svc_config -o $dcpsrepo2_ior "
+                                     "$opt -o $dcpsrepo2_ior "
   #                                  . " -ORBDebugLevel 1 "
                                      . "-FederationId 546 ");
 
 $DCPSREPO3 = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "$svc_config -o $dcpsrepo3_ior "
+                                     "$opt -o $dcpsrepo3_ior "
   #                                  . " -ORBDebugLevel 1 "
                                      . "-FederationId 819 ");
 

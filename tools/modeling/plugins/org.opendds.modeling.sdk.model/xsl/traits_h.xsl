@@ -21,6 +21,11 @@
 <!-- Extract the name of the model once. -->
 <xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model/@name"/>
+<xsl:variable name="normalized-modelname">
+  <xsl:call-template name="normalize-identifier">
+    <xsl:with-param name="identifier" select="$model/@name"/>
+  </xsl:call-template>
+</xsl:variable>
 <xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 <xsl:variable name="instances" select="//instance"/>
 
@@ -29,6 +34,9 @@
   <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#define ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;', $newline)"/>
+  <xsl:text>#include &lt;model/TransportDirectives.h&gt;
+
+</xsl:text>
 
   <xsl:apply-templates select="$model"/>
 <xsl:text>
@@ -63,6 +71,7 @@
 <xsl:template name="output-instance">
   <xsl:param name="instance"/>
   <xsl:param name="elements-qname"/>
+
   <xsl:variable name="Instname">
     <xsl:call-template name="capitalize">
       <xsl:with-param name="value" select="$instance/@name"/>
@@ -76,19 +85,19 @@
 
   <!-- output struct declaration -->
   <xsl:value-of select="concat($newline,
-    '  struct ', $export, $structname, 
-    ' : OpenDDS::Model::DefaultInstanceTraits {', $newline,
-    '    enum { transport_key_base = ', 
-    $instance/transportOffset/@value, '};', $newline,
-    '    void transport_config(OpenDDS::DCPS::TransportIdType id);', $newline,
-    '  };', $newline
-  )"/>
+        '  struct ', $export, $structname, ' {', $newline)"/>
+  <xsl:value-of select="concat('    ', $structname, '();', $newline)"/>
+  <xsl:value-of select="concat('    virtual ~', $structname, '();', $newline)"/>
+  <xsl:value-of select="concat(
+        '    std::string configName(const std::string&amp; modeledName) const;',
+        $newline,
+        '  };', $newline
+      )"/>
 
   <!-- output typedef-->
   <xsl:value-of select="concat($newline,
-    '  typedef OpenDDS::Model::Service&lt; ', $elements-qname, ', ',
-    $structname, '&gt; ', $tdname, ';', $newline
-  )"/>
+        '  typedef OpenDDS::Model::Service&lt; ', $elements-qname, ', ',
+        $structname, '&gt; ', $tdname, ';', $newline)"/>
 </xsl:template>
 
 <!-- Ignore text -->

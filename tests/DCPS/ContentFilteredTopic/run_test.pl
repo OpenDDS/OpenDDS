@@ -22,8 +22,7 @@ if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
-my $use_svc_config = !new PerlACE::ConfigList->check_config('STATIC');
-my $opts = $use_svc_config ? "-ORBSvcConf $ENV{DDS_ROOT}/tests/tcp.conf" : '';
+my $opts = '';
 
 while (scalar @ARGV) {
   if ($ARGV[0] =~ /^-d/i) {

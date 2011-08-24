@@ -1,4 +1,6 @@
 #include "../idl_test3_lib/FooDefTypeSupportImpl.h"
+#include "../idl_test3_lib/FooDef2TypeSupportImpl.h"
+#include "../idl_test3_lib/FooDef3TypeSupportImpl.h"
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include <map>
@@ -72,7 +74,6 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
 
 
   ACE_TCHAR ebuffer[51200] ; ebuffer[0] = ACE_TEXT('\0') ;
-  ACE_TCHAR obuffer[51200] ; obuffer[0] = ACE_TEXT('\0') ;
 
   OpenDDS::DCPS::Serializer ss(mb);
 
@@ -293,133 +294,133 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   const CORBA::ULong SEQ_LEN_SIZE = 4;
 
   { //=====================================================================
-    Xyz::SeqOfBoolean val;
-    val.length (SEQ_LEN);
+    Xyz::StructOfSeqOfBoolean val;
+    val.field.length (SEQ_LEN);
     for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++)
       {
-        val[ii] = (ii % 2 == 0) ? true : false;
+        val.field[ii] = (ii % 2 == 0) ? true : false;
       }
-    Xyz::SeqOfBoolean val_out;
-    if (try_marshaling<Xyz::SeqOfBoolean>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::SeqOfBoolean"))
+    Xyz::StructOfSeqOfBoolean val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfBoolean>(val, val_out,
+                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::StructOfSeqOfBoolean"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
           {
-            if (val_out[ii] != ((ii % 2 == 0) ? true : false))
+            if (val_out.field[ii] != ((ii % 2 == 0) ? true : false))
               {
                 ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("Xyz::SeqOfBoolean: marshaling comparison failure\n")));
+                  ACE_TEXT("Xyz::StructOfSeqOfBoolean: marshaling comparison failure\n")));
                 failed = true;
               }
           }
       }
   }
   { //=====================================================================
-    Xyz::SeqOfString val;
-    val.length (SEQ_LEN);
-    val[0] = CORBA::string_dup("I");
-    val[1] = CORBA::string_dup("hope");
-    val[2] = CORBA::string_dup("this");
-    val[3] = CORBA::string_dup("works");
-    val[4] = CORBA::string_dup("");
-    Xyz::SeqOfString val_out;
-    if (try_marshaling<Xyz::SeqOfString>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*4+14, "Xyz::SeqOfString"))
+    Xyz::StructOfSeqOfString val;
+    val.field.length (SEQ_LEN);
+    val.field[0] = CORBA::string_dup("I");
+    val.field[1] = CORBA::string_dup("hope");
+    val.field[2] = CORBA::string_dup("this");
+    val.field[3] = CORBA::string_dup("works");
+    val.field[4] = CORBA::string_dup("");
+    Xyz::StructOfSeqOfString val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfString>(val, val_out,
+                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*4+14, "Xyz::StructOfSeqOfString"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
           {
-            if (strcmp(val[ii], val_out[ii]))
+            if (strcmp(val.field[ii], val_out.field[ii]))
               {
                 ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("Xyz::SeqOfString: marshaling comparison failure\n")));
+                  ACE_TEXT("Xyz::StructOfSeqOfString: marshaling comparison failure\n")));
                 failed = true;
               }
           }
       }
   }
   { //=====================================================================
-    Xyz::SeqOfChar val;
-    val.length (SEQ_LEN);
+    Xyz::StructOfSeqOfChar val;
+    val.field.length (SEQ_LEN);
     for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++)
       {
-        val[ii] = static_cast<char>(65+ii);
+        val.field[ii] = static_cast<char>(65+ii);
       }
-    Xyz::SeqOfChar val_out;
-    if (try_marshaling<Xyz::SeqOfChar>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::SeqOfChar"))
+    Xyz::StructOfSeqOfChar val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfChar>(val, val_out,
+                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::StructOfSeqOfChar"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
           {
-            if (val_out[ii] != static_cast<char>(65+ii))
+            if (val_out.field[ii] != static_cast<char>(65+ii))
               {
                 ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("Xyz::SeqOfChar: marshaling comparison failure\n")));
+                  ACE_TEXT("Xyz::StructOfSeqOfChar: marshaling comparison failure\n")));
                 failed = true;
               }
           }
       }
   }
   { //=====================================================================
-    Xyz::SeqOfOctet val;
-    val.length (SEQ_LEN);
+    Xyz::StructOfSeqOfOctet val;
+    val.field.length (SEQ_LEN);
     for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++)
       {
-        val[ii] = ii;
+        val.field[ii] = ii;
       }
-    Xyz::SeqOfOctet val_out;
-    if (try_marshaling<Xyz::SeqOfOctet>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::SeqOfOctet"))
+    Xyz::StructOfSeqOfOctet val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfOctet>(val, val_out,
+                            DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::StructOfSeqOfOctet"))
       {
         for (CORBA::Octet ii =0; ii < SEQ_LEN;ii++)
           {
-            if (val_out[ii] != ii)
+            if (val_out.field[ii] != ii)
               {
                 ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("Xyz::SeqOfOctet: marshaling comparison failure\n")));
+                  ACE_TEXT("Xyz::StructOfSeqOfOctet: marshaling comparison failure\n")));
                 failed = true;
               }
           }
       }
   }
   { //=====================================================================
-    Xyz::SeqOfLong val;
-    val.length (SEQ_LEN);
+    Xyz::StructOfSeqOfLong val;
+    val.field.length (SEQ_LEN);
     for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++)
       {
-        val[ii] = ii;
+        val.field[ii] = ii;
       }
-    Xyz::SeqOfLong val_out;
-    if (try_marshaling<Xyz::SeqOfLong>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+4*SEQ_LEN, "Xyz::SeqOfLong"))
+    Xyz::StructOfSeqOfLong val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfLong>(val, val_out,
+                            DONT_CHECK_MS, SEQ_LEN_SIZE+4*SEQ_LEN, "Xyz::StructOfSeqOfLong"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
           {
-            if (val_out[ii] != CORBA::Long(ii))
+            if (val_out.field[ii] != CORBA::Long(ii))
               {
                 ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("Xyz::SeqOfLong: marshaling comparison failure\n")));
+                  ACE_TEXT("Xyz::StructOfSeqOfLong: marshaling comparison failure\n")));
                 failed = true;
               }
           }
       }
   }
   { //=====================================================================
-    Xyz::SeqOfAnEnum val;
-    val.length (SEQ_LEN);
+    Xyz::StructOfSeqOfAnEnum val;
+    val.field.length (SEQ_LEN);
     for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++)
       {
-        val[ii] = (ii % 2 == 0) ? Xyz::greenx : Xyz::bluex;
+        val.field[ii] = (ii % 2 == 0) ? Xyz::greenx : Xyz::bluex;
       }
-    Xyz::SeqOfAnEnum val_out;
-    if (try_marshaling<Xyz::SeqOfAnEnum>(val, val_out,
-                            DONT_CHECK_MS, SEQ_LEN_SIZE+4*SEQ_LEN, "Xyz::SeqOfAnEnum"))
+    Xyz::StructOfSeqOfAnEnum val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfAnEnum>(val, val_out,
+                            DONT_CHECK_MS, SEQ_LEN_SIZE+4*SEQ_LEN, "Xyz::StructOfSeqOfAnEnum"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
           {
-            if (val_out[ii] != ((ii % 2 == 0) ? Xyz::greenx : Xyz::bluex))
+            if (val_out.field[ii] != ((ii % 2 == 0) ? Xyz::greenx : Xyz::bluex))
               {
                 ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("Xyz::SeqOfAnEnum: marshaling comparison failure\n")));
+                  ACE_TEXT("Xyz::StructOfSeqOfAnEnum: marshaling comparison failure\n")));
                 failed = true;
               }
           }
@@ -458,30 +459,30 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   // SEQUENCE OF SEQUENCES
   const CORBA::ULong SofS_LEN = 4;
   { //=====================================================================
-    Xyz::SeqOfSeqOfLong val;
-    val.length(SofS_LEN);
+    Xyz::StructOfSeqOfSeqOfLong val;
+    val.field.length(SofS_LEN);
     for (CORBA::ULong jj =0; jj < SofS_LEN; jj++)
       {
-        val[jj].length (SEQ_LEN);
+        val.field[jj].length (SEQ_LEN);
         for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++)
             {
-              val[jj][ii] = CORBA::Long(ii+jj*ARRAY_LEN);
+              val.field[jj][ii] = CORBA::Long(ii+jj*ARRAY_LEN);
             }
       }
-    Xyz::SeqOfSeqOfLong val_out;
-    if (try_marshaling<Xyz::SeqOfSeqOfLong>(val, val_out,
+    Xyz::StructOfSeqOfSeqOfLong val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfSeqOfLong>(val, val_out,
                             DONT_CHECK_MS,
                             // longs + inner lengths + outter length
                             4*SEQ_LEN*SofS_LEN + 4*SofS_LEN + 4,
-                            "Xyz::SeqOfSeqOfLong"))
+                            "Xyz::StructOfSeqOfSeqOfLong"))
       {
         for (CORBA::ULong jj =0; jj < SofS_LEN; jj++)
           for (CORBA::ULong ii =0; ii < ARRAY_LEN; ii++)
             {
-            if (val_out[jj][ii] != CORBA::Long(ii+jj*ARRAY_LEN))
+            if (val_out.field[jj][ii] != CORBA::Long(ii+jj*ARRAY_LEN))
               {
                 ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("Xyz::SeqOfSeqOfLong: marshaling comparison failure\n")));
+                  ACE_TEXT("Xyz::StructOfSeqOfSeqOfLong: marshaling comparison failure\n")));
                 failed = true;
               }
           }
@@ -509,18 +510,18 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   }
 
   { //=====================================================================
-    Xyz::SeqOfString val;
-    val.length(2); //4 for seq length
-    val[0] = CORBA::string_dup("four"); //4+4 strlen & string
-    val[1] = CORBA::string_dup("five5"); //4+5 strlen + string
-    Xyz::SeqOfString val_out;
-    if (try_marshaling<Xyz::SeqOfString>(val, val_out,
-                            DONT_CHECK_MS, 21, "Xyz::SeqOfString"))
+    Xyz::StructOfSeqOfString val;
+    val.field.length(2); //4 for seq length
+    val.field[0] = CORBA::string_dup("four"); //4+4 strlen & string
+    val.field[1] = CORBA::string_dup("five5"); //4+5 strlen + string
+    Xyz::StructOfSeqOfString val_out;
+    if (try_marshaling<Xyz::StructOfSeqOfString>(val, val_out,
+                            DONT_CHECK_MS, 21, "Xyz::StructOfSeqOfString"))
       {
-         if (strcmp(val[1], val_out[1]))
+         if (strcmp(val.field[1], val_out.field[1]))
            {
              ACE_ERROR((LM_ERROR,
-               ACE_TEXT("Xyz::SeqOfString: marshaling comparison failure\n")));
+               ACE_TEXT("Xyz::StructOfSeqOfString: marshaling comparison failure\n")));
              failed = true;
            }
       }

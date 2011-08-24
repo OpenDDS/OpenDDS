@@ -5,6 +5,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 #ifndef TREENODE_H
 #define TREENODE_H
 
@@ -12,6 +13,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QtAlgorithms>
 #include <QtGui/QColor>
+#include <QtGui/QCheckBox>
 
 namespace Monitor {
 
@@ -139,11 +141,19 @@ class TreeNode {
     TreeNode*  parent() const;
     TreeNode*& parent();
 
+    QList<TreeNode*> children() const;
+
     /// Access the source node for our data, if different from us.
     TreeNode*  valueSource() const;
     TreeNode*& valueSource();
 
+    /// Display accessors
+    void setDisplay(const bool flag = false);
+    void resetDisplays();
+    bool display() const;
+
   private:
+
     /// Container of children of this element.
     QList<TreeNode*> children_;
 
@@ -161,6 +171,10 @@ class TreeNode {
 
     /// Data source if this is a reference value.
     TreeNode* valueSource_;
+
+    /// display for graphviz / qt
+    bool display_;
+
 };
 
 } // End of namespace Monitor
@@ -200,7 +214,8 @@ Monitor::TreeNode::TreeNode(
 
 ) : data_( data),
     parent_( parent),
-    valueSource_( 0)
+    valueSource_( 0),
+    display_ (false)
 {
 }
 
@@ -445,6 +460,13 @@ Monitor::TreeNode::parent()
 }
 
 inline
+QList<Monitor::TreeNode*>
+Monitor::TreeNode::children() const
+{
+  return this->children_;
+}
+
+inline
 Monitor::TreeNode*
 Monitor::TreeNode::valueSource() const
 {
@@ -456,6 +478,28 @@ Monitor::TreeNode*&
 Monitor::TreeNode::valueSource()
 {
   return this->valueSource_;
+}
+
+inline
+void Monitor::TreeNode::setDisplay(const bool flag)
+{
+  this->display_ = flag;
+}
+
+inline
+void Monitor::TreeNode::resetDisplays()
+{
+  this->display_ = false;
+
+  for (int i = 0; i < this->children_.size(); ++i) {
+    (this->children_.at(i))->resetDisplays();
+  }
+}
+
+inline
+bool Monitor::TreeNode::display() const
+{
+  return this->display_;
 }
 
 #endif /* TREENODE_H */

@@ -108,7 +108,6 @@ cp $DDS_ROOT/performance-tests/Bench/bin/run_test    $PKG/bin/
 mkdir -p $PKG/etc
 
 # Configuration
-cp $DDS_ROOT/performance-tests/Bench/etc/svc.conf $PKG/etc/
 cp $DDS_ROOT/performance-tests/Bench/etc/*.ini    $PKG/etc/
 
 mkdir -p $PKG/tests/scenarios

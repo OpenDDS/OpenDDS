@@ -50,48 +50,41 @@ $subDebugOpts .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
 #
 ########################################
 
-$use_svc_conf = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_conf ? "-ORBSvcConf tcp.conf" : '';
-$pub_opts = "$opts $pubDebugOpts -DCPSConfigFile pub.ini";
-$sub_opts = "$opts $subDebugOpts -DCPSConfigFile sub.ini";
+$pub_opts = "$pubDebugOpts -DCPSConfigFile pub.ini";
+$sub_opts = "$subDebugOpts -DCPSConfigFile sub.ini";
 
 if ($ARGV[0] eq 'udp') {
-    $opts = ($use_svc_conf ? "-ORBSvcConf udp.conf" : '') . " -t udp";
+    $opts = "-t udp";
     $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
-    $opts = ($use_svc_conf ? "-ORBSvcConf multicast.conf" : '') . " -t multicast";
+    $opts = "-t multicast";
     $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
     $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
-    $opts = $use_svc_conf ? "-ORBSvcConf tcp.conf" : '';
-    $pub_opts = "$opts -t default_tcp";
-    $sub_opts = "$opts -t default_tcp";
+    $pub_opts = "-t default_tcp";
+    $sub_opts = "-t default_tcp";
 }
 elsif ($ARGV[0] eq 'default_udp') {
-    $opts = $use_svc_conf ? "-ORBSvcConf udp.conf" : '';
-    $pub_opts = "$opts -t default_udp";
-    $sub_opts = "$opts -t default_udp";
+    $pub_opts = "-t default_udp";
+    $sub_opts = "-t default_udp";
 }
 elsif ($ARGV[0] eq 'default_multicast') {
-    $opts = $use_svc_conf ? "-ORBSvcConf multicast.conf" : '';
-    $pub_opts = "$opts -t default_multicast";
-    $sub_opts = "$opts -t default_multicast";
+    $pub_opts = "-t default_multicast";
+    $sub_opts = "-t default_multicast";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;
 }
 
-$repo_svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-                 : "-ORBSvcConf ../../tcp.conf";
 
 $dcpsrepo_ior = "repo.ior";
 $info_prst_file = "info.pr";
-$repo_bit_opt = "$repo_svc_config -NOBITS";
+$repo_bit_opt = "-NOBITS";
 $app_bit_opt = "-DCPSBit 0";
 $SRV_PORT = PerlACE::random_port();
 

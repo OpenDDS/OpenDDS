@@ -19,14 +19,6 @@ BestEffortSession::BestEffortSession(MulticastDataLink* link,
 }
 
 bool
-BestEffortSession::acked()
-{
-  // Assume remote peer is available; this does not prevent
-  // data loss if the peer is initially unresponsive:
-  return true;
-}
-
-bool
 BestEffortSession::check_header(const TransportHeader& /*header*/)
 {
   // Assume header is valid; this does not prevent duplicate
@@ -55,25 +47,39 @@ BestEffortSession::check_header(const DataSampleHeader& header)
   return true;
 }
 
-void
-BestEffortSession::control_received(char /*submessage_id*/,
-                                    ACE_Message_Block* /*control*/)
-{
-  // Ignore all transport control samples; this permits a
-  // best-effort session to share the same communication
-  // channel as reliable sessions.
-}
 
 bool
-BestEffortSession::start(bool /*active*/)
+BestEffortSession::start(bool active)
 {
-  return true;
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
+                   guard,
+                   this->start_lock_,
+                   false);
+
+  if (this->started_) return true;  // already started
+
+  ACE_Reactor* reactor = this->link_->get_reactor();
+  if (reactor == 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("BestEffortSession::start: ")
+                      ACE_TEXT("NULL reactor reference!\n")),
+                     false);
+  }
+
+  this->active_ = active;
+
+  if (active && !this->start_syn(reactor)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("BestEffortSession::start: ")
+                      ACE_TEXT("failed to schedule SYN watchdog!\n")),
+                     false);
+  }
+
+  return this->started_ = true;
 }
 
-void
-BestEffortSession::stop()
-{
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

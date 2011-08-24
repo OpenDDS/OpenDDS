@@ -8,7 +8,6 @@
 
 import DDS.*;
 import OpenDDS.DCPS.*;
-import OpenDDS.DCPS.transport.*;
 import org.omg.CORBA.StringSeqHolder;
 import Messenger.*;
 
@@ -44,41 +43,11 @@ public class Both {
             return;
         }
 
-        // OpenDDS-specific attachment of transport to publisher
-        TransportImpl transport_impl =
-            TheTransportFactory.create_transport_impl(1,
-                TheTransportFactory.AUTO_CONFIG);
-        if (transport_impl == null) {
-            System.err.println("ERROR: Transport 1 creation failed");
-            return;
-        }
-
-        AttachStatus stat = transport_impl.attach_to_publisher(pub);
-        if (stat != AttachStatus.ATTACH_OK) {
-            System.err.println("ERROR: Couldn't attach transport 1.");
-            System.exit(1);
-        }
-
         Subscriber sub = dp.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(),
                                               null, DEFAULT_STATUS_MASK.value);
         if (sub == null) {
             System.err.println("ERROR: Subscriber creation failed");
             return;
-        }
-
-        // OpenDDS-specific attachment of transport to subscriber
-        TransportImpl transport2_impl =
-            TheTransportFactory.create_transport_impl(2,
-                TheTransportFactory.AUTO_CONFIG);
-        if (transport2_impl == null) {
-            System.err.println("ERROR: Transport 2 creation failed");
-            return;
-        }
-
-        stat = transport2_impl.attach_to_subscriber(sub);
-        if (stat != AttachStatus.ATTACH_OK) {
-            System.err.println("ERROR: Couldn't attach transport 2.");
-            System.exit(1);
         }
 
         Topic top = dp.create_topic("Movie Discussion List",
@@ -200,7 +169,6 @@ public class Both {
         // Clean up
         dp.delete_contained_entities();
         dpf.delete_participant(dp);
-        TheTransportFactory.release();
         TheServiceParticipant.shutdown();
     }
 }

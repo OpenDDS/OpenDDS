@@ -17,7 +17,7 @@ OpenDDS::DCPS::RepoIdSetMap::RepoIdSetMap()
 }
 
 ACE_INLINE OpenDDS::DCPS::RepoIdSet*
-OpenDDS::DCPS::RepoIdSetMap::find(RepoId key)
+OpenDDS::DCPS::RepoIdSetMap::find(RepoId key) const
 {
   DBG_ENTRY_LVL("RepoIdSetMap","find",6);
   RepoIdSet_rch value;
@@ -72,26 +72,3 @@ OpenDDS::DCPS::RepoIdSetMap::map() const
   return this->map_;
 }
 
-ACE_INLINE size_t
-OpenDDS::DCPS::RepoIdSetMap::marshaled_size()
-{
-  DBG_ENTRY_LVL("RepoIdSetMap","marshaled_size",6);
-
-  // serialize len for the map size and set size information.
-  size_t size = (this->size() + 1) * sizeof(CORBA::ULong);
-
-  size_t num_ids = 0;
-
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
-    // one sub id
-    ++ num_ids;
-    // num of pubids in the RepoIdSet.
-    num_ids += itr->second->size();
-  }
-
-  size += num_ids * sizeof(RepoId);
-
-  return size;
-}

@@ -19,6 +19,7 @@
 #include "Definitions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 #include "DisjointSequence.h"
 #include "SubscriptionInstance.h"
 #include "InstanceState.h"
@@ -29,6 +30,7 @@
 #include "ContentFilteredTopicImpl.h"
 #include "GroupRakeData.h"
 #include "CoherentChangeControl.h"
+#include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "ace/String_Base.h"
@@ -217,10 +219,12 @@ private:
 class OpenDDS_Dcps_Export DataReaderImpl
   : public virtual LocalObject<DataReaderEx>,
     public virtual EntityImpl,
+    public virtual TransportClient,
     public virtual TransportReceiveListener,
     public virtual ACE_Event_Handler {
 public:
   friend class RequestedDeadlineWatchdog;
+  friend class QueryConditionImpl;
 
   typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
 
@@ -236,19 +240,15 @@ public:
   virtual DDS::InstanceHandle_t get_instance_handle()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void add_associations(
-    OpenDDS::DCPS::RepoId yourId,
-    const OpenDDS::DCPS::WriterAssociationSeq & writers)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void add_association(const RepoId& yourId,
+                       const WriterAssociation& writer,
+                       bool active);
 
-  virtual void remove_associations(
-    const OpenDDS::DCPS::WriterIdSeq & writers,
-    CORBA::Boolean callback)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void association_complete(const RepoId& remote_id);
 
-  virtual void update_incompatible_qos(
-    const OpenDDS::DCPS::IncompatibleQosStatus & status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void remove_associations(const WriterIdSeq& writers, bool callback);
+
+  void update_incompatible_qos(const IncompatibleQosStatus& status);
 
   /**
   * This is used to retrieve the listener for a certain status change.
@@ -422,8 +422,9 @@ public:
   /// process a message that has been received - could be control or a data sample.
   virtual void data_received(const ReceivedDataSample& sample);
 
+  virtual bool check_transport_qos(const TransportInst& inst);
+
   RepoId get_subscription_id() const;
-  void set_subscription_id(RepoId subscription_id);
 
   DDS::DataReader_ptr get_dr_obj_ref();
 
@@ -580,6 +581,8 @@ public:
   // Set the instance related writers to reevaluate the owner.
   void reset_ownership (::DDS::InstanceHandle_t instance);
 
+  virtual EntityImpl* parent() const;
+
 protected:
 
   SubscriberImpl* get_subscriber_servant();
@@ -675,8 +678,14 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  bool verify_coherent_changes_completion (WriterInfo* writer);
-  bool coherent_change_received (WriterInfo* writer);
+  bool verify_coherent_changes_completion(WriterInfo* writer);
+  bool coherent_change_received(WriterInfo* writer);
+
+  const RepoId& get_repo_id() const { return this->subscription_id_; }
+
+  CORBA::Long get_priority_value(const AssociationData& data) const {
+    return data.publication_transport_priority_;
+  }
 
   friend class WriterInfo;
   friend class InstanceState;

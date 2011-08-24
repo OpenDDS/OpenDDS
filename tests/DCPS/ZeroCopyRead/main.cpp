@@ -19,12 +19,11 @@
 #include "SimpleTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/udp/UdpConfiguration.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -209,45 +208,6 @@ private:
     int num_allocs_;
     int num_frees_;
 };
-
-
-int init_tranport ()
-{
-  int status = 0;
-
-      reader_transport_impl
-        = TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                      ACE_TEXT("SimpleTcp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
-
-      if (reader_transport_impl->configure(reader_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub TCP ")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-
-      writer_transport_impl
-        = TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                      ACE_TEXT("SimpleTcp"),
-                                                      OpenDDS::DCPS::DONT_AUTO_CONFIG);
-      OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
-
-      if (writer_transport_impl->configure(writer_config.in()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) init_transport: sub TCP")
-                    ACE_TEXT(" Failed to configure the transport.\n")));
-          status = 1;
-        }
-
-  return status;
-}
 
 
 int wait_for_data (::DDS::Subscriber_ptr sub,
@@ -524,41 +484,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                           1);
       }
 
-      // Initialize the transport
-      if (0 != ::init_tranport() )
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) init_transport failed!\n")),
-                           1);
-      }
-
-      // Attach the subscriber to the transport.
-      OpenDDS::DCPS::SubscriberImpl* sub_impl
-        = dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(sub.in());
-
-      if (0 == sub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
-                          1);
-      }
-
-      sub_impl->attach_transport(reader_transport_impl.in());
-
-
-      // Attach the publisher to the transport.
-      OpenDDS::DCPS::PublisherImpl* pub_impl
-        = dynamic_cast<OpenDDS::DCPS::PublisherImpl*> (pub.in ());
-
-      if (0 == pub_impl)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
-                          1);
-      }
-
-      pub_impl->attach_transport(writer_transport_impl.in());
-
       // Create the datawriter
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
@@ -643,22 +568,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // =============== do the test ====
 
-
-      ::DDS::OfferedIncompatibleQosStatus incomp;
-      if (foo_dw->get_offered_incompatible_qos_status (incomp) != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          ACE_TEXT ("ERROR: failed to get offered incompatible qos status\n")),
-          1);
-      }
-
-      int incompatible_transport_found = 0;
-      for (CORBA::ULong ii =0; ii < incomp.policies.length (); ii++)
-        {
-          if (incomp.policies[ii].policy_id
-                        == ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID)
-            incompatible_transport_found = 1;
-        }
 
       ::DDS::SubscriptionMatchedStatus matched;
 
@@ -953,7 +862,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         //    while the instance container loses its
         //    reference because of history.depth.
         //=====================================================
-        ACE_DEBUG((LM_INFO,"==== TEST 3 : Show that zero-copy reference counting works\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 3 : show that zero-copy reference counting works\n"));
 
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
@@ -1493,7 +1402,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         //=====================================================
         // 8) Show that an allocator can be provided.
         //=====================================================
-        ACE_DEBUG((LM_INFO,"==== TEST 8 : Show that an allocator can be provided.\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 8 : show that an allocator can be provided.\n"));
 
         const CORBA::Long max_samples = 2;
         // Note: the default allocator for a ZCSeq is very fast because
@@ -1601,7 +1510,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         //==================================================================
         // 9) Show that the ZC sequence impl meets CORBA C++ mapping reqmts
         //==================================================================
-        ACE_DEBUG((LM_INFO, ACE_TEXT("==== TEST 9 : Show that the ZC sequence")
+        ACE_DEBUG((LM_INFO, ACE_TEXT("==== TEST 9 : show that the ZC sequence")
                    ACE_TEXT(" impl meets CORBA C++ mapping reqmts.\n")));
         using Test::SimpleSeq;
         using Test::Simple;
@@ -1670,7 +1579,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 10) Show that loans are checked by delete_datareader.
         //=====================================================
       // !!!! note - this test should be the last because it deletes the datareader
-        ACE_DEBUG((LM_INFO,"==== TEST 10: Show that loans are checked by delete_datareader.\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 10: show that loans are checked by delete_datareader.\n"));
 
         const CORBA::Long max_samples = 2;
         // Initialize the ZeroCopySeq and ZeroCopyInfoSeq objects for read
@@ -1744,6 +1653,20 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       }
+      {
+        //=====================================================
+        // 11) test length of sequence
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 11: Set length on zero copy sequence.\n"));
+        Test::SimpleSeq      seq;
+        seq.length(7);
+        if (seq.length() != 7) {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) t11 ERROR: length %d when set to 7.\n"),
+                      seq.length()));
+          test_failed = 1;
+        }
+      }
     }
   catch (const TestException&)
     {
@@ -1775,7 +1698,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       }
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     } //xxx dp::Entity::Object::muxtex_refcount_ = 1

@@ -20,8 +20,8 @@ images/
 ------------------------------------------------------------------------
 FILES:
 
-Monitor.ui
-  -- Qt4 designer file specifying the UI for the application.
+*.ui
+  -- Qt4 designer files specifying the UI for the application.
 
 Monitor.qrc
   -- Resource specification file, managed by Qt4 designer.

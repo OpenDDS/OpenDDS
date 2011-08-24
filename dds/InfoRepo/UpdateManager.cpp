@@ -199,8 +199,8 @@ Manager::pushImage(const DImage& image)
   SeqGuard<DDS::DataReaderQos> dr_qos_guard;
   SeqGuard<DDS::DataReaderQos>::Seq& dr_qos_seq = dr_qos_guard.seq();
 
-  SeqGuard<OpenDDS::DCPS::TransportInterfaceInfo> trans_guard;
-  SeqGuard<OpenDDS::DCPS::TransportInterfaceInfo>::Seq& transports = trans_guard.seq();
+  SeqGuard<OpenDDS::DCPS::TransportLocatorSeq> trans_guard;
+  SeqGuard<OpenDDS::DCPS::TransportLocatorSeq>::Seq& transports = trans_guard.seq();
 
   SeqGuard<URActor> reader_guard;
   SeqGuard<URActor>::Seq& readers = reader_guard.seq();
@@ -213,8 +213,8 @@ Manager::pushImage(const DImage& image)
 
     TAO_InputCDR in_cdr(actor.transportInterfaceInfo.second
                         , actor.transportInterfaceInfo.first);
-    OpenDDS::DCPS::TransportInterfaceInfo* trans;
-    ACE_NEW_NORETURN(trans, OpenDDS::DCPS::TransportInterfaceInfo);
+    OpenDDS::DCPS::TransportLocatorSeq* trans;
+    ACE_NEW_NORETURN(trans, OpenDDS::DCPS::TransportLocatorSeq);
     transports.push_back(trans);
     in_cdr >> *trans;
 
@@ -357,7 +357,7 @@ Manager::add(const DActor& actor)
   TAO_InputCDR transportCdr(actor.transportInterfaceInfo.second
                             , actor.transportInterfaceInfo.first);
 
-  OpenDDS::DCPS::TransportInterfaceInfo transport_info;
+  OpenDDS::DCPS::TransportLocatorSeq transport_info;
   transportCdr >> transport_info;
 
   if (actor.type == DataReader) {

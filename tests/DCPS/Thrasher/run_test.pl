@@ -12,10 +12,8 @@ use PerlDDS::Run_Test;
 
 PerlDDS::add_lib_path('../FooType');
 
-$opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf tcp.conf";
-$pub_opts = "$opts ";
-$sub_opts = "$opts ";
+$pub_opts = "";
+$sub_opts = "";
 
 my $runTop ;# = 1;
 # $pub_opts .= "-DCPSDebugLevel 1 -ORBVerboseLogging 0 ";
@@ -55,12 +53,11 @@ if ($arg eq 'low') {
 $status = 0;
 
 $dcpsrepo_ior = "repo.ior";
-$repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior ");
+                                    "-o $dcpsrepo_ior");
 
 $Subscriber = PerlDDS::create_process("subscriber", "$sub_opts");
 

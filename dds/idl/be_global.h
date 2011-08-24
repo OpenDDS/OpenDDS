@@ -75,14 +75,15 @@ public:
 
   void open_streams(const char* filename);
 
-  std::ostringstream header_, impl_, idl_;
-  ACE_CString header_name_, impl_name_, idl_name_, output_dir_, tao_inc_pre_;
+  std::ostringstream header_, impl_, idl_, ws_config_;
+  ACE_CString header_name_, impl_name_, idl_name_, ws_config_name_,
+    output_dir_, tao_inc_pre_;
 
   ///print message to all open streams
   void multicast(const char* message);
 
   enum stream_enum_t {
-    STREAM_H, STREAM_CPP, STREAM_IDL
+    STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_WS
   };
 
   void reset_includes();
@@ -121,13 +122,15 @@ public:
 
   bool suppress_idl() const { return suppress_idl_; }
 
+  bool generate_wireshark() const { return generate_wireshark_; }
+
   static bool writeFile(const char* fileName, const std::string &content);
 
 private:
   const char* filename_;
   // Name of the IDL file we are processing.
 
-  bool java_, suppress_idl_;
+  bool java_, suppress_idl_, generate_wireshark_;
 
   ACE_CString export_macro_, export_include_, pch_include_, java_arg_, seq_;
 };

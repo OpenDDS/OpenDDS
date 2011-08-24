@@ -12,15 +12,15 @@ import java.util.Properties;
 
 import javax.jms.JMSException;
 
-import OpenDDS.DCPS.transport.TheTransportFactory;
-import OpenDDS.DCPS.transport.TransportConfiguration;
-import OpenDDS.DCPS.transport.TransportImpl;
-
 import org.opendds.jms.common.beans.BeanHelper;
 import org.opendds.jms.common.lang.Strings;
 import org.opendds.jms.common.util.Logger;
 import org.opendds.jms.common.util.PropertiesHelper;
 import org.opendds.jms.common.util.Serial;
+
+import OpenDDS.DCPS.transport.TheTransportRegistry;
+import OpenDDS.DCPS.transport.TransportConfig;
+import OpenDDS.DCPS.transport.TransportInst;
 
 /**
  * @author Steven Stallion
@@ -44,14 +44,14 @@ public class TransportFactory {
         this.properties = properties;
     }
 
-    protected TransportConfiguration createConfiguration() throws JMSException {
-        TransportConfiguration configuration;
+    protected TransportInst createConfiguration() throws JMSException {
+    	TransportInst configuration;
 
         synchronized (serial) {
             if (serial.overflowed()) {
                 throw new JMSException("Insufficient Transport IDs available");
             }
-            configuration = TheTransportFactory.get_or_create_configuration(serial.next(), type);
+            configuration = TheTransportRegistry.create_inst("" + serial.next(), type);
         }
 
         Logger logger = Transports.getLogger(configuration);
@@ -67,14 +67,15 @@ public class TransportFactory {
         return configuration;
     }
 
-    public TransportImpl createTransport() throws JMSException {
-        TransportConfiguration configuration = createConfiguration();
+    public TransportConfig createTransport() throws JMSException {
+    	TransportInst configuration = createConfiguration();
 
-        TransportImpl transport = TheTransportFactory.create_transport_impl(configuration.getId(), false);
+    	TransportConfig transport = TheTransportRegistry.create_config(configuration.getName());
         if (transport == null) {
             throw new JMSException("Unable to create Transport; please check logs");
         }
-        transport.configure(configuration);
+
+        transport.addLast(configuration);
 
         Logger logger = Transports.getLogger(configuration);
         logger.debug("Created %s", transport);

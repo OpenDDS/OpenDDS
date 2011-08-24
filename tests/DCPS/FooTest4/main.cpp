@@ -18,12 +18,11 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/framework/TransportConfiguration.h"
+#include "dds/DCPS/transport/framework/TransportInst.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -176,49 +175,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                             1);
         }
-
-      OpenDDS::DCPS::TransportImpl_rch transport_impl
-        = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
-
-      OpenDDS::DCPS::TransportConfiguration_rch config
-        = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
-
-      if (transport_impl->configure(config.in ()) != 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                    "(%P|%t) Failed to configure the transport impl\n"));
-          return 1 ;
-        }
-
-      OpenDDS::DCPS::AttachStatus status
-        = sub_impl->attach_transport(transport_impl.in());
-
-      if (status != OpenDDS::DCPS::ATTACH_OK)
-      {
-        // We failed to attach to the transport for some reason.
-        ACE_TString status_str;
-
-        switch (status)
-          {
-            case OpenDDS::DCPS::ATTACH_BAD_TRANSPORT:
-              status_str = ACE_TEXT("ATTACH_BAD_TRANSPORT");
-              break;
-            case OpenDDS::DCPS::ATTACH_ERROR:
-              status_str = ACE_TEXT("ATTACH_ERROR");
-              break;
-            case OpenDDS::DCPS::ATTACH_INCOMPATIBLE_QOS:
-              status_str = ACE_TEXT("ATTACH_INCOMPATIBLE_QOS");
-              break;
-            default:
-              status_str = ACE_TEXT("Unknown Status");
-              break;
-          }
-
-        ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) Failed to attach to the transport. ")
-                    ACE_TEXT("AttachStatus == %s\n"), status_str.c_str()));
-        return 1;
-      }
 
       ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
@@ -587,7 +543,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dpf->delete_participant(dp.in ());
 
       ACE_OS::sleep (2);
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
     }

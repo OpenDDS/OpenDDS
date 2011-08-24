@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.opendds.modeling.diagram.main; singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 3.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.opendds.modeling.diagram.main.part.OpenDDSDiagramEditorPlugin
 Bundle-Vendor: %providerName
@@ -39,7 +39,8 @@ Require-Bundle: org.eclipse.core.runtime,
  com.ociweb.gmf,
  org.eclipse.ocl.ecore;visibility:=reexport,
  org.eclipse.emf.validation;visibility:=reexport,
- org.eclipse.emf.validation.ocl;visibility:=reexport
+ org.eclipse.emf.validation.ocl;visibility:=reexport,
+ org.opendds.modeling.validation;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true

@@ -9,9 +9,13 @@ import org.w3c.dom.NodeList;
 public class ParsedGeneratorFile extends ParsedXmlFile implements IGeneratorModel {
 	private static final String sourceExpression = "//generator:CodeGen/source/@name";
 	private static final String targetExpression = "//generator:CodeGen/target/@name";
+	private static final String offsetExpression = "//instance/transportOffset";
+	private static final String transportExpression = "//instance/transport";
 
 	protected static XPathExpression sourceExpr;
 	protected static XPathExpression targetExpr;
+	protected static XPathExpression offsetExpr;
+	protected static XPathExpression transportExpr;
 
 	/**
 	 *  Only needed when there is no EMF model to delegate to.
@@ -53,7 +57,14 @@ public class ParsedGeneratorFile extends ParsedXmlFile implements IGeneratorMode
 			this.generatorModel.setParsedModelFile(parsedModelFile);
 		}
 	}
-
+	
+	boolean hasOffset() {
+ 		return parseExpression(getOffsetExpr()).getLength() > 0;
+	}
+	boolean hasInstanceTransport() {
+		return parseExpression(getTransportExpr()).getLength() > 0;
+	}
+	
 	@Override
 	public void reset() {
 		source = null;
@@ -203,6 +214,32 @@ public class ParsedGeneratorFile extends ParsedXmlFile implements IGeneratorMode
 			}
 		}
 		return targetExpr;
+	}
+
+	protected XPathExpression getOffsetExpr() {
+		if (offsetExpr == null) {
+			try {
+				offsetExpr = getXpath().compile(offsetExpression);
+
+			} catch (XPathExpressionException e) {
+				errorHandler.error(IErrorHandler.Severity.ERROR, "getOffsetExpr",
+						"XPath expression not available to obtain the transport offset.", e);
+			}
+		}
+		return offsetExpr;
+	}
+
+	protected XPathExpression getTransportExpr() {
+		if (transportExpr == null) {
+			try {
+				transportExpr = getXpath().compile(transportExpression);
+
+			} catch (XPathExpressionException e) {
+				errorHandler.error(IErrorHandler.Severity.ERROR, "getOffsetExpr",
+						"XPath expression not available to obtain the instance transport.", e);
+			}
+		}
+		return transportExpr;
 	}
 
 	protected String resultFromNodeList(NodeList nodes, String attr) {

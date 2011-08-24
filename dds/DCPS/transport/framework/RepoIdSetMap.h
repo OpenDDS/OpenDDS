@@ -32,7 +32,7 @@ public:
   virtual ~RepoIdSetMap();
 
   int        insert(RepoId key, RepoId value);
-  RepoIdSet* find(RepoId key);
+  RepoIdSet* find(RepoId key) const;
 
   int        remove(RepoId key, RepoId value);
   RepoIdSet* remove_set(RepoId key);
@@ -44,16 +44,6 @@ public:
   /// Give access to the underlying map for iteration purposes.
   MapType& map();
   const MapType& map() const;
-
-  /// The size of the serialized map.
-  size_t marshaled_size();
-
-  /// Serialize this map. The data in the stream:
-  /// size of this map, list of key(repoid)-value(RepoIdSet).
-  ACE_Message_Block* marshal(bool byte_order);
-
-  /// Demarshal the serialized data of a RepoIdSetMap.
-  int demarshal(ACE_Message_Block* acks, bool byte_order);
 
   /// List the key of this map.
   void get_keys(RepoIdSet& keys) const;

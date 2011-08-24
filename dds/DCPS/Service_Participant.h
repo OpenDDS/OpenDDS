@@ -14,8 +14,8 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "DomainParticipantFactoryImpl.h"
-#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MonitorFactory.h"
 
@@ -309,12 +309,12 @@ public:
    *       this function to setup the desired port number.
    */
   //@{
-  int bit_transport_port(RepoKey repo = DEFAULT_REPO) const;
-  void bit_transport_port(int port, RepoKey repo = DEFAULT_REPO);
+  int bit_transport_port() const;
+  void bit_transport_port(int port);
   //@}
 
-  /// Accessor of the TransportImpl used by the builtin topics.
-  TransportImpl_rch bit_transport_impl(DDS::DomainId_t domain = ANY_DOMAIN);
+  /// Accessor of the TransportConfig used by the builtin topics
+  TransportConfig_rch bit_transport_config();
 
   /**
    * Accessor for bit_lookup_duration_msec_.
@@ -335,15 +335,15 @@ public:
     bit_enabled_ = b;
   }
 
-  ///Create the TransportImpl for all builtin topics.
-  int init_bit_transport_impl(DDS::DomainId_t domain = ANY_DOMAIN);
-
   /// Get the data durability cache corresponding to the given
   /// DurabilityQosPolicy and sample list depth.
   DataDurabilityCache * get_data_durability_cache(
     DDS::DurabilityQosPolicy const & durability);
 
 private:
+
+  /// Create the TransportConfig for all builtin topics.
+  int init_bit_transport_config();
 
   /// Initalize default qos.
   void initialize();
@@ -361,7 +361,7 @@ private:
    * Import the configuration file to the ACE_Configuration_Heap
    * object and load common section configuration to the
    * Service_Participant singleton and load the factory and
-   * transport section configuration to the TransportFactory
+   * transport section configuration to the TransportRegistry
    * singleton.
    */
   int load_configuration();
@@ -477,16 +477,16 @@ private:
   int                                    liveliness_factor_;
 
   /// The builtin topic transport address.
-  typedef std::map<RepoKey, ACE_TString> RepoTransportIpMap;
-  RepoTransportIpMap bitTransportIpMap_;
+  ACE_TString bit_transport_ip_;
+
+  /// The builtin topic transport configuration
+  TransportConfig_rch bit_transport_config_;
+
+  /// Prevent concurrent attempts to initialize built-in topics
+  ACE_Thread_Mutex bit_config_lock_;
 
   /// The builtin topic transport port number.
-  typedef std::map<RepoKey, int> RepoTransportPortMap;
-  RepoTransportPortMap bitTransportPortMap_;
-
-  /// The mapping from DomainId to transport implementations.
-  typedef std::map<DDS::DomainId_t, TransportImpl_rch> RepoTransportMap;
-  RepoTransportMap bitTransportMap_;
+  int bit_transport_port_;
 
   bool bit_enabled_;
 
@@ -497,6 +497,11 @@ private:
   /// The configuration object that imports the configuration
   /// file.
   ACE_Configuration_Heap cf_;
+
+  /// Specifies the name of the transport configuration that
+  /// is used when the entity tree does not specify one.  If
+  /// not set, the default transport configuration is used.
+  ACE_TString global_transport_config_;
 
 public:
   /// Pointer to the monitor factory that is used to create

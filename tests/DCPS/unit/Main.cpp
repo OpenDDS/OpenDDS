@@ -11,10 +11,9 @@
 #include "dds/DdsDcpsTopicC.h"
 #include "MyTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"
-#include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "tao/ORB_Core.h"
@@ -688,7 +687,6 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           orb_task->wait ();
         }
 
-      TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
 
       if (client_orb)

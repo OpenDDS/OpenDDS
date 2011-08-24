@@ -43,27 +43,23 @@ my $failed = 0;
 
 my $repo_ior     = PerlACE::LocalFile ("repo.ior");
 
-my $publisher_ini  = PerlACE::LocalFile ("dds_tcp_conf.ini");
-my $pub_udp_ini    = PerlACE::LocalFile ("pub_udp_conf.ini");
-my $subscriber_ini = PerlACE::LocalFile ("dds_tcp_conf.ini");
-my $sub1_udp_ini   = PerlACE::LocalFile ("sub_udp_conf.ini");
-my $sub2_udp_ini   = PerlACE::LocalFile ("sub2_udp_conf.ini");
+my $tcp_ini    = PerlACE::LocalFile ("dds_tcp_conf.ini");
+my $udp_ini    = PerlACE::LocalFile ("dds_udp_conf.ini");
 
 # Change how test is configured according to which test we are.
-my $common_opts    = "-ORBSvcConf ./tcp.conf ";
+my $common_opts    = " ";
    $common_opts   .= "-DCPSDebugLevel $debug " if $debug;
    $common_opts   .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
    $common_opts   .= "-ORBLogFile $debugFile " if $debugFile;
 my $repo_opts      = "-ORBEndpoint iiop://localhost:12345";
-my $publisher_opts = "-DCPSConfigFile $publisher_ini ";
-my $sub1_opts      = "-DCPSConfigFile $publisher_ini ";
-my $sub2_opts      = "-DCPSConfigFile $subscriber_ini ";
+my $publisher_opts = "-DCPSConfigFile $tcp_ini ";
+my $sub1_opts      = "-DCPSConfigFile $tcp_ini ";
+my $sub2_opts      = "-DCPSConfigFile $tcp_ini ";
 
 if( $udp) {
-  $common_opts    .= "-ORBSvcConf ./udp.conf ";
-  $publisher_opts  = "-DCPSConfigFile $pub_udp_ini ";
-  $sub1_opts       = "-DCPSConfigFile $sub1_udp_ini ";
-  $sub2_opts       = "-DCPSConfigFile $sub2_udp_ini ";
+  $publisher_opts  = "-DCPSConfigFile $udp_ini ";
+  $sub1_opts       = "-DCPSConfigFile $udp_ini ";
+  $sub2_opts       = "-DCPSConfigFile $udp_ini ";
 }
 
 if( $nobit) {

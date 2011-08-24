@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.opendds.modeling.sdk.model.editor;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 3.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorEditorPlugin$Implementation
 Bundle-Vendor: %providerName
@@ -14,6 +14,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.opendds.modeling.sdk.model.edit;visibility:=reexport,
  org.eclipse.emf.ecore.xmi;visibility:=reexport,
  org.eclipse.emf.edit.ui;visibility:=reexport,
- org.eclipse.ui.ide;visibility:=reexport
+ org.eclipse.ui.ide;visibility:=reexport,
+ org.junit4
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.core.filesystem

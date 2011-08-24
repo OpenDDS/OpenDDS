@@ -5,19 +5,36 @@
 #define SIMPLEDATAREADER_H
 
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/Definitions.h"
 
 
-class SimpleDataReader : public OpenDDS::DCPS::TransportReceiveListener
+class SimpleDataReader
+  : public OpenDDS::DCPS::TransportReceiveListener
+  , public OpenDDS::DCPS::TransportClient
 {
   public:
 
-    SimpleDataReader();
+    explicit SimpleDataReader(const OpenDDS::DCPS::RepoId& sub_id);
     virtual ~SimpleDataReader();
 
-    void init(OpenDDS::DCPS::RepoId sub_id);
+    void init(const OpenDDS::DCPS::AssociationData& publication, int num_msgs);
 
-    virtual void data_received(const OpenDDS::DCPS::ReceivedDataSample& sample);
+    // Implementing TransportReceiveListener
+    void data_received(const OpenDDS::DCPS::ReceivedDataSample& sample);
+    void notify_subscription_disconnected(const OpenDDS::DCPS::WriterIdSeq&) {}
+    void notify_subscription_reconnected(const OpenDDS::DCPS::WriterIdSeq&) {}
+    void notify_subscription_lost(const OpenDDS::DCPS::WriterIdSeq&) {}
+    void notify_connection_deleted() {}
+    void remove_associations(const OpenDDS::DCPS::WriterIdSeq&, bool) {}
+
+    // Implementing TransportClient
+    bool check_transport_qos(const OpenDDS::DCPS::TransportInst&)
+      { return true; }
+    const OpenDDS::DCPS::RepoId& get_repo_id() const
+      { return sub_id_; }
+    CORBA::Long get_priority_value(const OpenDDS::DCPS::AssociationData&) const
+      { return 0; }
 
     void transport_lost();
 
@@ -26,11 +43,18 @@ class SimpleDataReader : public OpenDDS::DCPS::TransportReceiveListener
     /// the TransportReceiveListeners have been told of the data_received().
     int received_test_message() const;
 
+    void print_time();
+
+    using OpenDDS::DCPS::TransportClient::enable_transport;
+    using OpenDDS::DCPS::TransportClient::disassociate;
 
   private:
 
-    OpenDDS::DCPS::RepoId sub_id_;
-    int received_test_message_;
+    const OpenDDS::DCPS::RepoId& sub_id_;
+    int num_messages_expected_;
+    int num_messages_received_;
+    ACE_Time_Value begin_recvd_;
+    ACE_Time_Value finished_recvd_;
 };
 
 #endif  /* SIMPLEDATAREADER_H */

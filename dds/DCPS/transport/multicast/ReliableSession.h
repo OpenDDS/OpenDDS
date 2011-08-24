@@ -17,7 +17,6 @@
 #include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 
 #include <map>
 #include <set>
@@ -26,23 +25,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ReliableSession;
-
-class OpenDDS_Multicast_Export SynWatchdog
-  : public DataLinkWatchdog<ACE_SYNCH_MUTEX> {
-public:
-  explicit SynWatchdog(ReliableSession* session);
-
-protected:
-  virtual ACE_Time_Value next_interval();
-  virtual void on_interval(const void* arg);
-
-  virtual ACE_Time_Value next_timeout();
-  virtual void on_timeout(const void* arg);
-
-private:
-  ReliableSession* session_;
-  size_t retries_;
-};
 
 class OpenDDS_Multicast_Export NakWatchdog
   : public DataLinkWatchdog<ACE_SYNCH_MUTEX> {
@@ -63,18 +45,10 @@ public:
   ReliableSession(MulticastDataLink* link,
                   MulticastPeer remote_peer);
 
-  virtual bool acked();
-
   virtual bool check_header(const TransportHeader& header);
 
-  virtual void control_received(char submessage_id,
+  virtual bool control_received(char submessage_id,
                                 ACE_Message_Block* control);
-
-  void syn_received(ACE_Message_Block* control);
-  void send_syn();
-
-  void synack_received(ACE_Message_Block* control);
-  void send_synack();
 
   void expire_naks();
   void send_naks();
@@ -83,27 +57,14 @@ public:
   void send_naks (DisjointSequence& found);
 
   void nakack_received(ACE_Message_Block* control);
-  void send_nakack(SequenceNumber low);
+  virtual void send_nakack(SequenceNumber low);
 
   virtual bool start(bool active);
   virtual void stop();
 
+  virtual void syn_hook(const SequenceNumber& seq);
+
 private:
-  ACE_SYNCH_MUTEX ack_lock_;
-  bool acked_;
-
-  ACE_SYNCH_MUTEX start_lock_;
-  bool started_;
-
-  // A session must be for a publisher
-  // or subscriber.  Implementation doesn't
-  // support being for both.
-  // As to control message,
-  // only subscribers receive syn, send synack, send naks, receive nakack,
-  // and publisher only send syn, receive synack,receive naks, send nakack.
-  bool active_;
-
-  SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;
 
   DisjointSequence nak_sequence_;

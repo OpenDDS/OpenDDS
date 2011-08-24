@@ -10,31 +10,31 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
 # Set the library path for the client to be able to load
 # the FooType* library.
 PerlDDS::add_lib_path('../FooType3Unbounded');
 
-$status=0;
+my $status=0;
 
 # single writer with single instances test
-$multiple_instance=0;
-$num_instances=1;
-$num_threads_to_write=5;
-$num_writes_per_thread=2;
-$num_writers=1;
+my $multiple_instance=0;
+my $num_instances=1;
+my $num_threads_to_write=5;
+my $num_writes_per_thread=2;
+my $num_writers=1;
 #Make max_samples_per_instance large enough.
-$max_samples_per_instance= 12345678;
-$history_depth=100;
-$blocking_write=0;
-$write_dalay_msec=0;
-$receive_dalay_msec=0;
-$check_data_dropped=0;
-$publisher_running_sec=30;
-$subscriber_running_sec=20;
-$repo_bit_conf = "-NOBITS";
-$app_bit_conf = "-DCPSBit 0";
-$sub_ready_file = "sub_ready.txt";
+my $max_samples_per_instance= 12345678;
+my $history_depth=100;
+my $blocking_write=0;
+my $write_delay_msec=0;
+my $receive_delay_msec=0;
+my $check_data_dropped=0;
+my $publisher_running_sec=30;
+my $subscriber_running_sec=20;
+my $repo_bit_conf = "-NOBITS";
+my $app_bit_conf = "-DCPSBit 0";
 
 # multiple instances test
 if ($ARGV[0] eq 'mi') {
@@ -58,9 +58,9 @@ elsif ($ARGV[0] eq 'bp_remove') {
   $history_depth=1;
   $num_threads_to_write=1;
   $num_writes_per_thread=1000;
-  $write_dalay_msec=0;
+  $write_delay_msec=0;
   $check_data_dropped=1;
-  $receive_dalay_msec=100;
+  $receive_delay_msec=100;
   $publisher_running_sec=150;
   $subscriber_running_sec=120;
 }
@@ -70,8 +70,8 @@ elsif ($ARGV[0] eq 'b') {
   $max_samples_per_instance=1;
   $num_threads_to_write=1;
   $num_writes_per_thread=1000;
-  $write_dalay_msec=0;
-  $receive_dalay_msec=100;
+  $write_delay_msec=0;
+  $receive_delay_msec=100;
   $publisher_running_sec=150;
   $subscriber_running_sec=120;
 }
@@ -83,45 +83,35 @@ else {
   exit 1;
 }
 
-$num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers + $num_instances;
+my $num_writes=$num_threads_to_write * $num_writes_per_thread * $num_writers;
 
-$dcpsrepo_ior="dcps_ir.ior";
-$pubdriver_ior="pubdriver.ior";
-# The pub_id_fname can not be a full path because the
-# pub_id_fname will be part of the parameter of the -p option
-# which will be parsed using ':' delimiter.
-$pub_id_fname="pub_id.txt";
-$pub_port=PerlACE::random_port();
-$sub_port=PerlACE::random_port();
-$sub_id=1;
+my $dcpsrepo_ior="dcps.ior";
 
 unlink $dcpsrepo_ior;
-unlink $pub_id_fname;
-unlink $pubdriver_ior;
-unlink $sub_ready_file;
 
-$svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : " -ORBSvcConf ../../tcp.conf ";
+my $DCPSREPO=PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                      "$repo_bit_conf -o $dcpsrepo_ior");
 
-$DCPSREPO=PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "$repo_bit_conf -o $dcpsrepo_ior"
-                                  . " $svc_config");
-
-$publisher=PerlDDS::create_process ("FooTest3_publisher"
-                                   , "$svc_config"
-                                   . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-                                   . " -DCPSInfoRepo file://$dcpsrepo_ior -t $num_threads_to_write -w $num_writers"
-                                   . " -m $multiple_instance -i $num_writes_per_thread "
-                                   . " -n $max_samples_per_instance -d $history_depth"
-                                   . " -v $pubdriver_ior -l $write_dalay_msec -r $check_data_dropped "
-                                   . " -b $blocking_write -f $sub_ready_file");
+my $publisher=PerlDDS::create_process ("FooTest3_publisher",
+                                       "$app_bit_conf"
+                                       . " -DCPSInfoRepo file://$dcpsrepo_ior"
+                                       . " -t $num_threads_to_write"
+                                       . " -w $num_writers"
+                                       . " -m $multiple_instance"
+                                       . " -i $num_writes_per_thread "
+                                       . " -n $max_samples_per_instance"
+                                       . " -d $history_depth"
+                                       . " -l $write_delay_msec"
+                                       . " -r $check_data_dropped "
+                                       . " -b $blocking_write ");
 
 print $publisher->CommandLine(), "\n";
 
-$subscriber=PerlDDS::create_process ("FooTest3_subscriber",
-                                    , "$svc_config"
-                                    . "$app_bit_conf -p $pub_id_fname:localhost:$pub_port -s $sub_id:localhost:$sub_port "
-                                    . " -n $num_writes -v file://$pubdriver_ior -l $receive_dalay_msec $sub_ready_file");
+my $subscriber=PerlDDS::create_process ("FooTest3_subscriber",
+                                        "$app_bit_conf"
+                                        . " -DCPSInfoRepo file://$dcpsrepo_ior"
+                                        . " -n $num_writes"
+                                        . " -l $receive_delay_msec");
 
 print $subscriber->CommandLine(), "\n";
 
@@ -137,7 +127,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 $subscriber->Spawn ();
 $publisher->Spawn ();
 
-$result=$publisher->WaitKill ($publisher_running_sec);
+my $result=$publisher->WaitKill ($publisher_running_sec);
 
 if ($result != 0) {
     print STDERR "ERROR: $publisher returned $result \n";
@@ -161,11 +151,18 @@ else {
     }
 }
 
-$ir=$DCPSREPO->TerminateWaitKill(5);
+my $ir=$DCPSREPO->TerminateWaitKill(5);
 
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status=1;
+}
+
+if ($status == 0) {
+  print "test PASSED.\n";
+}
+else {
+  print STDERR "test FAILED.\n";
 }
 
 exit $status;

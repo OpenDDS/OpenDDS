@@ -9,8 +9,13 @@ project : dcps, wireshark {
   libout        = .
 
   Source_Files {
+    giop_base.cpp
+    packet-opendds.cpp
+    packet-datawriter.cpp
+    packet-repo.cpp
     plugin.cpp
-    packet.cpp
+    sample_dissector.cpp
+    sample_manager.cpp
   }
 
   Resource_Files {

@@ -15,11 +15,10 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #endif
@@ -32,8 +31,6 @@
 
 namespace {
 
-OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
-OpenDDS::DCPS::TransportIdType transport_impl_id_2 = transport_impl_id + 10;
 int num_processes = 2;
 int num_topics = 200;
 int num_samples_per_topic = 10;
@@ -45,33 +42,20 @@ parse_args(int argc, ACE_TCHAR *argv[])
   //
   // Command-line Options:
   //
-  //    -t <transport, udp or multicast>
   //    -w <number of topics>
   //    -s <samples per topic>
   //    -z <sec>  -- don't check the sample counts, just sleep this much
   //                 and exit
   //
 
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:p:w:s:z:"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("p:w:s:z:"));
 
   int c;
   while ((c = get_opts()) != -1) {
     switch (c) {
-    case 't':
-
-      if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("udp")) == 0) {
-        transport_impl_id = 2;
-
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("multicast")) == 0) {
-        transport_impl_id = 3;
-      }
-
-      transport_impl_id_2 = transport_impl_id + 10;
-
-      break;
     case 'p':
       num_processes = ACE_OS::atoi(get_opts.opt_arg());
-      std::cout << "num_procsses = " << num_processes << std::endl;
+      std::cout << "num_processes = " << num_processes << std::endl;
       break;
 
     case 'w':
@@ -95,7 +79,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
     case '?':
     default:
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("usage: %C -t config -n num_procs\n"), argv[0]),
+                        ACE_TEXT("usage: %C -n num_procs\n"), argv[0]),
                        -1);
     }
   }
@@ -179,18 +163,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    // Initialize and attach Transport
-    OpenDDS::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create_transport_impl(transport_impl_id,
-                                                 OpenDDS::DCPS::AUTO_CONFIG);
-
-    if (transport_impl->attach(pub.in()) != OpenDDS::DCPS::ATTACH_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: attach failed!\n")),
-                       -1);
-    }
-
     // Create DataWriter
     DDS::DataWriterQos dw_qos;
     pub->get_default_datawriter_qos (dw_qos);
@@ -227,19 +199,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
     }
 
-    // Initialize Transport
-    OpenDDS::DCPS::TransportImpl_rch transport_impl_2 =
-      TheTransportFactory->create_transport_impl(transport_impl_id_2,
-                                                 OpenDDS::DCPS::AUTO_CONFIG);
-
-    OpenDDS::DCPS::AttachStatus status = transport_impl_2->attach(sub.in());
-
-    if (status != OpenDDS::DCPS::ATTACH_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: attach() failed!\n")), -1);
-    }
-
     // Create DataReader
     DDS::DataReaderListener_var* listener =
       new DDS::DataReaderListener_var[num_topics];
@@ -247,7 +206,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos (dr_qos);
-    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
     for (int i = 0; i < num_topics; ++i) {
       listener[i] = new DataReaderListenerImpl;
@@ -290,9 +249,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       } while (matches.current_count < num_processes);
     }
-
-    // TODO: shouldn't need this
-    ACE_OS::sleep(5);
 
     int expected_num_reads = num_samples_per_topic * num_processes;
 
@@ -345,7 +301,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
 
-    TheTransportFactory->release();
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

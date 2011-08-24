@@ -1434,7 +1434,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
     "  target = " << cxx << "::_unchecked_narrow (c);\n"
     "}\n\n";
 
-  c.cppfile << //TODO: handle a Java-implemented local object (JavaPeer)
+  c.cppfile <<
   c.sigToJava << "\n"
   "{\n"
   "  ACE_UNUSED_ARG (createNewObject);\n"

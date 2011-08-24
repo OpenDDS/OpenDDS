@@ -15,6 +15,23 @@ use PerlDDS::Run_Test;
 my $dir = 'tools/modeling/tests';
 my $test_lst = "$DDS_ROOT/$dir/modeling_tests.lst";
 
+my $cwd = getcwd();
+if (defined $ENV{'ANT_HOME'}) {
+  chdir '../plugins/org.opendds.modeling.validation';
+  my $ant = $ENV{'ANT_HOME'} . '/bin/ant';
+  if (!-r $ant) {
+    $ant = 'ant';
+  }
+  my $status = system("\"$ant\" -f build-external.xml run.tests");
+  if ($status > 0) {
+    print "ERROR: ant invocation failed with $status\n";
+  }
+  chdir $cwd;
+}
+else {
+  print "Warning: skipping model validation due to lack of ANT_HOME\n";
+}
+
 sub get_dirs {
   if ($#ARGV >= 0) {
     print "Overriding dir list\n";
@@ -34,15 +51,15 @@ sub generate {
   my $base = shift;
   my $status;
 
-  my $bin = "$DDS_ROOT/tools/modeling/plugins/$plugin/bin";
+  my $plugdir = "$DDS_ROOT/tools/modeling/plugins/$plugin";
   my $jclass = "$javapkg.model.GeneratorSpecification.Generator.SdkGenerator";
   my $classfile = $jclass;
   $classfile =~ s!\.!/!g;
   $classfile .= '.class';
-  if (! -r "$bin/$classfile") {
+  if (! -r "$plugdir/bin/$classfile") {
     print "Compiling Java SdkGenerator\n";
     my $cwd = getcwd();
-    chdir "$bin/../src";
+    chdir "$plugdir/src";
     $classfile =~ s/\.class$/.java/;
     mkdir '../bin' unless -d '../bin';
     $status = system("\"$JAVA_HOME/bin/javac\" -g -d ../bin $classfile");
@@ -54,7 +71,8 @@ sub generate {
   }
 
   print "Running code generation on: $base\n";
-  $status = system("\"$JAVA_HOME/bin/java\" -classpath $bin $jclass $base");
+  $status = system("\"$JAVA_HOME/bin/java\" -classpath $plugdir/bin " .
+                   "$jclass $base");
   if ($status > 0) {
     print "ERROR: Java SdkGenerator invocation failed with $status\n";
     exit($status >> 8);
@@ -64,8 +82,12 @@ sub generate {
 open MWC, '>modeling_tests.mwc' or die "Can't write modeling_tests.mwc";
 print MWC "workspace {\n";
 
-my $cwd = getcwd();
 foreach my $dir (get_dirs()) {
+  my $old_sep = $/;
+  $/ = '/';
+  chomp $dir;
+  $/ = $old_sep;
+
   chdir $cwd . '/' . $dir or die "Can't change to $dir\n";
   my @ddsfiles = glob '*.codegen';
   if ($#ddsfiles == -1) {

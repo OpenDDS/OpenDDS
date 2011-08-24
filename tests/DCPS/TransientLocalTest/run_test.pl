@@ -14,9 +14,7 @@ use PerlDDS::Run_Test;
 $status = 0;
 $debug  ;# = 10;
 
-$opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf tcp.conf";
-$opts .= " -DCPSDebugLevel $debug " if $debug;
+$opts = $debug ? "-DCPSDebugLevel $debug " : '';
 $pub_opts = "$opts -DCPSConfigFile pub.ini";
 $sub_opts = "$opts -DCPSConfigFile sub.ini";
 

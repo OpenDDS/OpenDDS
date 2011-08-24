@@ -73,7 +73,7 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use PerlDDS::Cross_Sync;
-
+use strict;
 
 sub configure_transport_file {
   my $currfile = shift;
@@ -92,6 +92,21 @@ sub configure_transport_file {
   return $newfile;
 }
 
+sub remove_reliable {
+  for my $fname (@_) {
+    my $newfile = $$fname . ".configured";
+    open(OLD, $$fname) or die "Failed to open the config file $$fname\n";
+    open(NEW, ">$newfile") or die "Failed to open the config file $newfile for modification\n";
+    my $section;
+    while (<OLD>) {
+      $section = $1 if /\[(\S+)\//;
+      print NEW $_ unless (/=\s*RELIABLE/ && $section ne 'publication');
+    }
+    close NEW;
+    close OLD;
+    $$fname = $newfile;
+  }
+}
 
 $| = 1;
 my $status = 0;
@@ -103,31 +118,31 @@ my $run_time = 120;
 
 
 if ($ARGV[1] == 100) {
-    $pub_config_file = "$bench_location/tests/latency/p1-100.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-100.ini";
 }
 elsif ($ARGV[1] == 250) {
-    $pub_config_file = "$bench_location/tests/latency/p1-250.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-250.ini";
 }
 elsif ($ARGV[1] == 500) {
-    $pub_config_file = "$bench_location/tests/latency/p1-500.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-500.ini";
 }
 elsif ($ARGV[1] == 1000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-1000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-1000.ini";
 }
 elsif ($ARGV[1] == 2500) {
-    $pub_config_file = "$bench_location/tests/latency/p1-2500.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-2500.ini";
 }
 elsif ($ARGV[1] == 5000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-5000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-5000.ini";
 }
 elsif ($ARGV[1] == 8000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-8000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-8000.ini";
 }
 elsif ($ARGV[1] == 16000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-16000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-16000.ini";
 }
 elsif ($ARGV[1] == 32000) {
-    $pub_config_file = "$bench_location/tests/latency/p1-32000.ini ";
+    $pub_config_file = "$bench_location/tests/latency/p1-32000.ini";
 }
 
 
@@ -135,11 +150,13 @@ if ($ARGV[0] eq 'udp') {
     # trans_config_file assigned after determining cross host identity
     mkdir "udp", 0777 unless -d "udp";
     chdir "udp";
+    remove_reliable(\$pub_config_file, \$sub_config_file);
 }
 elsif ($ARGV[0] eq 'multi-be') {
     $trans_config_file = "$bench_location/etc/transport-multi-be.ini ";
     mkdir "multi-be", 0777 unless -d "multi-be";
     chdir "multi-be";
+    remove_reliable(\$pub_config_file, \$sub_config_file);
 }
 elsif ($ARGV[0] eq 'multi-rel') {
     $trans_config_file = "$bench_location/etc/transport-multi-rel.ini ";
@@ -156,8 +173,10 @@ else {
 }
 
 
-$CS = new PerlDDS::Cross_Sync (1, PerlACE::random_port(), PerlACE::random_port()
-                        , $pub_config_file, $sub_config_file, "../test_list.txt");
+my $CS = new PerlDDS::Cross_Sync(1, PerlACE::random_port(),
+                                 PerlACE::random_port(),
+                                 $pub_config_file, $sub_config_file,
+                                 "../test_list.txt");
 if (!$CS) {
     print "Crossplatform test pre-reqs not met. Skipping...\n";
     exit 0;
@@ -173,8 +192,8 @@ if ($role == -1) {
     exit -1;
 }
 
-@ports = $CS->boot_ports ();
-my($port1) = 10001 + @ports[0];
+my @ports = $CS->boot_ports ();
+my($port1) = 10001 + $ports[0];
 my $dcpsrepo_ior = "repo.ior";
 my $repo_host;
 if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
@@ -187,7 +206,7 @@ my $common_args = "-P -h $repo_host:$port1 -i $trans_config_file ";
 if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     unlink $dcpsrepo_ior;
 
-    $Publisher = PerlDDS::create_process
+    my $Publisher = PerlDDS::create_process
           ("$bench_location/bin/run_test",
            "$common_args -t $run_time -S -s $pub_config_file");
 
@@ -207,7 +226,7 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
         exit 1;
     }
 
-    $PublisherResult = $Publisher->WaitKill ($run_time + 60);
+    my $PublisherResult = $Publisher->WaitKill ($run_time + 60);
     if ($PublisherResult != 0) {
         print STDERR "ERROR: publisher returned $PublisherResult \n";
         $status = 1;
@@ -215,14 +234,14 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
 
     unlink $dcpsrepo_ior;
 } else {
-    $Subscriber = PerlDDS::create_process
+    my $Subscriber = PerlDDS::create_process
           ("$bench_location/bin/run_test",
            "$common_args -t $run_time -s $sub_config_file");
 
     print $Subscriber->CommandLine(). "\n";
     $Subscriber->Spawn ();
 
-    $SubscriberResult = $Subscriber->WaitKill ($run_time + 60);
+    my $SubscriberResult = $Subscriber->WaitKill ($run_time + 60);
     if ($SubscriberResult != 0) {
         print STDERR "ERROR: subscriber returned $SubscriberResult \n";
         $status = 1;

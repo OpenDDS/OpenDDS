@@ -4,7 +4,7 @@
 #include <dds/DCPS/WaitSet.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include "model/ExchangeTraits.h"
@@ -87,9 +87,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     using OpenDDS::Model::ExchangeLib::Elements;
 
     DDS::TopicDescription_var tdv(model.topic(Elements::Participants::FeedConsumption,
-                                             Elements::Topics::Trades));
+                                             Elements::Topics::ExchangeLib__Trades));
     DDS::TopicDescription_var qdv(model.topic(Elements::Participants::FeedConsumption,
-                                             Elements::Topics::Quotes));
+                                             Elements::Topics::ExchangeLib__Quotes));
     DDS::DataReader_var reader = model.reader(Elements::DataReaders::MatchReader);
 
     DDS::DataReaderListener_var listener(new ReaderListener(disposed));

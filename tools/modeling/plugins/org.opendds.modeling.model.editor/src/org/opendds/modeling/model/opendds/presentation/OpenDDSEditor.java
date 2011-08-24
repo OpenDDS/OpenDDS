@@ -720,12 +720,12 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 		adapterFactory.addAdapterFactory(new QoSItemProviderAdapterFactory());
 		adapterFactory
 				.addAdapterFactory(new TopicsItemProviderAdapterFactory());
-		adapterFactory.addAdapterFactory(new TypesItemProviderAdapterFactory());
 		adapterFactory.addAdapterFactory(new DCPSItemProviderAdapterFactory());
 		adapterFactory
 				.addAdapterFactory(new ApplicationItemProviderAdapterFactory());
 		adapterFactory
 				.addAdapterFactory(new EnumerationsItemProviderAdapterFactory());
+		adapterFactory.addAdapterFactory(new TypesItemProviderAdapterFactory());
 		adapterFactory
 				.addAdapterFactory(new ReflectiveItemProviderAdapterFactory());
 

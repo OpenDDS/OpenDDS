@@ -92,6 +92,8 @@ public:
 
   const char* type_name() const;
 
+  virtual void transport_config(const TransportConfig_rch& cfg);
+
 private:
   /// The topic qos
   DDS::TopicQos                qos_;

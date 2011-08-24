@@ -27,11 +27,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   TheParticipantFactoryWithArgs(argc, argv);
   application.processEvents();
 
-  // Load the SimpleTcp transport library as we know that we will be
+  // Load the Tcp transport library as we know that we will be
   // using it.
   ACE_Service_Config::process_directive(
-    ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
-    ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"")
+    ACE_TEXT("dynamic OpenDDS_Tcp Service_Object * ")
+    ACE_TEXT("OpenDDS_Tcp:_make_TcpLoader()")
   );
   application.processEvents();
 
