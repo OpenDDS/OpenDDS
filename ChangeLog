@@ -1,3 +1,12 @@
+Thu Aug 25 18:55:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerTopics.opendds:
+
+          Fix and test case for RT14906 Support transitive topic references
+          in same directory.
+
 Wed Aug 24 22:29:27 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
@@ -27,7 +36,7 @@ Mon Aug 22 19:01:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
 
-          remove CORBA::string_dup of literals, and keep them in const char* 
+          remove CORBA::string_dup of literals, and keep them in const char*
           arrays.
 
 Fri Aug 19 16:10:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
