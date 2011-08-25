@@ -15,6 +15,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 #include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
 
@@ -66,6 +67,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  int result = 0;
   ACE_DEBUG ((LM_DEBUG, "(%P|%t) subscriber main\n"));
   try
     {
@@ -190,6 +192,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
+      DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
+      DDS::DataReader_var bitdr =
+        builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+      listener_servant->set_builtin_datareader(bitdr.in());
+
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
@@ -257,6 +264,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
+      if (listener_servant->builtin_read_errors()) {
+        cerr << "subscriber: Built in topic read failure." << endl;
+        result = 1;
+      }
+
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
       }
@@ -273,5 +285,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  return 0;
+  return result;
 }

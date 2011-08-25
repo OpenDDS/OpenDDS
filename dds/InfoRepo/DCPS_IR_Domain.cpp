@@ -560,6 +560,41 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
+#if defined (DDS_HAS_MINIMUM_BIT)
+int DCPS_IR_Domain::reassociate_built_in_topic_pubs()
+{
+  return 1;
+}
+#else
+int DCPS_IR_Domain::reassociate_built_in_topic_pubs()
+{
+  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DCPS_IR_Domain::reassociate_built_in_topic_pubs() ")
+               ACE_TEXT(" Re-associating Built In Topics for domain %d\n"),
+               id_));
+  }
+
+  DCPS_IR_Participant_Map::iterator participantIter = participants_.begin();
+  DCPS_IR_Participant_Map::iterator end = participants_.end();
+  while (participantIter != end 
+         && !participantIter->second->isBitPublisher() ) {
+    participantIter++;
+  }
+
+  if (participantIter != end) {
+    for (DCPS_IR_Topic_Map::const_iterator topicIter
+           = participantIter->second->topics().begin();
+           topicIter != participantIter->second->topics().end();
+           ++topicIter) {
+      topicIter->second->reassociate_all_publications();
+    }
+  }
+
+  return 0;
+}
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
 int DCPS_IR_Domain::init_built_in_topics_topics()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)

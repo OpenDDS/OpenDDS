@@ -134,6 +134,12 @@ public:
   /// Cleans up the Built-In Topic structures
   int cleanup_built_in_topics();
 
+  /// Reassociate the Built-In Topic datawriters
+  /// This needs to be called after reincarnating from persistence and 
+  /// before the run begins
+  /// Returns 0 (zero) if successful
+  int reassociate_built_in_topic_pubs();
+
   /// Publish the Built-In Topic information
   void publish_participant_bit(DCPS_IR_Participant* participant);
   void publish_topic_bit(DCPS_IR_Topic* topic);
