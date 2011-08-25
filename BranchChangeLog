@@ -1,3 +1,9 @@
+Thu Aug 25 22:11:16 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/dissector/sample_dissector.cpp:
+
+          Updated to account for CDR-compliant wchar and wstring serialization.
+
 Thu Aug 25 21:51:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Serializer/Serializer.mpc:
