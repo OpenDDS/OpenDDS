@@ -1,3 +1,18 @@
+Thu Aug 25 23:30:25 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+ 
+          Cleaned up extra whitespace.
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+
+          Marked the subscriber as requiring built_in_topics
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+
+          Removed unnecessary constructor call.
+
 Thu Aug 25 18:55:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:

@@ -577,7 +577,7 @@ int DCPS_IR_Domain::reassociate_built_in_topic_pubs()
 
   DCPS_IR_Participant_Map::iterator participantIter = participants_.begin();
   DCPS_IR_Participant_Map::iterator end = participants_.end();
-  while (participantIter != end 
+  while (participantIter != end
          && !participantIter->second->isBitPublisher() ) {
     participantIter++;
   }

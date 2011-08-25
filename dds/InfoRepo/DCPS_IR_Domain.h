@@ -134,7 +134,7 @@ public:
   int cleanup_built_in_topics();
 
   /// Reassociate the Built-In Topic datawriters
-  /// This needs to be called after reincarnating from persistence and 
+  /// This needs to be called after reincarnating from persistence and
   /// before the run begins
   /// Returns 0 (zero) if successful
   int reassociate_built_in_topic_pubs();

@@ -14,8 +14,7 @@ DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
     publication_handle_ (::DDS::HANDLE_NIL),
     post_restart_publication_handle_ (::DDS::HANDLE_NIL),
-    builtin_read_error_(false),
-    builtin_(::DDS::HANDLE_NIL)
+    builtin_read_error_(false)
 {
 }
 
