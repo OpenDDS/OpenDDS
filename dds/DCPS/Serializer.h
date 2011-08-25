@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_SERIALIZER_H
 
 #include "ace/CDR_Base.h"
+#include "ace/CDR_Stream.h"
 #include "dcps_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -69,22 +70,16 @@ public:
   /// Examine byte swaping behavior.
   bool swap_bytes() const;
 
-  /// Establish alignment behavior.
-  void alignment(Alignment align);
-
   /// Examine alignment behavior.
   Alignment alignment() const;
 
   /// Examine the state of the stream abstraction.
   bool good_bit() const;
-#ifndef RTPS
-  void good_bit(bool b) { good_bit_ = b; }
-#endif
 
-  /// Read a C string.
+  /// Read a narrow string.
   void read_string(ACE_CDR::Char*& dest);
 
-  /// Read a WChar string.
+  /// Read a wide string.
   void read_string(ACE_CDR::WChar*& dest);
 
   /**
@@ -93,77 +88,133 @@ public:
    * Return @c false on failure and @c true on success.
    */
   //@{ @name Read basic IDL types arrays
-  ACE_CDR::Boolean read_boolean_array(ACE_CDR::Boolean* x,
-                                      ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_char_array(ACE_CDR::Char* x,
-                                   ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_wchar_array(ACE_CDR::WChar* x,
-                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_octet_array(ACE_CDR::Octet* x,
-                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_short_array(ACE_CDR::Short* x,
-                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_ushort_array(ACE_CDR::UShort* x,
-                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_long_array(ACE_CDR::Long* x,
-                                   ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_ulong_array(ACE_CDR::ULong* x,
-                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_longlong_array(ACE_CDR::LongLong* x,
-                                       ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_ulonglong_array(ACE_CDR::ULongLong* x,
-                                        ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_float_array(ACE_CDR::Float* x,
-                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_double_array(ACE_CDR::Double* x,
-                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean read_longdouble_array(ACE_CDR::LongDouble* x,
-                                         ACE_CDR::ULong length);
+  bool read_boolean_array(ACE_CDR::Boolean* x, ACE_CDR::ULong length);
+  bool read_char_array(ACE_CDR::Char* x, ACE_CDR::ULong length);
+  bool read_wchar_array(ACE_CDR::WChar* x, ACE_CDR::ULong length);
+  bool read_octet_array(ACE_CDR::Octet* x, ACE_CDR::ULong length);
+  bool read_short_array(ACE_CDR::Short* x, ACE_CDR::ULong length);
+  bool read_ushort_array(ACE_CDR::UShort* x, ACE_CDR::ULong length);
+  bool read_long_array(ACE_CDR::Long* x, ACE_CDR::ULong length);
+  bool read_ulong_array(ACE_CDR::ULong* x, ACE_CDR::ULong length);
+  bool read_longlong_array(ACE_CDR::LongLong* x, ACE_CDR::ULong length);
+  bool read_ulonglong_array(ACE_CDR::ULongLong* x, ACE_CDR::ULong length);
+  bool read_float_array(ACE_CDR::Float* x, ACE_CDR::ULong length);
+  bool read_double_array(ACE_CDR::Double* x, ACE_CDR::ULong length);
+  bool read_longdouble_array(ACE_CDR::LongDouble* x, ACE_CDR::ULong length);
   //@}
 
   /// Note: the portion written starts at x and ends
   ///    at x + length.
   /// The length is *NOT* stored into the CDR stream.
   //@{ @name Array write operations
-  ACE_CDR::Boolean write_boolean_array(const ACE_CDR::Boolean* x,
-                                       ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_char_array(const ACE_CDR::Char* x,
-                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_wchar_array(const ACE_CDR::WChar* x,
-                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_octet_array(const ACE_CDR::Octet* x,
-                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_short_array(const ACE_CDR::Short* x,
-                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_ushort_array(const ACE_CDR::UShort* x,
-                                      ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_long_array(const ACE_CDR::Long* x,
-                                    ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_ulong_array(const ACE_CDR::ULong* x,
-                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_longlong_array(const ACE_CDR::LongLong* x,
-                                        ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_ulonglong_array(const ACE_CDR::ULongLong* x,
-                                         ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_float_array(const ACE_CDR::Float* x,
-                                     ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_double_array(const ACE_CDR::Double* x,
-                                      ACE_CDR::ULong length);
-  ACE_CDR::Boolean write_longdouble_array(const ACE_CDR::LongDouble* x,
-                                          ACE_CDR::ULong length);
+  bool write_boolean_array(const ACE_CDR::Boolean* x, ACE_CDR::ULong length);
+  bool write_char_array(const ACE_CDR::Char* x, ACE_CDR::ULong length);
+  bool write_wchar_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length);
+  bool write_octet_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length);
+  bool write_short_array(const ACE_CDR::Short* x, ACE_CDR::ULong length);
+  bool write_ushort_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length);
+  bool write_long_array(const ACE_CDR::Long* x, ACE_CDR::ULong length);
+  bool write_ulong_array(const ACE_CDR::ULong* x, ACE_CDR::ULong length);
+  bool write_longlong_array(const ACE_CDR::LongLong* x, ACE_CDR::ULong length);
+  bool write_ulonglong_array(const ACE_CDR::ULongLong* x, ACE_CDR::ULong length);
+  bool write_float_array(const ACE_CDR::Float* x, ACE_CDR::ULong length);
+  bool write_double_array(const ACE_CDR::Double* x, ACE_CDR::ULong length);
+  bool write_longdouble_array(const ACE_CDR::LongDouble* x, ACE_CDR::ULong length);
   //@}
 
+  // Insertion operators.
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::Char x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::Short x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::UShort x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::Long x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::ULong x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::LongLong x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::ULongLong x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::LongDouble x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::Float x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::Double x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, const ACE_CDR::Char* x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, const ACE_CDR::WChar* x);
+
+  // Using the ACE CDR Stream disambiguators.
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_boolean x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_char x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_wchar x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_octet x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_string x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
+
+  // Extraction operators.
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::Char& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::Short& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::UShort& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::Long& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::ULong& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::LongLong& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::ULongLong& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::LongDouble& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::Float& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::Double& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::Char*& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::WChar*& x);
+
+  // Using the ACE CDR Stream disambiguators.
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_boolean x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_char x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_wchar x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_octet x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_string x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
+
   /// Read from the chain into a destination buffer.
+  // This method doesn't respect alignment, so use with care.
+  // Any of the other public methods (which know the type) are preferred.
   void buffer_read(char* dest, size_t size, bool swap);
 
+private:
   /// Read an array of values from the chain.
   /// NOTE: This assumes that the buffer contains elements that are
   ///       properly aligned.  The buffer must have padding if the
   ///       elements are not naturally aligned; or this routine should
   ///       not be used.
-  void read_array(char* x,
-                  size_t size,
-                  ACE_CDR::ULong length);
+  void read_array(char* x, size_t size, ACE_CDR::ULong length);
+  void read_array(char* x, size_t size, ACE_CDR::ULong length, bool swap);
 
   /// Write to the chain from a source buffer.
   void buffer_write(const char* src, size_t size, bool swap);
@@ -174,14 +225,9 @@ public:
   ///       method.  If padding exists in the array, it will be
   ///       written when _not_ swapping, and will _not_ be written
   ///       when swapping, resulting in corrupted data.
-  void write_array(const char* x,
-                   size_t size,
-                   ACE_CDR::ULong length);
+  void write_array(const char* x, size_t size, ACE_CDR::ULong length);
+  void write_array(const char* x, size_t size, ACE_CDR::ULong length, bool swap);
  
-#ifdef RTPS 
-  ACE_Message_Block* Current() { return current_ ; }
-#endif
-
   /// Align for reading: moves current_->rd_ptr() past the alignment padding.
   /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
   int align_r(size_t alignment);
@@ -191,7 +237,6 @@ public:
   /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
   int align_w(size_t alignment);
 
-private:
   /// Efficient straight copy for quad words and shorter.  This is
   /// an instance method to match the swapcpy semantics.
   void smemcpy(char* to, const char* from, size_t n);
@@ -206,7 +251,10 @@ private:
   /// Implementation of the actual write to the chain.
   size_t dowrite(const char* dest, size_t size, bool swap, size_t offset);
 
+  /// Update alignment state when a cont() chain is followed during a read.
   void align_cont_r();
+
+  /// Update alignment state when a cont() chain is followed during a write.
   void align_cont_w();
 
   /// Currently active message block in chain.
@@ -231,6 +279,15 @@ private:
 
   static const size_t MAX_ALIGN = 8;
   static const char ALIGN_PAD[MAX_ALIGN];
+
+public:
+  static const size_t WCHAR_SIZE = 2; // Serialize wchar as UTF-16BE
+
+#if defined ACE_LITTLE_ENDIAN
+  static const bool SWAP_BE = true;
+#else
+  static const bool SWAP_BE = false;
+#endif
 };
 
 template<typename T> struct KeyOnly {
@@ -249,86 +306,6 @@ template<typename T> struct KeyOnly {
 
 namespace OpenDDS {
 namespace DCPS {
-
-// Insertion operators.
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Char x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Short x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::UShort x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Long x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::ULong x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::LongLong x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::ULongLong x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::LongDouble x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Float x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Double x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, const ACE_CDR::Char* x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, const ACE_CDR::WChar* x);
-
-// Using the ACE CDR Stream disambiguators.
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_boolean x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_char x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_wchar x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_octet x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_string x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
-
-// Extraction operators.
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Char& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Short& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::UShort& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Long& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::ULong& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::LongLong& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::ULongLong& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::LongDouble& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Float& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Double& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Char*& x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::WChar*& x);
-
-// Using the ACE CDR Stream disambiguators.
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_boolean x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_char x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_wchar x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_octet x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_string x);
-OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
 
 // predefined type gen_max_marshaled_size methods
 OpenDDS_Dcps_Export

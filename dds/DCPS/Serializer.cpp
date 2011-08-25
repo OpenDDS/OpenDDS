@@ -110,10 +110,10 @@ Serializer::read_string(ACE_CDR::Char*& dest)
   //
   // Extract the string length.
   //
-  ACE_CDR::ULong length;
+  ACE_CDR::ULong length; // includes the null
   this->buffer_read(reinterpret_cast<char*>(&length), sizeof(ACE_CDR::ULong), this->swap_bytes());
 
-  if (this->good_bit() == false) {
+  if (!this->good_bit_) {
     return;
   }
 
@@ -126,7 +126,7 @@ Serializer::read_string(ACE_CDR::Char*& dest)
     //
     // Allocate the destination.
     //
-    ACE_NEW_NORETURN(dest, ACE_CDR::Char[ length+1]);
+    ACE_NEW_NORETURN(dest, ACE_CDR::Char[length]);
 
     if (dest == 0) {
       this->good_bit_ = false;
@@ -138,22 +138,11 @@ Serializer::read_string(ACE_CDR::Char*& dest)
       this->read_char_array(dest, length);
     }
 
-    if (this->good_bit() == true) {
-      //
-      // Null terminate the string.
-      //
-      dest[length] = '\0';
-
-    } else {
+    if (!this->good_bit_) {
       delete [] dest;
       dest = 0;
     }
   }
-
-  //
-  // Save the status.
-  //
-  this->good_bit_ = (dest != 0);
 }
 
 void
@@ -172,7 +161,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
   this->buffer_read(reinterpret_cast<char*>(&bytecount),
                     sizeof(ACE_CDR::ULong), this->swap_bytes());
 
-  if (this->good_bit() == false) {
+  if (!this->good_bit_) {
     return;
   }
 
@@ -183,23 +172,30 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
   //
   if (bytecount <= this->current_->total_length()) {
 
-    const ACE_CDR::ULong length = bytecount / sizeof(ACE_CDR::WChar);
+    const ACE_CDR::ULong length = bytecount / WCHAR_SIZE;
     //
     // Allocate the destination.
     //
-    ACE_NEW_NORETURN(dest, ACE_CDR::WChar[length+1]);
+    ACE_NEW_NORETURN(dest, ACE_CDR::WChar[length + 1]);
 
     if (dest == 0) {
       this->good_bit_ = false;
-
-    } else {
-      //
-      // Extract the string.
-      //
-      this->read_wchar_array(dest, length);
+      return;
     }
 
-    if (this->good_bit() == true) {
+#if ACE_SIZEOF_WCHAR == 2
+    this->read_array(reinterpret_cast<char*>(dest), WCHAR_SIZE, length, SWAP_BE);
+#else
+    for (size_t i = 0; i < length && this->good_bit_; ++i) {
+      ACE_UINT16 as_utf16;
+      this->buffer_read(reinterpret_cast<char*>(&as_utf16), WCHAR_SIZE, SWAP_BE);
+      if (this->good_bit_) {
+        dest[i] = as_utf16;
+      }
+    }
+#endif
+
+    if (this->good_bit_) {
       //
       // Null terminate the string.
       //
@@ -210,11 +206,6 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
       dest = 0;
     }
   }
-
-  //
-  // Save the status.
-  //
-  this->good_bit_ = (dest != 0);
 }
 
 } // namespace DCPS

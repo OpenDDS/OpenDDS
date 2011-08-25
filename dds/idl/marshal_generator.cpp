@@ -213,8 +213,9 @@ namespace {
           be_global->impl_ <<
             "    length += max_marshaled_size_ulong() + "
             "(seq[i] ? ACE_OS::strlen(seq[i]) : 0)"
-            << ((elem_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar);\n"
-                                     : " + 1;\n");
+            << ((elem_cls & CL_WIDE)
+                ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+                : " + 1;\n");
         } else if (elem_cls & CL_ARRAY) {
           be_global->impl_ <<
             "    " << cxx_elem << "_var tmp_var = " << cxx_elem
@@ -276,7 +277,7 @@ namespace {
         << streamAndCheck(">> length");
       if (!seq->unbounded()) {
         be_global->impl_ <<
-          "  if (length > seq.maximum ()) {\n"
+          "  if (length > seq.maximum()) {\n"
           "    return false;\n"
           "  }\n";
       }
@@ -364,8 +365,9 @@ namespace {
             be_global->impl_ <<
               indent << "length += max_marshaled_size_ulong() + "
               "ACE_OS::strlen(arr" << nfl.index_ << ")"
-              << ((elem_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar);\n"
-                                       : " + 1;\n");
+              << ((elem_cls & CL_WIDE)
+                  ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+                  : " + 1;\n");
           } else if (elem_cls & CL_ARRAY) {
             be_global->impl_ <<
               indent << cxx_elem << "_var tmp_var = " << cxx_elem
@@ -455,8 +457,7 @@ namespace {
   // specified and returns the AST_Type associated with that key.
   // Because the key name can contain indexed arrays and nested
   // structures, things can get interesting.
-  AST_Type* find_type(const std::vector<AST_Field*>& fields,
-                      string key)
+  AST_Type* find_type(const std::vector<AST_Field*>& fields, const string& key)
   {
     string key_base = key;   // the field we are looking for here
     string key_rem;          // the sub-field we will look for recursively
@@ -480,7 +481,7 @@ namespace {
       string field_name = fields[i]->local_name()->get_string();
       if (field_name == key_base) {
         AST_Type* field_type = fields[i]->field_type();
-        if (!is_array && key_rem == "") {
+        if (!is_array && key_rem.empty()) {
           // The requested key field matches this one.  We do not allow
           // arrays (must be indexed specifically) or structs (must
           // identify specific sub-fields).
@@ -609,8 +610,10 @@ namespace {
           break;
         case AST_PredefinedType::PT_short:
         case AST_PredefinedType::PT_ushort:
-        case AST_PredefinedType::PT_wchar:
           size += 2;
+          break;
+        case AST_PredefinedType::PT_wchar:
+          size += 3; // see Serializer::max_marshaled_size_wchar()
           break;
         case AST_PredefinedType::PT_long:
         case AST_PredefinedType::PT_ulong:
@@ -637,7 +640,8 @@ namespace {
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
         AST_String* string_node = dynamic_cast<AST_String*>(type);
-        size += string_node->width() * string_node->max_size()->ev ()->u.ulval;
+        const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
+        size += width * string_node->max_size()->ev()->u.ulval;
         if (type->node_type() == AST_Decl::NT_string) {
           size += 1; // narrow string includes the null terminator
         }
@@ -723,7 +727,8 @@ namespace {
       return "max_marshaled_size_ulong()";
     } else if (fld_cls & CL_STRING) {
       return "max_marshaled_size_ulong() + ACE_OS::strlen(" + qual + ")"
-        + ((fld_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar)" : " + 1");
+        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE"
+                               : " + 1");
     } else if (fld_cls & CL_PRIMITIVE) {
       return "gen_max_marshaled_size(" + getWrapper(qual, type, WD_OUTPUT)
         + ')';

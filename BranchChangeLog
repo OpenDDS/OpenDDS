@@ -1,3 +1,23 @@
+Thu Aug 25 19:21:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+        * dds/idl/marshal_generator.cpp:
+
+          wchar and wstring serialization are now CDR-compliant.
+          Since RTPS leaves the encoding unspecified, we are using UTF-16BE.
+          Systems with ACE_SIZEOF_WCHAR == 4 could pass characters larger than
+          16-bits.  As of now these are errors (surrogate pairs are not used),
+          but in the future this could be implemented.
+          Made (almost) every un-typed method private.
+          Now using regular C++ bool to represent success/failure return values.
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+
+          Cleaned up test output and removed temp code.
+
 Wed Aug 24 21:59:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Serializer.inl:

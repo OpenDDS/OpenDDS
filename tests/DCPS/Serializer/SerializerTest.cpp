@@ -467,7 +467,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   std::cout << "Size of Values: " << sizeof(Values) << std::endl;
   std::cout << "Size of ArrayValues: " << sizeof(ArrayValues) << std::endl;
 
-  std::cout << "*** Alignment = ALIGN_NONE" << std::endl;
+  std::cout << "\n\n*** Alignment = ALIGN_NONE" << std::endl;
   Serializer::Alignment align = Serializer::ALIGN_NONE;
   runTest(expected, expectedArray, true /*swap*/, align);
   runTest(expected, expectedArray, false /*swap*/, align);

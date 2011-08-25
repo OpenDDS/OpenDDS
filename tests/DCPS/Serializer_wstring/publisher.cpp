@@ -27,9 +27,6 @@ using namespace Messenger;
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-
-  cerr << "sizeof(ACE_CDR::WChar): " << sizeof(ACE_CDR::WChar) << endl;
-
   try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
