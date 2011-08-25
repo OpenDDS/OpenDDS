@@ -1,3 +1,11 @@
+Thu Aug 25 21:51:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Serializer/Serializer.mpc:
+        * tests/DCPS/Serializer/AlignmentTest.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Added tests for proper data alignment according to CDR rules.
+
 Thu Aug 25 19:21:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Serializer.h:

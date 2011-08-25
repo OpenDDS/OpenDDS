@@ -383,12 +383,12 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
 {
   ACE_Message_Block* testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
   const char* out = swap ? "" : "OUT";
-  std::cout << std::endl << "STARTING INSERTION OF SINGLE VALUES WITH" << out << " SWAPING" << std::endl;
+  std::cout << std::endl << "STARTING INSERTION OF SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   insertions(testchain, expected, swap, align);
   size_t bytesWritten = testchain->total_length();
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
-  std::cout << "EXTRACTING SINGLE VALUES WITH" << out << " SWAPING" << std::endl;
+  std::cout << "EXTRACTING SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   Values observed;
   extractions(testchain, observed, swap, align);
   if (testchain->total_length()) {
@@ -399,12 +399,12 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
   testchain->release();
 
   testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
-  std::cout << std::endl << "STARTING INSERTION OF ARRAY VALUES WITH" << out << " SWAPING" << std::endl;
+  std::cout << std::endl << "STARTING INSERTION OF ARRAY VALUES WITH" << out << " SWAPPING" << std::endl;
   array_insertions(testchain, expectedArray, ARRAYSIZE, swap, align);
   bytesWritten = testchain->total_length();
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
-  std::cout << "EXTRACTING ARRAY VALUES WITH" << out << " SWAPING" << std::endl;
+  std::cout << "EXTRACTING ARRAY VALUES WITH" << out << " SWAPPING" << std::endl;
   ArrayValues observedArray;
   array_extractions(testchain, observedArray, ARRAYSIZE, swap, align);
   if (testchain->total_length()) {
@@ -415,11 +415,13 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
   testchain->release();
 }
 
+bool runAlignmentTest();
+
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
   const char string[] = "This is a test of the string serialization.";
-  ACE_CDR::WChar* wstring = 0;
+  const ACE_CDR::WChar wstring[] = L"This is a test of the wstring serialization.";
 
   Values expected = { 0x01,
                       0x2345,
@@ -438,7 +440,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                       0x1a,
                       0xb2,
                       const_cast<ACE_CDR::Char*>(string),
-                      wstring
+                      const_cast<ACE_CDR::WChar*>(wstring)
   };
 
   ArrayValues expectedArray;
@@ -472,15 +474,19 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   runTest(expected, expectedArray, true /*swap*/, align);
   runTest(expected, expectedArray, false /*swap*/, align);
 
-  std::cout << "*** Alignment = ALIGN_INITIALIZE" << std::endl;
+  std::cout << "\n\n*** Alignment = ALIGN_INITIALIZE" << std::endl;
   align = Serializer::ALIGN_INITIALIZE;
   runTest(expected, expectedArray, true /*swap*/, align);
   runTest(expected, expectedArray, false /*swap*/, align);
 
-  std::cout << "*** Alignment = ALIGN_CDR" << std::endl;
+  std::cout << "\n\n*** Alignment = ALIGN_CDR" << std::endl;
   align = Serializer::ALIGN_CDR;
   runTest(expected, expectedArray, true /*swap*/, align);
   runTest(expected, expectedArray, false /*swap*/, align);
+
+  if (!runAlignmentTest()) {
+    failed = true;
+  }
 
   if (failed) {
     std::cerr << std::endl << "SerializerTest FAILED" << std::endl;
