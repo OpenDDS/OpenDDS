@@ -1,8 +1,16 @@
+Fri Aug 26 14:52:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerTopics.codegen:
+        * tools/modeling/tests/MessengerSplit/MessengerTopics.opendds:
+
+          Add missing codegen file.  
+          Fix model name in model.
+
 Thu Aug 25 23:30:25 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
         * dds/InfoRepo/DCPS_IR_Domain.h:
- 
+
           Cleaned up extra whitespace.
 
         * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
