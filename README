@@ -14,7 +14,9 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 2.3.
+This directory structure contains OpenDDS 2.3-RT14855-1 a branch of OpenDDS.
+This branch contains the fix for Built-in Topics not reconnecting after
+persistent restart of the DCPS Information Repository.
 
 
 ======================================================================

@@ -1,3 +1,12 @@
+Thu Aug 25 23:36:47 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/Version.h:
+        * PROBLEM-REPORT-FORM:
+        * README:
+        * VERSION:
+
+          Added versioning and comments about the branch.
+
 Thu Aug 25 23:30:25 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
