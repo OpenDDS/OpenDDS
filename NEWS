@@ -1,3 +1,11 @@
+Version 2.3-RT14855-1 of OpenDDS.
+
+- Fixed Builtin Topics reconnecting after a persistent restart of the
+  DCPS_InfoRepo.
+
+
+========================================================================
+
 Version 2.3 of OpenDDS.
 
 - First release of the OpenDDS Modeling SDK, a modeling tool that can be

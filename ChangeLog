@@ -1,3 +1,11 @@
+Mon Aug 29 17:04:47 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * NEWS:
+        * PROBLEM-REPORT-FORM:
+        * VERSION:
+
+          OpenDDS version 2.3-RT14855-1 released.
+
 Thu Aug 25 23:36:47 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/Version.h:
