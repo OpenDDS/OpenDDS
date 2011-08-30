@@ -28,8 +28,13 @@ module OpenDDS
       octet       entityKind;
     };
 
-    const octet ENTITYKIND_BUILTIN_UNKNOWN      = 0xc0;
-    const octet ENTITYKIND_BUILTIN_PARTICIPANT  = 0xc1;
+    const octet ENTITYKIND_BUILTIN_UNKNOWN         = 0xc0;
+    const octet ENTITYKIND_BUILTIN_PARTICIPANT     = 0xc1;
+    const octet ENTITYKIND_BUILTIN_WRITER_WITH_KEY = 0xc2;
+    const octet ENTITYKIND_BUILTIN_WRITER_NO_KEY   = 0xc3;
+    const octet ENTITYKIND_BUILTIN_READER_NO_KEY   = 0xc4;
+    const octet ENTITYKIND_BUILTIN_READER_WITH_KEY = 0xc7;
+
     const octet ENTITYKIND_USER_UNKNOWN         = 0x00;
     const octet ENTITYKIND_USER_WRITER_WITH_KEY = 0x02;
     const octet ENTITYKIND_USER_WRITER_NO_KEY   = 0x03;

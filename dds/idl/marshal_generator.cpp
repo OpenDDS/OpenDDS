@@ -185,8 +185,9 @@ namespace {
         "  if ((size + padding) % 8) {\n"
         "    padding += 4;\n"
         "  }\n";
+    default:
+      return "";
     }
-    return "";
   }
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
@@ -366,8 +367,9 @@ namespace {
     case AST_PredefinedType::PT_double:
     case AST_PredefinedType::PT_longdouble:
       return "8";
+    default:
+      return "";
     }
-    return "";
   }
 
   void gen_array(UTL_ScopedName* name, AST_Array* arr)

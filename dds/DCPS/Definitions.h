@@ -210,7 +210,7 @@ operator>>(Serializer& s, SequenceNumber& x) {
 }
 
 inline void
-gen_find_size(const SequenceNumber& sn, size_t& size, size_t& padding) {
+gen_find_size(const SequenceNumber& /*sn*/, size_t& size, size_t& padding) {
   find_size_ulong(size, padding);
   size += gen_max_marshaled_size(CORBA::Long());
 }

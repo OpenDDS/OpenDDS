@@ -15,71 +15,68 @@
 module OpenDDS {
   module RTPS {
 
+    // OMG Specification formal/2010-11-01 DDS-RTPS v2.1
+    // Section 9.3: "Mapping of the RTPS Types"
+
     typedef DCPS::GuidPrefix_t GuidPrefix_t;
+    // see GUIDPREFIX_UNKNOWN constant in BaseMessageTypes.h
+
     typedef DCPS::EntityId_t EntityId;
+    // see ENTITYID_* constants in BaseMessageTypes.h
+
     typedef DCPS::GUID_t GUID_t;
+    // see GUID_UNKNOWN constant in BaseMessageTypes.h
 
     typedef DCPS::GUIDSeq GUIDSeq;
 
     typedef DDS::OctetSeq OctetSeq;
+    typedef DDS::StringSeq StringSeq;
 
     /* Type used to hold a timestamp. */
-    struct Time_t {
+    struct Time_t { // IETF RFC 1305: time = seconds + fraction / 2^32
       long seconds;
       unsigned long fraction;
     };
+    // see TIME_* constants in BaseMessageTypes.h
     typedef Time_t Timestamp_t;
 
-    typedef octet VIDOctetArray[2];
+    typedef octet OctetArray2[2];
 
-    /* Type used to represent the vendor of the service implementing the RTPS protocol. */
+    /* Type used to represent the vendor of the service
+       implementing the RTPS protocol. */
     struct VendorId_t {
-      VIDOctetArray vendorId;
+      OctetArray2 vendorId;
     };
+    // see VENDORID_* constants in BaseMessageTypes.h
 
     /* Type used to hold sequence numbers. */
     struct SequenceNumber_t {
       long high;
       unsigned long low;
     };
-
-    typedef sequence<long, 8> SNSLongSeq;
-
-    /* SequenceNumberSet SubmessageElements are used as parts of several messages to
-       provide binary information about individual sequence numbers within a range. */
-    /* ***ATTENTION***: requires custom de/serializer */
-    struct SequenceNumberSet {
-      SequenceNumber_t bitmapBase;
-      SNSLongSeq bitmap;
-    };
+    // see SEQUENCENUMBER_UNKNOWN constant in BaseMessageTypes.h
 
     /* Type used to hold fragment numbers. */
     struct FragmentNumber_t {
       unsigned long value;
     };
 
-    typedef sequence<long, 8> FNSLongSeq;
+    typedef octet OctetArray16[16];
 
-    /* FragmentNumberSet SubmessageElements are used to provide binary information
-       about individual fragment numbers within a range. */
-    /* ***ATTENTION***: requires custom de/serializer */
-    struct FragmentNumberSet {
-      FragmentNumber_t bitmapBase;
-      FNSLongSeq bitmap;
-    };
-
-    typedef octet LOctetArray[16];
-
-    /* Type used to represent the addressing information needed to send a message
-       to an RTPS Endpoint */
+    /* Type used to represent the addressing information needed to send a
+       message to an RTPS Endpoint */
     struct Locator_t {
       long kind;
       unsigned long _port;
-      LOctetArray address;
+      OctetArray16 address;
     };
 
-    /* LocatorList is used to specify a list of locators. */
-    typedef sequence<Locator_t, 8> LocatorList;
+    const long LOCATOR_KIND_INVALID = -1;
+    const long LOCATOR_KIND_RESERVED = 0;
+    const long LOCATOR_KIND_UDPv4 = 1;
+    const long LOCATOR_KIND_UDPv6 = 2;
+    const unsigned long LOCATOR_PORT_INVALID = 0;
+    // see LOCATOR_* constants in BaseMessageTypes.h
 
     /* Specialization of Locator_t used to hold UDP IPv4 locators using a more
        compact representation. */
@@ -87,19 +84,28 @@ module OpenDDS {
       unsigned long address;
       unsigned long _port;
     };
+    // see LOCATORUDPv4_INVALID constant in BaseMessageTypes.h
 
     /* Enumeration used to distinguish whether a Topic has defined some fields
-       within to be used as the ‘key’ that identifies data-instances within the
+       within to be used as the 'key' that identifies data-instances within the
        Topic. */
     struct TopicKind_t {
       long value;
     };
+
+    // Constants for the TopicKind_t::value field
+    const short NO_KEY = 1;
+    const short WITH_KEY = 2;
 
     /* Enumeration used to indicate the level of the reliability used for
        communications. */
     struct ReliabilityKind_t {
       long value;
     };
+
+    // Constants for the ReliabilityKind_t::value field
+    const short BEST_EFFORT = 1;
+    const short RELIABLE = 3;
 
     /* Type used to encapsulate a count that is incremented monotonically, used
        to identify message duplicates. */
@@ -112,46 +118,42 @@ module OpenDDS {
       octet major;
       octet minor;
     };
+    // see PROTOCOLVERSION* constants in BaseMessageTypes.h
 
-    typedef octet KHOctetArray[16];
     struct KeyHash_t {
-      KHOctetArray value;
+      OctetArray16 value;
     };
 
-    typedef octet SIOctetArray[4];
+    typedef octet OctetArray4[4];
+
     struct StatusInfo_t {
-      SIOctetArray value;
+      OctetArray4 value;
     };
 
-    /* Type used to uniquely identify a parameter in a parameter list. */
-    struct ParameterId_t {
-      short value;
-    };
-
-    typedef string<256> CFPBoundedString;
-    typedef sequence<string> CFPStringSeq;
+    typedef string<256> String256;
 
     /* information to enable content filtering */
     struct ContentFilterProperty_t {
-      CFPBoundedString contentFilteredTopicName;
-      CFPBoundedString relatedTopicName;
-      CFPBoundedString filterClassName;
+      String256 contentFilteredTopicName;
+      String256 relatedTopicName;
+      String256 filterClassName;
       string filterExpression;
-      CFPStringSeq expressionParameters;
+      StringSeq expressionParameters;
     };
 
     /* For each filter signature, the results indicate whether the
        sample passed the filter. */
     typedef sequence<long> FilterResult_t;
 
-    /* A list of filters that were applied to the sample. */
+    /* A list of filters that were applied to the sample.
+       See section 9.6.3.1 for the signature-generation algorithm. */
     typedef long FilterSignature_t[4];
 
-    typedef sequence<FilterSignature_t> CFIFilterSignatureSeq;
+    typedef sequence<FilterSignature_t> FilterSignatureSeq;
 
     struct ContentFilterInfo_t {
       FilterResult_t filterResult;
-      CFIFilterSignatureSeq filterSignatures;
+      FilterSignatureSeq filterSignatures;
     };
 
     struct Property_t {
@@ -159,17 +161,26 @@ module OpenDDS {
       string value;
     };
 
+    typedef sequence<Property_t> PropertySeq; // used in PID_PROPERTY_LIST
+
     struct EntityName_t {
       string name;
     };
 
-    /* requires custom de/marshalling */
+    /* Type used to uniquely identify a parameter in a parameter list. */
+    struct ParameterId_t {
+      short value;
+    };
+    // see PID_* constants in BaseMessageTypes.h
+
+    /* requires custom de/marshalling as part of ParameterList */
     struct Parameter {
       ParameterId_t parameterId;
       OctetSeq value;
     };
 
     /* contains a list of Parameters, terminated with a sentinel */
+    /* requires custom de/marshalling: see 9.4.2.11 */
     typedef sequence<Parameter> ParameterList;
 
     struct OriginalWriterInfo_t {
@@ -179,35 +190,30 @@ module OpenDDS {
     };
 
     typedef unsigned long BuiltinEndpointSet_t;
-
-    /* ***ATTENTION***: Not sure how best to represent SerializedPayload */
-    typedef OctetSeq SerializedPayload_t;
-
-    const long LOCATOR_KIND_INVALID = -1;
-    const unsigned long LOCATOR_PORT_INVALID = 0;
-    const long LOCATOR_KIND_RESERVED = 0;
-    const long LOCATOR_KIND_UDPv4 = 1;
-    const long LOCATOR_KIND_UDPv6  = 2;
-
-    const short NO_KEY = 1;
-    const short WITH_KEY = 2;
-
-    const short BEST_EFFORT = 1;
-    const short RELIABLE = 3;
-
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER = 0x00000001 << 0;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR = 0x00000001 << 1;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER = 0x00000001 << 2;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR = 0x00000001 << 3;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER = 0x00000001 << 4;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR = 0x00000001 << 5;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER = 0x00000001 << 6;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR = 0x00000001 << 7;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER = 0x00000001 << 8;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR = 0x00000001 << 9;
-    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER = 0x00000001 << 10;
-    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER = 0x00000001 << 11;
-
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER =
+      1 << 0;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR =
+      1 << 1;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER =
+      1 << 2;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR =
+      1 << 3;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER =
+      1 << 4;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR =
+      1 << 5;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER =
+      1 << 6;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR =
+      1 << 7;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER =
+      1 << 8;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR =
+      1 << 9;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER =
+      1 << 10;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER =
+      1 << 11;
   };
 };
 

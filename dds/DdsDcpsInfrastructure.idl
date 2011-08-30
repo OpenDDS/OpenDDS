@@ -571,22 +571,26 @@ module DDS {
 
     // ----------------------------------------------------------------------
 #if !defined (DDS_HAS_MINIMUM_BIT)
-
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::ParticipantBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[0]"
 #pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[1]"
 #pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[2]"
+#endif
+
     struct ParticipantBuiltinTopicData {
       BuiltinTopicKey_t key;
       UserDataQosPolicy user_data;
     };
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[0]"
 #pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[1]"
 #pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[2]"
+#endif
+
     struct TopicBuiltinTopicData {
                 BuiltinTopicKey_t key;
                 string name;
@@ -606,11 +610,13 @@ module DDS {
                 TopicDataQosPolicy topic_data;
                 };
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::PublicationBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[0]"
 #pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[1]"
 #pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[2]"
+#endif
     struct PublicationBuiltinTopicData {
                 BuiltinTopicKey_t key;
                 BuiltinTopicKey_t participant_key;
@@ -633,11 +639,13 @@ module DDS {
                 GroupDataQosPolicy group_data;
                 };
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 // These pragmas are OpenDDS-specific.
 #pragma DCPS_DATA_TYPE "DDS::SubscriptionBuiltinTopicData"
 #pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[0]"
 #pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[1]"
 #pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[2]"
+#endif
     struct SubscriptionBuiltinTopicData {
                 BuiltinTopicKey_t key;
                 BuiltinTopicKey_t participant_key;
@@ -657,8 +665,6 @@ module DDS {
                 TopicDataQosPolicy topic_data;
                 GroupDataQosPolicy group_data;
                 };
-
-#endif /* !defined (DDS_HAS_MINIMUM_BIT) */
 
     // ----------------------------------------------------------------------
     local interface Entity {

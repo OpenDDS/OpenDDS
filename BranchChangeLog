@@ -1,3 +1,35 @@
+Tue Aug 30 22:27:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+
+          Updated to version 2.1 of RTPS spec.
+          Not much has changed in this area.
+
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Updated RTPS structure and constant definitions.
+
+        * dds/DdsDcpsGuid.idl:
+
+          Added more ENTITYKIND_BUILTIN_* constants from RTPS spec.
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Even with DDS_HAS_MINIMUM_BIT, RTPS needs to see the Built-In Topic
+          struct definitions for use with RTPS discovery.
+
+        * dds/DCPS/Definitions.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed warnings.
+
+        * java/dds/OpenDDS/DCPS:
+
+          Ignored Java files generated from DdsDcpsGuid.idl (svn:ignore only).
+
 Tue Aug 30 14:05:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
