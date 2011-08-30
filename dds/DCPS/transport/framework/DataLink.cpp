@@ -568,7 +568,7 @@ OpenDDS::DCPS::DataLink::create_control(char submessage_id,
 
   DataSampleHeader header;
 
-  header.byte_order_ = TAO_ENCAP_BYTE_ORDER;
+  header.byte_order_ = ACE_CDR_BYTE_ORDER;
   header.message_id_ = TRANSPORT_CONTROL;
   header.submessage_id_ = submessage_id;
   header.message_length_ = static_cast<ACE_UINT32>(data->total_length());
@@ -691,7 +691,7 @@ OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
   RepoId publication = GUID_UNKNOWN;
   Serializer serializer(
     sample.sample_,
-    sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
   serializer >> publication;
 
   TransportSendListener* listener;

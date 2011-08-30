@@ -66,8 +66,8 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Implementation-specific sub-message Ids.
   char submessage_id_;
 
-  /// 0 -  Message encoded using little-endian byte order.
-  /// 1 -  Message encoded using network byte order.
+  /// 0 -  Message encoded using big-endian byte order. (see ace/CDR_Base.h)
+  /// 1 -  Message encoded using little-endian byte order.
   bool byte_order_ : 1;
 
   /// The flag indicates the sample belongs to a coherent

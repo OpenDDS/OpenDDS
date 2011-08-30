@@ -1447,7 +1447,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     DDS::Duration_t delay;
     Serializer serializer(
       sample.sample_,
-      sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+      sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
     SequenceNumber ack;
     serializer >> ack;
     serializer >> delay;
@@ -1508,7 +1508,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     Serializer serializer(
-      sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+      sample.sample_, sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
     serializer >> control;
 
     if (DCPS_debug_level > 0) {
@@ -1642,14 +1642,15 @@ DataReaderImpl::send_sample_ack(
   SequenceNumber sequence,
   DDS::Time_t when)
 {
-  static const size_t dataSize = gen_find_size(sequence)
-                                 + gen_find_size(publication);
+  size_t dataSize = 0, padding = 0;
+  gen_find_size(sequence, dataSize, padding);
+  gen_find_size(publication, dataSize, padding);
 
   ACE_Message_Block* data;
   ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
 
   bool doSwap    = this->swap_bytes();
-  bool byteOrder = (doSwap? !TAO_ENCAP_BYTE_ORDER: TAO_ENCAP_BYTE_ORDER);
+  bool byteOrder = doSwap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
 
   Serializer serializer(data, doSwap);
   serializer << publication;

@@ -172,6 +172,23 @@ namespace {
       idt + "}\n";
   }
 
+  string checkAlignment(AST_Type* elem)
+  {
+    // At this point the stream must be 4-byte aligned (from the sequence
+    // length), but it might need to be 8-byte aligned for primitives > 4.
+    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
+    case AST_PredefinedType::PT_longlong:
+    case AST_PredefinedType::PT_ulonglong:
+    case AST_PredefinedType::PT_double:
+    case AST_PredefinedType::PT_longdouble:
+      return
+        "  if ((size + padding) % 8) {\n"
+        "    padding += 4;\n"
+        "  }\n";
+    }
+    return "";
+  }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -190,45 +207,49 @@ namespace {
     }
     string cxx_elem = scoped(elem->name());
     {
-      Function find_size("gen_find_size", "size_t");
+      Function find_size("gen_find_size", "void");
       find_size.addArg("seq", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
       find_size.endArgs();
+      be_global->impl_ <<
+        "  find_size_ulong(size, padding);\n";
       if (elem_cls & CL_ENUM) {
-        be_global->impl_ << "  return max_marshaled_size_ulong() + "
-          "seq.length() * max_marshaled_size_ulong();\n";
+        be_global->impl_ <<
+          "  size += seq.length() * max_marshaled_size_ulong();\n";
       } else if (elem_cls & CL_PRIMITIVE) {
-        be_global->impl_ << "  return max_marshaled_size_ulong() + "
-          "seq.length() * " << getMaxSizeExprPrimitive(elem) << ";\n";
+        be_global->impl_ << checkAlignment(elem) <<
+          "  size += seq.length() * " << getMaxSizeExprPrimitive(elem) << ";\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
-          "  return 0; // sequence of objrefs is not marshaled\n";
+          "  // sequence of objrefs is not marshaled\n";
       } else if (elem_cls == CL_UNKNOWN) {
         be_global->impl_ <<
-          "  return 0; // sequence of unknown/unsupported type\n";
+          "  // sequence of unknown/unsupported type\n";
       } else { // String, Struct, Array, Sequence, Union
         be_global->impl_ <<
-          "  size_t length = max_marshaled_size_ulong();\n"
           "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n";
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            "    length += max_marshaled_size_ulong() + "
-            "(seq[i] ? ACE_OS::strlen(seq[i]) : 0)"
+            "    find_size_ulong(size, padding);\n"
+            "    if (seq[i]) {\n"
+            "      size += ACE_OS::strlen(seq[i])"
             << ((elem_cls & CL_WIDE)
                 ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
-                : " + 1;\n");
+                : " + 1;\n") <<
+            "    }\n";
         } else if (elem_cls & CL_ARRAY) {
           be_global->impl_ <<
             "    " << cxx_elem << "_var tmp_var = " << cxx_elem
             << "_dup(seq[i]);\n"
             "    " << cxx_elem << "_forany tmp = tmp_var.inout();\n"
-            "    length += gen_find_size(tmp);\n";
-        } else {
+            "    gen_find_size(tmp, size, padding);\n";
+        } else { // Struct, Sequence, Union
           be_global->impl_ <<
-            "    length += gen_find_size(seq[i]);\n";
+            "    gen_find_size(seq[i], size, padding);\n";
         }
         be_global->impl_ <<
-          "  }\n"
-          "  return length;\n";
+          "  }\n";
       }
     }
     {
@@ -327,6 +348,28 @@ namespace {
     }
   }
 
+  string getAlignment(AST_Type* elem)
+  {
+    if (elem->node_type() == AST_Decl::NT_enum) {
+      return "4";
+    }
+    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
+    case AST_PredefinedType::PT_short:
+    case AST_PredefinedType::PT_ushort:
+      return "2";
+    case AST_PredefinedType::PT_long:
+    case AST_PredefinedType::PT_ulong:
+    case AST_PredefinedType::PT_float:
+      return "4";
+    case AST_PredefinedType::PT_longlong:
+    case AST_PredefinedType::PT_ulonglong:
+    case AST_PredefinedType::PT_double:
+    case AST_PredefinedType::PT_longdouble:
+      return "8";
+    }
+    return "";
+  }
+
   void gen_array(UTL_ScopedName* name, AST_Array* arr)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -345,41 +388,51 @@ namespace {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
     }
     {
-      Function find_size("gen_find_size", "size_t");
+      Function find_size("gen_find_size", "void");
       find_size.addArg("arr", "const " + cxx + "_forany&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  return " << n_elems << " * max_marshaled_size_ulong();\n";
+          "  find_size_ulong(size, padding);\n";
+          if (n_elems > 1) {
+            be_global->impl_ <<
+              "  size += " << n_elems - 1 << " * max_marshaled_size_ulong();\n";
+          }
       } else if (elem_cls & CL_PRIMITIVE) {
+        const string align = getAlignment(elem);
+        if (!align.empty()) {
+          be_global->impl_ <<
+            "  if ((size + padding) % " << align << ") {\n"
+            "    padding += " << align << " - ((size + padding) % " << align
+            << ");\n"
+            "  }\n";
+        }
         be_global->impl_ <<
-          "  return " << n_elems << " * " << getMaxSizeExprPrimitive(elem)
+          "  size += " << n_elems << " * " << getMaxSizeExprPrimitive(elem)
           << ";\n";
       } else { // String, Struct, Array, Sequence, Union
-        be_global->impl_ <<
-          "  size_t length = 0;\n";
-        {
-          string indent = "  ";
-          NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-          if (elem_cls & CL_STRING) {
-            be_global->impl_ <<
-              indent << "length += max_marshaled_size_ulong() + "
-              "ACE_OS::strlen(arr" << nfl.index_ << ")"
-              << ((elem_cls & CL_WIDE)
-                  ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
-                  : " + 1;\n");
-          } else if (elem_cls & CL_ARRAY) {
-            be_global->impl_ <<
-              indent << cxx_elem << "_var tmp_var = " << cxx_elem
-              << "_dup(arr" << nfl.index_ << ");\n" <<
-              indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
-              indent << "length += gen_find_size(tmp);\n";
-          } else {
-            be_global->impl_ <<
-              "    length += gen_find_size(arr" << nfl.index_ << ");\n";
-          }
+        string indent = "  ";
+        NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+        if (elem_cls & CL_STRING) {
+          be_global->impl_ <<
+            indent << "find_size_ulong(size, padding);\n" <<
+            indent << "size += ACE_OS::strlen(arr" << nfl.index_ << ")"
+            << ((elem_cls & CL_WIDE)
+                ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+                : " + 1;\n");
+        } else if (elem_cls & CL_ARRAY) {
+          be_global->impl_ <<
+            indent << cxx_elem << "_var tmp_var = " << cxx_elem
+            << "_dup(arr" << nfl.index_ << ");\n" <<
+            indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
+            indent << "gen_find_size(tmp, size, padding);\n";
+        } else { // Struct, Sequence, Union
+          be_global->impl_ <<
+            indent << "gen_find_size(arr" << nfl.index_
+            << ", size, padding);\n";
         }
-        be_global->impl_ << "  return length;\n";
       }
     }
     {
@@ -548,7 +601,8 @@ namespace {
     throw std::string("Field not found.");
   }
 
-  bool is_bounded_type(AST_Type* type) {
+  bool is_bounded_type(AST_Type* type)
+  {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
     unTypeDef(type);
@@ -595,10 +649,36 @@ namespace {
     return bounded;
   }
 
+  void align(size_t alignment, size_t& size, size_t& padding)
+  {
+    if ((size + padding) % alignment) {
+      padding += alignment - ((size + padding) % alignment);
+    }
+  }
+
+  void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding);
+
+  // Max marshaled size of repeating 'type' 'n' times in the stream
+  // (for an array or sequence)
+  void mms_repeating(AST_Type* type, size_t n, size_t& size, size_t& padding)
+  {
+    if (n > 0) {
+      // 1st element may need padding relative to whatever came before
+      max_marshaled_size(type, size, padding);
+    }
+    if (n > 1) {
+      // subsequent elements may need padding relative to prior element
+      size_t prev_size = size, prev_pad = padding;
+      max_marshaled_size(type, size, padding);
+      size += (n - 2) * (size - prev_size);
+      padding += (n - 2) * (padding - prev_pad);
+    }
+  }
+
   // Should only be called on bounded types (see above function)
-  size_t max_marshaled_size(AST_Type* type) {
+  void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding)
+  {
     unTypeDef(type);
-    size_t size = 0;
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
         AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
@@ -610,6 +690,7 @@ namespace {
           break;
         case AST_PredefinedType::PT_short:
         case AST_PredefinedType::PT_ushort:
+          align(2, size, padding);
           size += 2;
           break;
         case AST_PredefinedType::PT_wchar:
@@ -618,14 +699,17 @@ namespace {
         case AST_PredefinedType::PT_long:
         case AST_PredefinedType::PT_ulong:
         case AST_PredefinedType::PT_float:
+          align(4, size, padding);
           size += 4;
           break;
         case AST_PredefinedType::PT_longlong:
         case AST_PredefinedType::PT_ulonglong:
         case AST_PredefinedType::PT_double:
+          align(8, size, padding);
           size += 8;
           break;
         case AST_PredefinedType::PT_longdouble:
+          align(8, size, padding);
           size += 16;
           break;
         default:
@@ -635,11 +719,14 @@ namespace {
         break;
       }
     case AST_Decl::NT_enum:
+      align(4, size, padding);
       size += 4;
       break;
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
         AST_String* string_node = dynamic_cast<AST_String*>(type);
+        align(4, size, padding);
+        size += 4;
         const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
         size += width * string_node->max_size()->ev()->u.ulval;
         if (type->node_type() == AST_Decl::NT_string) {
@@ -653,7 +740,7 @@ namespace {
           AST_Field** f;
           struct_node->field(f, i);
           AST_Type* field_type = (*f)->field_type();
-          size += max_marshaled_size(field_type);
+          max_marshaled_size(field_type, size, padding);
         }
         break;
       }
@@ -661,7 +748,9 @@ namespace {
         AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
         AST_Type* base_node = seq_node->base_type();
         size_t bound = seq_node->max_size()->ev()->u.ulval;
-        size += 4 + bound * max_marshaled_size(base_node);
+        align(4, size, padding);
+        size += 4;
+        mms_repeating(base_node, bound, size, padding);
         break;
       }
     case AST_Decl::NT_array: {
@@ -672,28 +761,37 @@ namespace {
         for (unsigned long i = 0; i < array_node->n_dims(); i++) {
           array_size *= dims[i]->ev()->u.ulval;
         }
-        size += array_size * max_marshaled_size(base_node);
+        mms_repeating(base_node, array_size, size, padding);
         break;
       }
     case AST_Decl::NT_union: {
         AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-        size += max_marshaled_size(union_node->disc_type());
-        size_t largest_field_size = 0;
+        max_marshaled_size(union_node->disc_type(), size, padding);
+        size_t largest_field_size = 0, largest_field_pad = 0;
+        const size_t starting_size = size, starting_pad = padding;
         for (unsigned long i = 0; i < union_node->nfields(); ++i) {
           AST_Field** f;
           union_node->field(f, i);
           AST_Type* field_type = (*f)->field_type();
-          size_t field_size = max_marshaled_size(field_type);
-          if (field_size > largest_field_size) largest_field_size = field_size;
+          max_marshaled_size(field_type, size, padding);
+          size_t field_size = size - starting_size,
+            field_pad = padding - starting_pad;
+          if (field_size > largest_field_size) {
+            largest_field_size = field_size;
+            largest_field_pad = field_pad;
+          }
+          // rewind:
+          size = starting_size;
+          padding = starting_pad;
         }
         size += largest_field_size;
+        padding += largest_field_pad;
         break;
       }
     default:
       // Anything else should be not here or is unbounded
       break;
     }
-    return size;
   }
 }
 
@@ -723,22 +821,33 @@ namespace {
     unTypeDef(type);
     Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name;
+    const string indent = (prefix == "uni") ? "      " : "  ";
     if (fld_cls & CL_ENUM) {
-      return "max_marshaled_size_ulong()";
+      return indent + "find_size_ulong(size, padding);\n";
     } else if (fld_cls & CL_STRING) {
-      return "max_marshaled_size_ulong() + ACE_OS::strlen(" + qual + ")"
-        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE"
-                               : " + 1");
+      return indent + "find_size_ulong(size, padding);\n" +
+        indent + "size += ACE_OS::strlen(" + qual + ")"
+        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+                               : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
-      return "gen_max_marshaled_size(" + getWrapper(qual, type, WD_OUTPUT)
-        + ')';
+      string align = getAlignment(type);
+      if (!align.empty()) {
+        align =
+          indent + "if ((size + padding) % " + align + ") {\n" +
+          indent + "  padding += " + align + " - ((size + padding) % "
+          + align + ");\n" +
+          indent + "}\n";
+      }
+      return align + 
+        indent + "size += gen_max_marshaled_size(" +
+        getWrapper(qual, type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
-      return "0"; // warning will be issued for the serialize functions
+      return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = name;
       if (fld_cls & CL_ARRAY) {
-        intro += "  " + getArrayForany(prefix.c_str(), name.c_str(),
-                          scoped(typedeff->name())) + '\n';
+        intro += indent + getArrayForany(prefix.c_str(), name.c_str(),
+                                         scoped(typedeff->name())) + '\n';
         fieldref += '_';
         if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
           local.erase(local.size() - 2);
@@ -746,7 +855,8 @@ namespace {
       } else {
         fieldref += '.';
       }
-      return "gen_find_size(" + fieldref + local + ')';
+      return indent +
+        "gen_find_size(" + fieldref + local + ", size, padding);\n";
     }
   }
 
@@ -800,8 +910,10 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
   {
-    Function find_size("gen_find_size", "size_t");
+    Function find_size("gen_find_size", "void");
     find_size.addArg("stru", "const " + cxx + "&");
+    find_size.addArg("size", "size_t&");
+    find_size.addArg("padding", "size_t&");
     find_size.endArgs();
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
@@ -811,11 +923,10 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
           && field_type->node_type() != AST_Decl::NT_pre_defined) {
         be_global->add_referenced(field_type->file_name().c_str());
       }
-      if (i) expr += "\n    + ";
       expr += findSizeCommon(fields[i]->local_name()->get_string(),
                              field_type, "stru", intro);
     }
-    be_global->impl_ << intro << "  return " << expr << ";\n";
+    be_global->impl_ << intro << expr;
   }
   {
     Function insertion("operator<<", "bool");
@@ -864,14 +975,24 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
       max_marsh.addArg("stru", "const " + cxx + "&");
+      max_marsh.addArg("align", "bool");
       max_marsh.endArgs();
-      size_t size = 0;
-      if (is_bounded_struct) {  // If not bounded, return 0.
+      if (is_bounded_struct) {
+        size_t size = 0, padding = 0;
         for (size_t i = 0; i < fields.size(); ++i) {
-          size += max_marshaled_size(fields[i]->field_type());
+          max_marshaled_size(fields[i]->field_type(), size, padding);
         }
+        if (padding) {
+          be_global->impl_
+            << "  return align ? " << size + padding << " : " << size << ";\n";
+        } else {
+          be_global->impl_
+            << "  return " << size << ";\n";
+        }
+      } else { // unbounded
+        be_global->impl_
+          << "  return 0;\n";
       }
-      be_global->impl_ << "  return " << size << ";\n";
     }
 
     // Generate key-related marshaling code
@@ -905,11 +1026,12 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
       max_marsh.addArg("stru", "KeyOnly<const " + cxx + ">");
+      max_marsh.addArg("align", "bool");
       max_marsh.endArgs();
 
-      size_t size = 0;
       if (bounded_key) {  // Only generate a size if the key is bounded
         IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        size_t size = 0, padding = 0;
         for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
           string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
           AST_Type* field_type = 0;
@@ -920,18 +1042,28 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                       << " (" << key_name << "). " << error << std::endl;
             return false;
           }
-          size += max_marshaled_size(field_type);
+          max_marshaled_size(field_type, size, padding);
         }
+        if (padding) {
+          be_global->impl_
+            << "  return align ? " << size + padding << " : " << size << ";\n";
+        } else {
+          be_global->impl_
+            << "  return " << size << ";\n";
+        }
+      } else { // unbounded
+        be_global->impl_ 
+          << "  return 0;\n";
       }
-      be_global->impl_  << "  return " << size << ";\n";
     }
 
     {
-      Function find_size("gen_find_size", "size_t");
+      Function find_size("gen_find_size", "void");
       find_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       string expr, intro;
-      bool first = true;
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
@@ -943,12 +1075,9 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        if (first) first = false;
-        else       expr += "\n    + ";
         expr += findSizeCommon(key_name, field_type, "stru.t", intro);
       }
-      if (first) expr += "0";  // No key, size = 0
-      be_global->impl_ << intro << "  return " << expr << ";\n";
+      be_global->impl_ << intro << expr;
     }
 
     {
@@ -1138,9 +1267,15 @@ namespace {
                                string(namePrefix) + "uni", intro, uni);
         be_global->impl_ <<
           "    {\n" <<
-          (intro.length() ? "    " : "") << intro <<
-          "      " << statementPrefix << " " << expr << ";\n" <<
-          (statementPrefix == string("return") ? "" : "      break;\n") <<
+          (intro.length() ? "    " : "") << intro;
+        if (*statementPrefix) {
+          be_global->impl_ <<
+            "      " << statementPrefix << " " << expr << ";\n" <<
+            (statementPrefix == string("return") ? "" : "      break;\n");
+        } else {
+          be_global->impl_ << expr << "      break;\n";
+        }
+        be_global->impl_<<
           "    }\n";
       }
     }
@@ -1162,17 +1297,26 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
   string cxx = scoped(name); // name as a C++ class
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
-    Function find_size("gen_find_size", "size_t");
+    Function find_size("gen_find_size", "void");
     find_size.addArg("uni", "const " + cxx + "&");
+    find_size.addArg("size", "size_t&");
+    find_size.addArg("padding", "size_t&");
     find_size.endArgs();
+    const string align = getAlignment(discriminator);
+    if (!align.empty()) {
+      be_global->impl_ <<
+        "  if ((size + padding) % " << align << ") {\n"
+        "    padding += " << align << " - ((size + padding) % " << align
+        << ");\n"
+        "  }\n";
+    }
     be_global->impl_ <<
-      "  size_t result = gen_max_marshaled_size(" << wrap_out << ");\n"
+      "  size += gen_max_marshaled_size(" << wrap_out << ");\n"
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
-                               "result +=", "", cxx);
+                               "", "", cxx);
     be_global->impl_ <<
-      "  }\n"
-      "  return result;\n";
+      "  }\n";
   }
   {
     Function insertion("operator<<", "bool");

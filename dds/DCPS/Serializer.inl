@@ -1006,5 +1006,14 @@ ACE_INLINE size_t max_marshaled_size_ulong()
   return sizeof(ACE_CDR::ULong);
 }
 
+ACE_INLINE void find_size_ulong(size_t& size, size_t& padding)
+{
+  const size_t sz = sizeof(ACE_CDR::ULong);
+  if ((size + padding) % sz) {
+    padding += sz - ((size + padding) % sz);
+  }
+  size += sz;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

@@ -858,8 +858,9 @@ DataWriterImpl::AckToken::expected(const RepoId& subscriber) const
 bool
 DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap) const
 {
-  const size_t dataSize = gen_find_size(sequence_)
-                        + gen_find_size(max_wait_);
+  size_t dataSize = 0, padding = 0;
+  gen_find_size(sequence_, dataSize, padding);
+  gen_find_size(max_wait_, dataSize, padding);
 
   ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize), false);
 
@@ -1855,7 +1856,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   DataSampleHeader header_data;
   header_data.message_id_ = message_id;
   header_data.byte_order_ =
-    this->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
+    this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = 0;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   header_data.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
@@ -1919,9 +1920,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   DataSampleHeader header_data;
   header_data.message_id_ = SAMPLE_DATA;
   header_data.byte_order_ =
-    this->swap_bytes()
-    ? !TAO_ENCAP_BYTE_ORDER
-    : TAO_ENCAP_BYTE_ORDER;
+    this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
   header_data.group_coherent_ =
     this->publisher_servant_->qos_.presentation.access_scope
@@ -2002,7 +2001,7 @@ DataWriterImpl::deliver_ack(
 {
   Serializer serializer(
     data,
-    header.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+    header.byte_order_ != ACE_CDR_BYTE_ORDER);
   SequenceNumber ack;
   serializer >> ack;
 

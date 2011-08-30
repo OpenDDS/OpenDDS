@@ -350,6 +350,8 @@ size_t max_marshaled_size_octet();
 /// lengths of strings and sequences are ulong
 OpenDDS_Dcps_Export
 size_t max_marshaled_size_ulong();
+OpenDDS_Dcps_Export
+void find_size_ulong(size_t& size, size_t& padding);
 
 } // namespace DCPS
 } // namespace OpenDDS

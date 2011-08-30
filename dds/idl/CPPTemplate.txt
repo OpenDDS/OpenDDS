@@ -397,20 +397,20 @@ void
   ::<%SCOPED%> data;
   if (OpenDDS::DCPS::gen_is_bounded_size (data))
   {
-    marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (data);
+    marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (data, false);
   }
   else
   {
-    marshaled_size_ =  0;// should use gen_find_size when marshaling
+    marshaled_size_ = 0; // should use gen_find_size when marshaling
   }
   OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko(data);
   if (OpenDDS::DCPS::gen_is_bounded_size (ko))
   {
-    key_marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (ko);
+    key_marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (ko, false);
   }
   else
   {
-    key_marshaled_size_ =  0;// should use gen_find_size when marshaling
+    key_marshaled_size_ = 0; // should use gen_find_size when marshaling
   }
 }
 
@@ -482,21 +482,29 @@ ACE_Message_Block*
     // block.
 
     OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko_instance_data(instance_data);
-    ACE_NEW_RETURN(mb,
-                   ACE_Message_Block(key_marshaled_size_
-                                     ? key_marshaled_size_
-                                     : OpenDDS::DCPS::gen_find_size(ko_instance_data)),
-                   0);
+    size_t effective_size = 0, padding = 0;
+    if (key_marshaled_size_) {
+      effective_size = key_marshaled_size_;
+    } else {
+      OpenDDS::DCPS::gen_find_size(ko_instance_data, effective_size, padding);
+    }
+    ACE_NEW_RETURN(mb, ACE_Message_Block(effective_size), 0);
     ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
     serializer << ko_instance_data;
+
   } else { // OpenDDS::DCPS::FULL_MARSHALING
+    size_t effective_size = 0, padding = 0;
+    if (marshaled_size_) {
+      effective_size = marshaled_size_;
+    } else {
+      OpenDDS::DCPS::gen_find_size(instance_data, effective_size, padding);
+    }
     ACE_NEW_MALLOC_RETURN(mb,
                           static_cast<ACE_Message_Block*>(
                               mb_allocator_->malloc(
                               sizeof(ACE_Message_Block))),
                           ACE_Message_Block(
-                              marshaled_size_ ? marshaled_size_ :
-                                  OpenDDS::DCPS::gen_find_size(instance_data),
+                              effective_size,
                               ACE_Message_Block::MB_DATA,
                               0, //cont
                               0, //data
@@ -1735,7 +1743,7 @@ void
 
   OpenDDS::DCPS::Serializer ser(
     sample.sample_,
-    sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
 
   if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
     ser >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(*data);
@@ -1771,7 +1779,7 @@ void
 
   ::OpenDDS::DCPS::Serializer ser(
     sample.sample_,
-    sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
 
   ser >> data;
 

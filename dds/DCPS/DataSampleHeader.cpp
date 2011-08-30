@@ -135,11 +135,13 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 
   if (flags & CONTENT_FILT_MASK) {
     CORBA::ULong seqLen;
-    const bool swap = (flags & BYTE_ORDER_MASK) != TAO_ENCAP_BYTE_ORDER;
+    const bool swap = (flags & BYTE_ORDER_MASK) != ACE_CDR_BYTE_ORDER;
     if (!mb_peek(seqLen, mb, expected, swap)) {
       return true;
     }
-    expected += sizeof(seqLen) + gen_find_size(GUID_t()) * seqLen;
+    size_t guidsize = 0, padding = 0;
+    gen_find_size(GUID_t(), guidsize, padding);
+    expected += sizeof(seqLen) + guidsize * seqLen;
   }
 
   return len < expected;
@@ -182,7 +184,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   // Set swap_bytes flag to the Serializer if data sample from
   // the publisher is in different byte order.
-  reader.swap_bytes(this->byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  reader.swap_bytes(this->byte_order_ != ACE_CDR_BYTE_ORDER);
 
   reader >> this->message_length_;
 
@@ -192,7 +194,8 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   reader >> this->sequence_;
 
   if (!reader.good_bit()) return;
-  this->marshaled_size_ += gen_find_size(this->sequence_);
+  size_t padding = 0;
+  gen_find_size(this->sequence_, this->marshaled_size_, padding);
 
   reader >> this->source_timestamp_sec_;
 
@@ -219,25 +222,25 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   reader >> this->publication_id_;
 
   if (!reader.good_bit()) return;
-  this->marshaled_size_ += gen_find_size(this->publication_id_);
+  gen_find_size(this->publication_id_, this->marshaled_size_, padding);
 
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
     if (!reader.good_bit()) return;
-    this->marshaled_size_ += gen_find_size(this->publisher_id_);
+    gen_find_size(this->publisher_id_, this->marshaled_size_, padding);
   }
 
   if (this->content_filter_) {
     reader >> this->content_filter_entries_;
     if (!reader.good_bit()) return;
-    this->marshaled_size_ += gen_find_size(this->content_filter_entries_);
+    gen_find_size(this->content_filter_entries_, this->marshaled_size_, padding);
   }
 }
 
 bool
 operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 {
-  Serializer writer(&buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  Serializer writer(&buffer, value.byte_order_ != ACE_CDR_BYTE_ORDER);
 
   writer << value.message_id_;
   writer << value.submessage_id_;
@@ -280,10 +283,15 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 void
 DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 {
-  ACE_Message_Block* optHdr = alloc_msgblock(*mb,
-    guids ? gen_find_size(*guids) : sizeof(CORBA::ULong), false);
+  size_t size = 0, padding = 0;
+  if (guids) {
+    gen_find_size(*guids, size, padding);
+  } else {
+    size = sizeof(CORBA::ULong);
+  }
+  ACE_Message_Block* optHdr = alloc_msgblock(*mb, size, false);
 
-  const bool swap = (TAO_ENCAP_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
+  const bool swap = (ACE_CDR_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
   Serializer ser(optHdr, swap);
   if (guids) {
     ser << *guids;

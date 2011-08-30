@@ -1,3 +1,44 @@
+Tue Aug 30 14:05:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+
+          gen_find_size() and gen_max_marshaled_size() now account for
+          optional alignment.
+          Use ACE_CDR_BYTE_ORDER instead of TAO_ENCAP_BYTE_ORDER.
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/Test.cpp:
+
+          Use CDR alignment for RTPS key hashing.
+
+        * tools/dissector/packet-opendds.cpp:
+
+          Updated for new gen_find_size() function signature.
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Test gen_find_size() and gen_max_marshaled_size() with and without
+          alignment.
+
+        * tests/DCPS/KeyTest/IsBounded.cpp:
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+
+          Updated for new gen_find_size() function signature and CDR-compliant
+          wchar serialization.
+
 Thu Aug 25 22:11:16 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/dissector/sample_dissector.cpp:

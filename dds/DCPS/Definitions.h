@@ -209,9 +209,10 @@ operator>>(Serializer& s, SequenceNumber& x) {
   return true;
 }
 
-inline size_t gen_find_size(const SequenceNumber& sn) {
-  ACE_UNUSED_ARG(sn);
-  return max_marshaled_size_ulong() + gen_max_marshaled_size(CORBA::Long());
+inline void
+gen_find_size(const SequenceNumber& sn, size_t& size, size_t& padding) {
+  find_size_ulong(size, padding);
+  size += gen_max_marshaled_size(CORBA::Long());
 }
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;

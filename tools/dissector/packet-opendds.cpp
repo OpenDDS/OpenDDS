@@ -260,7 +260,9 @@ namespace OpenDDS
       offset += len;
 
       // hf_sequence
-      len = static_cast<gint>(gen_find_size(header.sequence_));
+      size_t size = 0, padding = 0;
+      gen_find_size(header.sequence_, size, padding);
+      len = static_cast<gint>(size);
       proto_tree_add_uint64(ltree, hf_sequence, tvb_, offset, len,
                             gint64(header.sequence_.getValue()));
       offset += len;
@@ -307,7 +309,9 @@ namespace OpenDDS
       offset += len;
 
       // hf_sample_sequence
-      len = static_cast<gint>(gen_find_size(sample.sequence_));
+      size_t size = 0, padding = 0;
+      gen_find_size(sample.sequence_, size, padding);
+      len = static_cast<gint>(size);
       if (sample.message_id_ == SAMPLE_DATA) {
         proto_tree_add_uint64(ltree, hf_sample_sequence, tvb_, offset, len,
                               gint64(sample.sequence_.getValue()));
@@ -347,7 +351,9 @@ namespace OpenDDS
         }
 
       // hf_sample_publication
-      len = static_cast<gint>(gen_find_size(sample.publication_id_));
+      size = 0;
+      gen_find_size(sample.publication_id_, size, padding);
+      len = static_cast<gint>(size);
       const guint8 *data_ptr =
         reinterpret_cast<const guint8*>(&sample.publication_id_);
       if (sample.message_id_ != TRANSPORT_CONTROL)
@@ -362,7 +368,9 @@ namespace OpenDDS
       // hf_sample_publisher
       if (sample.group_coherent_)
         {
-          len = static_cast<gint>(gen_find_size(sample.publisher_id_));
+          size = 0;
+          gen_find_size(sample.publisher_id_, size, padding);
+          len = static_cast<gint>(size);
           data_ptr = reinterpret_cast<const guint8*>(&sample.publisher_id_);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
@@ -379,8 +387,9 @@ namespace OpenDDS
       // hf_sample_content_filt
       if (sample.content_filter_)
         {
-          gint total_len =
-            static_cast<gint>(gen_find_size(sample.content_filter_entries_));
+          size = 0;
+          gen_find_size(sample.content_filter_entries_, size, padding);
+          gint total_len = static_cast<gint>(size);
           len = sizeof(CORBA::ULong);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
@@ -401,7 +410,9 @@ namespace OpenDDS
                   DCPS::RepoIdConverter converter(filter);
                   std::stringstream strm;
                   strm << "filter [" << i << "] = " << converter << std::ends;
-                  len = static_cast<gint>(gen_find_size(filter));
+                  size = 0;
+                  gen_find_size(filter, size, padding);
+                  len = static_cast<gint>(size);
                   proto_tree_add_text (subtree, tvb_, offset, len, "%s",
                                        strm.str().c_str());
                   offset += len;

@@ -13,7 +13,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader()
-  : byte_order_(TAO_ENCAP_BYTE_ORDER),
+  : byte_order_(ACE_CDR_BYTE_ORDER),
     first_fragment_(false),
     last_fragment_(false),
     reserved_(0),
@@ -68,7 +68,7 @@ OpenDDS::DCPS::TransportHeader::swap_bytes() const
 {
   DBG_ENTRY_LVL("TransportHeader","swap_bytes",6);
 
-  return this->byte_order_ != TAO_ENCAP_BYTE_ORDER;
+  return this->byte_order_ != ACE_CDR_BYTE_ORDER;
 }
 
 ACE_INLINE
