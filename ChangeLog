@@ -1,3 +1,9 @@
+Tue Aug 30 14:41:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+
+          Validation error.
+
 Tue Aug 30 13:54:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ConfigTransports/common.cpp:

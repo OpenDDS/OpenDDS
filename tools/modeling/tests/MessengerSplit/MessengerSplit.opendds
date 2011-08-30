@@ -12,7 +12,7 @@
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="false">
-          <topic href="MessengerTopics.opendds#_mcVnwPDxEd-I4rwicuuPOw"/>
+          <topic xsi:type="opendds:topic" href="MessengerTopics.opendds#_mcVnwPDxEd-I4rwicuuPOw"/>
         </readers>
       </subscribers>
     </participants>
