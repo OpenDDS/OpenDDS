@@ -177,12 +177,12 @@
   </target>
 
   <target name="run.tests" depends="staging">
-    <exec osfamily="unix" dir="${staging.dir}" executable="/bin/sh">
+    <exec osfamily="unix" dir="${staging.dir}" executable="/bin/sh" failonerror="${fail.on.test.fail}">
       <arg line="${app.name}.sh"/>
       <arg line="-rqf"/>
       <arg line="../../../../../modeling/tests/"/>
     </exec>
-    <exec osfamily="windows" dir="${staging.dir}" executable="cmd.exe">
+    <exec osfamily="windows" dir="${staging.dir}" executable="cmd.exe" failonerror="${fail.on.test.fail}">
       <arg line="/c"/>
       <arg line="${app.name}.bat"/>
       <arg line="-rqf"/>

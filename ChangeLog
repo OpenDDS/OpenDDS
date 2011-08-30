@@ -1,3 +1,12 @@
+Tue Aug 30 17:25:37 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build-external.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/tests/setup.pl:
+
+          Add supoort to fail fast (default) when ant run.tests taget fails,
+          or use -f arg on setup.pl to force the script to keep running.
+
 Tue Aug 30 14:41:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
