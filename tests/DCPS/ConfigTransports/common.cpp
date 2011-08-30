@@ -136,7 +136,7 @@ assert_negotiated(const Options& opts, const DDS::Entity_ptr e)
 }
 
 bool
-wait_subscription_matched_status(const Options& opts, const DDS::DataReader_ptr r)
+wait_subscription_matched_status(const Options& /*opts*/, const DDS::DataReader_ptr r)
 {
   //  To check the match status ?
   DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};

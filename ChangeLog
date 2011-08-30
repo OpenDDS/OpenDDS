@@ -1,3 +1,9 @@
+Tue Aug 30 13:54:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.cpp:
+
+          More warnings.
+
 Mon Aug 29 14:31:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ConfigTransports/Puller.cpp:
