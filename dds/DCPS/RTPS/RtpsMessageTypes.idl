@@ -29,25 +29,24 @@ module OpenDDS {
     /* SequenceNumberSet SubmessageElements are used as parts of several
        messages to provide binary information about individual sequence numbers
        within a range. */
-    /* ***ATTENTION***: requires custom de/serializer: see 9.4.2.6 */
+    /* custom de/serializer implemented in opendds_idl: see 9.4.2.6 */
     struct SequenceNumberSet {
       SequenceNumber_t bitmapBase;
+      unsigned long numBits;
       LongSeq8 bitmap;
     };
 
     /* FragmentNumberSet SubmessageElements are used to provide binary
        information about individual fragment numbers within a range. */
-    /* ***ATTENTION***: requires custom de/serializer: see 9.4.2.8 */
+    /* custom de/serializer implemented in opendds_idl: see 9.4.2.8 */
     struct FragmentNumberSet {
       FragmentNumber_t bitmapBase;
+      unsigned long numBits;
       LongSeq8 bitmap;
     };
 
     /* LocatorList is used to specify a list of locators. */
     typedef sequence<Locator_t, 8> LocatorList;
-
-    /* requires custom de/serializer (length not seralized, see 9.4.2.12) */
-    typedef OctetSeq SerializedPayload;
 
 
     // ======== 9.4.4 Header ========
@@ -79,8 +78,8 @@ module OpenDDS {
     struct AckNackSubmessage {
       SubmessageHeader smHeader;
         // F = smHeader.flags & 2 (FinalFlag)
-      EntityId readerId;
-      EntityId writerId;
+      EntityId_t readerId;
+      EntityId_t writerId;
       SequenceNumberSet readerSNState;
       Count_t count;
     };
@@ -94,14 +93,16 @@ module OpenDDS {
         // K = smHeader.flags & 8 (KeyFlag)
       unsigned short extraFlags;
       unsigned short octetsToInlineQos; // used by serializer
-      EntityId readerId;
-      EntityId writerId;
+      EntityId_t readerId;
+      EntityId_t writerId;
       SequenceNumber_t writerSN;
       ParameterList inlineQos; // if Q
-      SerializedPayload payload; // if D||K
+      // SerializedPayload payload; // if D||K
+      //   These Submessages correspond to the OpenDDS::DCPS::DataSampleHeader,
+      //   so they do not contain any payload data.
     };
 
-    /* Sent from an RTPS Writer to an RTPS Reader. Wxtends the Data Submessage
+    /* Sent from an RTPS Writer to an RTPS Reader. Extends the Data Submessage
        by enabling the serializedData to be fragmented and sent as multiple
        DataFrag Submessages. */
     struct DataFragSubmessage {
@@ -110,23 +111,25 @@ module OpenDDS {
         // K = smHeader.flags & 4 (KeyFlag)
       unsigned short extraFlags;
       unsigned short octetsToInlineQos; // used by serializer
-      EntityId readerId;
-      EntityId writerId;
+      EntityId_t readerId;
+      EntityId_t writerId;
       SequenceNumber_t writerSN;
       FragmentNumber_t fragmentStartingNum;
       unsigned short fragmentsInSubmessage;
       unsigned short fragmentSize;
       unsigned long sampleSize;
       ParameterList inlineQos; // if Q
-      SerializedPayload payload;
+      // SerializedPayload payload;  // unconditional
+      //   These Submessages correspond to the OpenDDS::DCPS::DataSampleHeader,
+      //   so they do not contain any payload data.
     };
 
     /* Sent from an RTPS Writer to an RTPS Reader. Indicates to the RTPS
        Reader that a range of sequence numbers is no longer relevant. */
     struct GapSubmessage {
       SubmessageHeader smHeader;
-      EntityId readerId;
-      EntityId writerId;
+      EntityId_t readerId;
+      EntityId_t writerId;
       SequenceNumber_t gapStart;
       SequenceNumberSet gapList;
     };
@@ -137,8 +140,8 @@ module OpenDDS {
       SubmessageHeader smHeader;
         // F = smHeader.flags & 2 (FinalFlag)
         // L = smHeader.flags & 4 (LivelinessFlag)
-      EntityId readerId;
-      EntityId writerId;
+      EntityId_t readerId;
+      EntityId_t writerId;
       SequenceNumber_t firstSN;
       SequenceNumber_t lastSN;
       Count_t count;
@@ -148,8 +151,8 @@ module OpenDDS {
        the Writer has available. */
     struct HeartBeatFragSubmessage {
       SubmessageHeader smHeader;
-      EntityId readerId;
-      EntityId writerId;
+      EntityId_t readerId;
+      EntityId_t writerId;
       SequenceNumber_t writerSN;
       FragmentNumber_t lastFragmentNum;
       Count_t count;
@@ -200,8 +203,8 @@ module OpenDDS {
        Writer. */
     struct NackFragSubmessage {
       SubmessageHeader smHeader;
-      EntityId readerId;
-      EntityId writerId;
+      EntityId_t readerId;
+      EntityId_t writerId;
       SequenceNumber_t writerSN;
       FragmentNumberSet fragmentNumberState;
       Count_t count;
@@ -252,13 +255,6 @@ module OpenDDS {
       LocatorSeq defaultUnicastLocatorList;
       Count_t manualLivelinessCount;
     };
-
-    /* Duration_t isn't defined in the PSM. It is used to hold time-differences.
-       Should have at least nano-second resolution.  Table 9.13's row for
-       PID_PARTICIPANT_LEASE_DURATION indicates this a 2-item struct or array,
-       just like Time_t (which does have the needed resolution).  So we'll use
-       Time_t for the Duration datatype. */
-    typedef Time_t Duration_t;
 
    // top-level data type for SPDP
     struct SPDPdiscoveredParticipantData {

@@ -53,10 +53,6 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION_2_0 = { 2, 0 };
     const ProtocolVersion_t PROTOCOLVERSION_2_1 = { 2, 1 };
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_1;
-
-    const ParameterId_t PID_PAD = { 0 };
-    const ParameterId_t PID_SENTINEL = { 1 };
-
   }
 }
 

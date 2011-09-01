@@ -209,6 +209,27 @@ Serializer::good_bit() const
   return this->good_bit_;
 }
 
+ACE_INLINE bool
+Serializer::skip(ACE_CDR::UShort bytes)
+{
+  for (size_t len = bytes; len;) {
+    if (!this->current_) {
+      this->good_bit_ = false;
+      return false;
+    }
+    const size_t cur_len = this->current_->length();
+    if (cur_len <= len) {
+      len -= cur_len;
+      this->current_->rd_ptr(this->current_->wr_ptr());
+      this->align_cont_r();
+    } else {
+      this->current_->rd_ptr(len);
+      break;
+    }
+  }
+  return this->good_bit();
+}
+
 ACE_INLINE void
 Serializer::read_array(char* x, size_t size, ACE_CDR::ULong length)
 {
@@ -219,7 +240,7 @@ ACE_INLINE void
 Serializer::read_array(char* x, size_t size,
                        ACE_CDR::ULong length, bool swap)
 {
-  if (!swap) {
+  if (!swap || size == 1) {
     //
     // No swap, copy direct.  This silently corrupts the data if there is
     // padding in the buffer.
@@ -249,7 +270,7 @@ ACE_INLINE void
 Serializer::write_array(const char* x, size_t size,
                         ACE_CDR::ULong length, bool swap)
 {
-  if (!swap) {
+  if (!swap || size == 1) {
     //
     // No swap, copy direct.
     //
@@ -485,19 +506,9 @@ Serializer::write_longdouble_array(const ACE_CDR::LongDouble* x,
 ACE_INLINE int
 Serializer::align_r(size_t al)
 {
-  size_t len =
+  const size_t len =
     (al - ptrdiff_t(this->current_->rd_ptr()) + this->align_rshift_) % al;
-  while (len) {
-    const size_t cur_len = this->current_->length();
-    if (cur_len <= len) {
-      len -= cur_len;
-      this->current_->rd_ptr(this->current_->wr_ptr());
-      this->align_cont_r();
-    } else {
-      this->current_->rd_ptr(len);
-      len = 0;
-    }
-  }
+  this->skip(static_cast<ACE_CDR::UShort>(len));
   return 0;
 }
 
@@ -507,6 +518,10 @@ Serializer::align_w(size_t al)
   size_t len =
     (al - ptrdiff_t(this->current_->wr_ptr()) + this->align_wshift_) % al;
   while (len) {
+    if (!this->current_) {
+      this->good_bit_ = false;
+      break;
+    }
     const size_t cur_spc = this->current_->space();
     if (cur_spc <= len) {
       len -= cur_spc;
@@ -520,7 +535,7 @@ Serializer::align_w(size_t al)
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, len);
       }
       this->current_->wr_ptr(len);
-      len = 0;
+      break;
     }
   }
   return 0;

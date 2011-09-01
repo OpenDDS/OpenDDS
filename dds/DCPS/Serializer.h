@@ -82,6 +82,11 @@ public:
   /// Read a wide string.
   void read_string(ACE_CDR::WChar*& dest);
 
+  /// Skip the logical rd_ptr() over a given number of bytes.
+  /// This is used by the RTPS protocol to allow reading messages from
+  /// future versions of the spec which may have additional optional fields.
+  bool skip(ACE_CDR::UShort bytes);
+
   /**
    * The buffer @a x must be large enough to contain @a length
    * elements.

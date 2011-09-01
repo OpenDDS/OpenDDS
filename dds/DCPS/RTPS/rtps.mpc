@@ -2,6 +2,12 @@ project : dcps, install {
   sharedname = OpenDDS_Rtps
   dynamicflags = OPENDDS_RTPS_BUILD_DLL
   idlflags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h
+
+  TypeSupport_Files {
+    RtpsBaseMessageTypes.idl
+    RtpsMessageTypes.idl
+  }
 
   specific {
     install_dir = dds/DCPS/RTPS

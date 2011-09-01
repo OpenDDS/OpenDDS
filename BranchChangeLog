@@ -1,3 +1,26 @@
+Thu Sep  1 17:37:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/Test.cpp:
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Completed IDL for RTPS Message types.
+
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+
+          Implemented a skip() function used to read ahead and ignore bytes.
+          read_array() and write_array() don't need to swap if size is 1.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Added special handling for RTPS types that don't follow CDR
+          serialization rules: ParameterList, Parameter, SequenceNumberSet,
+          FragmentNumberSet, DataSubmessage, DataFragSubmessage,
+          InfoReplySubmessage, InfoTimestampSubmessage, InfoReplyIp4Submessage.
+
 Tue Aug 30 22:27:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GuidUtils.h:

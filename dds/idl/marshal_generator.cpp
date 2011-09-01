@@ -12,6 +12,7 @@
 #include "utl_identifier.h"
 
 #include <string>
+#include <map>
 #include <sstream>
 #include <iostream>
 #include <cctype>
@@ -190,11 +191,73 @@ namespace {
     }
   }
 
+  bool isRtpsSpecialSequence(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::ParameterList";
+  }
+
+  bool genRtpsSpecialSequence(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("seq", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    size_t param_size = 0, param_padding = 0;\n"
+        "    gen_find_size(seq[i], param_size, param_padding);\n"
+        "    size += param_size;\n"
+        "    if (size % 4) {\n"
+        "      size += 4 - (size % 4);\n"
+        "    }\n"
+        "  }\n"
+        "  size += 4; /* PID_SENTINEL */\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("seq", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (!(strm << seq[i])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n"
+        "  return (strm << OpenDDS::RTPS::PID_SENTINEL)\n"
+        "    && (strm << OpenDDS::RTPS::PID_PAD);\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("seq", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  while (true) {\n"
+        "    const CORBA::ULong len = seq.length();\n"
+        "    seq.length(len + 1);\n"
+        "    if (!(strm >> seq[len])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    if (seq[len]._d() == OpenDDS::RTPS::PID_SENTINEL) {\n"
+        "      return true;\n"
+        "    }\n"
+        "  }\n";
+    }
+    return true;
+  }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     string cxx = scoped(tdname);
+    if (isRtpsSpecialSequence(cxx)) {
+      genRtpsSpecialSequence(cxx);
+      return;
+    }
     AST_Type* elem = seq->base_type();
     unTypeDef(elem);
     Classification elem_cls = classify(elem);
@@ -903,6 +966,115 @@ namespace {
       return "(strm " + fieldref + local + ')';
     }
   }
+
+  bool isRtpsSpecialStruct(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::SequenceNumberSet"
+      || cxx == "OpenDDS::RTPS::FragmentNumberSet";
+  }
+
+  bool genRtpsSpecialStruct(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  size += 12 + 4 * ((stru.numBits + 31) / 32); // RTPS Custom\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if ((strm << stru.bitmapBase) && (strm << stru.numBits)) {\n"
+        "    const CORBA::ULong M = (stru.numBits + 31) / 32;\n"
+        "    if (stru.bitmap.length() < M) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    for (CORBA::ULong i = 0; i < M; ++i) {\n"
+        "      if (!(strm << stru.bitmap[i])) {\n"
+        "        return false;\n"
+        "      }\n"
+        "    }\n"
+        "    return true;\n"
+        "  }\n"
+        "  return false;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  if ((strm >> stru.bitmapBase) && (strm >> stru.numBits)) {\n"
+        "    const CORBA::ULong M = (stru.numBits + 31) / 32;\n"
+        "    if (M > 8) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    stru.bitmap.length(M);\n"
+        "    for (CORBA::ULong i = 0; i < M; ++i) {\n"
+        "      if (!(strm >> stru.bitmap[i])) {\n"
+        "        return false;\n"
+        "      }\n"
+        "    }\n"
+        "    return true;\n"
+        "  }\n"
+        "  return false;\n";
+    }
+    return true;
+  }
+
+  struct RtpsFieldCustomizer {
+
+    explicit RtpsFieldCustomizer(const string& cxx)
+    {
+      if (cxx == "OpenDDS::RTPS::DataSubmessage") {
+        cst_["inlineQos"] = "stru.smHeader.flags & 2";
+        iQosOffset_ = "16";
+
+      } else if (cxx == "OpenDDS::RTPS::DataFragSubmessage") {
+        cst_["inlineQos"] = "stru.smHeader.flags & 2";
+        iQosOffset_ = "28";
+
+      } else if (cxx == "OpenDDS::RTPS::InfoReplySubmessage") {
+        cst_["multicastLocatorList"] = "stru.smHeader.flags & 2";
+
+      } else if (cxx == "OpenDDS::RTPS::InfoTimestampSubmessage") {
+        cst_["timestamp"] = "!(stru.smHeader.flags & 2)";
+
+      } else if (cxx == "OpenDDS::RTPS::InfoReplyIp4Submessage") {
+        cst_["multicastLocator"] = "stru.smHeader.flags & 2";
+      }
+    }
+
+    string getConditional(const string& field_name) const
+    {
+      if (cst_.empty()) {
+        return "";
+      }
+      std::map<string, string>::const_iterator it = cst_.find(field_name);
+      if (it != cst_.end()) {
+        return it->second;
+      }
+      return "";
+    }
+
+    string preFieldRead(const string& field_name) const
+    {
+      if (cst_.empty() || field_name != "inlineQos" || iQosOffset_.empty()) {
+        return "";
+      }
+      return "strm.skip(stru.octetsToInlineQos - " + iQosOffset_ + ")\n"
+        "    && ";
+    }
+
+    std::map<string, string> cst_;
+    string iQosOffset_;
+  };
 }
 
 bool marshal_generator::gen_struct(UTL_ScopedName* name,
@@ -911,6 +1083,10 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
+  if (isRtpsSpecialStruct(cxx)) {
+    return genRtpsSpecialStruct(cxx);
+  }
+  RtpsFieldCustomizer rtpsCustom(cxx);
   {
     Function find_size("gen_find_size", "void");
     find_size.addArg("stru", "const " + cxx + "&");
@@ -925,8 +1101,15 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
           && field_type->node_type() != AST_Decl::NT_pre_defined) {
         be_global->add_referenced(field_type->file_name().c_str());
       }
-      expr += findSizeCommon(fields[i]->local_name()->get_string(),
-                             field_type, "stru", intro);
+      const string field_name = fields[i]->local_name()->get_string(),
+        cond = rtpsCustom.getConditional(field_name);
+      if (!cond.empty()) {
+        expr += "  if (" + cond + ") {\n  ";
+      }
+      expr += findSizeCommon(field_name, field_type, "stru", intro);
+      if (!cond.empty()) {
+        expr += "  }\n";
+      }
     }
     be_global->impl_ << intro << expr;
   }
@@ -938,8 +1121,16 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (i) expr += "\n    && ";
-      expr += streamCommon(fields[i]->local_name()->get_string(),
-                           fields[i]->field_type(), "<< stru", intro, cxx);
+      const string field_name = fields[i]->local_name()->get_string(),
+        cond = rtpsCustom.getConditional(field_name);
+      if (!cond.empty()) {
+        expr += "(!(" + cond + ") || ";
+      }
+      expr += streamCommon(field_name, fields[i]->field_type(),
+                           "<< stru", intro, cxx);
+      if (!cond.empty()) {
+        expr += ")";
+      }
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -951,8 +1142,17 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (i) expr += "\n    && ";
-      expr += streamCommon(fields[i]->local_name()->get_string(),
-                           fields[i]->field_type(), ">> stru", intro, cxx);
+      const string field_name = fields[i]->local_name()->get_string(),
+        cond = rtpsCustom.getConditional(field_name);
+      if (!cond.empty()) {
+        expr += rtpsCustom.preFieldRead(field_name);
+        expr += "(!(" + cond + ") || ";
+      }
+      expr += streamCommon(field_name, fields[i]->field_type(),
+                           ">> stru", intro, cxx);
+      if (!cond.empty()) {
+        expr += ")";
+      }
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -1226,12 +1426,24 @@ namespace {
   void generateSwitchBodyForUnion(CommonFn commonFn,
     const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
     const char* statementPrefix, const char* namePrefix = "",
-    const string& uni = "")
+    const string& uni = "", bool forceDisableDefault = false)
   {
     size_t n_labels = 0;
     bool has_default = false;
     for (size_t i = 0; i < branches.size(); ++i) {
       AST_UnionBranch* branch = branches[i];
+      if (forceDisableDefault) {
+        bool foundDefault = false;
+        for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+          if (branch->label(j)->label_kind() == AST_UnionLabel::UL_default) {
+            foundDefault = true;
+          }
+        }
+        if (foundDefault) {
+          has_default = true;
+          continue;
+        }
+      }
       generateBranchLabels(branch, discriminator, n_labels, has_default);
       string intro, name = branch->local_name()->get_string();
       if (namePrefix == string(">> ")) {
@@ -1288,6 +1500,95 @@ namespace {
         "    break;\n";
     }
   }
+
+  bool isRtpsSpecialUnion(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::Parameter";
+  }
+
+  bool genRtpsSpecialUnion(const string& cxx, AST_Type* discriminator,
+                           const std::vector<AST_UnionBranch*>& branches)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("uni", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
+                                 "", "", cxx);
+      be_global->impl_ <<
+        "  }\n"
+        "  if (size % 4) {\n"
+        "    size += 4 - (size % 4);\n"
+        "  }\n"
+        "  size += 4; // parameterId & length\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("outer_strm", "Serializer&");
+      insertion.addArg("uni", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if (!(outer_strm << uni._d())) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  size_t size = 0, pad = 0;\n"
+        "  gen_find_size(uni, size, pad);\n"
+        "  size -= 4; // parameterId & length\n"
+        "  if (size > ACE_UINT16_MAX || !(outer_strm << ACE_CDR::UShort(size)))"
+        " {\n"
+        "    return false;\n"
+        "  }\n"
+        "  ACE_Message_Block param(size);\n"
+        "  Serializer strm(&param, outer_strm.swap_bytes(), "
+        "Serializer::ALIGN_CDR);\n"
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+                                 "return", "<< ", cxx);
+      be_global->impl_ <<
+        "  }\n"
+        "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
+        "param.rd_ptr());\n"
+        "  return outer_strm.write_octet_array(data, ACE_CDR::ULong(size));\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("outer_strm", "Serializer&");
+      extraction.addArg("uni", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  ACE_CDR::UShort disc, size;\n"
+        "  if (!(outer_strm >> disc) || !(outer_strm >> size)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  ACE_Message_Block param(size);\n"
+        "  ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
+        "param.wr_ptr());\n"
+        "  if (!outer_strm.read_octet_array(data, size)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  param.wr_ptr(size);\n"
+        "  Serializer strm(&param, outer_strm.swap_bytes(), "
+        "Serializer::ALIGN_CDR);\n"
+        "  switch (disc) {\n";
+      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+                                 "return", ">> ", cxx, true);
+      be_global->impl_ <<
+        "  default:\n"
+        "    {\n"
+        "      uni.unknown_data_(OpenDDS::RTPS::OctetSeq(size));\n"
+        "      uni.unknown_data_().length(size);\n"
+        "      std::memcpy(uni.unknown_data_().get_buffer(), data, size);\n"
+        "      uni._d(disc);\n"
+        "    }\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    return true;
+  }
 }
 
 bool marshal_generator::gen_union(UTL_ScopedName* name,
@@ -1297,6 +1598,9 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
+  if (isRtpsSpecialUnion(cxx)) {
+    return genRtpsSpecialUnion(cxx, discriminator, branches);
+  }
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
     Function find_size("gen_find_size", "void");

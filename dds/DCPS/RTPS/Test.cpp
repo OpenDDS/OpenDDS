@@ -21,7 +21,7 @@ namespace {
 
   bool gen_is_bounded_size(const TestMsg&) { return false; }
 
-  size_t gen_max_marshaled_size(const TestMsg&, bool align) { return 0; }
+  size_t gen_max_marshaled_size(const TestMsg&, bool /*align*/) { return 0; }
 
   void gen_find_size(const TestMsg& stru, size_t& size, size_t& padding)
   {
@@ -33,7 +33,7 @@ namespace {
 
   bool gen_is_bounded_size(KeyOnly<const TestMsg>) { return true; }
 
-  size_t gen_max_marshaled_size(KeyOnly<const TestMsg>, bool align) { return 4; }
+  size_t gen_max_marshaled_size(KeyOnly<const TestMsg>, bool /*align*/) { return 4; }
 
   void gen_find_size(KeyOnly<const TestMsg>, size_t& size, size_t& padding)
   {
