@@ -256,7 +256,7 @@ module OpenDDS {
       Count_t manualLivelinessCount;
     };
 
-   // top-level data type for SPDP
+    // top-level data type for SPDP
     struct SPDPdiscoveredParticipantData {
       DDS::ParticipantBuiltinTopicData ddsParticipantData;
       ParticipantProxy_t participantProxy;

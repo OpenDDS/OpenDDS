@@ -1,3 +1,33 @@
+Wed Sep  7 18:19:48 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_rtps.mpb:
+
+          Added an mpb for use by projects that depend on the OpenDDS_Rtps lib.
+
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Whitespace fix only.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed some corner cases with Parameter and ParameterList.
+
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          The wchar member must be initialized to avoid seeing values outside
+          the unicode BMP on systems with 4-byte wchar_t.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+        * tests/DCPS/RtpsMessages/RtpsMessages.mpc:
+        * tests/DCPS/RtpsMessages/run_test.pl:
+
+          New test for RTPS Message serialization.
+
+        * dds/DCPS/RTPS/Test.cpp:
+
+          Removed this file.  Its contents were moved to RtpsMessagesTest.cpp.
+
 Thu Sep  1 17:37:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageTypes.h:

@@ -572,7 +572,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //  BigUnionSeq theSeqOfBitUnion;//+4 = 4493
   my_foo.x = 0.99f;                //+4 = 4497
   my_foo.y = 0.11f;                //+4 = 4501
-  //  wchar theWChar;              //+3 = 4504
+  my_foo.theWChar = L'a';          //+3 = 4504
   //  wstring theWString;          //+4 = 4508    {padding +1 = 636}
   //  long double theLongDouble;  //+16 = 4524
 

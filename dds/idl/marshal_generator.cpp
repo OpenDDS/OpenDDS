@@ -206,9 +206,10 @@ namespace {
       find_size.endArgs();
       be_global->impl_ <<
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (seq[i]._d() == OpenDDS::RTPS::PID_SENTINEL) continue;\n"
         "    size_t param_size = 0, param_padding = 0;\n"
         "    gen_find_size(seq[i], param_size, param_padding);\n"
-        "    size += param_size;\n"
+        "    size += param_size + param_padding;\n"
         "    if (size % 4) {\n"
         "      size += 4 - (size % 4);\n"
         "    }\n"
@@ -222,6 +223,7 @@ namespace {
       insertion.endArgs();
       be_global->impl_ <<
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (seq[i]._d() == OpenDDS::RTPS::PID_SENTINEL) continue;\n"
         "    if (!(strm << seq[i])) {\n"
         "      return false;\n"
         "    }\n"
@@ -242,6 +244,7 @@ namespace {
         "      return false;\n"
         "    }\n"
         "    if (seq[len]._d() == OpenDDS::RTPS::PID_SENTINEL) {\n"
+        "      seq.length(len);\n"
         "      return true;\n"
         "    }\n"
         "  }\n";
@@ -1522,7 +1525,7 @@ namespace {
       be_global->impl_ <<
         "  }\n"
         "  if (size % 4) {\n"
-        "    size += 4 - (size % 4);\n"
+        "    padding += 4 - (size % 4);\n"
         "  }\n"
         "  size += 4; // parameterId & length\n";
     }
@@ -1538,21 +1541,38 @@ namespace {
         "  size_t size = 0, pad = 0;\n"
         "  gen_find_size(uni, size, pad);\n"
         "  size -= 4; // parameterId & length\n"
-        "  if (size > ACE_UINT16_MAX || !(outer_strm << ACE_CDR::UShort(size)))"
-        " {\n"
+        "  if (size + pad > ACE_UINT16_MAX || "
+        "!(outer_strm << ACE_CDR::UShort(size + pad))) {\n"
         "    return false;\n"
         "  }\n"
-        "  ACE_Message_Block param(size);\n"
+        "  ACE_Message_Block param(size + pad);\n"
         "  Serializer strm(&param, outer_strm.swap_bytes(), "
-        "Serializer::ALIGN_CDR);\n"
+        "outer_strm.alignment());\n"
+        "  if (!insertParamData(strm, uni)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
+        "param.rd_ptr());\n"
+        "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(size))) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  if (outer_strm.alignment() == Serializer::ALIGN_INITIALIZE) {\n"
+        "    static const ACE_CDR::Octet padding[4] = {0};\n"
+        "    return outer_strm.write_octet_array(padding, ACE_CDR::ULong(pad));\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function insertData("insertParamData", "bool");
+      insertData.addArg("strm", "Serializer&");
+      insertData.addArg("uni", "const " + cxx + "&");
+      insertData.endArgs();
+      be_global->impl_ <<
         "  switch (uni._d()) {\n";
       generateSwitchBodyForUnion(streamCommon, branches, discriminator,
                                  "return", "<< ", cxx);
       be_global->impl_ <<
-        "  }\n"
-        "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
-        "param.rd_ptr());\n"
-        "  return outer_strm.write_octet_array(data, ACE_CDR::ULong(size));\n";
+        "  }\n";
     }
     {
       Function extraction("operator>>", "bool");
