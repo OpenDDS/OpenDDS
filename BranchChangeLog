@@ -1,3 +1,32 @@
+Wed Sep  7 22:34:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/OpenDDS_Rtps_Udp.mpc:
+        * dds/DCPS/transport/rtps_udp/RtpsUdp.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink_rch.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy_rch.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy_rch.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/Rtps_Udp_Export.h:
+        * dds/DCPS/transport/rtps_udp/rtps_udp.rc:
+
+          Added an initial (skeletal) OpenDDS transport type for RTPS over UDP.
+          UDP/IP (capable of IPv4 and IPv6; both unicast and multicast) is the
+          only PSM in the RTPS specification (v2.1) but other PSMs, or
+          implementation-specific transport types, may be used in the future.
+
 Wed Sep  7 18:19:48 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_rtps.mpb:
