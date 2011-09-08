@@ -186,6 +186,13 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   // the publisher is in different byte order.
   reader.swap_bytes(this->byte_order_ != ACE_CDR_BYTE_ORDER);
 
+  reader >> ACE_InputCDR::to_octet(byte);
+
+  if (!reader.good_bit()) return;
+  this->marshaled_size_ += sizeof(byte);
+
+  this->cdr_encapsulation_ = byte & 1;
+
   reader >> this->message_length_;
 
   if (!reader.good_bit()) return;
@@ -256,6 +263,10 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
                          | (value.more_fragments_     << MORE_FRAGMENTS_FLAG)
                          ;
   writer << ACE_OutputCDR::from_octet(flags);
+
+  flags = value.cdr_encapsulation_;
+  writer << ACE_OutputCDR::from_octet(flags);
+
   writer << value.message_length_;
   writer << value.sequence_;
   writer << value.source_timestamp_sec_;
@@ -487,6 +498,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
     if (value.sequence_repair_ == 1) str << "Sequence Repair, ";
     if (value.more_fragments_ == 1) str << "More Fragments, ";
+    if (value.cdr_encapsulation_ == 1) str << "CDR Encapsulation, ";
 
     str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
         << value.sequence_.getValue() << ", ";

@@ -147,6 +147,9 @@ tests/DCPS/Messenger/run_corbaloc_test.pl host_port_only: !DCPS_MIN
 tests/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN !DDS_NO_ORBSVCS
 tests/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
+# test doesn't link to rtps_udp transport lib, once it does !STATIC can go away
+tests/DCPS/Messenger/run_test.pl rtps: !STATIC !DCPS_MIN
+
 ##tests/DCPS/BidirMessenger/run_test.pl: !DCPS_MIN
 ##tests/DCPS/BidirMessenger/run_test.pl udp: !DCPS_MIN
 ##tests/DCPS/BidirMessenger/run_test.pl multicast: !DCPS_MIN !QNX

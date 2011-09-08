@@ -80,6 +80,7 @@ TransportClient::enable_transport()
   }
 
   swap_bytes_ = tc->swap_bytes_;
+  cdr_encapsulation_ = false;
   passive_connect_duration_.set(tc->passive_connect_duration_ / 1000,
                                 (tc->passive_connect_duration_ % 1000) * 1000);
 
@@ -93,6 +94,7 @@ TransportClient::enable_transport()
       const CORBA::ULong len = conn_info_.length();
       conn_info_.length(len + 1);
       impl->connection_info(conn_info_[len]);
+      cdr_encapsulation_ |= inst->requires_cdr();
     }
   }
 

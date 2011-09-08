@@ -20,9 +20,8 @@
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
-#include "tao/debug.h"
 
-#include "Serializer.h"
+#include "tao/debug.h"
 
 #include <sstream>
 

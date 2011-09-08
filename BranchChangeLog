@@ -1,3 +1,51 @@
+Thu Sep  8 19:15:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * tools/dissector/packet-opendds.cpp:
+
+          Added a second flags byte to DataSampleHeader, with the single flag
+          for "cdr encapsulation".
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Enable the "cdr encapsulation" flag in DataSampleHeader, if needed.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Marshal and demarshal data in the CDR-compilant way if (on the writer
+          side) at least one of our transports require it and (on the reader
+          side) the DataSampleHeader indicates CDR encapsualted data.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+
+          Removed unused #includes.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+
+          Added a virtual method to check if a transport requires
+          CDR-encapsulated payload data.  TransportClient uses it.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Make rtps_udp a "known" transport so it can be loaded automatically
+          when referenced in config files.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Messenger/rtps.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Added an RTPS config file for this test.  Currently, this still sends
+          the data with tcp, but having rtps_udp as an enabled transport causes
+          CDR-encapsulated data marshaling.
+
 Wed Sep  7 22:34:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/OpenDDS_Rtps_Udp.mpc:

@@ -14,7 +14,6 @@
 #include "TransportDefs.h"
 #include "RepoIdSet_rch.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/Serializer.h"
 #include "ace/Synch.h"
 #include <map>
 

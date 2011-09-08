@@ -26,6 +26,7 @@ public:
   virtual void dump(std::ostream& os);
 
   bool is_reliable() const { return true; }
+  bool requires_cdr() const { return true; }
 
 private:
   friend class RtpsUdpType;

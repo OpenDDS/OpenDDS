@@ -18,6 +18,14 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , content_filter_(0)
   , sequence_repair_(0)
   , more_fragments_(0)
+  , cdr_encapsulation_(0)
+  , reserved_1(0)
+  , reserved_2(0)
+  , reserved_3(0)
+  , reserved_4(0)
+  , reserved_5(0)
+  , reserved_6(0)
+  , reserved_7(0)
   , message_length_(0)
   , sequence_()
   , source_timestamp_sec_(0)
@@ -40,6 +48,14 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , content_filter_(0)
   , sequence_repair_(0)
   , more_fragments_(0)
+  , cdr_encapsulation_(0)
+  , reserved_1(0)
+  , reserved_2(0)
+  , reserved_3(0)
+  , reserved_4(0)
+  , reserved_5(0)
+  , reserved_6(0)
+  , reserved_7(0)
   , message_length_(0)
   , sequence_()
   , source_timestamp_sec_(0)
@@ -70,7 +86,7 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
 {
   return 1 + // message_id_;
          1 + // submessage_id_;
-         1 + // flags
+         2 + // flags
          4 + // message_length_;
          8 + // sequence_;
          4 + // source_timestamp_sec_;

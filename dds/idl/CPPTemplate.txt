@@ -397,7 +397,7 @@ void
   ::<%SCOPED%> data;
   if (OpenDDS::DCPS::gen_is_bounded_size (data))
   {
-    marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (data, false);
+    marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (data, true);
   }
   else
   {
@@ -406,7 +406,7 @@ void
   OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko(data);
   if (OpenDDS::DCPS::gen_is_bounded_size (ko))
   {
-    key_marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (ko, false);
+    key_marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (ko, true);
   }
   else
   {
@@ -475,29 +475,45 @@ ACE_Message_Block*
   const ::<%SCOPED%>& instance_data,
   OpenDDS::DCPS::MarshalingType marshaling_type)
 {
-  ACE_Message_Block* mb;
+  const bool cdr = this->cdr_encapsulation(), swap = this->swap_bytes();
 
+  ACE_Message_Block* mb;
   if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
     // Don't use the cached allocator for the registered sample message
     // block.
 
     OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko_instance_data(instance_data);
-    size_t effective_size = 0, padding = 0;
+    size_t effective_size = cdr ? 4 : 0, padding = 0;
     if (key_marshaled_size_) {
-      effective_size = key_marshaled_size_;
+      effective_size += key_marshaled_size_;
+      padding = 4; // worst case
     } else {
       OpenDDS::DCPS::gen_find_size(ko_instance_data, effective_size, padding);
     }
+    if (cdr) {
+      effective_size += padding;
+    }
     ACE_NEW_RETURN(mb, ACE_Message_Block(effective_size), 0);
-    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
+    OpenDDS::DCPS::Serializer serializer(mb, swap, cdr
+      ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+      : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    if (cdr) {
+      serializer << ACE_OutputCDR::from_octet(0);
+      serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
+      serializer << ACE_CDR::UShort(0);
+    }
     serializer << ko_instance_data;
 
   } else { // OpenDDS::DCPS::FULL_MARSHALING
-    size_t effective_size = 0, padding = 0;
+    size_t effective_size = cdr ? 4 : 0, padding = 0;
     if (marshaled_size_) {
-      effective_size = marshaled_size_;
+      effective_size += marshaled_size_;
+      padding = 4; // worst case
     } else {
       OpenDDS::DCPS::gen_find_size(instance_data, effective_size, padding);
+    }
+    if (cdr) {
+      effective_size += padding;
     }
     ACE_NEW_MALLOC_RETURN(mb,
                           static_cast<ACE_Message_Block*>(
@@ -516,7 +532,14 @@ ACE_Message_Block*
                               db_allocator_,
                               mb_allocator_),
                            0);
-    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
+    OpenDDS::DCPS::Serializer serializer(mb, swap, cdr
+      ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+      : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    if (cdr) {
+      serializer << ACE_OutputCDR::from_octet(0);
+      serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
+      serializer << ACE_CDR::UShort(0);
+    }
     serializer << instance_data;
   }
 
@@ -1741,9 +1764,17 @@ void
                             data_allocator_->malloc(sizeof(::<%SCOPED%>))),
                            ::<%SCOPED%>);
 
+  const bool cdr = sample.header_.cdr_encapsulation_;
+
   OpenDDS::DCPS::Serializer ser(
     sample.sample_,
-    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+    cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+
+  if (cdr) {
+    ACE_CDR::ULong header;
+    ser >> header;
+  }
 
   if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
     ser >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(*data);
@@ -1777,9 +1808,17 @@ void
 
   ::<%SCOPED%> data;
 
+  const bool cdr = sample.header_.cdr_encapsulation_;
+
   ::OpenDDS::DCPS::Serializer ser(
     sample.sample_,
-    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+    cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+
+  if (cdr) {
+    ACE_CDR::ULong header;
+    ser >> header;
+  }
 
   ser >> data;
 

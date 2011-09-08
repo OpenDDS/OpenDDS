@@ -96,6 +96,18 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// The current "Data Sample" needs reassembly before further processing.
   bool more_fragments_ : 1;
 
+  /// The data payload uses CDR encapsulation and alignment rules, as defined
+  /// by the RTPS specification formal/2010-11-01.
+  bool cdr_encapsulation_ : 1;
+
+  bool reserved_1 : 1;
+  bool reserved_2 : 1;
+  bool reserved_3 : 1;
+  bool reserved_4 : 1;
+  bool reserved_5 : 1;
+  bool reserved_6 : 1;
+  bool reserved_7 : 1;
+
   /// The size of the data sample (without header).  After this header is
   /// demarshaled, the transport expects to see this many bytes in the stream
   /// before the start of the next header (or end of the Transport PDU).

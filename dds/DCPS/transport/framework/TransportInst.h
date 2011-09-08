@@ -98,6 +98,9 @@ public:
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
+  /// Does the transport require a CDR-encapsulated data payload?
+  virtual bool requires_cdr() const { return false; }
+
 protected:
 
   TransportInst(const char* type,

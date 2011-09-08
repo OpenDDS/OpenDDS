@@ -86,6 +86,8 @@ int hf_sample_flags_group_coh   = -1;
 int hf_sample_flags_content_filt= -1;
 int hf_sample_flags_seq_repair  = -1;
 int hf_sample_flags_more_frags  = -1;
+int hf_sample_flags2            = -1;
+int hf_sample_flags_cdr_encap   = -1;
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -100,10 +102,17 @@ const int* sample_flags_fields[] = {
   NULL
 };
 
+const int sample_flags2_bits = 1;
+const int* sample_flags2_fields[] = {
+  &hf_sample_flags_cdr_encap,
+  NULL
+};
+
 gint ett_trans_header  = -1;
 gint ett_trans_flags   = -1;
 gint ett_sample_header = -1;
 gint ett_sample_flags  = -1;
+gint ett_sample_flags2 = -1;
 gint ett_filters = -1;
 
 const value_string byte_order_vals[] = {
@@ -293,11 +302,19 @@ namespace OpenDDS
           proto_tree_add_item(ltree, hf_sample_sub_id, tvb_, offset, len, FALSE);
         }
       offset += len;
+
       // hf_sample_flags
       len = sizeof(ACE_CDR::Octet);
       proto_tree_add_bitmask(ltree, tvb_, offset,
                              hf_sample_flags,
                              ett_sample_flags, sample_flags_fields, FALSE);
+      offset += len;
+
+      // hf_sample_flags2
+      len = sizeof(ACE_CDR::Octet);
+      proto_tree_add_bitmask(ltree, tvb_, offset,
+                             hf_sample_flags2,
+                             ett_sample_flags2, sample_flags2_fields, FALSE);
       offset += len;
 
       // hf_sample_length
@@ -423,7 +440,6 @@ namespace OpenDDS
             {
               offset += total_len;
             }
-      //TODO: represent the content_filter entries in wireshark, for now skip
         }
     }
 
@@ -740,6 +756,17 @@ namespace OpenDDS
                 FT_BOOLEAN, sample_flags_bits, BF_HFILL(7)
                 }
         },
+        {
+          &hf_sample_flags2,
+            { "Flags2", "opendds.sample.flags2",
+                FT_UINT8, BASE_HEX, NULL_HFILL
+            }
+        },
+        { &hf_sample_flags_cdr_encap,
+            { "CDR Encapsulation", "opendds.sample.flags2.cdr_encap",
+              FT_BOOLEAN, sample_flags2_bits, BF_HFILL(0)
+            }
+        },
         { &hf_sample_length,
             { "Length", "opendds.sample.length",
                 FT_UINT32, BASE_HEX, NULL_HFILL
@@ -783,6 +810,7 @@ namespace OpenDDS
         &ett_trans_flags,
         &ett_sample_header,
         &ett_sample_flags,
+        &ett_sample_flags2,
         &ett_filters
       };
 

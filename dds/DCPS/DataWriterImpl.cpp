@@ -1927,6 +1927,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     == DDS::GROUP_PRESENTATION_QOS;
   header_data.content_filter_ = content_filter;
   header_data.sequence_repair_ = needSequenceRepair;
+  header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   ++this->sequence_number_;
   header_data.sequence_ = this->sequence_number_;
