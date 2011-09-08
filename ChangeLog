@@ -1,3 +1,10 @@
+Thu Sep  8 18:26:40 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Change to not define DDS_HAS_WCHAR for android as it is not complete
+          on the platform.
+
 Tue Aug 30 17:25:37 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.validation/build-external.xml:
