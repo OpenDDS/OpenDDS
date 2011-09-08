@@ -87,7 +87,7 @@ int hf_sample_flags_content_filt= -1;
 int hf_sample_flags_seq_repair  = -1;
 int hf_sample_flags_more_frags  = -1;
 int hf_sample_flags2            = -1;
-int hf_sample_flags_cdr_encap   = -1;
+int hf_sample_flags2_cdr_encap  = -1;
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -102,9 +102,9 @@ const int* sample_flags_fields[] = {
   NULL
 };
 
-const int sample_flags2_bits = 1;
+const int sample_flags2_bits = 8;
 const int* sample_flags2_fields[] = {
-  &hf_sample_flags_cdr_encap,
+  &hf_sample_flags2_cdr_encap,
   NULL
 };
 
@@ -455,6 +455,26 @@ namespace OpenDDS
           return;
         }
 
+      if (header.cdr_encapsulation_)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      "DDS_Dissector::dissect_sample_payload: "
+                      "dissection of CDR-encapsulated data is not currently "
+                      "supported\n"));
+          offset += header.message_length_;
+          return;
+        }
+
+      if (header.byte_order_ != ACE_CDR_BYTE_ORDER)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      "DDS_Dissector::dissect_sample_payload: "
+                      "dissection of byte-swapped data is not currently "
+                      "supported\n"));
+          offset += header.message_length_;
+          return;
+        }
+
       RepoIdConverter converter(header.publication_id_);
 
       const char * data_name =
@@ -756,13 +776,12 @@ namespace OpenDDS
                 FT_BOOLEAN, sample_flags_bits, BF_HFILL(7)
                 }
         },
-        {
-          &hf_sample_flags2,
+        { &hf_sample_flags2,
             { "Flags2", "opendds.sample.flags2",
                 FT_UINT8, BASE_HEX, NULL_HFILL
             }
         },
-        { &hf_sample_flags_cdr_encap,
+        { &hf_sample_flags2_cdr_encap,
             { "CDR Encapsulation", "opendds.sample.flags2.cdr_encap",
               FT_BOOLEAN, sample_flags2_bits, BF_HFILL(0)
             }

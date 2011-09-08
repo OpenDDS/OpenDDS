@@ -1,3 +1,22 @@
+Thu Sep  8 23:02:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+
+          Replaced ACE container with std container, cleaned up function
+          pointer and const char* comparison bugs.
+
+        * tools/dissector/packet-opendds.cpp:
+
+          Corrected handling of the new "flags2" byte in DataSampleHeader.
+          Sanity checks for sample dissection: if the data is using CDR
+          alignment rules, or if it's byte-swapped relative to the wireshark
+          host, we can't dissect it with the current implementation.
+
+        * tools/dissector/sample_dissector.cpp:
+
+          Fixed a bug I introduced earlier on the branch.
+
 Thu Sep  8 19:15:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:

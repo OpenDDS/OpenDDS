@@ -162,7 +162,7 @@ namespace OpenDDS
           }
         case String:
           {
-            len = 5 + *(reinterpret_cast< guint32 * >(data));
+            len = 4 + *(reinterpret_cast< guint32 * >(data));
             break;
           }
         case WString:
