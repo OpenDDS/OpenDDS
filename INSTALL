@@ -83,6 +83,102 @@ BUILDING OpenDDS
         or "-ExeSubDir Static_Release".
 
 
+* Cross Compiling:
+
+  DDS can be built for some platforms that require compilation of code
+  on a separate system than where the code will execute.
+
+  Compilation uses the Option B method with an additional requirement of
+  building the opendds_idl tool for the host system.  This requires having
+  two separate builds, one for the host and one for the target.
+
+  1 Build ACE and TAO IDL compiler for the HOST.
+
+    This requires building the TAO host components necessary for the cross
+    compilation.
+
+    See the cross compilation instructions in $ACE_ROOT/ACE-INSTALL.html
+    and $TAO_ROOT/TAO-INSTALL.html for the list of projects to build.
+
+    See the standard build instructions in
+    http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonWindows
+    or http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonLinux,
+    or the relevant sections in OCI's TAO Developer's Guide.
+
+  2 Set the environment variables for the HOST build.
+
+    Set DDS_ROOT to the location of the DDS checkout for the HOST build.
+
+    Add $DDS_ROOT/bin to the PATH (on, Windows add %DDS_ROOT%\bin)
+
+    Add $DDS_ROOT/lib to the LD_LIBRARY_PATH (or %DDS_ROOT%\lib to
+    the PATH for Windows)
+
+    Make sure that the other normal ACE/TAO environment
+    variables are defined using the HOST's build.
+
+  3 Build opendds_idl executable for the HOST build.
+
+    On Linux or Solaris:
+    make -C dds/idl
+    (on Solaris be sure this is GNU make, possibly using "gmake")
+
+    On Windows:
+    Load the solution of your choice into Visual Studio and build the
+    opendds_idl project.
+    There are a few solutions to select from:
+        DDS.sln - VC71, DLLs
+        DDS_Static.sln - VC71, Static libs
+        DDS_vc8.sln - VC8, DLLs
+        DDS_Static_vc8.sln - VC8, Static libs
+        DDS_vc9.sln - VC9, DLLs
+        DDS_Static_vc9.sln - VC9, Static libs
+    (Do not up-convert a VC71 solution or project to VC8/VC9)
+
+  4 Build ACE and TAO for the TARGET.
+
+    Using the cross compilation instructions in 
+    $ACE_ROOT/ACE-INSTALL.html and $TAO_ROOT/TAO-INSTALL.html set the
+    appropriate HOST compiled tools.
+
+    Depending on the tool and compiler setup, it may require
+    regenerating Makefile and Solution files.
+
+    For regenerating project files, see the build instructions in
+    http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonWindows
+    or http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonLinux,
+    or the relevant sections in OCI's TAO Developer's Guide.
+
+  5 Set the environment variables for the TARGET.
+
+    Set DDS_ROOT to the location of the DDS checkout for the TARGET.
+
+    Add $DDS_ROOT/bin to the PATH (on, Windows add %DDS_ROOT%\bin)
+
+    Add $DDS_ROOT/lib to the LD_LIBRARY_PATH (or %DDS_ROOT%\lib to
+    the PATH for Windows)
+
+    Make sure that the other normal ACE/TAO environment
+    variables are defined for the TARGET's build.
+
+  6 Configure the TARGET build to use the HOST built opendds_idl tool
+
+    Either copy or link the opendds_idl executable from the HOST
+    build's bin/ directory to the TARGET build's bin/ directory.
+
+  7 Build for the HOST
+
+    Depending on the compiler and instructions to use it,
+    compilation may consist of using existing Makefiles with the 
+    make command or regeneration of project files may be necessary.
+    See the MPC documentation http://www.ociweb.com/products/MPC
+
+  8 Test
+
+    Presently, there is no automated testing setup for deployed platforms.
+    Any testing has to be done manually.
+
+
 * Getting Started building your own applications:
 
   See the OpenDDS Developer's Guide:
@@ -128,3 +224,12 @@ BUILDING OpenDDS
   the instructions under "Note:" above to re-generate the makefiles after
   adding the line "link_codecfactory=1" to the end of
   $ACE_ROOT/bin/MakeProjectCreator/config/default.features.
+
+ Android:
+  Currently there is only support for building with Standalone compiler
+  toolchain of the Android Native Development Kit.  The standard NDK compiler
+  is not identified as supporting exceptions or RTTI, as of NDK r5c.
+
+  Compilation on Windows can fail due to cygwin/Windows not differentiating
+  between the ACE file Signal.h and the system file signal.h.
+

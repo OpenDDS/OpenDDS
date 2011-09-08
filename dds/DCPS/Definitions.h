@@ -31,7 +31,8 @@
 // More strict check than ACE does: if we have GNU lib C++ without support for
 // wchar_t (std::wstring, std::wostream, etc.) then we don't have DDS_HAS_WCHAR
 #if defined (ACE_HAS_WCHAR) && \
-    (!defined (_GLIBCPP_VERSION) || defined(_GLIBCPP_USE_WCHAR_T))
+    (!defined (_GLIBCPP_VERSION) || defined(_GLIBCPP_USE_WCHAR_T)) && \
+    !defined (__ANDROID__)
 #define DDS_HAS_WCHAR
 #endif
 
