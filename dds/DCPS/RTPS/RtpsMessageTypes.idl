@@ -240,7 +240,6 @@ module OpenDDS {
      * Each of the fields should have a PID_* in Tables 9.12 and 9.13.
      */
 
-    typedef sequence<BuiltinEndpointSet_t> BuiltinEndpointSetSeq;
     typedef sequence<Locator_t> LocatorSeq;
 
     struct ParticipantProxy_t {
@@ -248,7 +247,7 @@ module OpenDDS {
       GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
       VendorId_t vendorId;
       boolean expectsInlineQos;
-      BuiltinEndpointSetSeq availableBuiltinEndpoints;
+      BuiltinEndpointSet_t availableBuiltinEndpoints;
       LocatorSeq metatrafficUnicastLocatorList;
       LocatorSeq metatrafficMulticastLocatorList;
       LocatorSeq defaultMulticastLocatorList;

@@ -1,3 +1,18 @@
+Fri Sep  9 21:00:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Removed BuiltinEndpointSetSeq, and changed the field
+          ParticipantProxy_t::availableBuiltinEndpoints to have type
+          BuiltinEndpointSet_t.  Having a sequence of these doesn't make
+          sense, but the spec seems to show it both ways.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Implemented the RTPS Message Receiver which maintains state among
+          the various submessages that belong to the same message.
+
 Thu Sep  8 23:02:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/dissector/giop_base.h:
