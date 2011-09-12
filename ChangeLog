@@ -1,3 +1,9 @@
+Mon Sep 12 15:46:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mpc:
+
+          Use project base to get dependencies.
+
 Mon Sep 12 14:38:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * INSTALL:
