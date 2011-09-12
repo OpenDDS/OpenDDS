@@ -229,7 +229,5 @@ BUILDING OpenDDS
   Currently there is only support for building with Standalone compiler
   toolchain of the Android Native Development Kit.  The standard NDK compiler
   is not identified as supporting exceptions or RTTI, as of NDK r5c.
-
   Compilation on Windows can fail due to cygwin/Windows not differentiating
   between the ACE file Signal.h and the system file signal.h.
-

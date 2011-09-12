@@ -1,3 +1,14 @@
+Mon Sep 12 14:38:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * INSTALL:
+
+          Trying to make it clear that the "Compilation on Widnows..."
+          paragraph only applies to the android cross-compile.
+
+        * java/build_scripts/generate_javadoc.pl:
+
+          Updated URL for Java SE javadocs, sun.com no longer works.
+
 Thu Sep  8 18:26:40 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/Definitions.h:

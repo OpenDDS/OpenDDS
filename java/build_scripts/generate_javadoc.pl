@@ -28,7 +28,7 @@ my @args = (
     "-author",
     "-windowtitle", "OpenDDS_DCPS",
     "-doctitle", "OpenDDS DCPS API Specification",
-    "-link", "http://java.sun.com/j2se/1.5.0/docs/api/",
+    "-link", "http://download.oracle.com/javase/1.5.0/docs/api/",
 # Package list:
     "DDS",
     "OpenDDS",
