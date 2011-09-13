@@ -265,6 +265,15 @@
               <xsl:with-param name="to-find" select="'/'"/>
             </xsl:call-template>
           </xsl:variable>
+          <!-- Take into account model dirname could be blank-->
+          <xsl:variable name="model-dirname-or-dot">
+            <xsl:choose>
+              <xsl:when test="string-length($model-dirname) &gt; 0">
+                <xsl:value-of select="$model-dirname"/>
+              </xsl:when>
+              <xsl:otherwise>.</xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
           <xsl:variable name="internaldatatype">
             <xsl:if test="name(.) = 'topicDescriptions' and @datatype">
               <xsl:value-of select="concat($model, '#', @datatype, ' ')"/>
@@ -272,7 +281,7 @@
           </xsl:variable>
           <xsl:variable name="externaldatatype">
             <xsl:if test="name(.) = 'topicDescriptions' and datatype">
-              <xsl:value-of select="concat($model-dirname, '/', datatype/@href, ' ')"/>
+              <xsl:value-of select="concat($model-dirname-or-dot, '/', datatype/@href, ' ')"/>
             </xsl:if>
           </xsl:variable>
           <xsl:variable name="internalreltopic">
@@ -282,7 +291,7 @@
           </xsl:variable>
           <xsl:variable name="externalreltopic">
             <xsl:if test="name(.) = 'topicDescriptions' and related_topic">
-              <xsl:value-of select="concat($model-dirname, '/', related_topic/@href, ' ')"/>
+              <xsl:value-of select="concat($model-dirname-or-dot, '/', related_topic/@href, ' ')"/>
             </xsl:if>
           </xsl:variable>
           <xsl:variable name="internalpolicies">

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="MessengerTopics">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw2" name="MessengerTopics">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
+      <datatype href="MessengerTypes.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
+    </topicDescriptions>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw3" name="Movie Discussion Replay">
+      <datatype href="MessengerTypes.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
+    </topicDescriptions>
+  </libs>
+</opendds:OpenDDSModel>

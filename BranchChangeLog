@@ -1,3 +1,8 @@
+Tue Sep 13 19:48:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4907 through r4941.
+          Attempting to fix bad svn:mergeinfo at the same time.
+
 Tue Sep 13 17:56:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:

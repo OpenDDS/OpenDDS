@@ -28,6 +28,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
 
 project(DDS*Subscriber) : dcpsexe_with_tcp {
   exename = subscriber
+  requires += built_in_topics
   after  += DDS*idl
   libs   += DDS*idl
 

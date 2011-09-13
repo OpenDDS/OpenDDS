@@ -136,7 +136,7 @@ assert_negotiated(const Options& opts, const DDS::Entity_ptr e)
 }
 
 bool
-wait_subscription_matched_status(const Options& opts, const DDS::DataReader_ptr r)
+wait_subscription_matched_status(const Options& /*opts*/, const DDS::DataReader_ptr r)
 {
   //  To check the match status ?
   DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
@@ -153,7 +153,7 @@ wait_subscription_matched_status(const Options& opts, const DDS::DataReader_ptr 
   DDS::WaitSet_var ws = new DDS::WaitSet;
   ws->attach_condition(condition);
 
-  int duration = opts.test_duration;
+//  int duration = opts.test_duration;
   DDS::Duration_t timeout = {
     DDS::DURATION_INFINITE_SEC,
     DDS::DURATION_INFINITE_NSEC

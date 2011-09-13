@@ -36,7 +36,7 @@ Puller::~Puller()
 }
 
 int
-Puller::pull(const ACE_Time_Value& duration)
+Puller::pull(const ACE_Time_Value& /*duration*/)
 {
   // Block until Publisher completes
   DDS::StatusCondition_var condition = reader_->get_statuscondition();
@@ -75,5 +75,6 @@ Puller::pull(const ACE_Time_Value& duration)
 
   ws->detach_condition(condition);
 
+  return 0;
 }
 

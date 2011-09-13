@@ -15,6 +15,13 @@ use PerlDDS::Run_Test;
 my $dir = 'tools/modeling/tests';
 my $test_lst = "$DDS_ROOT/$dir/modeling_tests.lst";
 
+my $force = 0;
+if ($#ARGV >= 0 && $ARGV[0] eq '-f') {
+    print "Setting force continue for failed tests\n";
+    $force = 1;
+    shift @ARGV;
+}
+
 my $cwd = getcwd();
 if (defined $ENV{'ANT_HOME'}) {
   chdir '../plugins/org.opendds.modeling.validation';
@@ -25,12 +32,14 @@ if (defined $ENV{'ANT_HOME'}) {
   my $status = system("\"$ant\" -f build-external.xml run.tests");
   if ($status > 0) {
     print "ERROR: ant invocation failed with $status\n";
+    die "ant run.tests target failed and forced is off. Exiting...\n" if $force == 0;
   }
   chdir $cwd;
 }
 else {
   print "Warning: skipping model validation due to lack of ANT_HOME\n";
 }
+
 
 sub get_dirs {
   if ($#ARGV >= 0) {
