@@ -10,6 +10,7 @@
 #include "DataSampleHeader.h"
 #include "Serializer.h"
 #include "RepoIdConverter.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include <iomanip>
@@ -527,6 +528,12 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
   }
 
   return str;
+}
+
+void
+DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
+{
+  rds.header_ = *this;
 }
 
 } // namespace DCPS

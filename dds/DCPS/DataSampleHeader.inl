@@ -6,8 +6,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   : message_id_(0)
@@ -167,9 +165,3 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
   return base[FLAGS_OFFSET] & mask_flag(flag);
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::DataSampleHeader::into_received_data_sample(
-  ReceivedDataSample& rds)
-{
-  rds.header_ = *this;
-}
