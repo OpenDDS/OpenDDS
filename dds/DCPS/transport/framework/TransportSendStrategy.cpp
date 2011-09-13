@@ -20,6 +20,7 @@
 #include "PacketRemoveVisitor.h"
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
@@ -53,11 +54,11 @@ namespace {
 // occurs every packet and is released after packet is sent.
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
-TransportSendStrategy::TransportSendStrategy
-(TransportInst*          transport_inst,
- ThreadSynchResource*    synch_resource,
- CORBA::Long             priority,
- ThreadSynchStrategy_rch thread_sync_strategy)
+TransportSendStrategy::TransportSendStrategy(
+  const TransportInst_rch& transport_inst,
+  ThreadSynchResource* synch_resource,
+  CORBA::Long priority,
+  const ThreadSynchStrategy_rch& thread_sync_strategy)
   : max_samples_(transport_inst->max_samples_per_packet_),
     optimum_size_(transport_inst->optimum_packet_size_),
     max_size_(transport_inst->max_packet_size_),
@@ -82,15 +83,13 @@ TransportSendStrategy::TransportSendStrategy
     replaced_element_mb_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
     replaced_element_db_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
     retained_element_allocator_(0),
+    transport_inst_(transport_inst),
     graceful_disconnecting_(false),
     link_released_(true),
     send_buffer_(0),
     transport_shutdown_(false)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
-
-  transport_inst->_add_ref();
-  this->transport_inst_ = transport_inst;
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper(priority);
@@ -112,7 +111,8 @@ TransportSendStrategy::TransportSendStrategy
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
 
-  this->delayed_delivered_notification_queue_ = new TransportQueueElement* [max_samples_];
+  this->delayed_delivered_notification_queue_ =
+    new TransportQueueElement*[max_samples_];
   this->delayed_notification_mode_ = new SendMode[max_samples_];
 }
 

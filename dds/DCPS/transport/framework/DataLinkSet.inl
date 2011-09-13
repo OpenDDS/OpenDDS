@@ -10,6 +10,7 @@
 #include "DataLink.h"
 #include "TransportSendElement.h"
 #include "SendResponseListener.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Util.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE

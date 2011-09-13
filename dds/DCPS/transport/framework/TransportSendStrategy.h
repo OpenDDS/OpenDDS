@@ -135,10 +135,10 @@ public:
 
 protected:
 
-  TransportSendStrategy(TransportInst*          transport_inst,
-                        ThreadSynchResource*    synch_resource,
-                        CORBA::Long             priority,
-                        ThreadSynchStrategy_rch thread_sync_strategy);
+  TransportSendStrategy(const TransportInst_rch& transport_inst,
+                        ThreadSynchResource* synch_resource,
+                        CORBA::Long priority,
+                        const ThreadSynchStrategy_rch& thread_sync_strategy);
 
   // Only our subclass knows how to do this.
   // Third arg is the "back-pressure" flag.  If send_bytes() returns

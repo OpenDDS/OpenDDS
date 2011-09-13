@@ -141,7 +141,9 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   }
 #endif /* ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 
-  if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
+  if (start(static_rchandle_cast<TransportSendStrategy>(this->send_strategy_),
+            static_rchandle_cast<TransportStrategy>(this->recv_strategy_))
+      != 0) {
     this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

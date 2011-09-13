@@ -90,19 +90,17 @@ private:
   /// created by the acceptor and needs to be attached to a DataLink.
   /// The DataLink may or may not already be created and waiting
   /// for this passive connection to appear.
-  /// Note that the TcpConnection* "ownership" is given away
-  /// to the passive_connection() call.
   void passive_connection(const ACE_INET_Addr& remote_address,
-                          TcpConnection* connection);
+                          const TcpConnection_rch& connection);
 
   /// Called by find_or_create_datalink().
   int make_active_connection(const ACE_INET_Addr& remote_address,
-                             TcpDataLink*   link);
+                             const TcpDataLink_rch& link);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
-  int connect_tcp_datalink(TcpDataLink*   link,
-                           TcpConnection* connection);
+  int connect_tcp_datalink(const TcpDataLink_rch& link,
+                           const TcpConnection_rch& connection);
 
   virtual PriorityKey blob_to_key(const TransportBLOB& remote,
                                   CORBA::Long priority,

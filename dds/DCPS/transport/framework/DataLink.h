@@ -18,8 +18,8 @@
 #include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
-#include "TransportReceiveStrategy.h"
-#include "TransportReceiveStrategy_rch.h"
+#include "TransportStrategy.h"
+#include "TransportStrategy_rch.h"
 #include "TransportSendControlElement.h"
 #include "TransportSendListener.h"
 #include "TransportReceiveListener.h"
@@ -270,8 +270,8 @@ protected:
   /// is returned.  Otherwise, a 0 is returned.  In the failure case,
   /// if one of the strategy objects was started successfully, then
   /// it will be stopped before the start() method returns -1.
-  int start(TransportSendStrategy*    send_strategy,
-            TransportReceiveStrategy* receive_strategy);
+  int start(const TransportSendStrategy_rch& send_strategy,
+            const TransportStrategy_rch& receive_strategy);
 
   /// This announces the "start" event to our subclass.  The "start"
   /// event will occur when this DataLink is handling its first
@@ -291,7 +291,7 @@ protected:
   static ACE_UINT64 get_next_datalink_id();
 
   /// The transport receive strategy object for this DataLink.
-  TransportReceiveStrategy_rch receive_strategy_;
+  TransportStrategy_rch receive_strategy_;
 
   friend class ThreadPerConnectionSendTask;
 

@@ -563,6 +563,7 @@ TransportRegistry::release()
   type_map_.clear();
   inst_map_.clear();
   config_map_.clear();
+  global_config_ = 0;
 }
 
 

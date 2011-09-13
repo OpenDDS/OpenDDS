@@ -9,42 +9,48 @@
 #include "EntryExit.h"
 #include "TransportReassembly.h"
 
+template<typename TH, typename DSH>
 ACE_INLINE int
-OpenDDS::DCPS::TransportReceiveStrategy::start()
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::start()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","start",6);
   return this->start_i();
 }
 
+template<typename TH, typename DSH>
 ACE_INLINE void
-OpenDDS::DCPS::TransportReceiveStrategy::stop()
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::stop()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","stop",6);
   this->stop_i();
 }
 
-ACE_INLINE const OpenDDS::DCPS::TransportHeader&
-OpenDDS::DCPS::TransportReceiveStrategy::received_header() const
+template<typename TH, typename DSH>
+ACE_INLINE const TH&
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::received_header() const
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","received_header",6);
   return this->receive_transport_header_;
 }
 
+template<typename TH, typename DSH>
 ACE_INLINE size_t
-OpenDDS::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::successor_index(size_t index) const
 {
   return ++index % RECEIVE_BUFFERS;
 }
 
+template<typename TH, typename DSH>
 ACE_INLINE void
-OpenDDS::DCPS::TransportReceiveStrategy::relink(bool)
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::relink(bool)
 {
   // The subclass needs implement this function for re-establishing
   // the link upon recv failure.
 }
 
+template<typename TH, typename DSH>
 ACE_INLINE void
-OpenDDS::DCPS::TransportReceiveStrategy::data_unavailable(
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::data_unavailable(
   const SequenceRange& dropped)
 {
   if (this->reassembly_) {

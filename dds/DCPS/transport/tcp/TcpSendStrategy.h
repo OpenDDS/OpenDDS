@@ -11,25 +11,25 @@
 
 #include "TcpConnection_rch.h"
 #include "TcpDataLink_rch.h"
+#include "TcpInst_rch.h"
+#include "TcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-class TcpConnection;
-class TcpInst;
 class TcpSynchResource;
 
 class TcpSendStrategy : public TransportSendStrategy {
 public:
 
-  TcpSendStrategy(TcpDataLink*      link,
-                        TcpInst* config,
-                        TcpConnection*    connection,
-                        TcpSynchResource* synch_resource,
-                        TransportReactorTask*   task,
-                        CORBA::Long             priority);
+  TcpSendStrategy(const TcpDataLink_rch& link,
+                  const TcpInst_rch& config,
+                  const TcpConnection_rch& connection,
+                  TcpSynchResource* synch_resource,
+                  const TransportReactorTask_rch& task,
+                  CORBA::Long priority);
   virtual ~TcpSendStrategy();
 
   /// This is called by the datalink object to associate with the "new" connection object.

@@ -55,7 +55,7 @@ size_t gen_max_marshaled_size(KeyOnly<const BigKey>, bool /*align*/)
   return 24;
 }
 
-void gen_find_size(KeyOnly<const BigKey>, size_t& size, size_t& padding)
+void gen_find_size(KeyOnly<const BigKey>, size_t& size, size_t& /*padding*/)
 {
   size += 24;
 }
@@ -189,7 +189,7 @@ bool test_messages()
   }
   {
     DataSubmessage ds = { {DATA, 1, 20}, 0, 16, ENTITYID_UNKNOWN,
-      ENTITYID_SEDP_BUILTIN_TOPIC_WRITER, {0, 2} };
+      ENTITYID_SEDP_BUILTIN_TOPIC_WRITER, {0, 2}, ParameterList() };
     const CORBA::Octet expected[] = {
       21, 1, 20, 0,               // smHeader
       0, 0, 16, 0,                // extraFlags, octetsToInlineQos
@@ -257,7 +257,8 @@ bool test_messages()
   }
   {
     DataFragSubmessage df = { {DATA_FRAG, 1, 1056}, 0, 28, ENTITYID_UNKNOWN,
-      ENTITYID_SEDP_BUILTIN_TOPIC_WRITER, {0, 3}, {4}, 1, 1024, 1493};
+      ENTITYID_SEDP_BUILTIN_TOPIC_WRITER, {0, 3}, {4}, 1, 1024, 1493,
+      ParameterList()};
     const CORBA::Octet expected[] = {
       22, 1, 32, 4,               // smHeader
       0, 0, 28, 0,                // extraFlags, octetsToInlineQos
@@ -339,7 +340,8 @@ bool test_messages()
       {LOCATOR_KIND_UDPv6, 49154, {1, 32, 184, 13, 163, 133,
                                    0, 0, 0, 0, 46, 138, 112, 3, 52, 115} } };
     LocatorList unicastLocatorList(sizeof(loc)/sizeof(loc[0]), loc);
-    InfoReplySubmessage ir = { {INFO_REPLY, 1, 64}, unicastLocatorList};
+    InfoReplySubmessage ir = { {INFO_REPLY, 1, 64}, unicastLocatorList,
+      LocatorList()};
     const CORBA::Octet expected[] = {
       15, 1, 64, 0,               // smHeader
       3, 0, 0, 0,                 // uniLL.length
@@ -376,7 +378,7 @@ bool test_messages()
     ok &= test(ir, expected_mc, "InfoReplySubmessage with multicast");
   }
   {
-    InfoSourceSubmessage is = { {INFO_SRC, 1, 20}, 0, {2, 1}, {1, 3},
+    InfoSourceSubmessage is = { {INFO_SRC, 1, 20}, 0, {2, 1}, { {1, 3} },
       {12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1} };
     const CORBA::Octet expected[] = {
       12, 1, 20, 0,               // smHeader
@@ -419,7 +421,7 @@ bool test_messages()
   }
   {
     InfoReplyIp4Submessage iri4 = { {INFO_REPLY_IP4, 1, 8},
-      {167837697, 49157} };
+      {167837697, 49157}, LocatorUDPv4_t()};
     const CORBA::Octet expected[] = {
       13, 1, 8, 0,                // smHeader
       1, 0, 1, 10, 5, 192, 0, 0}; // unicastLocator

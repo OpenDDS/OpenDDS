@@ -90,7 +90,13 @@ RtpsUdpReceiveStrategy::stop_i()
 }
 
 bool
-RtpsUdpReceiveStrategy::check_header(const TransportHeader& header)
+RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
+{
+  return true;
+}
+
+bool
+RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
   return true;
 }

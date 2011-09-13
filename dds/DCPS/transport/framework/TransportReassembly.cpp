@@ -167,7 +167,7 @@ TransportReassembly::dropped_one(const SequenceNumber& dropped,
     SequenceNumber dataSampleNumber = iter->first;
     list<FragRange>& flist = iter->second;
 
-    ReceivedDataSample dummy;
+    ReceivedDataSample dummy(0);
     dummy.header_.sequence_ = dataSampleNumber;
     dummy.header_.more_fragments_ = true;
 

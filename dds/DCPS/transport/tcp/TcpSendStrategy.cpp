@@ -17,32 +17,22 @@
 #include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
-  TcpDataLink*      link,
-  TcpInst* config,
-  TcpConnection*    connection,
+  const TcpDataLink_rch& link,
+  const TcpInst_rch& config,
+  const TcpConnection_rch& connection,
   TcpSynchResource* synch_resource,
-  TransportReactorTask*   task,
-  CORBA::Long             priority)
-  : TransportSendStrategy(config, synch_resource, priority,
+  const TransportReactorTask_rch& task,
+  CORBA::Long priority)
+  : TransportSendStrategy(static_rchandle_cast<TransportInst>(config),
+                          synch_resource, priority,
                           new PerConnectionSynchStrategy)
+  , connection_(connection)
+  , link_(link)
+  , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","TcpSendStrategy",6);
 
-  // Keep a "copy" of the connection reference for ourselves
-  connection->_add_ref();
-  this->connection_ = connection;
-
-  // Give a "copy" of this send strategy to the connection object.
   connection->set_send_strategy(this);
-
-  // Keep a "copy" of the TcpDataLink reference for ourselves
-  link->_add_ref();
-  this->link_ = link;
-
-  // Keep a "copy" of the reference to the TransportReactorTask for ourselves.
-  task->_add_ref();
-  this->reactor_task_ = task;
-
 }
 
 OpenDDS::DCPS::TcpSendStrategy::~TcpSendStrategy()

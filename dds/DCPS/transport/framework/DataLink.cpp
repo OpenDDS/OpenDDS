@@ -1264,7 +1264,7 @@ OpenDDS::DCPS::DataLink::handle_timeout(const ACE_Time_Value &/*tv*/,
     //this->impl_ = 0;
 
     TransportSendStrategy_rch send_strategy = 0;
-    TransportReceiveStrategy_rch recv_strategy = 0;
+    TransportStrategy_rch recv_strategy = 0;
     {
       GuardType guard2(this->strategy_lock_);
 

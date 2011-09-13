@@ -23,8 +23,6 @@
 #include "TcpConnection.inl"
 #endif /* __ACE_INLINE__ */
 
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
-
 // The connection lost can be detected by both send and receive strategy. When
 // that happens, both of them add a request to the reconnect task. The reconnect
 // will be attempted when the first request is dequeued and the second request
@@ -186,10 +184,9 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   ACE_UINT32 len = ntohl(nlen);
 
-  char * buf = new char [len];
+  std::vector<char> buf(len);
 
-  if (this->peer().recv_n(buf,
-                          len) == -1) {
+  if (this->peer().recv_n(&buf[0], len) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: TcpConnection::open() - ")
                       ACE_TEXT("unable to receive the address string ")
@@ -199,12 +196,10 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
                      -1);
   }
 
-  const std::string bufstr(buf);
+  const std::string bufstr(&buf[0]);
   NetworkAddress network_order_address(bufstr);
 
   network_order_address.to_addr(this->remote_address_);
-
-  delete[] buf;
 
   ACE_UINT32 priority = 0;
 
@@ -229,7 +224,8 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   // Now it is time to announce (and give) ourselves to the
   // TcpTransport object.
-  transport->passive_connection(this->remote_address_,this);
+  transport->passive_connection(this->remote_address_,
+                                TcpConnection_rch(this, false));
 
   this->connected_ = true;
 

@@ -34,7 +34,8 @@ Factory::participant(const DDS::DomainParticipantFactory_var& dpf) const
 
 
   // Register TypeSupport (Messenger::Message)
-  TEST_CHECK(DDS::RETCODE_OK == typsup_->register_type(dp.in(), typsup_->get_type_name())); // Use the default name for the type
+  CORBA::String_var tn = typsup_->get_type_name();
+  TEST_CHECK(DDS::RETCODE_OK == typsup_->register_type(dp.in(), tn)); // Use the default name for the type
 
   return dp;
 
@@ -51,9 +52,10 @@ Factory::topic(const DDS::DomainParticipant_var& dp) const
   DDS::TopicQos topic_qos;
   TEST_CHECK(DDS::RETCODE_OK == dp->get_default_topic_qos(topic_qos));
 
-  ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) Topic name: %s\n"), typsup_->get_type_name()));
+  CORBA::String_var tn = typsup_->get_type_name();
+  ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) Topic name: %C\n"), tn.in()));
   DDS::Topic_var p(dp->create_topic(topicname.c_str(),
-                                    typsup_->get_type_name(),
+                                    tn,
                                     TOPIC_QOS_DEFAULT,
                                     DDS::TopicListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK));
@@ -161,8 +163,9 @@ Factory::reader(const DDS::Subscriber_var& sub, const DDS::Topic_var& topic, con
   dr_qos.liveliness.lease_duration = opts_.LEASE_DURATION;
   dr_qos.reliability.kind = opts_.reliability_kind;
 
-  DDS::TopicDescription_var description =
-          sub->get_participant()->lookup_topicdescription(topic->get_name());
+  DDS::DomainParticipant_var dp = sub->get_participant();
+  CORBA::String_var tn = topic->get_name();
+  DDS::TopicDescription_var description = dp->lookup_topicdescription(tn);
   TEST_ASSERT(!CORBA::is_nil(description.in()));
 
   DDS::DataReader_var rd(sub->create_datareader(description.in(),

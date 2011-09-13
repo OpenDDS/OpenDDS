@@ -13,8 +13,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-ReceivedDataSample::ReceivedDataSample()
-  : sample_(0)
+ReceivedDataSample::ReceivedDataSample(ACE_Message_Block* payload)
+  : sample_(payload)
 {
   DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample",6);
 }
@@ -24,7 +24,7 @@ ReceivedDataSample::ReceivedDataSample(const ReceivedDataSample& other)
   : header_(other.header_)
   , sample_(ACE_Message_Block::duplicate(other.sample_))
 {
-  DBG_ENTRY_LVL("ReceivedDataSample" ,"ReceivedDataSample(copy)", 6);
+  DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample(copy)", 6);
 }
 
 ACE_INLINE ReceivedDataSample&

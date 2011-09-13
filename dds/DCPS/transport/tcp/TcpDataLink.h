@@ -18,7 +18,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TransportSendStrategy;
-class TransportReceiveStrategy;
+class TransportStrategy;
 
 class TcpDataLink : public DataLink {
 public:
@@ -36,9 +36,9 @@ public:
   /// Called when an established connection object is available
   /// for this TcpDataLink.  Called by the TcpTransport's
   /// connect_datalink() method.
-  int connect(TcpConnection*      connection,
-              TransportSendStrategy*    send_strategy,
-              TransportReceiveStrategy* receive_strategy);
+  int connect(const TcpConnection_rch& connection,
+              const TransportSendStrategy_rch& send_strategy,
+              const TransportStrategy_rch& receive_strategy);
 
   int reconnect(TcpConnection* connection);
 
@@ -48,9 +48,9 @@ public:
   virtual void pre_stop_i();
 
   /// Set release pending flag.
-  void set_release_pending (bool flag);
+  void set_release_pending(bool flag);
   /// Get release pending flag.
-  bool is_release_pending () const;
+  bool is_release_pending() const;
 
 protected:
 

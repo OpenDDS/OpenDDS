@@ -79,6 +79,11 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// Demarshal transport packet from ACE_Message_Block.
   void init(ACE_Message_Block* buffer);
 
+  bool first_fragment() { return this->first_fragment_; }
+  bool last_fragment()  { return this->last_fragment_; }
+  void last_fragment(bool frag) { this->last_fragment_ = frag; }
+  const SequenceNumber& sequence() { return this->sequence_; }
+
 private:
   struct no_init_t {};
   static const no_init_t no_init;

@@ -194,7 +194,7 @@ TcpTransport::connect_datalink_i(const RepoId& /*local_id*/,
   }
 
   // Now we need to attempt to establish a connection for the DataLink.
-  int result = this->make_active_connection(key.address(), link.in());
+  int result = this->make_active_connection(key.address(), link);
 
   if (result != 0) {
     ACE_ERROR((LM_ERROR,
@@ -278,7 +278,7 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
   }
 
   guard.release(); // connect_tcp_datalink() isn't called with connections_lock_
-  if (this->connect_tcp_datalink(ready_link.in(), connection.in()) == -1) {
+  if (this->connect_tcp_datalink(ready_link, connection) == -1) {
     GuardType guard(this->links_lock_);
     this->links_.unbind(ready_key);
     ready_link = 0;
@@ -560,17 +560,14 @@ TcpTransport::get_configuration()
 
 /// This method is called by a TcpConnection object that has been
 /// created and opened by our acceptor_ as a result of passively
-/// accepting a connection on our local address.  The connection object
-/// is "giving itself away" for us to manage.  Ultimately, the connection
+/// accepting a connection on our local address.  Ultimately, the connection
 /// object needs to be paired with a DataLink object that is (or will be)
 /// expecting this passive connection to be established.
 void
 TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
-                                 TcpConnection* connection)
+                                 const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpTransport", "passive_connection", 6);
-  // Take ownership of the passed-in connection pointer.
-  TcpConnection_rch connection_obj = connection;
 
   if (Transport_debug_level > 5) {
     std::stringstream os;
@@ -618,7 +615,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     }
     this->pending_connections_.erase(range.first, range.second);
 
-    if (this->connect_tcp_datalink(link.in(), connection) == -1) {
+    if (this->connect_tcp_datalink(link, connection) == -1) {
       VDBG_LVL((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: connect_tcp_datalink failed\n")), 5);
       GuardType guard(this->links_lock_);
@@ -629,7 +626,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
       GuardType guard(this->links_lock_);
       this->links_.unbind(key);
     } else {
-      this->con_checker_->add(connection_obj);
+      this->con_checker_->add(connection);
     }
     return;
   }
@@ -638,8 +635,8 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   // accept_datalink() call hasn't happened yet.  Store in connections_ for the
   // accept_datalink() method to find.
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n"
-            , this->connections_.size()), 5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n",
+            this->connections_.size()), 5);
 
   // Check and report and problems.
   ConnectionMap::iterator where = this->connections_.find(key);
@@ -654,25 +651,25 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                connection->transport_priority()));
   }
 
-  this->connections_[key] = connection_obj;
+  this->connections_[key] = connection;
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n"
-            , this->connections_.size()), 5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n",
+            this->connections_.size()), 5);
 
   // Enqueue the connection to the reconnect task that verifies if the connection
   // is re-established.
-  this->con_checker_->add(connection_obj);
+  this->con_checker_->add(connection);
 }
 
 /// Actively establish a connection to the remote address.
 int
 TcpTransport::make_active_connection(const ACE_INET_Addr& remote_address,
-                                     TcpDataLink* link)
+                                     const TcpDataLink_rch& link)
 {
-  DBG_ENTRY_LVL("TcpTransport","make_active_connection",6);
+  DBG_ENTRY_LVL("TcpTransport", "make_active_connection", 6);
 
   // Create the connection object here.
-  TcpConnection_rch connection = new TcpConnection();
+  TcpConnection_rch connection = new TcpConnection;
 
   if (DCPS_debug_level > 9) {
     std::stringstream buffer;
@@ -694,15 +691,15 @@ TcpTransport::make_active_connection(const ACE_INET_Addr& remote_address,
     return -1;
   }
 
-  return this->connect_tcp_datalink(link, connection.in());
+  return this->connect_tcp_datalink(link, connection);
 }
 
 /// Common code used by accept_datalink(), passive_connection(), and make_active_connection().
 int
-TcpTransport::connect_tcp_datalink(TcpDataLink* link,
-                                   TcpConnection* connection)
+TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
+                                   const TcpConnection_rch& connection)
 {
-  DBG_ENTRY_LVL("TcpTransport","connect_tcp_datalink",6);
+  DBG_ENTRY_LVL("TcpTransport", "connect_tcp_datalink", 6);
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -711,25 +708,16 @@ TcpTransport::connect_tcp_datalink(TcpDataLink* link,
                link->transport_priority()));
   }
 
-  TransportSendStrategy_rch send_strategy
-  = new TcpSendStrategy(
-    link,
-    this->tcp_config_.in(),
-    connection,
-    new TcpSynchResource(
-      connection,
-      this->tcp_config_->max_output_pause_period_),
-    this->reactor_task_.in(),
-    link->transport_priority());
+  TransportSendStrategy_rch send_strategy =
+    new TcpSendStrategy(link, this->tcp_config_, connection,
+                        new TcpSynchResource(connection,
+                          this->tcp_config_->max_output_pause_period_),
+                        this->reactor_task_, link->transport_priority());
 
-  TransportReceiveStrategy_rch receive_strategy =
-    new TcpReceiveStrategy(link,
-                                 connection,
-                                 this->reactor_task_.in());
+  TransportStrategy_rch receive_strategy =
+    new TcpReceiveStrategy(link, connection, this->reactor_task_);
 
-  if (link->connect(connection,
-                    send_strategy.in(),
-                    receive_strategy.in()) != 0) {
+  if (link->connect(connection, send_strategy, receive_strategy) != 0) {
     return -1;
   }
 

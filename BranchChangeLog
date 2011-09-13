@@ -1,3 +1,104 @@
+Tue Sep 13 17:56:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+
+          Added a few inline methods to make it work with the
+          TransportReceiveStrategy changes (see below).
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportStrategy.h:
+        * dds/DCPS/transport/framework/TransportStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.inl:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSynchResource.h:
+        * dds/DCPS/transport/tcp/TcpSynchResource.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+
+          Refactored transport framework and existing transports to support
+          alternate (RTPS) message headers.  The central change is making the
+          TransportReceiveStrategy a class template so it is not hard-wired to
+          use TransportHeader and DataSampleHeader.  A new class,
+          TransportStrategy was created to handle the parts that can't be in
+          a template because they are used by the DataLink base class.
+          Also changed more transport internal methods to use _rch and
+          automatic reference counting instead of raw pointers and manual
+          manipulation of the reference count.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.cpp:
+
+          Added new classes to be the RTPS equivalents of the OpenDDS
+          TransportHeader (RTPS Message Header) and DataSampleHeader (RTPS
+          Submessage Header and Submessage Elements).  These are just stubbed-
+          out for now.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Adapted rtps_udp for the framework changes.
+
+        * tests/DCPS/ConfigTransports/Factory.cpp:
+        * tests/DCPS/ConfigTransports/common.cpp:
+
+          Fix some DDS and ACE usage errors (memory / refcount leaks, wrong
+          logging format characters).
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Remove unused add_lib_path().
+
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Cleaned up formatting.  ReceivedDataSample no longer has default ctor.
+
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+
+          Can't look at the data sample when !sample_info.valid_data.
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Fixed compiler warnings.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Removed these files.  They have been renamed to the *_T.* variants.
+
 Fri Sep  9 21:00:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsMessageTypes.idl:

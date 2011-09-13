@@ -7,7 +7,7 @@
  */
 
 #include "TransportSendStrategy.h"
-#include "TransportReceiveStrategy.h"
+#include "TransportStrategy.h"
 #include "ThreadPerConnectionSendTask.h"
 #include "EntryExit.h"
 
@@ -204,11 +204,6 @@ OpenDDS::DCPS::DataLink::remove_all_msgs(RepoId pub_id)
   }
 }
 
-/// We use our "this" pointer for our id.  Note that the "this" pointer
-/// is a DataLink* as far as we are concerned.  This *is* different (due
-/// to virtual tables) than the "this" pointer when in a DataLink subclass.
-/// But since this is the only place where a DataLink provides its "id",
-/// this should all work out (comparing ids for equality/inequality).
 ACE_INLINE OpenDDS::DCPS::DataLinkIdType
 OpenDDS::DCPS::DataLink::id() const
 {
@@ -217,39 +212,27 @@ OpenDDS::DCPS::DataLink::id() const
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
-                               TransportReceiveStrategy* receive_strategy)
+OpenDDS::DCPS::DataLink::start(const TransportSendStrategy_rch& send_strategy,
+                               const TransportStrategy_rch& receive_strategy)
 {
   DBG_ENTRY_LVL("DataLink","start",6);
 
   // We assume that the send_strategy is not NULL, but the receive_strategy
   // is allowed to be NULL.
 
-  // Keep a "copy" of the send_strategy.
-  send_strategy->_add_ref(); //ciju: why do this? Cause the ptr was from a .in() and not a .retrn()
-  TransportSendStrategy_rch ss = send_strategy;
-
-  // Keep a "copy" of the receive_strategy (if there is one).
-  TransportReceiveStrategy_rch rs;
-
-  if (receive_strategy != 0) {
-    receive_strategy->_add_ref(); //ciju: Why do this? Same reason as above
-    rs = receive_strategy;
-  }
-
   // Attempt to start the strategies, and if there is a start() failure,
   // make sure to stop() any strategy that was already start()'ed.
-  if (ss->start() != 0) {
+  if (send_strategy->start() != 0) {
     // Failed to start the TransportSendStrategy.
     return -1;
   }
 
-  if ((!rs.is_nil()) && (rs->start() != 0)) {
+  if ((!receive_strategy.is_nil()) && (receive_strategy->start() != 0)) {
     // Failed to start the TransportReceiveStrategy.
 
     // Remember to stop() the TransportSendStrategy since we did start it,
     // and now need to "undo" that action.
-    ss->stop();
+    send_strategy->stop();
 
     return -1;
   }
@@ -259,8 +242,8 @@ OpenDDS::DCPS::DataLink::start(TransportSendStrategy*    send_strategy,
   {
     GuardType guard(this->strategy_lock_);
 
-    this->send_strategy_    = ss._retn();
-    this->receive_strategy_ = rs._retn();
+    this->send_strategy_    = send_strategy;
+    this->receive_strategy_ = receive_strategy;
 
     this->strategy_condition_.broadcast();
   }

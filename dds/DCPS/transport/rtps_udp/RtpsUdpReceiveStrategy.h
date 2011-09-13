@@ -10,8 +10,10 @@
 #define DCPS_RTPSUDPRECEIVESTRATEGY_H
 
 #include "Rtps_Udp_Export.h"
+#include "RtpsTransportHeader.h"
+#include "RtpsSampleHeader.h"
 
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 
 #include "dds/DCPS/RTPS/RtpsBaseMessageTypesC.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
@@ -27,7 +29,7 @@ namespace DCPS {
 class RtpsUdpDataLink;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
-  : public TransportReceiveStrategy,
+  : public TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>,
     public ACE_Event_Handler {
 public:
   explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link);
@@ -46,12 +48,9 @@ protected:
   virtual int start_i();
   virtual void stop_i();
 
-  virtual bool check_header(const TransportHeader& header);
+  virtual bool check_header(const RtpsTransportHeader& header);
 
-  virtual bool check_header(const DataSampleHeader& header)
-  {
-    return TransportReceiveStrategy::check_header(header);
-  }
+  virtual bool check_header(const RtpsSampleHeader& header);
 
 private:
   RtpsUdpDataLink* link_;

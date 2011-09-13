@@ -21,6 +21,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class ReceivedDataSample;
+
 /// One byte message id (<256)
 enum MessageId {
   SAMPLE_DATA,
@@ -204,6 +206,12 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Implement load from buffer.
   void init(ACE_Message_Block* buffer);
 
+  void into_received_data_sample(ReceivedDataSample& rds);
+
+  ACE_UINT32 message_length() { return this->message_length_; }
+
+  bool more_fragments() const { return this->more_fragments_; }
+
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t marshaled_size_;
@@ -213,11 +221,11 @@ private:
 OpenDDS_Dcps_Export
 bool operator<<(ACE_Message_Block&, const DataSampleHeader& value);
 
-/// Message Id enumarion insertion onto an ostream.
+/// Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const MessageId value);
 
-/// Sub-Message Id enumarion insertion onto an ostream.
+/// Sub-Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& os, const SubMessageId rhs);
 
