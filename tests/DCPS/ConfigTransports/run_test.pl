@@ -18,6 +18,7 @@ getopts('d:t:');
 my $debug = $opt_d;
 
 PerlDDS::add_lib_path('../FooType4');
+PerlDDS::add_lib_path('../common');
 
 # An hour should be enough of a timeout for debugging ...
 my $pub_time = $opt_t || ($debug ? 3600 : 5);

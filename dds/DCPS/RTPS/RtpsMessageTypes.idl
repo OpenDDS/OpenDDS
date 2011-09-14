@@ -219,6 +219,77 @@ module OpenDDS {
       LocatorUDPv4_t multicastLocator; // if M
     };
 
+    enum SubmessageKind {
+      RESERVED_0,
+      PAD,            /* = 0x01, Pad */
+      RESERVED_2,
+      RESERVED_3,
+      RESERVED_4,
+      RESERVED_5,
+      ACKNACK,        /* = 0x06, AckNack */
+      HEARTBEAT,      /* = 0x07, Heartbeat */
+      GAP,            /* = 0x08, Gap */
+      INFO_TS,        /* = 0x09, InfoTimestamp */
+      RESERVED_10,
+      RESERVED_11,
+      INFO_SRC,       /* = 0x0c, InfoSource */
+      INFO_REPLY_IP4, /* = 0x0d, InfoReplyIp4 */
+      INFO_DST,       /* = 0x0e, InfoDestination */
+      INFO_REPLY,     /* = 0x0f, InfoReply */
+      RESERVED_16,
+      RESERVED_17,
+      NACK_FRAG,      /* = 0x12, NackFrag */
+      HEARTBEAT_FRAG, /* = 0x13, HeartbeatFrag */
+      RESERVED_20,
+      DATA,           /* = 0x15, Data */
+      DATA_FRAG       /* = 0x16, DataFrag */
+    };
+
+    // The Submessage union is not directly marsahaled, but it's used
+    // for convenience in the implementation.
+    union Submessage switch (SubmessageKind) {
+      case PAD:
+        PadSubmessage pad_;
+
+      case ACKNACK:
+        AckNackSubmessage acknack_;
+
+      case HEARTBEAT:
+        HeartBeatSubmessage heartbeat_;
+
+      case GAP:
+        GapSubmessage gap_;
+
+      case INFO_TS:
+        InfoTimestampSubmessage info_ts_;
+
+      case INFO_SRC:
+        InfoSourceSubmessage info_src_;
+
+      case INFO_REPLY_IP4:
+        InfoReplyIp4Submessage info_reply_ipv4_;
+
+      case INFO_DST:
+        InfoDestinationSubmessage info_dst_;
+
+      case INFO_REPLY:
+        InfoReplySubmessage info_reply_;
+
+      case NACK_FRAG:
+        NackFragSubmessage nack_frag_;
+
+      case HEARTBEAT_FRAG:
+        HeartBeatFragSubmessage hb_frag_;
+
+      case DATA:
+        DataSubmessage data_;
+
+      case DATA_FRAG:
+        DataFragSubmessage data_frag_;
+
+      default:
+        SubmessageHeader unknown_;
+    };
 
     // Section 9.6: "Mapping of the RTPS Protocol"
     // ======== 9.6.2 Data for Built-in Endpoints ========

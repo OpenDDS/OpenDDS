@@ -10,6 +10,7 @@
 #define DCPS_RTPSSAMPLEHEADER_H
 
 #include "ace/Basic_Types.h"
+#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 
 class ACE_Message_Block;
 
@@ -21,23 +22,36 @@ class ReceivedDataSample;
 /// Adapt the TransportReceiveStrategy for RTPS's "sample" (submessage) Header
 struct RtpsSampleHeader {
 
-  static size_t max_marshaled_size();
-  static bool partial(const ACE_Message_Block& mb);
+  // This is not really the max_marshaled_size, but it's used for determining
+  // how much of the submessage to show in debugging hexdumps.  Since we don't
+  // know which kind of submessage we have, we can only count on the 4-byte
+  // SubmessageHeader being present.
+  static size_t max_marshaled_size() { return 4; }
+
+  // We never have partial "sample" headers since this is UDP.
+  // (The header could fail to parse in init(), but unlike the TCP case we
+  // never want to go back to the reactor and wait for more bytes to arrive.)
+  static bool partial(const ACE_Message_Block&) { return false; }
 
   RtpsSampleHeader();
   explicit RtpsSampleHeader(ACE_Message_Block& mb);
   RtpsSampleHeader& operator=(ACE_Message_Block& mn);
 
+  void pdu_remaining(size_t size);
   size_t marshaled_size();
+  ACE_UINT32 message_length();
 
   bool valid() const;
 
   void into_received_data_sample(ReceivedDataSample& rds);
 
-  ACE_UINT32 message_length();
-
   bool more_fragments() const;
 
+  void init(ACE_Message_Block& mb);
+
+  OpenDDS::RTPS::Submessage submessage_;
+  bool valid_;
+  size_t marshaled_size_, message_length_;
 };
 
 }

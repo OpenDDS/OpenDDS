@@ -212,6 +212,8 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   bool more_fragments() const { return this->more_fragments_; }
 
+  void pdu_remaining(size_t) { /* ignored, only RTPS uses this */ }
+
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t marshaled_size_;

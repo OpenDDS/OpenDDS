@@ -10,6 +10,7 @@
 #define DCPS_RTPSTRANSPORTHEADER_H
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 
 class ACE_Message_Block;
 
@@ -32,7 +33,11 @@ struct RtpsTransportHeader {
   void last_fragment(bool frag);
   const SequenceNumber& sequence();
 
+  void init(ACE_Message_Block& mb);
+
   size_t length_;
+  OpenDDS::RTPS::Header header_;
+  bool valid_;
 
   SequenceNumber seq_; //TODO: remove this
 };

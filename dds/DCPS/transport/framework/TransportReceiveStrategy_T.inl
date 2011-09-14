@@ -29,8 +29,14 @@ template<typename TH, typename DSH>
 ACE_INLINE const TH&
 OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::received_header() const
 {
-  DBG_ENTRY_LVL("TransportReceiveStrategy","received_header",6);
   return this->receive_transport_header_;
+}
+
+template<typename TH, typename DSH>
+ACE_INLINE const DSH&
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::received_sample_header() const
+{
+  return this->data_sample_header_;
 }
 
 template<typename TH, typename DSH>

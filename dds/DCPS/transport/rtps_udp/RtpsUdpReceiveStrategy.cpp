@@ -13,6 +13,11 @@
 
 #include "ace/Reactor.h"
 
+namespace {
+  // conversion factor from NTP fractional (2^-32) seconds to nanoseconds
+  const double NTP_FRACS_TO_NANOS = 0.23283064365386962890625;
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -40,6 +45,8 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       int n,
                                       ACE_INET_Addr& remote_address)
 {
+  //TODO: call an ACE recv() method, passing remote_address_ by reference.
+  remote_address = remote_address_;
   return n;
 }
 
@@ -47,7 +54,25 @@ void
 RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                                        const ACE_INET_Addr& remote_address)
 {
-  this->link_->data_received(sample);
+  using namespace OpenDDS::RTPS;
+  const RtpsSampleHeader& rsh = received_sample_header();
+  const SubmessageKind kind = rsh.submessage_._d();
+
+  switch (kind) {
+  case INFO_SRC:
+  case INFO_REPLY_IP4:
+  case INFO_DST:
+  case INFO_REPLY:
+    // No-op: the INFO_* submessages only modify the state of the
+    // MessageReceiver (see check_header()), they are not passed up to DCPS.
+    break;
+  case DATA:
+    receiver_.fill_header(sample.header_);
+    this->link_->data_received(sample);
+    break;
+  default:
+    break;
+  }
 }
 
 int
@@ -92,13 +117,15 @@ RtpsUdpReceiveStrategy::stop_i()
 bool
 RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 {
-  return true;
+  receiver_.reset(remote_address_, header.header_);
+  return header.valid();
 }
 
 bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
-  return true;
+  receiver_.submsg(header.submessage_);
+  return header.valid();
 }
 
 RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(
@@ -133,6 +160,38 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
 
   have_timestamp_ = false;
   timestamp_ = TIME_INVALID;
+}
+
+void
+RtpsUdpReceiveStrategy::MessageReceiver::submsg(
+  const OpenDDS::RTPS::Submessage& s)
+{
+  using namespace OpenDDS::RTPS;
+
+  switch (s._d()) {
+  case INFO_TS:
+    submsg(s.info_ts_());
+    break;
+
+  case INFO_SRC:
+    submsg(s.info_src_());
+    break;
+
+  case INFO_REPLY_IP4:
+    submsg(s.info_reply_ipv4_());
+    break;
+
+  case INFO_DST:
+    submsg(s.info_dst_());
+    break;
+
+  case INFO_REPLY:
+    submsg(s.info_reply_());
+    break;
+
+  default:
+    break;
+  }
 }
 
 void
@@ -217,6 +276,18 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   multicast_reply_locator_list_.length(1);
   multicast_reply_locator_list_[0] = OpenDDS::RTPS::LOCATOR_INVALID;
   have_timestamp_ = false;
+}
+
+void
+RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
+  DataSampleHeader& header) const
+{
+  if (have_timestamp_) {
+    header.source_timestamp_sec_ = timestamp_.seconds;
+    header.source_timestamp_nanosec_ =
+      static_cast<ACE_UINT32>(timestamp_.fraction * NTP_FRACS_TO_NANOS);
+  }
+  assign(header.publication_id_.guidPrefix, source_guid_prefix_);
 }
 
 } // namespace DCPS

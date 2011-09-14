@@ -121,6 +121,14 @@ public:
     this->low_  = ACE_UINT32(value % LOW_BASE);
   }
 
+  void setValue(ACE_INT32 high, ACE_UINT32 low) {
+    this->high_ = high;
+    this->low_ = low;
+    if (this->getValue() < MIN_VALUE) {
+      this->setValue(MIN_VALUE);
+    }
+  }
+
   Value getValue() const {
     return LOW_BASE * this->high_ + this->low_;
   }

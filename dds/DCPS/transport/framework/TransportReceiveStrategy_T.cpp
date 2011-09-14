@@ -620,6 +620,8 @@ TransportReceiveStrategy<TH, DSH>::handle_input()
                   "Hex Dump:\n%s\n", ebuffer));
           }
 
+          this->data_sample_header_.pdu_remaining(this->pdu_remaining_);
+
           //
           // Demarshal the sample header.
           //

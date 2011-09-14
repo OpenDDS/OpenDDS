@@ -63,11 +63,14 @@ private:
     void reset(const ACE_INET_Addr& remote_address,
                const OpenDDS::RTPS::Header& hdr);
 
+    void submsg(const OpenDDS::RTPS::Submessage& s);
     void submsg(const OpenDDS::RTPS::InfoDestinationSubmessage& id);
     void submsg(const OpenDDS::RTPS::InfoReplySubmessage& ir);
     void submsg(const OpenDDS::RTPS::InfoReplyIp4Submessage& iri4);
     void submsg(const OpenDDS::RTPS::InfoTimestampSubmessage& it);
     void submsg(const OpenDDS::RTPS::InfoSourceSubmessage& is);
+
+    void fill_header(DataSampleHeader& header) const;
 
     static inline void assign(OpenDDS::RTPS::GuidPrefix_t& dest,
                               const OpenDDS::RTPS::GuidPrefix_t& src);
@@ -93,6 +96,7 @@ private:
   };
 
   MessageReceiver receiver_;
+  ACE_INET_Addr remote_address_;
 };
 
 inline void

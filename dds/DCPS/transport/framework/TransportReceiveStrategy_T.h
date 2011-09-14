@@ -48,6 +48,10 @@ public:
   /// for subclasses.
   const TH& received_header() const;
 
+  /// Provides access to the received sample header
+  /// for subclasses.
+  const DSH& received_sample_header() const;
+
 protected:
   TransportReceiveStrategy();
 

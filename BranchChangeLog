@@ -1,3 +1,42 @@
+Wed Sep 14 21:55:18 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Added ability to set SequenceNumber from two 32-bit values (hi/lo).
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Moved the SubmessageKind enum into IDL, created a Submessage union.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.inl:
+
+          Provide accessor for current DataSampleHeader.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+
+          New call from Recv Strategy to Data Sample Header to let the header
+          know how many bytes are remaining in the "pdu".
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Continued implementing RTPS-specific receive strategy logic,
+          including adapting the RTPS header data to the DataSampleHeader for
+          use by the DCPS layer.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Restored an add_lib_path() which was mistakenly removed yesterday.
+
 Tue Sep 13 19:54:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.inl:
