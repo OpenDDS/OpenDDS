@@ -1,3 +1,9 @@
+Wed Sep 14 20:49:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mwc:
+
+          Look in model dir for mpb files.
+
 Mon Sep 12 15:46:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerSplit/MessengerSplit.mpc:
