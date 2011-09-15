@@ -28,11 +28,10 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
 }
 
 RtpsUdpDataLink*
-RtpsUdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
-                                bool active)
+RtpsUdpTransport::make_datalink(const RepoId& local_id, bool active)
 {
   RtpsUdpDataLink_rch link;
-  ACE_NEW_RETURN(link, RtpsUdpDataLink(this, active), 0);
+  ACE_NEW_RETURN(link, RtpsUdpDataLink(this, local_id, active), 0);
 
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -55,8 +54,7 @@ RtpsUdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
   ACE_NEW_RETURN(recv_strategy, RtpsUdpReceiveStrategy(link.in()), 0);
   link->receive_strategy(recv_strategy);
 
-  // Open logical connection:
-  if (!link->open(remote_address)) {
+  if (!link->open()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::make_datalink: ")
@@ -89,7 +87,7 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
 DataLink*
 RtpsUdpTransport::accept_datalink(ConnectionEvent& ce)
 {
-  return 0;
+  return make_datalink(ce.local_id_, false);
 }
 
 void
@@ -100,15 +98,16 @@ RtpsUdpTransport::stop_accepting(ConnectionEvent& ce)
 bool
 RtpsUdpTransport::configure_i(TransportInst* config)
 {
-  this->config_i_ = dynamic_cast<RtpsUdpInst*>(config);
-  if (this->config_i_ == 0) {
+  this->config_i_ =
+    RcHandle<RtpsUdpInst>(dynamic_cast<RtpsUdpInst*>(config), false);
+
+  if (this->config_i_.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
                      false);
   }
-  this->config_i_->_add_ref();
 
   this->create_reactor_task();
 

@@ -53,119 +53,42 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
   ACE_CDR::UShort octetsToNextHeader = 0;
 
-  switch (kind) {
-  case PAD:
-    if (ser >> submessage_.pad_()) {
-      octetsToNextHeader = submessage_.pad_().smHeader.submessageLength;
-      submessage_._d(PAD);
-      valid_ = true;
-    }
-    break;
-
-  case ACKNACK:
-    if (ser >> submessage_.acknack_()) {
-      octetsToNextHeader = submessage_.acknack_().smHeader.submessageLength;
-      submessage_._d(ACKNACK);
-      valid_ = true;
-    }
-    break;
-
-  case HEARTBEAT:
-    if (ser >> submessage_.heartbeat_()) {
-      octetsToNextHeader = submessage_.heartbeat_().smHeader.submessageLength;
-      submessage_._d(HEARTBEAT);
-      valid_ = true;
-    }
-    break;
-
-  case GAP:
-    if (ser >> submessage_.gap_()) {
-      octetsToNextHeader = submessage_.gap_().smHeader.submessageLength;
-      submessage_._d(GAP);
-      valid_ = true;
-    }
-    break;
-
-  case INFO_TS:
-    if (ser >> submessage_.info_ts_()) {
-      octetsToNextHeader = submessage_.info_ts_().smHeader.submessageLength;
-      submessage_._d(INFO_TS);
-      valid_ = true;
-    }
-    break;
-
-  case INFO_SRC:
-    if (ser >> submessage_.info_src_()) {
-      octetsToNextHeader = submessage_.info_src_().smHeader.submessageLength;
-      submessage_._d(INFO_SRC);
-      valid_ = true;
-    }
-    break;
-
-  case INFO_REPLY_IP4:
-    if (ser >> submessage_.info_reply_ipv4_()) {
-      octetsToNextHeader = submessage_.info_reply_ipv4_().smHeader.submessageLength;
-      submessage_._d(INFO_REPLY_IP4);
-      valid_ = true;
-    }
-    break;
-
-  case INFO_DST:
-    if (ser >> submessage_.info_dst_()) {
-      octetsToNextHeader = submessage_.info_dst_().smHeader.submessageLength;
-      submessage_._d(INFO_DST);
-      valid_ = true;
-    }
-    break;
-
-  case INFO_REPLY:
-    if (ser >> submessage_.info_reply_()) {
-      octetsToNextHeader = submessage_.info_reply_().smHeader.submessageLength;
-      submessage_._d(INFO_REPLY);
-      valid_ = true;
-    }
-    break;
-
-  case NACK_FRAG:
-    if (ser >> submessage_.nack_frag_()) {
-      octetsToNextHeader = submessage_.nack_frag_().smHeader.submessageLength;
-      submessage_._d(NACK_FRAG);
-      valid_ = true;
-    }
-    break;
-
-  case HEARTBEAT_FRAG:
-    if (ser >> submessage_.hb_frag_()) {
-      octetsToNextHeader = submessage_.hb_frag_().smHeader.submessageLength;
-      submessage_._d(HEARTBEAT_FRAG);
-      valid_ = true;
-    }
-    break;
-
-  case DATA:
-    if (ser >> submessage_.data_()) {
-      octetsToNextHeader = submessage_.data_().smHeader.submessageLength;
-      submessage_._d(DATA);
-      valid_ = true;
-    }
-    break;
-
-  case DATA_FRAG:
-    if (ser >> submessage_.data_frag_()) {
-      octetsToNextHeader = submessage_.data_frag_().smHeader.submessageLength;
-      submessage_._d(DATA_FRAG);
-      valid_ = true;
-    }
-    break;
-
-  default:
-    if (ser >> submessage_.unknown_()) {
-      octetsToNextHeader = submessage_.unknown_().submessageLength;
-      submessage_._d(kind);
-      valid_ = true;
-    }
-    break;
+#define CASE_SMKIND(kind, class, name) case kind: {               \
+    class submessage;                                             \
+    if (ser >> submessage) {                                      \
+      octetsToNextHeader = submessage.smHeader.submessageLength;  \
+      submessage_.name##_(submessage);                            \
+      valid_ = true;                                              \
+    }                                                             \
+    break;                                                        \
   }
+
+  switch (kind) {
+  CASE_SMKIND(PAD, PadSubmessage, pad)
+  CASE_SMKIND(ACKNACK, AckNackSubmessage, acknack)
+  CASE_SMKIND(HEARTBEAT, HeartBeatSubmessage, heartbeat)
+  CASE_SMKIND(GAP, GapSubmessage, gap)
+  CASE_SMKIND(INFO_TS, InfoTimestampSubmessage, info_ts)
+  CASE_SMKIND(INFO_SRC, InfoSourceSubmessage, info_src)
+  CASE_SMKIND(INFO_REPLY_IP4, InfoReplyIp4Submessage, info_reply_ipv4)
+  CASE_SMKIND(INFO_DST, InfoDestinationSubmessage, info_dst)
+  CASE_SMKIND(INFO_REPLY, InfoReplySubmessage, info_reply)
+  CASE_SMKIND(NACK_FRAG, NackFragSubmessage, nack_frag)
+  CASE_SMKIND(HEARTBEAT_FRAG, HeartBeatFragSubmessage, hb_frag)
+  CASE_SMKIND(DATA, DataSubmessage, data)
+  CASE_SMKIND(DATA_FRAG, DataFragSubmessage, data_frag)
+  default:
+    {
+      SubmessageHeader submessage;
+      if (ser >> submessage) {
+        octetsToNextHeader = submessage.submessageLength;
+        submessage_.unknown_(submessage);
+        valid_ = true;
+      }
+      break;
+    }
+  }
+#undef CASE_SMKIND
 
   const ACE_CDR::UShort SMHDR_SZ = 4; // size of SubmessageHeader
 
@@ -208,7 +131,6 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   switch (submessage_._d()) {
   case DATA: {
     const OpenDDS::RTPS::DataSubmessage& rtps = submessage_.data_();
-    opendds.byte_order_ = rtps.smHeader.flags & FLAG_E;
     opendds.cdr_encapsulation_ = true;
     opendds.message_length_ = message_length();
     opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
@@ -237,6 +159,9 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
       // Handle the case of D = 0 and K = 0 (used for Coherent Sets see 8.7.5)
     }
 
+    if (rtps.smHeader.flags & (FLAG_D | FLAG_K)) {
+      opendds.byte_order_ = rds.sample_->rd_ptr()[1] & FLAG_E;
+    }
 
     //TODO: all the rest...
     break;

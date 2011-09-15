@@ -24,6 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
+                                 const RepoId& local_id,
                                  bool active)
   : DataLink(transport,
              0, // priority
@@ -31,13 +32,31 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
              active),// is_active
     active_(active),
     config_(0),
-    reactor_task_(0)
+    reactor_task_(0),
+    local_id_(local_id)
 {
 }
 
 bool
-RtpsUdpDataLink::open(const ACE_INET_Addr& remote_address)
+RtpsUdpDataLink::open()
 {
+  if (this->socket_.open(this->config_->local_address_) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpDataLink::open: socket open: %m\n")),
+                     false);
+  }
+
+  if (start(static_rchandle_cast<TransportSendStrategy>(this->send_strategy_),
+            static_rchandle_cast<TransportStrategy>(this->recv_strategy_))
+      != 0) {
+    stop_i();
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("UdpDataLink::open: start failed!\n")),
+                     false);
+  }
+
   return true;
 }
 

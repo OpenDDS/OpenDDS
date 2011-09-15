@@ -21,6 +21,7 @@
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -31,7 +32,8 @@ class ReceivedDataSample;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink {
 public:
-  RtpsUdpDataLink(RtpsUdpTransport* transport, bool active);
+  RtpsUdpDataLink(RtpsUdpTransport* transport, const RepoId& local_id,
+                  bool active);
 
   void configure(RtpsUdpInst* config,
                  TransportReactorTask* reactor_task);
@@ -46,28 +48,27 @@ public:
 
   ACE_Reactor* get_reactor();
 
-  ACE_INET_Addr& remote_address();
-
   ACE_SOCK_Dgram& socket();
 
-  bool open(const ACE_INET_Addr& remote_address);
+  bool open();
 
   void control_received(ReceivedDataSample& sample,
                         const ACE_INET_Addr& remote_address);
 
-protected:
+  const RepoId& local_id() const { return local_id_; }
+
+private:
+  virtual void stop_i();
+
   bool active_;
 
   RtpsUdpInst* config_;
-  TransportReactorTask* reactor_task_;
+  TransportReactorTask_rch reactor_task_;
 
   RtpsUdpSendStrategy_rch send_strategy_;
   RtpsUdpReceiveStrategy_rch recv_strategy_;
 
-  virtual void stop_i();
-
-private:
-  ACE_INET_Addr remote_address_;
+  RepoId local_id_;
 
   ACE_SOCK_Dgram socket_;
 };

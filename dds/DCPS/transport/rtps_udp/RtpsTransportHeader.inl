@@ -14,7 +14,7 @@ namespace DCPS {
 ACE_INLINE size_t
 RtpsTransportHeader::max_marshaled_size()
 {
-  return 4;
+  return 20;
 }
 
 ACE_INLINE

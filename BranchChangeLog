@@ -1,3 +1,37 @@
+Thu Sep 15 23:01:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_rtps_udp.mpb:
+
+          New base project for linking the RTPS/UDP transport library.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fixed a bug found during testing.  Bug only occurs when the
+          destructor runs while there are still datalinks, which shouldn't
+          happen in real use cases.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued implementation.
+
+        * bin/dcps_tests.lst:
+        * tests/transport/rtps/DDS_transport_rtps.mpc:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/run_test.pl:
+        * tests/transport/rtps/subscriber.cpp:
+
+          New test of the rtps_udp transport type: for now publisher writes
+          bytes directly to the socket (not using the OpenDDS transport).
+          The subscriber uses the transport.
+
 Wed Sep 14 21:55:18 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Definitions.h:

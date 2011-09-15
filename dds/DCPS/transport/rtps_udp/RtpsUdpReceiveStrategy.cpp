@@ -24,14 +24,14 @@ namespace DCPS {
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link)
   : link_(link)
   , last_received_()
-  , receiver_(OpenDDS::DCPS::GUIDPREFIX_UNKNOWN) //TODO: get local prefix from link
+  , receiver_(link->local_id().guidPrefix)
 {
 }
 
 ACE_HANDLE
 RtpsUdpReceiveStrategy::get_handle() const
 {
-  return ACE_INVALID_HANDLE;
+  return link_->socket().get_handle();
 }
 
 int
@@ -45,9 +45,9 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       int n,
                                       ACE_INET_Addr& remote_address)
 {
-  //TODO: call an ACE recv() method, passing remote_address_ by reference.
+  const ssize_t ret = link_->socket().recv(iov, n, remote_address_);
   remote_address = remote_address_;
-  return n;
+  return ret;
 }
 
 void
@@ -95,7 +95,7 @@ RtpsUdpReceiveStrategy::start_i()
                      -1);
   }
 
-  this->enable_reassembly();
+  //this->enable_reassembly();
   return 0;
 }
 
@@ -128,6 +128,9 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
   return header.valid();
 }
 
+
+// MessageReceiver nested class
+
 RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(
   const OpenDDS::RTPS::GuidPrefix_t& local)
 {
@@ -146,13 +149,13 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   assign(source_guid_prefix_, hdr.guidPrefix);
   assign(dest_guid_prefix_, local_);
 
-  unicast_reply_locator_list_.length(0);
+  unicast_reply_locator_list_.length(1);
   unicast_reply_locator_list_[0].kind =
     addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   unicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
   assign(unicast_reply_locator_list_[0].address, addr);
 
-  multicast_reply_locator_list_.length(0);
+  multicast_reply_locator_list_.length(1);
   multicast_reply_locator_list_[0].kind =
     addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   multicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;

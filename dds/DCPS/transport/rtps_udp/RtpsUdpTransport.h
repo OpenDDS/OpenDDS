@@ -58,7 +58,7 @@ protected:
   virtual std::string transport_type() const { return "rtps_udp"; }
 
 private:
-  RtpsUdpDataLink* make_datalink(const ACE_INET_Addr& remote_address, bool active);
+  RtpsUdpDataLink* make_datalink(const RepoId& local_id, bool active);
 
   RcHandle<RtpsUdpInst> config_i_;
 

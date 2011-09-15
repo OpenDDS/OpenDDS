@@ -42,7 +42,7 @@ TransportClient::~TransportClient()
   }
 
   for (DataLinkSet::MapType::iterator iter = links_.map().begin();
-       iter != links_.map().end();) {
+       iter != links_.map().end(); ++iter) {
     iter->second->remove_listener(repo_id_);
   }
 

@@ -14,7 +14,8 @@ RtpsUdpDataLink::configure(RtpsUdpInst* config,
                            TransportReactorTask* reactor_task)
 {
   this->config_ = config;
-  this->reactor_task_ = reactor_task;
+  this->config_->_add_ref();
+  this->reactor_task_ = TransportReactorTask_rch(reactor_task, false);
 }
 
 ACE_INLINE void
@@ -38,13 +39,13 @@ RtpsUdpDataLink::active() const
 ACE_INLINE RtpsUdpInst*
 RtpsUdpDataLink::config()
 {
-  return this->config_;
+  return RcHandle<RtpsUdpInst>(this->config_, false)._retn();
 }
 
 ACE_INLINE TransportReactorTask*
 RtpsUdpDataLink::reactor_task()
 {
-  return this->reactor_task_;
+  return TransportReactorTask_rch(this->reactor_task_)._retn();
 }
 
 ACE_INLINE ACE_Reactor*
@@ -52,12 +53,6 @@ RtpsUdpDataLink::get_reactor()
 {
   if (this->reactor_task_ == 0) return 0;
   return this->reactor_task_->get_reactor();
-}
-
-ACE_INLINE ACE_INET_Addr&
-RtpsUdpDataLink::remote_address()
-{
-  return this->remote_address_;
 }
 
 ACE_INLINE ACE_SOCK_Dgram&
