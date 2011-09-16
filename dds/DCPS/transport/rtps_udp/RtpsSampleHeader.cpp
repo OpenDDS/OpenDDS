@@ -40,16 +40,17 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
   if (mb.length() > 1) {
     flags = mb.rd_ptr()[1];
-  } else if (!mb.cont() || mb.cont()->length() == 0) {
+  } else if (mb.cont() && mb.cont()->length() > 0) {
+    flags = mb.cont()->rd_ptr()[0];
+  } else {
     valid_ = false;
     return;
-  } else {
-    flags = *(mb.cont()->rd_ptr());
   }
 
   const bool little_endian = flags & FLAG_E;
   const size_t starting_length = mb.total_length();
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER != little_endian, Serializer::ALIGN_CDR);
+  Serializer ser(&mb, ACE_CDR_BYTE_ORDER != little_endian,
+                 Serializer::ALIGN_CDR);
 
   ACE_CDR::UShort octetsToNextHeader = 0;
 

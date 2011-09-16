@@ -1,3 +1,15 @@
+Fri Sep 16 16:29:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+
+          Cleanup from yesterday's commit.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Enhance test -- actually check what we receive.
+
 Thu Sep 15 23:01:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_rtps_udp.mpb:

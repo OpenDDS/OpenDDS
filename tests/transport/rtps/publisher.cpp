@@ -14,6 +14,7 @@
 #include <ace/Get_Opt.h>
 #include <ace/SOCK_Dgram.h>
 #include <ace/Message_Block.h>
+#include <ace/OS_NS_sys_time.h>
 
 #include <iostream>
 #include <sstream>
@@ -109,8 +110,14 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
      local_prefix[4], local_prefix[5], local_prefix[6], local_prefix[7],
      local_prefix[8], local_prefix[9], local_prefix[10], local_prefix[11]} };
 
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  ACE_TCHAR ts[50];
+  ACE::timestamp(now, ts, sizeof(ts)/sizeof(ts[0]));
+  ACE_DEBUG((LM_INFO, "Sending with timestamp %s\n", ts));
+  const double conv = 4294.967296; // NTP fractional (2^-32) sec per microsec
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},
-                                       {1315413839, 822079774} };
+    {static_cast<ACE_CDR::Long>(now.sec()),
+     static_cast<ACE_CDR::ULong>(now.usec() * conv)} };
 
   DataSubmessage ds = { {DATA, 7, 20 + 24 + 12 + sizeof(text)}, 0, 16,
     ENTITYID_UNKNOWN, local_guid.entityId, {0, 1}, ParameterList() };

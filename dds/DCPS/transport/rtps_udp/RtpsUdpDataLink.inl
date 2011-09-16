@@ -14,7 +14,6 @@ RtpsUdpDataLink::configure(RtpsUdpInst* config,
                            TransportReactorTask* reactor_task)
 {
   this->config_ = config;
-  this->config_->_add_ref();
   this->reactor_task_ = TransportReactorTask_rch(reactor_task, false);
 }
 
@@ -39,7 +38,7 @@ RtpsUdpDataLink::active() const
 ACE_INLINE RtpsUdpInst*
 RtpsUdpDataLink::config()
 {
-  return RcHandle<RtpsUdpInst>(this->config_, false)._retn();
+  return this->config_;
 }
 
 ACE_INLINE TransportReactorTask*
