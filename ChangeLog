@@ -1,3 +1,9 @@
+Fri Sep 16 14:31:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/simple/run_test.pl:
+
+          Use PerlACE::random_port() to get a random port number.
+
 Wed Sep 14 20:49:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerSplit/MessengerSplit.mwc:

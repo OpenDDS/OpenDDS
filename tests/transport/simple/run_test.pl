@@ -34,14 +34,14 @@ elsif ($ARGV[0] eq 'bp') {
 #
 my $publisherId = 1;
 my $publisherHost = "localhost";
-my $publisherPort = 10001 + PerlACE::uniqueid();
+my $publisherPort = PerlACE::random_port();
 
 #
 # Subscriber parameters.
 #
 my $subscriberId = 2;
 my $subscriberHost = "localhost";
-my $subscriberPort = 10002 + PerlACE::uniqueid();
+my $subscriberPort = PerlACE::random_port();
 my $subreadyfile = "subready.txt";
 unlink $subreadyfile;
 
