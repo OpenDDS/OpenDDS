@@ -97,6 +97,9 @@ private:
 
   MessageReceiver receiver_;
   ACE_INET_Addr remote_address_;
+
+  typedef TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>
+    BASE_TRS;
 };
 
 inline void

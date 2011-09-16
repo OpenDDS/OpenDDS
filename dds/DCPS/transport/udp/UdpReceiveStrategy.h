@@ -44,7 +44,7 @@ protected:
 
   virtual bool check_header(const DataSampleHeader& header)
   {
-    return TransportReceiveStrategy::check_header(header);
+    return TransportReceiveStrategy<>::check_header(header);
   }
 
 private:

@@ -29,7 +29,7 @@ public:
   virtual ACE_HANDLE get_handle() const;
   virtual int handle_input(ACE_HANDLE fd);
 
-  using TransportReceiveStrategy::data_unavailable;
+  using TransportReceiveStrategy<>::data_unavailable;
 
 protected:
   virtual ssize_t receive_bytes(iovec iov[],

@@ -10,6 +10,7 @@
 
 #include "MulticastDataLink.h"
 #include "MulticastInst.h"
+#include "MulticastReceiveStrategy.h"
 
 #include "ace/Global_Macros.h"
 #include "ace/Time_Value.h"

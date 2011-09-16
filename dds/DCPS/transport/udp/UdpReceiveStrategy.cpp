@@ -30,7 +30,7 @@ UdpReceiveStrategy::get_handle() const
 int
 UdpReceiveStrategy::handle_input(ACE_HANDLE /*fd*/)
 {
-  return TransportReceiveStrategy::handle_input();  // delegate to parent
+  return TransportReceiveStrategy<>::handle_input();  // delegate to parent
 }
 
 ssize_t
