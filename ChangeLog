@@ -1,3 +1,10 @@
+Fri Sep 16 19:37:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          More cleanup for older ACE that has no ostream << ACE_Time_Value.
+
 Fri Sep 16 18:21:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:

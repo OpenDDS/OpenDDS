@@ -115,7 +115,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const std::time_t seconds = now.sec();
   std::string timestr(std::ctime(&seconds));
   timestr.erase(timestr.size() - 1); // remove \n from ctime()
-  ACE_DEBUG((LM_INFO, "Sending with timestamp %C %06q usec\n",
+  ACE_DEBUG((LM_INFO, "Sending with timestamp %C %q usec\n",
              timestr.c_str(), ACE_INT64(now.usec())));
   const double conv = 4294.967296; // NTP fractional (2^-32) sec per microsec
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},

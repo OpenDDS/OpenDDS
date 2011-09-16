@@ -62,7 +62,7 @@ public:
     std::ostringstream oss;
     oss << "data_received():\n\t"
       "id = " << int(sample.header_.message_id_) << "\n\t"
-      "timestamp = " << atv << " " << std::ctime(&seconds) << "\t"
+      "timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
       "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
       "byte order = " << sample.header_.byte_order_ << "\n\t"
       "length = " << sample.header_.message_length_ << "\n\t"
