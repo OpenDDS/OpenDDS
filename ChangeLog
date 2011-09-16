@@ -1,3 +1,13 @@
+Fri Sep 16 19:22:58 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+          Exclude using mlockall on Android since it is defined but not
+          implemented on the platform.
+
 Fri Sep 16 14:31:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/simple/run_test.pl:
