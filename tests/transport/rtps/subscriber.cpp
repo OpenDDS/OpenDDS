@@ -110,7 +110,7 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   ACE_TString host;
-  u_short port;
+  u_short port = 0;
 
   ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
   int option = 0;

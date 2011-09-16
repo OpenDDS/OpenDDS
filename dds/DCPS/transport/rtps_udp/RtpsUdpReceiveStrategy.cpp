@@ -14,8 +14,8 @@
 #include "ace/Reactor.h"
 
 namespace {
-  // conversion factor from NTP fractional (2^-32) seconds to nanoseconds
-  const double NTP_FRACS_TO_NANOS = 0.23283064365386962890625;
+  // conversion factor from nanoseconds to NTP fractional (2^-32) seconds
+  const double NANOS_TO_NTP_FRACS = 4.294967296;
 }
 
 namespace OpenDDS {
@@ -288,7 +288,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
   if (have_timestamp_) {
     header.source_timestamp_sec_ = timestamp_.seconds;
     header.source_timestamp_nanosec_ =
-      static_cast<ACE_UINT32>(timestamp_.fraction * NTP_FRACS_TO_NANOS);
+      static_cast<ACE_UINT32>(timestamp_.fraction / NANOS_TO_NTP_FRACS);
   }
   assign(header.publication_id_.guidPrefix, source_guid_prefix_);
 }

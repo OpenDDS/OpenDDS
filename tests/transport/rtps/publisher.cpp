@@ -19,6 +19,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
+#include <ctime>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -72,7 +73,7 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   ACE_TString host;
-  u_short port;
+  u_short port = 0;
 
   ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
   int option = 0;
@@ -111,9 +112,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
      local_prefix[8], local_prefix[9], local_prefix[10], local_prefix[11]} };
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
-  ACE_TCHAR ts[50];
-  ACE::timestamp(now, ts, sizeof(ts)/sizeof(ts[0]));
-  ACE_DEBUG((LM_INFO, "Sending with timestamp %s\n", ts));
+  const std::time_t seconds = now.sec();
+  std::string timestr(std::ctime(&seconds));
+  timestr.erase(timestr.size() - 1); // remove \n from ctime()
+  ACE_DEBUG((LM_INFO, "Sending with timestamp %C %06q usec\n",
+             timestr.c_str(), ACE_INT64(now.usec())));
   const double conv = 4294.967296; // NTP fractional (2^-32) sec per microsec
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},
     {static_cast<ACE_CDR::Long>(now.sec()),
