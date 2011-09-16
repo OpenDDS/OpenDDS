@@ -2187,8 +2187,11 @@ void
   // can be notified the dispose event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal(sample, instance, just_registered, filtered,
-                      OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+  OpenDDS::DCPS::MarshalingType marshaling = OpenDDS::DCPS::FULL_MARSHALING;
+  if (sample.header_.key_fields_only_) {
+    marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
+  }
+  this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
 }
 
 void
@@ -2203,8 +2206,11 @@ void
   // can be notified the unregister event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal (sample, instance, just_registered, filtered,
-                       OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+  OpenDDS::DCPS::MarshalingType marshaling = OpenDDS::DCPS::FULL_MARSHALING;
+  if (sample.header_.key_fields_only_) {
+    marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
+  }
+  this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
 }
 
 DDS::ReturnCode_t

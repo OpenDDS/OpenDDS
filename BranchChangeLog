@@ -1,3 +1,22 @@
+Fri Sep 16 22:12:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * tools/dissector/packet-opendds.cpp:
+
+          Use a free bit in the 2nd flag byte to indicate "key only" marshaling.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Make use of that flag instead of a always assuming that the "instance
+          control" types of messages are key-only.  This will allow us to
+          interoperate with other RTPS implementations that send the entire
+          data sample payload in instance control messages.
+
 Fri Sep 16 18:35:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:

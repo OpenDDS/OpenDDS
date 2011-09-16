@@ -1865,6 +1865,11 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.publication_id_ = publication_id_;
   header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
 
+  if (message_id == INSTANCE_REGISTRATION || message_id == DISPOSE_INSTANCE
+      || message_id == UNREGISTER_INSTANCE) {
+    header_data.key_fields_only_ = true;
+  }
+
   ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size();
 

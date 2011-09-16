@@ -56,6 +56,11 @@ enum DataSampleHeaderFlag {
   MORE_FRAGMENTS_FLAG
 };
 
+enum DataSampleHeaderFlag2 {
+  CDR_ENCAP_FLAG,
+  KEY_ONLY_FLAG
+};
+
 /// The header message of a data sample.
 /// This header and the data sample are in different
 /// message block and will be chained together.
@@ -98,9 +103,17 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// The current "Data Sample" needs reassembly before further processing.
   bool more_fragments_ : 1;
 
+  // bools above this line are in the first flags byte, below this line are
+  // in the second flags byte.  To avoid complicating the implementation of
+  // partial(), flags that impact the size of serialized DataSampleHeader
+  // should go in the first flags byte.
+
   /// The data payload uses CDR encapsulation and alignment rules, as defined
   /// by the RTPS specification formal/2010-11-01.
   bool cdr_encapsulation_ : 1;
+
+  /// Only the key fields of the data sample are present in the payload.
+  bool key_fields_only_ : 1;
 
   bool reserved_1 : 1;
   bool reserved_2 : 1;
@@ -108,7 +121,6 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   bool reserved_4 : 1;
   bool reserved_5 : 1;
   bool reserved_6 : 1;
-  bool reserved_7 : 1;
 
   /// The size of the data sample (without header).  After this header is
   /// demarshaled, the transport expects to see this many bytes in the stream
@@ -156,7 +168,8 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Indicates which readers should not receive the data.
   GUIDSeq content_filter_entries_;
 
-  static long mask_flag(DataSampleHeaderFlag flag);
+  static ACE_UINT8 mask_flag(DataSampleHeaderFlag  flag) { return 1 << flag; }
+  static ACE_UINT8 mask_flag(DataSampleHeaderFlag2 flag) { return 1 << flag; }
 
   static void clear_flag(DataSampleHeaderFlag flag,
                          ACE_Message_Block* buffer);

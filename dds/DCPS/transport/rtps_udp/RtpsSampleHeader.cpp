@@ -154,8 +154,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
       }
     }
 
-    if ((rtps.smHeader.flags & FLAG_D) && opendds.message_id_ != SAMPLE_DATA) {
-      // DCPS expects the key fields only.  Use another bit in the DSH?
+    if (rtps.smHeader.flags & FLAG_K) {
+      opendds.key_fields_only_ = true;
     } else if (!(rtps.smHeader.flags & (FLAG_D | FLAG_K))) {
       // Handle the case of D = 0 and K = 0 (used for Coherent Sets see 8.7.5)
     }

@@ -88,6 +88,7 @@ int hf_sample_flags_seq_repair  = -1;
 int hf_sample_flags_more_frags  = -1;
 int hf_sample_flags2            = -1;
 int hf_sample_flags2_cdr_encap  = -1;
+int hf_sample_flags2_key_only   = -1;
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -105,6 +106,7 @@ const int* sample_flags_fields[] = {
 const int sample_flags2_bits = 8;
 const int* sample_flags2_fields[] = {
   &hf_sample_flags2_cdr_encap,
+  &hf_sample_flags2_key_only,
   NULL
 };
 
@@ -743,7 +745,7 @@ namespace OpenDDS
         },
         { &hf_sample_flags_coherent,
             { "Coherent", "opendds.sample.flags.coherent",
-                FT_BOOLEAN, sample_flags_bits, BF_HFILL (1)
+                FT_BOOLEAN, sample_flags_bits, BF_HFILL(1)
                 }
         },
         { &hf_sample_flags_historic,
@@ -784,6 +786,11 @@ namespace OpenDDS
         { &hf_sample_flags2_cdr_encap,
             { "CDR Encapsulation", "opendds.sample.flags2.cdr_encap",
               FT_BOOLEAN, sample_flags2_bits, BF_HFILL(0)
+            }
+        },
+        { &hf_sample_flags2_key_only,
+            { "Key Fields Only", "opendds.sample.flags2.key_only",
+              FT_BOOLEAN, sample_flags2_bits, BF_HFILL(1)
             }
         },
         { &hf_sample_length,

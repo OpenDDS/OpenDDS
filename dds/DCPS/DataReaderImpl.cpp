@@ -1354,7 +1354,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool is_new_instance = false;
     bool filtered = false;
     MarshalingType marshaling = FULL_MARSHALING;
-    if (sample.header_.message_id_ == INSTANCE_REGISTRATION) {
+    if (sample.header_.key_fields_only_) {
       marshaling = KEY_ONLY_MARSHALING;
     }
     dds_demarshal(sample, instance, is_new_instance, filtered, marshaling);

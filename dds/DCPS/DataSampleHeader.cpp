@@ -192,7 +192,8 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(byte);
 
-  this->cdr_encapsulation_ = byte & 1;
+  this->cdr_encapsulation_ = byte & mask_flag(CDR_ENCAP_FLAG);
+  this->key_fields_only_   = byte & mask_flag(KEY_ONLY_FLAG);
 
   reader >> this->message_length_;
 
@@ -265,7 +266,9 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
                          ;
   writer << ACE_OutputCDR::from_octet(flags);
 
-  flags = value.cdr_encapsulation_;
+  flags = (value.cdr_encapsulation_ << CDR_ENCAP_FLAG)
+        | (value.key_fields_only_   << KEY_ONLY_FLAG)
+        ;
   writer << ACE_OutputCDR::from_octet(flags);
 
   writer << value.message_length_;
@@ -500,6 +503,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.sequence_repair_ == 1) str << "Sequence Repair, ";
     if (value.more_fragments_ == 1) str << "More Fragments, ";
     if (value.cdr_encapsulation_ == 1) str << "CDR Encapsulation, ";
+    if (value.key_fields_only_ == 1) str << "Key Fields Only, ";
 
     str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
         << value.sequence_.getValue() << ", ";

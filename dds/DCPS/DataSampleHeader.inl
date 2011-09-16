@@ -19,13 +19,13 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , sequence_repair_(0)
   , more_fragments_(0)
   , cdr_encapsulation_(0)
+  , key_fields_only_(0)
   , reserved_1(0)
   , reserved_2(0)
   , reserved_3(0)
   , reserved_4(0)
   , reserved_5(0)
   , reserved_6(0)
-  , reserved_7(0)
   , message_length_(0)
   , sequence_()
   , source_timestamp_sec_(0)
@@ -49,13 +49,13 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , sequence_repair_(0)
   , more_fragments_(0)
   , cdr_encapsulation_(0)
+  , key_fields_only_(0)
   , reserved_1(0)
   , reserved_2(0)
   , reserved_3(0)
   , reserved_4(0)
   , reserved_5(0)
   , reserved_6(0)
-  , reserved_7(0)
   , message_length_(0)
   , sequence_()
   , source_timestamp_sec_(0)
@@ -97,13 +97,6 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
         16 ; // publisher_id_;
   // content_filter_entries_ is not marsahled into the same Data Block
   // so it is not part of the max_marshaled_size() which is used to allocate
-}
-
-ACE_INLINE
-long
-OpenDDS::DCPS::DataSampleHeader::mask_flag(DataSampleHeaderFlag flag)
-{
-  return 1 << flag;
 }
 
 /// The clear_flag and set_flag methods are a hack to update the
