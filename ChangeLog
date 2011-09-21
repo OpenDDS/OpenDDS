@@ -1,3 +1,10 @@
+Wed Sep 21 22:34:38 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Print a warning if and orb.idl file is being included to
+          specify the correct path to use for a tao orb.idl include.
+
 Fri Sep 16 19:22:58 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
