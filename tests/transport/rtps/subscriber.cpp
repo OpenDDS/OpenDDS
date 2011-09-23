@@ -26,7 +26,7 @@ class SimpleDataReader : public TransportReceiveListener, public TransportClient
 public:
 
   explicit SimpleDataReader(const RepoId& sub_id)
-    : message_received_(false)
+    : done_(false)
     , sub_id_(sub_id)
   {}
 
@@ -42,8 +42,6 @@ public:
 
   void data_received(const ReceivedDataSample& sample)
   {
-    message_received_ = true;
-
     Serializer ser(sample.sample_,
                    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                    Serializer::ALIGN_CDR);
@@ -53,6 +51,16 @@ public:
     ok &= (ser >> key);
     CORBA::String_var value;
     ok &= (ser >> value.out());
+
+    if (!ok) {
+      ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
+      return;
+    }
+
+    if (key == 99) {
+      done_ = true;
+      return;
+    }
 
     GuidConverter pub(sample.header_.publication_id_);
     DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
@@ -100,7 +108,7 @@ public:
   using TransportClient::enable_transport;
   using TransportClient::disassociate;
 
-  bool message_received_;
+  bool done_;
   const RepoId& sub_id_;
   RepoId pub_id_;
 };
@@ -172,11 +180,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   std::cout << "Associating with pub..." << std::endl;
   if (!sdr.init(publication)) {
-    std::cerr << "TransportClient::associate() failed\n";
+    std::cerr << "subscriber TransportClient::associate() failed\n";
     return 1;
   }
 
-  while (!sdr.message_received_) {
+  while (!sdr.done_) {
     ACE_OS::sleep(1);
   }
 

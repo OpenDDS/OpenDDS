@@ -1296,7 +1296,7 @@ TransportSendStrategy::send_stop()
       return;
     }
 
-    size_t header_length = this->header_.length_;// + this->not_yet_pac_q_len_;
+    size_t header_length = this->header_.length_;
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "We are in MODE_DIRECT in an important send_stop() - "
           "header_.length_ == [%d].\n", header_length));
@@ -1745,8 +1745,7 @@ TransportSendStrategy::prepare_packet()
                       this->header_db_allocator_,
                       this->header_mb_allocator_));
 
-  // Marshal the packet header_ into the header_block_.
-  *this->header_block_ << this->header_;
+  marshal_transport_header(this->header_block_);
 
   this->pkt_chain_ = this->header_block_->duplicate();
 
@@ -1780,6 +1779,12 @@ TransportSendStrategy::prepare_packet()
   // that the first block in the pkt_chain_ is the packet header block
   // (actually a duplicate() of the packet header_block_).
   this->header_complete_ = false;
+}
+
+void
+TransportSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
+{
+  *mb << this->header_;
 }
 
 void

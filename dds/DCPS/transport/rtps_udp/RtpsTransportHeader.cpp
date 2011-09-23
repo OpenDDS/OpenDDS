@@ -17,6 +17,7 @@
 
 namespace {
   const ACE_CDR::Octet PROTOCOL_RTPS[] = {'R', 'T', 'P', 'S'};
+  const OpenDDS::DCPS::SequenceNumber dummy;
 }
 
 namespace OpenDDS {
@@ -26,7 +27,7 @@ void
 RtpsTransportHeader::init(ACE_Message_Block& mb)
 {
   // Byte order doesn't matter for RTPS::Header, since it's
-  // all structs and arrays of octet.
+  // exclusively structs/arrays of octet.
   Serializer ser(&mb, false, Serializer::ALIGN_CDR);
   valid_ = (ser >> header_);
 
@@ -42,6 +43,12 @@ RtpsTransportHeader::init(ACE_Message_Block& mb)
                         PROTOCOL_RTPS);
     valid_ &= (header_.version.major == OpenDDS::RTPS::PROTOCOLVERSION.major);
   }
+}
+
+const SequenceNumber&
+RtpsTransportHeader::sequence()
+{
+  return dummy;
 }
 
 }

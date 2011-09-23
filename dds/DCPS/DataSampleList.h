@@ -119,6 +119,8 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
   /// Timestamp for the sample when it was first written.
   DDS::Time_t source_timestamp_;
 
+  SequenceNumber sequence_;
+
   /// Used to make removal from the
   /// container _much_ more efficient.
 

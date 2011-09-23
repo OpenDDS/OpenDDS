@@ -283,54 +283,54 @@ module OpenDDS {
     union Parameter switch (ParameterId_t) {
       case PID_TOPIC_NAME:
       case PID_TOPIC_TYPE:
-        String256 string_data_;
+        String256 string_data;
 
       // DDS Quality-of-Service (QoS) structs
       case PID_USER_DATA:
-        DDS::UserDataQosPolicy user_data_;
+        DDS::UserDataQosPolicy user_data;
       case PID_GROUP_DATA:
-        DDS::GroupDataQosPolicy group_data_;
+        DDS::GroupDataQosPolicy group_data;
       case PID_TOPIC_DATA:
-        DDS::TopicDataQosPolicy topic_data_;
+        DDS::TopicDataQosPolicy topic_data;
       case PID_DURABILITY:
-        DDS::DurabilityQosPolicy durability_;
+        DDS::DurabilityQosPolicy durability;
       case PID_DURABILITY_SERVICE:
-        DDS::DurabilityServiceQosPolicy durability_service_;
+        DDS::DurabilityServiceQosPolicy durability_service;
       case PID_DEADLINE:
-        DDS::DeadlineQosPolicy deadline_;
+        DDS::DeadlineQosPolicy deadline;
       case PID_LATENCY_BUDGET:
-        DDS::LatencyBudgetQosPolicy latency_budget_;
+        DDS::LatencyBudgetQosPolicy latency_budget;
       case PID_LIVELINESS:
-        DDS::LivelinessQosPolicy liveliness_;
+        DDS::LivelinessQosPolicy liveliness;
       case PID_RELIABILITY:
-        DDS::ReliabilityQosPolicy reliability_;
+        DDS::ReliabilityQosPolicy reliability;
       case PID_LIFESPAN:
-        DDS::LifespanQosPolicy lifespan_;
+        DDS::LifespanQosPolicy lifespan;
       case PID_DESTINATION_ORDER:
-        DDS::DestinationOrderQosPolicy destination_order_;
+        DDS::DestinationOrderQosPolicy destination_order;
       case PID_HISTORY:
-        DDS::HistoryQosPolicy history_;
+        DDS::HistoryQosPolicy history;
       case PID_RESOURCE_LIMITS:
-        DDS::ResourceLimitsQosPolicy resource_limits_;
+        DDS::ResourceLimitsQosPolicy resource_limits;
       case PID_OWNERSHIP:
-        DDS::OwnershipQosPolicy ownership_;
+        DDS::OwnershipQosPolicy ownership;
       case PID_OWNERSHIP_STRENGTH:
-        DDS::OwnershipStrengthQosPolicy ownership_strength_;
+        DDS::OwnershipStrengthQosPolicy ownership_strength;
       case PID_PRESENTATION:
-        DDS::PresentationQosPolicy presentation_;
+        DDS::PresentationQosPolicy presentation;
       case PID_PARTITION:
-        DDS::PartitionQosPolicy partition_;
+        DDS::PartitionQosPolicy partition;
       case PID_TIME_BASED_FILTER:
-        DDS::TimeBasedFilterQosPolicy time_based_filter_;
+        DDS::TimeBasedFilterQosPolicy time_based_filter;
       case PID_TRANSPORT_PRIORITY:
-        DDS::TransportPriorityQosPolicy transport_priority_;
+        DDS::TransportPriorityQosPolicy transport_priority;
 
       // RTPS-defined data types
       case PID_PROTOCOL_VERSION:
-        ProtocolVersion_t version_;
+        ProtocolVersion_t version;
 
       case PID_VENDORID:
-        VendorId_t vendor_;
+        VendorId_t vendor;
 
       case PID_UNICAST_LOCATOR:
       case PID_MULTICAST_LOCATOR:
@@ -338,13 +338,13 @@ module OpenDDS {
       case PID_DEFAULT_MULTICAST_LOCATOR:
       case PID_METATRAFFIC_UNICAST_LOCATOR:
       case PID_METATRAFFIC_MULTICAST_LOCATOR:
-        Locator_t locator_;
+        Locator_t locator;
 
       case PID_MULTICAST_IPADDRESS:
       case PID_DEFAULT_UNICAST_IPADDRESS:
       case PID_METATRAFFIC_UNICAST_IPADDRESS:
       case PID_METATRAFFIC_MULTICAST_IPADDRESS:
-        unsigned long ipv4_address_;
+        unsigned long ipv4_address;
         //NOTE: the spec uses "IPv4Address_t" which is not defined anywhere.
         //      We have chosen unsigned long to match the type of
         //      the address field in the LocatorUDPv4_t struct.
@@ -352,66 +352,66 @@ module OpenDDS {
       case PID_DEFAULT_UNICAST_PORT:
       case PID_METATRAFFIC_UNICAST_PORT:
       case PID_METATRAFFIC_MULTICAST_PORT:
-        unsigned long udpv4_port_;
+        unsigned long udpv4_port;
         //NOTE: the spec uses "Port_t" which is not defined anywhere.
         //      We have chosen unsigned long to match the type of
         //      the port field in the LocatorUDPv4_t struct.
 
       case PID_EXPECTS_INLINE_QOS:
-        boolean expects_inline_qos_;
+        boolean expects_inline_qos;
 
       case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
-        Count_t count_;
+        Count_t count;
 
       case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
-        unsigned long participant_builtin_endpoints_;
+        unsigned long participant_builtin_endpoints;
 
       case PID_PARTICIPANT_LEASE_DURATION:
-        Duration_t duration_;
+        Duration_t duration;
 
       case PID_CONTENT_FILTER_PROPERTY:
-        ContentFilterProperty_t content_filter_property_;
+        ContentFilterProperty_t content_filter_property;
 
       case PID_PARTICIPANT_GUID:
       case PID_GROUP_GUID:
-        GUID_t guid_;
+        GUID_t guid;
 
       case PID_PARTICIPANT_ENTITYID:
       case PID_GROUP_ENTITYID:
-        EntityId_t entity_id_;
+        EntityId_t entity_id;
 
       case PID_BUILTIN_ENDPOINT_SET:
-        BuiltinEndpointSet_t builtin_endpoints_;
+        BuiltinEndpointSet_t builtin_endpoints;
 
       case PID_PROPERTY_LIST:
-        PropertySeq properties_;
+        PropertySeq properties;
 
       case PID_TYPE_MAX_SIZE_SERIALIZED:
-        long type_max_size_serialized_;
+        long type_max_size_serialized;
 
       case PID_ENTITY_NAME:
-        EntityName_t entity_name_;
+        EntityName_t entity_name;
 
       case PID_KEY_HASH:
-        KeyHash_t key_hash_;
+        KeyHash_t key_hash;
 
       case PID_STATUS_INFO:
-        StatusInfo_t status_info_;
+        StatusInfo_t status_info;
 
       case PID_CONTENT_FILTER_INFO:
-        ContentFilterInfo_t content_filter_info_;
+        ContentFilterInfo_t content_filter_info;
 
       case PID_COHERENT_SET:
-        SequenceNumber_t coherent_set_;
+        SequenceNumber_t coherent_set;
 
       case PID_DIRECTED_WRITE:
-        GUIDSeq directed_write_;
+        GUIDSeq directed_write;
 
       case PID_ORIGINAL_WRITER_INFO:
-        OriginalWriterInfo_t original_writer_info_;
+        OriginalWriterInfo_t original_writer_info;
 
       default:
-        OctetSeq unknown_data_;
+        OctetSeq unknown_data;
     };
   };
 };

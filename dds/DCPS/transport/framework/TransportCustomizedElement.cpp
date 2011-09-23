@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportCustomizedElement.h"
 #include "TransportSendListener.h"
+#include "TransportSendElement.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportCustomizedElement.inl"
@@ -65,6 +66,12 @@ TransportCustomizedElement::set_msg(ACE_Message_Block* m)
 {
   DBG_ENTRY_LVL("TransportCustomizedElement", "set_msg", 6);
   msg_ = m;
+}
+
+const TransportSendElement*
+TransportCustomizedElement::original_send_element() const
+{
+  return dynamic_cast<TransportSendElement*>(orig_);
 }
 
 } // namespace DCPS

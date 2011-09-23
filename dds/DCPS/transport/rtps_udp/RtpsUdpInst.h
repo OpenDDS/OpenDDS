@@ -21,7 +21,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
 
   /// for testing
-  ACE_INET_Addr local_address_;
+  ACE_INET_Addr local_address_, remote_address_;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);

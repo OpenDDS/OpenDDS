@@ -1699,6 +1699,7 @@ DataWriterImpl::write(DataSample* data,
 
   element->source_timestamp_.sec     = source_timestamp.sec;
   element->source_timestamp_.nanosec = source_timestamp.nanosec;
+  element->sequence_                 = this->sequence_number_;
 
   element->filter_out_ = filter_out_var._retn(); // ownership passed to element
 

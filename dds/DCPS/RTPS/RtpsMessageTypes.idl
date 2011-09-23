@@ -245,51 +245,51 @@ module OpenDDS {
       DATA_FRAG       /* = 0x16, DataFrag */
     };
 
-    // The Submessage union is not directly marsahaled, but it's used
-    // for convenience in the implementation.
     union Submessage switch (SubmessageKind) {
       case PAD:
-        PadSubmessage pad_;
+        PadSubmessage pad_sm;
 
       case ACKNACK:
-        AckNackSubmessage acknack_;
+        AckNackSubmessage acknack_sm;
 
       case HEARTBEAT:
-        HeartBeatSubmessage heartbeat_;
+        HeartBeatSubmessage heartbeat_sm;
 
       case GAP:
-        GapSubmessage gap_;
+        GapSubmessage gap_sm;
 
       case INFO_TS:
-        InfoTimestampSubmessage info_ts_;
+        InfoTimestampSubmessage info_ts_sm;
 
       case INFO_SRC:
-        InfoSourceSubmessage info_src_;
+        InfoSourceSubmessage info_src_sm;
 
       case INFO_REPLY_IP4:
-        InfoReplyIp4Submessage info_reply_ipv4_;
+        InfoReplyIp4Submessage info_reply_ipv4_sm;
 
       case INFO_DST:
-        InfoDestinationSubmessage info_dst_;
+        InfoDestinationSubmessage info_dst_sm;
 
       case INFO_REPLY:
-        InfoReplySubmessage info_reply_;
+        InfoReplySubmessage info_reply_sm;
 
       case NACK_FRAG:
-        NackFragSubmessage nack_frag_;
+        NackFragSubmessage nack_frag_sm;
 
       case HEARTBEAT_FRAG:
-        HeartBeatFragSubmessage hb_frag_;
+        HeartBeatFragSubmessage hb_frag_sm;
 
       case DATA:
-        DataSubmessage data_;
+        DataSubmessage data_sm;
 
       case DATA_FRAG:
-        DataFragSubmessage data_frag_;
+        DataFragSubmessage data_frag_sm;
 
       default:
-        SubmessageHeader unknown_;
+        SubmessageHeader unknown_sm;
     };
+
+    typedef sequence<Submessage> SubmessageSeq;
 
     // Section 9.6: "Mapping of the RTPS Protocol"
     // ======== 9.6.2 Data for Built-in Endpoints ========

@@ -1051,6 +1051,10 @@ namespace {
 
       } else if (cxx == "OpenDDS::RTPS::InfoReplyIp4Submessage") {
         cst_["multicastLocator"] = "stru.smHeader.flags & 2";
+
+      } else if (cxx == "OpenDDS::RTPS::SubmessageHeader") {
+        preamble_ =
+          "  strm.swap_bytes(ACE_CDR_BYTE_ORDER != (stru.flags & 1));\n";
       }
     }
 
@@ -1076,7 +1080,7 @@ namespace {
     }
 
     std::map<string, string> cst_;
-    string iQosOffset_;
+    string iQosOffset_, preamble_;
   };
 }
 
@@ -1121,7 +1125,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
-    string expr, intro;
+    string expr, intro = rtpsCustom.preamble_;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (i) expr += "\n    && ";
       const string field_name = fields[i]->local_name()->get_string(),
@@ -1506,12 +1510,14 @@ namespace {
 
   bool isRtpsSpecialUnion(const string& cxx)
   {
-    return cxx == "OpenDDS::RTPS::Parameter";
+    return cxx == "OpenDDS::RTPS::Parameter"
+      || cxx == "OpenDDS::RTPS::Submessage";
   }
 
-  bool genRtpsSpecialUnion(const string& cxx, AST_Type* discriminator,
-                           const std::vector<AST_UnionBranch*>& branches)
+  bool genRtpsParameter(AST_Type* discriminator,
+                        const std::vector<AST_UnionBranch*>& branches)
   {
+    const string cxx = "OpenDDS::RTPS::Parameter";
     {
       Function find_size("gen_find_size", "void");
       find_size.addArg("uni", "const " + cxx + "&");
@@ -1558,7 +1564,8 @@ namespace {
         "  }\n"
         "  if (outer_strm.alignment() == Serializer::ALIGN_INITIALIZE) {\n"
         "    static const ACE_CDR::Octet padding[4] = {0};\n"
-        "    return outer_strm.write_octet_array(padding, ACE_CDR::ULong(pad));\n"
+        "    return outer_strm.write_octet_array(padding, "
+        "ACE_CDR::ULong(pad));\n"
         "  }\n"
         "  return true;\n";
     }
@@ -1599,15 +1606,66 @@ namespace {
       be_global->impl_ <<
         "  default:\n"
         "    {\n"
-        "      uni.unknown_data_(OpenDDS::RTPS::OctetSeq(size));\n"
-        "      uni.unknown_data_().length(size);\n"
-        "      std::memcpy(uni.unknown_data_().get_buffer(), data, size);\n"
+        "      uni.unknown_data(OpenDDS::RTPS::OctetSeq(size));\n"
+        "      uni.unknown_data().length(size);\n"
+        "      std::memcpy(uni.unknown_data().get_buffer(), data, size);\n"
         "      uni._d(disc);\n"
         "    }\n"
         "  }\n"
         "  return true;\n";
     }
     return true;
+  }
+
+  bool genRtpsSubmessage(AST_Type* discriminator,
+                         const std::vector<AST_UnionBranch*>& branches)
+  {
+    const string cxx = "OpenDDS::RTPS::Submessage";
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("uni", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
+                                 "", "", cxx);
+      be_global->impl_ <<
+        "  }\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("uni", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+                                 "return", "<< ", cxx);
+      be_global->impl_ <<
+        "  }\n";
+    }
+    {
+      Function insertion("operator>>", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("uni", cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ << "  // unused\n  return false;\n";
+    }
+    return true;
+  }
+
+  bool genRtpsSpecialUnion(const string& cxx, AST_Type* discriminator,
+                           const std::vector<AST_UnionBranch*>& branches)
+  {
+    if (cxx == "OpenDDS::RTPS::Parameter") {
+      return genRtpsParameter(discriminator, branches);
+    } else if (cxx == "OpenDDS::RTPS::Submessage") {
+      return genRtpsSubmessage(discriminator, branches);
+    } else {
+      return false;
+    }
   }
 }
 

@@ -14,6 +14,10 @@
 namespace OpenDDS {
   namespace RTPS {
 
+    // For messages we create, the "octetsToInlineQoS" value will be constant.
+    const ACE_CDR::UShort DATA_OCTETS_TO_IQOS = 16;
+    const ACE_CDR::UShort DATA_FRAG_OCTETS_TO_IQOS = 28;
+
     const OctetArray4
       PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =
         { 0x00, 0x00, 0x00, 0x00 },

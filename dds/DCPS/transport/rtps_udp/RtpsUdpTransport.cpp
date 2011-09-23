@@ -76,12 +76,12 @@ RtpsUdpTransport::find_datalink_i(const RepoId& /*local_id*/,
 }
 
 DataLink*
-RtpsUdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
+RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
                                      const RepoId& /*remote_id*/,
                                      const TransportBLOB& remote_data,
                                      CORBA::Long priority)
 {
-  return 0;
+  return make_datalink(local_id, true);
 }
 
 DataLink*

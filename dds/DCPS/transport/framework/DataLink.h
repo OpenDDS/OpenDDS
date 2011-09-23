@@ -331,6 +331,14 @@ private:
   /// empty maps for new associations.
   void prepare_release();
 
+  /// Allow derived classes to provide an alternate "customized" queue element
+  /// for this DataLink (not shared with other links in the DataLinkSet).
+  virtual TransportQueueElement* customize_queue_element(
+    TransportQueueElement* element)
+  {
+    return element;
+  }
+
   typedef ACE_SYNCH_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.

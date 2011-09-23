@@ -59,14 +59,8 @@ RtpsTransportHeader::last_fragment()
 }
 
 ACE_INLINE void
-RtpsTransportHeader::last_fragment(bool frag)
+RtpsTransportHeader::last_fragment(bool /*frag*/)
 {
-}
-
-ACE_INLINE const SequenceNumber&
-RtpsTransportHeader::sequence()
-{
-  return seq_;
 }
 
 }

@@ -19,6 +19,9 @@ namespace OpenDDS {
     const Time_t TIME_INVALID  = { -1, 0xffffffff };
     const Time_t TIME_INFINITE = { 0x7fffffff, 0xffffffff };
 
+    // conversion factor from nanoseconds to NTP fractional (2^-32) seconds
+    const double NANOS_TO_RTPS_FRACS = 4.294967296;
+
     const VendorId_t VENDORID_UNKNOWN = { { 0 } };
     const VendorId_t VENDORID_OPENDDS =
       { { OpenDDS::DCPS::VENDORID_OCI[0], OpenDDS::DCPS::VENDORID_OCI[1] } };

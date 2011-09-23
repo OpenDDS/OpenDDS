@@ -9,7 +9,12 @@
 #include "RtpsSampleHeader.h"
 
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/DataSampleList.h"
+
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/BaseMessageTypes.h"
+
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #ifndef __ACE_INLINE__
@@ -58,7 +63,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     class submessage;                                             \
     if (ser >> submessage) {                                      \
       octetsToNextHeader = submessage.smHeader.submessageLength;  \
-      submessage_.name##_(submessage);                            \
+      submessage_.name##_sm(submessage);                          \
       valid_ = true;                                              \
     }                                                             \
     break;                                                        \
@@ -83,7 +88,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       SubmessageHeader submessage;
       if (ser >> submessage) {
         octetsToNextHeader = submessage.submessageLength;
-        submessage_.unknown_(submessage);
+        submessage_.unknown_sm(submessage);
         valid_ = true;
       }
       break;
@@ -131,7 +136,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
   switch (submessage_._d()) {
   case DATA: {
-    const OpenDDS::RTPS::DataSubmessage& rtps = submessage_.data_();
+    const OpenDDS::RTPS::DataSubmessage& rtps = submessage_.data_sm();
     opendds.cdr_encapsulation_ = true;
     opendds.message_length_ = message_length();
     opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
@@ -141,7 +146,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
     for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
       if (rtps.inlineQos[i]._d() == PID_STATUS_INFO) {
-        const ACE_CDR::Octet flags = rtps.inlineQos[i].status_info_().value[3];
+        const ACE_CDR::Octet flags = rtps.inlineQos[i].status_info().value[3];
         if (flags & 1) {
           opendds.message_id_ = DISPOSE_INSTANCE;
         } else if (flags & 2) {
@@ -170,6 +175,29 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   default:
     break;
   }
+}
+
+void
+RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+                                       const DataSampleListElement& dsle)
+{
+  using namespace OpenDDS::RTPS;
+
+  ACE_CDR::Octet flags =
+    DataSampleHeader::test_flag(BYTE_ORDER_FLAG, dsle.sample_);
+  const ACE_CDR::UShort len = 8;
+  const DDS::Time_t& st = dsle.source_timestamp_;
+  const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
+    {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)} };
+  subm.length(1);
+  subm[0].info_ts_sm(ts);
+
+  flags |= FLAG_D; //TODO: or FLAG_K for instance registration/dispose/unreg.
+  const DataSubmessage data = { {DATA, flags, 0}, 0, DATA_OCTETS_TO_IQOS,
+    ENTITYID_UNKNOWN, dsle.publication_id_.entityId, {dsle.sequence_.getHigh(),
+    dsle.sequence_.getLow()}, ParameterList() /*TODO: inlineQos */};
+  subm.length(2);
+  subm[1].data_sm(data);
 }
 
 

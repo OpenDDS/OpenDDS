@@ -1,4 +1,4 @@
-project(*pub) : dcpsexe, dcps_rtps {
+project(*pub) : dcpsexe, dcps_rtps_udp {
 
   exename = publisher
 

@@ -200,9 +200,9 @@ bool test_messages()
     ds.smHeader.flags |= 2;
     ParameterList iqos(2);
     iqos.length(2);
-    iqos[0].string_data_("my_topic_name"); // 14 with null
+    iqos[0].string_data("my_topic_name"); // 14 with null
     iqos[0]._d(PID_TOPIC_NAME);
-    iqos[1].string_data_("my_type_name"); // 13 with null
+    iqos[1].string_data("my_type_name"); // 13 with null
     iqos[1]._d(PID_TOPIC_TYPE);
     ds.inlineQos = iqos;
     ds.smHeader.submessageLength = 72;
@@ -248,8 +248,8 @@ bool test_messages()
     if (!(ser >> ds2) || mb.length() || ds2.inlineQos.length() != 2
         || ds2.inlineQos[0]._d() != PID_TOPIC_NAME
         || ds2.inlineQos[1]._d() != PID_TOPIC_TYPE
-        || 0 != std::strcmp(ds2.inlineQos[0].string_data_(), "my_topic_name")
-        || 0 != std::strcmp(ds2.inlineQos[1].string_data_(), "my_type_name")) {
+        || 0 != std::strcmp(ds2.inlineQos[0].string_data(), "my_topic_name")
+        || 0 != std::strcmp(ds2.inlineQos[1].string_data(), "my_type_name")) {
       std::cerr << "ERROR: failed to deserialize DataSubmessage with larger "
                    "than normal value of octetsToInlineQos.\n";
       ok = false;

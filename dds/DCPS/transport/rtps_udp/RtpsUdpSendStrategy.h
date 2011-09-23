@@ -13,6 +13,10 @@
 
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
+#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+
+#include "ace/INET_Addr.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -34,7 +38,11 @@ protected:
   }
 
 private:
+  void marshal_transport_header(ACE_Message_Block* mb);
+
   RtpsUdpDataLink* link_;
+  ACE_INET_Addr remote_address_;
+  OpenDDS::RTPS::Header rtps_header_;
 };
 
 } // namespace DCPS

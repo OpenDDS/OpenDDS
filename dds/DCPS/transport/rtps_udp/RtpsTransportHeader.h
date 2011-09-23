@@ -38,8 +38,6 @@ struct RtpsTransportHeader {
   size_t length_;
   OpenDDS::RTPS::Header header_;
   bool valid_;
-
-  SequenceNumber seq_; //TODO: remove this
 };
 
 }

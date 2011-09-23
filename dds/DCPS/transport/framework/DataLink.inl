@@ -90,6 +90,8 @@ OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
 {
   DBG_ENTRY_LVL("DataLink","send",6);
 
+  element = this->customize_queue_element(element);
+
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->add_request(SEND, element);
 

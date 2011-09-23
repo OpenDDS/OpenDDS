@@ -60,6 +60,9 @@ public:
 private:
   virtual void stop_i();
 
+  virtual TransportQueueElement* customize_queue_element(
+    TransportQueueElement* element);
+
   bool active_;
 
   RtpsUdpInst* config_;

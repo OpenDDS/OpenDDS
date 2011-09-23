@@ -13,10 +13,6 @@
 
 #include "ace/Reactor.h"
 
-namespace {
-  // conversion factor from nanoseconds to NTP fractional (2^-32) seconds
-  const double NANOS_TO_NTP_FRACS = 4.294967296;
-}
 
 namespace OpenDDS {
 namespace DCPS {
@@ -173,23 +169,23 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
 
   switch (s._d()) {
   case INFO_TS:
-    submsg(s.info_ts_());
+    submsg(s.info_ts_sm());
     break;
 
   case INFO_SRC:
-    submsg(s.info_src_());
+    submsg(s.info_src_sm());
     break;
 
   case INFO_REPLY_IP4:
-    submsg(s.info_reply_ipv4_());
+    submsg(s.info_reply_ipv4_sm());
     break;
 
   case INFO_DST:
-    submsg(s.info_dst_());
+    submsg(s.info_dst_sm());
     break;
 
   case INFO_REPLY:
-    submsg(s.info_reply_());
+    submsg(s.info_reply_sm());
     break;
 
   default:
@@ -285,10 +281,11 @@ void
 RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
   DataSampleHeader& header) const
 {
+  using namespace OpenDDS::RTPS;
   if (have_timestamp_) {
     header.source_timestamp_sec_ = timestamp_.seconds;
     header.source_timestamp_nanosec_ =
-      static_cast<ACE_UINT32>(timestamp_.fraction / NANOS_TO_NTP_FRACS);
+      static_cast<ACE_UINT32>(timestamp_.fraction / NANOS_TO_RTPS_FRACS + .5);
   }
   assign(header.publication_id_.guidPrefix, source_guid_prefix_);
 }
