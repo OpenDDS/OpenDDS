@@ -1,3 +1,11 @@
+Tue Sep 27 20:27:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          call work_available() when transport packet is partially sent
+          to wake up the background thread immediately.  Background thread
+          will complete the partial.
+
 Wed Sep 21 22:34:38 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/idl/be_produce.cpp:
