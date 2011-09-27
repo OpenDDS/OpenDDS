@@ -13,6 +13,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/QoS_Helper.h"
 
 #include <tao/CORBA_String.h>
 
@@ -32,6 +33,15 @@
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
+
+void log_time(const ACE_Time_Value& t)
+{
+  const std::time_t seconds = t.sec();
+  std::string timestr(std::ctime(&seconds));
+  timestr.erase(timestr.size() - 1); // remove \n from ctime()
+  ACE_DEBUG((LM_INFO, "Sending with timestamp %C %q usec\n",
+             timestr.c_str(), ACE_INT64(t.usec())));
+}
 
 struct TestMsg {
   ACE_CDR::ULong key;
@@ -202,11 +212,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
      local_prefix[8], local_prefix[9], local_prefix[10], local_prefix[11]} };
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
-  const std::time_t seconds = now.sec();
-  std::string timestr(std::ctime(&seconds));
-  timestr.erase(timestr.size() - 1); // remove \n from ctime()
-  ACE_DEBUG((LM_INFO, "Sending with timestamp %C %q usec\n",
-             timestr.c_str(), ACE_INT64(now.usec())));
+  log_time(now);
   const double conv = 4294.967296; // NTP fractional (2^-32) sec per microsec
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},
     {static_cast<ACE_CDR::Long>(now.sec()),
@@ -242,7 +248,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ACE_INET_Addr local_addr;
   ACE_SOCK_Dgram sock(local_addr);
-  ssize_t res = sock.send(msg.rd_ptr(), msg.length(), rtps_inst->remote_address_);
+  ssize_t res = sock.send(msg.rd_ptr(), msg.length(),
+                          rtps_inst->remote_address_);
   if (res < 0) {
     std::cerr << "ERROR: error in send()\n";
     return 1;
@@ -270,16 +277,20 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataSampleHeader dsh;
   dsh.message_id_ = SAMPLE_DATA;
   dsh.publication_id_ = local_guid;
-  dsh.sequence_ = 1;
+  dsh.sequence_ = 2;
   dsh.message_length_ = 12 + sizeof(text);
-
+  elements[0].sequence_ = dsh.sequence_;
+  const ACE_Time_Value t = ACE_OS::gettimeofday();
+  log_time(t);
+  elements[0].source_timestamp_ = time_value_to_time(t);
   elements[0].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
       ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_));
 
   *elements[0].sample_ << dsh;
 
-  Serializer ser2(elements[0].sample_, host_is_bigendian, Serializer::ALIGN_CDR);
+  Serializer ser2(elements[0].sample_->cont(), host_is_bigendian,
+                  Serializer::ALIGN_CDR);
   ok = (ser2 << encap) && (ser2 << data.key) && (ser2 << data.value);
   if (!ok) {
     std::cerr << "ERROR: failed to serialize data for elements[0]\n";
@@ -288,6 +299,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ++dsh.sequence_;
   dsh.message_length_ = 13;
+  elements[1].sequence_ = dsh.sequence_;
+  elements[1].source_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
   elements[1].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
       ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_));
@@ -296,7 +309,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   data.key = 99;
   data.value = "";
-  Serializer ser3(elements[1].sample_, host_is_bigendian, Serializer::ALIGN_CDR);
+  Serializer ser3(elements[1].sample_->cont(), host_is_bigendian,
+                  Serializer::ALIGN_CDR);
   ok = (ser3 << encap) && (ser3 << data.key) && (ser3 << data.value);
   if (!ok) {
     std::cerr << "ERROR: failed to serialize data for elements[1]\n";

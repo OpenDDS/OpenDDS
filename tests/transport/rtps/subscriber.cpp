@@ -80,7 +80,7 @@ public:
     ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
 
     if (sample.header_.message_id_ != SAMPLE_DATA
-        || sample.header_.sequence_ != 1 || !sample.header_.byte_order_
+        || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
         || sample.header_.message_length_ != 533
         || pub.checksum() != GuidConverter(pub_id_).checksum()) {
       ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
@@ -111,6 +111,7 @@ public:
   bool done_;
   const RepoId& sub_id_;
   RepoId pub_id_;
+  SequenceNumber seq_;
 };
 
 
