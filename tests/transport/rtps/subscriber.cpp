@@ -149,6 +149,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
   rtps_inst->local_address_.set(port, host.c_str());
+  rtps_inst->datalink_release_delay_ = 0;
 
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
@@ -191,7 +192,9 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   sdr.disassociate(publication.remote_id_);
 
-  TheTransportRegistry->release();
+  TheServiceParticipant->shutdown();
+  orb->shutdown();
+  orb->destroy();
   ACE_Thread_Manager::instance()->wait();
 
   return 0;

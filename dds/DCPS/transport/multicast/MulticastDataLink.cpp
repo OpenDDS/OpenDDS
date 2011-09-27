@@ -253,13 +253,16 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
                 guard,
                 this->session_lock_);
 
-      char* ptr = sample.sample_->rd_ptr();
+      char* ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
+
       for (MulticastSessionMap::iterator it(this->sessions_.begin());
           it != this->sessions_.end(); ++it) {
         it->second->control_received(sample.header_.submessage_id_,
                                      sample.sample_);
         // reset read pointer
-        sample.sample_->rd_ptr(ptr);
+        if (ptr) {
+          sample.sample_->rd_ptr(ptr);
+        }
       }
     }
   } break;

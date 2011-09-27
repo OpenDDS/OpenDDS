@@ -32,6 +32,10 @@ using namespace OpenDDS::DCPS;
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  // prevent Service_Participant from spawning a thread for ORB::run
+  CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
+  TheServiceParticipant->set_ORB(orb);
+
   DDS::DomainParticipantFactory_var dpf =
     TheParticipantFactoryWithArgs(argc, argv);
   TEST_CHECK(dpf.in() != 0);
@@ -108,6 +112,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(global_config->name() == "myconfig");
 
   TheServiceParticipant->shutdown();
+  orb->destroy();
 
   return 0;
 }

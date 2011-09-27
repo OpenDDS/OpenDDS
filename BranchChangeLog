@@ -1,3 +1,34 @@
+Tue Sep 27 21:53:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          release_element() also needs to delete the TCE when there is
+          no allocator (using an allocator is optional with this class).
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          If the DataSampleHeader (or RTPS SubmessageHeader) indicates that
+          there is no data payload, don't allocate a Message Block for it.
+          Users of ReceivedDataSample need to check for a null sample_ pointer.
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Account for the fact that ReceivedDataSample::sample_ may be null.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fix a leaked refcount on the reactor task.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          Prevent Service_Participant from spawning a thread for ORB::run.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Improve shutdown and cleanup to get a clean valgrind run.
+
 Tue Sep 27 16:00:45 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:

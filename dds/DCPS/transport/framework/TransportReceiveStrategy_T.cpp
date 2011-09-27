@@ -694,129 +694,136 @@ TransportReceiveStrategy<TH, DSH>::handle_input()
         }
       }
 
-      //
-      // Manage the current sample data.
-      //
-      //   This involves reading data to complete the current sample.  As
-      //   samples are completed, they are dispatched via the
-      //   data_received() mechanism.  This data is read into message
-      //   blocks that are obtained from the pool of message blocks since
-      //   the lifetime of this data will last until the DataReader
-      //   components demarshal the sample data.  A reference to the
-      //   current sample being built is retained as a member to allow us
-      //   to hold partialy read samples until they are completed.
-      //
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "Determine amount of data for the next block in the chain\n"));
+      if (this->receive_buffers_[this->buffer_index_]->length() == 0) {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   After adjusting buffer chain, "
+                        "We are done - no more data.\n"));
+        return 0;
+      }
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->buffer_index_ == %d.\n",this->buffer_index_));
+      if (this->receive_sample_remaining_ > 0) {
+        //
+        // Manage the current sample data.
+        //
+        //   This involves reading data to complete the current sample.  As
+        //   samples are completed, they are dispatched via the
+        //   data_received() mechanism.  This data is read into message
+        //   blocks that are obtained from the pool of message blocks since
+        //   the lifetime of this data will last until the DataReader
+        //   components demarshal the sample data.  A reference to the
+        //   current sample being built is retained as a member to allow us
+        //   to hold partialy read samples until they are completed.
+        //
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "Determine amount of data for the next block in the chain\n"));
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[this->buffer_index_]->rd_ptr()));
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->buffer_index_ == %d.\n",this->buffer_index_));
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[this->buffer_index_]->wr_ptr()));
-      //
-      // Determine the amount of data for the next block in the chain.
-      //
-      size_t amount
-      = ace_min<size_t>(
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->wr_ptr()));
+        //
+        // Determine the amount of data for the next block in the chain.
+        //
+        const size_t amount = ace_min<size_t>(
           this->receive_sample_remaining_,
           this->receive_buffers_[this->buffer_index_]->length());
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "amount of data for the next block in the chain is %d\n",
-            amount));
-      //
-      // Now create a message block for the data in the current buffer
-      // and chain it if we are starting a new sample.
-      //
-      ACE_Message_Block* current_sample_block = 0;
-      ACE_NEW_MALLOC_RETURN(
-        current_sample_block,
-        (ACE_Message_Block*) this->mb_allocator_.malloc(
-          sizeof(ACE_Message_Block)),
-        ACE_Message_Block(
-          this->receive_buffers_[this->buffer_index_]
-          ->data_block()->duplicate(),
-          0,
-          &this->mb_allocator_),
-        -1);
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "amount of data for the next block in the chain is %d\n",
+              amount));
+        //
+        // Now create a message block for the data in the current buffer
+        // and chain it if we are starting a new sample.
+        //
+        ACE_Message_Block* current_sample_block = 0;
+        ACE_NEW_MALLOC_RETURN(
+          current_sample_block,
+          (ACE_Message_Block*) this->mb_allocator_.malloc(
+            sizeof(ACE_Message_Block)),
+          ACE_Message_Block(
+            this->receive_buffers_[this->buffer_index_]
+            ->data_block()->duplicate(),
+            0,
+            &this->mb_allocator_),
+          -1);
 
-      //
-      // Chain it to the end of the current sample.
-      //
-      if (this->payload_ == 0) {
-        this->payload_ = current_sample_block;
+        //
+        // Chain it to the end of the current sample.
+        //
+        if (this->payload_ == 0) {
+          this->payload_ = current_sample_block;
 
-      } else {
-        ACE_Message_Block* block = this->payload_;
+        } else {
+          ACE_Message_Block* block = this->payload_;
 
-        while (block->cont() != 0) {
-          block = block->cont();
+          while (block->cont() != 0) {
+            block = block->cont();
+          }
+
+          block->cont(current_sample_block);
         }
 
-        block->cont(current_sample_block);
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "Before adjustment of the pointers and byte counters\n"));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->rd_ptr() "
+              "== %u.\n",
+              this->payload_->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->wr_ptr() "
+              "== %u.\n",
+              this->payload_->wr_ptr()));
+
+        //
+        // Adjust the pointers and byte counters.
+        //
+        current_sample_block->rd_ptr(
+          this->receive_buffers_[this->buffer_index_]->rd_ptr());
+        current_sample_block->wr_ptr(
+          this->receive_buffers_[this->buffer_index_]->wr_ptr());
+        this->receive_buffers_[this->buffer_index_]->rd_ptr(amount);
+        this->receive_sample_remaining_ -= amount;
+        this->pdu_remaining_            -= amount;
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "After adjustment of the pointers and byte counters\n"));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->rd_ptr() "
+              "== %u.\n",
+              this->payload_->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->wr_ptr() "
+              "== %u.\n",
+              this->payload_->wr_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->wr_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "After adjustment, remaining sample bytes == %d\n",
+              this->receive_sample_remaining_));
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "After adjustment, remaining transport packet bytes == %d\n",
+              this->pdu_remaining_));
       }
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "Before adjustment of the pointers and byte counters\n"));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->payload_->rd_ptr() "
-            "== %u.\n",
-            this->payload_->rd_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->payload_->wr_ptr() "
-            "== %u.\n",
-            this->payload_->wr_ptr()));
-
-      //
-      // Adjust the pointers and byte counters.
-      //
-      current_sample_block->rd_ptr(
-        this->receive_buffers_[this->buffer_index_]->rd_ptr());
-      current_sample_block->wr_ptr(
-        this->receive_buffers_[this->buffer_index_]->wr_ptr());
-      this->receive_buffers_[this->buffer_index_]->rd_ptr(amount);
-      this->receive_sample_remaining_ -= amount;
-      this->pdu_remaining_            -= amount;
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "After adjustment of the pointers and byte counters\n"));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->payload_->rd_ptr() "
-            "== %u.\n",
-            this->payload_->rd_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->payload_->wr_ptr() "
-            "== %u.\n",
-            this->payload_->wr_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[this->buffer_index_]->rd_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[this->buffer_index_]->wr_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "After adjustment, remaining sample bytes == %d\n",
-            this->receive_sample_remaining_));
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "After adjustment, remaining transport packet bytes == %d\n",
-            this->pdu_remaining_));
 
       //
       // Dispatch the received message if we have received it all.
@@ -856,7 +863,7 @@ TransportReceiveStrategy<TH, DSH>::handle_input()
         // ~ReceivedDataSample() releases the payload_ message block
       }
 
-      if (amount == 0
+      if (this->receive_sample_remaining_ == 0
           && this->receive_buffers_[this->buffer_index_]->length() == 0) {
         // Relinquish control if there is no more data to process.
         VDBG((LM_DEBUG,"(%P|%t) DBG:   We are done - no more data.\n"));

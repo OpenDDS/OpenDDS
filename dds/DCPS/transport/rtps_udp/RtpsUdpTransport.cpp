@@ -42,7 +42,8 @@ RtpsUdpTransport::make_datalink(const RepoId& local_id, bool active)
   }
 
   // Configure link with transport configuration and reactor task:
-  link->configure(this->config_i_.in(), reactor_task());
+  TransportReactorTask_rch rt = reactor_task();
+  link->configure(this->config_i_.in(), rt.in());
 
   // Assign send strategy:
   RtpsUdpSendStrategy* send_strategy;
