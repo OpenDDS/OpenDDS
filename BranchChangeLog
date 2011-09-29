@@ -1,3 +1,11 @@
+Thu Sep 29 14:41:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Fix for the prior change to this file from Tuesday.
+          "We are done - no more data" check needs to go after potentially
+          delivering the data sample to the receive listener(s).
+
 Thu Sep 29 14:19:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

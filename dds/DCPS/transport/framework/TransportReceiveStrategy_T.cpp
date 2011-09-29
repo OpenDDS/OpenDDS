@@ -677,6 +677,7 @@ TransportReceiveStrategy<TH, DSH>::handle_input()
       // buffer after the last read(s).
       //
       size_t initial = this->buffer_index_;
+      bool last_buffer = false;
 
       while (this->receive_buffers_[this->buffer_index_]->length() == 0) {
         this->buffer_index_ = this->successor_index(this->buffer_index_);
@@ -686,19 +687,11 @@ TransportReceiveStrategy<TH, DSH>::handle_input()
               this->buffer_index_));
 
         if (initial == this->buffer_index_) {
-          // At this point we have a data sample with no data.
-          // This is actually Ok, since some control messages -
-          // specifically the DATAWRITER_LIVELINESS messages
-          // contain no data.
+          last_buffer = true; // no other buffers in receive_buffers_ have data
           break;
         }
       }
 
-      if (this->receive_buffers_[this->buffer_index_]->length() == 0) {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   After adjusting buffer chain, "
-                        "We are done - no more data.\n"));
-        return 0;
-      }
 
       if (this->receive_sample_remaining_ > 0) {
         //
@@ -863,8 +856,8 @@ TransportReceiveStrategy<TH, DSH>::handle_input()
         // ~ReceivedDataSample() releases the payload_ message block
       }
 
-      if (this->receive_sample_remaining_ == 0
-          && this->receive_buffers_[this->buffer_index_]->length() == 0) {
+      if (last_buffer &&
+          this->receive_buffers_[this->buffer_index_]->length() == 0) {
         // Relinquish control if there is no more data to process.
         VDBG((LM_DEBUG,"(%P|%t) DBG:   We are done - no more data.\n"));
         return 0;
