@@ -1,3 +1,7 @@
+Thu Sep 29 19:32:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4942 through r4964.
+
 Thu Sep 29 14:41:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
@@ -168,6 +172,13 @@ Fri Sep 16 22:12:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
           interoperate with other RTPS implementations that send the entire
           data sample payload in instance control messages.
 
+Fri Sep 16 19:37:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          More cleanup for older ACE that has no ostream << ACE_Time_Value.
+
 Fri Sep 16 18:35:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
@@ -178,6 +189,18 @@ Fri Sep 16 18:35:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
         * tests/transport/rtps/subscriber.cpp:
 
           Clean up test to work on earlier ACE+TAO versions.
+
+Fri Sep 16 18:21:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Fix compile errors on older GCC versions.
 
 Fri Sep 16 16:29:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 

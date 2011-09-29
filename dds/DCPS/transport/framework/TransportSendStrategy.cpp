@@ -1197,6 +1197,9 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             } else {
               next_fragment->data_dropped(true /* dropped by transport */);
             }
+          } else if (mode_ == MODE_QUEUE) {
+            // Background thread handles packets in progress
+            this->synch_->work_available();
           }
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "

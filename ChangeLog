@@ -1,21 +1,45 @@
-Fri Sep 16 19:37:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+Tue Sep 27 20:27:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
-        * tests/transport/rtps/publisher.cpp:
-        * tests/transport/rtps/subscriber.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
-          More cleanup for older ACE that has no ostream << ACE_Time_Value.
+          call work_available() when transport packet is partially sent
+          to wake up the background thread immediately.  Background thread
+          will complete the partial.
 
-Fri Sep 16 18:21:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+Wed Sep 21 22:34:38 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
 
-        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
-        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
-        * dds/DCPS/transport/multicast/ReliableSession.cpp:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
-        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
-        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * dds/idl/be_produce.cpp:
 
-          Fix compile errors on older GCC versions.
+          Print a warning if and orb.idl file is being included to
+          specify the correct path to use for a tao orb.idl include.
+
+Fri Sep 16 19:22:58 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+          Exclude using mlockall on Android since it is defined but not
+          implemented on the platform.
+
+Fri Sep 16 14:31:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/simple/run_test.pl:
+
+          Use PerlACE::random_port() to get a random port number.
+
+Wed Sep 14 20:49:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mwc:
+
+          Look in model dir for mpb files.
+
+Mon Sep 12 15:46:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mpc:
+
+          Use project base to get dependencies.
 
 Mon Sep 12 14:38:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 

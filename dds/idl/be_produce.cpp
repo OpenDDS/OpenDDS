@@ -270,6 +270,14 @@ BE_produce()
       string stb_inc = base_name + "C.h";
       if (stb_inc != "tao/orbC.h") {
         be_global->add_include(stb_inc.c_str());
+        if (stb_inc == "orbC.h" ||
+            (stb_inc.size() >= 7
+            && stb_inc.substr(stb_inc.size() - 7) == "/orbC.h") ) {
+          ACE_DEBUG((LM_WARNING,
+                     ACE_TEXT("Warning: (%s) Potential inclusion of TAO orbC.H ")
+                     ACE_TEXT(" Include TAO orb.idl with path of tao/orb.idl")
+                     ACE_TEXT(" to prevent compilation errors\n"), idl_fn));
+        }
       }
 
     }

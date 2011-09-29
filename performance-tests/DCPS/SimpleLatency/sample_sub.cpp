@@ -47,7 +47,7 @@ void set_rt()
     ACE_DEBUG ((LM_DEBUG, "WARNING: %p\n", ACE_TEXT("sched_params")));
   }
 
-#if (defined (MCL_CURRENT) && defined(MCL_FUTURE))
+#if (defined (MCL_CURRENT) && defined(MCL_FUTURE) && !defined(__ANDROID__))
   if (mlockall(MCL_CURRENT || MCL_FUTURE)) {
     ACE_DEBUG ((LM_DEBUG, "WARNING: Could not lock memory - Run with root access.\n"));
   }
