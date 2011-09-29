@@ -20,6 +20,8 @@ namespace DCPS {
 
 RtpsUdpInst::RtpsUdpInst(const std::string& name)
   : TransportInst("rtps_udp", name)
+  , use_multicast_(true)
+  , multicast_group_address_(7401, "239.255.0.1")
 {
 }
 
@@ -31,7 +33,7 @@ RtpsUdpInst::new_impl(const TransportInst_rch& inst)
 
 int
 RtpsUdpInst::load(ACE_Configuration_Heap& cf,
-              ACE_Configuration_Section_Key& sect)
+                  ACE_Configuration_Section_Key& sect)
 {
   TransportInst::load(cf, sect); // delegate to parent
 
@@ -42,7 +44,6 @@ void
 RtpsUdpInst::dump(std::ostream& os)
 {
   TransportInst::dump(os);
-
 }
 
 } // namespace DCPS

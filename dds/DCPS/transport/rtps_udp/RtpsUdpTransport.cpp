@@ -28,34 +28,22 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
 }
 
 RtpsUdpDataLink*
-RtpsUdpTransport::make_datalink(const RepoId& local_id, bool active)
+RtpsUdpTransport::make_datalink(const RepoId& local_id)
 {
-  RtpsUdpDataLink_rch link;
-  ACE_NEW_RETURN(link, RtpsUdpDataLink(this, local_id, active), 0);
+  ACE_NEW_RETURN(link_, RtpsUdpDataLink(this, local_id), 0);
 
-  if (link.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::make_datalink: ")
-                      ACE_TEXT("failed to create DataLink!\n")),
-                     0);
-  }
-
-  // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rt = reactor_task();
-  link->configure(this->config_i_.in(), rt.in());
+  link_->configure(config_i_.in(), rt.in());
 
-  // Assign send strategy:
   RtpsUdpSendStrategy* send_strategy;
-  ACE_NEW_RETURN(send_strategy, RtpsUdpSendStrategy(link.in()), 0);
-  link->send_strategy(send_strategy);
+  ACE_NEW_RETURN(send_strategy, RtpsUdpSendStrategy(link_.in()), 0);
+  link_->send_strategy(send_strategy);
 
-  // Assign receive strategy:
   RtpsUdpReceiveStrategy* recv_strategy;
-  ACE_NEW_RETURN(recv_strategy, RtpsUdpReceiveStrategy(link.in()), 0);
-  link->receive_strategy(recv_strategy);
+  ACE_NEW_RETURN(recv_strategy, RtpsUdpReceiveStrategy(link_.in()), 0);
+  link_->receive_strategy(recv_strategy);
 
-  if (!link->open()) {
+  if (!link_->open()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::make_datalink: ")
@@ -63,7 +51,7 @@ RtpsUdpTransport::make_datalink(const RepoId& local_id, bool active)
                      0);
   }
 
-  return link._retn();
+  return RtpsUdpDataLink_rch(link_)._retn();
 }
 
 DataLink*
@@ -82,13 +70,13 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
                                      const TransportBLOB& remote_data,
                                      CORBA::Long priority)
 {
-  return make_datalink(local_id, true);
+  return make_datalink(local_id);
 }
 
 DataLink*
 RtpsUdpTransport::accept_datalink(ConnectionEvent& ce)
 {
-  return make_datalink(ce.local_id_, false);
+  return make_datalink(ce.local_id_);
 }
 
 void
@@ -137,21 +125,22 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& data) const
 }
 
 void
-RtpsUdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
+RtpsUdpTransport::release_datalink_i(DataLink*, bool /*release_pending*/)
 {
+  this->link_ = 0;
 }
 
 PriorityKey
 RtpsUdpTransport::blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
-                          bool active)
+                              CORBA::Long priority,
+                              bool active)
 {
   return PriorityKey();
 }
 
 void
 RtpsUdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
-                                 ACE_Message_Block* data)
+                                     ACE_Message_Block* data)
 {
 }
 

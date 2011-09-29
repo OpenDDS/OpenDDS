@@ -47,7 +47,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
 ssize_t
 RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
-  return link_->socket().send(iov, n, remote_address_);
+  return link_->unicast_socket().send(iov, n, remote_address_);
 }
 
 void

@@ -34,7 +34,8 @@ public:
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
-                                ACE_INET_Addr& remote_address);
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE fd);
 
   virtual bool check_header(const TransportHeader& header);
   virtual bool check_header(const DataSampleHeader& header);

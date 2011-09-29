@@ -90,14 +90,13 @@ TransportReceiveStrategy<TH, DSH>::enable_reassembly()
 /// some shortcuts (we will) that will need to be dealt with later once
 /// a more robust implementation can be put in place.
 ///
-/// Our handle_input() method is called by the reactor when there is
+/// Our handle_dds_input() method is called by the reactor when there is
 /// data to be pulled from our peer() ACE_SOCK_Stream.
-//TransportReceiveStrategy::handle_input(ACE_HANDLE)
 template<typename TH, typename DSH>
 int
-TransportReceiveStrategy<TH, DSH>::handle_input()
+TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 {
-  DBG_ENTRY_LVL("TransportReceiveStrategy","handle_input",6);
+  DBG_ENTRY_LVL("TransportReceiveStrategy", "handle_dds_input", 6);
 
   //
   // What we will be doing here:
@@ -313,7 +312,8 @@ TransportReceiveStrategy<TH, DSH>::handle_input()
   ACE_INET_Addr remote_address;
   ssize_t bytes_remaining = this->receive_bytes(iov,
                                                 static_cast<int>(vec_index),
-                                                remote_address);
+                                                remote_address,
+                                                fd);
 
   if (bytes_remaining < 0) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Problem ")
@@ -906,7 +906,7 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
     if (this->pdu_remaining_ > 0 && this->successor_index(index) == this->buffer_index_) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("TransportReceiveStrategy::handle_input()")
+                        ACE_TEXT("TransportReceiveStrategy::handle_dds_input()")
                         ACE_TEXT(" - Unrecoverably corrupted ")
                         ACE_TEXT("receive buffer management detected: ")
                         ACE_TEXT("read more bytes than available.\n")),

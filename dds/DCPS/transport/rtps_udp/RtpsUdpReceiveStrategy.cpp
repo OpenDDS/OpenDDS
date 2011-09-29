@@ -8,6 +8,7 @@
 
 #include "RtpsUdpReceiveStrategy.h"
 #include "RtpsUdpDataLink.h"
+#include "RtpsUdpInst.h"
 
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 
@@ -24,26 +25,28 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link)
 {
 }
 
-ACE_HANDLE
-RtpsUdpReceiveStrategy::get_handle() const
-{
-  return link_->socket().get_handle();
-}
-
 int
-RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE /*fd*/)
+RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  return BASE_TRS::handle_input();  // delegate to parent
+  return BASE_TRS::handle_dds_input(fd);
 }
 
 ssize_t
 RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       int n,
-                                      ACE_INET_Addr& remote_address)
+                                      ACE_INET_Addr& remote_address,
+                                      ACE_HANDLE fd)
 {
-  const ssize_t ret = link_->socket().recv(iov, n, remote_address_);
-  remote_address = remote_address_;
-  return ret;
+  if (fd == link_->unicast_socket().get_handle()) {
+    const ssize_t ret = link_->unicast_socket().recv(iov, n, remote_address);
+    remote_address_ = remote_address;
+    return ret;
+
+  } else {
+    const ssize_t ret = link_->multicast_socket().recv(iov, n, remote_address);
+    remote_address_ = remote_address;
+    return ret;
+  }
 }
 
 void
@@ -64,7 +67,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     break;
   case DATA:
     receiver_.fill_header(sample.header_);
-    this->link_->data_received(sample);
+    link_->data_received(sample);
     break;
   default:
     break;
@@ -74,7 +77,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ACE_Reactor* reactor = this->link_->get_reactor();
+  ACE_Reactor* reactor = link_->get_reactor();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -83,22 +86,34 @@ RtpsUdpReceiveStrategy::start_i()
                      -1);
   }
 
-  if (reactor->register_handler(this, ACE_Event_Handler::READ_MASK) != 0) {
+  if (reactor->register_handler(link_->unicast_socket().get_handle(), this,
+                                ACE_Event_Handler::READ_MASK) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for DataLink!\n")),
+                      ACE_TEXT("failed to register handler for unicast\n")),
                      -1);
   }
 
-  //this->enable_reassembly();
+  if (link_->config()->use_multicast_) {
+    if (reactor->register_handler(link_->multicast_socket().get_handle(), this,
+                                  ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("failed to register handler for multicast\n")),
+                       -1);
+    }
+  }
+
+  // enable_reassembly();
   return 0;
 }
 
 void
 RtpsUdpReceiveStrategy::stop_i()
 {
-  ACE_Reactor* reactor = this->link_->get_reactor();
+  ACE_Reactor* reactor = link_->get_reactor();
   if (reactor == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -107,7 +122,13 @@ RtpsUdpReceiveStrategy::stop_i()
     return;
   }
 
-  reactor->remove_handler(this, ACE_Event_Handler::READ_MASK);
+  reactor->remove_handler(link_->unicast_socket().get_handle(),
+                          ACE_Event_Handler::READ_MASK);
+
+  if (link_->config()->use_multicast_) {
+    reactor->remove_handler(link_->multicast_socket().get_handle(),
+                            ACE_Event_Handler::READ_MASK);
+  }
 }
 
 bool

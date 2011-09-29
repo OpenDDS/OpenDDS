@@ -1,3 +1,46 @@
+Thu Sep 29 22:22:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          Check for null orig_ pointer in msg_payload().
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Allow derived Receive Strategies to register multiple handles with
+          the reactor.  The active handle is passed to (newly renamed)
+          handle_dds_input() and on to receive_bytes().
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Added multicast socket to RtpsUdpDataLink.
+          Use allocator from DataSampleListElement when creating
+          TransportCustomizedElements in RtpsUdpDataLink.
+          Continued implementing RtpsUdpTransport.
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Adapt other transports to the framework change above.
+
+        * tests/transport/rtps/run_test.pl:
+
+          Test with multicast in addition to unicast.
+
 Thu Sep 29 19:32:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4942 through r4964.

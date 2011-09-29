@@ -36,15 +36,15 @@ OpenDDS::DCPS::TcpReceiveStrategy::~TcpReceiveStrategy()
 }
 
 ssize_t
-OpenDDS::DCPS::TcpReceiveStrategy::receive_bytes
-(iovec iov[],
- int   n,
- ACE_INET_Addr& remote_address)
+OpenDDS::DCPS::TcpReceiveStrategy::receive_bytes(
+  iovec iov[],
+  int   n,
+  ACE_INET_Addr& /*remote_address*/,
+  ACE_HANDLE /*fd*/)
 {
-  DBG_ENTRY_LVL("TcpReceiveStrategy","receive_bytes",6);
+  DBG_ENTRY_LVL("TcpReceiveStrategy", "receive_bytes", 6);
 
   // We don't do anything to the remote_address for the Tcp case.
-  ACE_UNUSED_ARG(remote_address);
 
   TcpConnection_rch connection = this->connection_;
 

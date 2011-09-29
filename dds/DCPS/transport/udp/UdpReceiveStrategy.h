@@ -32,7 +32,8 @@ public:
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
-                                ACE_INET_Addr& remote_address);
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE fd);
 
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);

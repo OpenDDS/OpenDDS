@@ -23,6 +23,9 @@ public:
   /// for testing
   ACE_INET_Addr local_address_, remote_address_;
 
+  bool use_multicast_;
+  ACE_INET_Addr multicast_group_address_;
+
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 

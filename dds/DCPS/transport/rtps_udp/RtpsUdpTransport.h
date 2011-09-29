@@ -58,44 +58,16 @@ protected:
   virtual std::string transport_type() const { return "rtps_udp"; }
 
 private:
-  RtpsUdpDataLink* make_datalink(const RepoId& local_id, bool active);
+  RtpsUdpDataLink* make_datalink(const RepoId& local_id);
 
   RcHandle<RtpsUdpInst> config_i_;
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
-
-  /// This lock is used to protect the client_links_ data member.
-  LockType client_links_lock_;
-
-  /// Map of fully associated DataLinks for this transport.  Protected
-  // by client_links_lock_.
-  typedef std::map<PriorityKey, RtpsUdpDataLink_rch> RtpsUdpDataLinkMap;
-  RtpsUdpDataLinkMap client_links_;
-
-  /// The single datalink for the passive side.  No locking required.
-  RtpsUdpDataLink_rch server_link_;
-
-  /// This protects the pending_connections_, pending_server_link_keys_,
-  /// and server_link_keys_ data members.
-  LockType connections_lock_;
-
-  /// Locked by connections_lock_.
-  /// These are passive-side PriorityKeys that have been fully associated
-  /// (processed by accept_datalink() and finished handshaking).  They are
-  /// ready for use and reuse via server_link_.
-  std::set<PriorityKey> server_link_keys_;
-
-  /// Locked by connections_lock_.  Tracks expected connections
-  /// that we have learned about in accept_datalink() but have
-  /// not yet performed the handshake.
-  std::multimap<ConnectionEvent*, PriorityKey> pending_connections_;
-
-  /// Locked by connections_lock_.
-  /// These are passive-side PriorityKeys that have finished handshaking,
-  /// but have not been processed by accept_datalink()
-  std::set<PriorityKey> pending_server_link_keys_;
+  /// In the initial implementation there will only be one link per transport.
+  /// This link can be safely reused by any clients that belong to the same
+  /// domain participant (same GUID prefix).  This implementation could be
+  /// extended to automatically create new links when the 'local_id' passed to
+  /// find/create/accept differs from the initial local_id.
+  RtpsUdpDataLink_rch link_;
 
   virtual PriorityKey blob_to_key(const TransportBLOB& remote,
                                   CORBA::Long priority,

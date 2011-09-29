@@ -34,13 +34,13 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
 public:
   explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link);
 
-  virtual ACE_HANDLE get_handle() const;
   virtual int handle_input(ACE_HANDLE fd);
 
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
-                                ACE_INET_Addr& remote_address);
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE fd);
 
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);

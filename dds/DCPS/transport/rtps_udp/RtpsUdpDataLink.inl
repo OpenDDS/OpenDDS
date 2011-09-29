@@ -55,9 +55,15 @@ RtpsUdpDataLink::get_reactor()
 }
 
 ACE_INLINE ACE_SOCK_Dgram&
-RtpsUdpDataLink::socket()
+RtpsUdpDataLink::unicast_socket()
 {
-  return this->socket_;
+  return this->unicast_socket_;
+}
+
+ACE_INLINE ACE_SOCK_Dgram_Mcast&
+RtpsUdpDataLink::multicast_socket()
+{
+  return this->multicast_socket_;
 }
 
 } // namespace DCPS

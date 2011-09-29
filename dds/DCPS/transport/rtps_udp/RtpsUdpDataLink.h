@@ -18,6 +18,7 @@
 
 #include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram.h"
+#include "ace/SOCK_Dgram_Mcast.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
@@ -32,11 +33,9 @@ class ReceivedDataSample;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink {
 public:
-  RtpsUdpDataLink(RtpsUdpTransport* transport, const RepoId& local_id,
-                  bool active);
+  RtpsUdpDataLink(RtpsUdpTransport* transport, const RepoId& local_id);
 
-  void configure(RtpsUdpInst* config,
-                 TransportReactorTask* reactor_task);
+  void configure(RtpsUdpInst* config, TransportReactorTask* reactor_task);
 
   void send_strategy(RtpsUdpSendStrategy* send_strategy);
   void receive_strategy(RtpsUdpReceiveStrategy* recv_strategy);
@@ -48,7 +47,8 @@ public:
 
   ACE_Reactor* get_reactor();
 
-  ACE_SOCK_Dgram& socket();
+  ACE_SOCK_Dgram& unicast_socket();
+  ACE_SOCK_Dgram_Mcast& multicast_socket();
 
   bool open();
 
@@ -73,7 +73,8 @@ private:
 
   RepoId local_id_;
 
-  ACE_SOCK_Dgram socket_;
+  ACE_SOCK_Dgram unicast_socket_;
+  ACE_SOCK_Dgram_Mcast multicast_socket_;
 };
 
 } // namespace DCPS

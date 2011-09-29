@@ -29,13 +29,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
-                                 const RepoId& local_id,
-                                 bool active)
-  : DataLink(transport,
-             0, // priority
-             false, // is_loopback,
-             active),// is_active
-    active_(active),
+                                 const RepoId& local_id)
+  : DataLink(transport, // 3 data link "attributes", below, are unused
+             0,         // priority
+             false,     // is_loopback
+             false),    // is_active
     config_(0),
     reactor_task_(0),
     local_id_(local_id)
@@ -45,15 +43,25 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
 bool
 RtpsUdpDataLink::open()
 {
-  if (this->socket_.open(this->config_->local_address_) != 0) {
+  if (unicast_socket_.open(config_->local_address_) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: socket open: %m\n")),
                      false);
   }
 
-  if (start(static_rchandle_cast<TransportSendStrategy>(this->send_strategy_),
-            static_rchandle_cast<TransportStrategy>(this->recv_strategy_))
+  if (config_->use_multicast_) {
+    if (multicast_socket_.join(config_->multicast_group_address_) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: ")
+                        ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed.\n")),
+                       false);
+    }
+  }
+
+  if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
+            static_rchandle_cast<TransportStrategy>(recv_strategy_))
       != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
@@ -132,8 +140,13 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     }
   }
 
-  TransportCustomizedElement* rtps = TransportCustomizedElement::alloc(element);
+  TransportCustomizedElement* rtps =
+    TransportCustomizedElement::alloc(element, false,
+      dsle->transport_customized_element_allocator_);
   rtps->set_msg(hdr);
+
+  // Let the framework know each TransportCustomizedElement must be in its own
+  // Transport packet (i.e. have its own RTPS Message Header).
   rtps->set_requires_exclusive();
   return rtps;
 }

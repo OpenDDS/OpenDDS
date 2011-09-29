@@ -37,7 +37,7 @@ public:
   int start();
   void stop();
 
-  int handle_input();
+  int handle_dds_input(ACE_HANDLE fd);
 
   /// The subclass needs to provide the implementation
   /// for re-establishing the datalink. This is called
@@ -58,7 +58,8 @@ protected:
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],
                                 int            n,
-                                ACE_INET_Addr& remote_address) = 0;
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE     fd) = 0;
 
   /// Check the transport header for suitability.
   virtual bool check_header(const TH& header);

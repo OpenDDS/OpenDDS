@@ -233,7 +233,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 }
 
 int
-OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE)
+OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE fd)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_input",6);
 
@@ -241,7 +241,7 @@ OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE)
     return 0;
   }
 
-  return this->receive_strategy_->handle_input();
+  return this->receive_strategy_->handle_dds_input(fd);
 }
 
 int
