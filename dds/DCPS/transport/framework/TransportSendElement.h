@@ -34,10 +34,12 @@ public:
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
 
-  /// Original sample from send listener.
-  const DataSampleListElement* sample () const;
+  virtual const ACE_Message_Block* msg_payload() const;
 
-  virtual bool owned_by_transport ();
+  /// Original sample from send listener.
+  const DataSampleListElement* sample() const;
+
+  virtual bool owned_by_transport();
 
 protected:
 

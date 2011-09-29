@@ -87,8 +87,8 @@ TransportSendBuffer::retain_all(RepoId pub_id)
 
     buffer_type& buffer(it->second);
 
-    TransportRetainedElement sample(0, pub_id);
-    PacketRemoveVisitor visitor(sample,
+    TransportQueueElement::MatchOnPubId match(pub_id);
+    PacketRemoveVisitor visitor(match,
                                 buffer.second,
                                 buffer.second,
                                 this->replaced_allocator_,
@@ -96,7 +96,7 @@ TransportSendBuffer::retain_all(RepoId pub_id)
                                 this->replaced_db_allocator_);
 
     buffer.first->accept_replace_visitor(visitor);
-    if (visitor.status() < 0) {
+    if (visitor.status() == REMOVE_ERROR) {
       RepoIdConverter converter(pub_id);
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
@@ -148,9 +148,9 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
 
   // Copy sample's message/data block descriptors:
   ACE_Message_Block*& data = buffer.second;
-  data = TransportQueueElement::clone(value.second,
-                                      &this->retained_mb_allocator_,
-                                      &this->retained_db_allocator_);
+  data = TransportQueueElement::clone_mb(value.second,
+                                         &this->retained_mb_allocator_,
+                                         &this->retained_db_allocator_);
 
   if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,

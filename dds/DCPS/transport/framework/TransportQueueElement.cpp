@@ -16,28 +16,30 @@
 # include "TransportQueueElement.inl"
 #endif /* !__ACE_INLINE__ */
 
-OpenDDS::DCPS::TransportQueueElement::~TransportQueueElement()
+namespace OpenDDS {
+namespace DCPS {
+
+TransportQueueElement::~TransportQueueElement()
 {
-  DBG_ENTRY_LVL("TransportQueueElement","~TransportQueueElement",6);
+  DBG_ENTRY_LVL("TransportQueueElement", "~TransportQueueElement", 6);
 }
 
 bool
-OpenDDS::DCPS::TransportQueueElement::requires_exclusive_packet() const
+TransportQueueElement::requires_exclusive_packet() const
 {
-  DBG_ENTRY_LVL("TransportQueueElement","requires_exclusive_packet",6);
+  DBG_ENTRY_LVL("TransportQueueElement", "requires_exclusive_packet", 6);
   return false;
 }
 
 bool
-OpenDDS::DCPS::TransportQueueElement::is_control(RepoId pub_id) const
+TransportQueueElement::is_control(RepoId /*pub_id*/) const
 {
-  DBG_ENTRY_LVL("TransportQueueElement","is_control",6);
-  ACE_UNUSED_ARG(pub_id);
+  DBG_ENTRY_LVL("TransportQueueElement", "is_control", 6);
   return false;
 }
 
-OpenDDS::DCPS::ElementPair
-OpenDDS::DCPS::TransportQueueElement::fragment(size_t size)
+ElementPair
+TransportQueueElement::fragment(size_t size)
 {
   ACE_Message_Block* head;
   ACE_Message_Block* tail;
@@ -55,12 +57,12 @@ OpenDDS::DCPS::TransportQueueElement::fragment(size_t size)
 }
 
 ACE_Message_Block*
-OpenDDS::DCPS::TransportQueueElement::clone(const ACE_Message_Block* msg,
-                                            MessageBlockAllocator* mb_allocator,
-                                            DataBlockAllocator* db_allocator)
+TransportQueueElement::clone_mb(const ACE_Message_Block* msg,
+                                MessageBlockAllocator* mb_allocator,
+                                DataBlockAllocator* db_allocator)
 {
-  DBG_ENTRY_LVL("TransportQueueElement","clone",6);
-  ACE_Message_Block* cur_block = const_cast<ACE_Message_Block* > (msg);
+  DBG_ENTRY_LVL("TransportQueueElement", "clone_mb", 6);
+  ACE_Message_Block* cur_block = const_cast<ACE_Message_Block*>(msg);
   ACE_Message_Block* head_copy = 0;
   ACE_Message_Block* cur_copy  = 0;
   ACE_Message_Block* prev_copy = 0;
@@ -81,14 +83,17 @@ OpenDDS::DCPS::TransportQueueElement::clone(const ACE_Message_Block* msg,
                                             db_allocator,
                                             mb_allocator),
                           0);
-    cur_copy->copy (cur_block->base (), cur_block->size ());
-    cur_copy->rd_ptr (cur_copy->base () + (cur_block->rd_ptr () - cur_block->base ()));
-    cur_copy->wr_ptr (cur_copy->base () + (cur_block->wr_ptr () - cur_block->base ()));
+
+    cur_copy->copy(cur_block->base(), cur_block->size());
+    cur_copy->rd_ptr(cur_copy->base() +
+                     (cur_block->rd_ptr() - cur_block->base()));
+    cur_copy->wr_ptr(cur_copy->base() +
+                     (cur_block->wr_ptr() - cur_block->base()));
 
     if (head_copy == 0) {
       head_copy = cur_copy;
     } else {
-      prev_copy->cont (cur_copy);
+      prev_copy->cont(cur_copy);
     }
 
     prev_copy = cur_copy;
@@ -99,3 +104,17 @@ OpenDDS::DCPS::TransportQueueElement::clone(const ACE_Message_Block* msg,
   return head_copy;
 }
 
+TransportQueueElement::MatchCriteria::~MatchCriteria()
+{
+}
+
+TransportQueueElement::MatchOnPubId::~MatchOnPubId()
+{
+}
+
+TransportQueueElement::MatchOnDataPayload::~MatchOnDataPayload()
+{
+}
+
+}
+}

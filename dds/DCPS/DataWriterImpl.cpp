@@ -1859,7 +1859,14 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = 0;
-  header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
+
+  if (data) {
+    header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
+    if (header_data.message_length_ == 0) {
+      data->release();
+    }
+  }
+
   header_data.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
@@ -1872,22 +1879,21 @@ DataWriterImpl::create_control_message(MessageId message_id,
   }
 
   ACE_Message_Block* message;
-  size_t max_marshaled_size = header_data.max_marshaled_size();
-
   ACE_NEW_MALLOC_RETURN(message,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
-                                          ACE_Message_Block::MB_DATA,
-                                          data->total_length() ? data : 0, //cont
-                                          0, //data
-                                          0, //allocator_strategy
-                                          0, //locking_strategy
-                                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                          ACE_Time_Value::zero,
-                                          ACE_Time_Value::max_time,
-                                          db_allocator_,
-                                          mb_allocator_),
+                        ACE_Message_Block(
+                          DataSampleHeader::max_marshaled_size(),
+                          ACE_Message_Block::MB_DATA,
+                          header_data.message_length_ ? data : 0, //cont
+                          0, //data
+                          0, //allocator_strategy
+                          0, //locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          db_allocator_,
+                          mb_allocator_),
                         0);
 
   *message << header_data;

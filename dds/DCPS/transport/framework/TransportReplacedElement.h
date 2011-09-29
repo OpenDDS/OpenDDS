@@ -18,10 +18,12 @@ namespace DCPS {
 
 class TransportReplacedElement;
 
-typedef Cached_Allocator_With_Overflow<TransportReplacedElement, ACE_SYNCH_NULL_MUTEX>
-TransportReplacedElementAllocator;
+typedef Cached_Allocator_With_Overflow<TransportReplacedElement,
+                                       ACE_SYNCH_NULL_MUTEX>
+  TransportReplacedElementAllocator;
 
-class OpenDDS_Dcps_Export TransportReplacedElement : public TransportQueueElement {
+class OpenDDS_Dcps_Export TransportReplacedElement
+  : public TransportQueueElement {
 public:
 
   TransportReplacedElement(TransportQueueElement* orig_elem,
@@ -35,7 +37,10 @@ public:
 
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
-  virtual bool owned_by_transport ();
+
+  virtual const ACE_Message_Block* msg_payload() const;
+
+  virtual bool owned_by_transport();
 
 protected:
 

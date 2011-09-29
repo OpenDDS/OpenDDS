@@ -31,6 +31,8 @@ public:
   virtual const ACE_Message_Block* msg() const;
   void set_msg(ACE_Message_Block* m);
 
+  virtual const ACE_Message_Block* msg_payload() const;
+
   virtual bool owned_by_transport() { return false; }
 
   virtual bool is_fragment() const { return fragment_; }

@@ -70,6 +70,13 @@ TransportCustomizedElement::set_msg(ACE_Message_Block* m)
   msg_ = m;
 }
 
+const ACE_Message_Block*
+TransportCustomizedElement::msg_payload() const
+{
+  DBG_ENTRY_LVL("TransportCustomizedElement", "msg_payload", 6);
+  return orig_->msg_payload();
+}
+
 const TransportSendElement*
 TransportCustomizedElement::original_send_element() const
 {

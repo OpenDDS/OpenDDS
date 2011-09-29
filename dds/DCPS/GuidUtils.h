@@ -109,6 +109,12 @@ operator==(const GUID_t& lhs, const GUID_t& rhs)
   return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
 }
 
+inline OpenDDS_Dcps_Export bool
+operator!=(const GUID_t& lhs, const GUID_t& rhs)
+{
+  return !(lhs == rhs);
+}
+
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const GUID_t& rhs);

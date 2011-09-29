@@ -13,6 +13,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "BasicQueue_T.h"
+#include "TransportDefs.h"
 #include "ace/Task.h"
 #include "ace/Synch.h"
 #include "ace/Condition_T.h"
@@ -75,7 +76,7 @@ public:
   virtual int close(u_long flag = 0);
 
   /// Remove sample from the thread per connection queue.
-  int remove_sample(TransportSendElement& element);
+  RemoveResult remove_sample(const DataSampleListElement* element);
 
 private:
 

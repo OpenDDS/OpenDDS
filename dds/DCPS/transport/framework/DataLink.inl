@@ -11,51 +11,54 @@
 #include "ThreadPerConnectionSendTask.h"
 #include "EntryExit.h"
 
+namespace OpenDDS {
+namespace DCPS {
+
 ACE_INLINE
 CORBA::Long&
-OpenDDS::DCPS::DataLink::transport_priority()
+DataLink::transport_priority()
 {
   return this->transport_priority_;
 }
 
 ACE_INLINE
 CORBA::Long
-OpenDDS::DCPS::DataLink::transport_priority() const
+DataLink::transport_priority() const
 {
   return this->transport_priority_;
 }
 
 
 ACE_INLINE
-bool& OpenDDS::DCPS::DataLink::is_loopback()
+bool& DataLink::is_loopback()
 {
   return this->is_loopback_;
 }
 
 
 ACE_INLINE
-bool  OpenDDS::DCPS::DataLink::is_loopback() const
+bool  DataLink::is_loopback() const
 {
   return this->is_loopback_;
 }
 
 
 ACE_INLINE
-bool& OpenDDS::DCPS::DataLink::is_active()
+bool& DataLink::is_active()
 {
   return this->is_active_;
 }
 
 
 ACE_INLINE
-bool  OpenDDS::DCPS::DataLink::is_active() const
+bool  DataLink::is_active() const
 {
   return this->is_active_;
 }
 
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::send_start()
+DataLink::send_start()
 {
   DBG_ENTRY_LVL("DataLink","send_start",6);
 
@@ -67,7 +70,7 @@ OpenDDS::DCPS::DataLink::send_start()
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::send_start_i()
+DataLink::send_start_i()
 {
   DBG_ENTRY_LVL("DataLink","send_start_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -86,7 +89,7 @@ OpenDDS::DCPS::DataLink::send_start_i()
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
+DataLink::send(TransportQueueElement* element)
 {
   DBG_ENTRY_LVL("DataLink","send",6);
 
@@ -102,7 +105,7 @@ OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
+DataLink::send_i(TransportQueueElement* element, bool relink)
 {
   DBG_ENTRY_LVL("DataLink","send_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -121,7 +124,7 @@ OpenDDS::DCPS::DataLink::send_i(TransportQueueElement* element, bool relink)
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::send_stop()
+DataLink::send_stop()
 {
   DBG_ENTRY_LVL("DataLink","send_stop",6);
 
@@ -133,7 +136,7 @@ OpenDDS::DCPS::DataLink::send_stop()
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::send_stop_i()
+DataLink::send_stop_i()
 {
   DBG_ENTRY_LVL("DataLink","send_stop_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -151,15 +154,19 @@ OpenDDS::DCPS::DataLink::send_stop_i()
   }
 }
 
-ACE_INLINE int
-OpenDDS::DCPS::DataLink::remove_sample(TransportSendElement& element,
-                                       bool dropped_by_transport)
+ACE_INLINE RemoveResult
+DataLink::remove_sample(const DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("DataLink","remove_sample",6);
-  ACE_UNUSED_ARG(dropped_by_transport);
+  DBG_ENTRY_LVL("DataLink", "remove_sample", 6);
 
-  // This one is easy.  Simply delegate to our TransportSendStrategy
-  // data member.
+  if (this->thr_per_con_send_task_ != 0) {
+    const RemoveResult rr = this->thr_per_con_send_task_->remove_sample(sample);
+    if (rr == REMOVE_RELEASED || rr == REMOVE_FOUND) {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+            "Removed sample from ThreadPerConnection queue.\n"));
+      return rr;
+    }
+  }
 
   TransportSendStrategy_rch strategy;
   {
@@ -168,26 +175,15 @@ OpenDDS::DCPS::DataLink::remove_sample(TransportSendElement& element,
     strategy = this->send_strategy_;
   }
 
-  int status = -1;
-
-  // Remove the sample from thread per connection queue and then
-  // delegate to send strategy.
-  if (this->thr_per_con_send_task_ != 0) {
-    status = this->thr_per_con_send_task_->remove_sample(element);
+  if (!strategy.is_nil()) {
+    return strategy->remove_sample(sample);
   }
 
-  if (status == 1) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "Removed sample from ThreadPerConnection queue.\n"));
-
-  } else if (!strategy.is_nil()) // not exist on thread per connectio queue.
-    return strategy->remove_sample(element);
-
-  return 0;
+  return REMOVE_NOT_FOUND;
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLink::remove_all_msgs(RepoId pub_id)
+DataLink::remove_all_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("DataLink","remove_all_msgs",6);
 
@@ -206,16 +202,16 @@ OpenDDS::DCPS::DataLink::remove_all_msgs(RepoId pub_id)
   }
 }
 
-ACE_INLINE OpenDDS::DCPS::DataLinkIdType
-OpenDDS::DCPS::DataLink::id() const
+ACE_INLINE DataLinkIdType
+DataLink::id() const
 {
   DBG_ENTRY_LVL("DataLink","id",6);
   return id_;
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::DataLink::start(const TransportSendStrategy_rch& send_strategy,
-                               const TransportStrategy_rch& receive_strategy)
+DataLink::start(const TransportSendStrategy_rch& send_strategy,
+                const TransportStrategy_rch& receive_strategy)
 {
   DBG_ENTRY_LVL("DataLink","start",6);
 
@@ -254,7 +250,7 @@ OpenDDS::DCPS::DataLink::start(const TransportSendStrategy_rch& send_strategy,
 
 ACE_INLINE
 void
-OpenDDS::DCPS::DataLink::unblock_wait_for_start()
+DataLink::unblock_wait_for_start()
 {
   GuardType guard(this->strategy_lock_);
   this->start_failed_ = true;
@@ -263,7 +259,7 @@ OpenDDS::DCPS::DataLink::unblock_wait_for_start()
 
 ACE_INLINE
 const char*
-OpenDDS::DCPS::DataLink::connection_notice_as_str(ConnectionNotice notice)
+DataLink::connection_notice_as_str(ConnectionNotice notice)
 {
   static const char* NoticeStr[] = { "DISCONNECTED",
                                      "RECONNECTED",
@@ -275,14 +271,14 @@ OpenDDS::DCPS::DataLink::connection_notice_as_str(ConnectionNotice notice)
 
 ACE_INLINE
 void
-OpenDDS::DCPS::DataLink::terminate_send()
+DataLink::terminate_send()
 {
   this->send_strategy_->terminate_send(false);
 }
 
 ACE_INLINE
 void
-OpenDDS::DCPS::DataLink::remove_listener(const OpenDDS::DCPS::RepoId& local_id)
+DataLink::remove_listener(const RepoId& local_id)
 {
   {
     GuardType guard(this->pub_map_lock_);
@@ -295,8 +291,8 @@ OpenDDS::DCPS::DataLink::remove_listener(const OpenDDS::DCPS::RepoId& local_id)
 }
 
 ACE_INLINE
-OpenDDS::DCPS::TransportSendListener*
-OpenDDS::DCPS::DataLink::send_listener_for(const RepoId& pub_id) const
+TransportSendListener*
+DataLink::send_listener_for(const RepoId& pub_id) const
 {
   // pub_map_ (and send_listeners_) are already locked when entering this
   // private method.
@@ -309,8 +305,8 @@ OpenDDS::DCPS::DataLink::send_listener_for(const RepoId& pub_id) const
 }
 
 ACE_INLINE
-OpenDDS::DCPS::TransportReceiveListener*
-OpenDDS::DCPS::DataLink::recv_listener_for(const RepoId& sub_id) const
+TransportReceiveListener*
+DataLink::recv_listener_for(const RepoId& sub_id) const
 {
   // sub_map_ (and recv_listeners_) are already locked when entering this
   // private method.
@@ -320,4 +316,7 @@ OpenDDS::DCPS::DataLink::recv_listener_for(const RepoId& sub_id) const
     return 0;
   }
   return found->second;
+}
+
+}
 }

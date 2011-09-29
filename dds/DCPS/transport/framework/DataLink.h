@@ -140,12 +140,7 @@ public:
   /// This method is essentially an "undo_send()" method.  It's goal
   /// is to remove all traces of the sample from this DataLink (if
   /// the sample is even known to the DataLink).
-  /// A return value of -1 indicates that a fatal error was encountered
-  /// while trying to carry out the remove_sample operation.
-  /// A return value of 0 indicates that there was no fatal error, and
-  /// that this DataLink no longer references the sample (if it ever
-  /// did).
-  int remove_sample(TransportSendElement& element, bool dropped_by_transport);
+  RemoveResult remove_sample(const DataSampleListElement* sample);
 
   // ciju: Called by LinkSet with locks held
   void remove_all_msgs(RepoId pub_id);

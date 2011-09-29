@@ -45,14 +45,6 @@ public:
 
   void remove_link(const DataLink_rch& link);
 
-  // ciju: Called with lock held in DataLinkSetMap
-  /// Remove all reservations involving the remote_id from each
-  /// DataLink in this set.  The supplied 'released' map will be
-  /// updated with all of the local_id to DataLink reservations that
-  /// were made invalid as a result of the release operation.
-  //void release_reservations(RepoId          remote_id,
-  //                          DataLinkSetMap& released_locals);
-
   /// Send to each DataLink in the set.
   void send(DataSampleListElement* sample);
 
@@ -63,9 +55,9 @@ public:
 
   void send_response(RepoId sub_id, ACE_Message_Block* response);
 
-  int remove_sample(const DataSampleListElement* sample, bool dropped_by_transport);
+  bool remove_sample(const DataSampleListElement* sample);
 
-  int remove_all_msgs(RepoId pub_id);
+  bool remove_all_msgs(RepoId pub_id);
 
   /// This will do several things, including adding to the membership
   /// of the send_links_ set.  Any DataLinks added to the send_links_

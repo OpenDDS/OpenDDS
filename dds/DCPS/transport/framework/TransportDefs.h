@@ -156,12 +156,12 @@ class ACE_Data_Block;
     if (tv != -1) VALUE.msec(tv);                                                \
   }
 
+namespace OpenDDS {
+namespace DCPS {
+
 // The transport and configuration section name used in the config file format
 static const ACE_TCHAR TRANSPORT_SECTION_NAME[] = ACE_TEXT("transport");
 static const ACE_TCHAR CONFIG_SECTION_NAME[] = ACE_TEXT("config");
-
-namespace OpenDDS {
-namespace DCPS {
 
 /// Identifier type for DataLink objects.
 typedef ACE_UINT64  DataLinkIdType;
@@ -199,25 +199,30 @@ enum { MAX_SEND_BLOCKS = 50 };
 // which a release will occur.
 
 /// Allocators used for transport receiving logic.
-enum { RECEIVE_DATA_BUFFER_SIZE = 65536 } ;
+enum { RECEIVE_DATA_BUFFER_SIZE = 65536 };
 
 typedef Cached_Allocator_With_Overflow<ACE_Message_Block, RECEIVE_SYNCH>
-TransportMessageBlockAllocator ;
+  TransportMessageBlockAllocator;
 
 typedef Cached_Allocator_With_Overflow<ACE_Data_Block,    RECEIVE_SYNCH>
-TransportDataBlockAllocator ;
+  TransportDataBlockAllocator;
 
-typedef Cached_Allocator_With_Overflow<
-char[RECEIVE_DATA_BUFFER_SIZE],
-RECEIVE_SYNCH>                  TransportDataAllocator ;
+typedef Cached_Allocator_With_Overflow<char[RECEIVE_DATA_BUFFER_SIZE],
+                                       RECEIVE_SYNCH>
+  TransportDataAllocator;
 
 /// Default TransportInst settings
 enum {
-  DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL   = 10,
-  DEFAULT_CONFIG_QUEUE_INITIAL_POOLS    = 5,
-  DEFAULT_CONFIG_MAX_PACKET_SIZE        = 2147481599,
-  DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET = 10,
-  DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE    = 4096
+  DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL = 10,
+  DEFAULT_CONFIG_QUEUE_INITIAL_POOLS     = 5,
+  DEFAULT_CONFIG_MAX_PACKET_SIZE         = 2147481599,
+  DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET  = 10,
+  DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE     = 4096
+};
+
+/// used by DataLink::remove_sample(), TransportSendStrategy, *RemoveVisitor
+enum RemoveResult {
+  REMOVE_ERROR, REMOVE_NOT_FOUND, REMOVE_FOUND, REMOVE_RELEASED
 };
 
 } // namespace DCPS

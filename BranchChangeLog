@@ -1,3 +1,59 @@
+Thu Sep 29 14:19:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          In create_control_message(), allow for null ACE_Message_Block of data.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Overload operator!=() to match operator==().
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Updated remove_sample() and remove_all_msgs() method signatures.
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.h:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Revamped comparison of TransportQueueElements.  This allows
+          remove_sample() to find customized elements in the queues.
+          TransportQueueElements are no longer created just for the sake of
+          comparison.  Track the status of removal in visitor status instead of
+          using the TransportQueueElement::released() bool.
+
 Tue Sep 27 21:53:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:

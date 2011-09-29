@@ -16,19 +16,22 @@
 #include "ThreadPerConRemoveVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
-OpenDDS::DCPS::ThreadPerConRemoveVisitor::~ThreadPerConRemoveVisitor()
+namespace OpenDDS {
+namespace DCPS {
+
+ThreadPerConRemoveVisitor::~ThreadPerConRemoveVisitor()
 {
-  DBG_ENTRY("ThreadPerConRemoveVisitor","~ThreadPerConRemoveVisitor");
+  DBG_ENTRY("ThreadPerConRemoveVisitor", "~ThreadPerConRemoveVisitor");
 }
 
 int
-OpenDDS::DCPS::ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* element,
-                                                               int&         remove)
+ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* req,
+                                                int& remove)
 {
-  DBG_ENTRY("ThreadPerConRemoveVisitor","visit_element_remove");
+  DBG_ENTRY("ThreadPerConRemoveVisitor", "visit_element_remove");
 
-  TransportRetainedElement remove_sample( this->sample_, GUID_UNKNOWN);
-  if( (element->op_ == SEND) && remove_sample == *element->element_) {
+  TransportQueueElement::MatchOnDataPayload modp(this->sample_->rd_ptr());
+  if ((req->op_ == SEND) && modp.matches(*req->element_)) {
     // We are visiting the element that we want to remove, since the
     // element "matches" our sample_.
 
@@ -40,21 +43,20 @@ OpenDDS::DCPS::ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* elem
 
     // Inform the element that we've made a decision - and it is
     // data_dropped()
-    element->element_->data_dropped();
+    const bool released = req->element_->data_dropped();
 
     // Adjust our status_ to indicate that we actually found (and removed)
     // the sample.
-    this->status_ = 1;
+    this->status_ = released ? REMOVE_RELEASED : REMOVE_FOUND;
 
-    if (this->sample_ != 0) {
-      // Stop visitation since we've handled the element that matched
-      // our sample_.
-      return 0;
-    }
-
-    // When this->sample_ == 0, we visit every element.
+    // Stop visitation since we've handled the element that matched
+    // our sample_.
+    return 0;
   }
 
   // Continue visitation.
   return 1;
+}
+
+}
 }

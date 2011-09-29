@@ -78,13 +78,7 @@ public:
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
-  /// A -1 is returned if some fatal error was encountered while
-  /// attempting to remove the sample.  Otherwise, a 0 is returned.
-  /// Note that a 0 return value does not imply that the sample was
-  /// actually found and removed - it could mean that, or it could
-  /// mean that the sample has already been fully sent, and there
-  /// is no trace of it in this strategy object.
-  int remove_sample(TransportSendElement& element);
+  RemoveResult remove_sample(const DataSampleListElement* sample);
 
   void remove_all_msgs(RepoId pub_id);
 
@@ -159,14 +153,6 @@ protected:
 
   /// Specific implementation processing of prepared packet.
   virtual void prepare_packet_i();
-
-  /// Provide the opportunity to remove a sample from implementation
-  /// specific lists as well.
-  virtual void remove_sample_i(const TransportSendElement& element);
-
-  /// Provide the opportunity to remove control messages from
-  /// implementation specific lists as well.
-  virtual void remove_all_msgs_i(RepoId pub_id);
 
   /// The maximum size of a message allowed by the this TransportImpl, or 0
   /// if there is such limit.  This is expected to be a constant, for example
@@ -286,7 +272,8 @@ public:
 
 private:
   /// Implement framework chain visitations to remove a sample.
-  int do_remove_sample(TransportQueueElement& current_sample);
+  RemoveResult do_remove_sample(
+    const TransportQueueElement::MatchCriteria& criteria);
 
   virtual void marshal_transport_header(ACE_Message_Block* mb);
 

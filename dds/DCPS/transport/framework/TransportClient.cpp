@@ -412,15 +412,13 @@ TransportClient::send_control(ACE_Message_Block* msg, void* extra /* = 0*/)
 bool
 TransportClient::remove_sample(const DataSampleListElement* sample)
 {
-  const int ret = links_.remove_sample(sample, /*dropped_by_transport*/ false);
-  return ret == 0;
+  return links_.remove_sample(sample);
 }
 
 bool
 TransportClient::remove_all_msgs()
 {
-  const int ret = links_.remove_all_msgs(repo_id_);
-  return ret == 0;
+  return links_.remove_all_msgs(repo_id_);
 }
 
 

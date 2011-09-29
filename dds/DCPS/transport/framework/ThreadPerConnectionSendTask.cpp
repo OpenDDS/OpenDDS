@@ -19,26 +19,29 @@
 
 #include "ace/Auto_Ptr.h"
 
-OpenDDS::DCPS::ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(
-  OpenDDS::DCPS::DataLink* link) : lock_(),
-    queue_(1, 10),
-    work_available_(lock_),
-    shutdown_initiated_(false),
-    opened_(false),
-    link_(link)
+namespace OpenDDS {
+namespace DCPS {
+
+ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(DataLink* link)
+  : lock_()
+  , queue_(1, 10)
+  , work_available_(lock_)
+  , shutdown_initiated_(false)
+  , opened_(false)
+  , link_(link)
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","ThreadPerConnectionSendTask",6);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "ThreadPerConnectionSendTask", 6);
 }
 
-OpenDDS::DCPS::ThreadPerConnectionSendTask::~ThreadPerConnectionSendTask()
+ThreadPerConnectionSendTask::~ThreadPerConnectionSendTask()
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","~ThreadPerConnectionSendTask",6);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "~ThreadPerConnectionSendTask", 6);
 }
 
-int OpenDDS::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
-                                                            TransportQueueElement* element)
+int ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
+                                             TransportQueueElement* element)
 {
-  DBG_ENTRY("ThreadPerConnectionSendTask","add");
+  DBG_ENTRY("ThreadPerConnectionSendTask", "add");
 
   ACE_Auto_Ptr<SendRequest> req(new SendRequest);
   req->op_ = op;
@@ -48,8 +51,9 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType o
   { // guard scope
     GuardType guard(this->lock_);
 
-    if (this->shutdown_initiated_)
+    if (this->shutdown_initiated_) {
       return -1;
+    }
 
     result = this->queue_.put(req.get());
 
@@ -57,18 +61,19 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType o
       this->work_available_.signal();
       req.release();
 
-    } else
+    } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ThreadPerConnectionSendTask::add %p\n"),
                  ACE_TEXT("put")));
+    }
   }
 
   return result;
 }
 
-int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
+int ThreadPerConnectionSendTask::open(void*)
 {
-  DBG_ENTRY("ThreadPerConnectionSendTask","open");
+  DBG_ENTRY("ThreadPerConnectionSendTask", "open");
 
   GuardType guard(this->lock_);
 
@@ -116,9 +121,9 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::open(void*)
   return 0;
 }
 
-int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
+int ThreadPerConnectionSendTask::svc()
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","svc",6);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "svc", 6);
 
   this->thr_id_ = ACE_OS::thr_self();
 
@@ -139,8 +144,9 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
         this->work_available_.wait();
       }
 
-      if (this->shutdown_initiated_)
+      if (this->shutdown_initiated_) {
         break;
+      }
 
       req = queue_.get();
 
@@ -163,48 +169,51 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
   return 0;
 }
 
-int OpenDDS::DCPS::ThreadPerConnectionSendTask::close(u_long flag)
+int ThreadPerConnectionSendTask::close(u_long flag)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask","close");
 
-  if (flag == 0)
+  if (flag == 0) {
     return 0;
+  }
 
   {
     GuardType guard(this->lock_);
 
-    if (this->shutdown_initiated_)
+    if (this->shutdown_initiated_) {
       return 0;
+    }
 
     // Set the shutdown flag to true.
     this->shutdown_initiated_ = true;
     this->work_available_.signal();
   }
 
-  if (this->opened_ && this->thr_id_ != ACE_OS::thr_self())
+  if (this->opened_ && this->thr_id_ != ACE_OS::thr_self()) {
     this->wait();
+  }
 
   return 0;
 }
 
-int
-OpenDDS::DCPS::ThreadPerConnectionSendTask::remove_sample(TransportSendElement& element)
+RemoveResult
+ThreadPerConnectionSendTask::remove_sample(const DataSampleListElement* element)
 {
-  DBG_ENTRY("ThreadPerConnectionSendTask","remove_sample");
+  DBG_ENTRY("ThreadPerConnectionSendTask", "remove_sample");
 
   GuardType guard(this->lock_);
 
-  ThreadPerConRemoveVisitor vistor(element.msg());
+  ACE_Message_Block* payload = element->sample_->cont();
+  ThreadPerConRemoveVisitor visitor(payload);
 
-  // Let it visit our elems_ collection as a "replace" visitor.
-  this->queue_.accept_visitor(vistor);
+  this->queue_.accept_visitor(visitor);
 
-  return vistor.status();
+  return visitor.status();
 }
 
-void OpenDDS::DCPS::ThreadPerConnectionSendTask::execute(SendRequest& req)
+void ThreadPerConnectionSendTask::execute(SendRequest& req)
 {
-  DBG_ENTRY_LVL("ThreadPerConnectionSendTask","execute",6);
+  DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "execute", 6);
 
   switch (req.op_) {
   case SEND_START:
@@ -221,4 +230,7 @@ void OpenDDS::DCPS::ThreadPerConnectionSendTask::execute(SendRequest& req)
                req.op_));
     break;
   }
+}
+
+}
 }

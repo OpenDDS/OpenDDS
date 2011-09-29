@@ -13,6 +13,8 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "BasicQueueVisitor_T.h"
 #include "TransportDefs.h"
+#include "TransportQueueElement.h"
+
 #include "ace/Message_Block.h"
 
 namespace OpenDDS {
@@ -20,11 +22,11 @@ namespace DCPS {
 
 class TransportQueueElement;
 
-class OpenDDS_Dcps_Export QueueRemoveVisitor : public BasicQueueVisitor<TransportQueueElement> {
+class OpenDDS_Dcps_Export QueueRemoveVisitor
+  : public BasicQueueVisitor<TransportQueueElement> {
 public:
 
-  /// Construct with a queue element representing the sample to be removed.
-  QueueRemoveVisitor(TransportQueueElement& sample);
+  explicit QueueRemoveVisitor(const TransportQueueElement::MatchCriteria& mc);
 
   virtual ~QueueRemoveVisitor();
 
@@ -35,17 +37,17 @@ public:
 
   /// Accessor for the status.  Called after this visitor object has
   /// been passed to BasicQueue<T>::accept_remove_visitor().
-  int status() const;
+  RemoveResult status() const;
 
   int removed_bytes() const;
 
 private:
 
-  /// The sample that needs to be removed.
-  TransportQueueElement& sample_;
+  /// Criteria object describing the Queue Element that needs to be removed.
+  const TransportQueueElement::MatchCriteria& mc_;
 
   /// Holds the status of our visit.
-  int status_;
+  RemoveResult status_;
 
   size_t removed_bytes_;
 };
