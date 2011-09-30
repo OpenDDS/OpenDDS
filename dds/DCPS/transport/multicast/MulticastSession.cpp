@@ -61,9 +61,11 @@ SynWatchdog::on_timeout(const void* /*arg*/)
   // log an error and return:
   ACE_ERROR((LM_WARNING,
              ACE_TEXT("(%P|%t) WARNING: ")
-             ACE_TEXT("SynWatchdog::on_timeout: ")
-             ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
-             this->session_->remote_peer()));
+             ACE_TEXT("SynWatchdog[transport=%C]::on_timeout: ")
+             ACE_TEXT("timed out waiting on remote peer: 0x%x local: 0x%x\n"),
+             this->session_->link()->config()->name().c_str(),
+             this->session_->remote_peer(),
+             this->session_->link()->local_peer()));
 }
 
 

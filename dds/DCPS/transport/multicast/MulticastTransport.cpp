@@ -74,15 +74,15 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
     if (!session->start(active)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("MulticastTransport::find_datalink_i: ")
+                        ACE_TEXT("MulticastTransport[%C]::find_datalink_i: ")
                         ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
-                        remote_peer),
+                        this->config_i_->name().c_str(), remote_peer),
                        0);
     }
 
-    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::find_datalink_i "
+    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::find_datalink_i "
               "started session for remote peer: 0x%x\n",
-              remote_peer), 2);
+              this->config_i_->name().c_str(), remote_peer), 2);
   }
 
   return link._retn();
@@ -106,9 +106,10 @@ MulticastTransport::make_datalink(const RepoId& local_id,
 
   bool is_loopback = local_peer == remote_peer;
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::make_datalink "
-            "remote peer \"%d priority %d is_loopback %d active %d\"\n",
-            remote_peer, priority, is_loopback, active), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::make_datalink "
+            "peers: local %d remote %d, priority %d is_loopback %d active %d\n",
+            this->config_i_->name().c_str(), local_peer, remote_peer,
+            priority, is_loopback, active), 2);
 
   MulticastDataLink_rch link;
   ACE_NEW_RETURN(link,
@@ -153,8 +154,9 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::start_session: ")
-                      ACE_TEXT("link is nil\n")),
+                      ACE_TEXT("MulticastTransport[%C]::start_session: ")
+                      ACE_TEXT("link is nil\n"),
+                      this->config_i_->name().c_str()),
                      0);
   }
 
@@ -162,18 +164,18 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::start_session: ")
+                      ACE_TEXT("MulticastTransport[%C]::start_session: ")
                       ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
-                      remote_peer),
+                      this->config_i_->name().c_str(), remote_peer),
                      0);
   }
 
   if (!session->start(active)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::start_session: ")
+                      ACE_TEXT("MulticastTransport[%C]::start_session: ")
                       ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
-                      remote_peer),
+                      this->config_i_->name().c_str(), remote_peer),
                      0);
   }
 
@@ -201,15 +203,15 @@ MulticastTransport::connect_datalink_i(const RepoId& local_id,
   }
 
   if (remote_peer == RepoIdConverter(local_id).participantId()) {
-    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
+    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::connect_datalink_i "
               "loopback on peer: 0x%x, skipping wait_for_ack\n",
-              remote_peer), 2);
+              this->config_i_->name().c_str(), remote_peer), 2);
     return link._retn();
   }
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::connect_datalink_i "
             "waiting for ack from: 0x%x\n",
-            remote_peer), 2);
+            this->config_i_->name().c_str(), remote_peer), 2);
 
   if (session->wait_for_ack()) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::connect_datalink_i "
@@ -244,8 +246,9 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
 
       if (this->connections_.count(remote_peer)) {
         // remote_peer has already completed the handshake
-        VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink "
-                  "peer 0x%x already completed handshake\n", remote_peer), 2);
+        VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::accept_datalink "
+                  "peer 0x%x already completed handshake\n",
+                  this->config_i_->name().c_str(), remote_peer), 2);
         return link._retn();
       }
 
@@ -255,8 +258,9 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
       guard.release(); // start_session() called without connections_lock_,
       // at this point we know we will return and not need the lock again.
 
-      VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink "
-                "starting session for peer 0x%x\n", remote_peer), 2);
+      VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::accept_datalink "
+                "starting session for peer 0x%x\n",
+                this->config_i_->name().c_str(), remote_peer), 2);
 
       MulticastSession_rch session = this->start_session(link, remote_peer,
                                                          false /*!active*/);
@@ -281,8 +285,9 @@ void
 MulticastTransport::passive_connection(MulticastPeer peer)
 {
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->connections_lock_);
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection "
-                      "from peer 0x%x\n", peer), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::passive_connection "
+                      "from peer 0x%x\n",
+                      this->config_i_->name().c_str(), peer), 2);
 
   typedef std::multimap<ConnectionEvent*, MulticastPeer>::iterator iter_t;
   for (iter_t iter = this->pending_connections_.begin();
@@ -309,8 +314,8 @@ MulticastTransport::configure_i(TransportInst* config)
   if (this->config_i_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::configure_i: ")
-                      ACE_TEXT("invalid configuration!\n")),
+                      ACE_TEXT("MulticastTransport[%@]::configure_i: ")
+                      ACE_TEXT("invalid configuration!\n"), this),
                      false);
   }
   this->config_i_->_add_ref();

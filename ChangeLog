@@ -1,3 +1,29 @@
+Fri Sep 30 20:22:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed a bug where the timeout for
+          passive_connect_duration was ignored.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Enhanced logging so that multiple transport
+          instances can be disambiguated.
+
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+
+          Added optional transport debug logging for this test.
+
+        * DDS_TAOv2.mwc:
+
+          Renamed from DDS_docgroup_TAO.mwc to indicate
+          that it works with TAO version 2.0.x.
+
+        * DDS_docgroup_TAO.mwc:
+
+          Removed this file.  It was renamed (see above).
+
 Thu Sep 29 19:29:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/Arrays/Arrays.gen:
