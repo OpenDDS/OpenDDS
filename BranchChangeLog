@@ -1,3 +1,28 @@
+Fri Sep 30 20:05:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          blob_to_key() is not called from the framework so it doesn't need
+          to be pure virtual here.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+
+          blob_to_key() is no longer virtual.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued developing the transport for RTPS.
+          Starting to track the remote "locators" so the send strategy knows
+          where to send messages.  Not done yet.
+
 Thu Sep 29 22:22:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:

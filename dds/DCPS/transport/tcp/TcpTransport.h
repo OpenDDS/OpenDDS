@@ -102,9 +102,9 @@ private:
   int connect_tcp_datalink(const TcpDataLink_rch& link,
                            const TcpConnection_rch& connection);
 
-  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
-                                  CORBA::Long priority,
-                                  bool active);
+  PriorityKey blob_to_key(const TransportBLOB& remote,
+                          CORBA::Long priority,
+                          bool active);
 
   /// Map Type: (key) PriorityKey to (value) TcpDataLink_rch
   typedef ACE_Hash_Map_Manager_Ex

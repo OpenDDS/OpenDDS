@@ -21,7 +21,7 @@ namespace DCPS {
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link)
   : link_(link)
   , last_received_()
-  , receiver_(link->local_id().guidPrefix)
+  , receiver_(link->local_prefix())
 {
 }
 

@@ -58,7 +58,7 @@ protected:
   virtual std::string transport_type() const { return "rtps_udp"; }
 
 private:
-  RtpsUdpDataLink* make_datalink(const RepoId& local_id);
+  RtpsUdpDataLink* make_datalink(const GuidPrefix_t& local_prefix);
 
   RcHandle<RtpsUdpInst> config_i_;
 
@@ -66,12 +66,8 @@ private:
   /// This link can be safely reused by any clients that belong to the same
   /// domain participant (same GUID prefix).  This implementation could be
   /// extended to automatically create new links when the 'local_id' passed to
-  /// find/create/accept differs from the initial local_id.
+  /// find/create/accept differs (in prefix) from the initial local_id.
   RtpsUdpDataLink_rch link_;
-
-  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
-                                  CORBA::Long priority,
-                                  bool active);
 };
 
 } // namespace DCPS

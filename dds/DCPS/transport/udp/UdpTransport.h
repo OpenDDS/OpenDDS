@@ -97,9 +97,9 @@ private:
   /// but have not been processed by accept_datalink()
   std::set<PriorityKey> pending_server_link_keys_;
 
-  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
-                                  CORBA::Long priority,
-                                  bool active);
+  PriorityKey blob_to_key(const TransportBLOB& remote,
+                          CORBA::Long priority,
+                          bool active);
 };
 
 } // namespace DCPS

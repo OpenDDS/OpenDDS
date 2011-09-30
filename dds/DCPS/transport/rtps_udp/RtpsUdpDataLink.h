@@ -24,6 +24,9 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
+#include <map>
+#include <set>
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -33,14 +36,14 @@ class ReceivedDataSample;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink {
 public:
-  RtpsUdpDataLink(RtpsUdpTransport* transport, const RepoId& local_id);
+
+  RtpsUdpDataLink(RtpsUdpTransport* transport,
+                  const GuidPrefix_t& local_prefix);
 
   void configure(RtpsUdpInst* config, TransportReactorTask* reactor_task);
 
   void send_strategy(RtpsUdpSendStrategy* send_strategy);
   void receive_strategy(RtpsUdpReceiveStrategy* recv_strategy);
-
-  bool active() const;
 
   RtpsUdpInst* config();
   TransportReactorTask* reactor_task();
@@ -55,7 +58,12 @@ public:
   void control_received(ReceivedDataSample& sample,
                         const ACE_INET_Addr& remote_address);
 
-  const RepoId& local_id() const { return local_id_; }
+  const GuidPrefix_t& local_prefix() const { return local_prefix_; }
+
+  void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address);
+
+  void get_locators(const RepoId& local_id,
+                    std::set<ACE_INET_Addr>& addrs) const;
 
 private:
   virtual void stop_i();
@@ -63,15 +71,14 @@ private:
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
 
-  bool active_;
-
   RtpsUdpInst* config_;
   TransportReactorTask_rch reactor_task_;
 
   RtpsUdpSendStrategy_rch send_strategy_;
   RtpsUdpReceiveStrategy_rch recv_strategy_;
 
-  RepoId local_id_;
+  GuidPrefix_t local_prefix_;
+  std::map<RepoId, ACE_INET_Addr, GUID_tKeyLessThan> locators_;
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;

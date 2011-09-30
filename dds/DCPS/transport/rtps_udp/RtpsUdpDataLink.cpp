@@ -20,6 +20,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
 
+#include <cstring>
+
 #ifndef __ACE_INLINE__
 # include "RtpsUdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
@@ -29,15 +31,15 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
-                                 const RepoId& local_id)
+                                 const GuidPrefix_t& local_prefix)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
              false),    // is_active
     config_(0),
-    reactor_task_(0),
-    local_id_(local_id)
+    reactor_task_(0)
 {
+  std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
 
 bool
@@ -55,14 +57,13 @@ RtpsUdpDataLink::open()
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("RtpsUdpDataLink::open: ")
-                        ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed.\n")),
+                        ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")),
                        false);
     }
   }
 
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
-            static_rchandle_cast<TransportStrategy>(recv_strategy_))
-      != 0) {
+            static_rchandle_cast<TransportStrategy>(recv_strategy_)) != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -77,6 +78,22 @@ void
 RtpsUdpDataLink::control_received(ReceivedDataSample& sample,
                                   const ACE_INET_Addr& remote_address)
 {
+}
+
+void
+RtpsUdpDataLink::add_locator(const RepoId& remote_id,
+                             const ACE_INET_Addr& address)
+{
+  locators_[remote_id] = address;
+}
+
+void
+RtpsUdpDataLink::get_locators(const RepoId& local_id,
+                              std::set<ACE_INET_Addr>& addrs) const
+{
+  //TODO: Use base DataLink's maps of associations to get list of peer RepoIds
+  //      corresponding to this local_id.  For each remote peer RepoId, get its
+  //      locator from the locators_ map and insert it into addrs.
 }
 
 void

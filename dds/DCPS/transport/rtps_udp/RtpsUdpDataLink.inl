@@ -29,12 +29,6 @@ RtpsUdpDataLink::receive_strategy(RtpsUdpReceiveStrategy* recv_strategy)
   this->recv_strategy_ = recv_strategy;
 }
 
-ACE_INLINE bool
-RtpsUdpDataLink::active() const
-{
-  return this->active_;
-}
-
 ACE_INLINE RtpsUdpInst*
 RtpsUdpDataLink::config()
 {

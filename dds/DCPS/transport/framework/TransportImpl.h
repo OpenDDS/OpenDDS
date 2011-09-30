@@ -172,10 +172,6 @@ protected:
   /// the release_datalink "event" occurs.
   virtual void release_datalink_i(DataLink* link, bool release_pending) = 0;
 
-  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
-                                  CORBA::Long priority,
-                                  bool active) = 0;
-
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
   /// returned.
