@@ -45,6 +45,7 @@ else {
 my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
+unlink <*.log>;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                        "-ORBDebugLevel 10 " .

@@ -135,16 +135,23 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     ws->detach_condition(condition);
 
+    for (int delay = 0; listener_svt->num_samples() != num_messages_expected
+         && delay < 10; ++delay) {
+      ACE_OS::sleep(1);
+    }
+
     if (listener_svt->num_samples() != num_messages_expected) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: did not receive expected samples !\n")), -1);
     }
+
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
 
     TheServiceParticipant->shutdown();
+    ACE_Thread_Manager::instance()->wait();
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");

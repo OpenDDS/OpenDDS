@@ -355,7 +355,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     payload_tail = frag->cont();
   } else {
     payload_tail = frag->duplicate();
-    frag->wr_ptr(frag->base() + frag_remain);
+    frag->wr_ptr(frag->wr_ptr() - frag->length() + frag_remain);
     ACE_Message_Block::release(frag->cont());
     payload_tail->rd_ptr(frag_remain);
   }

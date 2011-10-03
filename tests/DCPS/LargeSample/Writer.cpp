@@ -97,7 +97,7 @@ Writer::svc()
     Messenger::Message message;
     message.subject_id = 99;
 
-    message.data.length(66*1000);
+    message.data.length(210 * 1000); // requires 4 fragments for udp/mcast
     for (CORBA::ULong j = 0; j < message.data.length(); ++j) {
       message.data[j] = j % 256;
     }

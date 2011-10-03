@@ -1,3 +1,26 @@
+Mon Oct  3 18:18:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Fixed a bug in fragmentation of samples that require more
+          than two fragments.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Fixed a bug in managing the 'last fragment' state across
+          multiple receive buffers.
+
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Added debug logging only.
+
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Extended tests to cover more fragmentation cases.
+
 Mon Oct  3 17:55:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * **/README:

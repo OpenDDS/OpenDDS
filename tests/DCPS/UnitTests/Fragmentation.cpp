@@ -122,6 +122,47 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(f.tail_->cont()->cont()->length() == N / 4);
     TEST_CHECK(!f.tail_->cont()->cont()->cont());
   }
+  { // 3 fragments needed: first split into 2 and then split the 2nd
+    ACE_Message_Block data(N);
+    data.wr_ptr(N);
+    header_mb.cont(&data);
+    Fragments f;
+    DataSampleHeader::split(header_mb, N / 3 + header_mb.length(),
+      f.head_, f.tail_);
+
+    DataSampleHeader header1(*f.head_);
+    TEST_CHECK(header1.more_fragments_);
+    TEST_CHECK(header1.message_length_ == N / 3);
+    TEST_CHECK(f.head_->cont());
+    TEST_CHECK(f.head_->cont()->length() == N / 3);
+    TEST_CHECK(!f.head_->cont()->cont());
+
+    DataSampleHeader header2(*f.tail_);
+    TEST_CHECK(!header2.more_fragments_);
+    TEST_CHECK(header2.message_length_ == 2 * N / 3);
+    TEST_CHECK(f.tail_->cont());
+    TEST_CHECK(f.tail_->cont()->length() == 2 * N / 3);
+    TEST_CHECK(!f.tail_->cont()->cont());
+
+    Fragments f2;
+    f.tail_->rd_ptr(f.tail_->base());
+    DataSampleHeader::split(*f.tail_, N / 3 + header_mb.length(),
+      f2.head_, f2.tail_);
+
+    DataSampleHeader header2a(*f2.head_);
+    TEST_CHECK(header2a.more_fragments_);
+    TEST_CHECK(header2a.message_length_ == N / 3);
+    TEST_CHECK(f2.head_->cont());
+    TEST_CHECK(f2.head_->cont()->length() == N / 3);
+    TEST_CHECK(!f2.head_->cont()->cont());
+
+    DataSampleHeader header2b(*f2.tail_);
+    TEST_CHECK(!header2b.more_fragments_);
+    TEST_CHECK(header2b.message_length_ == N / 3);
+    TEST_CHECK(f2.tail_->cont());
+    TEST_CHECK(f2.tail_->cont()->length() == N / 3);
+    TEST_CHECK(!f2.tail_->cont()->cont());
+  }
   { // content filtering flag with no "entries" (adds another MB to the chain)
     ACE_Message_Block data(N);
     data.wr_ptr(N);
