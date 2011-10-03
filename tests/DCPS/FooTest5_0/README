@@ -1,4 +1,4 @@
-A simple test that does both publication and subscription work 
+A simple test that does both publication and subscription work
 in the main thread.
 This simplifies the coordination of writes and reads.
 
@@ -20,7 +20,7 @@ Command line option:
     //  -z                          verbose transport debug
 
 !!! unsupported options !!!
-    //  -t use_take?1:0             defaults to 0 
+    //  -t use_take?1:0             defaults to 0
     //  -m multiple_instances?1:0   defaults to 0
 
 Single datareader with single instance test:     - run_test.pl

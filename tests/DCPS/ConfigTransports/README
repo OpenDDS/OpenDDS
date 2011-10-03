@@ -14,10 +14,10 @@ Source: None
 No explicitly provided configuration and DDS defults apply.
 
 Source: (name)
-Transport configuration name is explicitly provided in the accompanying INI-formatted file. 
+Transport configuration name is explicitly provided in the accompanying INI-formatted file.
 
 Entity: None
-None of the entities has bound to explicitly provided configuration. No setup/configuration code is used either. 
+None of the entities has bound to explicitly provided configuration. No setup/configuration code is used either.
 
 Entity: ReaderWriter (rw)
 Transport configuration is applied at the Reader (Writer) entity level.

@@ -8,5 +8,5 @@ This directory is intended for simple tests to allow easy addition of new tests 
 
 UnitTest description:
   LivelinessTest:
-  This test exercises Qos_Helper::lease_greater_than, to verify that the 
+  This test exercises Qos_Helper::lease_greater_than, to verify that the
   function correctly handles the infinite lease and other values.

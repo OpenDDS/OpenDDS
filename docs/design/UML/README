@@ -1,9 +1,9 @@
 DDS.uml
 a UML model created using StarUML(Open Source free UML modeling tool)
 it uses Analysis.unt, InDepthOverview.unt, and Overview.unt.
-   After opening DDS.uml with StarUML, in the ModelExplorer under "Use 
+   After opening DDS.uml with StarUML, in the ModelExplorer under "Use
    Case Model" you will find "Overview" (an overview of how the publish
-   and subscribe mechanisms work) and  "In Depth Overview" (a more in 
+   and subscribe mechanisms work) and  "In Depth Overview" (a more in
    depth overview, aimed at those who will be making changes to DDS).
    Under "Analysis Model" there are some Class Diagrams for some of the
    major classes in the system.
@@ -14,7 +14,7 @@ diagrams.
 
 
 XXX_Detail.jpg
-A set of images created from the above described UML model of the "In Depth 
+A set of images created from the above described UML model of the "In Depth
 Overview" diagrams.
 
 DDS.xmi

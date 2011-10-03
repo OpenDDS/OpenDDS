@@ -1,7 +1,7 @@
 $Id$
 
 !!! NOTE: This test is obsolete.
-   
+
 
 This was the first DDS DCPS test.
 It uses a hand-written DDS data type support (not generated from dcps_ts.pl).

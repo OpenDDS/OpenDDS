@@ -1,4 +1,4 @@
-A test for built-in-topic implementation. 
+A test for built-in-topic implementation.
 
 Test steps:
 
@@ -13,16 +13,16 @@ Test steps:
 
 The monitor1 and monitor2 should both get following bit info.
 
- 4 domainparticipants, 
- 2 topics, 
+ 4 domainparticipants,
+ 2 topics,
  1 datareader
  1 datawriter
 
 
-The test log was redirected to a file since it has an error on the InfoRepo during 
-shutdown. The problem is the InfoRepo bit datawriter try to dispose samples upon 
+The test log was redirected to a file since it has an error on the InfoRepo during
+shutdown. The problem is the InfoRepo bit datawriter try to dispose samples upon
 remove_association for a remote bit datareader, the dispose() sends the control messages
-to each associated link while the remote is shutting down and remove_association came 
+to each associated link while the remote is shutting down and remove_association came
 after.
 
 ===errors from test===

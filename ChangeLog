@@ -1,3 +1,9 @@
+Mon Oct  3 17:55:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * **/README:
+
+          Removed trailing whitespace.
+
 Fri Sep 30 20:22:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

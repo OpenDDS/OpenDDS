@@ -63,7 +63,7 @@ one service over another.  Speed is not the only criterion.
 
 Currently OpenDDS does not support the Data Local Reconstruction Layer
 (DLRL) portion of the DDS specification.  See the Developer's Guide for
-further information on OpenDDS compliance with the DDS specification. 
+further information on OpenDDS compliance with the DDS specification.
 This document is freely available as a PDF file
 from the same location where OpenDDS can be downloaded.  Some
 additional notes about compliance with the DDS specification can be
