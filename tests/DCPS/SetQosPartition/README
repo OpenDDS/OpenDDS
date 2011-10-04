@@ -18,4 +18,4 @@ Test sequence:
 
 - First DataReader reset PARTITION to be compatible with the DataWriter
   so both DataReaders receives sample from DataWriter.
-  
+

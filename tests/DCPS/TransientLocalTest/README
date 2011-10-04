@@ -40,4 +40,3 @@ Index: dds/DCPS/PublisherImpl.cpp
 Without the fix, this test will encounter a deadlock. With the fix, the test
 should pass.
 
- 

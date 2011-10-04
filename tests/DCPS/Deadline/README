@@ -27,6 +27,3 @@ The test performs following actions:
 
 6. Attempts another set deadlines to verify the missed deadline status
    updated appropriately.
-
-
-   
