@@ -43,7 +43,6 @@ public:
   MulticastDataLink(MulticastTransport* transport,
                     MulticastSessionFactory* session_factory,
                     MulticastPeer local_peer,
-                    bool is_loopback,
                     bool is_active);
   virtual ~MulticastDataLink();
 

@@ -104,19 +104,16 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
   MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
 
-  bool is_loopback = local_peer == remote_peer;
-
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::make_datalink "
-            "peers: local %d remote %d, priority %d is_loopback %d active %d\n",
+            "peers: local 0x%x remote 0x%x, priority %d active %d\n",
             this->config_i_->name().c_str(), local_peer, remote_peer,
-            priority, is_loopback, active), 2);
+            priority, active), 2);
 
   MulticastDataLink_rch link;
   ACE_NEW_RETURN(link,
                  MulticastDataLink(this,
                                    session_factory.in(),
                                    local_peer,
-                                   is_loopback,
                                    active),
                  0);
 
@@ -136,11 +133,12 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   // Join multicast group:
   if (!link->join(this->config_i_->group_address_)) {
     ACE_TCHAR str[64];
-    this->config_i_->group_address_.addr_to_string(str, sizeof(str));
+    this->config_i_->group_address_.addr_to_string(str,
+                                                   sizeof(str)/sizeof(str[0]));
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport::make_datalink: ")
-                      ACE_TEXT("failed to join multicast group: %C!\n"),
+                      ACE_TEXT("failed to join multicast group: %s!\n"),
                       str),
                      0);
   }

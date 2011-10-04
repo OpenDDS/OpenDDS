@@ -1,3 +1,29 @@
+Tue Oct  4 19:00:04 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Removed "is_loopback" from the data link.  Multicast data links are
+          shared among many sessions, and each session could be loopback or
+          not.  This removes the check for "messages we just sent" in the
+          check_header(TransportHeader) method.  These messages may be needed
+          in the case of an associated reader/writer pair in the same transport
+          instance.  In cases they are not needed, they are properly ignored
+          by the higher layers.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Updated make_datalink() due to changes noted above.
+          Fixed wchar bug in error logging for when multicast join fails.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+          Added debug logging for syn/synack.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Continued test enhancement from yesterday -- handle errors better.
+
 Mon Oct  3 18:18:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.cpp:

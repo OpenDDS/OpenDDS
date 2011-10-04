@@ -141,9 +141,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     if (listener_svt->num_samples() != num_messages_expected) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: did not receive expected samples !\n")), -1);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" ERROR: did not receive expected samples !\n")));
     }
 
     // Clean-up!
