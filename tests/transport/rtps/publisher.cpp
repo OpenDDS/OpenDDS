@@ -398,6 +398,5 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   orb->destroy();
   ACE_Thread_Manager::instance()->wait();
 
-  std::cout << "publisher: Leaving main()" << std::endl;
   return 0;
 }
