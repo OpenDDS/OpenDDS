@@ -46,7 +46,6 @@ public:
   void receive_strategy(RtpsUdpReceiveStrategy* recv_strategy);
 
   RtpsUdpInst* config();
-  TransportReactorTask* reactor_task();
 
   ACE_Reactor* get_reactor();
 
@@ -62,6 +61,9 @@ public:
 
   void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address);
 
+  /// Given a 'local_id' of a publication or subscription, populate the set of
+  /// 'addrs' with the network addresses of any remote peers (or if 'local_id'
+  /// is GUID_UNKNOWN, all known addresses).
   void get_locators(const RepoId& local_id,
                     std::set<ACE_INET_Addr>& addrs) const;
 

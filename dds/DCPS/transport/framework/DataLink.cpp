@@ -30,18 +30,19 @@
 #include "ace/Reactor.h"
 #include "ace/SOCK.h"
 
-#include <iostream>     // For operator<<() diagnostic formatting.
-#include <sstream>      // For Guid value conversion formatting.
+#include <iostream>
+#include <sstream>
 
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"
 #endif /* __ACE_INLINE__ */
 
+namespace OpenDDS {
+namespace DCPS {
+
 /// Only called by our TransportImpl object.
-OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl,
-                                  CORBA::Long priority,
-                                  bool is_loopback,
-                                  bool is_active)
+DataLink::DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback,
+                   bool is_active)
   : stopped_(false),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
@@ -53,12 +54,12 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl,
     is_active_(is_active),
     start_failed_(false)
 {
-  DBG_ENTRY_LVL("DataLink","DataLink",6);
+  DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
   impl->_add_ref();
   this->impl_ = impl;
 
-  datalink_release_delay_.sec(this->impl_->config_->datalink_release_delay_/1000);
+  datalink_release_delay_.sec(this->impl_->config_->datalink_release_delay_ / 1000);
   datalink_release_delay_.usec(this->impl_->config_->datalink_release_delay_ % 1000 * 1000);
 
   id_ = DataLink::get_next_datalink_id();
@@ -88,9 +89,9 @@ OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl,
   this->db_allocator_ = new DataBlockAllocator(control_chunks);
 }
 
-OpenDDS::DCPS::DataLink::~DataLink()
+DataLink::~DataLink()
 {
-  DBG_ENTRY_LVL("DataLink","~DataLink",6);
+  DBG_ENTRY_LVL("DataLink", "~DataLink", 6);
 
   if ((this->pub_map_.size() > 0) || (this->sub_map_.size() > 0)) {
     ACE_DEBUG((LM_WARNING,
@@ -112,14 +113,14 @@ OpenDDS::DCPS::DataLink::~DataLink()
   }
 }
 
-OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::DCPS::DataLink::impl() const
+TransportImpl_rch
+DataLink::impl() const
 {
   return impl_;
 }
 
 void
-OpenDDS::DCPS::DataLink::wait_for_start()
+DataLink::wait_for_start()
 {
   GuardType guard(this->strategy_lock_);
   while ((this->send_strategy_.is_nil() || this->receive_strategy_.is_nil())
@@ -129,7 +130,7 @@ OpenDDS::DCPS::DataLink::wait_for_start()
 }
 
 void
-OpenDDS::DCPS::DataLink::stop()
+DataLink::stop()
 {
   GuardType guard(this->strategy_lock_);
 
@@ -153,7 +154,7 @@ OpenDDS::DCPS::DataLink::stop()
 }
 
 void
-OpenDDS::DCPS::DataLink::resume_send()
+DataLink::resume_send()
 {
   if (!this->send_strategy_->isDirectMode())
     this->send_strategy_->resume_send();
@@ -164,12 +165,11 @@ OpenDDS::DCPS::DataLink::resume_send()
 /// Return Codes: 0 means successful reservation made.
 ///              -1 means failure.
 int
-OpenDDS::DCPS::DataLink::make_reservation(
-  RepoId subscriber_id,  /* remote */
-  RepoId publisher_id,   /* local */
-  TransportSendListener* send_listener)
+DataLink::make_reservation(RepoId subscriber_id,  /* remote */
+                           RepoId publisher_id,   /* local */
+                           TransportSendListener* send_listener)
 {
-  DBG_ENTRY_LVL("DataLink","make_reservation",6);
+  DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
   int pub_result      = 0;
   int sub_result      = 0;
   int pub_undo_result = 0;
@@ -287,12 +287,11 @@ OpenDDS::DCPS::DataLink::make_reservation(
 
 /// Only called by our TransportImpl object.
 int
-OpenDDS::DCPS::DataLink::make_reservation
-(RepoId                    publisher_id,     /* remote */
- RepoId                    subscriber_id,    /* local */
- TransportReceiveListener* receive_listener)
+DataLink::make_reservation(RepoId publisher_id,     /* remote */
+                           RepoId subscriber_id,    /* local */
+                           TransportReceiveListener* receive_listener)
 {
-  DBG_ENTRY_LVL("DataLink","make_reservation",6);
+  DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
   int sub_result      = 0;
   int pub_result      = 0;
   int sub_undo_result = 0;
@@ -414,6 +413,46 @@ OpenDDS::DCPS::DataLink::make_reservation
   return -1;
 }
 
+GUIDSeq*
+DataLink::peer_ids(const RepoId& local_id) const
+{
+  // Is 'local_id' a local publication?
+  GuardType guard(this->pub_map_lock_);
+  if (this->send_listeners_.count(local_id)) {
+    ReceiveListenerSet_rch rls = this->pub_map_.find(local_id);
+    if (rls.is_nil()) {
+      return 0;
+    }
+    GUIDSeq_var result = new GUIDSeq;
+    result->length(static_cast<CORBA::ULong>(rls->size()));
+    CORBA::ULong i = 0;
+    for (ReceiveListenerSet::MapType::iterator iter = rls->map().begin();
+         iter != rls->map().end(); ++iter) {
+      result[i++] = iter->first;
+    }
+    return result._retn();
+  }
+  guard.release();
+
+  // Is 'local_id' a local subscription?
+  GuardType sub_guard(this->sub_map_lock_);
+  if (this->recv_listeners_.count(local_id)) {
+    RepoIdSet_rch ris = this->sub_map_.find(local_id);
+    if (ris.is_nil()) {
+      return 0;
+    }
+    GUIDSeq_var result = new GUIDSeq;
+    result->length(static_cast<CORBA::ULong>(ris->size()));
+    CORBA::ULong i = 0;
+    for (RepoIdSet::MapType::iterator iter = ris->map().begin();
+         iter != ris->map().end(); ++iter) {
+      result[i++] = iter->first;
+    }
+    return result._retn();
+  }
+  return 0;
+}
+
 /// This gets invoked when a TransportClient::remove_associations()
 /// call has been made.  Because this DataLink can be shared amongst
 /// different TransportClient objects, and different threads could
@@ -422,11 +461,10 @@ OpenDDS::DCPS::DataLink::make_reservation
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
 void
-OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
-                                              RepoId          local_id,
-                                              DataLinkSetMap& released_locals)
+DataLink::release_reservations(RepoId remote_id, RepoId local_id,
+                               DataLinkSetMap& released_locals)
 {
-  DBG_ENTRY_LVL("DataLink","release_reservations",6);
+  DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
   if (DCPS_debug_level > 9) {
     RepoIdConverter local(local_id);
@@ -539,7 +577,7 @@ OpenDDS::DCPS::DataLink::release_reservations(RepoId          remote_id,
 }
 
 bool
-OpenDDS::DCPS::DataLink::cancel_release()
+DataLink::cancel_release()
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
   ACE_Reactor* reactor = orb->orb_core()->reactor();
@@ -547,24 +585,23 @@ OpenDDS::DCPS::DataLink::cancel_release()
 }
 
 int
-OpenDDS::DCPS::DataLink::start_i()
+DataLink::start_i()
 {
-  DBG_ENTRY_LVL("DataLink","start_i",6);
+  DBG_ENTRY_LVL("DataLink", "start_i", 6);
 
   return 0;
 }
 
 void
-OpenDDS::DCPS::DataLink::stop_i()
+DataLink::stop_i()
 {
-  DBG_ENTRY_LVL("DataLink","stop_i",6);
+  DBG_ENTRY_LVL("DataLink", "stop_i", 6);
 }
 
 ACE_Message_Block*
-OpenDDS::DCPS::DataLink::create_control(char submessage_id,
-                                        ACE_Message_Block* data)
+DataLink::create_control(char submessage_id, ACE_Message_Block* data)
 {
-  DBG_ENTRY_LVL("DataLink","create_control",6);
+  DBG_ENTRY_LVL("DataLink", "create_control", 6);
 
   DataSampleHeader header;
 
@@ -595,10 +632,10 @@ OpenDDS::DCPS::DataLink::create_control(char submessage_id,
   return message;
 }
 
-OpenDDS::DCPS::SendControlStatus
-OpenDDS::DCPS::DataLink::send_control(ACE_Message_Block* message)
+SendControlStatus
+DataLink::send_control(ACE_Message_Block* message)
 {
-  DBG_ENTRY_LVL("DataLink","send_control",6);
+  DBG_ENTRY_LVL("DataLink", "send_control", 6);
   SendResponseListener listener;
 
   TransportSendControlElement* elem;
@@ -624,9 +661,9 @@ OpenDDS::DCPS::DataLink::send_control(ACE_Message_Block* message)
 /// within this DataLink that are interested in the (remote) publisher id
 /// that sent the sample.
 int
-OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
+DataLink::data_received(ReceivedDataSample& sample)
 {
-  DBG_ENTRY_LVL("DataLink","data_received",6);
+  DBG_ENTRY_LVL("DataLink", "data_received", 6);
 
   // Which remote publisher sent this message?
   RepoId publisher_id = sample.header_.publication_id_;
@@ -636,7 +673,7 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
   // from the remote publisher_id.
   ReceiveListenerSet_rch listener_set;
 
-  if (OpenDDS::DCPS::Transport_debug_level > 9) {
+  if (Transport_debug_level > 9) {
     std::stringstream buffer;
     buffer << sample.header_;
     RepoIdConverter converter(publisher_id);
@@ -654,7 +691,7 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 
   if (listener_set.is_nil()) {
     // Nobody has any interest in this message.  Drop it on the floor.
-    if (OpenDDS::DCPS::Transport_debug_level > 4) {
+    if (Transport_debug_level > 4) {
       RepoIdConverter converter(publisher_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::data_received: ")
@@ -686,7 +723,7 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
 }
 
 void
-OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
+DataLink::ack_received(ReceivedDataSample& sample)
 {
   RepoId publication = GUID_UNKNOWN;
   Serializer serializer(
@@ -730,13 +767,11 @@ OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
 /// have already acquired our lock_.
 // Ciju: Don't believe a guard is necessary here
 void
-OpenDDS::DCPS::DataLink::release_remote_subscriber
-(RepoId          subscriber_id,
- RepoId          publisher_id,
- RepoIdSet_rch&      pubid_set,
- DataLinkSetMap& released_publishers)
+DataLink::release_remote_subscriber(RepoId subscriber_id, RepoId publisher_id,
+                                    RepoIdSet_rch& pubid_set,
+                                    DataLinkSetMap& released_publishers)
 {
-  DBG_ENTRY_LVL("DataLink","release_remote_subscriber",6);
+  DBG_ENTRY_LVL("DataLink", "release_remote_subscriber", 6);
 
   RepoIdSet::MapType& pubid_map = pubid_set->map();
 
@@ -779,13 +814,11 @@ OpenDDS::DCPS::DataLink::release_remote_subscriber
 /// have already acquired our lock_.
 // Ciju: Don't believe a guard is necessary here
 void
-OpenDDS::DCPS::DataLink::release_remote_publisher
-(RepoId              publisher_id,
- RepoId              subscriber_id,
- ReceiveListenerSet_rch& listener_set,
- DataLinkSetMap&     released_subscribers)
+DataLink::release_remote_publisher(RepoId publisher_id, RepoId subscriber_id,
+                                   ReceiveListenerSet_rch& listener_set,
+                                   DataLinkSetMap& released_subscribers)
 {
-  DBG_ENTRY_LVL("DataLink","release_remote_publisher",6);
+  DBG_ENTRY_LVL("DataLink", "release_remote_publisher", 6);
 
   if (listener_set->exist(subscriber_id)) {
     // Remove the publisher_id => subscriber_id association.
@@ -818,7 +851,7 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
 
 // static
 ACE_UINT64
-OpenDDS::DCPS::DataLink::get_next_datalink_id()
+DataLink::get_next_datalink_id()
 {
   static ACE_UINT64 next_id = 0;
   static LockType lock;
@@ -839,9 +872,9 @@ OpenDDS::DCPS::DataLink::get_next_datalink_id()
 }
 
 void
-OpenDDS::DCPS::DataLink::transport_shutdown()
+DataLink::transport_shutdown()
 {
-  DBG_ENTRY_LVL("DataLink","transport_shutdown",6);
+  DBG_ENTRY_LVL("DataLink", "transport_shutdown", 6);
 
   if (! this->send_strategy_.is_nil ()) {
     this->send_strategy_->transport_shutdown ();
@@ -858,9 +891,9 @@ OpenDDS::DCPS::DataLink::transport_shutdown()
 }
 
 void
-OpenDDS::DCPS::DataLink::notify(ConnectionNotice notice)
+DataLink::notify(ConnectionNotice notice)
 {
-  DBG_ENTRY_LVL("DataLink","notify",6);
+  DBG_ENTRY_LVL("DataLink", "notify", 6);
 
   VDBG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataLink::notify: this(%X) notify %C\n"),
@@ -880,7 +913,7 @@ OpenDDS::DCPS::DataLink::notify(ConnectionNotice notice)
 
       TransportSendListener* tsl = send_listener_for(itr->first);
       if (tsl != 0) {
-        if (OpenDDS::DCPS::Transport_debug_level > 0) {
+        if (Transport_debug_level > 0) {
           RepoIdConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
@@ -912,7 +945,7 @@ OpenDDS::DCPS::DataLink::notify(ConnectionNotice notice)
         }
 
       } else {
-        if (OpenDDS::DCPS::Transport_debug_level > 0) {
+        if (Transport_debug_level > 0) {
           RepoIdConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
@@ -938,7 +971,7 @@ OpenDDS::DCPS::DataLink::notify(ConnectionNotice notice)
 
       TransportReceiveListener* trl = recv_listener_for(itr->first);
       if (trl != 0) {
-        if (OpenDDS::DCPS::Transport_debug_level > 0) {
+        if (Transport_debug_level > 0) {
           RepoIdConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
@@ -978,7 +1011,7 @@ OpenDDS::DCPS::DataLink::notify(ConnectionNotice notice)
         }
 
       } else {
-        if (OpenDDS::DCPS::Transport_debug_level > 0) {
+        if (Transport_debug_level > 0) {
           RepoIdConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
@@ -992,11 +1025,11 @@ OpenDDS::DCPS::DataLink::notify(ConnectionNotice notice)
 }
 
 void
-OpenDDS::DCPS::DataLink::notify_connection_deleted()
+DataLink::notify_connection_deleted()
 {
   GuardType guard(this->released_local_lock_);
 
-  if (OpenDDS::DCPS::Transport_debug_level > 5) {
+  if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
                ACE_TEXT("pmap %d smap %d\n"),
@@ -1012,7 +1045,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
 
     TransportSendListener* tsl = send_listener_for(itr->first);
     if (tsl != 0) {
-      if (OpenDDS::DCPS::Transport_debug_level > 0) {
+      if (Transport_debug_level > 0) {
         RepoIdConverter converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
@@ -1033,7 +1066,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
     TransportReceiveListener* trl = recv_listener_for(itr2->first);
 
     if (trl != 0) {
-      if (OpenDDS::DCPS::Transport_debug_level > 0) {
+      if (Transport_debug_level > 0) {
         RepoIdConverter converter(itr2->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
@@ -1047,7 +1080,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
 }
 
 void
-OpenDDS::DCPS::DataLink::pre_stop_i()
+DataLink::pre_stop_i()
 {
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->close(1);
@@ -1055,7 +1088,7 @@ OpenDDS::DCPS::DataLink::pre_stop_i()
 }
 
 bool
-OpenDDS::DCPS::DataLink::release_resources()
+DataLink::release_resources()
 {
   DBG_ENTRY_LVL("DataLink", "release_resources", 6);
 
@@ -1065,7 +1098,7 @@ OpenDDS::DCPS::DataLink::release_resources()
 }
 
 bool
-OpenDDS::DCPS::DataLink::is_target(const RepoId& sub_id)
+DataLink::is_target(const RepoId& sub_id)
 {
   GuardType guard(this->sub_map_lock_);
   RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
@@ -1073,8 +1106,8 @@ OpenDDS::DCPS::DataLink::is_target(const RepoId& sub_id)
   return !pubs.is_nil();
 }
 
-OpenDDS::DCPS::GUIDSeq*
-OpenDDS::DCPS::DataLink::target_intersection(const OpenDDS::DCPS::GUIDSeq& in)
+GUIDSeq*
+DataLink::target_intersection(const GUIDSeq& in)
 {
   GUIDSeq_var res;
   GuardType guard(this->sub_map_lock_);
@@ -1092,14 +1125,14 @@ OpenDDS::DCPS::DataLink::target_intersection(const OpenDDS::DCPS::GUIDSeq& in)
 }
 
 CORBA::ULong
-OpenDDS::DCPS::DataLink::num_targets() const
+DataLink::num_targets() const
 {
   GuardType guard(this->sub_map_lock_);
   return static_cast<CORBA::ULong>(this->sub_map_.size());
 }
 
-OpenDDS::DCPS::RepoIdSet_rch
-OpenDDS::DCPS::DataLink::get_targets() const
+RepoIdSet_rch
+DataLink::get_targets() const
 {
   GuardType guard(this->sub_map_lock_);
   RepoIdSet_rch ret(new RepoIdSet);
@@ -1108,10 +1141,8 @@ OpenDDS::DCPS::DataLink::get_targets() const
 }
 
 bool
-OpenDDS::DCPS::DataLink::exist(const RepoId& remote_id,
-                               const RepoId& local_id,
-                               const bool&   pub_side,
-                               bool& last)
+DataLink::exist(const RepoId& remote_id, const RepoId& local_id,
+                const bool& pub_side, bool& last)
 {
   if (pub_side) {
     RepoIdSet_rch pubs;
@@ -1141,7 +1172,7 @@ OpenDDS::DCPS::DataLink::exist(const RepoId& remote_id,
   return false;
 }
 
-void OpenDDS::DCPS::DataLink::prepare_release()
+void DataLink::prepare_release()
 {
   {
     GuardType guard(this->sub_map_lock_);
@@ -1169,7 +1200,7 @@ void OpenDDS::DCPS::DataLink::prepare_release()
   }
 }
 
-void OpenDDS::DCPS::DataLink::clear_associations()
+void DataLink::clear_associations()
 {
   // The pub_map_ has an entry for each pub_id
   // Create iterator to traverse Publisher map.
@@ -1250,11 +1281,8 @@ void OpenDDS::DCPS::DataLink::clear_associations()
 }
 
 int
-OpenDDS::DCPS::DataLink::handle_timeout(const ACE_Time_Value &/*tv*/,
-                                        const void * arg)
+DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
-  ACE_UNUSED_ARG(arg);
-
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
     this->pre_stop_i();
 
@@ -1297,7 +1325,7 @@ OpenDDS::DCPS::DataLink::handle_timeout(const ACE_Time_Value &/*tv*/,
 }
 
 void
-OpenDDS::DCPS::DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
+DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
 {
   /**
    * The following IPV6 code was lifted in spirit from the RTCORBA
@@ -1365,9 +1393,8 @@ OpenDDS::DCPS::DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
 }
 
 std::ostream&
-operator<<(std::ostream& str, const OpenDDS::DCPS::DataLink& value)
+operator<<(std::ostream& str, const DataLink& value)
 {
-  using namespace OpenDDS::DCPS;
   str << "   There are " << value.pub_map_.map().size()
   << " publications currently associated with this link:"
   << std::endl;
@@ -1386,4 +1413,7 @@ operator<<(std::ostream& str, const OpenDDS::DCPS::DataLink& value)
   }
 
   return str;
+}
+
+}
 }

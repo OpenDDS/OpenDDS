@@ -38,18 +38,6 @@ class ACE_SOCK;
 namespace OpenDDS {
 namespace DCPS {
 
-class DataLink;
-
-} // namespace DCPS
-} // namespace OpenDDS
-
-OpenDDS_Dcps_Export
-std::ostream& operator<<(std::ostream& str,
-                         const OpenDDS::DCPS::DataLink& value);
-
-namespace OpenDDS {
-namespace DCPS {
-
 class  TransportReceiveListener;
 class  TransportSendListener;
 class  TransportQueueElement;
@@ -297,6 +285,11 @@ protected:
   void send_i(TransportQueueElement* element, bool relink = true);
   void send_stop_i();
 
+  /// For a given local RepoId (publication or subscription), return the list
+  /// of remote peer RepoIds (subscriptions or publications) that this link
+  /// knows about due to make_reservation().
+  GUIDSeq* peer_ids(const RepoId& local_id) const;
+
 private:
 
   /// Helper function to output the enum as a string to help debugging.
@@ -337,7 +330,8 @@ private:
   typedef ACE_SYNCH_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.
-  friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
+  friend OpenDDS_Dcps_Export
+  std::ostream& operator<<(std::ostream& str, const DataLink& value);
 
   /// A boolean indicating if the DataLink has been stopped. This
   /// value is protected by the strategy_lock_.
@@ -357,7 +351,7 @@ private:
   /// (aka, received) data samples.
   ReceiveListenerSetMap pub_map_;
 
-  LockType pub_map_lock_;
+  mutable LockType pub_map_lock_;
 
   /// Map associating each subscriber_id with the set of publisher_ids.
   /// In essence, the pub_map_ and sub_map_ are the "mirror image" of

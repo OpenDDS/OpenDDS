@@ -17,6 +17,8 @@
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
+#include "dds/DCPS/RTPS/RtpsBaseMessageTypesC.h"
+
 #include <map>
 
 namespace OpenDDS {
@@ -28,8 +30,8 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
 
-  void passive_connection(const ACE_INET_Addr& remote_address,
-                          ACE_Message_Block* data);
+  static void address_to_bytes(OpenDDS::RTPS::OctetArray16& dest,
+                               const ACE_INET_Addr& addr);
 
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,

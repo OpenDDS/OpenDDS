@@ -41,7 +41,6 @@ private:
   void marshal_transport_header(ACE_Message_Block* mb);
 
   RtpsUdpDataLink* link_;
-  ACE_INET_Addr remote_address_;
   OpenDDS::RTPS::Header rtps_header_;
 };
 

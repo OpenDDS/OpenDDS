@@ -39,29 +39,43 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
   rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
   std::memcpy(rtps_header_.guidPrefix, link->local_prefix(),
               sizeof(GuidPrefix_t));
-
-  // for testing only...
-  remote_address_ = link->config()->remote_address_;
 }
 
 ssize_t
 RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
-  //TODO: determine destination address(es)
-  // 1. need to (safely) get current elems_ from base TransportSendStrategy
-  //    -- also cover the case where we come in from TransportSendBuffer
-  // 2. first TQE in elems_ should be good enough, since we require exclusive
-  // 3. get the publication RepoId from that TQE
-  // 4. link_->get_locators(pub_id, addrs)
-  // 5. send to each addr in addrs
+  // determine destination address(es) from TransportQueueElement in progress
+  TransportQueueElement* elem = current_packet_first_element();
+  if (!elem) {
+    errno = ENOTCONN;
+    return -1;
+  }
+  //TODO: also cover the case where we come in from TransportSendBuffer
 
-  return link_->unicast_socket().send(iov, n, remote_address_);
+  std::set<ACE_INET_Addr> addrs;
+  link_->get_locators(elem->publication_id(), addrs);
+  if (addrs.empty()) {
+    errno = ENOTCONN;
+    return -1;
+  }
+
+  ssize_t result = -1;
+  typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
+  for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
+    ssize_t result_per_dest = link_->unicast_socket().send(iov, n, *iter);
+    if (result_per_dest < 0) {
+      // TODO: log error
+    } else {
+      result = result_per_dest;
+    }
+  }
+  return result;
 }
 
 void
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  Serializer writer(mb);
+  Serializer writer(mb); // byte order doesn't matter for the RTPS Header
   writer << rtps_header_;
 }
 

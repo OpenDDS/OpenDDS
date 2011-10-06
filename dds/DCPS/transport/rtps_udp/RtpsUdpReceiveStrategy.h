@@ -79,9 +79,6 @@ private:
                               const OpenDDS::RTPS::OctetArray16& src);
 
     static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
-                              const ACE_INET_Addr& addr);
-
-    static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
                               const ACE_CDR::ULong& ipv4addr_be);
 
     OpenDDS::RTPS::GuidPrefix_t local_;
@@ -97,9 +94,6 @@ private:
 
   MessageReceiver receiver_;
   ACE_INET_Addr remote_address_;
-
-  typedef TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>
-    BASE_TRS;
 };
 
 inline void
@@ -116,23 +110,6 @@ RtpsUdpReceiveStrategy::MessageReceiver::assign(
   const OpenDDS::RTPS::OctetArray16& src)
 {
   std::memcpy(&dest[0], &src[0], sizeof(OpenDDS::RTPS::OctetArray16));
-}
-
-inline void
-RtpsUdpReceiveStrategy::MessageReceiver::assign(
-  OpenDDS::RTPS::OctetArray16& dest,
-  const ACE_INET_Addr& addr)
-{
-  // ACE does not make this easy...
-  const void* raw = addr.get_addr();
-  if (addr.get_type() == AF_INET6) {
-    const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
-    std::memcpy(&dest[0], &in->sin6_addr, 16);
-  } else {
-    const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
-    std::memset(&dest[0], 0, 12);
-    std::memcpy(&dest[12], &in->sin_addr, 4);
-  }
 }
 
 inline void

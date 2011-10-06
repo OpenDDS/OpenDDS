@@ -137,15 +137,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // 0. initialization
 
-  // transports can depend on ORB's reactor for timer scheduling
-  CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
-  TheServiceParticipant->set_ORB(orb);
+  ACE_INET_Addr remote_addr(port, host.c_str());
 
   TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
                                                              "rtps_udp");
 
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
-  rtps_inst->remote_address_.set(port, host.c_str());
   rtps_inst->datalink_release_delay_ = 0;
 
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
@@ -167,12 +164,27 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   remote.entityKey(0x452310);
   remote.entityKind(ENTITYKIND_USER_READER_WITH_KEY);
 
+  LocatorSeq locators;
+  locators.length(1);
+  locators[0].kind = (remote_addr.get_type() == AF_INET6)
+                     ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  locators[0].port = port;
+  RtpsUdpTransport::address_to_bytes(locators[0].address, remote_addr);
+
+  size_t size_locator = 0, padding_locator = 0;
+  gen_find_size(locators, size_locator, padding_locator);
+  ACE_Message_Block mb_locator(size_locator + padding_locator);
+  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  ser_loc << locators;
+
   SimpleDataWriter sdw(local_guid);
   sdw.enable_transport();
   AssociationData subscription;
   subscription.remote_id_ = remote;
   subscription.remote_data_.length(1);
   subscription.remote_data_[0].transport_type = "rtps_udp";
+  subscription.remote_data_[0].data.replace(
+    static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
 
   if (!sdw.init(subscription)) {
     std::cerr << "publisher TransportClient::associate() failed\n";
@@ -224,8 +236,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ACE_INET_Addr local_addr;
   ACE_SOCK_Dgram sock(local_addr);
-  ssize_t res = sock.send(msg.rd_ptr(), msg.length(),
-                          rtps_inst->remote_address_);
+  ssize_t res = sock.send(msg.rd_ptr(), msg.length(), remote_addr);
   if (res < 0) {
     std::cerr << "ERROR: error in send()\n";
     return 1;
@@ -269,7 +280,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   padding = 0;
   find_size_ulong(size, padding);   // encap
   gen_find_size(data, size, padding);
-  dsh.message_length_ = size + padding;
+  dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
 
   elements[index].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
@@ -299,7 +310,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   OpenDDS::DCPS::KeyOnly<const TestMsg> ko_instance_data(data);
   find_size_ulong(size, padding);   // encap
   gen_find_size(ko_instance_data, size, padding);
-  dsh.message_length_ = size + padding;
+  dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
   
   elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
 					      ACE_Message_Block::MB_DATA,
@@ -366,7 +377,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   padding = 0;
   find_size_ulong(size, padding);   // encap
   gen_find_size(data, size, padding);
-  dsh.message_length_ = size + padding;
+  dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
 
   elements[index].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
@@ -394,8 +405,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sdw.disassociate(subscription.remote_id_);
 
   TheServiceParticipant->shutdown();
-  orb->shutdown();
-  orb->destroy();
   ACE_Thread_Manager::instance()->wait();
 
   return 0;

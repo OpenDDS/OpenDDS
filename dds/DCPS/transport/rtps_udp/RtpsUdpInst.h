@@ -20,8 +20,7 @@ namespace DCPS {
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
 
-  /// for testing
-  ACE_INET_Addr local_address_, remote_address_;
+  ACE_INET_Addr local_address_;
 
   bool use_multicast_;
   ACE_INET_Addr multicast_group_address_;

@@ -91,9 +91,28 @@ void
 RtpsUdpDataLink::get_locators(const RepoId& local_id,
                               std::set<ACE_INET_Addr>& addrs) const
 {
-  //TODO: Use base DataLink's maps of associations to get list of peer RepoIds
-  //      corresponding to this local_id.  For each remote peer RepoId, get its
-  //      locator from the locators_ map and insert it into addrs.
+  using std::map;
+  typedef map<RepoId, ACE_INET_Addr, GUID_tKeyLessThan>::const_iterator iter_t;
+
+  if (local_id == GUID_UNKNOWN) {
+    for (iter_t iter = locators_.begin(); iter != locators_.end(); ++iter) {
+      addrs.insert(iter->second);
+    }
+    return;
+  }
+
+  const GUIDSeq_var peers = peer_ids(local_id);
+  if (!peers.ptr()) {
+    return;
+  }
+  for (CORBA::ULong i = 0; i < peers->length(); ++i) {
+    const iter_t iter = locators_.find(peers[i]);
+    if (iter == locators_.end()) {
+      // log error...
+    } else {
+      addrs.insert(iter->second);
+    }
+  }
 }
 
 void

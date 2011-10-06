@@ -154,8 +154,10 @@ protected:
   /// Specific implementation processing of prepared packet.
   virtual void prepare_packet_i();
 
+  TransportQueueElement* current_packet_first_element() const;
+
   /// The maximum size of a message allowed by the this TransportImpl, or 0
-  /// if there is such limit.  This is expected to be a constant, for example
+  /// if there is no such limit.  This is expected to be a constant, for example
   /// UDP/IPv4 can send messages of up to 65466 bytes.
   /// The transport framework will use the returned value (if > 0) to
   /// fragment larger messages.  This fragmentation and

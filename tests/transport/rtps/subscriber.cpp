@@ -183,10 +183,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  // transports can depend on ORB's reactor for timer scheduling
-  CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
-  TheServiceParticipant->set_ORB(orb);
-
   TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
                                                              "rtps_udp");
 
@@ -236,8 +232,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sdr.disassociate(publication.remote_id_);
 
   TheServiceParticipant->shutdown();
-  orb->shutdown();
-  orb->destroy();
   ACE_Thread_Manager::instance()->wait();
 
   return 0;

@@ -9,6 +9,7 @@
 #include "RtpsUdpReceiveStrategy.h"
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 
@@ -28,7 +29,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link)
 int
 RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  return BASE_TRS::handle_dds_input(fd);
+  return handle_dds_input(fd);
 }
 
 ssize_t
@@ -170,7 +171,8 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   unicast_reply_locator_list_[0].kind =
     addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   unicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
-  assign(unicast_reply_locator_list_[0].address, addr);
+  RtpsUdpTransport::address_to_bytes(unicast_reply_locator_list_[0].address,
+                                     addr);
 
   multicast_reply_locator_list_.length(1);
   multicast_reply_locator_list_[0].kind =

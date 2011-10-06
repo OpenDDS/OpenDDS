@@ -1,3 +1,40 @@
+Thu Oct  6 18:26:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Moved operator<< into our namespace.
+          Added a peer_ids() protected method so that the derived DataLink
+          class can get of list of GUIDs that this DataLink is associated with.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+
+          Added a current_packet_first_element() protected method so that the
+          derived SendStrategy can peek at the elems_ queue in order to get
+          contextual information about what's being sent.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued implementing transport.  Use RTPS Locators for the blob.
+          Track and use per-association remote network addresses.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          ORB_init() no longer needed since datalink_release_delay_ is off.
+          Modified publisher to use the transport blob instead of "cheating"
+          by setting the remote_address_ in the TransportInst.
+
 Thu Oct  6 15:58:46 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/transport/rtps/publisher.cpp:

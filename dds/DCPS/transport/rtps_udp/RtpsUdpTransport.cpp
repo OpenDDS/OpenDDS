@@ -114,6 +114,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote) const
     reinterpret_cast<const char*>(remote.get_buffer()),
     0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
+  mb.wr_ptr(mb.space());
 
   Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   LocatorSeq locators;
@@ -159,19 +160,65 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote) const
 bool
 RtpsUdpTransport::connection_info_i(TransportLocator& info) const
 {
+  using namespace OpenDDS::RTPS;
+
+  LocatorSeq locators;
+  CORBA::ULong idx = 0;
+
+  // multicast first so it's preferred by remote peers
+  if (config_i_->use_multicast_) {
+    locators.length(2);
+    locators[0].kind =
+      (config_i_->multicast_group_address_.get_type() == AF_INET6)
+      ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    locators[0].port = config_i_->multicast_group_address_.get_port_number();
+    address_to_bytes(locators[0].address, config_i_->multicast_group_address_);
+    idx = 1;
+
+  } else {
+    locators.length(1);
+  }
+
+  locators[idx].kind = (config_i_->local_address_.get_type() == AF_INET6)
+                       ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  locators[idx].port = config_i_->local_address_.get_port_number();
+  address_to_bytes(locators[idx].address, config_i_->local_address_);
+
+  size_t size = 0, padding = 0;
+  gen_find_size(locators, size, padding);
+  ACE_Message_Block mb(size + padding);
+
+  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  if (!(ser << locators)) {
+    return false;
+  }
+
   info.transport_type = "rtps_udp";
-  //TODO: Need local address info from sockets / ACE
-  //      Marshal in the form of a LocatorSeq (see get_connection_addr() above)
+  info.data.replace(static_cast<CORBA::ULong>(mb.length()), &mb);
   return true;
+}
+
+void
+RtpsUdpTransport::address_to_bytes(OpenDDS::RTPS::OctetArray16& dest,
+                                   const ACE_INET_Addr& addr)
+{
+  const void* raw = addr.get_addr();
+  if (addr.get_type() == AF_INET6) {
+    const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
+    std::memcpy(&dest[0], &in->sin6_addr, 16);
+  } else {
+    const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
+    std::memset(&dest[0], 0, 12);
+    std::memcpy(&dest[12], &in->sin_addr, 4);
+  }
 }
 
 bool
 RtpsUdpTransport::configure_i(TransportInst* config)
 {
-  this->config_i_ =
-    RcHandle<RtpsUdpInst>(dynamic_cast<RtpsUdpInst*>(config), false);
+  config_i_ = RcHandle<RtpsUdpInst>(dynamic_cast<RtpsUdpInst*>(config), false);
 
-  if (this->config_i_.is_nil()) {
+  if (config_i_.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: ")
@@ -179,7 +226,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                      false);
   }
 
-  this->create_reactor_task();
+  create_reactor_task();
 
   return true;
 }
@@ -187,22 +234,19 @@ RtpsUdpTransport::configure_i(TransportInst* config)
 void
 RtpsUdpTransport::shutdown_i()
 {
-  // Shutdown reserved datalinks and release configuration:
-
-  this->config_i_ = 0;
+  if (!link_.is_nil()) {
+    link_->transport_shutdown();
+  }
+  link_ = 0;
+  config_i_ = 0;
 }
 
 void
 RtpsUdpTransport::release_datalink_i(DataLink*, bool /*release_pending*/)
 {
-  this->link_ = 0;
+  link_ = 0;
 }
 
-void
-RtpsUdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
-                                     ACE_Message_Block* data)
-{
-}
 
 } // namespace DCPS
 } // namespace OpenDDS
