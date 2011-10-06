@@ -265,11 +265,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   elements[index].source_timestamp_ = time_value_to_time(t);
 
   // Calculate the data buffer length
-  dsh.message_length_ = 0;
+  size = 0;
   padding = 0;
-  find_size_ulong(dsh.message_length_, padding);   // encap
-  gen_find_size(data, dsh.message_length_, padding);
-  dsh.message_length_ += padding;
+  find_size_ulong(size, padding);   // encap
+  gen_find_size(data, size, padding);
+  dsh.message_length_ = size + padding;
 
   elements[index].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
@@ -294,12 +294,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dsh.key_fields_only_ = true;
 
   // Calculate the data buffer length
-  dsh.message_length_ = 0;
+  size = 0;
   padding = 0;
   OpenDDS::DCPS::KeyOnly<const TestMsg> ko_instance_data(data);
-  find_size_ulong(dsh.message_length_, padding);   // encap
-  gen_find_size(ko_instance_data, dsh.message_length_, padding);
-  dsh.message_length_ += padding;
+  find_size_ulong(size, padding);   // encap
+  gen_find_size(ko_instance_data, size, padding);
+  dsh.message_length_ = size + padding;
   
   elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
 					      ACE_Message_Block::MB_DATA,
@@ -362,11 +362,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   data.value = "";
 
   // Calculate the data buffer length
-  dsh.message_length_ = 0;
+  size = 0;
   padding = 0;
-  find_size_ulong(dsh.message_length_, padding);   // encap
-  gen_find_size(data, dsh.message_length_, padding);
-  dsh.message_length_ += padding;
+  find_size_ulong(size, padding);   // encap
+  gen_find_size(data, size, padding);
+  dsh.message_length_ = size + padding;
 
   elements[index].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
