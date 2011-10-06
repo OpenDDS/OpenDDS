@@ -22,7 +22,25 @@
 #endif
 
 namespace {
-  enum { FLAG_E = 1, FLAG_D = 4, FLAG_K = 8 };
+  enum { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4, FLAG_K = 8 };
+  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_REGISTER   = { { 0, 0, 0, 0 } };
+  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_DISPOSE    = { { 0, 0, 0, 1 } };
+  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } };
+
+}
+
+namespace OpenDDS {
+  namespace RTPS {
+    inline bool operator==(const OpenDDS::RTPS::StatusInfo_t& lhs,
+			   const OpenDDS::RTPS::StatusInfo_t& rhs)
+    {
+      return
+	(lhs.value[3] == rhs.value[3]) &&
+	(lhs.value[2] == rhs.value[2]) &&
+	(lhs.value[1] == rhs.value[1]) &&
+	(lhs.value[0] == rhs.value[0]);
+    }
+  }
 }
 
 namespace OpenDDS {
@@ -147,14 +165,14 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
     for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
       if (rtps.inlineQos[i]._d() == PID_STATUS_INFO) {
-        const ACE_CDR::Octet flags = rtps.inlineQos[i].status_info().value[3];
-        if (flags & 1) {
+        if (rtps.inlineQos[i].status_info() == STATUS_INFO_DISPOSE) {
           opendds.message_id_ = DISPOSE_INSTANCE;
-        } else if (flags & 2) {
+        } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_UNREGISTER) {
           opendds.message_id_ = UNREGISTER_INSTANCE;
           //TODO: handle both DISPOSE and UNREGISTER
           // (need to synthesize a second ReceivedDataSample for DCPS layer?)
-        } else {
+        } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_REGISTER) {
+	  // TODO: Remove this case if we decide not to send Register messages
           opendds.message_id_ = INSTANCE_REGISTRATION;
         }
       }
@@ -163,10 +181,11 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     if (rtps.smHeader.flags & FLAG_K) {
       opendds.key_fields_only_ = true;
     } else if (!(rtps.smHeader.flags & (FLAG_D | FLAG_K))) {
-      // Handle the case of D = 0 and K = 0 (used for Coherent Sets see 8.7.5)
+      // TODO: Handle the case of D = 0 and K = 0 (used for Coherent Sets see 8.7.5)
     }
 
     if (rtps.smHeader.flags & (FLAG_D | FLAG_K)) {
+      // Peek at the byte order from the encapsulation containing the payload.
       opendds.byte_order_ = rds.sample_->rd_ptr()[1] & FLAG_E;
     }
 
@@ -193,10 +212,61 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
   subm.length(1);
   subm[0].info_ts_sm(ts);
 
-  flags |= FLAG_D; //TODO: or FLAG_K for instance registration/dispose/unreg.
-  const DataSubmessage data = { {DATA, flags, 0}, 0, DATA_OCTETS_TO_IQOS,
-    ENTITYID_UNKNOWN, dsle.publication_id_.entityId, {dsle.sequence_.getHigh(),
-    dsle.sequence_.getLow()}, ParameterList() /*TODO: inlineQos */};
+  DataSubmessage data = {
+    {DATA, flags, 0},
+    0,
+    DATA_OCTETS_TO_IQOS,
+    ENTITYID_UNKNOWN,
+    dsle.publication_id_.entityId,
+    {dsle.sequence_.getHigh(), dsle.sequence_.getLow()},
+    ParameterList()
+  };
+  char message_id = DataSampleHeader::extract_message_id(dsle.sample_);
+  switch (message_id) {
+  case INSTANCE_REGISTRATION:
+    {
+      // TODO: Determine if we want to send a message here.
+      // We should probably eat this message, but for now I am just going to
+      // send it with none of the status info bits set (it is easier)
+      data.smHeader.flags |= FLAG_K;
+      int qos_len = data.inlineQos.length();
+      data.inlineQos.length(qos_len+1);
+      data.inlineQos[qos_len].status_info(STATUS_INFO_REGISTER);
+    }
+    break;
+  case UNREGISTER_INSTANCE:
+    {
+      data.smHeader.flags |= FLAG_K;
+      int qos_len = data.inlineQos.length();
+      data.inlineQos.length(qos_len+1);
+      data.inlineQos[qos_len].status_info(STATUS_INFO_UNREGISTER);
+    }
+    break;
+  case DISPOSE_INSTANCE:
+    {
+      data.smHeader.flags |= FLAG_K;
+      int qos_len = data.inlineQos.length();
+      data.inlineQos.length(qos_len+1);
+      data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
+    }
+    break;
+  case SAMPLE_DATA:
+    {
+      // Must be a data message
+      data.smHeader.flags |= FLAG_D;
+    }
+    break;
+  default:
+    // TODO: Figure out what to do here...
+    break;
+  }
+
+  /*TODO: other inlineQos */
+
+  if (data.inlineQos.length() > 0) {
+    data.smHeader.flags |= FLAG_Q;
+  }
+
   subm.length(2);
   subm[1].data_sm(data);
 }

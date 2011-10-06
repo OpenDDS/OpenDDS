@@ -31,6 +31,8 @@
 #include <cstring>
 #include <ctime>
 
+#include "TestMsg.h"
+
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
@@ -41,34 +43,6 @@ void log_time(const ACE_Time_Value& t)
   timestr.erase(timestr.size() - 1); // remove \n from ctime()
   ACE_DEBUG((LM_INFO, "Sending with timestamp %C %q usec\n",
              timestr.c_str(), ACE_INT64(t.usec())));
-}
-
-struct TestMsg {
-  ACE_CDR::ULong key;
-  TAO::String_Manager value;
-};
-
-bool gen_is_bounded_size(KeyOnly<const TestMsg>)
-{
-  return true;
-}
-
-size_t gen_max_marshaled_size(KeyOnly<const TestMsg>, bool /*align*/)
-{
-  return 4;
-}
-
-void gen_find_size(KeyOnly<const TestMsg>, size_t& size, size_t& padding)
-{
-  if ((size + padding) % 4) {
-    padding += 4 - ((size + padding) % 4);
-  }
-  size += 4;
-}
-
-bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru)
-{
-  return strm << stru.t.key;
 }
 
 // sample text (pasted directly from the RTPS spec) to use in the message data
@@ -231,17 +205,18 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   marshal_key_hash(data, hash);
   ds.inlineQos[0].key_hash(hash);
 
+  const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
   size_t size = 0, padding = 0;
   gen_find_size(hdr, size, padding);
   gen_find_size(it, size, padding);
   gen_find_size(ds, size, padding);
-  size += 12 + sizeof(text);
+  find_size_ulong(size, padding);
+  gen_find_size(data, size, padding);
 
   ACE_Message_Block msg(size + padding);
   Serializer ser(&msg, host_is_bigendian, Serializer::ALIGN_CDR);
-  const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
   bool ok = (ser << hdr) && (ser << it) && (ser << ds)
-    && (ser << encap) && (ser << data.key) && (ser << data.value);
+    && (ser << encap) && (ser << data);
   if (!ok) {
     std::cerr << "ERROR: failed to serialize RTPS message\n";
     return 1;
@@ -262,10 +237,13 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // 2. send through the OpenDDS transport
 
-  TransportSendElementAllocator alloc(2, sizeof(TransportSendElementAllocator));
+  TransportSendElementAllocator alloc(5, sizeof(TransportSendElementAllocator));
   DataSampleListElement elements[] = {
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),
+    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
+    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Instance Registration
+    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Dispose Instance
+    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Unregister Instance
+    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
   };
   DataSampleList list;
   list.head_ = elements;
@@ -275,46 +253,132 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     elements[i].next_send_sample_ = &elements[i + 1];
   }
 
+  // Send a regular data sample
+  int index = 0;
   DataSampleHeader dsh;
   dsh.message_id_ = SAMPLE_DATA;
   dsh.publication_id_ = local_guid;
   dsh.sequence_ = 2;
-  dsh.message_length_ = 12 + sizeof(text);
-  elements[0].sequence_ = dsh.sequence_;
+  elements[index].sequence_ = dsh.sequence_;
   const ACE_Time_Value t = ACE_OS::gettimeofday();
   log_time(t);
-  elements[0].source_timestamp_ = time_value_to_time(t);
-  elements[0].sample_ =
+  elements[index].source_timestamp_ = time_value_to_time(t);
+
+  // Calculate the data buffer length
+  dsh.message_length_ = 0;
+  padding = 0;
+  find_size_ulong(dsh.message_length_, padding);   // encap
+  gen_find_size(data, dsh.message_length_, padding);
+  dsh.message_length_ += padding;
+
+  elements[index].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
       ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_));
 
-  *elements[0].sample_ << dsh;
+  *elements[index].sample_ << dsh;
 
-  Serializer ser2(elements[0].sample_->cont(), host_is_bigendian,
+  Serializer ser2(elements[index].sample_->cont(), host_is_bigendian,
                   Serializer::ALIGN_CDR);
-  ok = (ser2 << encap) && (ser2 << data.key) && (ser2 << data.value);
+  ok = (ser2 << encap) && (ser2 << data);
   if (!ok) {
-    std::cerr << "ERROR: failed to serialize data for elements[0]\n";
+    std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
     return 1;
   }
 
-  ++dsh.sequence_;
-  dsh.message_length_ = 13;
-  elements[1].sequence_ = dsh.sequence_;
-  elements[1].source_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
-  elements[1].sample_ =
+  // Send an instance registration
+  index++;
+  data.key = 0x04030201;
+  dsh.message_id_ = INSTANCE_REGISTRATION;
+  dsh.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  dsh.publication_id_ = local_guid;
+  dsh.key_fields_only_ = true;
+
+  // Calculate the data buffer length
+  dsh.message_length_ = 0;
+  padding = 0;
+  OpenDDS::DCPS::KeyOnly<const TestMsg> ko_instance_data(data);
+  find_size_ulong(dsh.message_length_, padding);   // encap
+  gen_find_size(ko_instance_data, dsh.message_length_, padding);
+  dsh.message_length_ += padding;
+  
+  elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+					      ACE_Message_Block::MB_DATA,
+					      new ACE_Message_Block(dsh.message_length_));
+  *elements[index].sample_ << dsh;
+
+  OpenDDS::DCPS::Serializer serializer(elements[index].sample_->cont(),
+				       host_is_bigendian,
+				       Serializer::ALIGN_CDR);
+  ok = (serializer << encap) && (serializer << ko_instance_data);
+  if (!ok) {
+    std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
+    return 1;
+  }
+
+  // Send a dispose instance
+  index++;
+  {
+    dsh.message_id_ = DISPOSE_INSTANCE;
+    elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+						    ACE_Message_Block::MB_DATA,
+						    new ACE_Message_Block(dsh.message_length_));
+    *elements[index].sample_ << dsh;
+    OpenDDS::DCPS::Serializer serializer(elements[index].sample_->cont(),
+					 host_is_bigendian,
+					 Serializer::ALIGN_CDR);
+    ok = (serializer << encap) && (serializer << ko_instance_data);
+    if (!ok) {
+      std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
+      return 1;
+    }
+  }
+
+  // Send an unregister instance
+  index++;
+  {
+    dsh.message_id_ = UNREGISTER_INSTANCE;
+    elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+						    ACE_Message_Block::MB_DATA,
+						    new ACE_Message_Block(dsh.message_length_));
+    *elements[index].sample_ << dsh;
+    OpenDDS::DCPS::Serializer serializer(elements[index].sample_->cont(),
+					 host_is_bigendian,
+					 Serializer::ALIGN_CDR);
+    ok = (serializer << encap) && (serializer << ko_instance_data);
+    if (!ok) {
+      std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
+      return 1;
+    }
+  }
+
+  // Send a data sample with a key of 99 to terminate the subscriber
+  index++;
+  dsh.sequence_ = 3;
+  dsh.message_id_ = SAMPLE_DATA;
+  dsh.key_fields_only_ = false;
+  elements[index].sequence_ = dsh.sequence_;
+  elements[index].source_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
+  data.key = 99;
+  data.value = "";
+
+  // Calculate the data buffer length
+  dsh.message_length_ = 0;
+  padding = 0;
+  find_size_ulong(dsh.message_length_, padding);   // encap
+  gen_find_size(data, dsh.message_length_, padding);
+  dsh.message_length_ += padding;
+
+  elements[index].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
       ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_));
 
-  *elements[1].sample_ << dsh;
+  *elements[index].sample_ << dsh;
 
-  data.key = 99;
-  data.value = "";
-  Serializer ser3(elements[1].sample_->cont(), host_is_bigendian,
+  Serializer ser3(elements[index].sample_->cont(), host_is_bigendian,
                   Serializer::ALIGN_CDR);
   ok = (ser3 << encap) && (ser3 << data.key) && (ser3 << data.value);
   if (!ok) {
-    std::cerr << "ERROR: failed to serialize data for elements[1]\n";
+    std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
     return 1;
   }
 
@@ -334,5 +398,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   orb->destroy();
   ACE_Thread_Manager::instance()->wait();
 
+  std::cout << "publisher: Leaving main()" << std::endl;
   return 0;
 }

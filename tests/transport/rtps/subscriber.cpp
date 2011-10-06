@@ -19,6 +19,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "TestMsg.h"
+
 using namespace OpenDDS::DCPS;
 
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
@@ -42,52 +44,93 @@ public:
 
   void data_received(const ReceivedDataSample& sample)
   {
-    Serializer ser(sample.sample_,
-                   sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                   Serializer::ALIGN_CDR);
-    ACE_CDR::ULong key;
-    bool ok = true;
-    ok &= (ser >> key); // read and ignore 32-bit CDR Encapsulation header
-    ok &= (ser >> key);
-    CORBA::String_var value;
-    ok &= (ser >> value.out());
+    switch (sample.header_.message_id_) {
+    case SAMPLE_DATA: {
+      Serializer ser(sample.sample_,
+		     sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+		     Serializer::ALIGN_CDR);
+      bool ok = true;
+      ACE_CDR::ULong encap;
+      ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
+      TestMsg data;
+      ok &= (ser >> data);
 
-    if (!ok) {
-      ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
-      return;
+      if (!ok) {
+	ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
+	return;
+      }
+
+      if (data.key == 99) {
+	ACE_DEBUG((LM_INFO, "data_received(): Received terminating sample\n"));
+	done_ = true;
+	return;
+      }
+
+      GuidConverter pub(sample.header_.publication_id_);
+      DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
+			sample.header_.source_timestamp_nanosec_};
+      ACE_Time_Value atv = time_to_time_value(ts);
+      std::time_t seconds = atv.sec();
+      std::ostringstream oss;
+      oss << "data_received():\n\t"
+	"id = " << int(sample.header_.message_id_) << "\n\t"
+	"timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
+	"seq# = " << sample.header_.sequence_.getValue() << "\n\t"
+	"byte order = " << sample.header_.byte_order_ << "\n\t"
+	"length = " << sample.header_.message_length_ << "\n\t"
+	"publication = " << pub << "\n\t"
+	"data.key = " << data.key << "\n\t"
+	"data.value = " << data.value << "\n";
+      ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
+
+      if (sample.header_.message_id_ != SAMPLE_DATA
+	  || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
+	  || sample.header_.message_length_ != 533
+	  || pub.checksum() != GuidConverter(pub_id_).checksum()) {
+	ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
+      }
+
+      if (data.key != 0x09230923 || std::strlen(data.value.in()) != 520) {
+	ACE_DEBUG((LM_ERROR, "ERROR: DataSample contents malformed\n"));
+      }
+      break;
     }
+    case INSTANCE_REGISTRATION:
+    case DISPOSE_INSTANCE:
+    case UNREGISTER_INSTANCE: {
+      OpenDDS::DCPS::Serializer ser(sample.sample_,
+				    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+				    OpenDDS::DCPS::Serializer::ALIGN_CDR);
+      bool ok = true;
+      ACE_CDR::ULong encap;
+      ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
+      TestMsg data;
+      ok &= (ser >> OpenDDS::DCPS::KeyOnly<TestMsg>(data));
 
-    if (key == 99) {
-      done_ = true;
-      return;
+      if (!ok) {
+	ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize key data\n"));
+	return;
+      }
+      if (data.key != 0x04030201) {
+	ACE_DEBUG((LM_ERROR, "ERROR: key contents malformed\n"));
+      }
+
+      std::ostringstream oss;
+      switch (sample.header_.message_id_) {
+      case INSTANCE_REGISTRATION:
+	oss << "data_received(): Received Instance Registration\n\t";
+	break;
+      case DISPOSE_INSTANCE:
+	oss << "data_received(): Received Dispose Instance\n\t";
+	break;
+      case UNREGISTER_INSTANCE:
+	oss << "data_received(): Received Unregister Instance\n\t";
+	break;
+      }
+      oss << "data.key = " << data.key << "\n";
+      ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
+      break;
     }
-
-    GuidConverter pub(sample.header_.publication_id_);
-    DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
-                      sample.header_.source_timestamp_nanosec_};
-    ACE_Time_Value atv = time_to_time_value(ts);
-    std::time_t seconds = atv.sec();
-    std::ostringstream oss;
-    oss << "data_received():\n\t"
-      "id = " << int(sample.header_.message_id_) << "\n\t"
-      "timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
-      "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
-      "byte order = " << sample.header_.byte_order_ << "\n\t"
-      "length = " << sample.header_.message_length_ << "\n\t"
-      "publication = " << pub << "\n\t"
-      "key = " << key << "\n\t"
-      "value = " << value << "\n";
-    ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
-
-    if (sample.header_.message_id_ != SAMPLE_DATA
-        || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
-        || sample.header_.message_length_ != 533
-        || pub.checksum() != GuidConverter(pub_id_).checksum()) {
-      ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
-    }
-
-    if (key != 0x09230923 || std::strlen(value.in()) != 520) {
-      ACE_DEBUG((LM_ERROR, "ERROR: DataSample contents malformed\n"));
     }
   }
 
@@ -197,5 +240,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   orb->destroy();
   ACE_Thread_Manager::instance()->wait();
 
+  std::cout << "subscriber: Leaving main()" << std::endl;
   return 0;
 }

@@ -180,6 +180,9 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   static bool test_flag(DataSampleHeaderFlag flag,
                         const ACE_Message_Block* buffer);
 
+  /// Extracts the message id field from the marshaled header buffer
+  static char extract_message_id(const ACE_Message_Block* buffer);
+
   /// Does the data in this mb constitute a partial Sample Header?
   static bool partial(const ACE_Message_Block& mb);
 
