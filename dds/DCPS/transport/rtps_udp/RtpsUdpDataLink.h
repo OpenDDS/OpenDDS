@@ -73,6 +73,8 @@ private:
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
 
+  virtual void release_remote_i(const RepoId& remote_id);
+
   RtpsUdpInst* config_;
   TransportReactorTask_rch reactor_task_;
 

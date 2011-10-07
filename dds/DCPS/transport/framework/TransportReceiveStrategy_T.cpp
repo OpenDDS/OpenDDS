@@ -906,7 +906,7 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
     if (this->pdu_remaining_ > 0 && this->successor_index(index) == this->buffer_index_) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("TransportReceiveStrategy::handle_dds_input()")
+                        ACE_TEXT("TransportReceiveStrategy::skip_bad_pdus()")
                         ACE_TEXT(" - Unrecoverably corrupted ")
                         ACE_TEXT("receive buffer management detected: ")
                         ACE_TEXT("read more bytes than available.\n")),

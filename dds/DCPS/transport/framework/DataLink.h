@@ -327,6 +327,8 @@ private:
     return element;
   }
 
+  virtual void release_remote_i(const RepoId& /*remote_id*/) {}
+
   typedef ACE_SYNCH_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.

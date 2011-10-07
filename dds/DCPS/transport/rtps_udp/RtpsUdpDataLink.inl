@@ -54,5 +54,11 @@ RtpsUdpDataLink::multicast_socket()
   return multicast_socket_;
 }
 
+ACE_INLINE void
+RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
+{
+  locators_.erase(remote_id);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

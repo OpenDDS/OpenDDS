@@ -517,6 +517,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
         // and there are no local pubs associated with this sub.
         GuardType guard(this->sub_map_lock_);
         id_set = this->sub_map_.remove_set(remote_id);
+        this->release_remote_i(remote_id);
       }
 
       //guard.acquire ();
@@ -538,6 +539,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       // Remove the remote_id(pub) after the remote/local ids is released
       // and there are no local subs associated with this pub.
       listener_set = this->pub_map_.remove_set(remote_id);
+      this->release_remote_i(remote_id);
     }
 
     //guard.acquire ();

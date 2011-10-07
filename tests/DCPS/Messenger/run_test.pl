@@ -58,8 +58,9 @@ elsif ($ARGV[0] eq 'stack') {
     $stack_based = 1;
 }
 elsif ($ARGV[0] eq 'rtps') {
-    $pub_opts .= " -DCPSConfigFile rtps.ini";
-    $sub_opts .= " -DCPSConfigFile rtps.ini";
+    $repo_bit_opt = '-NOBITS';
+    $pub_opts .= " -DCPSConfigFile rtps.ini -DCPSBit 0";
+    $sub_opts .= " -DCPSConfigFile rtps.ini -DCPSBit 0";
 }
 elsif ($ARGV[0] eq 'all') {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;

@@ -1,3 +1,26 @@
+Fri Oct  7 18:06:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Updated log message to identify the correct method.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Provide a hook for derived classes to know when a remote
+          RepoId is no longer associated to any local user of this link.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+
+          Use the above hook to remove entries from the
+          locators_ map when remote peers disassociate.
+
+        * tests/DCPS/Messenger/rtps.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Updated test to acutally use the rtps_udp transport.
+
 Thu Oct  6 18:26:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
