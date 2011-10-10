@@ -601,11 +601,11 @@ DataLink::stop_i()
 }
 
 ACE_Message_Block*
-DataLink::create_control(char submessage_id, ACE_Message_Block* data)
+DataLink::create_control(char submessage_id,
+                         DataSampleHeader& header,
+                         ACE_Message_Block* data)
 {
   DBG_ENTRY_LVL("DataLink", "create_control", 6);
-
-  DataSampleHeader header;
 
   header.byte_order_ = ACE_CDR_BYTE_ORDER;
   header.message_id_ = TRANSPORT_CONTROL;
@@ -635,7 +635,7 @@ DataLink::create_control(char submessage_id, ACE_Message_Block* data)
 }
 
 SendControlStatus
-DataLink::send_control(ACE_Message_Block* message)
+DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* message)
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
   SendResponseListener listener;
@@ -648,6 +648,7 @@ DataLink::send_control(ACE_Message_Block* message)
                         TransportSendControlElement(1,  // initial_count
                                                     GUID_UNKNOWN,
                                                     &listener,
+                                                    header,
                                                     message,
                                                     this->send_control_allocator_),
                         SEND_CONTROL_ERROR);

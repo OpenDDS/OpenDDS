@@ -216,13 +216,14 @@ public:
   /// This allows a subclass to easily create a transport control
   /// sample to send via send_control.
   ACE_Message_Block* create_control(char submessage_id,
+                                    DataSampleHeader& header,
                                     ACE_Message_Block* data);
 
   /// This allows a subclass to send transport control samples over
   /// this DataLink. This is useful for sending transport-specific
   /// control messages between one or more endpoints under this
   /// DataLink's control.
-  SendControlStatus send_control(ACE_Message_Block* data);
+  SendControlStatus send_control(const DataSampleHeader& header, ACE_Message_Block* data);
 
   /// Return the subset of the input set which are also targets of
   /// this DataLink (see is_target()).

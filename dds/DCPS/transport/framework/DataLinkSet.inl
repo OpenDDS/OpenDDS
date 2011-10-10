@@ -73,9 +73,10 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 }
 
 ACE_INLINE OpenDDS::DCPS::SendControlStatus
-OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
-                                         TransportSendListener* listener,
-                                         ACE_Message_Block*     msg)
+OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
+                                         TransportSendListener*  listener,
+                                         const DataSampleHeader& header,
+                                         ACE_Message_Block*      msg)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_control",6);
   //Optimized - use cached allocator.
@@ -89,6 +90,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
     TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
                                 listener,
+                                header,
                                 msg,
                                 &send_control_element_allocator_),
     SEND_CONTROL_ERROR);
@@ -107,6 +109,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_response(
   RepoId pub_id,
+  const DataSampleHeader& header,
   ACE_Message_Block* response)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
@@ -121,6 +124,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
     TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
                                 &listener,
+                                header,
                                 response,
                                 &send_control_element_allocator_));
 

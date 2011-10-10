@@ -60,9 +60,13 @@ protected:
 
   // Data transfer:
 
-  bool send_response(const RepoId& peer, ACE_Message_Block* payload); // [DR]
+  bool send_response(const RepoId& peer,
+                     const DataSampleHeader& header,
+                     ACE_Message_Block* payload); // [DR]
   void send(const DataSampleList& samples);
-  SendControlStatus send_control(ACE_Message_Block* msg, void* extra = 0);
+  SendControlStatus send_control(const DataSampleHeader& header,
+                                 ACE_Message_Block* msg,
+                                 void* extra = 0);
   bool remove_sample(const DataSampleListElement* sample);
   bool remove_all_msgs();
 

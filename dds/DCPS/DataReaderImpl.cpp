@@ -1688,7 +1688,7 @@ DataReaderImpl::send_sample_ack(
                std::string(publicationBuffer).c_str()));
   }
 
-  return this->send_response(publication, sample_ack);
+  return this->send_response(publication, outbound_header, sample_ack);
 }
 
 void DataReaderImpl::notify_read_conditions()

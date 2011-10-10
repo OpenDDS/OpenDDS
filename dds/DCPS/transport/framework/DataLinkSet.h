@@ -49,11 +49,14 @@ public:
   void send(DataSampleListElement* sample);
 
   /// Send control message to each DataLink in the set.
-  SendControlStatus send_control(RepoId                 pub_id,
-                                 TransportSendListener* listener,
-                                 ACE_Message_Block*     msg);
+  SendControlStatus send_control(RepoId                  pub_id,
+                                 TransportSendListener*  listener,
+                                 const DataSampleHeader& header,
+                                 ACE_Message_Block*      msg);
 
-  void send_response(RepoId sub_id, ACE_Message_Block* response);
+  void send_response(RepoId sub_id,
+                     const DataSampleHeader& header,
+                     ACE_Message_Block* response);
 
   bool remove_sample(const DataSampleListElement* sample);
 

@@ -32,13 +32,13 @@ namespace {
 namespace OpenDDS {
   namespace RTPS {
     inline bool operator==(const OpenDDS::RTPS::StatusInfo_t& lhs,
-			   const OpenDDS::RTPS::StatusInfo_t& rhs)
+                           const OpenDDS::RTPS::StatusInfo_t& rhs)
     {
       return
-	(lhs.value[3] == rhs.value[3]) &&
-	(lhs.value[2] == rhs.value[2]) &&
-	(lhs.value[1] == rhs.value[1]) &&
-	(lhs.value[0] == rhs.value[0]);
+        (lhs.value[3] == rhs.value[3]) &&
+        (lhs.value[2] == rhs.value[2]) &&
+        (lhs.value[1] == rhs.value[1]) &&
+        (lhs.value[0] == rhs.value[0]);
     }
   }
 }
@@ -169,10 +169,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
           opendds.message_id_ = DISPOSE_INSTANCE;
         } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_UNREGISTER) {
           opendds.message_id_ = UNREGISTER_INSTANCE;
-          //TODO: handle both DISPOSE and UNREGISTER
-          // (need to synthesize a second ReceivedDataSample for DCPS layer?)
         } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_REGISTER) {
-	  // TODO: Remove this case if we decide not to send Register messages
+          // TODO: Remove this case if we decide not to send Register messages
           opendds.message_id_ = INSTANCE_REGISTRATION;
         }
       }
@@ -223,6 +221,55 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
   };
   char message_id = DataSampleHeader::extract_message_id(dsle.sample_);
   switch (message_id) {
+  case SAMPLE_DATA:
+    // Must be a data message
+    data.smHeader.flags |= FLAG_D;
+    break;
+  default:
+    // TODO: Figure out what to do here (if there are other cases)
+    ACE_DEBUG((LM_INFO,
+               "RtpsSampleHeader::populate_submessages(): Non-sample messages seen, message_id = %d\n",
+               message_id));
+    break;
+  }
+
+  /*TODO: other inlineQos */
+
+  if (data.inlineQos.length() > 0) {
+    data.smHeader.flags |= FLAG_Q;
+  }
+
+  subm.length(2);
+  subm[1].data_sm(data);
+}
+
+
+void
+RtpsSampleHeader::populate_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+                                               const TransportSendControlElement& tsce)
+{
+  using namespace OpenDDS::RTPS;
+
+  const DataSampleHeader& header = tsce.header();
+  ACE_CDR::Octet flags = header.byte_order_ == true;
+  const ACE_CDR::UShort len = 8;
+  ACE_INT32  st_sec  = header.source_timestamp_sec_;
+  ACE_UINT32 st_nsec = header.source_timestamp_nanosec_;
+  const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
+    {st_sec, static_cast<ACE_UINT32>(st_nsec * NANOS_TO_RTPS_FRACS + .5)} };
+  subm.length(1);
+  subm[0].info_ts_sm(ts);
+
+  DataSubmessage data = {
+    {DATA, flags, 0},
+    0,
+    DATA_OCTETS_TO_IQOS,
+    ENTITYID_UNKNOWN,
+    header.publication_id_.entityId,
+    {header.sequence_.getHigh(), header.sequence_.getLow()},
+    ParameterList()
+  };
+  switch (header.message_id_) {
   case INSTANCE_REGISTRATION:
     {
       // TODO: Determine if we want to send a message here.
@@ -250,14 +297,11 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
       data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
     }
     break;
-  case SAMPLE_DATA:
-    {
-      // Must be a data message
-      data.smHeader.flags |= FLAG_D;
-    }
-    break;
   default:
-    // TODO: Figure out what to do here...
+    // TODO: Figure out what to do here (if there are other cases)
+    ACE_DEBUG((LM_INFO,
+               "RtpsSampleHeader::populate_control_submessages(): Non-sample messages seen, message_id = %d\n",
+               header.message_id_));
     break;
   }
 
@@ -270,7 +314,6 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
   subm.length(2);
   subm[1].data_sm(data);
 }
-
 
 }
 }

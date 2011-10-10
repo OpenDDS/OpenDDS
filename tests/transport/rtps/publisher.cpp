@@ -87,6 +87,16 @@ public:
     --callbacks_expected_;
   }
 
+  void control_delivered(ACE_Message_Block* sample)
+  {
+    ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_delivered()\n"));
+  }
+
+  void control_dropped(ACE_Message_Block* sample, bool dropped_by_transport)
+  {
+    ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_dropped()\n"));
+  }
+
   void notify_publication_disconnected(const ReaderIdSeq&) {}
   void notify_publication_reconnected(const ReaderIdSeq&) {}
   void notify_publication_lost(const ReaderIdSeq&) {}
@@ -104,6 +114,7 @@ public:
   using TransportClient::enable_transport;
   using TransportClient::disassociate;
   using TransportClient::send;
+  using TransportClient::send_control;
 
   const RepoId& pub_id_;
   RepoId sub_id_;
@@ -246,14 +257,83 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_DEBUG((LM_INFO, oss.str().c_str()));
   }
 
-  // 2. send through the OpenDDS transport
+  // 2a. send control messages through the OpenDDS transport
 
-  TransportSendElementAllocator alloc(5, sizeof(TransportSendElementAllocator));
+  // Send an instance registration
+  {
+    TestMsg control_sample;
+    control_sample.key = 0x04030201;
+    DataSampleHeader dsh;
+    dsh.message_id_ = INSTANCE_REGISTRATION;
+    dsh.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+    dsh.publication_id_ = local_guid;
+    dsh.key_fields_only_ = true;
+
+    // Calculate the data buffer length
+    size = 0;
+    padding = 0;
+    OpenDDS::DCPS::KeyOnly<const TestMsg> ko_instance_data(control_sample);
+    find_size_ulong(size, padding);   // encap
+    gen_find_size(ko_instance_data, size, padding);
+    dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
+
+    ACE_Message_Block* ir_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                                                     ACE_Message_Block::MB_DATA,
+                                                     new ACE_Message_Block(dsh.message_length_));
+    *ir_mb << dsh;
+
+    OpenDDS::DCPS::Serializer serializer(ir_mb->cont(),
+                                         host_is_bigendian,
+                                         Serializer::ALIGN_CDR);
+    ok = (serializer << encap) && (serializer << ko_instance_data);
+    if (!ok) {
+      std::cerr << "ERROR: failed to serialize data for instance registration\n";
+      return 1;
+    }
+    sdw.send_control(dsh, ir_mb);
+
+    // Send a dispose instance
+    {
+      dsh.message_id_ = DISPOSE_INSTANCE;
+      ACE_Message_Block* di_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                                                       ACE_Message_Block::MB_DATA,
+                                                       new ACE_Message_Block(dsh.message_length_));
+      *di_mb << dsh;
+      OpenDDS::DCPS::Serializer serializer(di_mb->cont(),
+                                           host_is_bigendian,
+                                           Serializer::ALIGN_CDR);
+      ok = (serializer << encap) && (serializer << ko_instance_data);
+      if (!ok) {
+        std::cerr << "ERROR: failed to serialize data for dispose instance\n";
+        return 1;
+      }
+      sdw.send_control(dsh, di_mb);
+    }
+
+    // Send an unregister instance
+    {
+      dsh.message_id_ = UNREGISTER_INSTANCE;
+      ACE_Message_Block* ui_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                                                       ACE_Message_Block::MB_DATA,
+                                                       new ACE_Message_Block(dsh.message_length_));
+      *ui_mb << dsh;
+      OpenDDS::DCPS::Serializer serializer(ui_mb->cont(),
+                                           host_is_bigendian,
+                                           Serializer::ALIGN_CDR);
+      ok = (serializer << encap) && (serializer << ko_instance_data);
+      if (!ok) {
+        std::cerr << "ERROR: failed to serialize data for unregister instance\n";
+        return 1;
+      }
+      sdw.send_control(dsh, ui_mb);
+    }
+  }
+
+  // 2b. send sample datathrough the OpenDDS transport
+
+  TransportSendElementAllocator alloc(2, sizeof(TransportSendElementAllocator));
   DataSampleListElement elements[] = {
     DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Instance Registration
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Dispose Instance
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Unregister Instance
     DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
   };
   DataSampleList list;
@@ -296,75 +376,9 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  // Send an instance registration
-  index++;
-  data.key = 0x04030201;
-  dsh.message_id_ = INSTANCE_REGISTRATION;
-  dsh.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-  dsh.publication_id_ = local_guid;
-  dsh.key_fields_only_ = true;
-
-  // Calculate the data buffer length
-  size = 0;
-  padding = 0;
-  OpenDDS::DCPS::KeyOnly<const TestMsg> ko_instance_data(data);
-  find_size_ulong(size, padding);   // encap
-  gen_find_size(ko_instance_data, size, padding);
-  dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
-  
-  elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-					      ACE_Message_Block::MB_DATA,
-					      new ACE_Message_Block(dsh.message_length_));
-  *elements[index].sample_ << dsh;
-
-  OpenDDS::DCPS::Serializer serializer(elements[index].sample_->cont(),
-				       host_is_bigendian,
-				       Serializer::ALIGN_CDR);
-  ok = (serializer << encap) && (serializer << ko_instance_data);
-  if (!ok) {
-    std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
-    return 1;
-  }
-
-  // Send a dispose instance
-  index++;
-  {
-    dsh.message_id_ = DISPOSE_INSTANCE;
-    elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-						    ACE_Message_Block::MB_DATA,
-						    new ACE_Message_Block(dsh.message_length_));
-    *elements[index].sample_ << dsh;
-    OpenDDS::DCPS::Serializer serializer(elements[index].sample_->cont(),
-					 host_is_bigendian,
-					 Serializer::ALIGN_CDR);
-    ok = (serializer << encap) && (serializer << ko_instance_data);
-    if (!ok) {
-      std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
-      return 1;
-    }
-  }
-
-  // Send an unregister instance
-  index++;
-  {
-    dsh.message_id_ = UNREGISTER_INSTANCE;
-    elements[index].sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-						    ACE_Message_Block::MB_DATA,
-						    new ACE_Message_Block(dsh.message_length_));
-    *elements[index].sample_ << dsh;
-    OpenDDS::DCPS::Serializer serializer(elements[index].sample_->cont(),
-					 host_is_bigendian,
-					 Serializer::ALIGN_CDR);
-    ok = (serializer << encap) && (serializer << ko_instance_data);
-    if (!ok) {
-      std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
-      return 1;
-    }
-  }
-
   // Send a data sample with a key of 99 to terminate the subscriber
   index++;
-  dsh.sequence_ = 3;
+  dsh.sequence_++;
   dsh.message_id_ = SAMPLE_DATA;
   dsh.key_fields_only_ = false;
   elements[index].sequence_ = dsh.sequence_;

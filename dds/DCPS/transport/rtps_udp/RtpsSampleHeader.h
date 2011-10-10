@@ -11,6 +11,7 @@
 
 #include "ace/Basic_Types.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/transport/framework/TransportSendControlElement.h"
 
 class ACE_Message_Block;
 
@@ -60,6 +61,8 @@ struct RtpsSampleHeader {
   // translating from an OpenDDS data structure to the RTPS format.
   static void populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
                                    const DataSampleListElement& dsle);
+  static void populate_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+                                           const TransportSendControlElement& tsce);
 };
 
 }

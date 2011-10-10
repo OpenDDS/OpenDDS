@@ -30,6 +30,7 @@ public:
   explicit SimpleDataReader(const RepoId& sub_id)
     : done_(false)
     , sub_id_(sub_id)
+    , control_msg_count_(0)
   {}
 
   virtual ~SimpleDataReader() {}
@@ -47,8 +48,8 @@ public:
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
       Serializer ser(sample.sample_,
-		     sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-		     Serializer::ALIGN_CDR);
+                     sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+                     Serializer::ALIGN_CDR);
       bool ok = true;
       ACE_CDR::ULong encap;
       ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
@@ -56,42 +57,42 @@ public:
       ok &= (ser >> data);
 
       if (!ok) {
-	ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
-	return;
+        ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
+        return;
       }
 
       if (data.key == 99) {
-	ACE_DEBUG((LM_INFO, "data_received(): Received terminating sample\n"));
-	done_ = true;
-	return;
+        ACE_DEBUG((LM_INFO, "data_received(): Received terminating sample\n"));
+        done_ = true;
+        return;
       }
 
       GuidConverter pub(sample.header_.publication_id_);
       DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
-			sample.header_.source_timestamp_nanosec_};
+                        sample.header_.source_timestamp_nanosec_};
       ACE_Time_Value atv = time_to_time_value(ts);
       std::time_t seconds = atv.sec();
       std::ostringstream oss;
       oss << "data_received():\n\t"
-	"id = " << int(sample.header_.message_id_) << "\n\t"
-	"timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
-	"seq# = " << sample.header_.sequence_.getValue() << "\n\t"
-	"byte order = " << sample.header_.byte_order_ << "\n\t"
-	"length = " << sample.header_.message_length_ << "\n\t"
-	"publication = " << pub << "\n\t"
-	"data.key = " << data.key << "\n\t"
-	"data.value = " << data.value << "\n";
+        "id = " << int(sample.header_.message_id_) << "\n\t"
+        "timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
+        "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
+        "byte order = " << sample.header_.byte_order_ << "\n\t"
+        "length = " << sample.header_.message_length_ << "\n\t"
+        "publication = " << pub << "\n\t"
+        "data.key = " << data.key << "\n\t"
+        "data.value = " << data.value << "\n";
       ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
 
       if (sample.header_.message_id_ != SAMPLE_DATA
-	  || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
-	  || sample.header_.message_length_ != 533
-	  || pub.checksum() != GuidConverter(pub_id_).checksum()) {
-	ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
+          || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
+          || sample.header_.message_length_ != 533
+          || pub.checksum() != GuidConverter(pub_id_).checksum()) {
+        ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
       }
 
       if (data.key != 0x09230923 || std::strlen(data.value.in()) != 520) {
-	ACE_DEBUG((LM_ERROR, "ERROR: DataSample contents malformed\n"));
+        ACE_DEBUG((LM_ERROR, "ERROR: DataSample contents malformed\n"));
       }
       break;
     }
@@ -99,8 +100,8 @@ public:
     case DISPOSE_INSTANCE:
     case UNREGISTER_INSTANCE: {
       OpenDDS::DCPS::Serializer ser(sample.sample_,
-				    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-				    OpenDDS::DCPS::Serializer::ALIGN_CDR);
+                                    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+                                    OpenDDS::DCPS::Serializer::ALIGN_CDR);
       bool ok = true;
       ACE_CDR::ULong encap;
       ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
@@ -108,24 +109,27 @@ public:
       ok &= (ser >> OpenDDS::DCPS::KeyOnly<TestMsg>(data));
 
       if (!ok) {
-	ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize key data\n"));
-	return;
+        ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize key data\n"));
+        return;
       }
-      if (data.key != 0x04030201) {
-	ACE_DEBUG((LM_ERROR, "ERROR: key contents malformed\n"));
+      if (data.key == 0x04030201) {
+        // Good control message
+        control_msg_count_++;
+      } else {
+        ACE_DEBUG((LM_ERROR, "ERROR: key contents malformed\n"));
       }
 
       std::ostringstream oss;
       switch (sample.header_.message_id_) {
       case INSTANCE_REGISTRATION:
-	oss << "data_received(): Received Instance Registration\n\t";
-	break;
+        oss << "data_received(): Received Instance Registration\n\t";
+        break;
       case DISPOSE_INSTANCE:
-	oss << "data_received(): Received Dispose Instance\n\t";
-	break;
+        oss << "data_received(): Received Dispose Instance\n\t";
+        break;
       case UNREGISTER_INSTANCE:
-	oss << "data_received(): Received Unregister Instance\n\t";
-	break;
+        oss << "data_received(): Received Unregister Instance\n\t";
+        break;
       }
       oss << "data.key = " << data.key << "\n";
       ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
@@ -155,6 +159,7 @@ public:
   const RepoId& sub_id_;
   RepoId pub_id_;
   SequenceNumber seq_;
+  int control_msg_count_;
 };
 
 
@@ -227,6 +232,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   while (!sdr.done_) {
     ACE_OS::sleep(1);
+  }
+
+  if (sdr.control_msg_count_ != 3) {
+    ACE_DEBUG((LM_ERROR, "ERROR: Expected 3 control messages, received %d\n",
+               sdr.control_msg_count_));
   }
 
   sdr.disassociate(publication.remote_id_);

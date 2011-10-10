@@ -51,6 +51,7 @@ public:
   /// customized messages to different DataLinks.
   virtual SendControlStatus send_control_customized(
     const DataLinkSet_rch& /* links */,
+    const DataSampleHeader& /* header */,
     ACE_Message_Block* /* msg */,
     void* /* extra */)
   {

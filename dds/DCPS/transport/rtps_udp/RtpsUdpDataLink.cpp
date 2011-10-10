@@ -13,6 +13,7 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "dds/DCPS/transport/framework/TransportSendControlElement.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 
@@ -37,7 +38,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
              false,     // is_loopback
              false),    // is_active
     config_(0),
-    reactor_task_(0)
+    reactor_task_(0),
+    transport_customized_element_allocator_(40, sizeof(TransportCustomizedElement))
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
@@ -131,29 +133,33 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   TransportSendElement* tse = dynamic_cast<TransportSendElement*>(element);
   TransportCustomizedElement* tce =
     dynamic_cast<TransportCustomizedElement*>(element);
+  TransportSendControlElement* tsce = dynamic_cast<TransportSendControlElement*>(element);
 
   ACE_Message_Block* data = 0;
-  const DataSampleListElement* dsle = 0;
+  OpenDDS::RTPS::SubmessageSeq subm;
 
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
-  if (tse) {
+  if (tsce) {        // Control message
+    data = msg->cont()->duplicate();
+    // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
+    RtpsSampleHeader::populate_control_submessages(subm, *tsce);
+  } else if (tse) {  // Basic data message
     // {DataSampleHeader} -> {Data Payload}
     data = msg->cont()->duplicate();
-    dsle = tse->sample();
-  } else if (tce) {
+    const DataSampleListElement* dsle = tse->sample();
+    // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
+    RtpsSampleHeader::populate_submessages(subm, *dsle);
+  } else if (tce) {  // Customized data message
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
     data = msg->cont()->cont()->duplicate();
-    dsle = tce->original_send_element()->sample();
+    const DataSampleListElement* dsle = tce->original_send_element()->sample();
+    // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
+    RtpsSampleHeader::populate_submessages(subm, *dsle);
   } else {
     //TODO: handle other types?
     return element;
   }
-
-  // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
-
-  OpenDDS::RTPS::SubmessageSeq subm;
-  RtpsSampleHeader::populate_submessages(subm, *dsle);
 
   size_t size = 0, padding = 0;
   for (CORBA::ULong i = 0; i < subm.length(); ++i) {
@@ -176,9 +182,12 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     }
   }
 
+  // TODO: Decide what to do with this allocator.  Currently, we use a locally
+  // created allocator.  Other options, pass a null reference (use the heap) or
+  // somehow get the allocator from the WriteDataContainer.
   TransportCustomizedElement* rtps =
     TransportCustomizedElement::alloc(element, false,
-      dsle->transport_customized_element_allocator_);
+                                      &this->transport_customized_element_allocator_);
   rtps->set_msg(hdr);
 
   // Let the framework know each TransportCustomizedElement must be in its own

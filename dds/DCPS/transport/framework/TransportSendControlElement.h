@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "TransportDefs.h"
 #include "TransportQueueElement.h"
 
@@ -29,10 +30,11 @@ TransportSendControlElementAllocator;
 class OpenDDS_Dcps_Export TransportSendControlElement : public TransportQueueElement {
 public:
 
-  TransportSendControlElement(int                    initial_count,
-                              RepoId                 publisher_id,
-                              TransportSendListener* listener,
-                              ACE_Message_Block*     msg_block,
+  TransportSendControlElement(int                     initial_count,
+                              RepoId                  publisher_id,
+                              TransportSendListener*  listener,
+                              const DataSampleHeader& header,
+                              ACE_Message_Block*      msg_block,
                               TransportSendControlElementAllocator* allocator = 0);
 
   virtual ~TransportSendControlElement();
@@ -45,6 +47,11 @@ public:
 
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
+
+  const DataSampleHeader& header() const { return this->header_; }
+  // Only allow const access to the header.  Modifying the header
+  // would require remarshaling.
+  //DataSampleHeader& header() { return this->header_; }
 
   virtual const ACE_Message_Block* msg_payload() const;
 
@@ -63,6 +70,9 @@ private:
 
   /// The TransportSendListener object to call back upon.
   TransportSendListener* listener_;
+
+  /// The OpenDDS DCPS header for this control message
+  DataSampleHeader header_;
 
   /// The control message.
   ACE_Message_Block* msg_;

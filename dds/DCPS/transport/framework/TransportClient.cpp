@@ -254,7 +254,9 @@ TransportClient::disassociate(const RepoId& peerId)
 }
 
 bool
-TransportClient::send_response(const RepoId& peer, ACE_Message_Block* payload)
+TransportClient::send_response(const RepoId& peer,
+                               const DataSampleHeader& header,
+                               ACE_Message_Block* payload)
 {
   DataLinkIndex::iterator found = data_link_index_.find(peer);
   if (found == data_link_index_.end()) {
@@ -272,7 +274,7 @@ TransportClient::send_response(const RepoId& peer, ACE_Message_Block* payload)
 
   DataLinkSet singular;
   singular.insert_link(found->second.in());
-  singular.send_response(peer, payload);
+  singular.send_response(peer, header, payload);
   return true;
 }
 
@@ -396,16 +398,18 @@ TransportClient::get_receive_listener()
 }
 
 SendControlStatus
-TransportClient::send_control(ACE_Message_Block* msg, void* extra /* = 0*/)
+TransportClient::send_control(const DataSampleHeader& header,
+                              ACE_Message_Block* msg,
+                              void* extra /* = 0*/)
 {
   TransportSendListener* listener = get_send_listener();
 
   if (extra) {
     DataLinkSet_rch pub_links(&links_, false);
-    return listener->send_control_customized(pub_links, msg, extra);
+    return listener->send_control_customized(pub_links, header, msg, extra);
 
   } else {
-    return links_.send_control(repo_id_, listener, msg);
+    return links_.send_control(repo_id_, listener, header, msg);
   }
 }
 

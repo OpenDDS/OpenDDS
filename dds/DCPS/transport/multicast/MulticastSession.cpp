@@ -113,7 +113,9 @@ MulticastSession::start_syn(ACE_Reactor* reactor)
 void
 MulticastSession::send_control(char submessage_id, ACE_Message_Block* data)
 {
-  ACE_Message_Block* control = this->link_->create_control(submessage_id, data);
+  DataSampleHeader header;
+  ACE_Message_Block* control =
+    this->link_->create_control(submessage_id, header, data);
   if (control == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -122,7 +124,7 @@ MulticastSession::send_control(char submessage_id, ACE_Message_Block* data)
     return;
   }
 
-  int error = this->link_->send_control(control);
+  int error = this->link_->send_control(header, control);
   if (error != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")

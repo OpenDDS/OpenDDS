@@ -312,6 +312,7 @@ public:
   void control_delivered(ACE_Message_Block* sample);
 
   SendControlStatus send_control_customized(const DataLinkSet_rch& links,
+                                            const DataSampleHeader& header,
                                             ACE_Message_Block* msg,
                                             void* extra);
 
@@ -521,6 +522,7 @@ private:
    */
   ACE_Message_Block*
   create_control_message(MessageId message_id,
+                         DataSampleHeader& header,
                          ACE_Message_Block* data,
                          const DDS::Time_t& source_timestamp);
 

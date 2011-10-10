@@ -900,11 +900,12 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
                this->readers_.size()));
   }
 
+  DataSampleHeader header;
   ACE_Message_Block* ack_request =
-    this->create_control_message(REQUEST_ACK, data, token.timestamp());
+    this->create_control_message(REQUEST_ACK, header, data, token.timestamp());
 
   const SendControlStatus status =
-    this->send_control(ack_request
+    this->send_control(header, ack_request
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
                        , ac.customized_.length() ? &ac : 0
 #endif
@@ -921,8 +922,10 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
 }
 
 SendControlStatus
-DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
-  ACE_Message_Block* msg, void* extra)
+DataWriterImpl::send_control_customized(const DataLinkSet_rch&  links,
+                                        const DataSampleHeader& header,
+                                        ACE_Message_Block*      msg,
+                                        void*                   extra)
 {
 #ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -991,9 +994,9 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
         // Deep copy the payload and chain it to a shallow-copied header
         ACE_Message_Block* data_orig = msg->cont();
         msg->cont(0); // temporarily unlink so we don't duplicate the data
-        ACE_Message_Block* header = msg->duplicate();
+        ACE_Message_Block* header_mb = msg->duplicate();
         ACE_Message_Block* data_modified = data_orig->clone();
-        header->cont(data_modified);
+        header_mb->cont(data_modified);
         msg->cont(data_orig);                 // undo the temporary unlink
 
         // Modify the payload to contain the customized sequence #
@@ -1017,11 +1020,11 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
           }
 
           // Now changing the header, need to copy its data contents
-          size_t len = header->length();
-          header->data_block(header->data_block()->clone());
-          header->wr_ptr(len);
-          DataSampleHeader::set_flag(CONTENT_FILTER_FLAG, header);
-          DataSampleHeader::add_cfentries(&ftseq, header);
+          size_t len = header_mb->length();
+          header_mb->data_block(header_mb->data_block()->clone());
+          header_mb->wr_ptr(len);
+          DataSampleHeader::set_flag(CONTENT_FILTER_FLAG, header_mb);
+          DataSampleHeader::add_cfentries(&ftseq, header_mb);
         }
 
         if (DCPS_debug_level > 4) {
@@ -1032,7 +1035,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
             (allTargets->size() == targets.length()) ? "out" : ""));
         }
 
-        ok &= (thisLink.send_control(this->publication_id_, this, header)
+        ok &= (thisLink.send_control(this->publication_id_, this, header, header_mb)
                == SEND_CONTROL_OK);
       }
     }
@@ -1048,7 +1051,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
         notCustomized.map().size()));
     }
 
-    ok &= (notCustomized.send_control(this->publication_id_, this, msg)
+    ok &= (notCustomized.send_control(this->publication_id_, this, header, msg)
            == SEND_CONTROL_OK);
   }
 
@@ -1576,12 +1579,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 
   // Add header with the registration sample data.
+  DataSampleHeader header;
   ACE_Message_Block* registered_sample =
     this->create_control_message(INSTANCE_REGISTRATION,
+                                 header,
                                  data,
                                  source_timestamp);
 
-  if (this->send_control(registered_sample) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
@@ -1626,12 +1631,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      ret);
   }
 
+  DataSampleHeader header;
   ACE_Message_Block* message =
     this->create_control_message(UNREGISTER_INSTANCE,
+                                 header,
                                  unregistered_sample_data,
                                  source_timestamp);
 
-  if (this->send_control(message) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
                       ACE_TEXT(" send_control failed. \n")),
@@ -1779,12 +1786,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      ret);
   }
 
+  DataSampleHeader header;
   ACE_Message_Block* message =
     this->create_control_message(DISPOSE_INSTANCE,
+                                 header,
                                  registered_sample_data,
                                  source_timestamp);
 
-  if (this->send_control(message) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose: ")
                       ACE_TEXT(" send_control failed. \n")),
@@ -1851,10 +1860,10 @@ DataWriterImpl::get_type_name() const
 
 ACE_Message_Block*
 DataWriterImpl::create_control_message(MessageId message_id,
+                                       DataSampleHeader& header_data,
                                        ACE_Message_Block* data,
                                        const DDS::Time_t& source_timestamp)
 {
-  DataSampleHeader header_data;
   header_data.message_id_ = message_id;
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
@@ -2113,10 +2122,11 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   DDS::Time_t source_timestamp =
     time_value_to_time(ACE_OS::gettimeofday());
 
+  DataSampleHeader header;
   ACE_Message_Block* control =
-    create_control_message(END_COHERENT_CHANGES, data, source_timestamp);
+    create_control_message(END_COHERENT_CHANGES, header, data, source_timestamp);
 
-  if (this->send_control(control) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, control) == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
                ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
@@ -2248,10 +2258,11 @@ bool
 DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
 {
   DDS::Time_t t = time_value_to_time(now);
+  DataSampleHeader header;
   ACE_Message_Block* liveliness_msg =
-    this->create_control_message(DATAWRITER_LIVELINESS, 0, t);
+    this->create_control_message(DATAWRITER_LIVELINESS, header, 0, t);
 
-  if (this->send_control(liveliness_msg) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, liveliness_msg) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
                       ACE_TEXT(" send_control failed. \n")),
