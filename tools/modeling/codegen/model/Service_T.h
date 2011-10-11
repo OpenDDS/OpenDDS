@@ -49,6 +49,12 @@ namespace OpenDDS { namespace Model {
       DDS::DataReader_var reader(typename DataReaders::Values reader);
       ///}
 
+      const std::string&  transportConfigName(typename Participants::Values which);
+      const std::string&  transportConfigName(typename Publishers::Values which);
+      const std::string&  transportConfigName(typename Subscribers::Values which);
+      const std::string&  transportConfigName(typename DataWriters::Values which);
+      const std::string&  transportConfigName(typename DataReaders::Values which);
+
     private:
       ///{ @name Entity Creation.
       DDS::DomainParticipant* createParticipant(

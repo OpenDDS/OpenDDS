@@ -1,3 +1,14 @@
+Tue Oct 11 03:43:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Expose transportConfigName.
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          Handle empty transport tags.
+
 Tue Oct  4 19:00:04 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:

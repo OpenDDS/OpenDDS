@@ -72,10 +72,13 @@ class GeneratorMigrator
     @new_transport_ref_re = /<transportRef.*transport=['"]([^'"]*)['"]/
     @tcp_open_re = /<TCPTransport>/
     @tcp_close_re = /<\/TCPTransport>/
+    @tcp_open_close_re = /<TCPTransport\/>/
     @udp_open_re = /<UDPTransport>/
     @udp_close_re = /<\/UDPTransport>/
+    @udp_open_close_re = /<UDPTransport\/>/
     @mc_open_re = /<MulticastTransport>/
     @mc_close_re = /<\/MulticastTransport>/
+    @mc_open_close_re = /<MulticastTransport\/>/
     @generator_open_re = /<\generator:CodeGen (.*)>/
     @generator_close_re = /<\/generator:CodeGen>/
     @transports_re = /<transports>/
@@ -123,7 +126,16 @@ class GeneratorMigrator
     elsif line =~ @mc_open_re
       transport 'MulticastTransport' # output config now, transport later
     elsif line =~ @tcp_close_re || line =~ @udp_close_re || line =~ @mc_close_re
-      close_transport # finish condig output
+      close_transport # finish config output
+    elsif line =~ @tcp_open_close_re
+      transport 'TcpTransport' # output config now, transport later
+      close_transport # finish config output
+    elsif line =~ @udp_open_close_re
+      transport 'UdpTransport' # output config now, transport later
+      close_transport # finish config output
+    elsif line =~ @mc_open_close_re
+      transport 'MulticastTransport' # output config now, transport later
+      close_transport # finish config output
     elsif line =~ @transports_re
       @has_transports = true # remember in case rerunning file
       puts line
