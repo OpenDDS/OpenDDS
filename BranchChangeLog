@@ -1,3 +1,20 @@
+Tue Oct 11 16:11:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * tests/transport/rtps/publisher.cpp:
+
+          Add a DataSampleHeader to the DataSampleListElement.
+          Remove the sequence number and source timestamp members
+          of the DSLE (they are redundant with those in the header).
+
 Mon Oct 10 16:04:48 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

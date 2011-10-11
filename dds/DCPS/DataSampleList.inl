@@ -32,13 +32,12 @@ DataSampleListElement::DataSampleListElement(
     transport_send_element_allocator_(tse_allocator),
     transport_customized_element_allocator_(tce_allocator)
 {
-  source_timestamp_.sec = 0;
-  source_timestamp_.nanosec = 0;
 }
 
 ACE_INLINE
 DataSampleListElement::DataSampleListElement(const DataSampleListElement& elem)
-  : sample_(elem.sample_->duplicate())
+  : header_(elem.header_)
+  , sample_(elem.sample_->duplicate())
   , publication_id_(elem.publication_id_)
   , num_subs_(elem.num_subs_)
   , previous_sample_(elem.previous_sample_)
@@ -60,8 +59,6 @@ DataSampleListElement::DataSampleListElement(const DataSampleListElement& elem)
             elem.subscription_ids_ + num_subs_,
             subscription_ids_);
 
-  source_timestamp_.sec = elem.source_timestamp_.sec;
-  source_timestamp_.nanosec = elem.source_timestamp_.nanosec;
 }
 
 ACE_INLINE
@@ -76,14 +73,13 @@ ACE_INLINE
 DataSampleListElement&
 DataSampleListElement::operator=(const DataSampleListElement& rhs)
 {
+  header_ = rhs.header_;
   sample_ = rhs.sample_->duplicate();
   publication_id_ = rhs.publication_id_;
   num_subs_ = rhs.num_subs_;
   std::copy(rhs.subscription_ids_,
             rhs.subscription_ids_ + num_subs_,
             subscription_ids_);
-  source_timestamp_.sec = rhs.source_timestamp_.sec;
-  source_timestamp_.nanosec = rhs.source_timestamp_.nanosec;
   previous_sample_ = rhs.previous_sample_;
   next_sample_ = rhs.next_sample_;
   next_instance_sample_ = rhs.next_instance_sample_;

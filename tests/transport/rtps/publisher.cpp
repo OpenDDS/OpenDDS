@@ -346,14 +346,15 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Send a regular data sample
   int index = 0;
-  DataSampleHeader dsh;
+  DataSampleHeader& dsh = elements[index].header_;
   dsh.message_id_ = SAMPLE_DATA;
   dsh.publication_id_ = local_guid;
   dsh.sequence_ = 2;
-  elements[index].sequence_ = dsh.sequence_;
-  const ACE_Time_Value t = ACE_OS::gettimeofday();
-  log_time(t);
-  elements[index].source_timestamp_ = time_value_to_time(t);
+  const ACE_Time_Value tv = ACE_OS::gettimeofday();
+  log_time(tv);
+  DDS::Time_t st = time_value_to_time(tv);
+  dsh.source_timestamp_sec_ = st.sec;
+  dsh.source_timestamp_nanosec_ = st.nanosec;
 
   // Calculate the data buffer length
   size = 0;
@@ -378,11 +379,16 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Send a data sample with a key of 99 to terminate the subscriber
   index++;
-  dsh.sequence_++;
-  dsh.message_id_ = SAMPLE_DATA;
-  dsh.key_fields_only_ = false;
-  elements[index].sequence_ = dsh.sequence_;
-  elements[index].source_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
+  DataSampleHeader& dsh2 = elements[index].header_;
+  dsh2.sequence_ = dsh.sequence_+1;
+  dsh2.message_id_ = SAMPLE_DATA;
+  dsh.publication_id_ = local_guid;
+  dsh2.key_fields_only_ = false;
+  const ACE_Time_Value tv2 = ACE_OS::gettimeofday();
+  log_time(tv2);
+  DDS::Time_t st2 = time_value_to_time(tv2);
+  dsh2.source_timestamp_sec_ = st2.sec;
+  dsh2.source_timestamp_nanosec_ = st2.nanosec;
   data.key = 99;
   data.value = "";
 
@@ -391,13 +397,13 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   padding = 0;
   find_size_ulong(size, padding);   // encap
   gen_find_size(data, size, padding);
-  dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
+  dsh2.message_length_ = static_cast<ACE_UINT32>(size + padding);
 
   elements[index].sample_ =
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_));
+      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh2.message_length_));
 
-  *elements[index].sample_ << dsh;
+  *elements[index].sample_ << dsh2;
 
   Serializer ser3(elements[index].sample_->cont(), host_is_bigendian,
                   Serializer::ALIGN_CDR);

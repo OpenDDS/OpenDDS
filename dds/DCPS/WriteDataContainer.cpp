@@ -41,8 +41,8 @@ resend_data_expired(DataSampleListElement const & element,
     // Finite lifespan.  Check if data has expired.
 
     DDS::Time_t const tmp = {
-      element.source_timestamp_.sec + lifespan.duration.sec,
-      element.source_timestamp_.nanosec + lifespan.duration.nanosec
+      element.header_.source_timestamp_sec_ + lifespan.duration.sec,
+      element.header_.source_timestamp_nanosec_ + lifespan.duration.nanosec
     };
 
     ACE_Time_Value const now(ACE_OS::gettimeofday());

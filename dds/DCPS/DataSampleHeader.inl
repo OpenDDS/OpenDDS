@@ -157,23 +157,3 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
   // Test flag bit.
   return base[FLAGS_OFFSET] & mask_flag(flag);
 }
-
-ACE_INLINE
-char
-OpenDDS::DCPS::DataSampleHeader::extract_message_id(const ACE_Message_Block* buffer)
-{
-  // Message id is the first byte
-  char* base = buffer->base();
-
-  // verify sufficient length exists:
-  if (static_cast<size_t>(buffer->end() - base) < 1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::extract_message_id: ")
-                      ACE_TEXT("ACE_Message_Block too short (missing message_id octet).\n")),
-		      127);
-  }
-
-  // return message_id
-  return base[0];
-}
-

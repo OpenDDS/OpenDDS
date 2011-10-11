@@ -204,7 +204,8 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
   ACE_CDR::Octet flags =
     DataSampleHeader::test_flag(BYTE_ORDER_FLAG, dsle.sample_);
   const ACE_CDR::UShort len = 8;
-  const DDS::Time_t& st = dsle.source_timestamp_;
+  const DDS::Time_t st = { dsle.header_.source_timestamp_sec_,
+                           dsle.header_.source_timestamp_nanosec_ };
   const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
     {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)} };
   subm.length(1);
@@ -216,10 +217,10 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
     DATA_OCTETS_TO_IQOS,
     ENTITYID_UNKNOWN,
     dsle.publication_id_.entityId,
-    {dsle.sequence_.getHigh(), dsle.sequence_.getLow()},
+    {dsle.header_.sequence_.getHigh(), dsle.header_.sequence_.getLow()},
     ParameterList()
   };
-  char message_id = DataSampleHeader::extract_message_id(dsle.sample_);
+  char message_id = dsle.header_.message_id_;
   switch (message_id) {
   case SAMPLE_DATA:
     // Must be a data message

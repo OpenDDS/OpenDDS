@@ -432,6 +432,7 @@ public:
   DDS::ReturnCode_t
   create_sample_data_message(DataSample* data,
                              DDS::InstanceHandle_t instance_handle,
+                             DataSampleHeader& header_data,
                              ACE_Message_Block*& message,
                              const DDS::Time_t& source_timestamp,
                              bool content_filter);

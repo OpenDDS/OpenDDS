@@ -1697,16 +1697,13 @@ DataWriterImpl::write(DataSample* data,
 
   ret = create_sample_data_message(data,
                                    handle,
+                                   element->header_,
                                    element->sample_,
                                    source_timestamp,
                                    (filter_out != 0));
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
-
-  element->source_timestamp_.sec     = source_timestamp.sec;
-  element->source_timestamp_.nanosec = source_timestamp.nanosec;
-  element->sequence_                 = this->sequence_number_;
 
   element->filter_out_ = filter_out_var._retn(); // ownership passed to element
 
@@ -1912,6 +1909,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
 DDS::ReturnCode_t
 DataWriterImpl::create_sample_data_message(DataSample* data,
                                            DDS::InstanceHandle_t instance_handle,
+                                           DataSampleHeader& header_data,
                                            ACE_Message_Block*& message,
                                            const DDS::Time_t& source_timestamp,
                                            bool content_filter)
@@ -1938,7 +1936,6 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   }
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-  DataSampleHeader header_data;
   header_data.message_id_ = SAMPLE_DATA;
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
