@@ -391,7 +391,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::copySubscriptionQos(
 
 template< typename ModelName, class InstanceTraits>
 inline
-const std::string&
+const std::string
 OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
   typename Participants::Values which
 ) {
@@ -400,7 +400,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
 
 template< typename ModelName, class InstanceTraits>
 inline
-const std::string&
+const std::strin&
 OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
   typename Publishers::Values which
 ) {
@@ -409,7 +409,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
 
 template< typename ModelName, class InstanceTraits>
 inline
-const std::string&
+const std::string
 OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
   typename Subscribers::Values which
 ) {
@@ -418,7 +418,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
 
 template< typename ModelName, class InstanceTraits>
 inline
-const std::string&
+const std::string
 OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
   typename DataWriters::Values which
 ) {
@@ -427,7 +427,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
 
 template< typename ModelName, class InstanceTraits>
 inline
-const std::string&
+const std::string
 OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
   typename DataReaders::Values which
 ) {
