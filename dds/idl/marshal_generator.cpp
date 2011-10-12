@@ -906,7 +906,7 @@ namespace {
           + align + ");\n" +
           indent + "}\n";
       }
-      return align + 
+      return align +
         indent + "size += gen_max_marshaled_size(" +
         getWrapper(qual, type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
@@ -1261,7 +1261,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
             << "  return " << size << ";\n";
         }
       } else { // unbounded
-        be_global->impl_ 
+        be_global->impl_
           << "  return 0;\n";
       }
     }
@@ -1562,7 +1562,7 @@ namespace {
         "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(size))) {\n"
         "    return false;\n"
         "  }\n"
-        "  if (outer_strm.alignment() == Serializer::ALIGN_INITIALIZE) {\n"
+        "  if (outer_strm.alignment() != Serializer::ALIGN_NONE) {\n"
         "    static const ACE_CDR::Octet padding[4] = {0};\n"
         "    return outer_strm.write_octet_array(padding, "
         "ACE_CDR::ULong(pad));\n"

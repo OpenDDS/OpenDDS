@@ -60,7 +60,8 @@ struct RtpsSampleHeader {
   // into_received_data_sample() so they are used on the sending side:
   // translating from an OpenDDS data structure to the RTPS format.
   static void populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                   const DataSampleListElement& dsle);
+                                   const DataSampleListElement& dsle,
+                                   bool requires_inline_qos);
   static void populate_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
                                            const TransportSendControlElement& tsce);
 };

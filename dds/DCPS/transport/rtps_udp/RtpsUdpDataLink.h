@@ -76,6 +76,12 @@ private:
 
   virtual void release_remote_i(const RepoId& remote_id);
 
+  bool requires_inline_qos(const PublicationId& pub_id,
+                           DDS::PublisherQos_out pub_qos,
+                           DDS::DataWriterQos_out dw_qos);
+
+  bool requires_inline_qos(const PublicationId& pub_id);
+
   RtpsUdpInst* config_;
   TransportReactorTask_rch reactor_task_;
 

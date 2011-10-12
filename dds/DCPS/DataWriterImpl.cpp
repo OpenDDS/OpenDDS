@@ -2468,5 +2468,13 @@ DataWriterImpl::get_readers(IdSet& readers)
   readers = this->readers_;
 }
 
+void
+DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos_data) const
+{
+  this->publisher_servant_->get_qos(qos_data.pub_qos);
+  qos_data.dw_qos = this->qos_;
+  qos_data.topic_name = this->topic_name_.in();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

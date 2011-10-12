@@ -331,6 +331,8 @@ public:
   /// Deliver a requested SAMPLE_ACK message to this writer.
   virtual void deliver_ack(const DataSampleHeader& header, DataSample* data);
 
+  virtual void retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos_data) const;
+
   virtual bool check_transport_qos(const TransportInst& inst);
 
   /// Are coherent changes pending?

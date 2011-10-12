@@ -64,6 +64,14 @@ public:
     DataSample* /* data */)
   {}
 
+  struct InlineQosData {
+    DDS::PublisherQos  pub_qos;
+    DDS::DataWriterQos dw_qos;
+    std::string        topic_name;
+  };
+
+  virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;
+
 protected:
 
   TransportSendListener();

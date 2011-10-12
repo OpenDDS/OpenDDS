@@ -149,13 +149,15 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     data = msg->cont()->duplicate();
     const DataSampleListElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
-    RtpsSampleHeader::populate_submessages(subm, *dsle);
+    RtpsSampleHeader::populate_submessages(subm, *dsle,
+                                           this->requires_inline_qos(dsle->publication_id_));
   } else if (tce) {  // Customized data message
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
     data = msg->cont()->cont()->duplicate();
     const DataSampleListElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
-    RtpsSampleHeader::populate_submessages(subm, *dsle);
+    RtpsSampleHeader::populate_submessages(subm, *dsle,
+                                           this->requires_inline_qos(dsle->publication_id_));
   } else {
     //TODO: handle other types?
     return element;
@@ -194,6 +196,12 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   // Transport packet (i.e. have its own RTPS Message Header).
   rtps->set_requires_exclusive();
   return rtps;
+}
+
+bool
+RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
+{
+  return false;
 }
 
 } // namespace DCPS

@@ -7,6 +7,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "dds/DCPS/Marked_Default_Qos.h"
 #include "TransportSendListener.h"
 #include "EntryExit.h"
 
@@ -58,4 +59,12 @@ OpenDDS::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
   ACE_UNUSED_ARG(dropped_by_transport);
   ACE_ERROR((LM_ERROR,
              "(%P|%t) ERROR: Subclass should override if sending control samples."));
+}
+
+void
+OpenDDS::DCPS::TransportSendListener::retrieve_inline_qos_data(InlineQosData& qos_data) const
+{
+  qos_data.dw_qos     = DATAWRITER_QOS_DEFAULT;
+  qos_data.pub_qos    = PUBLISHER_QOS_DEFAULT;
+  qos_data.topic_name = "";
 }

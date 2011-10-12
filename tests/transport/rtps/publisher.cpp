@@ -14,6 +14,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
 
 #include <tao/CORBA_String.h>
 
@@ -102,6 +103,15 @@ public:
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted() {}
   void remove_associations(const ReaderIdSeq&, bool) {}
+  virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const
+  {
+    qos_data.dw_qos     = DATAWRITER_QOS_DEFAULT;
+    qos_data.pub_qos    = PUBLISHER_QOS_DEFAULT;
+    qos_data.pub_qos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
+    qos_data.pub_qos.partition.name.length(1);
+    qos_data.pub_qos.partition.name[0] = "Hello";
+    qos_data.topic_name = "My Topic ";
+  }
 
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)

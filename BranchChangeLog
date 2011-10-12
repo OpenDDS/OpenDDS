@@ -1,3 +1,28 @@
+Wed Oct 12 20:51:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Add supporrt for inline Qos parameters.  This feature
+          adds the requires_inline_qos() function for RtpsUdpDataLink
+          and the retrieve_inline_qos_data() function for
+          TransportSendListeners.  Not all QoS parameters are supported
+          in this commit (currently only topic_name, partition, and
+          presentation).
+
+        * tests/transport/rtps/publisher.cpp:
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fix a marshaling error for Parameters (involves missing
+          padding).
+
 Wed Oct 12 20:20:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendBuffer.h:

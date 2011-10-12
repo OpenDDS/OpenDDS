@@ -10,12 +10,15 @@
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/Qos_Helper.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/transport/framework/TransportSendListener.h"
 
 #ifndef __ACE_INLINE__
 #include "RtpsSampleHeader.inl"
@@ -87,6 +90,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     break;                                                        \
   }
 
+  valid_ = false;
   switch (kind) {
   CASE_SMKIND(PAD, PadSubmessage, pad)
   CASE_SMKIND(ACKNACK, AckNackSubmessage, acknack)
@@ -172,6 +176,19 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
         } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_REGISTER) {
           // TODO: Remove this case if we decide not to send Register messages
           opendds.message_id_ = INSTANCE_REGISTRATION;
+      //} else if (rtps.inlineQos[i]._d() == PID_TOPIC_NAME) {
+      //  ACE_DEBUG((LM_DEBUG, "topic_name = %s\n", rtps.inlineQos[i].string_data()));
+      //} else if (rtps.inlineQos[i]._d() == PID_PRESENTATION) {
+      //  DDS::PresentationQosPolicy pres_qos = rtps.inlineQos[i].presentation();
+      //  ACE_DEBUG((LM_DEBUG, "presentation qos, access_scope = %d, coherent_access = %d, ordered_access = %d\n",
+      //             pres_qos.access_scope, pres_qos.coherent_access, pres_qos.ordered_access));
+      //} else if (rtps.inlineQos[i]._d() == PID_PARTITION) {
+      //  DDS::PartitionQosPolicy part_qos = rtps.inlineQos[i].partition();
+      //  ACE_DEBUG((LM_DEBUG, "partition qos(%d): ", part_qos.name.length()));
+      //  for (size_t i = 0; i < part_qos.name.length(); i++) {
+      //    ACE_DEBUG((LM_DEBUG, "'%s'  ", part_qos.name[i].in()));
+      //  }
+      //  ACE_DEBUG((LM_DEBUG, "\n"));
         }
       }
     }
@@ -197,7 +214,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
 void
 RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                       const DataSampleListElement& dsle)
+                                       const DataSampleListElement& dsle,
+                                       bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
@@ -235,6 +253,27 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
   }
 
   /*TODO: other inlineQos */
+  if (requires_inline_qos) {
+    TransportSendListener::InlineQosData qos_data;
+    dsle.send_listener_->retrieve_inline_qos_data(qos_data);
+    if (qos_data.topic_name.length() > 0) {
+      int qos_len = data.inlineQos.length();
+      data.inlineQos.length(qos_len+1);
+      data.inlineQos[qos_len].string_data(qos_data.topic_name.c_str());
+      data.inlineQos[qos_len]._d(PID_TOPIC_NAME);
+    }
+    DDS::PublisherQos default_pub_qos = PUBLISHER_QOS_DEFAULT;
+    if (!(qos_data.pub_qos.presentation == default_pub_qos.presentation)) {
+      int qos_len = data.inlineQos.length();
+      data.inlineQos.length(qos_len+1);
+      data.inlineQos[qos_len].presentation(qos_data.pub_qos.presentation);
+    }
+    if (!(qos_data.pub_qos.partition == default_pub_qos.partition)) {
+      int qos_len = data.inlineQos.length();
+      data.inlineQos.length(qos_len+1);
+      data.inlineQos[qos_len].partition(qos_data.pub_qos.partition);
+    }
+  }
 
   if (data.inlineQos.length() > 0) {
     data.smHeader.flags |= FLAG_Q;
