@@ -255,7 +255,7 @@ MulticastSession::send_synack()
 {
   // Send nakack before sending synack to
   // reduce naks from remote.
-  TransportSendBuffer* send_buffer = this->link_->send_buffer();
+  SingleSendBuffer* send_buffer = this->link_->send_buffer();
   if (send_buffer && !send_buffer->empty()
       && send_buffer->low() > ++SequenceNumber()) {
     send_nakack(send_buffer->low());

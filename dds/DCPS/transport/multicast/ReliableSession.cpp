@@ -310,7 +310,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   if ((local_peer != this->link_->local_peer())        // Not to us.
     || (this->remote_peer_ != header.source_)) return; // Not from the remote peer for this session.
 
-  TransportSendBuffer* send_buffer = this->link_->send_buffer();
+  SingleSendBuffer* send_buffer = this->link_->send_buffer();
   // Broadcast a MULTICAST_NAKACK control sample before resending to suppress
   // repair requests for unrecoverable samples by providing a
   // new low-water mark for affected peers:

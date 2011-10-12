@@ -1,3 +1,30 @@
+Wed Oct 12 20:20:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Refactored TransportSendBuffer into two classes, TSB is now the
+          abstract base class representing the interface that
+          TransportSendStrategy needs.  The new class SingleSendBuffer
+          represents the existing use-case for multicast, where a single
+          TSB object is all that's needed per datalink.  TSB is no longer
+          a reference-counted object, it's always owned by the datalink.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Adjusted use of TransportSendBuffer to account for the changes above.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer_rch.h:
+
+          Removed this file.
+
 Wed Oct 12 15:00:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

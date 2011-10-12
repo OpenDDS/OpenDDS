@@ -15,33 +15,37 @@ TransportSendBuffer::capacity() const
   return this->capacity_;
 }
 
+ACE_INLINE void
+TransportSendBuffer::bind(TransportSendStrategy* strategy)
+{
+  this->strategy_ = strategy;
+}
+
+
+// class SingleSendBuffer
+
 ACE_INLINE size_t
-TransportSendBuffer::n_chunks() const
+SingleSendBuffer::n_chunks() const
 {
   return this->n_chunks_;
 }
 
-ACE_INLINE void
-TransportSendBuffer::bind(TransportSendStrategy* strategy) {
-  this->strategy_ = strategy;
-}
-
 ACE_INLINE SequenceNumber
-TransportSendBuffer::low() const
+SingleSendBuffer::low() const
 {
   if (this->buffers_.empty()) throw std::exception();
   return this->buffers_.begin()->first;
 }
 
 ACE_INLINE SequenceNumber
-TransportSendBuffer::high() const
+SingleSendBuffer::high() const
 {
   if (this->buffers_.empty()) throw std::exception();
   return this->buffers_.rbegin()->first;
 }
 
 ACE_INLINE bool
-TransportSendBuffer::empty() const
+SingleSendBuffer::empty() const
 {
   return this->buffers_.empty();
 }

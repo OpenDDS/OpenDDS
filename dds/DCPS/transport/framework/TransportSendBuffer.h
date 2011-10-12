@@ -11,57 +11,78 @@
 
 #include "dds/DCPS/dcps_export.h"
 
-#include "BasicQueue_T.h"
-#include "TransportQueueElement.h"
 #include "TransportRetainedElement.h"
 #include "TransportReplacedElement.h"
 #include "TransportSendStrategy.h"
 
-#include "ace/Message_Block.h"
-
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/RcObject_T.h"
 
-#include <exception>
 #include <map>
-#include <set>
 #include <utility>
+
+class ACE_Message_Block;
 
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportSendBuffer
-  : public RcObject<ACE_SYNCH_MUTEX> {
+/// Abstract base class that forms the interface for TransportSendStrategy
+/// to store data for potential retransmission.  Derived classes actually
+/// store the data and can utilize TransportSendBuffer's friendship in
+/// TransportSendStrategy to retransmit (see method "resend_one").
+class OpenDDS_Dcps_Export TransportSendBuffer {
 public:
-  typedef std::pair<TransportSendStrategy::QueueType*, ACE_Message_Block*> buffer_type;
-
-  explicit TransportSendBuffer(size_t capacity,
-                               size_t max_samples_per_packet);
-  ~TransportSendBuffer();
-
   size_t capacity() const;
-  size_t n_chunks() const;
-
   void bind(TransportSendStrategy* strategy);
 
+  virtual void retain_all(RepoId pub_id) = 0;
+  virtual void insert(SequenceNumber sequence,
+                      TransportSendStrategy::QueueType* queue,
+                      ACE_Message_Block* chain) = 0;
+
+protected:
+  explicit TransportSendBuffer(size_t capacity) : capacity_(capacity) {}
+  virtual ~TransportSendBuffer();
+
+  typedef TransportSendStrategy::LockType LockType;
+  typedef TransportSendStrategy::QueueType QueueType;
+  typedef std::pair<QueueType*, ACE_Message_Block*> BufferType;
+
+  void resend_one(const BufferType& buffer);
+  LockType& strategy_lock() { return this->strategy_->lock_; }
+
+  TransportSendStrategy* strategy_;
+  const size_t capacity_;
+
+private:
+  TransportSendBuffer(const TransportSendBuffer&); // unimplemented
+  TransportSendBuffer& operator=(const TransportSendBuffer&); // unimplemented
+};
+
+/// "Classic" implementation of TransportSendBuffer for use when the sequence
+/// number passed to insert() is a TransportHeader sequence number, which means
+/// only a single object needs to exist per TransportSendStrategy/DataLink.
+class OpenDDS_Dcps_Export SingleSendBuffer : public TransportSendBuffer {
+public:
   void release_all();
-  void release(buffer_type& buffer);
+  void release(BufferType& buffer);
 
-  void retain_all(RepoId pub_id);
+  size_t n_chunks() const;
 
-  void insert(SequenceNumber sequence, const buffer_type& value);
+  SingleSendBuffer(size_t capacity, size_t max_samples_per_packet);
 
   bool resend(const SequenceRange& range);
-  void resend(buffer_type& buffer);
 
   SequenceNumber low() const;
   SequenceNumber high() const;
   bool empty() const;
 
 private:
-  size_t capacity_;
+  void retain_all(RepoId pub_id);
+  void insert(SequenceNumber sequence,
+              TransportSendStrategy::QueueType* queue,
+              ACE_Message_Block* chain);
+                      
   size_t n_chunks_;
 
   TransportRetainedElementAllocator retained_allocator_;
@@ -71,9 +92,7 @@ private:
   MessageBlockAllocator replaced_mb_allocator_;
   DataBlockAllocator replaced_db_allocator_;
 
-  TransportSendStrategy* strategy_;
-
-  typedef std::map<SequenceNumber, buffer_type> BufferMap;
+  typedef std::map<SequenceNumber, BufferType> BufferMap;
   BufferMap buffers_;
 };
 

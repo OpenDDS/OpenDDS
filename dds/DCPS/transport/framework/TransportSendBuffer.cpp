@@ -25,9 +25,24 @@
 namespace OpenDDS {
 namespace DCPS {
 
-TransportSendBuffer::TransportSendBuffer(size_t capacity,
-                                         size_t max_samples_per_packet)
-  : capacity_(capacity),
+TransportSendBuffer::~TransportSendBuffer()
+{
+  //release_all();
+}
+
+void
+TransportSendBuffer::resend_one(const BufferType& buffer)
+{
+  int bp = 0;
+  this->strategy_->do_send_packet(buffer.second, bp);
+}
+
+
+// class SingleSendBuffer
+
+SingleSendBuffer::SingleSendBuffer(size_t capacity,
+                                   size_t max_samples_per_packet)
+  : TransportSendBuffer(capacity),
     n_chunks_(capacity * max_samples_per_packet),
     retained_allocator_(this->n_chunks_),
     retained_mb_allocator_(this->n_chunks_ * 2),
@@ -38,13 +53,8 @@ TransportSendBuffer::TransportSendBuffer(size_t capacity,
 {
 }
 
-TransportSendBuffer::~TransportSendBuffer()
-{
-  //release_all();
-}
-
 void
-TransportSendBuffer::release_all()
+SingleSendBuffer::release_all()
 {
   for (BufferMap::iterator it(this->buffers_.begin());
        it != this->buffers_.end(); ++it) {
@@ -54,11 +64,11 @@ TransportSendBuffer::release_all()
 }
 
 void
-TransportSendBuffer::release(buffer_type& buffer)
+SingleSendBuffer::release(BufferType& buffer)
 {
-  if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
+  if (Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) TransportSendBuffer::release() - ")
+      ACE_TEXT("(%P|%t) SingleSendBuffer::release() - ")
       ACE_TEXT("releasing buffer at: (0x%x,0x%x)\n"),
       buffer.first, buffer.second
     ));
@@ -72,12 +82,12 @@ TransportSendBuffer::release(buffer_type& buffer)
 }
 
 void
-TransportSendBuffer::retain_all(RepoId pub_id)
+SingleSendBuffer::retain_all(RepoId pub_id)
 {
-  if ( OpenDDS::DCPS::Transport_debug_level >= 4) {
+  if (Transport_debug_level >= 4) {
     RepoIdConverter converter(pub_id);
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) TransportSendBuffer::retain_all() - ")
+      ACE_TEXT("(%P|%t) SingleSendBuffer::retain_all() - ")
       ACE_TEXT("copying out blocks for publication: %C\n"),
       std::string(converter).c_str()
     ));
@@ -85,7 +95,7 @@ TransportSendBuffer::retain_all(RepoId pub_id)
   for (BufferMap::iterator it(this->buffers_.begin());
        it != this->buffers_.end(); ++it) {
 
-    buffer_type& buffer(it->second);
+    BufferType& buffer(it->second);
 
     TransportQueueElement::MatchOnPubId match(pub_id);
     PacketRemoveVisitor visitor(match,
@@ -100,7 +110,7 @@ TransportSendBuffer::retain_all(RepoId pub_id)
       RepoIdConverter converter(pub_id);
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("TransportSendBuffer::retain_all: ")
+                 ACE_TEXT("SingleSendBuffer::retain_all: ")
                  ACE_TEXT("failed to retain data from publication: %C!\n"),
                  std::string(converter).c_str()));
       release(buffer);
@@ -109,7 +119,9 @@ TransportSendBuffer::retain_all(RepoId pub_id)
 }
 
 void
-TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
+SingleSendBuffer::insert(SequenceNumber sequence,
+                         TransportSendStrategy::QueueType* queue,
+                         ACE_Message_Block* chain)
 {
 
   // Age off oldest sample if we are at capacity:
@@ -117,9 +129,9 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
     BufferMap::iterator it(this->buffers_.begin());
     if (it == this->buffers_.end()) return;
 
-    if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
+    if (Transport_debug_level >= 10) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
+        ACE_TEXT("(%P|%t) SingleSendBuffer::insert() - ")
         ACE_TEXT("aging off PDU: %q as buffer(%q,%q)\n"),
         it->first.getValue(),
         it->second.first, it->second.second
@@ -130,31 +142,27 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
     this->buffers_.erase(it);
   }
 
-  std::pair<BufferMap::iterator, bool> pair =
-    this->buffers_.insert(BufferMap::value_type(sequence, buffer_type()));
-  if (pair.first == this->buffers_.end()) return;
-
-  buffer_type& buffer(pair.first->second);
+  BufferType& buffer = this->buffers_[sequence];
 
   // Copy sample's TransportQueueElements:
   TransportSendStrategy::QueueType*& elems = buffer.first;
-  ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
+  ACE_NEW(elems, TransportSendStrategy::QueueType(queue->size(), 1));
 
   CopyChainVisitor visitor(*elems,
                            &this->retained_allocator_,
                            &this->retained_mb_allocator_,
                            &this->retained_db_allocator_);
-  value.first->accept_visitor(visitor);
+  queue->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
   ACE_Message_Block*& data = buffer.second;
-  data = TransportQueueElement::clone_mb(value.second,
+  data = TransportQueueElement::clone_mb(chain,
                                          &this->retained_mb_allocator_,
                                          &this->retained_db_allocator_);
 
-  if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
+  if (Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
+      ACE_TEXT("(%P|%t) SingleSendBuffer::insert() - ")
       ACE_TEXT("saved PDU: 0x%x as buffer(0x%x,0x%x)\n"),
       sequence.getValue(),
       buffer.first, buffer.second
@@ -163,12 +171,9 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
 }
 
 bool
-TransportSendBuffer::resend(const SequenceRange& range)
+SingleSendBuffer::resend(const SequenceRange& range)
 {
-  ACE_GUARD_RETURN( TransportSendStrategy::LockType,
-                    guard,
-                    this->strategy_->lock_,
-                    false);
+  ACE_GUARD_RETURN(LockType, guard, strategy_lock(), false);
 
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
@@ -176,15 +181,15 @@ TransportSendBuffer::resend(const SequenceRange& range)
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(this->buffers_.find(sequence));
     if (it != this->buffers_.end()) {
-      if (OpenDDS::DCPS::Transport_debug_level >= 4) {
+      if (Transport_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) TransportSendBuffer::resend() - ")
+                   ACE_TEXT("(%P|%t) SingleSendBuffer::resend() - ")
                    ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
                    sequence.getValue(),
                    it->second.first,
                    it->second.second));
       }
-      resend(it->second);
+      resend_one(it->second);
     }
   }
 
@@ -192,12 +197,6 @@ TransportSendBuffer::resend(const SequenceRange& range)
   return range.first >= low() && range.second <= high();
 }
 
-void
-TransportSendBuffer::resend(buffer_type& buffer)
-{
-  int bp = 0;
-  this->strategy_->do_send_packet(buffer.second, bp);
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -39,14 +39,16 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
     session_factory_(session_factory, false),
     local_peer_(local_peer),
     config_(0),
-    reactor_task_(0)
+    reactor_task_(0),
+    send_buffer_(0)
 {
 }
 
 MulticastDataLink::~MulticastDataLink()
 {
-  if (!this->send_buffer_.is_nil()) {
+  if (this->send_buffer_) {
     this->send_strategy_->send_buffer(0);
+    delete this->send_buffer_;
   }
 }
 
@@ -65,16 +67,16 @@ MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
   // configured number of most-recent datagrams are retained:
   if (this->session_factory_->requires_send_buffer()) {
     ACE_NEW_NORETURN(this->send_buffer_,
-                     TransportSendBuffer(this->config_->nak_depth_,
-                                         this->config_->max_samples_per_packet_));
-    if (this->send_buffer_.is_nil()) {
+                     SingleSendBuffer(this->config_->nak_depth_,
+                                      this->config_->max_samples_per_packet_));
+    if (!this->send_buffer_) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("MulticastDataLink::send_strategy: ")
-                 ACE_TEXT("failed to create TransportSendBuffer!\n")));
+                 ACE_TEXT("failed to create SingleSendBuffer!\n")));
       return;
     }
-    send_strategy->send_buffer(this->send_buffer_.in());
+    send_strategy->send_buffer(this->send_buffer_);
   }
   this->send_strategy_ = send_strategy;
 }

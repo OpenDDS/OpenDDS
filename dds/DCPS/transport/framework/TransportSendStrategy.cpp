@@ -1861,7 +1861,7 @@ TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
     // If a secondary send buffer is bound, sent samples must
     // be inserted in order to properly maintain the buffer:
     this->send_buffer_->insert(this->header_.sequence_,
-      TransportSendBuffer::buffer_type(this->elems_, this->pkt_chain_));
+      this->elems_, this->pkt_chain_);
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "

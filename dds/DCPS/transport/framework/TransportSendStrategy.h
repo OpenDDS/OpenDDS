@@ -127,6 +127,8 @@ public:
   /// listener.
   void transport_shutdown();
 
+  typedef BasicQueue<TransportQueueElement> QueueType;
+
 protected:
 
   TransportSendStrategy(const TransportInst_rch& transport_inst,
@@ -171,7 +173,6 @@ protected:
   static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
 private:
-  typedef BasicQueue<TransportQueueElement> QueueType;
 
   enum SendPacketOutcome {
     OUTCOME_COMPLETE_SEND,
