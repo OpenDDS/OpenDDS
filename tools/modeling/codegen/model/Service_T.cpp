@@ -400,7 +400,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
 
 template< typename ModelName, class InstanceTraits>
 inline
-const std::strin&
+const std::string
 OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
   typename Publishers::Values which
 ) {
