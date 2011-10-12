@@ -56,8 +56,8 @@ struct RtpsSampleHeader {
   size_t marshaled_size_, message_length_;
 
   // Unlike the rest of this class, which is used with the
-  // TransportReceiveStrategy, this function does the inverse of
-  // into_received_data_sample() so it is used on the sending side:
+  // TransportReceiveStrategy, thes functions do the inverse of
+  // into_received_data_sample() so they are used on the sending side:
   // translating from an OpenDDS data structure to the RTPS format.
   static void populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
                                    const DataSampleListElement& dsle);

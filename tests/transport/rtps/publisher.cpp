@@ -329,7 +329,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  // 2b. send sample datathrough the OpenDDS transport
+  // 2b. send sample data through the OpenDDS transport
 
   TransportSendElementAllocator alloc(2, sizeof(TransportSendElementAllocator));
   DataSampleListElement elements[] = {

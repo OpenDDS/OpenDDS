@@ -1,3 +1,18 @@
+Wed Oct 12 14:44:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+
+          Updated comment to reflect that there are two populate* functions.
+
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.cpp:
+
+          Moved #include to the proper file.
+
+        * tests/transport/rtps/publisher.cpp:
+
+          Fixed typo in comment.
+
 Tue Oct 11 16:11:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:

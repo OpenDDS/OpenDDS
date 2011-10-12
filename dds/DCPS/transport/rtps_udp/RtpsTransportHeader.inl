@@ -6,8 +6,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
-
 namespace OpenDDS {
 namespace DCPS {
 
