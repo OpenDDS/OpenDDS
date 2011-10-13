@@ -32,6 +32,8 @@
 #include <map>
 #include <set>
 
+class DDS_TEST;
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -84,10 +86,9 @@ private:
   virtual void release_reservations_i(const RepoId& remote_id,
                                       const RepoId& local_id);
 
-  bool requires_inline_qos(const PublicationId& pub_id,
-                           DDS::PublisherQos_out pub_qos,
-                           DDS::DataWriterQos_out dw_qos);
-
+  friend class ::DDS_TEST;
+  /// static member used by testing code to force inline qos
+  static bool force_inline_qos_;
   bool requires_inline_qos(const PublicationId& pub_id);
 
   RtpsUdpInst* config_;

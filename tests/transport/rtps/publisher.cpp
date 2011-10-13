@@ -34,6 +34,13 @@
 
 #include "TestMsg.h"
 
+class DDS_TEST {  // friended by RtpsUdpDataLink
+public:
+  static void force_inline_qos(bool val) {
+    OpenDDS::DCPS::RtpsUdpDataLink::force_inline_qos_ = val;
+  }
+};
+
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
@@ -63,7 +70,7 @@ class SimpleDataWriter : public TransportSendListener, public TransportClient
 public:
 
   explicit SimpleDataWriter(const RepoId& pub_id)
-    : pub_id_(pub_id)
+    : pub_id_(pub_id), inline_qos_mode_(DEFAULT_QOS)
   {}
 
   virtual ~SimpleDataWriter() {}
@@ -98,6 +105,14 @@ public:
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_dropped()\n"));
   }
 
+  // Enum to define qos returned by this object when populating inline qos
+  // This will determine which qos policies are placed in the submessage.
+  enum InlineQosMode {
+    DEFAULT_QOS,       // Use the default values for all pub and dw qos
+    PARTIAL_MOD_QOS,   // Modify some (but not all) qos values
+    FULL_MOD_QOS       // Modify all qos values.
+  };
+
   void notify_publication_disconnected(const ReaderIdSeq&) {}
   void notify_publication_reconnected(const ReaderIdSeq&) {}
   void notify_publication_lost(const ReaderIdSeq&) {}
@@ -107,10 +122,26 @@ public:
   {
     qos_data.dw_qos     = DATAWRITER_QOS_DEFAULT;
     qos_data.pub_qos    = PUBLISHER_QOS_DEFAULT;
-    qos_data.pub_qos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
-    qos_data.pub_qos.partition.name.length(1);
-    qos_data.pub_qos.partition.name[0] = "Hello";
-    qos_data.topic_name = "My Topic ";
+    qos_data.topic_name = "My Topic ";  // Topic name is always included in inline qos
+    switch (this->inline_qos_mode_) {
+    case FULL_MOD_QOS:
+      qos_data.pub_qos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
+      qos_data.dw_qos.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
+      qos_data.dw_qos.deadline.period.sec = 10;
+      qos_data.dw_qos.latency_budget.duration.sec = 11;
+      qos_data.dw_qos.ownership.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
+    case PARTIAL_MOD_QOS:
+      qos_data.pub_qos.partition.name.length(1);
+      qos_data.pub_qos.partition.name[0] = "Hello";
+      qos_data.dw_qos.ownership_strength.value = 12;
+      qos_data.dw_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+      qos_data.dw_qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+      qos_data.dw_qos.transport_priority.value = 13;
+      qos_data.dw_qos.lifespan.duration.sec = 14;
+      qos_data.dw_qos.destination_order.kind = DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
+    case DEFAULT_QOS:
+      break;
+    }
   }
 
   // Implementing TransportClient
@@ -129,6 +160,7 @@ public:
   const RepoId& pub_id_;
   RepoId sub_id_;
   ssize_t callbacks_expected_;
+  InlineQosMode inline_qos_mode_;
 };
 
 int
@@ -300,6 +332,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cerr << "ERROR: failed to serialize data for instance registration\n";
       return 1;
     }
+    ::DDS_TEST::force_inline_qos(false);  // No inline QoS
     sdw.send_control(dsh, ir_mb);
 
     // Send a dispose instance
@@ -317,6 +350,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         std::cerr << "ERROR: failed to serialize data for dispose instance\n";
         return 1;
       }
+      ::DDS_TEST::force_inline_qos(true);  // Inline QoS
+      sdw.inline_qos_mode_ = SimpleDataWriter::PARTIAL_MOD_QOS;
       sdw.send_control(dsh, di_mb);
     }
 
@@ -335,6 +370,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         std::cerr << "ERROR: failed to serialize data for unregister instance\n";
         return 1;
       }
+      ::DDS_TEST::force_inline_qos(true);  // Inline QoS
+      sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
       sdw.send_control(dsh, ui_mb);
     }
   }
@@ -424,6 +461,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   sdw.callbacks_expected_ = list.size_;
+  ::DDS_TEST::force_inline_qos(true);  // Inline QoS
   sdw.send(list);
 
   while (sdw.callbacks_expected_) {

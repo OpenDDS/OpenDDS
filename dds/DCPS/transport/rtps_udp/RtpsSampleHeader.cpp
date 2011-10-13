@@ -20,6 +20,8 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 
+#include <sstream>
+
 #ifndef __ACE_INLINE__
 #include "RtpsSampleHeader.inl"
 #endif
@@ -167,6 +169,15 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
     opendds.message_id_ = SAMPLE_DATA;
 
+#if defined(OPENDDS_TEST_INLINE_QOS)
+    std::stringstream os;
+    os << "into_received_data_sample(): " << rtps.inlineQos.length()
+       << " inline QoS parameters\n";
+    for (CORBA::ULong index = 0; index < rtps.inlineQos.length(); ++index) {
+      os << "  parameter type = " << rtps.inlineQos[index]._d() << "\n";
+    }
+    ACE_DEBUG((LM_DEBUG, "%s", os.str().c_str()));
+#endif
     for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
       if (rtps.inlineQos[i]._d() == PID_STATUS_INFO) {
         if (rtps.inlineQos[i].status_info() == STATUS_INFO_DISPOSE) {
@@ -176,20 +187,23 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
         } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_REGISTER) {
           // TODO: Remove this case if we decide not to send Register messages
           opendds.message_id_ = INSTANCE_REGISTRATION;
-      //} else if (rtps.inlineQos[i]._d() == PID_TOPIC_NAME) {
-      //  ACE_DEBUG((LM_DEBUG, "topic_name = %s\n", rtps.inlineQos[i].string_data()));
-      //} else if (rtps.inlineQos[i]._d() == PID_PRESENTATION) {
-      //  DDS::PresentationQosPolicy pres_qos = rtps.inlineQos[i].presentation();
-      //  ACE_DEBUG((LM_DEBUG, "presentation qos, access_scope = %d, coherent_access = %d, ordered_access = %d\n",
-      //             pres_qos.access_scope, pres_qos.coherent_access, pres_qos.ordered_access));
-      //} else if (rtps.inlineQos[i]._d() == PID_PARTITION) {
-      //  DDS::PartitionQosPolicy part_qos = rtps.inlineQos[i].partition();
-      //  ACE_DEBUG((LM_DEBUG, "partition qos(%d): ", part_qos.name.length()));
-      //  for (size_t i = 0; i < part_qos.name.length(); i++) {
-      //    ACE_DEBUG((LM_DEBUG, "'%s'  ", part_qos.name[i].in()));
-      //  }
-      //  ACE_DEBUG((LM_DEBUG, "\n"));
         }
+#if defined(OPENDDS_TEST_INLINE_QOS)
+      } else if (rtps.inlineQos[i]._d() == PID_TOPIC_NAME) {
+        ACE_DEBUG((LM_DEBUG, "topic_name = %s\n", rtps.inlineQos[i].string_data()));
+      } else if (rtps.inlineQos[i]._d() == PID_PRESENTATION) {
+        DDS::PresentationQosPolicy pres_qos = rtps.inlineQos[i].presentation();
+        ACE_DEBUG((LM_DEBUG, "presentation qos, access_scope = %d, "
+                   "coherent_access = %d, ordered_access = %d\n",
+                   pres_qos.access_scope, pres_qos.coherent_access, pres_qos.ordered_access));
+      } else if (rtps.inlineQos[i]._d() == PID_PARTITION) {
+        DDS::PartitionQosPolicy part_qos = rtps.inlineQos[i].partition();
+        ACE_DEBUG((LM_DEBUG, "partition qos(%d): ", part_qos.name.length()));
+        for (size_t i = 0; i < part_qos.name.length(); i++) {
+          ACE_DEBUG((LM_DEBUG, "'%s'  ", part_qos.name[i].in()));
+        }
+        ACE_DEBUG((LM_DEBUG, "\n"));
+#endif
       }
     }
 
@@ -213,9 +227,9 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 }
 
 void
-RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                       const DataSampleListElement& dsle,
-                                       bool requires_inline_qos)
+RtpsSampleHeader::populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+                                                   const DataSampleListElement& dsle,
+                                                   bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
@@ -252,27 +266,11 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
     break;
   }
 
-  /*TODO: other inlineQos */
   if (requires_inline_qos) {
     TransportSendListener::InlineQosData qos_data;
     dsle.send_listener_->retrieve_inline_qos_data(qos_data);
-    if (qos_data.topic_name.length() > 0) {
-      int qos_len = data.inlineQos.length();
-      data.inlineQos.length(qos_len+1);
-      data.inlineQos[qos_len].string_data(qos_data.topic_name.c_str());
-      data.inlineQos[qos_len]._d(PID_TOPIC_NAME);
-    }
-    DDS::PublisherQos default_pub_qos = PUBLISHER_QOS_DEFAULT;
-    if (!(qos_data.pub_qos.presentation == default_pub_qos.presentation)) {
-      int qos_len = data.inlineQos.length();
-      data.inlineQos.length(qos_len+1);
-      data.inlineQos[qos_len].presentation(qos_data.pub_qos.presentation);
-    }
-    if (!(qos_data.pub_qos.partition == default_pub_qos.partition)) {
-      int qos_len = data.inlineQos.length();
-      data.inlineQos.length(qos_len+1);
-      data.inlineQos[qos_len].partition(qos_data.pub_qos.partition);
-    }
+
+    populate_inline_qos(qos_data, data);
   }
 
   if (data.inlineQos.length() > 0) {
@@ -285,8 +283,9 @@ RtpsSampleHeader::populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
 
 
 void
-RtpsSampleHeader::populate_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                               const TransportSendControlElement& tsce)
+RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+                                                    const TransportSendControlElement& tsce,
+                                                    bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
@@ -345,7 +344,12 @@ RtpsSampleHeader::populate_control_submessages(OpenDDS::RTPS::SubmessageSeq& sub
     break;
   }
 
-  /*TODO: other inlineQos */
+  if (requires_inline_qos) {
+    TransportSendListener::InlineQosData qos_data;
+    tsce.listener()->retrieve_inline_qos_data(qos_data);
+
+    populate_inline_qos(qos_data, data);
+  }
 
   if (data.inlineQos.length() > 0) {
     data.smHeader.flags |= FLAG_Q;
@@ -353,6 +357,44 @@ RtpsSampleHeader::populate_control_submessages(OpenDDS::RTPS::SubmessageSeq& sub
 
   subm.length(2);
   subm[1].data_sm(data);
+}
+
+#define PROCESS_INLINE_QOS(QOS_NAME, DEFAULT_QOS, WRITER_QOS) \
+  if (WRITER_QOS.QOS_NAME != DEFAULT_QOS.QOS_NAME) {          \
+    int qos_len = data.inlineQos.length();                    \
+    data.inlineQos.length(qos_len+1);                         \
+    data.inlineQos[qos_len].QOS_NAME(WRITER_QOS.QOS_NAME);    \
+  }
+
+void
+RtpsSampleHeader::populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
+                                      OpenDDS::RTPS::DataSubmessage& data)
+{
+  using namespace OpenDDS::RTPS;
+
+  // Always include topic name (per the spec)
+  int qos_len = data.inlineQos.length();
+  data.inlineQos.length(qos_len+1);
+  data.inlineQos[qos_len].string_data(qos_data.topic_name.c_str());
+  data.inlineQos[qos_len]._d(PID_TOPIC_NAME);
+
+  // Conditionally include other QoS inline when the differ from the
+  // default value.
+  DDS::PublisherQos default_pub_qos = PUBLISHER_QOS_DEFAULT;
+  PROCESS_INLINE_QOS(presentation, default_pub_qos, qos_data.pub_qos);
+  PROCESS_INLINE_QOS(partition, default_pub_qos, qos_data.pub_qos);
+
+  DDS::DataWriterQos default_dw_qos = DATAWRITER_QOS_DEFAULT;
+  PROCESS_INLINE_QOS(durability, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(deadline, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(latency_budget, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(ownership, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(ownership_strength, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(liveliness, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(reliability, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(transport_priority, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(lifespan, default_dw_qos, qos_data.dw_qos);
+  PROCESS_INLINE_QOS(destination_order, default_dw_qos, qos_data.dw_qos);
 }
 
 }

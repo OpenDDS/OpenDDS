@@ -1,3 +1,22 @@
+Thu Oct 13 21:12:39 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Add operator!=() implementations for the qos policy structs.
+          Clean up some of the macro hell.
+
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/transport/rtps/publisher.cpp:
+
+          Clean up some of the inline QoS code.  Add support for
+          inline QoS to the control variants of the Data submessage.
+          Add support for the remaining inline QoS policies.
+
 Thu Oct 13 20:57:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

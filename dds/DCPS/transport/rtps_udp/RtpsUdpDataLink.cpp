@@ -233,21 +233,22 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   if (tsce) {        // Control message
     data = msg->cont()->duplicate();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
-    RtpsSampleHeader::populate_control_submessages(subm, *tsce);
+    RtpsSampleHeader::populate_data_control_submessages(
+              subm, *tsce, this->requires_inline_qos(tsce->publication_id()));
   } else if (tse) {  // Basic data message
     // {DataSampleHeader} -> {Data Payload}
     data = msg->cont()->duplicate();
     const DataSampleListElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
-    RtpsSampleHeader::populate_submessages(subm, *dsle,
-                                           this->requires_inline_qos(dsle->publication_id_));
+    RtpsSampleHeader::populate_data_sample_submessages(
+              subm, *dsle, this->requires_inline_qos(dsle->publication_id_));
   } else if (tce) {  // Customized data message
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
     data = msg->cont()->cont()->duplicate();
     const DataSampleListElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
-    RtpsSampleHeader::populate_submessages(subm, *dsle,
-                                           this->requires_inline_qos(dsle->publication_id_));
+    RtpsSampleHeader::populate_data_sample_submessages(
+              subm, *dsle, this->requires_inline_qos(dsle->publication_id_));
   } else {
     //TODO: handle other types?
     return element;
@@ -291,9 +292,16 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 bool
 RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
 {
-  return false;
+  if (this->force_inline_qos_) {
+    // Force true for testing purposes
+    return true;
+  } else {
+    // TODO: replace this with logic from reader based on discovery
+    return false;
+  }
 }
 
+bool RtpsUdpDataLink::force_inline_qos_ = false;
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -12,6 +12,7 @@
 #include "ace/Basic_Types.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
+#include "dds/DCPS/transport/framework/TransportSendListener.h"
 
 class ACE_Message_Block;
 
@@ -59,11 +60,15 @@ struct RtpsSampleHeader {
   // TransportReceiveStrategy, thes functions do the inverse of
   // into_received_data_sample() so they are used on the sending side:
   // translating from an OpenDDS data structure to the RTPS format.
-  static void populate_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                   const DataSampleListElement& dsle,
-                                   bool requires_inline_qos);
-  static void populate_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                           const TransportSendControlElement& tsce);
+  static void populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+                                               const DataSampleListElement& dsle,
+                                               bool requires_inline_qos);
+  static void populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+                                                const TransportSendControlElement& tsce,
+                                                bool requires_inline_qos);
+
+  static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
+                                  OpenDDS::RTPS::DataSubmessage& data);
 };
 
 }

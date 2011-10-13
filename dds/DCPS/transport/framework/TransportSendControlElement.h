@@ -53,6 +53,8 @@ public:
   // would require remarshaling.
   //DataSampleHeader& header() { return this->header_; }
 
+  const TransportSendListener* listener() const { return listener_; }
+
   virtual const ACE_Message_Block* msg_payload() const;
 
   virtual SequenceNumber sequence() const;
