@@ -1,7 +1,7 @@
 Verify bug fix of view state.
 
 The samples of same instance returned from a read/take operation should
-have same view state. The view state is only changed when the samples 
+have same view state. The view state is only changed when the samples
 from most recent generation are actually read.
 
 Both publication and subscription work in the main thread
@@ -22,4 +22,4 @@ Command line option:
 
 run the test
 
-./main -DcpsBit 0  -ORBSvcConf ../../tcp.conf  
+./main -DcpsBit 0  -ORBSvcConf ../../tcp.conf

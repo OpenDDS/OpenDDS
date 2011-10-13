@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportReassembly.h"
+#include "TransportDebug.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -42,6 +43,8 @@ TransportReassembly::insert(std::list<FragRange>& flist,
     if (next < fr.transport_seq_.first) {
       // insert before 'it'
       flist.insert(it, FragRange(transportSeq, data));
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
+        "inserted on left\n"));
       return true;
 
     } else if (next == fr.transport_seq_.first) {
@@ -63,6 +66,8 @@ TransportReassembly::insert(std::list<FragRange>& flist,
         fr.sample_.sample_ = 0;
       }
       fr.transport_seq_.first = transportSeq;
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
+        "combined on left\n"));
       return true;
 
     } else if (prev == fr.transport_seq_.second) {
@@ -80,6 +85,8 @@ TransportReassembly::insert(std::list<FragRange>& flist,
       }
       data.sample_ = 0;
       fr.transport_seq_.second = transportSeq;
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
+        "combined on right\n"));
 
       // check if the next FragRange in the list needs to be combined
       if (++it != flist.end()) {
@@ -98,6 +105,8 @@ TransportReassembly::insert(std::list<FragRange>& flist,
           }
           fr.transport_seq_.second = it->transport_seq_.second;
           flist.erase(it);
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
+            "coalesced on right\n"));
         }
       }
       return true;
@@ -106,6 +115,8 @@ TransportReassembly::insert(std::list<FragRange>& flist,
 
   // add to end of list
   flist.push_back(FragRange(transportSeq, data));
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
+    "inserted at end of list\n"));
   return true;
 }
 
@@ -114,6 +125,10 @@ TransportReassembly::reassemble(const SequenceNumber& transportSeq,
                                 bool firstFrag,
                                 ReceivedDataSample& data)
 {
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+    "tseq %q first %d dseq %q\n", transportSeq.getValue(), firstFrag ? 1 : 0,
+    data.header_.sequence_.getValue()));
+
   if (firstFrag) {
     have_first_.insert(data.header_.sequence_);
   }
@@ -122,6 +137,8 @@ TransportReassembly::reassemble(const SequenceNumber& transportSeq,
   if (iter == fragments_.end()) {
     fragments_[data.header_.sequence_].push_back(FragRange(transportSeq, data));
     // since this is the first fragment we've seen, it can't possibly be done
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+      "stored first frag, returning 0 (incomplete)\n"));
     return false;
   }
 
@@ -140,9 +157,13 @@ TransportReassembly::reassemble(const SequenceNumber& transportSeq,
     swap(data, iter->second.front().sample_);
     fragments_.erase(iter);
     have_first_.erase(data.header_.sequence_);
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+      "removed frag, returning %d\n", data.sample_ ? 1 : 0));
     return data.sample_; // could be false if we had data_unavailable()
   }
 
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+    "returning 0 (incomplete)\n"));
   return false;
 }
 
@@ -159,6 +180,8 @@ void
 TransportReassembly::dropped_one(const SequenceNumber& dropped,
                                  const SequenceNumber& first)
 {
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::dropped_one() "
+    "dropped %q first %q\n", dropped.getValue(), first.getValue()));
   using std::list;
   typedef list<FragRange>::iterator list_iterator;
 

@@ -10,7 +10,7 @@ We create a datareader and datawriter for each topic.
 
 run_test.pl: 3 writers in one publisher process and 3 readers in one subscriber
              process.
-  
+
 run_test1.pl: 3 publisher processes (one for each topic) and 3 readers in
               one subscriber process.
 

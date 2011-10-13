@@ -9,8 +9,8 @@ Each test case needs to launch DCPSInfoRepo:
 
 Command line option:
 
-    -i num_samples_per_reader   defaults to 1 
-    -r num_datareaders          defaults to 1 
+    -i num_samples_per_reader   defaults to 1
+    -r num_datareaders          defaults to 1
     -m multiple_instances?1:0   defaults to 0
     -t use_take?1:0             defaults to 0
 
@@ -30,7 +30,7 @@ Each test also tests the following:
  Subscriber unit tests
   get_qos
   set_qos
-  get_default_subscriber_qos  
+  get_default_subscriber_qos
   set_default_datareader_qos
   get_participant
   create_datareader
@@ -38,9 +38,9 @@ Each test also tests the following:
 
  Datareader unit tests
   get_qos
-  set_qos 
+  set_qos
   copy_from_topic_qos
-  get_topicdescription 
+  get_topicdescription
   get_subscriber
   get_key_value
   read_next_sample

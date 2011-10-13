@@ -1,3 +1,7 @@
+Thu Oct 13 21:44:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4965 through r4988.
+
 Thu Oct 13 21:12:39 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:

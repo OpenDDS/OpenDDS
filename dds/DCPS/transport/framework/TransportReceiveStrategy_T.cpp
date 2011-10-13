@@ -838,10 +838,15 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
             (this->data_sample_header_.more_fragments()
              || this->receive_transport_header_.last_fragment())) {
 
+          VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+                "Attempt reassembly of fragments\n"));
+
           if (this->reassembly_->reassemble(
                 this->receive_transport_header_.sequence(),
                 this->receive_transport_header_.first_fragment(),
                 rds)) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+                  "Reassembled complete message\n"));
             this->deliver_sample(rds, remote_address);
           }
           // If reassemble() returned false, it takes ownership of the data
@@ -850,6 +855,10 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         } else {
           this->deliver_sample(rds, remote_address);
         }
+
+        // For the reassembly algorithm, the 'last_fragment_' header bit only
+        // applies to the first DataSampleHeader in the TransportHeader
+        this->receive_transport_header_.last_fragment(false);
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Release the sample that we just sent.\n"));
@@ -862,10 +871,6 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         VDBG((LM_DEBUG,"(%P|%t) DBG:   We are done - no more data.\n"));
         return 0;
       }
-
-      // For the reassembly algorithm, the 'last_fragment_' header bit only
-      // applies to the first DataSampleHeader in the TransportHeader
-      this->receive_transport_header_.last_fragment(false);
 
     } // End of while (this->pdu_remaining_ > 0)
 

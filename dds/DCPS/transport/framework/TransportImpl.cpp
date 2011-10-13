@@ -251,9 +251,12 @@ TransportImpl::ConnectionEvent::wait(const ACE_Time_Value& timeout)
     deadline = ACE_OS::gettimeofday() + timeout;
     p_deadline = &deadline;
   }
+
   ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
   while (link_.is_nil()) {
-    cond_.wait(p_deadline);
+    if (cond_.wait(p_deadline) == -1) {
+      return;
+    }
   }
 }
 

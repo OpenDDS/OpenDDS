@@ -1,3 +1,125 @@
+Wed Oct 12 21:28:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Syntax error, but darn templates don't compile!
+
+Wed Oct 12 18:42:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Don't return a reference to a temporary.
+
+Tue Oct 11 03:43:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Expose transportConfigName.
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          Handle empty transport tags.
+
+Tue Oct  4 19:00:04 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Removed "is_loopback" from the data link.  Multicast data links are
+          shared among many sessions, and each session could be loopback or
+          not.  This removes the check for "messages we just sent" in the
+          check_header(TransportHeader) method.  These messages may be needed
+          in the case of an associated reader/writer pair in the same transport
+          instance.  In cases they are not needed, they are properly ignored
+          by the higher layers.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Updated make_datalink() due to changes noted above.
+          Fixed wchar bug in error logging for when multicast join fails.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+          Added debug logging for syn/synack.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Continued test enhancement from yesterday -- handle errors better.
+
+Mon Oct  3 18:18:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Fixed a bug in fragmentation of samples that require more
+          than two fragments.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Fixed a bug in managing the 'last fragment' state across
+          multiple receive buffers.
+
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Added debug logging only.
+
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Extended tests to cover more fragmentation cases.
+
+Mon Oct  3 17:55:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * **/README:
+
+          Removed trailing whitespace.
+
+Fri Sep 30 20:22:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed a bug where the timeout for
+          passive_connect_duration was ignored.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Enhanced logging so that multiple transport
+          instances can be disambiguated.
+
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+
+          Added optional transport debug logging for this test.
+
+        * DDS_TAOv2.mwc:
+
+          Renamed from DDS_docgroup_TAO.mwc to indicate
+          that it works with TAO version 2.0.x.
+
+        * DDS_docgroup_TAO.mwc:
+
+          Removed this file.  It was renamed (see above).
+
+Thu Sep 29 19:29:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/Arrays/Arrays.gen:
+        * tools/modeling/tests/CompositeKey/CompositeKey.gen:
+        * tools/modeling/tests/DataLibRef/DataLibRef.gen:
+        * tools/modeling/tests/DomainZero/DomainZero.gen:
+        * tools/modeling/tests/InvalidNames/InvalidNames.gen:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.gen:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.gen:
+        * tools/modeling/tests/MessengerMC/MessengerMC.gen:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.gen:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.gen:
+        * tools/modeling/tests/UDP/UDP.gen:
+
+          Removed these files.  *.gen files are no longer used, they all have
+          corresponding *.codegen files which are actually used by the tests.
+
 Tue Sep 27 20:27:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

@@ -61,9 +61,11 @@ SynWatchdog::on_timeout(const void* /*arg*/)
   // log an error and return:
   ACE_ERROR((LM_WARNING,
              ACE_TEXT("(%P|%t) WARNING: ")
-             ACE_TEXT("SynWatchdog::on_timeout: ")
-             ACE_TEXT("timed out waiting on remote peer: 0x%x!\n"),
-             this->session_->remote_peer()));
+             ACE_TEXT("SynWatchdog[transport=%C]::on_timeout: ")
+             ACE_TEXT("timed out waiting on remote peer: 0x%x local: 0x%x\n"),
+             this->session_->link()->config()->name().c_str(),
+             this->session_->remote_peer(),
+             this->session_->link()->local_peer()));
 }
 
 
@@ -172,8 +174,16 @@ MulticastSession::syn_received(ACE_Message_Block* control)
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::syn_received "
+                      "local 0x%x remote 0x%x\n",
+                      this->link()->config()->name().c_str(),
+                      this->link()->local_peer(), this->remote_peer_), 2);
+
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession::syn_received "
+                      "sender is our remote peer\n"), 2);
 
   Serializer serializer(control, header.swap_bytes());
 
@@ -182,6 +192,9 @@ MulticastSession::syn_received(ACE_Message_Block* control)
 
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession::syn_received "
+                      "payload is our local peer\n"), 2);
 
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
@@ -213,6 +226,12 @@ MulticastSession::send_syn()
 
   serializer << this->remote_peer_;
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_syn "
+                      "local 0x%x remote 0x%x active %d\n",
+                      this->link()->config()->name().c_str(),
+                      this->link()->local_peer(), this->remote_peer_,
+                      this->active_ ? 1 : 0), 2);
+
   // Send control sample to remote peer:
   send_control(MULTICAST_SYN, data);
 }
@@ -222,14 +241,25 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 {
   if (!this->active_) return; // sub send syn, then doesn't receive them.
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::synack_received "
+                      "local 0x%x remote 0x%x\n",
+                      this->link()->config()->name().c_str(),
+                      this->link()->local_peer(), this->remote_peer_), 2);
+
   // Already received ack.
   if (this->acked()) return;
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession::synack_received "
+                      "not yet acked\n"), 2);
 
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession::synack_received "
+                      "sender is our remote peer\n"), 2);
 
   Serializer serializer(control, header.swap_bytes());
 
@@ -238,6 +268,9 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession::synack_received "
+                      "payload is our local peer\n"), 2);
 
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
@@ -269,6 +302,12 @@ MulticastSession::send_synack()
   Serializer serializer(data);
 
   serializer << this->remote_peer_;
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_synack "
+                      "local 0x%x remote 0x%x active %d\n",
+                      this->link()->config()->name().c_str(),
+                      this->link()->local_peer(), this->remote_peer_,
+                      this->active_ ? 1 : 0), 2);
 
   // Send control sample to remote peer:
   send_control(MULTICAST_SYNACK, data);

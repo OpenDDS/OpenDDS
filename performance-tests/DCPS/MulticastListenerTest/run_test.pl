@@ -67,7 +67,11 @@ while ($arg_ind <= $#ARGV) {
     }
     elsif ($ARGV[$arg_ind] eq '-debug') {
         $arg_ind++;
-        $debug="-DCPSDebugLevel 6"
+        $debug .= "-DCPSDebugLevel 6 ";
+    }
+    elsif ($ARGV[$arg_ind] eq '-tdebug') {
+        $arg_ind++;
+        $debug .= "-DCPSTransportDebugLevel 3 ";
     }
     else {
         usage("Invalid parameter $ARGV[$arg_ind]");

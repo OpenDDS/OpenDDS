@@ -1,9 +1,9 @@
 
-This directory contains unit tests for some of the key-related 
-functionality of OpenDDS.  The file KeyTest.idl contains a number 
-of DCPS data type definitions and corresponding key definitions 
-that Open DDS should allow (and produce valid code for).  The 
-files of the form KeyTypeError_*.idl each contain what should 
+This directory contains unit tests for some of the key-related
+functionality of OpenDDS.  The file KeyTest.idl contains a number
+of DCPS data type definitions and corresponding key definitions
+that Open DDS should allow (and produce valid code for).  The
+files of the form KeyTypeError_*.idl each contain what should
 be flagged as an illegal key definition from OpenDDS' perspective.
 
 KeyMarhalling.cpp uses some of the data types and keys from KeyTest.idl

@@ -22,7 +22,7 @@ Each node connects a subscriber and publisher for sending an receiving file
 
 How to run this example:
 
-Run the DCPSInfoRepo: 
+Run the DCPSInfoRepo:
 $DDS_ROOT/bin/DCPSInfoRepo -ORBSvcConf simple_tcp.conf -o repo.ior -d domain_ids -ORBEndpoint iiop://:2007
 
 Run the nodes:

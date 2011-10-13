@@ -12,7 +12,7 @@ The Publisher then crashes during its initialization.
 
 The new test script option 'dl_clean' tests a bug(RT11348) in DDS transport that the
 DataLinkCleanupTask removes the new associations. This happens when new association
-is added to a datalink that was declared to release resource due to disconnect. 
+is added to a datalink that was declared to release resource due to disconnect.
 
 To reproduce the problem before the bug fix, follow steps:
 
@@ -31,18 +31,18 @@ Index: dds/DCPS/transport/framework/DataLink.cpp
 +
    return impl_->release_link_resources (this);
  }
- 
- 
+
+
 2) Run dl_clean test.
 
 cd $DDS_ROOT/tests/DCPS/Reconnect
 ./run_test.pl dl_clean
 
-3) Symptom:  The test will stop receiving any messages after second subscriber 
-start about 10 seconds. It finally output "test FAILED".  
+3) Symptom:  The test will stop receiving any messages after second subscriber
+start about 10 seconds. It finally output "test FAILED".
 
 
-To verify the bug was fixed, the patch above needs be applied. 
+To verify the bug was fixed, the patch above needs be applied.
 Run $DDS_ROOT/tests/DCPS/Reconnect/run_test.pl dl_clean test.
 The restarted subscriber continue receiving messages until test
 finish and it finally output "test PASSED".

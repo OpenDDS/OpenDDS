@@ -32,9 +32,8 @@ namespace DCPS {
 MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
                                      MulticastSessionFactory* session_factory,
                                      MulticastPeer local_peer,
-                                     bool is_loopback,
                                      bool is_active)
-  : DataLink(transport, 0, is_loopback, is_active), // priority, is_loopback, is_active
+  : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
     transport_(transport),
     session_factory_(session_factory, false),
     local_peer_(local_peer),
@@ -209,12 +208,6 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 bool
 MulticastDataLink::check_header(const TransportHeader& header)
 {
-  // Skip messages we just sent.
-
-  if (header.source_ == this->local_peer() && ! this->is_loopback_) {
-    return false;
-  }
-
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
                    this->session_lock_,
@@ -232,12 +225,12 @@ MulticastDataLink::check_header(const TransportHeader& header)
 bool
 MulticastDataLink::check_header(const DataSampleHeader& header)
 {
+  if (header.message_id_ == TRANSPORT_CONTROL) return true;
+
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
                    this->session_lock_,
                    false);
-
-  if (header.message_id_ == TRANSPORT_CONTROL) return true;
 
   // Skip data sample unless there is a session for it.
   return (this->sessions_.count(receive_strategy()->received_header().source_) > 0);

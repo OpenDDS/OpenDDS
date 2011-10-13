@@ -388,3 +388,49 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::copySubscriptionQos(
   }
   this->modelData_.copySubscriptionQos( reader, readerQos);
 }
+
+template< typename ModelName, class InstanceTraits>
+inline
+const std::string
+OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
+  typename Participants::Values which
+) {
+  return this->modelData_.transportConfigName(which);
+}
+
+template< typename ModelName, class InstanceTraits>
+inline
+const std::string
+OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
+  typename Publishers::Values which
+) {
+  return this->modelData_.transportConfigName(which);
+}
+
+template< typename ModelName, class InstanceTraits>
+inline
+const std::string
+OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
+  typename Subscribers::Values which
+) {
+  return this->modelData_.transportConfigName(which);
+}
+
+template< typename ModelName, class InstanceTraits>
+inline
+const std::string
+OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
+  typename DataWriters::Values which
+) {
+  return this->modelData_.transportConfigName(which);
+}
+
+template< typename ModelName, class InstanceTraits>
+inline
+const std::string
+OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
+  typename DataReaders::Values which
+) {
+  return this->modelData_.transportConfigName(which);
+}
+
