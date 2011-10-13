@@ -99,6 +99,11 @@ public:
   /// Accessor for the publisher id that sent the sample.
   virtual RepoId publication_id() const = 0;
 
+  virtual SequenceNumber sequence() const
+  {
+    return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  }
+
   /// The marshalled sample (sample header + sample data)
   virtual const ACE_Message_Block* msg() const = 0;
 

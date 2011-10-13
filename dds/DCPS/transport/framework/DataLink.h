@@ -329,6 +329,8 @@ private:
   }
 
   virtual void release_remote_i(const RepoId& /*remote_id*/) {}
+  virtual void release_reservations_i(const RepoId& /*remote_id*/,
+                                      const RepoId& /*local_id*/) {}
 
   typedef ACE_SYNCH_MUTEX     LockType;
 

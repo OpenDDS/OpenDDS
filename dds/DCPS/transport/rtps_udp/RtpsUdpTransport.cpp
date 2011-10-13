@@ -32,10 +32,10 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
 RtpsUdpDataLink*
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  ACE_NEW_RETURN(link_, RtpsUdpDataLink(this, local_prefix), 0);
-
   TransportReactorTask_rch rt = reactor_task();
-  link_->configure(config_i_.in(), rt.in());
+  ACE_NEW_RETURN(link_,
+                 RtpsUdpDataLink(this, local_prefix, config_i_.in(), rt.in()),
+                 0);
 
   RtpsUdpSendStrategy* send_strategy;
   ACE_NEW_RETURN(send_strategy, RtpsUdpSendStrategy(link_.in()), 0);
@@ -60,7 +60,7 @@ DataLink*
 RtpsUdpTransport::find_datalink_i(const RepoId& /*local_id*/,
                                   const RepoId& /*remote_id*/,
                                   const TransportBLOB& /*remote_data*/,
-                                  CORBA::Long /*priority*/,
+                                  const ConnectionAttribs& /*attribs*/,
                                   bool /*active*/)
 {
   // We're not going to use find_datalink_i() for this transport.
@@ -72,7 +72,7 @@ DataLink*
 RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
                                      const RepoId& remote_id,
                                      const TransportBLOB& remote_data,
-                                     CORBA::Long /*priority*/)
+                                     const ConnectionAttribs& attribs)
 {
   RtpsUdpDataLink_rch link;
   if (link_.is_nil()) {
@@ -80,6 +80,7 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
   }
 
   link->add_locator(remote_id, get_connection_addr(remote_data));
+  link->associated(local_id, remote_id, attribs.reliable_);
   return link._retn();
 }
 
@@ -93,7 +94,7 @@ RtpsUdpTransport::accept_datalink(ConnectionEvent& ce)
     if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
       return connect_datalink_i(ce.local_id_, ce.remote_association_.remote_id_,
                                 ce.remote_association_.remote_data_[idx].data,
-                                ce.priority_);
+                                ce.attribs_);
     }
   }
 

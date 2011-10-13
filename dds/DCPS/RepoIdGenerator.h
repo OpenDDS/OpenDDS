@@ -84,8 +84,7 @@
  * EntityId_t GUID_t.entityId bytes:                           |  0 |  1 |  2 |  3 |
  * EntityKey_t GUID_t.entityId.entityKey bytes:                |  0 |  1 |  2 |
  *
- * Where the VendorId value used for OpenDDS is the one for
- * Object Computing, Inc. == 0x03.
+ * Where the VendorId value used for OpenDDS is defined in GuidUtils.h
  */
 class OpenDDS_Dcps_Export RepoIdGenerator {
 public:

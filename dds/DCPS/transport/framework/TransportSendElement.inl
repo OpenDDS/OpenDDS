@@ -35,7 +35,14 @@ OpenDDS::DCPS::TransportSendElement::alloc(int initial_count,
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportSendElement::owned_by_transport ()
+OpenDDS::DCPS::TransportSendElement::owned_by_transport()
 {
   return false;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::SequenceNumber
+OpenDDS::DCPS::TransportSendElement::sequence() const
+{
+  return this->element_->header_.sequence_;
 }

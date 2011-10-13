@@ -37,13 +37,13 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
-                                    CORBA::Long priority,
+                                    const ConnectionAttribs& attribs,
                                     bool active);
 
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
-                                       CORBA::Long priority);
+                                       const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);
   virtual void stop_accepting(ConnectionEvent& ce);
@@ -64,11 +64,11 @@ private:
 
   RcHandle<RtpsUdpInst> config_i_;
 
-  /// In the initial implementation there will only be one link per transport.
+  /// RTPS uses only one link per transport.
   /// This link can be safely reused by any clients that belong to the same
-  /// domain participant (same GUID prefix).  This implementation could be
-  /// extended to automatically create new links when the 'local_id' passed to
-  /// find/create/accept differs (in prefix) from the initial local_id.
+  /// domain participant (same GUID prefix).  Use by a second participant
+  /// is not possible because the network location returned by
+  /// connection_info_i() can't be shared among participants.
   RtpsUdpDataLink_rch link_;
 };
 

@@ -62,12 +62,13 @@ DataLink*
 TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
                               const RepoId& /*remote_id*/,
                               const TransportBLOB& remote_data,
-                              CORBA::Long priority,
+                              const ConnectionAttribs& attribs,
                               bool active)
 {
   DBG_ENTRY_LVL("TcpTransport", "find_datalink_i", 6);
 
-  const PriorityKey key = this->blob_to_key(remote_data, priority, active);
+  const PriorityKey key =
+    this->blob_to_key(remote_data, attribs.priority_, active);
 
   VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
@@ -75,7 +76,7 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
             ACE_TEXT("is_loopback %d\"\n"),
             key.address().get_host_name(),
             key.address().get_port_number(),
-            priority, key.is_loopback()),
+            attribs.priority_, key.is_loopback()),
           2);
 
   TcpDataLink_rch link;
@@ -168,15 +169,15 @@ DataLink*
 TcpTransport::connect_datalink_i(const RepoId& /*local_id*/,
                                  const RepoId& /*remote_id*/,
                                  const TransportBLOB& remote_data,
-                                 CORBA::Long priority)
+                                 const ConnectionAttribs& attribs)
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_datalink_i", 6);
 
   const PriorityKey key =
-    this->blob_to_key(remote_data, priority, true /*active*/);
+    this->blob_to_key(remote_data, attribs.priority_, true /*active*/);
 
   TcpDataLink_rch link =
-    new TcpDataLink(key.address(), this, priority,
+    new TcpDataLink(key.address(), this, attribs.priority_,
                     key.is_loopback(), true /*active*/);
 
   { // guard scope
@@ -236,10 +237,10 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
 
       const PriorityKey key =
         this->blob_to_key(ce.remote_association_.remote_data_[idx].data,
-                          ce.priority_, false /*active == false*/);
+                          ce.attribs_.priority_, false /*active == false*/);
 
       TcpDataLink_rch link =
-        new TcpDataLink(key.address(), this, ce.priority_,
+        new TcpDataLink(key.address(), this, ce.attribs_.priority_,
                         key.is_loopback(), false /*active == false*/);
       {
         GuardType guard(this->links_lock_);

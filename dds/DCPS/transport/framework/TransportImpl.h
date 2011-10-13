@@ -85,26 +85,31 @@ protected:
 
   bool configure(TransportInst* config);
 
+  struct ConnectionAttribs {
+    CORBA::Long priority_;
+    bool reliable_; // local side supports reliability
+  };
+
   DataLink* find_datalink(const RepoId& local_id,
                           const AssociationData& remote_association,
-                          CORBA::Long priority,
+                          const ConnectionAttribs& attribs,
                           bool active);
 
   DataLink* connect_datalink(const RepoId& local_id,
                              const AssociationData& remote_association,
-                             CORBA::Long priority);
+                             const ConnectionAttribs& attribs);
 
   struct OpenDDS_Dcps_Export ConnectionEvent {
     ConnectionEvent(const RepoId& local_id,
                     const AssociationData& remote_association,
-                    CORBA::Long priority);
+                    const ConnectionAttribs& attribs);
 
     void wait(const ACE_Time_Value& timeout);
     bool complete(const DataLink_rch& link);
 
     const RepoId& local_id_;
     const AssociationData& remote_association_;
-    const CORBA::Long priority_;
+    const ConnectionAttribs& attribs_;
     ACE_Thread_Mutex mtx_;
     ACE_Condition_Thread_Mutex cond_;
     DataLink_rch link_;
@@ -133,7 +138,7 @@ protected:
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
-                                       CORBA::Long priority) = 0;
+                                       const ConnectionAttribs& attribs) = 0;
 
   /// stop_accepting() is called from TransportClient::associate()
   /// to terminate the accepting process begun by accept_datalink().
@@ -149,7 +154,7 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
-                                    CORBA::Long priority,
+                                    const ConnectionAttribs& attribs,
                                     bool active) = 0;
 
 
@@ -205,7 +210,8 @@ private:
 
   DataLink* find_connect_i(const RepoId& local_id,
                            const AssociationData& remote_association,
-                           CORBA::Long priority, bool active, bool connect);
+                           const ConnectionAttribs& attribs,
+                           bool active, bool connect);
 
 public:
   typedef ACE_SYNCH_MUTEX                ReservationLockType;

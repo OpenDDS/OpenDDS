@@ -199,7 +199,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ser_loc << locators;
 
   SimpleDataWriter sdw(local_guid);
-  sdw.enable_transport();
+  sdw.enable_transport(false /*reliable*/);
   AssociationData subscription;
   subscription.remote_id_ = remote;
   subscription.remote_data_.length(1);

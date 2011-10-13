@@ -71,13 +71,13 @@ DataLink*
 UdpTransport::find_datalink_i(const RepoId& /*local_id*/,
                               const RepoId& /*remote_id*/,
                               const TransportBLOB& remote_data,
-                              CORBA::Long priority,
+                              const ConnectionAttribs& attribs,
                               bool active)
 {
   ACE_INET_Addr remote_address = get_connection_addr(remote_data);
 
   bool is_loopback = remote_address == this->config_i_->local_address_;
-  PriorityKey key(priority, remote_address, is_loopback, active);
+  PriorityKey key(attribs.priority_, remote_address, is_loopback, active);
 
   if (active) {
     GuardType guard(this->client_links_lock_);
@@ -102,12 +102,12 @@ DataLink*
 UdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
                                  const RepoId& /*remote_id*/,
                                  const TransportBLOB& remote_data,
-                                 CORBA::Long priority)
+                                 const ConnectionAttribs& attribs)
 {
   ACE_INET_Addr remote_address = get_connection_addr(remote_data);
   const bool active = true;
 
-  PriorityKey key = this->blob_to_key(remote_data, priority, active);
+  PriorityKey key = this->blob_to_key(remote_data, attribs.priority_, active);
 
   // Create new DataLink for logical connection:
   UdpDataLink_rch link = make_datalink(remote_address, active);
@@ -130,7 +130,7 @@ UdpTransport::accept_datalink(ConnectionEvent& ce)
     if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
       const PriorityKey key =
         this->blob_to_key(ce.remote_association_.remote_data_[idx].data,
-                          ce.priority_, false /*active == false*/);
+                          ce.attribs_.priority_, false /*active == false*/);
 
       keys.push_back(key);
     }

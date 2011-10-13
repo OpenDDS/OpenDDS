@@ -32,14 +32,18 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
-                                 const GuidPrefix_t& local_prefix)
+                                 const GuidPrefix_t& local_prefix,
+                                 RtpsUdpInst* config,
+                                 TransportReactorTask* reactor_task)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
              false),    // is_active
-    config_(0),
-    reactor_task_(0),
-    transport_customized_element_allocator_(40, sizeof(TransportCustomizedElement))
+    config_(config),
+    reactor_task_(reactor_task, false),
+    transport_customized_element_allocator_(40,
+                                            sizeof(TransportCustomizedElement)),
+    multi_buff_(this, config->nak_depth_)
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
@@ -63,6 +67,8 @@ RtpsUdpDataLink::open()
                        false);
     }
   }
+
+  send_strategy_->send_buffer(&multi_buff_);
 
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
             static_rchandle_cast<TransportStrategy>(recv_strategy_)) != 0) {
@@ -118,8 +124,92 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
 }
 
 void
+RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
+                            bool reliable)
+{
+  if (!reliable) {
+    return;
+  }
+
+  GuidConverter conv(local_id);
+  EntityKind kind = conv.entityKind();
+  if (kind == KIND_WRITER) {
+    writers_[local_id].remote_readers_[remote_id];
+
+  } else if (kind == KIND_READER) {
+    readers_[local_id].remote_writers_[remote_id];
+  }
+}
+
+void
+RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
+                                        const RepoId& local_id)
+{
+  GuidConverter conv(local_id);
+  EntityKind kind = conv.entityKind();
+  if (kind == KIND_WRITER) {
+    RtpsWriterMap::iterator rw = writers_.find(local_id);
+
+    if (rw != writers_.end()) {
+      rw->second.remote_readers_.erase(remote_id);
+
+      if (rw->second.remote_readers_.empty()) {
+        writers_.erase(rw);
+      }
+    }
+
+  } else if (kind == KIND_READER) {
+    RtpsReaderMap::iterator rr = readers_.find(local_id);
+
+    if (rr != readers_.end()) {
+      rr->second.remote_writers_.erase(remote_id);
+
+      if (rr->second.remote_writers_.empty()) {
+        readers_.erase(rr);
+      }
+    }
+  }
+}
+
+void
 RtpsUdpDataLink::stop_i()
 {
+}
+
+void
+RtpsUdpDataLink::MultiSendBuffer::retain_all(RepoId pub_id)
+{
+  RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
+  if (wi != outer_->writers_.end() && !wi->second.send_buff_.is_nil()) {
+    wi->second.send_buff_->retain_all(pub_id);
+  }
+}
+
+void
+RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
+                                         TransportSendStrategy::QueueType* q,
+                                         ACE_Message_Block* chain)
+{
+  const SequenceNumber seq = q->peek()->sequence();
+  if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    return;
+  }
+
+  const RepoId pub_id = q->peek()->publication_id();
+
+  RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
+  if (wi == outer_->writers_.end()) {
+    return; // this datawriter is not reliable
+  }
+
+  RcHandle<SingleSendBuffer>& send_buff = wi->second.send_buff_;
+
+  if (send_buff.is_nil()) {
+    send_buff = new SingleSendBuffer(outer_->config_->nak_depth_, 1 /*mspp*/);
+    send_buff->bind(outer_->send_strategy_.in());
+  }
+
+  send_buff->insert(seq, q, chain);
 }
 
 TransportQueueElement*
@@ -203,6 +293,7 @@ RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
 {
   return false;
 }
+
 
 } // namespace DCPS
 } // namespace OpenDDS

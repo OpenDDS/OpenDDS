@@ -34,7 +34,7 @@ TransportClient::TransportClient()
 
 TransportClient::~TransportClient()
 {
-  if (OpenDDS::DCPS::Transport_debug_level > 5) {
+  if (Transport_debug_level > 5) {
     RepoIdConverter converter(repo_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
@@ -53,7 +53,7 @@ TransportClient::~TransportClient()
 }
 
 void
-TransportClient::enable_transport()
+TransportClient::enable_transport(bool reliable)
 {
   EntityImpl* ent = dynamic_cast<EntityImpl*>(this);
 
@@ -81,6 +81,7 @@ TransportClient::enable_transport()
 
   swap_bytes_ = tc->swap_bytes_;
   cdr_encapsulation_ = false;
+  reliable_ = reliable;
   passive_connect_duration_.set(tc->passive_connect_duration_ / 1000,
                                 (tc->passive_connect_duration_ % 1000) * 1000);
 
@@ -147,7 +148,8 @@ TransportClient::associate(const AssociationData& data, bool active)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
   repo_id_ = get_repo_id();
-  const CORBA::Long priority = get_priority_value(data);
+  const TransportImpl::ConnectionAttribs attribs =
+    {get_priority_value(data), reliable_};
 
   MultiReservLock mrl(impls_);
   ACE_GUARD_RETURN(MultiReservLock, guard2, mrl, false);
@@ -156,7 +158,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   for (size_t i = 0; i < impls_.size(); ++i) {
 
     DataLink_rch link =
-      impls_[i]->find_datalink(repo_id_, data, priority, active);
+      impls_[i]->find_datalink(repo_id_, data, attribs, active);
     if (!link.is_nil()) {
       add_link(link, data.remote_id_);
       return true;
@@ -167,7 +169,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   if (active) {
 
     for (size_t i = 0; i < impls_.size(); ++i) {
-      DataLink_rch link = impls_[i]->connect_datalink(repo_id_, data, priority);
+      DataLink_rch link = impls_[i]->connect_datalink(repo_id_, data, attribs);
       if (!link.is_nil()) {
         add_link(link, data.remote_id_);
         return true;
@@ -175,7 +177,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     }
   } else { // passive
 
-    TransportImpl::ConnectionEvent ce(repo_id_, data, priority);
+    TransportImpl::ConnectionEvent ce(repo_id_, data, attribs);
     for (size_t i = 0; i < impls_.size(); ++i) {
       DataLink_rch link = impls_[i]->accept_datalink(ce);
       if (!link.is_nil()) {

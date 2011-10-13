@@ -1174,7 +1174,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (topic_servant_) {
 
     try {
-      this->enable_transport();
+      this->enable_transport(this->qos_.reliability.kind ==
+                             DDS::RELIABLE_RELIABILITY_QOS);
 
       const TransportLocatorSeq& trans_conf_info = this->connection_info();
 

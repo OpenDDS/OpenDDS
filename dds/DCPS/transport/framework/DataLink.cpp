@@ -507,6 +507,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
       //guard.release ();
       // The remote_id is a subscriber_id.
+      this->release_reservations_i(remote_id, local_id);
       this->release_remote_subscriber(remote_id,
                                       local_id,
                                       id_set,
@@ -529,6 +530,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
               ACE_TEXT("the remote_id is a pub id.\n")), 5);
     //guard.release ();
     // The remote_id is a publisher_id.
+    this->release_reservations_i(remote_id, local_id);
     this->release_remote_publisher(remote_id,
                                    local_id,
                                    listener_set,

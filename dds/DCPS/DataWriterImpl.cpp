@@ -1372,9 +1372,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   // Configure WriteDataContainer constructor parameters from qos.
 
-  bool const should_block =
-    (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS
-     && qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
+  const bool reliable = qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
+    should_block = reliable && qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS;
 
   CORBA::Long const depth =
     get_instance_sample_list_depth(
@@ -1477,7 +1476,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   this->set_enabled();
 
   try {
-    this->enable_transport();
+    this->enable_transport(reliable);
 
     const TransportLocatorSeq& trans_conf_info = connection_info();
 

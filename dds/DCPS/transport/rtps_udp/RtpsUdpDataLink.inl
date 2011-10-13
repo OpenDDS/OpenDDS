@@ -10,14 +10,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE void
-RtpsUdpDataLink::configure(RtpsUdpInst* config,
-                           TransportReactorTask* reactor_task)
-{
-  config_ = config;
-  reactor_task_ = TransportReactorTask_rch(reactor_task, false);
-}
-
-ACE_INLINE void
 RtpsUdpDataLink::send_strategy(RtpsUdpSendStrategy* send_strategy)
 {
   send_strategy_ = send_strategy;

@@ -43,6 +43,13 @@ TransportCustomizedElement::alloc(TransportQueueElement* orig,
   }
 }
 
+ACE_INLINE
+SequenceNumber
+TransportCustomizedElement::sequence() const
+{
+  return this->orig_ ? this->orig_->sequence()
+    : SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

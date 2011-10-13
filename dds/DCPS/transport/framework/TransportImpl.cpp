@@ -181,7 +181,7 @@ TransportImpl::attach_client(TransportClient* client)
 void
 TransportImpl::detach_client(TransportClient* client)
 {
-  DBG_ENTRY_LVL("TransportImpl", "attach_client", 6);
+  DBG_ENTRY_LVL("TransportImpl", "detach_client", 6);
 
   GuardType guard(this->lock_);
   clients_.erase(client);
@@ -190,7 +190,8 @@ TransportImpl::detach_client(TransportClient* client)
 DataLink*
 TransportImpl::find_connect_i(const RepoId& local_id,
                               const AssociationData& remote_association,
-                              CORBA::Long priority, bool active, bool connect)
+                              const ConnectionAttribs& attribs,
+                              bool active, bool connect)
 {
   const CORBA::ULong num_blobs = remote_association.remote_data_.length();
   const std::string ttype = transport_type();
@@ -201,11 +202,11 @@ TransportImpl::find_connect_i(const RepoId& local_id,
       if (connect) {
         link = connect_datalink_i(local_id, remote_association.remote_id_,
                                   remote_association.remote_data_[idx].data,
-                                  priority);
+                                  attribs);
       } else {
         link = find_datalink_i(local_id, remote_association.remote_id_,
                                remote_association.remote_data_[idx].data,
-                               priority, active);
+                               attribs, active);
       }
       if (!link.is_nil()) {
         return link._retn();
@@ -218,26 +219,26 @@ TransportImpl::find_connect_i(const RepoId& local_id,
 DataLink*
 TransportImpl::find_datalink(const RepoId& local_id,
                              const AssociationData& remote_association,
-                             CORBA::Long priority,
+                             const ConnectionAttribs& attribs,
                              bool active)
 {
-  return find_connect_i(local_id, remote_association, priority, active, false);
+  return find_connect_i(local_id, remote_association, attribs, active, false);
 }
 
 DataLink*
 TransportImpl::connect_datalink(const RepoId& local_id,
                                 const AssociationData& remote_association,
-                                CORBA::Long priority)
+                                const ConnectionAttribs& attribs)
 {
-  return find_connect_i(local_id, remote_association, priority, true, true);
+  return find_connect_i(local_id, remote_association, attribs, true, true);
 }
 
 TransportImpl::ConnectionEvent::ConnectionEvent(const RepoId& local_id,
                                   const AssociationData& remote_association,
-                                  CORBA::Long priority)
+                                  const ConnectionAttribs& attribs)
   : local_id_(local_id)
   , remote_association_(remote_association)
-  , priority_(priority)
+  , attribs_(attribs)
   , cond_(mtx_)
 {}
 

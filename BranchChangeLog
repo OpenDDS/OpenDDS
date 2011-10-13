@@ -1,3 +1,70 @@
+Thu Oct 13 20:57:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          TransportClient::enable_transport() now gets a bool for "reliable".
+
+        * dds/DCPS/RepoIdGenerator.h:
+
+          Updated comment about VendorId inside the GUID.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added hook for derived classes to get release_reservations().
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Pass "reliable" bool down to the specific transport object.
+
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+
+          TransportQueueElements can now report their sequence numbers.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+
+          Updated SingleSendBuffer for use in RtpsUdpDataLink.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Expose a "nak_depth" configuration parameter.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Started implementing reliability features of RTPS (support
+          for HEARTBEAT, ACKNACK, and GAP submessages).
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Updated for changes in TransportImpl.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+
+          TransportClient::enable_transport() now requires an argument.
+
 Wed Oct 12 20:51:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

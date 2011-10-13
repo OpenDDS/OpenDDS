@@ -33,6 +33,8 @@ public:
 
   virtual const ACE_Message_Block* msg_payload() const;
 
+  virtual SequenceNumber sequence() const;
+
   virtual bool owned_by_transport() { return false; }
 
   virtual bool is_fragment() const { return fragment_; }

@@ -46,7 +46,7 @@ protected:
 
   // Local setup:
 
-  void enable_transport();
+  void enable_transport(bool reliable);
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
@@ -102,7 +102,7 @@ private:
 
   // Configuration details:
 
-  bool swap_bytes_, cdr_encapsulation_;
+  bool swap_bytes_, cdr_encapsulation_, reliable_;
   ACE_Time_Value passive_connect_duration_;
 
 

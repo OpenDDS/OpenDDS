@@ -22,6 +22,7 @@ RtpsUdpInst::RtpsUdpInst(const std::string& name)
   : TransportInst("rtps_udp", name)
   , use_multicast_(true)
   , multicast_group_address_(7401, "239.255.0.1")
+  , nak_depth_(32) // default nak_depth in OpenDDS_Multicast
 {
 }
 

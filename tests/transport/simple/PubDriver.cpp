@@ -237,7 +237,7 @@ PubDriver::run()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimplePublisher object.\n"));
 
-  this->writer_.enable_transport();
+  this->writer_.enable_transport(false /*reliable*/);
   this->writer_.init(subscription);
 
   // Wait for a fully association establishment and then start sending samples.

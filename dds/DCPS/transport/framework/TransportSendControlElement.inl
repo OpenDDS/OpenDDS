@@ -29,8 +29,14 @@ OpenDDS::DCPS::TransportSendControlElement::TransportSendControlElement
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportSendControlElement::owned_by_transport ()
+OpenDDS::DCPS::TransportSendControlElement::owned_by_transport()
 {
   return false;
 }
 
+ACE_INLINE
+OpenDDS::DCPS::SequenceNumber
+OpenDDS::DCPS::TransportSendControlElement::sequence() const
+{
+  return this->header_.sequence_;
+}

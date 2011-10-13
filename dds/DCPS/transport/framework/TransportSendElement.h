@@ -36,6 +36,8 @@ public:
 
   virtual const ACE_Message_Block* msg_payload() const;
 
+  virtual SequenceNumber sequence() const;
+
   /// Original sample from send listener.
   const DataSampleListElement* sample() const;
 

@@ -35,13 +35,13 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
-                                    CORBA::Long priority,
+                                    const ConnectionAttribs& attribs,
                                     bool active);
 
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
-                                       CORBA::Long priority);
+                                       const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);
   virtual void stop_accepting(ConnectionEvent& ce);

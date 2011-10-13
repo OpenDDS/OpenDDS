@@ -59,10 +59,11 @@ private:
   TransportSendBuffer& operator=(const TransportSendBuffer&); // unimplemented
 };
 
-/// "Classic" implementation of TransportSendBuffer for use when the sequence
-/// number passed to insert() is a TransportHeader sequence number, which means
-/// only a single object needs to exist per TransportSendStrategy/DataLink.
-class OpenDDS_Dcps_Export SingleSendBuffer : public TransportSendBuffer {
+/// Implementation of TransportSendBuffer that manages data for a single
+/// domain of SequenceNumbers -- for a given SingelSendBuffer object, the
+/// sequence numbers passed to insert() must be generated from the same place.
+class OpenDDS_Dcps_Export SingleSendBuffer
+  : public TransportSendBuffer, public RcObject<ACE_SYNCH_MUTEX> {
 public:
   void release_all();
   void release(BufferType& buffer);
@@ -77,12 +78,12 @@ public:
   SequenceNumber high() const;
   bool empty() const;
 
-private:
   void retain_all(RepoId pub_id);
   void insert(SequenceNumber sequence,
               TransportSendStrategy::QueueType* queue,
               ACE_Message_Block* chain);
-                      
+
+private:
   size_t n_chunks_;
 
   TransportRetainedElementAllocator retained_allocator_;
