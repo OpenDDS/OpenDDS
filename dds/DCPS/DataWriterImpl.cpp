@@ -1878,8 +1878,10 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.publication_id_ = publication_id_;
   header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
 
-  if (message_id == INSTANCE_REGISTRATION || message_id == DISPOSE_INSTANCE
-      || message_id == UNREGISTER_INSTANCE) {
+  if (message_id == INSTANCE_REGISTRATION
+   || message_id == DISPOSE_INSTANCE
+   || message_id == UNREGISTER_INSTANCE
+   || message_id == DISPOSE_UNREGISTER_INSTANCE) {
     header_data.key_fields_only_ = true;
   }
 

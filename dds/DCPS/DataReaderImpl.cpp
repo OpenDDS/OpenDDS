@@ -1613,6 +1613,33 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   this->notify_read_conditions();
   break;
 
+  case DISPOSE_UNREGISTER_INSTANCE: {
+    this->writer_activity(sample.header_);
+    SubscriptionInstance* instance = 0;
+
+    if (this->watchdog_.get()) {
+      // Find the instance first for timer cancellation since
+      // the instance may be deleted during dispose and can
+      // not be accessed.
+      this->lookup_instance (sample, instance);
+      if (! this->is_exclusive_ownership_
+          || (this->is_exclusive_ownership_
+             && (instance != 0 )
+             && (this->owner_manager_->is_owner (instance->instance_handle_,
+                                                sample.header_.publication_id_)))
+          || (this->is_exclusive_ownership_
+             && (instance != 0 )
+             && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+        this->watchdog_->cancel_timer(instance);
+      }
+    }
+    instance = 0;
+    this->dispose(sample, instance);
+    this->unregister(sample, instance);
+  }
+  this->notify_read_conditions();
+  break;
+
   default:
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: DataReaderImpl::data_received"

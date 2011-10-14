@@ -31,6 +31,7 @@ namespace {
   const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_REGISTER   = { { 0, 0, 0, 0 } };
   const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_DISPOSE    = { { 0, 0, 0, 1 } };
   const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } };
+  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
 
 }
 
@@ -184,6 +185,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
           opendds.message_id_ = DISPOSE_INSTANCE;
         } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_UNREGISTER) {
           opendds.message_id_ = UNREGISTER_INSTANCE;
+        } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_DISPOSE_UNREGISTER) {
+          opendds.message_id_ = DISPOSE_UNREGISTER_INSTANCE;
         } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_REGISTER) {
           // TODO: Remove this case if we decide not to send Register messages
           opendds.message_id_ = INSTANCE_REGISTRATION;
@@ -334,6 +337,14 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
       int qos_len = data.inlineQos.length();
       data.inlineQos.length(qos_len+1);
       data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
+    }
+    break;
+  case DISPOSE_UNREGISTER_INSTANCE:
+    {
+      data.smHeader.flags |= FLAG_K;
+      int qos_len = data.inlineQos.length();
+      data.inlineQos.length(qos_len+1);
+      data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
     }
     break;
   default:

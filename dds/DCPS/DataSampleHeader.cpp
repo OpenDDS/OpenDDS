@@ -448,6 +448,8 @@ std::ostream& operator<<(std::ostream& str, const MessageId value)
     return str << "END_COHERENT_CHANGES";
   case TRANSPORT_CONTROL:
     return str << "TRANSPORT_CONTROL";
+  case DISPOSE_UNREGISTER_INSTANCE:
+    return str << "DISPOSE_UNREGISTER_INSTANCE";
   default:
     return str << "Unknown";
   }

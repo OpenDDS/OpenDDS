@@ -98,7 +98,8 @@ public:
     }
     case INSTANCE_REGISTRATION:
     case DISPOSE_INSTANCE:
-    case UNREGISTER_INSTANCE: {
+    case UNREGISTER_INSTANCE:
+    case DISPOSE_UNREGISTER_INSTANCE: {
       OpenDDS::DCPS::Serializer ser(sample.sample_,
                                     sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                                     OpenDDS::DCPS::Serializer::ALIGN_CDR);
@@ -129,6 +130,9 @@ public:
         break;
       case UNREGISTER_INSTANCE:
         oss << "data_received(): Received Unregister Instance\n\t";
+        break;
+      case DISPOSE_UNREGISTER_INSTANCE:
+        oss << "data_received(): Received Dispose & Unregister Instance\n\t";
         break;
       }
       oss << "data.key = " << data.key << "\n";
@@ -234,8 +238,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_OS::sleep(1);
   }
 
-  if (sdr.control_msg_count_ != 3) {
-    ACE_DEBUG((LM_ERROR, "ERROR: Expected 3 control messages, received %d\n",
+  if (sdr.control_msg_count_ != 4) {
+    ACE_DEBUG((LM_ERROR, "ERROR: Expected 4 control messages, received %d\n",
                sdr.control_msg_count_));
   }
 

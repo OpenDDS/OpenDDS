@@ -1,3 +1,22 @@
+Fri Oct 14 14:23:44 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Add support for combined Dispose/Unregister messages.
+          This was added as a new message type in DataSampleHeader.
+          OpenDDS does not currently generate these messages, but
+          may receive them from other RTPS implementations.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Test manual generation and processing of Dispose/Unregister
+          messages via RTPS.
+
 Fri Oct 14 13:18:09 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:

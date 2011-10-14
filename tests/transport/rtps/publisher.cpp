@@ -375,6 +375,26 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
       sdw.send_control(dsh, ui_mb);
     }
+
+    // Send a dispose & unregister instance
+    {
+      dsh.message_id_ = DISPOSE_UNREGISTER_INSTANCE;
+      ACE_Message_Block* ui_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                                                       ACE_Message_Block::MB_DATA,
+                                                       new ACE_Message_Block(dsh.message_length_));
+      *ui_mb << dsh;
+      OpenDDS::DCPS::Serializer serializer(ui_mb->cont(),
+                                           host_is_bigendian,
+                                           Serializer::ALIGN_CDR);
+      ok = (serializer << encap) && (serializer << ko_instance_data);
+      if (!ok) {
+        std::cerr << "ERROR: failed to serialize data for dispose unregister instance\n";
+        return 1;
+      }
+      ::DDS_TEST::force_inline_qos(true);  // Inline QoS
+      sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
+      sdw.send_control(dsh, ui_mb);
+    }
   }
 
   // 2b. send sample data through the OpenDDS transport
