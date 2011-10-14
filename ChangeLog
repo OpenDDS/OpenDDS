@@ -1,3 +1,9 @@
+Fri Oct 14 14:37:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude more multicasts tests on QNX.
+
 Wed Oct 12 21:28:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:
