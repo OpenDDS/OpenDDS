@@ -83,8 +83,8 @@ RtpsUdpDataLink::open()
 }
 
 void
-RtpsUdpDataLink::control_received(ReceivedDataSample& sample,
-                                  const ACE_INET_Addr& remote_address)
+RtpsUdpDataLink::control_received(ReceivedDataSample&  /*sample*/,
+                                  const ACE_INET_Addr& /*remote_address*/)
 {
 }
 
@@ -290,7 +290,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 }
 
 bool
-RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
+RtpsUdpDataLink::requires_inline_qos(const PublicationId& /*pub_id*/)
 {
   if (this->force_inline_qos_) {
     // Force true for testing purposes

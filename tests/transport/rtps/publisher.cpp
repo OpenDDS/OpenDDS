@@ -95,12 +95,13 @@ public:
     --callbacks_expected_;
   }
 
-  void control_delivered(ACE_Message_Block* sample)
+  void control_delivered(ACE_Message_Block* /*sample*/)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_delivered()\n"));
   }
 
-  void control_dropped(ACE_Message_Block* sample, bool dropped_by_transport)
+  void control_dropped(ACE_Message_Block* /*sample*/,
+                       bool /*dropped_by_transport*/)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_dropped()\n"));
   }
