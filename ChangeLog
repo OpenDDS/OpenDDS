@@ -1,3 +1,9 @@
+Fri Oct 14 21:47:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added another potential location of TAO orbsvcs executables.
+
 Fri Oct 14 14:37:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
