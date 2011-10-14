@@ -1,3 +1,23 @@
+Fri Oct 14 19:36:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Add a constant for the size of SubmessageHeader.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          For reliable writers, track the current sequence number and generate
+          GAP submessages when needed.  On the receive side, added a
+          gap_received() method, but it doesn't do anything yet.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Generate/expect a gap in the sequence numbers used in the test.
+
 Fri Oct 14 14:23:44 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

@@ -16,6 +16,7 @@
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/MessageTypes.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
@@ -228,6 +229,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   ACE_Message_Block* data = 0;
   OpenDDS::RTPS::SubmessageSeq subm;
 
+  add_gap_submsg(subm, *element);
+
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
   if (tsce) {        // Control message
@@ -302,6 +305,79 @@ RtpsUdpDataLink::requires_inline_qos(const PublicationId& /*pub_id*/)
 }
 
 bool RtpsUdpDataLink::force_inline_qos_ = false;
+
+void
+RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
+                                const TransportQueueElement& tqe)
+{
+  using namespace OpenDDS::RTPS;
+
+  const SequenceNumber seq = tqe.sequence();
+  const RepoId pub = tqe.publication_id();
+  if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || pub == GUID_UNKNOWN) {
+    return;
+  }
+
+  const RtpsWriterMap::iterator wi = writers_.find(pub);
+  if (wi == writers_.end()) {
+    return; // not a reliable writer, does not send GAPs
+  }
+
+  RtpsWriter& rw = wi->second;
+
+  if (seq != rw.last_sent_ + 1) {
+    SequenceNumber firstMissing = rw.last_sent_;
+    ++firstMissing;
+
+    // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
+    // [gapStart, gapListBase) and those in the SNSet.
+    const SequenceNumber_t gapStart = {firstMissing.getHigh(),
+                                       firstMissing.getLow()},
+                           gapListBase = {seq.getHigh(),
+                                          seq.getLow()};
+
+    // We are not going to enable any bits in the "bitmap" of the SNSet,
+    // but the "numBits" and the bitmap.length must both be > 0.
+    LongSeq8 bitmap;
+    bitmap.length(1);
+    bitmap[0] = 0;
+
+    GapSubmessage gap = {
+      {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
+      ENTITYID_UNKNOWN, // readerId: applies to all matched readers
+      pub.entityId,
+      gapStart,
+      {gapListBase, 1, bitmap}
+    };
+
+    size_t size = 0, padding = 0;
+    gen_find_size(gap, size, padding);
+    gap.smHeader.submessageLength =
+      static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+
+    const CORBA::ULong i = msg.length();
+    msg.length(i + 1);
+    msg[i].gap_sm(gap);
+  }
+
+  rw.last_sent_ = seq;
+}
+
+void
+RtpsUdpDataLink::gap_received(const OpenDDS::RTPS::GapSubmessage& gap,
+                              const GuidPrefix_t& src_prefix)
+{
+  using namespace OpenDDS::RTPS;
+  RepoId src;
+  std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
+  src.entityId = gap.writerId;
+
+  RepoId local;
+  std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
+  local.entityId = gap.readerId; // may be ENTITYID_UNKNOWN (all readers)
+
+  //TODO: process GAP
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

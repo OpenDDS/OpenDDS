@@ -232,7 +232,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ser_loc << locators;
 
   SimpleDataWriter sdw(local_guid);
-  sdw.enable_transport(false /*reliable*/);
+  sdw.enable_transport(true /*reliable*/);
   AssociationData subscription;
   subscription.remote_id_ = remote;
   subscription.remote_data_.length(1);
@@ -417,7 +417,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataSampleHeader& dsh = elements[index].header_;
   dsh.message_id_ = SAMPLE_DATA;
   dsh.publication_id_ = local_guid;
-  dsh.sequence_ = 2;
+  dsh.sequence_ = 3; // test GAP generation
   const ACE_Time_Value tv = ACE_OS::gettimeofday();
   log_time(tv);
   DDS::Time_t st = time_value_to_time(tv);

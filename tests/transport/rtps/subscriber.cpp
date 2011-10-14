@@ -91,6 +91,10 @@ public:
         ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
       }
 
+      if (seq_ == 2) {
+        ++seq_; // publisher.cpp deliberately skips #2 to test GAP generation
+      }
+
       if (data.key != 0x09230923 || std::strlen(data.value.in()) != 520) {
         ACE_DEBUG((LM_ERROR, "ERROR: DataSample contents malformed\n"));
       }

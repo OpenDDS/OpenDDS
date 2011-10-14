@@ -18,6 +18,8 @@ namespace OpenDDS {
     const ACE_CDR::UShort DATA_OCTETS_TO_IQOS = 16;
     const ACE_CDR::UShort DATA_FRAG_OCTETS_TO_IQOS = 28;
 
+    const ACE_CDR::UShort SMHDR_SZ = 4; // size of SubmessageHeader
+
     const OctetArray4
       PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =
         { 0x00, 0x00, 0x00, 0x00 },

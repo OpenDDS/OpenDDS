@@ -121,8 +121,6 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   }
 #undef CASE_SMKIND
 
-  const ACE_CDR::UShort SMHDR_SZ = 4; // size of SubmessageHeader
-
   if (valid_) {
 
     // marshaled_size_ is # of bytes of submessage we have read from "mb"
@@ -243,8 +241,9 @@ RtpsSampleHeader::populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq&
                            dsle.header_.source_timestamp_nanosec_ };
   const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
     {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)} };
-  subm.length(1);
-  subm[0].info_ts_sm(ts);
+  CORBA::ULong i = subm.length();
+  subm.length(i + 1);
+  subm[i++].info_ts_sm(ts);
 
   DataSubmessage data = {
     {DATA, flags, 0},
@@ -280,8 +279,8 @@ RtpsSampleHeader::populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq&
     data.smHeader.flags |= FLAG_Q;
   }
 
-  subm.length(2);
-  subm[1].data_sm(data);
+  subm.length(i + 1);
+  subm[i].data_sm(data);
 }
 
 
@@ -299,8 +298,9 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
   ACE_UINT32 st_nsec = header.source_timestamp_nanosec_;
   const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
     {st_sec, static_cast<ACE_UINT32>(st_nsec * NANOS_TO_RTPS_FRACS + .5)} };
-  subm.length(1);
-  subm[0].info_ts_sm(ts);
+  CORBA::ULong i = subm.length();
+  subm.length(i + 1);
+  subm[i++].info_ts_sm(ts);
 
   DataSubmessage data = {
     {DATA, flags, 0},
@@ -366,8 +366,8 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
     data.smHeader.flags |= FLAG_Q;
   }
 
-  subm.length(2);
-  subm[1].data_sm(data);
+  subm.length(i + 1);
+  subm[i].data_sm(data);
 }
 
 #define PROCESS_INLINE_QOS(QOS_NAME, DEFAULT_QOS, WRITER_QOS) \

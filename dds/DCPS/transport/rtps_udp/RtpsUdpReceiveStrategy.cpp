@@ -70,6 +70,10 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     receiver_.fill_header(sample.header_);
     link_->data_received(sample);
     break;
+  case GAP:
+    link_->gap_received(rsh.submessage_.gap_sm(),
+                        receiver_.source_guid_prefix_);
+    break;
   default:
     break;
   }

@@ -64,6 +64,9 @@ public:
   void control_received(ReceivedDataSample& sample,
                         const ACE_INET_Addr& remote_address);
 
+  void gap_received(const OpenDDS::RTPS::GapSubmessage& gap,
+                    const GuidPrefix_t& src_prefix);
+
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
   void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address);
@@ -90,6 +93,9 @@ private:
   /// static member used by testing code to force inline qos
   static bool force_inline_qos_;
   bool requires_inline_qos(const PublicationId& pub_id);
+
+  void add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
+                      const TransportQueueElement& tqe);
 
   RtpsUdpInst* config_;
   TransportReactorTask_rch reactor_task_;
@@ -133,6 +139,7 @@ private:
   struct RtpsWriter {
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
+    SequenceNumber last_sent_;
   };
 
   typedef std::map<RepoId, RtpsWriter, GUID_tKeyLessThan> RtpsWriterMap;
