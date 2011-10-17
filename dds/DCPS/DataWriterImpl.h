@@ -572,7 +572,6 @@ private:
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.
-  /// Not used in first implementation.
   SequenceNumber                  sequence_number_;
   /// Flag indicating DataWriter current belongs to
   /// a coherent change set.

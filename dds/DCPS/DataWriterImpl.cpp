@@ -62,7 +62,7 @@ DataWriterImpl::DataWriterImpl()
     domain_id_(0),
     publisher_servant_(0),
     publication_id_(GUID_UNKNOWN),
-    sequence_number_(),
+    sequence_number_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
     coherent_(false),
     coherent_samples_(0),
     data_container_(0),
@@ -1882,6 +1882,14 @@ DataWriterImpl::create_control_message(MessageId message_id,
    || message_id == DISPOSE_INSTANCE
    || message_id == UNREGISTER_INSTANCE
    || message_id == DISPOSE_UNREGISTER_INSTANCE) {
+    // Use the sequence number here for the sake of RTPS (where these
+    // control messages map onto the Data Submessage).
+    if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+      this->sequence_number_ = SequenceNumber();
+    } else {
+      ++this->sequence_number_;
+    }
+    header_data.sequence_ = this->sequence_number_;
     header_data.key_fields_only_ = true;
   }
 
@@ -1948,7 +1956,11 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.sequence_repair_ = needSequenceRepair;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
-  ++this->sequence_number_;
+  if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    this->sequence_number_ = SequenceNumber();
+  } else {
+    ++this->sequence_number_;
+  }
   header_data.sequence_ = this->sequence_number_;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;

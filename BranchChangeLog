@@ -1,3 +1,14 @@
+Mon Oct 17 21:19:19 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+
+          Start sequence numbers in the data writer with one.
+          Add valid sequence numbers to instance state control
+          messages and properly process them in the reader.
+
 Fri Oct 14 19:36:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/MessageTypes.h:

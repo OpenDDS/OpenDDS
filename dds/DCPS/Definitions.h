@@ -58,7 +58,7 @@ typedef RepoId SubscriptionId;
 class OpenDDS_Dcps_Export SequenceNumber {
 public:
   typedef ACE_INT64 Value;
-  /// Construct with a value, default to negative starting point.
+  /// Construct with a value, default to one (starting point).
   SequenceNumber(Value value = MIN_VALUE) {
     setValue(value);
   }

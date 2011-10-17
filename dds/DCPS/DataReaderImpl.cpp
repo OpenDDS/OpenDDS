@@ -1282,7 +1282,11 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
     ACE_Time_Value when = ACE_OS::gettimeofday();
     writer->received_activity(when);
 
-    if (header.message_id_ == SAMPLE_DATA) {
+    if ((header.message_id_ == SAMPLE_DATA) ||
+        (header.message_id_ == INSTANCE_REGISTRATION) ||
+        (header.message_id_ == UNREGISTER_INSTANCE) ||
+        (header.message_id_ == DISPOSE_INSTANCE) ||
+        (header.message_id_ == DISPOSE_UNREGISTER_INSTANCE)) {
 
       if (writer->seen_data_ && !header.sequence_repair_) {
         // Data samples should be acknowledged prior to any
