@@ -25,6 +25,7 @@ public:
   bool use_multicast_;
   ACE_INET_Addr multicast_group_address_;
   size_t nak_depth_;
+  ACE_Time_Value nak_response_delay_, heartbeat_period_;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);

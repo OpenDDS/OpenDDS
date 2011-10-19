@@ -1779,25 +1779,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 
   iovec iov[MAX_SEND_BLOCKS];
 
-  const ACE_Message_Block* block = packet;
-
-  int num_blocks = 0;
-
-#ifdef _MSC_VER
-#pragma warning(push)
-// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
-// since on other platforms iov_len is 64-bit
-#pragma warning(disable : 4267)
-#endif
-  while (block != 0 && num_blocks < MAX_SEND_BLOCKS) {
-    iov[num_blocks].iov_len  = block->length();
-    iov[num_blocks].iov_base = block->rd_ptr();
-    ++num_blocks;
-    block = block->cont();
-  }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+  int num_blocks = mb_to_iov(*packet, iov);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "There are [%d] number of entries in the iovec array.\n",
@@ -1952,6 +1934,29 @@ TransportSendStrategy::space_available() const
     return std::min(this->max_size_ - used, max_msg - used);
   }
   return this->max_size_ - used;
+}
+
+int
+TransportSendStrategy::mb_to_iov(const ACE_Message_Block& msg, iovec* iov)
+{
+  
+  int num_blocks = 0;
+#ifdef _MSC_VER
+#pragma warning(push)
+// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+// since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
+  for (const ACE_Message_Block* block = &msg;
+       block && num_blocks < MAX_SEND_BLOCKS;
+       block = block->cont()) {
+    iov[num_blocks].iov_len = block->length();
+    iov[num_blocks++].iov_base = block->rd_ptr();
+  }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+  return num_blocks;
 }
 
 // close namespaces

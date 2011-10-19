@@ -1288,6 +1288,8 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         (header.message_id_ == DISPOSE_INSTANCE) ||
         (header.message_id_ == DISPOSE_UNREGISTER_INSTANCE)) {
 
+      SequenceRange resetRange(SequenceNumber(), header.sequence_);
+
       if (writer->seen_data_ && !header.sequence_repair_) {
         // Data samples should be acknowledged prior to any
         // reader-side filtering to ensure discontiguities
@@ -1299,15 +1301,17 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         // a baseline must be established based on the first
         // data sample received.
         writer->seen_data_ = true;
-        writer->ack_sequence_.reset(header.sequence_);
+        writer->ack_sequence_.reset();
+        writer->ack_sequence_.insert(resetRange);
       }
 
       if (header.coherent_change_) {
         if (writer->coherent_samples_ == 0) {
-          writer->coherent_sample_sequence_.reset(header.sequence_);
+          writer->coherent_sample_sequence_.reset();
+          writer->coherent_sample_sequence_.insert(resetRange);
         }
         else {
-          writer->coherent_sample_sequence_.update(header.sequence_);
+          writer->coherent_sample_sequence_.insert(header.sequence_);
         }
       }
     }
@@ -2161,7 +2165,8 @@ OpenDDS::DCPS::WriterInfo::should_ack(
       current = this->ack_deadlines_.erase(current);
 
     } else {
-      if (current->first <= this->ack_sequence_.low()) {
+      if (!this->ack_sequence_.empty() &&
+          current->first <= this->ack_sequence_.cumulative_ack()) {
         return true;
       }
 
@@ -2210,52 +2215,52 @@ void
 OpenDDS::DCPS::WriterInfo::ack_sequence(SequenceNumber value)
 {
   // sample_lock_ is held by the caller.
-  this->ack_sequence_.update(value);
+  this->ack_sequence_.insert(value);
 }
 
 SequenceNumber
 OpenDDS::DCPS::WriterInfo::ack_sequence() const
 {
   // sample_lock_ is held by the caller.
-  return this->ack_sequence_.low();
+  return this->ack_sequence_.cumulative_ack();
 }
 
 
 Coherent_State
-OpenDDS::DCPS::WriterInfo::coherent_change_received ()
+OpenDDS::DCPS::WriterInfo::coherent_change_received()
 {
-  if (this->writer_coherent_samples_.num_samples_ == 0)
+  if (this->writer_coherent_samples_.num_samples_ == 0) {
     return NOT_COMPLETED_YET;
+  }
 
-  if (! this->coherent_sample_sequence_.disjoint()
+  if (!this->coherent_sample_sequence_.disjoint()
       && (this->coherent_sample_sequence_.high()
-          == this->writer_coherent_samples_.last_sample_))
-  {
+          == this->writer_coherent_samples_.last_sample_)) {
     return COMPLETED;
   }
-  else if (this->coherent_sample_sequence_.high()
-          > this->writer_coherent_samples_.last_sample_) {
+
+  if (this->coherent_sample_sequence_.high() >
+      this->writer_coherent_samples_.last_sample_) {
     return REJECTED;
   }
-  else {
-    return NOT_COMPLETED_YET;
-  }
+
+  return NOT_COMPLETED_YET;
 }
 
 void
-OpenDDS::DCPS::WriterInfo::reset_coherent_info ()
+OpenDDS::DCPS::WriterInfo::reset_coherent_info()
 {
   this->coherent_samples_ = 0;
   this->group_coherent_ = false;
   this->publisher_id_ = GUID_UNKNOWN;
   this->coherent_sample_sequence_.reset();
   this->writer_coherent_samples_.reset();
-  this->group_coherent_samples_.clear ();
+  this->group_coherent_samples_.clear();
 }
 
 
 void
-OpenDDS::DCPS::WriterInfo::set_group_info (const CoherentChangeControl& info)
+OpenDDS::DCPS::WriterInfo::set_group_info(const CoherentChangeControl& info)
 {
   if (! (this->publisher_id_ == info.publisher_id_)
       || this->group_coherent_ != info.group_coherent_) {

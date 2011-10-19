@@ -1,3 +1,54 @@
+Wed Oct 19 17:52:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Significant rework of DisjointSequence.  Added doxygen comments.
+          What used to be update() is now insert(), what used to be
+          lowest_valid() is now another form of insert(), and what used to be
+          low() is noweither low() or cumulative_ack() depending on the usage.
+          DisjointSequence no longer handles wrapping SequenceNumbers, but the
+          64-bit sequence numbers don't wrap (under real-world conditions).
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Moved another useful constant up to this header.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Cleaned up unused #includes.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Refactored code that makes iovec[]s from ACE_Message_Block chains
+          so that it can be reused by derived classes.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Continued implementing RTPS reliablity, focusing for now on DW side:
+          - mechanism for generating control messages in the transport
+          - timers for sending heartbeats and replying to nacks
+          - processing incoming AckNackSubmessage
+          Also, on DR side: hook for keeping track of received sequence numbers
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Updated usage of DisjointSequence.
+
 Mon Oct 17 21:19:19 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

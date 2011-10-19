@@ -61,11 +61,17 @@ public:
 
   bool open();
 
-  void control_received(ReceivedDataSample& sample,
-                        const ACE_INET_Addr& remote_address);
+  void received(const OpenDDS::RTPS::DataSubmessage& data,
+                const GuidPrefix_t& src_prefix);
 
-  void gap_received(const OpenDDS::RTPS::GapSubmessage& gap,
-                    const GuidPrefix_t& src_prefix);
+  void received(const OpenDDS::RTPS::GapSubmessage& gap,
+                const GuidPrefix_t& src_prefix);
+
+  void received(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
+                const GuidPrefix_t& src_prefix);
+
+  void received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
+                const GuidPrefix_t& src_prefix);
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
@@ -132,6 +138,10 @@ private:
 
   struct ReaderInfo {
     SequenceNumber seq_;
+    CORBA::Long acknack_recvd_count_;
+    std::vector<OpenDDS::RTPS::SequenceNumberSet> requested_changes_;
+
+    ReaderInfo() : acknack_recvd_count_(0) {}
   };
 
   typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> ReaderInfoMap;
@@ -140,6 +150,9 @@ private:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber last_sent_;
+    CORBA::Long heartbeat_count_;
+
+    RtpsWriter() : heartbeat_count_(0) {}
   };
 
   typedef std::map<RepoId, RtpsWriter, GUID_tKeyLessThan> RtpsWriterMap;
@@ -149,17 +162,68 @@ private:
   // RTPS reliability support for local readers:
 
   struct WriterInfo {
-    DisjointSequence dis_;
+    DisjointSequence recvd_;
+    CORBA::Long heartbeat_recvd_count_;
+
+    WriterInfo() : heartbeat_recvd_count_(0) {}
   };
 
   typedef std::map<RepoId, WriterInfo, GUID_tKeyLessThan> WriterInfoMap;
 
   struct RtpsReader {
     WriterInfoMap remote_writers_;
+    CORBA::Long acknack_count_;
+
+    RtpsReader() : acknack_count_(0) {}
   };
 
   typedef std::map<RepoId, RtpsReader, GUID_tKeyLessThan> RtpsReaderMap;
   RtpsReaderMap readers_;
+
+
+  // Timers for reliability:
+
+  void send_nack_replies();
+  void send_heartbeats();
+
+  struct NackResponseDelay : ACE_Event_Handler {
+
+    explicit NackResponseDelay(RtpsUdpDataLink* outer)
+      : outer_(outer), scheduled_(false) {}
+
+    void schedule();
+
+    int handle_timeout(const ACE_Time_Value&, const void*)
+    {
+      scheduled_ = false;
+      outer_->send_nack_replies();
+      return 0;
+    }
+
+    RtpsUdpDataLink* outer_;
+    bool scheduled_;
+
+  } nack_reply_;
+
+
+  struct HeartBeat : ACE_Event_Handler {
+
+    explicit HeartBeat(RtpsUdpDataLink* outer)
+      : outer_(outer), enabled_(false) {}
+
+    int handle_timeout(const ACE_Time_Value&, const void*)
+    {
+      outer_->send_heartbeats();
+      return 0;
+    }
+
+    void enable();
+    void disable();
+
+    RtpsUdpDataLink* outer_;
+    bool enabled_;
+
+  } heartbeat_;
 };
 
 } // namespace DCPS

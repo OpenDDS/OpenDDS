@@ -52,7 +52,7 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
                 }
               else
                 {
-                  listener->samples_[samples[i].data_source].update (samples[i].sequence_num);
+                  listener->samples_[samples[i].data_source].insert(samples[i].sequence_num);
                   pub_finished[samples[i].data_source] = true;
                 }
             }
@@ -119,7 +119,7 @@ DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
     for (unsigned j = 0; j < stats_.num_publishers_; j++)
       {
         pub_finished_[j] = false;
-        this->samples_[j] = OpenDDS::DCPS::DisjointSequence (0);
+        this->samples_[j] = OpenDDS::DCPS::DisjointSequence ();
       }
 
   }

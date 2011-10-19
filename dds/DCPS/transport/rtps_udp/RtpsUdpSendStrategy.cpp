@@ -59,17 +59,7 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
     return -1;
   }
 
-  ssize_t result = -1;
-  typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
-  for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
-    ssize_t result_per_dest = link_->unicast_socket().send(iov, n, *iter);
-    if (result_per_dest < 0) {
-      // TODO: log error
-    } else {
-      result = result_per_dest;
-    }
-  }
-  return result;
+  return send_multi_i(iov, n, addrs);
 }
 
 void
@@ -77,6 +67,41 @@ RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
   Serializer writer(mb); // byte order doesn't matter for the RTPS Header
   writer << rtps_header_;
+}
+
+void
+RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
+                                       const std::set<ACE_INET_Addr>& addrs)
+{
+  ACE_Message_Block message(RtpsTransportHeader::max_marshaled_size());
+  //TODO: allocators?
+  marshal_transport_header(&message);
+  message.cont(&submessages);
+
+  iovec iov[MAX_SEND_BLOCKS];
+  int num_blocks = mb_to_iov(message, iov);
+  ssize_t result = send_multi_i(iov, num_blocks, addrs);
+  if (result < 0) {
+    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
+      "failed to send RTPS control message\n"));
+  }
+}
+
+ssize_t
+RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
+                                  const std::set<ACE_INET_Addr>& addrs)
+{
+  ssize_t result = -1;
+  typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
+  for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
+    ssize_t result_per_dest = link_->unicast_socket().send(iov, n, *iter);
+    if (result_per_dest < 0) {
+      // TODO: log error?
+    } else {
+      result = result_per_dest;
+    }
+  }
+  return result;
 }
 
 void

@@ -16,7 +16,6 @@
 #include "TransportSendStrategy.h"
 
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/DisjointSequence.h"
 
 #include <map>
 #include <utility>

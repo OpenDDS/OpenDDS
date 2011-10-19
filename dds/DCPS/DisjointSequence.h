@@ -12,58 +12,92 @@
 #include "dcps_export.h"
 #include "Definitions.h"
 
-#include <cstdlib>
-#include <iterator>
 #include <set>
 #include <vector>
 
 namespace OpenDDS {
 namespace DCPS {
 
-struct SequenceRange_LessThan {
-  bool operator()(const SequenceRange& lhs, const SequenceRange& rhs) const {
-    return lhs.second < rhs.second;
-  }
-};
-
+/// Data structure for a set of SequenceNumbers.
+/// Sequence numbers can be inserted as single numbers, ranges,
+/// or RTPS-style bitmaps.  The DisjointSequence can then be queried for
+/// contiguous ranges and internal gaps.
 class OpenDDS_Dcps_Export DisjointSequence {
 public:
-  typedef std::set<SequenceRange, SequenceRange_LessThan> RangeSet;
 
-  explicit DisjointSequence(SequenceNumber value = SequenceNumber());
+  DisjointSequence();
+  void reset();
 
+  bool empty() const;
+
+  /// Lowest SequenceNumber in the set.
+  /// Precondition: !empty()
   SequenceNumber low() const;
+
+  /// Highest SequenceNumber in the set.
+  /// Precondition: !empty()
   SequenceNumber high() const;
 
+  /// Gets the high end of the lowest contiguous range.
+  /// Named after the use case of tracking received messages (which may be
+  /// received out-of-order) and then determining the largest value that the
+  /// receiver is allowed to acknowledge (under a cumulative-acking protocol).
+  /// If empty(), returns SEQUENCENUMBER_UNKNOWN.
+  SequenceNumber cumulative_ack() const;
+
+  /// Objects with the disjoint() property have an internal gap in the inserted
+  /// SequenceNumbers.
   bool disjoint() const;
 
-  void reset(SequenceNumber value = SequenceNumber());
+  /// All insert() methods return true upon modifying the set and false if
+  /// the set already contained the SequenceNumber(s) that were to be inserted.
+  /// This is the general form of insert() whereby the caller receives a list of
+  /// sub-ranges of 'range' that were not already in the DisjointSequence.
+  /// For example, given a DisjointSequence 'seq' containing (1, 2, 5, 9),
+  /// calling seq.insert(SequenceRange(4, 12), v) returns true
+  /// and yields v = [(4, 4), (6, 8), (10, 12)] and seq = (1, 2, 4, ..., 12).
+  bool insert(const SequenceRange& range, std::vector<SequenceRange>& added);
 
-  // indicates the new lowest valid SequenceNumber,
-  // if there are SequenceNumbers missing before
-  // this value, they will be treated as received
-  // and the low water mark will be moved to at least
-  // the SequenceNumber prior to value (if value itself
-  // has already been received, then low water mark will
-  // be moved to just prior to the next missing Sequence
-  // Number).  lowest_valid will return true if invalid
-  // values have been dropped.
-  bool lowest_valid(SequenceNumber value,
-                    std::vector<SequenceRange>* dropped = 0);
+  /// Insert all numbers between range.first and range.second (both inclusive).
+  bool insert(const SequenceRange& range);
 
-  // add the value or range of values to the set of seen
-  // values
-  bool update(SequenceNumber value);
-  bool update(const SequenceRange& range);
+  /// Shorthand for "insert(SequenceRange(value, value))"
+  bool insert(SequenceNumber value);
 
-  // returns missing ranges of SequenceNumbers
+  /// Insert using the RTPS compact representation of a set.  The three
+  /// parameters, taken together, describe a set with each 1 bit starting
+  /// at the lsb of bits[0] and extending through num_bits indicating presence
+  /// of the number (value + bit_index) in the set.  bit_index is 0-based.
+  /// Precondition: the array 'bits' has at least ceil(num_bits / 32) entries.
+  bool insert(SequenceNumber value,
+              CORBA::ULong num_bits,
+              const CORBA::Long bits[]);
+
+  /// Returns missing ranges of SequenceNumbers (internal gaps in the sequence)
   std::vector<SequenceRange> missing_sequence_ranges() const;
+
+  /// Returns a representation of the members of the sequence as a list of
+  /// contiguous ranges (each Range is inclusive on both sides).
+  std::vector<SequenceRange> present_sequence_ranges() const;
 
   void dump() const;
 
 private:
-  void validate(const SequenceRange& range) const;
 
+  bool insert_i(const SequenceRange& range,
+                std::vector<SequenceRange>* gaps = 0);
+
+  static void validate(const SequenceRange& range);
+
+  static bool SequenceRange_LessThan(const SequenceRange& lhs,
+                                     const SequenceRange& rhs)
+  {
+    return lhs.second < rhs.second;
+  }
+
+  typedef bool (*SRCompare)(const SequenceRange&, const SequenceRange&);
+
+  typedef std::set<SequenceRange, SRCompare> RangeSet;
   RangeSet sequences_;
 };
 

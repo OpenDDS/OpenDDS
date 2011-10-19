@@ -15,7 +15,6 @@
 
 #include "ace/Log_Msg.h"
 
-#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/RepoIdConverter.h"
 
 #ifndef __ACE_INLINE__

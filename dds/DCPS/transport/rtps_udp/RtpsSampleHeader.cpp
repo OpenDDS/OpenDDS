@@ -144,9 +144,9 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       // (from a newer minor version of the RTPS spec).  Either way, indicate
       // to the TransportReceiveStrategy that there is no data payload here.
       message_length_ = 0;
-      if (octetsToNextHeader + SMHDR_SZ > marshaled_size_) {
-        valid_ = ser.skip(octetsToNextHeader + SMHDR_SZ -
-                          static_cast<ACE_CDR::UShort>(marshaled_size_));
+      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(marshaled_size_);
+      if (octetsToNextHeader + SMHDR_SZ > marshaled) {
+        valid_ = ser.skip(octetsToNextHeader + SMHDR_SZ - marshaled);
       }
     }
   }
