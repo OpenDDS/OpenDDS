@@ -1,3 +1,10 @@
+Wed Oct 19 19:10:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportStrategy.h:
+
+          Need to specifically include Synch_Traits.h so we can build
+          against ACE 6.0.5+.
+
 Wed Oct 19 17:52:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
