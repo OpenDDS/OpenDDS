@@ -1,3 +1,12 @@
+Thu Oct 20 13:01:31 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * docs/design/RTPS Discovery.jpg:
+        * docs/design/RTPS Discovery.odg:
+        * docs/design/RTPS_DISCOVERY:
+
+          Add some design docs having to do with the overall RTPS
+          discovery design.
+
 Wed Oct 19 19:10:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportStrategy.h:
