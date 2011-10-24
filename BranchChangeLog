@@ -1,3 +1,9 @@
+Mon Oct 24 19:20:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Now that it compiles, make it pass the test.
+
 Mon Oct 24 18:58:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.cpp:
