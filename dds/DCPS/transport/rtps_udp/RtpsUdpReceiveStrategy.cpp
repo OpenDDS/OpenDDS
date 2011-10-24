@@ -67,22 +67,29 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     // No-op: the INFO_* submessages only modify the state of the
     // MessageReceiver (see check_header()), they are not passed up to DCPS.
     break;
+
   case DATA:
     receiver_.fill_header(sample.header_);
-    link_->received(rsh.submessage_.data_sm(), receiver_.source_guid_prefix_);
+    link_->received(rsh.submessage_.data_sm(), receiver_.source_guid_prefix_,
+                    receiver_.dest_guid_prefix_);
     link_->data_received(sample);
     break;
+
   case GAP:
-    link_->received(rsh.submessage_.gap_sm(), receiver_.source_guid_prefix_);
+    link_->received(rsh.submessage_.gap_sm(), receiver_.source_guid_prefix_,
+                    receiver_.dest_guid_prefix_);
     break;
+
   case HEARTBEAT:
     link_->received(rsh.submessage_.heartbeat_sm(),
-                    receiver_.source_guid_prefix_);
+                    receiver_.source_guid_prefix_, receiver_.dest_guid_prefix_);
     break;
+
   case ACKNACK:
-    link_->received(rsh.submessage_.acknack_sm(),
-                    receiver_.source_guid_prefix_);
+    link_->received(rsh.submessage_.acknack_sm(), receiver_.source_guid_prefix_,
+                    receiver_.dest_guid_prefix_);
     break;
+
   default:
     break;
   }

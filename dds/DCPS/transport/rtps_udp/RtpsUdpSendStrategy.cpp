@@ -29,7 +29,8 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
                           0,  // synch_resource
                           link->transport_priority(),
                           new NullSynchStrategy),
-    link_(link)
+    link_(link),
+    override_dest_(0)
 {
   rtps_header_.prefix[0] = 'R';
   rtps_header_.prefix[1] = 'T';
@@ -44,13 +45,16 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
 ssize_t
 RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
+  if (override_dest_) {
+    return send_multi_i(iov, n, *override_dest_);
+  }
+
   // determine destination address(es) from TransportQueueElement in progress
   TransportQueueElement* elem = current_packet_first_element();
   if (!elem) {
     errno = ENOTCONN;
     return -1;
   }
-  //TODO: also cover the case where we come in from TransportSendBuffer
 
   std::set<ACE_INET_Addr> addrs;
   link_->get_locators(elem->publication_id(), addrs);
@@ -60,6 +64,18 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
   }
 
   return send_multi_i(iov, n, addrs);
+}
+
+RtpsUdpSendStrategy::OverrideToken
+RtpsUdpSendStrategy::override_destinations(const std::set<ACE_INET_Addr>& dest)
+{
+  override_dest_ = &dest;
+  return OverrideToken(this);
+}
+
+RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
+{
+  outer_->override_dest_ = 0;
 }
 
 void

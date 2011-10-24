@@ -62,16 +62,20 @@ public:
   bool open();
 
   void received(const OpenDDS::RTPS::DataSubmessage& data,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const GuidPrefix_t& dst_prefix);
 
   void received(const OpenDDS::RTPS::GapSubmessage& gap,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const GuidPrefix_t& dst_prefix);
 
   void received(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const GuidPrefix_t& dst_prefix);
 
   void received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const GuidPrefix_t& dst_prefix);
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
@@ -137,7 +141,6 @@ private:
   // RTPS reliability support for local writers:
 
   struct ReaderInfo {
-    SequenceNumber seq_;
     CORBA::Long acknack_recvd_count_;
     std::vector<OpenDDS::RTPS::SequenceNumberSet> requested_changes_;
 
@@ -192,6 +195,7 @@ private:
       : outer_(outer), scheduled_(false) {}
 
     void schedule();
+    void cancel();
 
     int handle_timeout(const ACE_Time_Value&, const void*)
     {

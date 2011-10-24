@@ -31,6 +31,16 @@ public:
 
   virtual void stop_i();
 
+  struct OverrideToken {
+    explicit OverrideToken(RtpsUdpSendStrategy* outer) : outer_(outer) {}
+    ~OverrideToken();
+    RtpsUdpSendStrategy* outer_;
+  };
+  friend struct OverrideToken;
+
+  OverrideToken override_destinations(
+    const std::set<ACE_INET_Addr>& destinations);
+
   void send_rtps_control(ACE_Message_Block& submessages,
                          const std::set<ACE_INET_Addr>& destinations);
 
@@ -50,6 +60,7 @@ private:
 
   RtpsUdpDataLink* link_;
   OpenDDS::RTPS::Header rtps_header_;
+  const std::set<ACE_INET_Addr>* override_dest_;
 };
 
 } // namespace DCPS

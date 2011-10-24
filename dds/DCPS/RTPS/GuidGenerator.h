@@ -1,4 +1,3 @@
-// -*- C++ -*-
 /*
  * $Id$
  *
@@ -9,6 +8,8 @@
 
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DCPS/RTPS/rtps_export.h"
+
+#include "ace/Basic_Types.h"
 
 namespace OpenDDS {
   namespace RTPS {
@@ -31,28 +32,28 @@ namespace OpenDDS {
  *
  */
 class OpenDDS_Rtps_Export GuidGenerator {
- public:
+public:
   /// Borrowed from ACE::UUID_Node, definition of the
   /// MAC address holder type
 
   enum {NODE_ID_SIZE = 6};
-  typedef u_char Node_ID[NODE_ID_SIZE];
+  typedef unsigned char Node_ID[NODE_ID_SIZE];
 
   /// Default constructor - initializes pid and MAC address values
-  GuidGenerator (void);
+  GuidGenerator();
 
   /// populate a GUID container with a unique ID. This will increment
   /// the counter, and use a lock (if compiled with MT ACE) while
   /// doing so.
-  void populate (DCPS::GUID_t &container);
+  void populate(DCPS::GUID_t& container);
 
- private:
-  uint16_t getCount(void);
+private:
+  ACE_UINT16 getCount();
 
   Node_ID node_id_;
   pid_t pid_;
   ACE_SYNCH_MUTEX counter_lock_;
-  uint16_t counter_;
+  ACE_UINT16 counter_;
 };
 
 } // namespace RTPS

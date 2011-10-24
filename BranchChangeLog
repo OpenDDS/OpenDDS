@@ -1,3 +1,35 @@
+Mon Oct 24 18:30:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added methods for converting to/from the RTPS bitmap representation.
+
+        * dds/DCPS/RTPS/GuidGenerator.h:
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          Updated to compile on VC++.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Allow for external locking so single lock can be held across
+          multiple calls to resend()/resend_i().
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Completed the initial implementation of the DataWriter side of the
+          RTPS Reliablity protocol (generate HEARTBEAT and GAP, ability to
+          resend DATA, receive ACKNACK).
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Unit tests for new DisjointSequence functionality.
+
 Mon Oct 24 18:17:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GuidBuilder.h:
@@ -67,7 +99,7 @@ Wed Oct 19 17:52:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
           Significant rework of DisjointSequence.  Added doxygen comments.
           What used to be update() is now insert(), what used to be
           lowest_valid() is now another form of insert(), and what used to be
-          low() is noweither low() or cumulative_ack() depending on the usage.
+          low() is now either low() or cumulative_ack() depending on the usage.
           DisjointSequence no longer handles wrapping SequenceNumbers, but the
           64-bit sequence numbers don't wrap (under real-world conditions).
 

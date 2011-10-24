@@ -177,6 +177,8 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 void
 RtpsUdpDataLink::stop_i()
 {
+  nack_reply_.cancel();
+  heartbeat_.disable();
 }
 
 void
@@ -367,20 +369,22 @@ RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::DataSubmessage& data,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const GuidPrefix_t& dst_prefix)
 {
 }
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::GapSubmessage& gap,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const GuidPrefix_t& dst_prefix)
 {
   RepoId src;
   std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
   src.entityId = gap.writerId;
 
   RepoId local;
-  std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
+  std::memcpy(local.guidPrefix, dst_prefix, sizeof(GuidPrefix_t));
   local.entityId = gap.readerId; // may be ENTITYID_UNKNOWN (all readers)
 
   //TODO: process GAP
@@ -388,17 +392,19 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::GapSubmessage& gap,
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const GuidPrefix_t& dst_prefix)
 {
 }
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const GuidPrefix_t& dst_prefix)
 {
   // local side is DW
   RepoId local;
-  std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
+  std::memcpy(local.guidPrefix, dst_prefix, sizeof(GuidPrefix_t));
   local.entityId = acknack.writerId;
 
   const RtpsWriterMap::iterator rw = writers_.find(local);
@@ -446,12 +452,14 @@ RtpsUdpDataLink::send_nack_replies()
     typedef ReaderInfoMap::iterator ri_iter;
     const ri_iter end = writer.remote_readers_.end();
     for (ri_iter ri = writer.remote_readers_.begin(); ri != end; ++ri) {
+
       for (size_t i = 0; i < ri->second.requested_changes_.size(); ++i) {
         const SequenceNumberSet& sn_state = ri->second.requested_changes_[i];
         SequenceNumber base;
         base.setValue(sn_state.bitmapBase.high, sn_state.bitmapBase.low);
         requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
       }
+
       if (ri->second.requested_changes_.size()) {
         if (locators_.count(ri->first)) {
           recipients.insert(locators_[ri->first]);
@@ -466,9 +474,14 @@ RtpsUdpDataLink::send_nack_replies()
 
     std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
     DisjointSequence gaps;
-    //TODO: let RtpsUdpSendStrategy know we are in a resend to "recipients"
-    for (size_t i = 0; i < ranges.size(); ++i) {
-      rw->second.send_buff_->resend(ranges[i]/*TODO, &gaps*/);
+    SingleSendBuffer& sb = *rw->second.send_buff_;
+    {
+      ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
+      RtpsUdpSendStrategy::OverrideToken ot =
+        send_strategy_->override_destinations(recipients);
+      for (size_t i = 0; i < ranges.size(); ++i) {
+        sb.resend_i(ranges[i], &gaps);
+      }
     }
 
     if (gaps.empty()) {
@@ -477,24 +490,44 @@ RtpsUdpDataLink::send_nack_replies()
 
     // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
     // [gapStart, gapListBase) and those in the SNSet.
-    const SequenceNumber firstMissing = gaps.low();
+    const SequenceNumber firstMissing = gaps.low(),
+                         base = ++SequenceNumber(gaps.cumulative_ack());
     const SequenceNumber_t gapStart = {firstMissing.getHigh(),
                                        firstMissing.getLow()},
-                           gapListBase = {}; //TODO
-//TODO: convert to SNSet, send.
-    // We are not going to enable any bits in the "bitmap" of the SNSet,
-    // but the "numBits" and the bitmap.length must both be > 0.
+                           gapListBase = {base.getHigh(), base.getLow()};
+    CORBA::ULong num_bits = 0;
     LongSeq8 bitmap;
-    bitmap.length(1);
-    bitmap[0] = 0;
+
+    if (gaps.disjoint()) {
+      bitmap.length(std::min(CORBA::ULong(8),
+                             CORBA::ULong(gaps.high().getValue() -
+                                          base.getValue()) / 32));
+      gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
+
+    } else {
+      bitmap.length(1);
+      bitmap[0] = 0;
+      num_bits = 1;
+    }
 
     GapSubmessage gap = {
       {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
       ENTITYID_UNKNOWN, // readerId: applies to all matched readers
       rw->first.entityId,
       gapStart,
-      {gapListBase, 1, bitmap}
+      {gapListBase, num_bits, bitmap}
     };
+
+    size_t size = 0, padding = 0;
+    gen_find_size(gap, size, padding);
+    gap.smHeader.submessageLength =
+      static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+
+    ACE_Message_Block mb_gap(size + padding); //TODO: allocators?
+    // byte swapping is handled in the operator<<() implementation
+    Serializer ser(&mb_gap, false, Serializer::ALIGN_CDR);
+    ser << gap;
+    send_strategy_->send_rtps_control(mb_gap, recipients);
   }
 }
 
@@ -562,6 +595,15 @@ RtpsUdpDataLink::NackResponseDelay::schedule()
     } else {
       scheduled_ = true;
     }
+  }
+}
+
+void
+RtpsUdpDataLink::NackResponseDelay::cancel()
+{
+  if (scheduled_) {
+    outer_->get_reactor()->cancel_timer(this);
+    scheduled_ = false;
   }
 }
 

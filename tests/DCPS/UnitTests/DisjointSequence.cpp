@@ -332,6 +332,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(ranges.size() == 2);
     TEST_CHECK(ranges[0] == SequenceRange(3, 3));
     TEST_CHECK(ranges[1] == SequenceRange(5, 6));
+
+    // See RTPS v2.1 section 9.4.2.6 for the definition the X:Y/ZZZZ notation
+    CORBA::Long bitmap; // 4:3/011 = (5,6)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
+    TEST_CHECK(num_bits == 3);
+    TEST_CHECK((bitmap & 0xE0000000) == 0x60000000);
   }
   {
     DisjointSequence sequence;
@@ -373,6 +380,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(dropped.size() == 2);
     TEST_CHECK(dropped[0] == SequenceRange(5, 5));
     TEST_CHECK(dropped[1] == SequenceRange(7, 8));
+
+    CORBA::Long bitmap; // 9:2/01 = (10,10)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
+    TEST_CHECK(num_bits == 2);
+    TEST_CHECK((bitmap & 0xC0000000) == 0x40000000);
   }
   {
     DisjointSequence sequence;
@@ -398,6 +411,194 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(dropped[0] == SequenceRange(4, 4));
     TEST_CHECK(dropped[1] == SequenceRange(6, 8));
     TEST_CHECK(dropped[2] == SequenceRange(10, 12));
+
+    CORBA::Long bitmap; // 3:10/0111111111 = (4,12)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
+    TEST_CHECK(num_bits == 10);
+    TEST_CHECK((bitmap & 0xFFC00000) == 0x7FC00000);
+  }
+  {
+    DisjointSequence sequence;
+    CORBA::Long bits[] = { 1 << 31 }; // high bit is logical index '0'
+    TEST_CHECK(sequence.insert(5, 1 /*num_bits*/, bits));
+    TEST_CHECK(!sequence.empty() && !sequence.disjoint());
+    TEST_CHECK(sequence.low() == 5 && sequence.high() == 5);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(3);
+    CORBA::Long bits[] = { 1 << 31 }; // high bit is logical index '0'
+    TEST_CHECK(sequence.insert(5, 1 /*num_bits*/, bits));
+    TEST_CHECK(!sequence.empty() && sequence.disjoint());
+    TEST_CHECK(sequence.low() == 3 && sequence.high() == 5);
+
+    CORBA::Long bitmap; // 4:2/01 = (5,5)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
+    TEST_CHECK(num_bits == 2);
+    TEST_CHECK((bitmap & 0xC0000000) == 0x40000000);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(3);
+    sequence.insert(7);
+    CORBA::Long bits[] = { 1 << 31 }; // high bit is logical index '0'
+    TEST_CHECK(sequence.insert(5, 1 /*num_bits*/, bits));
+    TEST_CHECK(!sequence.empty() && sequence.disjoint());
+    TEST_CHECK(sequence.low() == 3 && sequence.high() == 7);
+    TEST_CHECK(sequence.present_sequence_ranges()[1] == SequenceRange(5, 5));
+
+    CORBA::Long bitmap; // 4:4/0101 = (5,5),(7,7)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
+    TEST_CHECK(num_bits == 4);
+    TEST_CHECK((bitmap & 0xF0000000) == 0x50000000);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(3);
+    CORBA::Long bits[] = { (1 << 31) | (1 << 29) };
+    TEST_CHECK(sequence.insert(5, 12 /*num_bits*/, bits));
+    TEST_CHECK(!sequence.empty() && sequence.disjoint());
+    TEST_CHECK(sequence.low() == 3 && sequence.high() == 7);
+    TEST_CHECK(sequence.present_sequence_ranges()[1] == SequenceRange(5, 5));
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(4);
+    CORBA::Long bits[] = { (1 << 31) | (1 << 30) };
+    TEST_CHECK(sequence.insert(5, 12 /*num_bits*/, bits));
+    TEST_CHECK(!sequence.disjoint());
+    TEST_CHECK(sequence.low() == 4 && sequence.high() == 6);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(3);
+    sequence.insert(5);
+    CORBA::Long bits[] = { (1 << 30) | (1 << 29) | (1 << 28) |
+                           (1 << 27) | (1 << 26) }; // 1/6:011111 = (2,6)
+    TEST_CHECK(sequence.insert(1, 6 /*num_bits*/, bits));
+    TEST_CHECK(!sequence.disjoint());
+    TEST_CHECK(sequence.low() == 2 && sequence.high() == 6);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(3);
+    sequence.insert(10);
+    CORBA::Long bits[] = { (1 << 30) | (1 << 29) |
+                           (1 << 27) | (1 << 26) }; // 1/6:011011 = (2,3),(5,6)
+    TEST_CHECK(sequence.insert(1, 6 /*num_bits*/, bits));
+    TEST_CHECK(sequence.disjoint());
+    TEST_CHECK(sequence.low() == 2 && sequence.high() == 10);
+    TEST_CHECK(sequence.present_sequence_ranges()[0] == SequenceRange(2, 3));
+    TEST_CHECK(sequence.present_sequence_ranges()[1] == SequenceRange(5, 6));
+
+    CORBA::Long bitmap; // 4:7/0110001 = (5,6),(10,10)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
+    TEST_CHECK(num_bits == 7);
+    TEST_CHECK((bitmap & 0xFE000000) == 0x62000000);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(SequenceRange(3, 6));
+    sequence.insert(SequenceRange(8, 10));
+    CORBA::Long bits[] = { (1 << 30) | (1 << 29) | (1 << 28) |
+                           (1 << 27) | (1 << 26) }; // 4/6:011111 = (5,9)
+    TEST_CHECK(sequence.insert(4, 6 /*num_bits*/, bits));
+    TEST_CHECK(!sequence.disjoint());
+    TEST_CHECK(sequence.low() == 3 && sequence.high() == 10);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(SequenceRange(3, 6));
+    sequence.insert(SequenceRange(8, 10));
+    CORBA::Long bits[] = { (1 << 30) | (1 << 29) | (1 << 28) };
+    TEST_CHECK(sequence.insert(4, 4 /*num_bits*/, bits)); // 4/4:0111 = (5,7)
+    TEST_CHECK(!sequence.disjoint());
+    TEST_CHECK(sequence.low() == 3 && sequence.high() == 10);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(3);
+    sequence.insert(SequenceRange(37, 38)); // skip ahead after inserting 36
+    CORBA::Long bits[] = { 0, (1 << 31)     // 36
+                            | (1 << 28) | (1 << 27) };  // 39-40
+    TEST_CHECK(sequence.insert(4, 37 /*num_bits*/, bits));
+    TEST_CHECK(sequence.disjoint());
+    TEST_CHECK(sequence.low() == 3 && sequence.high() == 40);
+    TEST_CHECK(sequence.present_sequence_ranges()[1] == SequenceRange(36, 40));
+
+    CORBA::Long bitmap[2]; // 4:37/{32x0}11111 = (36,40)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(bitmap, 2, num_bits));
+    TEST_CHECK(num_bits == 37);
+    TEST_CHECK(!bitmap[0] && ((bitmap[1] & 0xF8000000) == 0xF8000000));
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(SequenceRange(32, 37)); // skip ahead across a Long boundary
+    CORBA::Long bits[] = { (1 << 1),    // 31 (0th long has #s 1-32)
+                           (1 << 24) }; // 40 (1st long has #s 33-65)
+    TEST_CHECK(sequence.insert(1, 64 /*num_bits*/, bits));
+    TEST_CHECK(sequence.disjoint());
+    TEST_CHECK(sequence.low() == 31 && sequence.high() == 40);
+    TEST_CHECK(sequence.present_sequence_ranges()[0] == SequenceRange(31, 37));
+    TEST_CHECK(sequence.present_sequence_ranges()[1] == SequenceRange(40, 40));
+
+    CORBA::Long bitmap; // 38:3/001 = (40,40)
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
+    TEST_CHECK(num_bits == 3);
+    TEST_CHECK((bitmap & 0xE0000000) == 0x20000000);
+  }
+  {
+    DisjointSequence sequence;
+    for (int i = 0; i < 32; ++i) sequence.insert(1 + 2 * i);
+    // sequence contains all odd numbers in [1, 63]
+    CORBA::Long bitmap[] = {0xAAAAAAAA, 0xAAAAAAAA}; // 2:62/010101...
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(bitmap, 2, num_bits));
+    TEST_CHECK(num_bits == 62);
+    TEST_CHECK(bitmap[0] == 0x55555555);
+    TEST_CHECK((bitmap[1] & 0xFFFFFFFC) == 0x55555554);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(31); // set base to 32
+    sequence.insert(32 + 17); // 17th bit from msb of bitmap[0]
+    sequence.insert(64 + 3);  //  3rd bit from msb of bitmap[1]
+    CORBA::Long bitmap[2];
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(bitmap, 2, num_bits));
+    TEST_CHECK(num_bits == 36);
+    TEST_CHECK(bitmap[0] == 0x00004000);
+    TEST_CHECK((bitmap[1] & 0xF0000000) == 0x10000000);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(31); // set base to 32
+    sequence.insert(SequenceRange(32 + 10, 64 + 23));
+    CORBA::Long bitmap[2];
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(bitmap, 2, num_bits));
+    TEST_CHECK(num_bits == 56);
+    TEST_CHECK(bitmap[0] == 0x003FFFFF);
+    TEST_CHECK((bitmap[1] & 0xFFFFFF00) == 0xFFFFFF00);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(31); // set base to 32
+    sequence.insert(SequenceRange(32 + 10, 32 + 19));
+    sequence.insert(100);
+    CORBA::Long bitmap[3];
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(bitmap, 3, num_bits));
+    TEST_CHECK(num_bits == 69);
+    TEST_CHECK(bitmap[0] == 0x003FF000);
+    TEST_CHECK(bitmap[1] == 0);
+    TEST_CHECK((bitmap[2] & 0xF8000000) == 0x08000000);
   }
   return 0;
 }

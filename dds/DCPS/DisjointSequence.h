@@ -66,12 +66,25 @@ public:
 
   /// Insert using the RTPS compact representation of a set.  The three
   /// parameters, taken together, describe a set with each 1 bit starting
-  /// at the lsb of bits[0] and extending through num_bits indicating presence
-  /// of the number (value + bit_index) in the set.  bit_index is 0-based.
+  /// at the msb of bits[0] and extending through num_bits (which are located at
+  /// the next least significant bits of bits[0] followed by the msb of bits[1],
+  /// etc.) indicating presence of the number (value + bit_index) in the set.
+  /// bit_index is 0-based.
   /// Precondition: the array 'bits' has at least ceil(num_bits / 32) entries.
   bool insert(SequenceNumber value,
               CORBA::ULong num_bits,
               const CORBA::Long bits[]);
+
+  /// Inverse of insert(value, num_bits, bits).  Populates array of bits[length]
+  /// with the bitmap of ranges above the cumulative_ack() value.  Sets the
+  /// number of significant (used) bits in num_bits.  The 'base' of the bitmap
+  /// is one larger than cumulative_ack().  Returns true if the entire
+  /// DisjointSequence was able to fit in bits[].  Returning false is not an
+  /// error, it's just that the higher-valued ranges didn't fit.
+  /// Precondition: the array 'bits' has 'length' entries allocated.
+  bool to_bitmap(CORBA::Long bitmap[],
+                 CORBA::ULong length,
+                 CORBA::ULong& num_bits) const;
 
   /// Returns missing ranges of SequenceNumbers (internal gaps in the sequence)
   std::vector<SequenceRange> missing_sequence_ranges() const;
@@ -83,10 +96,6 @@ public:
   void dump() const;
 
 private:
-
-  bool insert_i(const SequenceRange& range,
-                std::vector<SequenceRange>* gaps = 0);
-
   static void validate(const SequenceRange& range);
 
   static bool SequenceRange_LessThan(const SequenceRange& lhs,
@@ -96,9 +105,16 @@ private:
   }
 
   typedef bool (*SRCompare)(const SequenceRange&, const SequenceRange&);
-
   typedef std::set<SequenceRange, SRCompare> RangeSet;
   RangeSet sequences_;
+
+
+  // helper methods:
+
+  bool insert_i(const SequenceRange& range,
+                std::vector<SequenceRange>* gaps = 0);
+
+  bool insert_bitmap_range(RangeSet::iterator& iter, const SequenceRange& sr);
 };
 
 

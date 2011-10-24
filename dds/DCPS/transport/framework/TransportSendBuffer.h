@@ -25,6 +25,8 @@ class ACE_Message_Block;
 namespace OpenDDS {
 namespace DCPS {
 
+class DisjointSequence;
+
 /// Abstract base class that forms the interface for TransportSendStrategy
 /// to store data for potential retransmission.  Derived classes actually
 /// store the data and can utilize TransportSendBuffer's friendship in
@@ -39,16 +41,17 @@ public:
                       TransportSendStrategy::QueueType* queue,
                       ACE_Message_Block* chain) = 0;
 
+  typedef TransportSendStrategy::LockType LockType;
+  LockType& strategy_lock() { return this->strategy_->lock_; }
+
 protected:
   explicit TransportSendBuffer(size_t capacity) : capacity_(capacity) {}
   virtual ~TransportSendBuffer();
 
-  typedef TransportSendStrategy::LockType LockType;
   typedef TransportSendStrategy::QueueType QueueType;
   typedef std::pair<QueueType*, ACE_Message_Block*> BufferType;
 
   void resend_one(const BufferType& buffer);
-  LockType& strategy_lock() { return this->strategy_->lock_; }
 
   TransportSendStrategy* strategy_;
   const size_t capacity_;
@@ -59,7 +62,7 @@ private:
 };
 
 /// Implementation of TransportSendBuffer that manages data for a single
-/// domain of SequenceNumbers -- for a given SingelSendBuffer object, the
+/// domain of SequenceNumbers -- for a given SingleSendBuffer object, the
 /// sequence numbers passed to insert() must be generated from the same place.
 class OpenDDS_Dcps_Export SingleSendBuffer
   : public TransportSendBuffer, public RcObject<ACE_SYNCH_MUTEX> {
@@ -71,7 +74,10 @@ public:
 
   SingleSendBuffer(size_t capacity, size_t max_samples_per_packet);
 
-  bool resend(const SequenceRange& range);
+  bool resend(const SequenceRange& range, DisjointSequence* gaps = 0);
+
+  // caller must already have the send strategy lock
+  bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0);
 
   SequenceNumber low() const;
   SequenceNumber high() const;

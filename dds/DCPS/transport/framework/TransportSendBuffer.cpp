@@ -13,6 +13,8 @@
 #include "PacketRemoveVisitor.h"
 #include "RemoveAllVisitor.h"
 
+#include "dds/DCPS/DisjointSequence.h"
+
 #include "ace/Log_Msg.h"
 
 #include "dds/DCPS/RepoIdConverter.h"
@@ -170,16 +172,25 @@ SingleSendBuffer::insert(SequenceNumber sequence,
 }
 
 bool
-SingleSendBuffer::resend(const SequenceRange& range)
+SingleSendBuffer::resend(const SequenceRange& range, DisjointSequence* gaps)
 {
   ACE_GUARD_RETURN(LockType, guard, strategy_lock(), false);
+  return resend_i(range, gaps);
+}
 
+bool
+SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
+{
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
     // Re-send requested sample if still buffered; missing samples
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(this->buffers_.find(sequence));
-    if (it != this->buffers_.end()) {
+    if (it == this->buffers_.end()) {
+      if (gaps) {
+        gaps->insert(sequence);
+      }
+    } else {
       if (Transport_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) SingleSendBuffer::resend() - ")
