@@ -1,3 +1,17 @@
+Mon Oct 24 18:17:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/GuidBuilder.inl:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.inl:
+
+          Rolled-back changes from prior commit.  (No emacs hints in OpenDDS.)
+
+        * dds/DCPS/RTPS/GuidGenerator.h:
+
+          Moved comment from GuidConverter.h here.
+
 Mon Oct 24 17:07:44 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * MPC/config/dcps_rtpsexe.mpb:

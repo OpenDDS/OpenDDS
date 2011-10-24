@@ -13,6 +13,23 @@
 namespace OpenDDS {
   namespace RTPS {
 
+/**
+ *   Generate GuidPrefix_t values for use with RTPS
+ *   Also see GuidConverter.h in dds/DCPS
+ *   0  GUID_t.guidPrefix[ 0] == VendorId_t == 0x01 for OCI (used for OpenDDS)
+ *   1  GUID_t.guidPrefix[ 1] == VendorId_t == 0x03 for OCI (used for OpenDDS)
+ *   2  GUID_t.guidPrefix[ 2] == MAC Address
+ *   3  GUID_t.guidPrefix[ 3] == MAC Address
+ *   4  GUID_t.guidPrefix[ 4] == MAC Address
+ *   5  GUID_t.guidPrefix[ 5] == MAC Address
+ *   6  GUID_t.guidPrefix[ 6] == MAC Address
+ *   7  GUID_t.guidPrefix[ 7] == MAC Address
+ *   8  GUID_t.guidPrefix[ 8] == Process ID (MS byte)
+ *   9  GUID_t.guidPrefix[ 9] == Process ID (LS byte)
+ *  10  GUID_t.guidPrefix[10] == Counter (MS byte)
+ *  11  GUID_t.guidPrefix[11] == Counter (LS byte)
+ *
+ */
 class OpenDDS_Rtps_Export GuidGenerator {
  public:
   /// Borrowed from ACE::UUID_Node, definition of the
