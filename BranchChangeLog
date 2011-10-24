@@ -1,3 +1,13 @@
+Mon Oct 24 18:58:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          GCC's STL implementation is more strict, we can't modify in-place.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fix a warning in struct initializer.
+
 Mon Oct 24 18:30:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:

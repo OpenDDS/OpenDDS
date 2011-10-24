@@ -182,16 +182,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
   const SequenceNumber low = std::min(iter->first, range.first);
   sequences_.erase(iter, right);
 
-  if (right != sequences_.end()
-      && right->first <= next && right->first > range.first) {
-    // extend *right in-place to include range's low side
-    right->first = low;
-    iter = right;
-
-  } else {
-    iter = sequences_.insert(SequenceRange(low, range.second)).first;
-  }
-
+  iter = sequences_.insert(SequenceRange(low, range.second)).first;
   return true;
 }
 

@@ -554,7 +554,7 @@ RtpsUdpDataLink::send_heartbeats()
       rw->first.entityId,
       {firstSN.getHigh(), firstSN.getLow()},
       {lastSN.getHigh(), lastSN.getLow()},
-      ++rw->second.heartbeat_count_
+      {++rw->second.heartbeat_count_}
     };
     subm.push_back(hb);
 
