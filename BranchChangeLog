@@ -1,3 +1,33 @@
+Mon Oct 24 17:07:44 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * MPC/config/dcps_rtpsexe.mpb:
+
+          New base project to support executables that depend on RTPS.
+
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/GuidBuilder.inl:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.inl:
+
+          Added emacs mode hints and documented RTPS based GUID_t octet
+          layout.
+
+        * dds/DCPS/RTPS/GuidGenerator.h:
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          New implementation of the RTPS GUID generator. Makes use of
+          hosts' primary MAC address (or random numbers if no MAC present)
+          plus the 16 bit process ID, plus a counter to generate a unique
+          ID. Probably a time value should be part of it tool, since PID
+          has the potential of being non-unique but there isn't enough
+          room for a timestamp too.
+
+        * tests/DCPS/UnitTests/GuidGenerator.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Added a new unit test to validate the GUID generator.
+
 Thu Oct 20 13:01:31 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * docs/design/RTPS Discovery.jpg:

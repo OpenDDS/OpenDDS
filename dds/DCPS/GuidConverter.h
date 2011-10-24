@@ -1,3 +1,4 @@
+// -*- C++ -*-
 /*
  * $Id$
  *
@@ -44,18 +45,17 @@ namespace DCPS {
  * ---- ---------------------    --------------------------
  *   0  GUID_t.guidPrefix[ 0] == VendorId_t == 0x00 for OCI (used for OpenDDS)
  *   1  GUID_t.guidPrefix[ 1] == VendorId_t == 0x03 for OCI (used for OpenDDS)
- *   2  GUID_t.guidPrefix[ 2] == 0x00
- *   3  GUID_t.guidPrefix[ 3] == 0x00
- *
- *   4  GUID_t.guidPrefix[ 4] == <private> (MS byte)
- *   5  GUID_t.guidPrefix[ 5] == <private>
- *   6  GUID_t.guidPrefix[ 6] == <private>
- *   7  GUID_t.guidPrefix[ 7] == <private> (LS byte)
- *
- *   8  GUID_t.guidPrefix[ 8] == <private> (MS byte)
- *   9  GUID_t.guidPrefix[ 9] == <private>
- *  10  GUID_t.guidPrefix[10] == <private>
- *  11  GUID_t.guidPrefix[11] == <private> (LS byte)
+
+ *   2  GUID_t.guidPrefix[ 2] == MAC Address
+ *   3  GUID_t.guidPrefix[ 3] == MAC Address
+ *   4  GUID_t.guidPrefix[ 4] == MAC Address
+ *   5  GUID_t.guidPrefix[ 5] == MAC Address
+ *   6  GUID_t.guidPrefix[ 6] == MAC Address
+ *   7  GUID_t.guidPrefix[ 7] == MAC Address
+ *   8  GUID_t.guidPrefix[ 8] == Process ID (MS byte)
+ *   9  GUID_t.guidPrefix[ 9] == Process ID (LS byte)
+ *  10  GUID_t.guidPrefix[10] == Counter (MS byte)
+ *  11  GUID_t.guidPrefix[11] == Counter (LS byte)
  *
  *  12  GUID_t.entityId.entityKey[ 0] == entity id[0] (MS byte)
  *  13  GUID_t.entityId.entityKey[ 1] == entity id[1]

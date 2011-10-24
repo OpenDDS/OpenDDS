@@ -41,3 +41,11 @@ project(*Fragmentation): dcpsexe {
     Fragmentation.cpp
   }
 }
+
+project(*GuidGenerator): dcps_rtpsexe {
+  exename   = *
+
+  Source_Files {
+    GuidGenerator.cpp
+  }
+}
