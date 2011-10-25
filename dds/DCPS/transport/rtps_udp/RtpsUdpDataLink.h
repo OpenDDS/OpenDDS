@@ -246,7 +246,7 @@ private:
     int handle_timeout(const ACE_Time_Value&, const void*)
     {
       scheduled_ = false;
-      outer_->*PMF();
+      (outer_->*function_)();
       return 0;
     }
 
