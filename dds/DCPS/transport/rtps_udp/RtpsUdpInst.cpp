@@ -24,8 +24,8 @@ RtpsUdpInst::RtpsUdpInst(const std::string& name)
   , multicast_group_address_(7401, "239.255.0.1")
   , nak_depth_(32) // default nak_depth in OpenDDS_Multicast
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
-  , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
+  , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
 {
 }
 
