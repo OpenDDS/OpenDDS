@@ -1,3 +1,34 @@
+Tue Oct 25 18:30:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added new methods to support generating RTPS ACKNACK submessages.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Support comparison (== and !=) of the EntityId_t portion of GUIDs
+          in addition to the full GUID comparisons.
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Added another common RTPS constant, for size of INFO_DST submessages.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Completed initial implementation of the DataReader side of the
+          RTPS Reliablity protocol (receive HEARTBEAT, DATA, GAP, generate
+          ACKNACK along with its INFO_DST and INFO_REPLY).
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Test new functionality in DisjointSequence.
+
 Mon Oct 24 19:20:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.cpp:

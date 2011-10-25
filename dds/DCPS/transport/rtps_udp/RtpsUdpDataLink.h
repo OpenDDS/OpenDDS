@@ -166,33 +166,79 @@ private:
 
   struct WriterInfo {
     DisjointSequence recvd_;
-    CORBA::Long heartbeat_recvd_count_;
+    bool ack_pending_;
+    CORBA::Long heartbeat_recvd_count_, acknack_count_;
 
-    WriterInfo() : heartbeat_recvd_count_(0) {}
+    WriterInfo()
+      : ack_pending_(false), heartbeat_recvd_count_(0), acknack_count_(0) {}
   };
 
   typedef std::map<RepoId, WriterInfo, GUID_tKeyLessThan> WriterInfoMap;
 
   struct RtpsReader {
     WriterInfoMap remote_writers_;
-    CORBA::Long acknack_count_;
-
-    RtpsReader() : acknack_count_(0) {}
   };
 
   typedef std::map<RepoId, RtpsReader, GUID_tKeyLessThan> RtpsReaderMap;
   RtpsReaderMap readers_;
 
+  typedef std::multimap<RepoId, RtpsReaderMap::iterator, GUID_tKeyLessThan>
+    RtpsReaderIndex;
+  RtpsReaderIndex reader_index_; // keys are remote data writer GUIDs
+
+  void process_heartbeat_i(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
+                           const RepoId& src, RtpsReaderMap::value_type& rr);
+
+  void process_gap_i(const OpenDDS::RTPS::GapSubmessage& gap,
+                     const RepoId& src, RtpsReaderMap::value_type& rr);
+
+  void process_data_i(const OpenDDS::RTPS::DataSubmessage& data,
+                      const RepoId& src, RtpsReaderMap::value_type& rr);
+
+
+  template<typename T, typename FN>
+  void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
+                           const GuidPrefix_t& dst_prefix, const FN& func)
+  {
+    using std::pair;
+    RepoId local;
+    std::memcpy(local.guidPrefix, dst_prefix, sizeof(GuidPrefix_t));
+    local.entityId = submessage.readerId; 
+
+    RepoId src;
+    std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
+    src.entityId = submessage.writerId;
+
+    if (local.entityId == ENTITYID_UNKNOWN) {
+      for (pair<RtpsReaderIndex::iterator, RtpsReaderIndex::iterator> iters =
+             reader_index_.equal_range(src);
+           iters.first != iters.second; ++iters.first) {
+        (this->*func)(submessage, src, *iters.first->second);
+      }
+
+    } else {
+      const RtpsReaderMap::iterator rr = readers_.find(local);
+      if (rr == readers_.end()) {
+        return;
+      }
+      (this->*func)(submessage, src, *rr);
+    }
+  }
 
   // Timers for reliability:
 
   void send_nack_replies();
   void send_heartbeats();
+  void send_heartbeat_replies();
 
-  struct NackResponseDelay : ACE_Event_Handler {
+  struct TimedDelay : ACE_Event_Handler {
 
-    explicit NackResponseDelay(RtpsUdpDataLink* outer)
-      : outer_(outer), scheduled_(false) {}
+    typedef void (RtpsUdpDataLink::*PMF)();
+
+    TimedDelay(RtpsUdpDataLink* outer, PMF function,
+               const ACE_Time_Value& timeout)
+      : outer_(outer), function_(function), timeout_(timeout), scheduled_(false)
+    {}
 
     void schedule();
     void cancel();
@@ -200,14 +246,16 @@ private:
     int handle_timeout(const ACE_Time_Value&, const void*)
     {
       scheduled_ = false;
-      outer_->send_nack_replies();
+      outer_->*PMF();
       return 0;
     }
 
     RtpsUdpDataLink* outer_;
+    PMF function_;
+    ACE_Time_Value timeout_;
     bool scheduled_;
 
-  } nack_reply_;
+  } nack_reply_, heartbeat_reply_;
 
 
   struct HeartBeat : ACE_Event_Handler {
@@ -228,6 +276,9 @@ private:
     bool enabled_;
 
   } heartbeat_;
+
+  OpenDDS::RTPS::InfoDestinationSubmessage info_dst_;
+  OpenDDS::RTPS::InfoReplySubmessage info_reply_;
 };
 
 } // namespace DCPS

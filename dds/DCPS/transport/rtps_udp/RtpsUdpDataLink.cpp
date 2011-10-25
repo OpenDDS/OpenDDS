@@ -29,7 +29,6 @@
 # include "RtpsUdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -46,7 +45,10 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
     transport_customized_element_allocator_(40,
                                             sizeof(TransportCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
-    nack_reply_(this),
+    nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
+                config->nak_response_delay_),
+    heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
+                     config->heartbeat_response_delay_),
     heartbeat_(this)
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
@@ -73,6 +75,41 @@ RtpsUdpDataLink::open()
   }
 
   send_strategy_->send_buffer(&multi_buff_);
+
+  // Set up info_dst_ and info_reply_ messages for use with ACKNACKS,
+  // these won't change during the life of the datalink.
+  using namespace OpenDDS::RTPS;
+  info_dst_.smHeader.submessageId = INFO_DST;
+  info_dst_.smHeader.flags = 1 /*FLAG_E*/;
+  info_dst_.smHeader.submessageLength = INFO_DST_SZ;
+  std::memcpy(info_dst_.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
+
+  info_reply_.smHeader.submessageId = INFO_REPLY;
+  info_reply_.smHeader.flags = 1 /*FLAG_E*/;
+  info_reply_.unicastLocatorList.length(1);
+  info_reply_.unicastLocatorList[0].kind =
+    (config_->local_address_.get_type() == AF_INET6)
+    ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  info_reply_.unicastLocatorList[0].port =
+    config_->local_address_.get_port_number();
+  RtpsUdpTransport::address_to_bytes(info_reply_.unicastLocatorList[0].address,
+                                     config_->local_address_);
+  if (config_->use_multicast_) {
+    info_reply_.multicastLocatorList.length(1);
+    info_reply_.multicastLocatorList[0].kind =
+      (config_->multicast_group_address_.get_type() == AF_INET6)
+      ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    info_reply_.multicastLocatorList[0].port =
+      config_->multicast_group_address_.get_port_number();
+    RtpsUdpTransport::address_to_bytes(
+      info_reply_.multicastLocatorList[0].address,
+      config_->multicast_group_address_);
+  }
+
+  size_t size = 0, padding = 0;
+  gen_find_size(info_reply_, size, padding);
+  info_reply_.smHeader.submessageLength =
+    static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
 
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
             static_rchandle_cast<TransportStrategy>(recv_strategy_)) != 0) {
@@ -136,7 +173,13 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     heartbeat_.enable();
 
   } else if (kind == KIND_READER) {
-    readers_[local_id].remote_writers_[remote_id];
+    RtpsReaderMap::iterator rr = readers_.find(local_id);
+    if (rr == readers_.end()) {
+      rr = readers_.insert(RtpsReaderMap::value_type(local_id, RtpsReader()))
+        .first;
+    }
+    rr->second.remote_writers_[remote_id];
+    reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
   }
 }
 
@@ -144,6 +187,7 @@ void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
+  using std::pair;
   GuidConverter conv(local_id);
   EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER) {
@@ -167,6 +211,16 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
     if (rr != readers_.end()) {
       rr->second.remote_writers_.erase(remote_id);
 
+      for (pair<RtpsReaderIndex::iterator, RtpsReaderIndex::iterator> iters =
+             reader_index_.equal_range(remote_id);
+           iters.first != iters.second;) {
+        if (iters.first->second == rr) {
+          reader_index_.erase(iters.first++);
+        } else {
+          ++iters.first;
+        }
+      }
+
       if (rr->second.remote_writers_.empty()) {
         readers_.erase(rr);
       }
@@ -178,6 +232,7 @@ void
 RtpsUdpDataLink::stop_i()
 {
   nack_reply_.cancel();
+  heartbeat_reply_.cancel();
   heartbeat_.disable();
 }
 
@@ -225,15 +280,16 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
+  OpenDDS::RTPS::SubmessageSeq subm;
+  add_gap_submsg(subm, *element);
+
   TransportSendElement* tse = dynamic_cast<TransportSendElement*>(element);
   TransportCustomizedElement* tce =
     dynamic_cast<TransportCustomizedElement*>(element);
-  TransportSendControlElement* tsce = dynamic_cast<TransportSendControlElement*>(element);
+  TransportSendControlElement* tsce =
+    dynamic_cast<TransportSendControlElement*>(element);
 
   ACE_Message_Block* data = 0;
-  OpenDDS::RTPS::SubmessageSeq subm;
-
-  add_gap_submsg(subm, *element);
 
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
@@ -242,6 +298,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_control_submessages(
               subm, *tsce, this->requires_inline_qos(tsce->publication_id()));
+
   } else if (tse) {  // Basic data message
     // {DataSampleHeader} -> {Data Payload}
     data = msg->cont()->duplicate();
@@ -249,6 +306,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
               subm, *dsle, this->requires_inline_qos(dsle->publication_id_));
+
   } else if (tce) {  // Customized data message
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
     data = msg->cont()->cont()->duplicate();
@@ -256,6 +314,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
               subm, *dsle, this->requires_inline_qos(dsle->publication_id_));
+
   } else {
     //TODO: handle other types?
     return element;
@@ -314,6 +373,10 @@ void
 RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
                                 const TransportQueueElement& tqe)
 {
+  // These are the GAP submessages that we'll send directly in-line with the
+  // DATA when we notice that the DataWriter has deliberately skipped seq #s.
+  // There are other GAP submessages generated in response to reader ACKNACKS,
+  // see send_nack_replies().
   using namespace OpenDDS::RTPS;
 
   const SequenceNumber seq = tqe.sequence();
@@ -372,6 +435,21 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::DataSubmessage& data,
                           const GuidPrefix_t& src_prefix,
                           const GuidPrefix_t& dst_prefix)
 {
+  datareader_dispatch(data, src_prefix, dst_prefix,
+                      &RtpsUdpDataLink::process_data_i);
+}
+
+void
+RtpsUdpDataLink::process_data_i(const OpenDDS::RTPS::DataSubmessage& data,
+                                const RepoId& src,
+                                RtpsReaderMap::value_type& rr)
+{
+  WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
+  if (wi != rr.second.remote_writers_.end()) {
+    SequenceNumber seq;
+    seq.setValue(data.writerSN.high, data.writerSN.low);
+    wi->second.recvd_.insert(seq);
+  }
 }
 
 void
@@ -379,15 +457,26 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::GapSubmessage& gap,
                           const GuidPrefix_t& src_prefix,
                           const GuidPrefix_t& dst_prefix)
 {
-  RepoId src;
-  std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
-  src.entityId = gap.writerId;
+  datareader_dispatch(gap, src_prefix, dst_prefix,
+                      &RtpsUdpDataLink::process_gap_i);
+}
 
-  RepoId local;
-  std::memcpy(local.guidPrefix, dst_prefix, sizeof(GuidPrefix_t));
-  local.entityId = gap.readerId; // may be ENTITYID_UNKNOWN (all readers)
-
-  //TODO: process GAP
+void
+RtpsUdpDataLink::process_gap_i(const OpenDDS::RTPS::GapSubmessage& gap,
+                               const RepoId& src, RtpsReaderMap::value_type& rr)
+{
+  WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
+  if (wi != rr.second.remote_writers_.end()) {
+    SequenceRange sr;
+    sr.first.setValue(gap.gapStart.high, gap.gapStart.low);
+    SequenceNumber base;
+    base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
+    sr.second = base.previous();
+    wi->second.recvd_.insert(sr);
+    wi->second.recvd_.insert(base, gap.gapList.numBits,
+                             gap.gapList.bitmap.get_buffer());
+    //FUTURE: to support wait_for_acks(), notify DCPS layer of the GAP
+  }
 }
 
 void
@@ -395,6 +484,123 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
                           const GuidPrefix_t& src_prefix,
                           const GuidPrefix_t& dst_prefix)
 {
+  datareader_dispatch(heartbeat, src_prefix, dst_prefix,
+                      &RtpsUdpDataLink::process_heartbeat_i);
+}
+
+void
+RtpsUdpDataLink::process_heartbeat_i(
+  const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
+  const RepoId& src, RtpsReaderMap::value_type& rr)
+{
+  WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
+  if (wi == rr.second.remote_writers_.end()) {
+    // we may not be associated yet, even if the writer thinks we are
+    return;
+  }
+
+  if (heartbeat.count.value <= wi->second.heartbeat_recvd_count_) {
+    return;
+  }
+
+  wi->second.heartbeat_recvd_count_ = heartbeat.count.value;
+
+  DisjointSequence& recvd = wi->second.recvd_;
+  // don't attempt to nack anything below heartbeat.firstSN or above .lastSN
+  if (!recvd.empty()) {
+    SequenceNumber first;
+    first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
+    if (recvd.cumulative_ack() < first) {
+      recvd.insert(SequenceRange(recvd.cumulative_ack(), first.previous()));
+    }
+
+    SequenceNumber last;
+    last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
+    if (recvd.last_ack() > last) {
+      recvd.insert(SequenceRange(++SequenceNumber(last), recvd.last_ack()));
+    }
+    //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
+    //        numbers we no longer expect to receive due to HEARTBEAT
+  }
+
+  const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
+    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
+
+  if (!final || (!liveliness && recvd.disjoint())) {
+    wi->second.ack_pending_ = true;
+    heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
+  }
+
+  //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
+}
+
+void
+RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
+{
+  using namespace OpenDDS::RTPS;
+  for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end();
+       ++rr) {
+    WriterInfoMap& writers = rr->second.remote_writers_;
+    for (WriterInfoMap::iterator wi = writers.begin(); wi != writers.end();
+         ++wi) {
+
+      // if we have some negative acknowledgements, we'll ask for a reply
+      DisjointSequence& recvd = wi->second.recvd_;
+      const bool nack = recvd.disjoint();
+
+      if (wi->second.ack_pending_ || nack) {
+        wi->second.ack_pending_ = false;
+
+        SequenceNumber ack;
+        CORBA::ULong num_bits = 1;
+        LongSeq8 bitmap;
+        bitmap.length(1);
+        bitmap[0] = 0;
+
+        if (!recvd.empty()) {
+          ack = ++SequenceNumber(recvd.cumulative_ack());
+          bitmap.length(std::min(CORBA::ULong(8),
+                                 CORBA::ULong(recvd.last_ack().getValue() -
+                                              ack.getValue()) / 32));
+          recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
+        }
+
+        AckNackSubmessage acknack = {
+          {ACKNACK, 1 /*FLAG_E*/ | (nack ? 0 : 2 /*FLAG_F*/), 0 /*length*/},
+          rr->first.entityId,
+          wi->first.entityId,
+          { // SequenceNumberSet: acking bitmapBase - 1
+            {ack.getHigh(), ack.getLow()},
+            num_bits, bitmap
+          },
+          {++wi->second.acknack_count_}
+        };
+
+        size_t size = 0, padding = 0;
+        gen_find_size(acknack, size, padding);
+        acknack.smHeader.submessageLength =
+          static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+        // ok to visit these next two out-of-order, all of these are aligned
+        gen_find_size(info_dst_, size, padding);
+        gen_find_size(info_reply_, size, padding);
+
+        ACE_Message_Block mb_acknack(size + padding); //TODO: allocators?
+        // byte swapping is handled in the operator<<() implementation
+        Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
+        ser << info_dst_;
+        ser << info_reply_;
+        ser << acknack;
+
+        if (!locators_.count(wi->first)) {
+          //TODO: log error, don't know where to send it
+        } else {
+          std::set<ACE_INET_Addr> recipients;
+          recipients.insert(locators_[wi->first]);
+          send_strategy_->send_rtps_control(mb_acknack, recipients);
+        }
+      }
+    }
+  }
 }
 
 void
@@ -405,7 +611,7 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
   // local side is DW
   RepoId local;
   std::memcpy(local.guidPrefix, dst_prefix, sizeof(GuidPrefix_t));
-  local.entityId = acknack.writerId;
+  local.entityId = acknack.writerId; // can't be ENTITYID_UNKNOWN
 
   const RtpsWriterMap::iterator rw = writers_.find(local);
   if (rw == writers_.end()) {
@@ -427,9 +633,14 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
 
   ri->second.acknack_recvd_count_ = acknack.count.value;
 
-  ri->second.requested_changes_.push_back(acknack.readerSNState);
+  const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
-  nack_reply_.schedule(); // timer will invoke send_nack_replies()
+  // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
+  // we don't need to do anything further.
+  if (!final) {
+    ri->second.requested_changes_.push_back(acknack.readerSNState);
+    nack_reply_.schedule(); // timer will invoke send_nack_replies()
+  }
 }
 
 void
@@ -583,15 +794,14 @@ RtpsUdpDataLink::send_heartbeats()
 }
 
 void
-RtpsUdpDataLink::NackResponseDelay::schedule()
+RtpsUdpDataLink::TimedDelay::schedule()
 {
   if (!scheduled_) {
-    const long timer = outer_->get_reactor()->schedule_timer(this, 0,
-      outer_->config_->nak_response_delay_);
+    const long timer = outer_->get_reactor()->schedule_timer(this, 0, timeout_);
 
     if (timer == -1) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::NackResponseDelay::"
-        "schedule failed to schedule timer %p\n", ACE_TEXT("")));
+      ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::TimedDelay::schedule "
+        "failed to schedule timer %p\n", ACE_TEXT("")));
     } else {
       scheduled_ = true;
     }
@@ -599,7 +809,7 @@ RtpsUdpDataLink::NackResponseDelay::schedule()
 }
 
 void
-RtpsUdpDataLink::NackResponseDelay::cancel()
+RtpsUdpDataLink::TimedDelay::cancel()
 {
   if (scheduled_) {
     outer_->get_reactor()->cancel_timer(this);

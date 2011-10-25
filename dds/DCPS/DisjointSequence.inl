@@ -29,6 +29,14 @@ DisjointSequence::cumulative_ack() const
     : sequences_.begin()->second;
 }
 
+ACE_INLINE SequenceNumber
+DisjointSequence::last_ack() const
+{
+  return sequences_.empty()
+    ? SequenceNumber::SEQUENCENUMBER_UNKNOWN()
+    : sequences_.rbegin()->first;
+}
+
 ACE_INLINE bool
 DisjointSequence::empty() const
 {

@@ -55,6 +55,13 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                                        const ACE_INET_Addr& /*remote_address*/)
 {
   using namespace OpenDDS::RTPS;
+
+  if (std::memcmp(receiver_.dest_guid_prefix_, link_->local_prefix(),
+                  sizeof(GuidPrefix_t))) {
+    // Not our message, we may be on multicast listening to all the others.
+    return;
+  }
+
   const RtpsSampleHeader& rsh = received_sample_header();
   const SubmessageKind kind = rsh.submessage_._d();
 

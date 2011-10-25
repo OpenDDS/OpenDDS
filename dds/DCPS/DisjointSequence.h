@@ -45,6 +45,11 @@ public:
   /// If empty(), returns SEQUENCENUMBER_UNKNOWN.
   SequenceNumber cumulative_ack() const;
 
+  /// Gets the low end of the highest contiguous range, may be thought of as
+  /// the inverse of cumulative_ack().
+  /// If empty(), returns SEQUENCENUMBER_UNKNOWN.
+  SequenceNumber last_ack() const;
+
   /// Objects with the disjoint() property have an internal gap in the inserted
   /// SequenceNumbers.
   bool disjoint() const;
@@ -75,16 +80,19 @@ public:
               CORBA::ULong num_bits,
               const CORBA::Long bits[]);
 
-  /// Inverse of insert(value, num_bits, bits).  Populates array of bits[length]
-  /// with the bitmap of ranges above the cumulative_ack() value.  Sets the
-  /// number of significant (used) bits in num_bits.  The 'base' of the bitmap
-  /// is one larger than cumulative_ack().  Returns true if the entire
-  /// DisjointSequence was able to fit in bits[].  Returning false is not an
-  /// error, it's just that the higher-valued ranges didn't fit.
+  /// Inverse of insert(value, num_bits, bits).  Populates array of
+  /// bitmap[length] with the bitmap of ranges above the cumulative_ack() value.
+  /// Sets the number of significant (used) bits in num_bits.  The 'base' of the
+  /// bitmap is one larger than cumulative_ack().  Returns true if the entire
+  /// DisjointSequence was able to fit in bitmap[].  Returning false is not an
+  /// error, it's just that the higher-valued ranges didn't fit.  If invert is
+  /// true, the 1's in the bitmap represent the missing_sequence_ranges()
+  /// instead of the present_sequence_ranges().
   /// Precondition: the array 'bits' has 'length' entries allocated.
   bool to_bitmap(CORBA::Long bitmap[],
                  CORBA::ULong length,
-                 CORBA::ULong& num_bits) const;
+                 CORBA::ULong& num_bits,
+                 bool invert = false) const;
 
   /// Returns missing ranges of SequenceNumbers (internal gaps in the sequence)
   std::vector<SequenceRange> missing_sequence_ranges() const;
@@ -115,6 +123,10 @@ private:
                 std::vector<SequenceRange>* gaps = 0);
 
   bool insert_bitmap_range(RangeSet::iterator& iter, const SequenceRange& sr);
+
+  static bool to_bitmap_helper(CORBA::ULong low, CORBA::ULong high,
+                               CORBA::Long bitmap[], CORBA::ULong length,
+                               CORBA::ULong& num_bits);
 };
 
 

@@ -96,6 +96,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     TEST_CHECK(sequence.low() == SequenceNumber(1));
     TEST_CHECK(sequence.high() == SequenceNumber(6));
+    TEST_CHECK(sequence.cumulative_ack() == SequenceNumber(1));
+    TEST_CHECK(sequence.last_ack() == SequenceNumber(6));
     TEST_CHECK(sequence.disjoint());
 
     // ASSERT insert of low + 1 updates the cumulative_ack
@@ -109,6 +111,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     TEST_CHECK(sequence.low() == SequenceNumber(1));
     TEST_CHECK(sequence.high() == SequenceNumber(6));
+    TEST_CHECK(sequence.cumulative_ack() == SequenceNumber(1));
+    TEST_CHECK(sequence.last_ack() == SequenceNumber(3));
     TEST_CHECK(sequence.disjoint());
 
     sequence.insert(2);
@@ -127,6 +131,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     TEST_CHECK(sequence.low() == SequenceNumber(1));
     TEST_CHECK(sequence.high() == SequenceNumber(6));
+    TEST_CHECK(sequence.last_ack() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
 
     sequence.insert(2);
@@ -146,12 +151,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     TEST_CHECK(sequence.low() == SequenceNumber(1));
     TEST_CHECK(sequence.high() == SequenceNumber(7));
+    TEST_CHECK(sequence.last_ack() == SequenceNumber(6));
     TEST_CHECK(sequence.disjoint());
 
     sequence.insert(SequenceRange(2, 3));
 
     TEST_CHECK(sequence.cumulative_ack() == SequenceNumber(4));
     TEST_CHECK(sequence.high() == SequenceNumber(7));
+    TEST_CHECK(sequence.last_ack() == SequenceNumber(6));
     TEST_CHECK(sequence.disjoint());
   }
 
@@ -339,6 +346,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
     TEST_CHECK(num_bits == 3);
     TEST_CHECK((bitmap & 0xE0000000) == 0x60000000);
+
+    CORBA::Long anti_bitmap; // 4:1/1 = (4,4)
+    CORBA::ULong anti_num_bits;
+    TEST_CHECK(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 1);
+    TEST_CHECK((anti_bitmap & 0x80000000) == 0x80000000);
   }
   {
     DisjointSequence sequence;
@@ -454,6 +467,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
     TEST_CHECK(num_bits == 4);
     TEST_CHECK((bitmap & 0xF0000000) == 0x50000000);
+
+    CORBA::Long anti_bitmap; // 4:3/101 = (4,4),(6,6)
+    CORBA::ULong anti_num_bits;
+    TEST_CHECK(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 3);
+    TEST_CHECK((anti_bitmap & 0xE0000000) == 0xA0000000);
   }
   {
     DisjointSequence sequence;
@@ -499,6 +518,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.to_bitmap(&bitmap, 1, num_bits));
     TEST_CHECK(num_bits == 7);
     TEST_CHECK((bitmap & 0xFE000000) == 0x62000000);
+
+    CORBA::Long anti_bitmap; // 4:6/100111 = (4,4),(7,9)
+    CORBA::ULong anti_num_bits;
+    TEST_CHECK(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 6);
+    TEST_CHECK((anti_bitmap & 0xFC000000) == 0x9C000000);
   }
   {
     DisjointSequence sequence;
@@ -535,6 +560,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.to_bitmap(bitmap, 2, num_bits));
     TEST_CHECK(num_bits == 37);
     TEST_CHECK(!bitmap[0] && ((bitmap[1] & 0xF8000000) == 0xF8000000));
+
+    CORBA::Long anti_bitmap; // 4:32/{32x1} = (4,35)
+    CORBA::ULong anti_num_bits;
+    TEST_CHECK(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 32);
+    TEST_CHECK(anti_bitmap == 0xFFFFFFFF);
   }
   {
     DisjointSequence sequence;
@@ -563,6 +594,15 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(num_bits == 62);
     TEST_CHECK(bitmap[0] == 0x55555555);
     TEST_CHECK((bitmap[1] & 0xFFFFFFFC) == 0x55555554);
+
+    CORBA::Long anti_bitmap[] = {0x55555555, 0x55555555}; // 2:61/101010...
+    CORBA::ULong anti_num_bits;
+    // doesn't fit in 1 Long, verify that it returns false
+    TEST_CHECK(!sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, true));
+    TEST_CHECK(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 61);
+    TEST_CHECK(anti_bitmap[0] == 0xAAAAAAAA);
+    TEST_CHECK((anti_bitmap[1] & 0xFFFFFFF8) == 0xAAAAAAA8);
   }
   {
     DisjointSequence sequence;
@@ -575,6 +615,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(num_bits == 36);
     TEST_CHECK(bitmap[0] == 0x00004000);
     TEST_CHECK((bitmap[1] & 0xF0000000) == 0x10000000);
+
+    CORBA::Long anti_bitmap[2];// 32:35/11111111 11111111 10111111 11111111 111
+    CORBA::ULong anti_num_bits;
+    TEST_CHECK(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 35);
+    TEST_CHECK(anti_bitmap[0] == 0xFFFFBFFF);
+    TEST_CHECK((anti_bitmap[1] & 0xE0000000) == 0xE0000000);
   }
   {
     DisjointSequence sequence;
@@ -586,6 +633,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(num_bits == 56);
     TEST_CHECK(bitmap[0] == 0x003FFFFF);
     TEST_CHECK((bitmap[1] & 0xFFFFFF00) == 0xFFFFFF00);
+
+    CORBA::Long anti_bitmap; // 32:10/1111111111
+    CORBA::ULong anti_num_bits;
+    TEST_CHECK(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 10);
+    TEST_CHECK((anti_bitmap & 0xFFC00000) == 0xFFC00000);
   }
   {
     DisjointSequence sequence;
@@ -599,6 +652,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(bitmap[0] == 0x003FF000);
     TEST_CHECK(bitmap[1] == 0);
     TEST_CHECK((bitmap[2] & 0xF8000000) == 0x08000000);
+
+    CORBA::Long anti_bitmap[3]; // 32:68/11111111 11000000 00001...
+    CORBA::ULong anti_num_bits;
+    TEST_CHECK(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, true));
+    TEST_CHECK(anti_num_bits == 68);
+    TEST_CHECK(anti_bitmap[0] == 0xFFC00FFF);
+    TEST_CHECK(anti_bitmap[1] == 0xFFFFFFFF);
+    TEST_CHECK((anti_bitmap[2] & 0xF0000000) == 0xF0000000);
   }
   return 0;
 }

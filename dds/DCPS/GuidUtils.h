@@ -57,6 +57,19 @@ enum EntityKind {     // EntityId_t.entityKind value(s)
 };
 
 struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
+  static bool entity_less(const EntityId_t& v1, const EntityId_t& v2)
+  {
+    if (v1.entityKey[2] < v2.entityKey[2]) return true;
+    if (v2.entityKey[2] < v1.entityKey[2]) return false;
+    if (v1.entityKey[1] < v2.entityKey[1]) return true;
+    if (v2.entityKey[1] < v1.entityKey[1]) return false;
+    if (v1.entityKey[0] < v2.entityKey[0]) return true;
+    if (v2.entityKey[0] < v1.entityKey[0]) return false;
+    if (v1.entityKind < v2.entityKind) return true;
+    if (v2.entityKind < v1.entityKind) return false;
+    return false;
+  }
+
   bool operator()(const GUID_t& v1, const GUID_t& v2) const
   {
     if (v1.guidPrefix[11] < v2.guidPrefix[11]) return true;
@@ -83,15 +96,7 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
     if (v2.guidPrefix[ 1] < v1.guidPrefix[ 1]) return false;
     if (v1.guidPrefix[ 0] < v2.guidPrefix[ 0]) return true;
     if (v2.guidPrefix[ 0] < v1.guidPrefix[ 0]) return false;
-    if (v1.entityId.entityKey[2] < v2.entityId.entityKey[2]) return true;
-    if (v2.entityId.entityKey[2] < v1.entityId.entityKey[2]) return false;
-    if (v1.entityId.entityKey[1] < v2.entityId.entityKey[1]) return true;
-    if (v2.entityId.entityKey[1] < v1.entityId.entityKey[1]) return false;
-    if (v1.entityId.entityKey[0] < v2.entityId.entityKey[0]) return true;
-    if (v2.entityId.entityKey[0] < v1.entityId.entityKey[0]) return false;
-    if (v1.entityId.entityKind < v2.entityId.entityKind) return true;
-    if (v2.entityId.entityKind < v1.entityId.entityKind) return false;
-    return false;
+    return entity_less(v1.entityId, v2.entityId);
   }
 };
 
@@ -101,7 +106,6 @@ gen_max_marshaled_size(const GUID_t&)
   return 16;
 }
 
-// Check for equality using the generated logical functor.
 inline OpenDDS_Dcps_Export bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
@@ -111,6 +115,19 @@ operator==(const GUID_t& lhs, const GUID_t& rhs)
 
 inline OpenDDS_Dcps_Export bool
 operator!=(const GUID_t& lhs, const GUID_t& rhs)
+{
+  return !(lhs == rhs);
+}
+
+inline OpenDDS_Dcps_Export bool
+operator==(const EntityId_t& lhs, const EntityId_t& rhs)
+{
+  return !GUID_tKeyLessThan::entity_less(lhs, rhs)
+    && !GUID_tKeyLessThan::entity_less(rhs, lhs);
+}
+
+inline OpenDDS_Dcps_Export bool
+operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
 {
   return !(lhs == rhs);
 }
