@@ -565,7 +565,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     CORBA::ULong anti_num_bits;
     TEST_CHECK(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
     TEST_CHECK(anti_num_bits == 32);
-    TEST_CHECK(anti_bitmap == 0xFFFFFFFF);
+    TEST_CHECK(static_cast<unsigned int>(anti_bitmap) == 0xFFFFFFFF);
   }
   {
     DisjointSequence sequence;
@@ -601,7 +601,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(!sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, true));
     TEST_CHECK(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, true));
     TEST_CHECK(anti_num_bits == 61);
-    TEST_CHECK(anti_bitmap[0] == 0xAAAAAAAA);
+    TEST_CHECK(static_cast<unsigned int>(anti_bitmap[0]) == 0xAAAAAAAA);
     TEST_CHECK((anti_bitmap[1] & 0xFFFFFFF8) == 0xAAAAAAA8);
   }
   {
@@ -620,7 +620,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     CORBA::ULong anti_num_bits;
     TEST_CHECK(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, true));
     TEST_CHECK(anti_num_bits == 35);
-    TEST_CHECK(anti_bitmap[0] == 0xFFFFBFFF);
+    TEST_CHECK(static_cast<unsigned int>(anti_bitmap[0]) == 0xFFFFBFFF);
     TEST_CHECK((anti_bitmap[1] & 0xE0000000) == 0xE0000000);
   }
   {
@@ -657,8 +657,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     CORBA::ULong anti_num_bits;
     TEST_CHECK(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, true));
     TEST_CHECK(anti_num_bits == 68);
-    TEST_CHECK(anti_bitmap[0] == 0xFFC00FFF);
-    TEST_CHECK(anti_bitmap[1] == 0xFFFFFFFF);
+    TEST_CHECK(static_cast<unsigned int>(anti_bitmap[0]) == 0xFFC00FFF);
+    TEST_CHECK(static_cast<unsigned int>(anti_bitmap[1]) == 0xFFFFFFFF);
     TEST_CHECK((anti_bitmap[2] & 0xF0000000) == 0xF0000000);
   }
   return 0;

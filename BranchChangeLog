@@ -1,3 +1,9 @@
+Wed Oct 26 18:49:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Added casts to avoid signed/unsigned comparison warnings.
+
 Tue Oct 25 18:30:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
