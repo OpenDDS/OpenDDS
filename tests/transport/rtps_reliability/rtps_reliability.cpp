@@ -270,6 +270,11 @@ struct TestParticipant: ACE_Event_Handler {
   ACE_Message_Block recv_mb_;
 };
 
+void reactor_wait()
+{
+  ACE_Time_Value one(1);
+  ACE_Reactor::instance()->run_reactor_event_loop(one);
+}
 
 void transport_setup()
 {
@@ -418,7 +423,7 @@ bool run_test()
   if (!part1.send_hb(writer1.entityId, seq, seq, part2_addr)) {
     return false;
   }
-  ACE_Reactor::instance()->run_reactor_event_loop(ACE_Time_Value(1));
+  reactor_wait();
 
   seq.low = 3; // #2 is the "lost" message
   if (!part1.send_data(writer1.entityId, seq, part2_addr)) {
@@ -435,12 +440,12 @@ bool run_test()
     return false;
   }
 
-  ACE_Reactor::instance()->run_reactor_event_loop(ACE_Time_Value(2));
+  reactor_wait();
   // further heartbeats should not generate any negative acks
   if (!part1.send_hb(writer1.entityId, first_seq, seq, part2_addr)) {
     return false;
   }
-  ACE_Reactor::instance()->run_reactor_event_loop(ACE_Time_Value(2));
+  reactor_wait();
 
   SequenceNumber sn;
   sn.setValue(seq.high, seq.low);
@@ -456,7 +461,7 @@ bool run_test()
   return true;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
   bool ok = false;
   try {

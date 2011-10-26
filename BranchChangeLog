@@ -1,3 +1,9 @@
+Wed Oct 26 22:45:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Corrected calls to ACE_Reactor API.
+
 Wed Oct 26 22:35:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
