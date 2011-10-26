@@ -198,6 +198,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
   rtps_inst->datalink_release_delay_ = 0;
+  rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 100*1000 /*microseconds*/);
 
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
@@ -488,6 +489,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   while (sdw.callbacks_expected_) {
     ACE_OS::sleep(1);
   }
+
+  // Allow enough time for a HEARTBEAT message to be generated
+  ACE_OS::sleep(rtps_inst->heartbeat_period_ * 2.0);
+
 
   // 3. cleanup
 

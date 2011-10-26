@@ -560,8 +560,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         if (!recvd.empty()) {
           ack = ++SequenceNumber(recvd.cumulative_ack());
           bitmap.length(std::min(CORBA::ULong(8),
-                                 CORBA::ULong(recvd.last_ack().getValue() -
-                                              ack.getValue()) / 32));
+                                 CORBA::ULong((recvd.last_ack().getValue() -
+                                               ack.getValue() + 31) / 32)));
           recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
         }
 
@@ -779,7 +779,7 @@ RtpsUdpDataLink::send_heartbeats()
   }
 
   if (!subm.empty()) {
-    ACE_Message_Block mb(HEARTBEAT_SZ * subm.size()); //TODO: allocators?
+    ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * subm.size()); //TODO: allocators?
     // byte swapping is handled in the operator<<() implementation
     Serializer ser(&mb, false, Serializer::ALIGN_CDR);
     for (size_t i = 0; i < subm.size(); ++i) {

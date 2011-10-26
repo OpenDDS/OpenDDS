@@ -74,7 +74,7 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
                                      const TransportBLOB& remote_data,
                                      const ConnectionAttribs& attribs)
 {
-  RtpsUdpDataLink_rch link;
+  RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
     link = make_datalink(local_id.guidPrefix);
   }

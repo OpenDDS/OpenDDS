@@ -217,3 +217,4 @@ tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN
 tests/transport/rtps/run_test.pl: !DCPS_MIN
+tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN

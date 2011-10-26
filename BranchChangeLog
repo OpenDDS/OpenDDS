@@ -1,3 +1,21 @@
+Wed Oct 26 22:35:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fixed bugs found during testing.
+
+        * tests/transport/rtps/publisher.cpp:
+
+          Let the Data Writer send HEARTBEAT messages.
+
+        * bin/dcps_tests.lst:
+        * tests/transport/rtps_reliability/DDS_transport_rtps_reliability.mpc:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/rtps_reliability/run_test.pl:
+
+          Added a new transport-level test for RTPS Reliability features.
+
 Wed Oct 26 18:49:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/UnitTests/DisjointSequence.cpp:
