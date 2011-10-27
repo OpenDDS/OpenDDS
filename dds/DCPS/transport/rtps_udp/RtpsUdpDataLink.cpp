@@ -95,6 +95,7 @@ RtpsUdpDataLink::open()
   RtpsUdpTransport::address_to_bytes(info_reply_.unicastLocatorList[0].address,
                                      config_->local_address_);
   if (config_->use_multicast_) {
+    info_reply_.smHeader.flags |= 2 /*FLAG_M*/;
     info_reply_.multicastLocatorList.length(1);
     info_reply_.multicastLocatorList[0].kind =
       (config_->multicast_group_address_.get_type() == AF_INET6)
@@ -559,6 +560,9 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
         if (!recvd.empty()) {
           ack = ++SequenceNumber(recvd.cumulative_ack());
+        }
+
+        if (recvd.disjoint()) {
           bitmap.length(std::min(CORBA::ULong(8),
                                  CORBA::ULong((recvd.last_ack().getValue() -
                                                ack.getValue() + 31) / 32)));

@@ -1,3 +1,10 @@
+Thu Oct 27 18:00:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Set the Multicast flag in INFO_REPLY if we have multicast.
+          Fixed 0-length bitmap in ACKNACK submessages if no nacks.
+
 Thu Oct 27 15:59:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/rtps_reliability/rtps_reliability.cpp:
