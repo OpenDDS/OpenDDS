@@ -1,3 +1,9 @@
+Thu Oct 27 15:59:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Fixed GCC warning for char array subscripting.
+
 Thu Oct 27 15:54:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:

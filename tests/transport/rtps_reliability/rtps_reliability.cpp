@@ -297,7 +297,8 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_hb(ser, peer)) return false;
         break;
       default:
-        ACE_DEBUG((LM_INFO, "Received submessage type: %C\n", smkinds[subm]));
+        ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
+                   smkinds[static_cast<unsigned char>(subm)]));
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_DEBUG((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
