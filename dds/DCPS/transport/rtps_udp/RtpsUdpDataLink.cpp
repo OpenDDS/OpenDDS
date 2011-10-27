@@ -392,9 +392,8 @@ RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
 
   RtpsWriter& rw = wi->second;
 
-  if (seq != rw.last_sent_ + 1) {
-    SequenceNumber firstMissing = rw.last_sent_;
-    ++firstMissing;
+  if (seq != rw.expected_) {
+    SequenceNumber firstMissing = rw.expected_;
 
     // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
     // [gapStart, gapListBase) and those in the SNSet.
@@ -427,7 +426,8 @@ RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
     msg[i].gap_sm(gap);
   }
 
-  rw.last_sent_ = seq;
+  rw.expected_ = seq;
+  ++rw.expected_;
 }
 
 void

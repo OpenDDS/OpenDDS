@@ -1,3 +1,15 @@
+Thu Oct 27 15:54:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Update sequence number tracking for GAP generation to reflect
+          the newer sequence number scheme in the DataWriterImpl.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Clean up test.  Added testing of writer-side reliability.
+
 Wed Oct 26 22:45:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/rtps_reliability/rtps_reliability.cpp:

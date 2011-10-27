@@ -152,7 +152,7 @@ private:
   struct RtpsWriter {
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
-    SequenceNumber last_sent_;
+    SequenceNumber expected_;
     CORBA::Long heartbeat_count_;
 
     RtpsWriter() : heartbeat_count_(0) {}

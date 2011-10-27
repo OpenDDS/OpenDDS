@@ -30,6 +30,14 @@
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
+const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
+const char* smkinds[] = {"RESERVED_0", "PAD", "RESERVED_2", "RESERVED_3",
+  "RESERVED_4", "RESERVED_5", "ACKNACK", "HEARTBEAT", "GAP", "INFO_TS",
+  "RESERVED_10", "RESERVED_11", "INFO_SRC", "INFO_REPLY_IP4", "INFO_DST",
+  "INFO_REPLY", "RESERVED_16", "RESERVED_17", "NACK_FRAG", "HEARTBEAT_FRAG",
+  "RESERVED_20", "DATA", "DATA_FRAG"};
+
+
 struct SimpleTC: TransportClient {
   explicit SimpleTC(const RepoId& local) : local_id_(local) {}
 
@@ -45,6 +53,7 @@ struct SimpleTC: TransportClient {
 
   RepoId local_id_;
 };
+
 
 struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   explicit SimpleDataReader(const RepoId& sub_id) : SimpleTC(sub_id) {}
@@ -68,23 +77,63 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   DisjointSequence recvd_;
 };
 
+
 struct SimpleDataWriter: SimpleTC, TransportSendListener {
-  explicit SimpleDataWriter(const RepoId& pub_id) : SimpleTC(pub_id) {}
+  explicit SimpleDataWriter(const RepoId& pub_id)
+    : SimpleTC(pub_id)
+    , alloc_(2, sizeof(TransportSendElementAllocator))
+    , dsle_(pub_id, this, 0, &alloc_, 0)
+  {
+    list_.head_ = list_.tail_ = &dsle_;
+    list_.size_ = 1;
+    dsle_.header_.message_id_ = SAMPLE_DATA;
+    dsle_.header_.message_length_ = 8;
+    dsle_.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
+    payload_.init(dsle_.header_.message_length_);
+    const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in BE format
+      data = 0xDCBADCBA;
+    Serializer ser(&payload_, host_is_bigendian, Serializer::ALIGN_CDR);
+    ser << encap;
+    ser << data;
+  }
+
+  void send_data(const SequenceNumber& seq)
+  {
+    dsle_.header_.sequence_ = seq;
+    dsle_.sample_ =
+      new ACE_Message_Block(DataSampleHeader::max_marshaled_size());
+    *dsle_.sample_ << dsle_.header_;
+    dsle_.sample_->cont(payload_.duplicate());
+    ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));
+    send(list_);
+  }
+
+  void data_delivered(const DataSampleListElement*)
+  {
+    ACE_DEBUG((LM_INFO, "SimpleDataWriter::data_delivered()\n"));
+  }
 
   void notify_publication_disconnected(const ReaderIdSeq&) {}
   void notify_publication_reconnected(const ReaderIdSeq&) {}
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted() {}
   void remove_associations(const ReaderIdSeq&, bool) {}
+
+  TransportSendElementAllocator alloc_;
+  DataSampleList list_;
+  DataSampleListElement dsle_;
+  ACE_Message_Block payload_;
 };
 
+
 enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4, FLAG_K = 8 };
-const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
 
 struct TestParticipant: ACE_Event_Handler {
   TestParticipant(ACE_SOCK_Dgram& sock,
-                  const OpenDDS::DCPS::GuidPrefix_t& prefix)
-    : sock_(sock), heartbeat_count_(0), recv_mb_(64 * 1024)
+                  const OpenDDS::DCPS::GuidPrefix_t& prefix,
+                  const OpenDDS::DCPS::EntityId_t& reader_ent)
+    : sock_(sock), heartbeat_count_(0), acknack_count_(0), recv_mb_(64 * 1024)
+    , do_nack_(true), reader_ent_(reader_ent)
   {
     const Header hdr = {
       {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
@@ -188,6 +237,31 @@ struct TestParticipant: ACE_Event_Handler {
     return send(mb, send_to);
   }
 
+  bool send_an(const OpenDDS::DCPS::EntityId_t& writer,
+               const SequenceNumber_t& nack, const ACE_INET_Addr& send_to)
+  {
+    LongSeq8 bitmap;
+    bitmap.length(1);
+    bitmap[0] = 0xF0000000;
+    const AckNackSubmessage an = {
+      {ACKNACK, FLAG_E, 0},
+      reader_ent_, writer,
+      {nack, 1, bitmap},
+      {++acknack_count_}
+    };
+    size_t size = 0, padding = 0;
+    gen_find_size(hdr_, size, padding);
+    gen_find_size(an, size, padding);
+    ACE_Message_Block mb(size + padding);
+    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+    bool ok = (ser << hdr_) && (ser << an);
+    if (!ok) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize acknack\n"));
+      return false;
+    }
+    return send(mb, send_to);
+  }
+
   int handle_input(ACE_HANDLE)
   {
     ACE_INET_Addr peer;
@@ -213,9 +287,17 @@ struct TestParticipant: ACE_Event_Handler {
       case ACKNACK:
         if (!recv_an(ser, peer)) return false;
         break;
+      case GAP:
+        if (!recv_gap(ser, peer)) return false;
+        break;
+      case DATA:
+        if (!recv_data(ser, peer)) return false;
+        break;
+      case HEARTBEAT:
+        if (!recv_hb(ser, peer)) return false;
+        break;
       default:
-        ACE_DEBUG((LM_INFO,
-          "Received unknown submessage type: %d\n", int(subm)));
+        ACE_DEBUG((LM_INFO, "Received submessage type: %C\n", smkinds[subm]));
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_DEBUG((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
@@ -236,7 +318,7 @@ struct TestParticipant: ACE_Event_Handler {
     AckNackSubmessage an;
     if (!(ser >> an)) {
       ACE_DEBUG((LM_ERROR,
-        "ERROR: in handle_input() failed to deserialize RTPS Header\n"));
+        "ERROR: recv_an() failed to deserialize AckNackSubmessage\n"));
       return false;
     }
     bool nack = false;
@@ -264,11 +346,73 @@ struct TestParticipant: ACE_Event_Handler {
     return true;
   }
 
+  bool recv_gap(Serializer& ser, const ACE_INET_Addr&)
+  {
+    GapSubmessage gap;
+    if (!(ser >> gap)) {
+      ACE_DEBUG((LM_ERROR,
+        "ERROR: recv_gap() failed to deserialize GapSubmessage\n"));
+      return false;
+    }
+    ACE_DEBUG((LM_INFO, "recv_gap() gapStart = %d gapListBase = %d\n",
+               gap.gapStart.low, gap.gapList.bitmapBase.low));
+    recvd_.insert(SequenceRange(gap.gapStart.low,
+                                gap.gapList.bitmapBase.low - 1));
+    return true;
+  }
+
+  bool recv_data(Serializer& ser, const ACE_INET_Addr&)
+  {
+    DataSubmessage data;
+    if (!(ser >> data)) {
+      ACE_DEBUG((LM_ERROR,
+        "ERROR: recv_data() failed to deserialize DataSubmessage\n"));
+      return false;
+    }
+    ACE_DEBUG((LM_INFO, "recv_data() seq = %d\n", data.writerSN.low));
+    if (data.smHeader.submessageLength) {
+      ser.skip(data.smHeader.submessageLength - 20);
+      // 20 == size of Data headers after smHeader (assuming no Inline QoS)
+    } else {
+      ser.skip(8);  // our data payloads are 8 bytes
+    }
+    if (!do_nack_ || data.writerSN.low != 2) { // pretend #2 was lost
+      recvd_.insert(data.writerSN.low);
+    }
+    return true;
+  }
+
+  bool recv_hb(Serializer& ser, const ACE_INET_Addr& peer)
+  {
+    HeartBeatSubmessage hb;
+    if (!(ser >> hb)) {
+      ACE_DEBUG((LM_ERROR,
+        "ERROR: recv_hb() failed to deserialize HeartBeatSubmessage\n"));
+      return false;
+    }
+    ACE_DEBUG((LM_INFO, "recv_hb() first = %d last = %d\n",
+               hb.firstSN.low, hb.lastSN.low));
+    // pretend #2 was lost
+    if (do_nack_ && hb.firstSN.low <= 2 && hb.lastSN.low >= 2) {
+      SequenceNumber_t nack = {0, 2};
+      ACE_DEBUG((LM_INFO, "\trequesting retransmit of #2\n"));
+      if (!send_an(hb.writerId, nack, peer)) {
+        return false;
+      }
+      do_nack_ = false;
+    }
+    return true;
+  }
+
   ACE_SOCK_Dgram& sock_;
-  CORBA::Long heartbeat_count_;
+  CORBA::Long heartbeat_count_, acknack_count_;
   Header hdr_, recv_hdr_;
   ACE_Message_Block recv_mb_;
+  bool do_nack_;
+  OpenDDS::DCPS::EntityId_t reader_ent_;
+  DisjointSequence recvd_;
 };
+
 
 void reactor_wait()
 {
@@ -278,18 +422,85 @@ void reactor_wait()
 
 void transport_setup()
 {
-  TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
-                                                             "rtps_udp");
+  TransportInst_rch inst =
+    TheTransportRegistry->create_inst("my_rtps", "rtps_udp");
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
   //TODO: remove the hard-coded port (below) once the transport knows how to
   //      listen on "any" OS-assigned port.
   rtps_inst->local_address_.set(11694, "localhost");
   rtps_inst->use_multicast_ = false;
   rtps_inst->datalink_release_delay_ = 0;
-  rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 100*1000 /*microseconds*/);
+  rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 500*1000 /*microseconds*/);
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
   TheTransportRegistry->global_config(cfg);
+}
+
+void make_guids(OpenDDS::DCPS::GUID_t& writer1, OpenDDS::DCPS::GUID_t& reader1,
+                OpenDDS::DCPS::GUID_t& writer2, OpenDDS::DCPS::GUID_t& reader2)
+{
+  GuidGenerator gen;
+  gen.populate(writer1);
+  OpenDDS::DCPS::EntityId_t entid = {
+    {0, 1, 2}, ENTITYKIND_USER_WRITER_WITH_KEY
+  };
+  writer1.entityId = entid;
+
+  reader1 = writer1;
+  reader1.entityId.entityKey[2] = 3;
+  reader1.entityId.entityKind = ENTITYKIND_USER_READER_WITH_KEY;
+
+  gen.populate(writer2);
+  writer2.entityId = entid;
+  writer2.entityId.entityKey[2] = 4;
+
+  reader2 = writer2;
+  reader2.entityId.entityKey[2] = 5;
+  reader2.entityId.entityKind = ENTITYKIND_USER_READER_WITH_KEY;
+}
+
+void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
+{
+  LocatorSeq part1_locators;
+  part1_locators.length(1);
+  part1_locators[0].kind = (part1_addr.get_type() == AF_INET6)
+                           ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  part1_locators[0].port = part1_addr.get_port_number();
+  RtpsUdpTransport::address_to_bytes(part1_locators[0].address, part1_addr);
+  size_t size_locator = 0, padding_locator = 0;
+  gen_find_size(part1_locators, size_locator, padding_locator);
+  mb_locator.init(size_locator + padding_locator);
+  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  ser_loc << part1_locators;
+}
+
+bool blob_to_addr(const TransportBLOB& blob, ACE_INET_Addr& addr)
+{
+  ACE_Data_Block db(blob.length(), ACE_Message_Block::MB_DATA,
+    reinterpret_cast<const char*>(blob.get_buffer()),
+    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
+  ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
+  mb.wr_ptr(mb.space());
+  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  LocatorSeq locators;
+  if (!(ser >> locators) || locators.length() < 1) {
+    ACE_DEBUG((LM_DEBUG,
+               "ERROR: couldn't deserialize Locators from participant 2\n"));
+    return false;
+  }
+  if (locators[0].kind == LOCATOR_KIND_UDPv6) {
+    addr.set_type(AF_INET6);
+    addr.set_address(reinterpret_cast<const char*>(locators[0].address), 16);
+  } else if (locators[0].kind == LOCATOR_KIND_UDPv4) {
+    addr.set_type(AF_INET);
+    addr.set_address(reinterpret_cast<const char*>(locators[0].address) + 12,
+                     4, 0 /*network order*/);
+  } else {
+    ACE_DEBUG((LM_DEBUG, "ERROR: unknown locator kind\n"));
+    return false;
+  }
+  addr.set_port_number(locators[0].port);
+  return true;
 }
 
 bool run_test()
@@ -301,37 +512,8 @@ bool run_test()
   // Participant 1 contains writer1 and reader1 and will use sockets directly
   // Participant 2 contains writer2 and reader2 and will use the OpenDDS tport
   // Associations: writer1 <-> reader2 and writer2 <-> reader1
-  GuidGenerator gen;
-  OpenDDS::DCPS::GUID_t writer1;
-  gen.populate(writer1);
-  {
-    OpenDDS::DCPS::EntityId_t entid = {
-      {0, 1, 2}, ENTITYKIND_USER_WRITER_WITH_KEY
-    };
-    writer1.entityId = entid;
-  }
-  OpenDDS::DCPS::GUID_t reader1 = writer1;
-  {
-    OpenDDS::DCPS::EntityId_t entid = {
-      {0, 1, 3}, ENTITYKIND_USER_READER_WITH_KEY
-    };
-    reader1.entityId = entid;
-  }
-  OpenDDS::DCPS::GUID_t writer2;
-  gen.populate(writer2);
-  {
-    OpenDDS::DCPS::EntityId_t entid = {
-      {0, 1, 4}, ENTITYKIND_USER_WRITER_WITH_KEY
-    };
-    writer2.entityId = entid;
-  }
-  OpenDDS::DCPS::GUID_t reader2 = writer2;
-  {
-    OpenDDS::DCPS::EntityId_t entid = {
-      {0, 1, 5}, ENTITYKIND_USER_READER_WITH_KEY
-    };
-    reader2.entityId = entid;
-  }
+  OpenDDS::DCPS::GUID_t writer1, reader1, writer2, reader2;
+  make_guids(writer1, reader1, writer2, reader2);
 
   ACE_SOCK_Dgram part1_sock;
   ACE_INET_Addr part1_addr;
@@ -345,32 +527,25 @@ bool run_test()
   SimpleDataReader sdr2(reader2);
   sdr2.enable_transport(true /*reliable*/);
 
+
   // "local" setup is now done, start making associations
-  LocatorSeq part1_locators;
-  part1_locators.length(1);
-  part1_locators[0].kind = (part1_addr.get_type() == AF_INET6)
-                           ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
-  part1_locators[0].port = part1_addr.get_port_number();
-  RtpsUdpTransport::address_to_bytes(part1_locators[0].address, part1_addr);
-  size_t size_locator = 0, padding_locator = 0;
-  gen_find_size(part1_locators, size_locator, padding_locator);
-  ACE_Message_Block mb_locator(size_locator + padding_locator);
-  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-  ser_loc << part1_locators;
+  ACE_Message_Block mb_locator;
+  make_blob(part1_addr, mb_locator);
+
   AssociationData part1_writer;
   part1_writer.remote_id_ = writer1;
   part1_writer.remote_data_.length(1);
   part1_writer.remote_data_[0].transport_type = "rtps_udp";
   part1_writer.remote_data_[0].data.replace(
     static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
-  if (!sdr2.associate(part1_writer, false)) {
+  if (!sdr2.associate(part1_writer, false /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataReader(reader2) could not associate with writer1\n"));
     return false;
   }
   AssociationData part1_reader = part1_writer;
   part1_reader.remote_id_ = reader1;
-  if (!sdw2.associate(part1_reader, true)) {
+  if (!sdw2.associate(part1_reader, true /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataWriter(writer1) could not associate with reader1\n"));
     return false;
@@ -382,39 +557,17 @@ bool run_test()
                "ERROR: couldn't get connection_info() for participant 2\n"));
     return false;
   }
+
   ACE_INET_Addr part2_addr;
-  {
-    ACE_Data_Block db(part2_loc[0].data.length(), ACE_Message_Block::MB_DATA,
-      reinterpret_cast<const char*>(part2_loc[0].data.get_buffer()),
-      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
-    ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
-    mb.wr_ptr(mb.space());
-    Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-    LocatorSeq locators;
-    if (!(ser >> locators) || locators.length() < 1) {
-      ACE_DEBUG((LM_DEBUG,
-                 "ERROR: couldn't deserialize Locators from participant 2\n"));
-      return false;
-    }
-    if (locators[0].kind == LOCATOR_KIND_UDPv6) {
-      part2_addr.set_type(AF_INET6);
-      part2_addr.set_address(reinterpret_cast<const char*>(locators[0].address),
-                             16);
-    } else if (locators[0].kind == LOCATOR_KIND_UDPv4) {
-      part2_addr.set_type(AF_INET);
-      part2_addr.set_address(reinterpret_cast<const char*>(locators[0].address)
-                             + 12, 4, 0 /*network order*/);
-    } else {
-      ACE_DEBUG((LM_DEBUG, "ERROR: unknown locator kind\n"));
-      return false;
-    }
-    part2_addr.set_port_number(locators[0].port);
+  if (!blob_to_addr(part2_loc[0].data, part2_addr)) {
+    return false;
   }
+
 
   // Associations are done, now test the real DR (SimpleDataReader) using our
   // TestParticipant class to interact with it over the socket directly.
 
-  TestParticipant part1(part1_sock, reader1.guidPrefix);
+  TestParticipant part1(part1_sock, reader1.guidPrefix, reader1.entityId);
   SequenceNumber_t first_seq = {0, 1}, seq = first_seq;
   if (!part1.send_data(writer1.entityId, seq, part2_addr)) {
     return false;
@@ -450,12 +603,29 @@ bool run_test()
   SequenceNumber sn;
   sn.setValue(seq.high, seq.low);
   if (sdr2.recvd_.disjoint() || sdr2.recvd_.empty()
-      || sdr2.recvd_.high() != sn) {
+      || sdr2.recvd_.high() != sn || sdr2.recvd_.low() != SequenceNumber()) {
     ACE_DEBUG((LM_ERROR, "ERROR: reader2 did not receive expected data\n"));
   }
 
-  //TODO: continue with checking the real DW (SimpleDataWriter) against the test
 
+  // Use the real DDS DataWriter (sdw2) against the test reader
+
+  SequenceNumber seq_dw2;
+  sdw2.send_data(seq_dw2++);  // send #1 - #3, test reader will nack #2
+  sdw2.send_data(seq_dw2++);
+  sdw2.send_data(seq_dw2++);
+  reactor_wait();
+  seq_dw2++; // skip #4, transport will generate an inline GAP
+  sdw2.send_data(seq_dw2++);  // send #5
+  reactor_wait();
+
+  if (part1.recvd_.disjoint() || part1.recvd_.empty()
+      || part1.recvd_.high() != seq_dw2.previous()
+      || part1.recvd_.low() != SequenceNumber()) {
+    ACE_DEBUG((LM_ERROR, "ERROR: reader1 did not receive expected data\n"));
+  }
+
+  // cleanup
   sdw2.disassociate(reader1);
   sdr2.disassociate(writer1);
   return true;
