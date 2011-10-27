@@ -33,11 +33,11 @@ public class MultiRepoBase {
     protected static void setUp(String[] args) {
         dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
 
-        TheServiceParticipant.set_repo_domain(DOMAIN1_ID, 1);
-        TheServiceParticipant.set_repo_ior("file://repo1.ior", 1);
+        TheServiceParticipant.set_repo_domain(DOMAIN1_ID, "1");
+        TheServiceParticipant.set_repo_ior("file://repo1.ior", "1");
 
-        TheServiceParticipant.set_repo_domain(DOMAIN2_ID, 2);
-        TheServiceParticipant.set_repo_ior("file://repo2.ior", 2);
+        TheServiceParticipant.set_repo_domain(DOMAIN2_ID, "2");
+        TheServiceParticipant.set_repo_ior("file://repo2.ior", "2");
 
         assert (dpf != null);
     }

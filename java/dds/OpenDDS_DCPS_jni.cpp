@@ -87,27 +87,30 @@ void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown(JNIEnv *, jclass)
   TheServiceParticipant->shutdown();
 }
 
-jint JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_domain_1to_1repo
-(JNIEnv *, jclass, jint domain)
+jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_domain_1to_1repo
+(JNIEnv * jni, jclass, jint domain)
 {
-  OpenDDS::DCPS::Service_Participant::RepoKey key =
+  OpenDDS::DCPS::Discovery::RepoKey key =
     TheServiceParticipant->domain_to_repo(domain);
-  return static_cast<jint>(key);
+  jstring retStr = jni->NewStringUTF(key.c_str());
+  return retStr;
 }
 
 void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_set_1repo_1domain
-(JNIEnv *, jclass, jint domain, jint repo)
+(JNIEnv * envp, jclass, jint domain, jstring repo)
 {
-  TheServiceParticipant->set_repo_domain(domain, repo);
+  JStringMgr repo_jsm(envp, repo);
+  TheServiceParticipant->set_repo_domain(domain, repo_jsm.c_str());
 }
 
 void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_set_1repo_1ior
-(JNIEnv *envp, jclass, jstring ior, jint repo)
+(JNIEnv *envp, jclass, jstring ior, jstring repo)
 {
-  JStringMgr jsm(envp, ior);
+  JStringMgr ior_jsm(envp, ior);
+  JStringMgr repo_jsm(envp, repo);
 
   try {
-    TheServiceParticipant->set_repo_ior(jsm.c_str(), repo);
+    TheServiceParticipant->set_repo_ior(ior_jsm.c_str(), repo_jsm.c_str());
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(envp, se);

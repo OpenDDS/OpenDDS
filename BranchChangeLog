@@ -1,3 +1,14 @@
+Thu Oct 27 23:54:01 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/TheServiceParticipant.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/tests/multirepo/MultiRepoBase.java:
+
+          Fix java problems caused by the Discovery changes below.
+          The biggest impact of these changes is that
+          ServiceParticipant::RepoKey was moved into the Discovery
+          class and went from being an int to a string.
+
 Thu Oct 27 21:06:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/ConfigUtils.h:
