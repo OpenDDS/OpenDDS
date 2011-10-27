@@ -1,3 +1,43 @@
+Thu Oct 27 21:06:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/ConfigUtils.h:
+        * dds/DCPS/ConfigUtils.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * docs/design/RTPS_DISCOVERY:
+        * tests/DCPS/ConfigFile/test1.ini:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.h:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/transport/rtps/run_test.pl:
+
+          Refactoring to allow optional configuration of RTPS
+          as a Discovery mechanism.  See docs/design/RTPS_DISCOVERY
+          for some design details.  This is a work in progress
+          but existing InfoRepo configuration should work as
+          before.  RTPS discovery is not hooked into any actual
+          code and will fail.
+
 Thu Oct 27 18:00:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:

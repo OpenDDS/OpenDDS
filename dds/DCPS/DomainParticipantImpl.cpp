@@ -2141,7 +2141,7 @@ DomainParticipantImpl::init_bit_datareaders()
 
     if (this->federated_) {
       // Determine the repository key to which we are attached.
-      int key = TheServiceParticipant->domain_to_repo(this->domain_id_);
+      Discovery::RepoKey key = TheServiceParticipant->domain_to_repo(this->domain_id_);
 
       // Create and attach the listener.
       this->failoverListener_ = new FailoverListener(key);

@@ -11,6 +11,7 @@
 
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "Definitions.h"
+#include "Discovery.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -24,7 +25,7 @@ class FailoverListener
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener> {
 public:
   /// Only construct with a repository key value.
-  FailoverListener(int key);
+  FailoverListener(Discovery::RepoKey key);
 
   /// Virtual destructor
   virtual ~FailoverListener();
@@ -90,7 +91,7 @@ public:
 private:
   /// Our repository key.  If we trigger, this is the key to the
   /// repository that has been lost.
-  int key_;
+  Discovery::RepoKey key_;
 };
 
 } // namespace DCPS

@@ -17,6 +17,7 @@ sub do_test {
 
   my $SUB = PerlDDS::create_process('subscriber', "-h localhost -p $port");
   my $result = $SUB->Spawn();
+  print $SUB->CommandLine() . "\n";
   if ($result != 0) {
     print STDERR "ERROR: spawning subscriber returned $result\n";
     return 1;
@@ -30,6 +31,7 @@ sub do_test {
   my $PUB = PerlDDS::create_process('publisher',
               $mcast ? "-h 239.255.0.1 -p 7401" : "-h localhost -p $port");
   $result = $PUB->SpawnWaitKill(60);
+  print $PUB->CommandLine() . "\n";
   if ($result != 0) {
     print STDERR "ERROR: publisher returned $result\n";
   }

@@ -5,12 +5,12 @@
 
 
 // Implementation skeleton constructor
-DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Service_Participant::RepoKey repo)
+DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Discovery::RepoKey repo)
   : repo_( repo)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::DataWriterListenerImpl Repo[ %d]\n"),
-    this->repo_
+    ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::DataWriterListenerImpl Repo[ %C]\n"),
+    this->repo_.c_str()
   ));
 }
 
@@ -18,8 +18,8 @@ DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Service_Particip
 DataWriterListenerImpl::~DataWriterListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::~DataWriterListenerImpl Repo[ %d]\n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::~DataWriterListenerImpl Repo[ %C]\n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -35,8 +35,8 @@ void DataWriterListenerImpl::on_offered_deadline_missed (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_offered_deadline_missed Repo[ %d]\n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_offered_deadline_missed Repo[ %C]\n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -52,8 +52,8 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_offered_incompatible_qos Repo[ %d]\n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_offered_incompatible_qos Repo[ %C]\n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -69,8 +69,8 @@ void DataWriterListenerImpl::on_liveliness_lost (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_liveliness_changed Repo[ %d]\n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_liveliness_changed Repo[ %C]\n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -86,8 +86,8 @@ void DataWriterListenerImpl::on_publication_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_publication_matched Repo[ %d] \n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_publication_matched Repo[ %C] \n"),
+      this->repo_.c_str()
     ));
   }
 

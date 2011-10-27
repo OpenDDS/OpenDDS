@@ -18,6 +18,8 @@
 #include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MonitorFactory.h"
+#include "dds/DCPS/Discovery.h"
+#include "dds/DCPS/InfoRepoDiscovery.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -71,15 +73,6 @@ public:
 
   /// Domain value for the default repository IOR.
   enum { ANY_DOMAIN = -1 };
-
-  /// Key value for the default repository IOR.
-  enum { DEFAULT_REPO = -1 };
-
-  /// Key type for storing repository objects.
-  typedef int RepoKey;
-
-  /// Map type to access IOR strings from repository key values.
-  typedef std::map<RepoKey, std::string> KeyIorMap;
 
   /// Constructor.
   Service_Participant();
@@ -146,9 +139,6 @@ public:
 
   /// Accessor of the DCPSInfo object reference.
   DCPSInfo_ptr get_repository(const DDS::DomainId_t domain);
-
-  /// Access the key/IOR mappings currently in effect.
-  const KeyIorMap& keyIorMap() const;
 
   /** Accessors of the qos policy initial values. **/
   DDS::UserDataQosPolicy            initial_UserDataQosPolicy() const;
@@ -220,39 +210,37 @@ public:
   ///         message.
   int liveliness_factor() const;
 
+  ///
+  void add_discovery(Discovery_rch discovery);
+
   /// Load DCPSInfoRepo IORs.
   // CORBA strings are narrow so ior is const char* not ACE_TCHAR
-  void set_repo_ior(const char* ior,
-                    const RepoKey key = DEFAULT_REPO,
-                    bool  attach_participant = true);
+  InfoRepoDiscovery_rch set_repo_ior(const char* ior,
+                                     Discovery::RepoKey key = Discovery::DEFAULT_REPO,
+                                     bool  attach_participant = true);
 
 #ifdef DDS_HAS_WCHAR
   /// Convenience overload for wchar_t
-  void set_repo_ior(const wchar_t* ior,
-                    const RepoKey key = DEFAULT_REPO,
-                    bool  attach_participant = true);
+  InfoRepoDiscovery_rch  set_repo_ior(const wchar_t* ior,
+                                      Discovery::RepoKey key = Discovery::DEFAULT_REPO,
+                                      bool  attach_participant = true);
 #endif
 
-  /// Load DCPSInfoRepo reference directly.
-  void set_repo(DCPSInfo_ptr repo,
-                const RepoKey key = DEFAULT_REPO,
-                bool  attach_participant = true);
-
   /// Rebind a domain from one repository to another.
-  void remap_domains(const RepoKey oldKey,
-                     const RepoKey newKey,
+  void remap_domains(Discovery::RepoKey oldKey,
+                     Discovery::RepoKey newKey,
                      bool attach_participant = true);
 
   /// Bind DCPSInfoRepo IORs to domains.
   void set_repo_domain(const DDS::DomainId_t domain,
-                       const RepoKey repo,
+                       Discovery::RepoKey repo,
                        bool attach_participant = true);
 
   /// Convert domainId to repository key.
-  RepoKey domain_to_repo(const DDS::DomainId_t domain) const;
+  Discovery::RepoKey domain_to_repo(const DDS::DomainId_t domain) const;
 
   /// Failover to a new repository.
-  void repository_lost(const RepoKey key);
+  void repository_lost(Discovery::RepoKey key);
 
   /// Accessors for FederationRecoveryDuration in seconds.
   //@{
@@ -373,19 +361,25 @@ private:
    * @note The values from command line can overwrite the values
    *       in configuration file.
    */
-  int load_common_configuration();
+  int load_common_configuration(ACE_Configuration_Heap& cf);
 
   /**
    * Load the domain configuration to the Service_Participant
    * singleton.
    */
-  int load_domain_configuration();
+  int load_domain_configuration(ACE_Configuration_Heap& cf);
 
   /**
    * Load the repository configuration to the Service_Participant
    * singleton.
    */
-  int load_repo_configuration();
+  int load_repo_configuration(ACE_Configuration_Heap& cf);
+
+  /**
+   * Load the RTPS discovery configuration to the Service_Participant
+   * singleton.
+   */
+  int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
 
 // public:
 
@@ -411,17 +405,13 @@ private:
   /// The domain participant factory object reference.
   DDS::DomainParticipantFactory_var  dp_factory_;
 
+  /// The RepoKey to Discovery object mapping
+  typedef std::map<Discovery::RepoKey, Discovery_rch> RepoIdDiscoveryMap;
+  RepoIdDiscoveryMap discoveryMap_;
+
   /// The DomainId to RepoKey mapping.
-  typedef std::map<DDS::DomainId_t, RepoKey> DomainRepoMap;
+  typedef std::map<DDS::DomainId_t, Discovery::RepoKey> DomainRepoMap;
   DomainRepoMap domainRepoMap_;
-
-  /// Repository key to IOR string values.
-  KeyIorMap keyIorMap_;
-
-  /// The DomainId to DCPSInfo/repository object references
-  /// container.
-  typedef std::map<RepoKey, DCPSInfo_var> RepoMap;
-  RepoMap repoMap_;
 
   /// The lock to serialize DomainParticipantFactory singleton
   /// creation and shutdown.
@@ -613,6 +603,8 @@ void deactivate_remote_object(T obj)
     poa->reference_to_id(obj);
   poa->deactivate_object(oid.in());
 }
+
+OpenDDS_Dcps_Export extern int (*rtps_discovery_config)(ACE_Configuration_Heap& cf);
 
 } // namespace DCPS
 } // namespace OpenDDS
