@@ -44,7 +44,7 @@ private:
               const ReceivedDataSample& data);
 
     SequenceRange transport_seq_;
-    ReceivedDataSample sample_;
+    ReceivedDataSample rec_ds_;
   };
 
   // Each element of the FragMap "fragments_" represents one sent message

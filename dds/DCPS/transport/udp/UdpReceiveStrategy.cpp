@@ -16,7 +16,7 @@ namespace DCPS {
 
 UdpReceiveStrategy::UdpReceiveStrategy(UdpDataLink* link)
   : link_(link)
-  , last_received_()
+  , expected_()
 {
 }
 
@@ -102,18 +102,17 @@ UdpReceiveStrategy::stop_i()
 bool
 UdpReceiveStrategy::check_header(const TransportHeader& header)
 {
-  SequenceNumber expected(this->last_received_);
-  ++expected;
-  if (header.sequence_ != expected) {
+  if (header.sequence_ != this->expected_) {
     VDBG_LVL((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: UdpReceiveStrategy::check_header ")
-               ACE_TEXT("expected %q received %q\n"), expected.getValue(),
-               header.sequence_.getValue()), 2);
-    SequenceRange range(expected, header.sequence_.previous());
+               ACE_TEXT("expected %q received %q\n"),
+               this->expected_.getValue(), header.sequence_.getValue()), 2);
+    SequenceRange range(this->expected_, header.sequence_.previous());
     this->data_unavailable(range);
   }
 
-  this->last_received_ = header.sequence_;
+  this->expected_ = header.sequence_;
+  ++this->expected_;
   return true;
 }
 

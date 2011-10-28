@@ -28,7 +28,7 @@ public:
   virtual bool start(bool active);
 
 private:
-  SequenceNumber last_received_;
+  SequenceNumber expected_;
 };
 
 } // namespace DCPS

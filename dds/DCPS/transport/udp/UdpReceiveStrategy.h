@@ -49,7 +49,7 @@ protected:
 
 private:
   UdpDataLink* link_;
-  SequenceNumber last_received_;
+  SequenceNumber expected_;
 };
 
 } // namespace DCPS

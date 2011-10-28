@@ -1,3 +1,19 @@
+Fri Oct 28 15:51:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Fixed a bug with reassembly of fragments.  Prior to this fix,
+          sometimes a sample with a lost fragment would be delivered.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Fixed a spurious runtime warning that was due to bad tracking
+          of sequence numbers.
+
 Fri Oct 14 21:47:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
