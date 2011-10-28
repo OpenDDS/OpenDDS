@@ -48,5 +48,11 @@ DCPSInfo_ptr InfoRepoDiscovery::get_dcps_info()
   return OpenDDS::DCPS::DCPSInfo::_duplicate(this->info_);
 }
 
+std::string
+InfoRepoDiscovery::get_stringified_dcps_info_ior()
+{
+  return this->ior_;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

@@ -857,7 +857,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
 
       if (which != participants.end()) {
         // Extract the repository to attach this domain to.
-        RepoIdDiscoveryMap::const_iterator disc_iter = this->discoveryMap_.find(key);
+        RepoKeyDiscoveryMap::const_iterator disc_iter = this->discoveryMap_.find(key);
 
         if (disc_iter != this->discoveryMap_.end()) {
           for (DomainParticipantFactoryImpl::DPSet::const_iterator
@@ -914,8 +914,8 @@ void
 Service_Participant::repository_lost(Discovery::RepoKey key)
 {
   // Find the lost repository.
-  RepoIdDiscoveryMap::iterator initialLocation = this->discoveryMap_.find(key);
-  RepoIdDiscoveryMap::iterator current         = initialLocation;
+  RepoKeyDiscoveryMap::iterator initialLocation = this->discoveryMap_.find(key);
+  RepoKeyDiscoveryMap::iterator current         = initialLocation;
 
   if (current == this->discoveryMap_.end()) {
     ACE_DEBUG((LM_WARNING,
@@ -1026,7 +1026,7 @@ Service_Participant::get_repository(const DDS::DomainId_t domain)
     repo = where->second;
   }
 
-  RepoIdDiscoveryMap::const_iterator location = this->discoveryMap_.find(repo);
+  RepoKeyDiscoveryMap::const_iterator location = this->discoveryMap_.find(repo);
 
   if (location == this->discoveryMap_.end()) {
     if ((repo == Discovery::DEFAULT_REPO) ||
@@ -1801,6 +1801,12 @@ Service_Participant::add_discovery(Discovery_rch discovery)
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
     this->discoveryMap_[discovery->key()] = discovery;
   }
+}
+
+const Service_Participant::RepoKeyDiscoveryMap&
+Service_Participant::discoveryMap() const
+{
+  return this->discoveryMap_;
 }
 
 int (*rtps_discovery_config)(ACE_Configuration_Heap& cf) = 0;

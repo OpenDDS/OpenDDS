@@ -44,6 +44,7 @@ public:
   /// Key value for the default repository IOR.
   static const std::string DEFAULT_REPO;
 
+  virtual std::string get_stringified_dcps_info_ior();
   virtual DCPSInfo_ptr get_dcps_info()=0;
 
   // Need one or more virtual functions to abstract away Built-In Topic

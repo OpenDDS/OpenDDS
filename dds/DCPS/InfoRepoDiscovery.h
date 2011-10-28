@@ -38,6 +38,7 @@ class OpenDDS_Dcps_Export InfoRepoDiscovery : public Discovery {
 public:
   InfoRepoDiscovery(RepoKey      key,
                     std::string  ior);
+  virtual std::string get_stringified_dcps_info_ior();
   virtual DCPSInfo_ptr get_dcps_info();
 
   /**

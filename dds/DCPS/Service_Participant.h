@@ -328,6 +328,10 @@ public:
   DataDurabilityCache * get_data_durability_cache(
     DDS::DurabilityQosPolicy const & durability);
 
+  /// Needed for monitor code
+  typedef std::map<Discovery::RepoKey, Discovery_rch> RepoKeyDiscoveryMap;
+  const RepoKeyDiscoveryMap& discoveryMap() const;
+
 private:
 
   /// Create the TransportConfig for all builtin topics.
@@ -406,8 +410,7 @@ private:
   DDS::DomainParticipantFactory_var  dp_factory_;
 
   /// The RepoKey to Discovery object mapping
-  typedef std::map<Discovery::RepoKey, Discovery_rch> RepoIdDiscoveryMap;
-  RepoIdDiscoveryMap discoveryMap_;
+  RepoKeyDiscoveryMap discoveryMap_;
 
   /// The DomainId to RepoKey mapping.
   typedef std::map<DDS::DomainId_t, Discovery::RepoKey> DomainRepoMap;

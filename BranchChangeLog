@@ -1,3 +1,19 @@
+Fri Oct 28 18:54:25 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * tools/monitor/MonitorTask.h:
+        * tools/monitor/MonitorTask.cpp:
+
+          Changes necessary to get the Monitor tool compiling and running
+          with the new Discovery scheme.  Once again, the monitor tool
+          needs to be revisited in the cotext of RTPS discovery (among
+          other things).
+
 Thu Oct 27 23:54:01 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * java/dds/OpenDDS/DCPS/TheServiceParticipant.java:

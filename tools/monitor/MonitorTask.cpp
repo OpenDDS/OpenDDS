@@ -39,7 +39,15 @@ namespace { // Anonymous namespace for file scope.
     BUILTIN_SUBSCRIPTION_REPORT_TYPE
   };
 
+  template <typename T> std::string stringify(const T& val) {
+    std::ostringstream oss;
+    oss << val;
+    return oss.str();
+  }
+
 } // End of anonymous namespace
+
+const Monitor::MonitorTask::RepoKey Monitor::MonitorTask::DEFAULT_REPO = OpenDDS::DCPS::Discovery::DEFAULT_REPO;
 
 Monitor::MonitorTask::MonitorTask(
   MonitorDataStorage* data,
@@ -57,11 +65,13 @@ Monitor::MonitorTask::MonitorTask(
 {
   // Find and map the current IOR strings to their IOR key values.
   if (mapExistingIORKeys) {
-    for( OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
-         location = TheServiceParticipant->keyIorMap().begin();
-         location != TheServiceParticipant->keyIorMap().end();
+    for( OpenDDS::DCPS::Service_Participant::RepoKeyDiscoveryMap::const_iterator
+         location = TheServiceParticipant->discoveryMap().begin();
+         location != TheServiceParticipant->discoveryMap().end();
          ++location) {
-      this->iorKeyMap_[ location->second] = location->first;
+      std::string ior = location->second->get_stringified_dcps_info_ior();
+
+      this->iorKeyMap_[ior] = location->first;
     }
   }
 }
@@ -202,6 +212,7 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
   }
 
   { ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, DEFAULT_REPO);
+
     IorKeyMap::iterator location = this->iorKeyMap_.find( ior);
     if( location != this->iorKeyMap_.end()) {
       // We already have this IOR mapped, use the existing key.
@@ -213,20 +224,19 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
     } else {
       // We need to find an open key to use.  Check the actual
       // Service_Participant mappings for a slot.
-      OpenDDS::DCPS::Service_Participant::KeyIorMap::const_iterator
+      OpenDDS::DCPS::Service_Participant::RepoKeyDiscoveryMap::const_iterator
         keyLocation;
-      key = this->lastKey_;
       do {
-        keyLocation = TheServiceParticipant->keyIorMap().find( ++key);
-      } while( keyLocation != TheServiceParticipant->keyIorMap().end());
-      this->lastKey_ = key;
+        key = stringify(++this->lastKey_);
+        keyLocation = TheServiceParticipant->discoveryMap().find( key);
+      } while( keyLocation != TheServiceParticipant->discoveryMap().end());
 
       // We have a new repository to install, go ahead.
       TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
 
       // Check that we were able to resolve and attach to the repository.
-      keyLocation = TheServiceParticipant->keyIorMap().find( key);
-      if( keyLocation == TheServiceParticipant->keyIorMap().end()) {
+      keyLocation = TheServiceParticipant->discoveryMap().find( key);
+      if( keyLocation == TheServiceParticipant->discoveryMap().end()) {
         // We failed to install this IOR, nothing left to do.
         return DEFAULT_REPO;
       }
@@ -335,9 +345,9 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::setActiveRepo() - ")
-      ACE_TEXT("rebinding instrumentation domain %d to repository key: %d.\n"),
+      ACE_TEXT("rebinding instrumentation domain %d to repository key: %C.\n"),
       this->options_.domain(),
-      key
+      key.c_str()
     ));
   }
 
