@@ -1,3 +1,10 @@
+Mon Oct 31 20:35:59 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/ConfigUtils.cpp:
+
+          Fixed for building with DOC ACE. The dependency on ace/SString.h
+          was implicit on older versions of ACE.
+
 Mon Oct 31 14:23:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/Discovery.h:

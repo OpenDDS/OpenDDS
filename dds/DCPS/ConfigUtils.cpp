@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "ConfigUtils.h"
+#include "ace/SString.h"
 
 namespace OpenDDS { namespace DCPS {
 
