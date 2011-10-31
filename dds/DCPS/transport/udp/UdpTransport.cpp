@@ -83,6 +83,7 @@ UdpTransport::find_datalink_i(const RepoId& /*local_id*/,
     GuardType guard(this->client_links_lock_);
     UdpDataLinkMap::iterator it(this->client_links_.find(key));
     if (it != this->client_links_.end()) {
+      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::find_datalink_i found client\n"));
       return UdpDataLink_rch(it->second)._retn(); // found
     }
   } else {
@@ -91,6 +92,7 @@ UdpTransport::find_datalink_i(const RepoId& /*local_id*/,
       return 0;
     } else {
       // return a reference to the one and only server data link
+      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::find_datalink_i found server\n"));
       return UdpDataLink_rch(this->server_link_)._retn();
     }
   }
@@ -114,6 +116,7 @@ UdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
   GuardType guard(this->client_links_lock_);
   this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
 
+  VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink_i\n"));
   return link._retn();
 }
 
@@ -143,11 +146,13 @@ UdpTransport::accept_datalink(ConnectionEvent& ce)
       // return server_link_
       this->pending_server_link_keys_.erase(keys[i]);
       this->server_link_keys_.insert(keys[i]);
+      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink completing\n"));
       return UdpDataLink_rch(this->server_link_)._retn();
     } else {
       // Add to pending and wait for handshake
       this->pending_connections_.insert(
         std::pair<ConnectionEvent* const, PriorityKey>(&ce, keys[i]));
+      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink pending\n"));
     }
   }
 
@@ -162,6 +167,7 @@ UdpTransport::stop_accepting(ConnectionEvent& ce)
   typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
   std::pair<iter_t, iter_t> range = this->pending_connections_.equal_range(&ce);
   this->pending_connections_.erase(range.first, range.second);
+  VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting\n"));
 }
 
 bool
@@ -198,6 +204,7 @@ UdpTransport::shutdown_i()
     it->second->transport_shutdown();
   }
   this->client_links_.clear();
+  this->server_link_ = 0;
 
   this->config_i_ = 0;
 }
@@ -315,9 +322,10 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
         this->pending_connections_.equal_range(evt);
       this->pending_connections_.erase(range.first, range.second);
 
+      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection completing\n"));
       // Signal TransportClient::associate() via the ConnectionEvent
       // to let it know that we found a good connection.
-      evt->complete(this->server_link_.in());
+      evt->complete(static_rchandle_cast<DataLink>(this->server_link_));
 
       // Add an entry to server_link_keys_ so we can find the
       // "connection" for that key.
@@ -327,6 +335,8 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
       // Add an entry to pending_server_link_keys_ so we can finish
       // associating in accept_datalink().
       this->pending_server_link_keys_.insert(key);
+
+      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection pending\n"));
     }
   }
 }

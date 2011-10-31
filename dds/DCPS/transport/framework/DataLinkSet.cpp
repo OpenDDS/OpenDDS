@@ -49,8 +49,7 @@ int
 OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",6);
-  link->_add_ref();
-  DataLink_rch mylink = link;
+  DataLink_rch mylink(link, false);
 
   GuardType guard(this->lock_);
 

@@ -32,9 +32,29 @@ public:
   /// Called by TransportReceiveStrategy to indicate that we can
   /// stop tracking partially-reassembled messages when we know the
   /// remaining fragments are not expected to arrive.
-  void data_unavailable(const SequenceRange& dropped);
+  void data_unavailable(const SequenceRange& transportSeqDropped);
 
 private:
+
+  // A FragKey represents the identifier for an original (pre-fragmentation)
+  // message.  Since DataSampleHeader sequence numbers are distinct for each
+  // "publication" (DataWriter), the partially-received messages need to be
+  // stored in a structure that's keyed off of both the PublicationId and the
+  // SequenceNumber.
+  struct FragKey {
+    FragKey(const PublicationId& pubId, const SequenceNumber& dataSampleSeq);
+
+    bool operator<(const FragKey& rhs) const
+    {
+      if (compare_(this->publication_, rhs.publication_)) return true;
+      if (compare_(rhs.publication_, this->publication_)) return false;
+      return this->data_sample_seq_ < rhs.data_sample_seq_;
+    }
+
+    static GUID_tKeyLessThan compare_;
+    PublicationId publication_;
+    SequenceNumber data_sample_seq_;
+  };
 
   // A FragRange represents a chunk of a partially-reassembled message.
   // The transport_seq_ range is the range of transport sequence numbers
@@ -48,14 +68,13 @@ private:
   };
 
   // Each element of the FragMap "fragments_" represents one sent message
-  // (one DataSampleHeader before fragmentation).  The map's key is the
-  // DataSampleHeader sequence_ number.  The list must have at
+  // (one DataSampleHeader before fragmentation).  The list must have at
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
-  typedef std::map<SequenceNumber, std::list<FragRange> > FragMap;
+  typedef std::map<FragKey, std::list<FragRange> > FragMap;
   FragMap fragments_;
 
-  std::set<SequenceNumber> have_first_;
+  std::set<FragKey> have_first_;
 
   static bool insert(std::list<FragRange>& flist,
                      const SequenceNumber& transportSeq,

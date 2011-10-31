@@ -20,6 +20,7 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
+#include "dds/DCPS/transport/framework/TransportReassembly.h"
 
 class ACE_Reactor;
 
@@ -72,6 +73,8 @@ public:
   virtual bool start(bool active) = 0;
   virtual void stop();
 
+  bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
+
 protected:
   MulticastDataLink* link_;
 
@@ -97,6 +100,8 @@ protected:
   // only subscribers receive syn, send synack, send naks, receive nakack,
   // and publisher only send syn, receive synack, receive naks, send nakack.
   bool active_;
+
+  TransportReassembly reassembly_;
 
 private:
   ACE_SYNCH_MUTEX ack_lock_;

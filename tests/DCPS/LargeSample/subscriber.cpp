@@ -25,16 +25,18 @@
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
+#include <cstdlib>
 
 namespace {
 
-const long num_messages_expected = 10;
+const long num_messages_expected = 40;
 
 } // namespace
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  bool ok = true;
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
@@ -140,10 +142,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(1);
     }
 
-    if (listener_svt->num_samples() != num_messages_expected) {
+    const long received = listener_svt->num_samples();
+    if (received != num_messages_expected) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l main()")
                  ACE_TEXT(" ERROR: did not receive expected samples !\n")));
+      // not actually a test failure for udp and unreliable multicast
+      // ACE log messages are redirected, so it won't fail the test
+    }
+
+    if (received <= num_messages_expected * 0.75) {
+      std::cout << "ERROR: data loss >= 25% (" << received << "/"
+                << num_messages_expected << " received)\n";
+      ok = false;
     }
 
     // Clean-up!
@@ -158,5 +169,5 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return -1;
   }
 
-  return 0;
+  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

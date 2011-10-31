@@ -22,8 +22,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
     data_allocator_(DATA_BLOCKS),
     buffer_index_(0),
     good_pdu_(true),
-    pdu_remaining_(0),
-    reassembly_(0)
+    pdu_remaining_(0)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",6);
 
@@ -48,8 +47,6 @@ OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",6);
 
-  delete this->reassembly_;
-
   if (this->receive_buffers_[ this->buffer_index_] != 0) {
     size_t size = this->receive_buffers_[ this->buffer_index_]->total_length();
 
@@ -72,12 +69,6 @@ bool
 OpenDDS::DCPS::TransportReceiveStrategy::check_header(const DataSampleHeader& /*header*/)
 {
   return true;
-}
-
-void
-OpenDDS::DCPS::TransportReceiveStrategy::enable_reassembly()
-{
-  this->reassembly_ = new TransportReassembly;
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -817,18 +808,12 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Now dispatch the sample to the DataLink\n"));
 
-        if (this->reassembly_ &&
-            (this->receive_sample_.header_.more_fragments_
-             || this->receive_transport_header_.last_fragment_)) {
-          VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                "Attempt reassembly of fragments\n"));
+        if (this->receive_sample_.header_.more_fragments_
+            || this->receive_transport_header_.last_fragment_) {
+          VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
 
-          if (this->reassembly_->reassemble(
-                this->receive_transport_header_.sequence_,
-                this->receive_transport_header_.first_fragment_,
-                this->receive_sample_)) {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                  "Reassembled complete message\n"));
+          if (this->reassemble(this->receive_sample_)) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
             this->deliver_sample(this->receive_sample_, remote_address);
           }
           // If reassemble() returned false, it takes ownership of the data
@@ -876,6 +861,15 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   //   pick up from where we left off correctly.
   //
   return 0;
+}
+
+bool
+OpenDDS::DCPS::TransportReceiveStrategy::reassemble(ReceivedDataSample&)
+{
+  ACE_DEBUG((LM_WARNING, "(%P|%t) TransportReceiveStrategy::reassemble() "
+    "WARNING: derived class must override if specific transport type uses "
+    "fragmentation and reassembly\n"));
+  return false;
 }
 
 int

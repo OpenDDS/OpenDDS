@@ -164,7 +164,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 
     DataSampleHeader sample_header;
     sample_header.message_id_ = TRANSPORT_CONTROL;
-    sample_header.message_length_ = data_block->length();
+    sample_header.message_length_ =
+      static_cast<ACE_UINT32>(data_block->length());
     ACE_Message_Block* sample_header_block;
     ACE_NEW_RETURN(sample_header_block,
                    ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
@@ -198,8 +199,9 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                                      0),
                    0);
 
-    transport_header.length_ = data_block->length()
-                             + sample_header_block->length();
+    transport_header.length_ =
+      static_cast<ACE_UINT32>(data_block->length() +
+                              sample_header_block->length());
     *transport_header_block << transport_header;
     transport_header_block->cont(sample_header_block);
 

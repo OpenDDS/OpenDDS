@@ -161,7 +161,10 @@ MulticastDataLink::find_session(MulticastPeer remote_peer)
                    0);
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
-  if (it != this->sessions_.end()) return it->second.in();
+  if (it != this->sessions_.end()) {
+    MulticastSession_rch sess = it->second;
+    return sess._retn();
+  }
   else return 0;
 }
 
@@ -174,7 +177,10 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
                    0);
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
-  if (it != this->sessions_.end()) return it->second.in();  // already exists
+  if (it != this->sessions_.end()) {
+    MulticastSession_rch sess = it->second;
+    return sess._retn();
+  }
 
   MulticastSession_rch session =
     this->session_factory_->create(this, remote_peer);
@@ -230,6 +236,23 @@ MulticastDataLink::check_header(const DataSampleHeader& header)
 
   // Skip data sample unless there is a session for it.
   return (this->sessions_.count(receive_strategy()->received_header().source_) > 0);
+}
+
+bool
+MulticastDataLink::reassemble(ReceivedDataSample& data,
+                              const TransportHeader& header)
+{
+  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
+                   guard,
+                   this->session_lock_,
+                   false);
+
+  MulticastSessionMap::iterator it(this->sessions_.find(header.source_));
+  if (it == this->sessions_.end()) return false;
+  if (it->second->acked()) {
+    return it->second->reassemble(data, header);
+  }
+  return false;
 }
 
 void

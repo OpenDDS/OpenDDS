@@ -14,33 +14,34 @@ namespace DCPS {
 BestEffortSession::BestEffortSession(MulticastDataLink* link,
                                      MulticastPeer remote_peer)
   : MulticastSession(link, remote_peer)
-  , expected_()
+  , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
 }
 
 bool
-BestEffortSession::check_header(const TransportHeader& /*header*/)
+BestEffortSession::check_header(const TransportHeader& header)
 {
+  if (header.sequence_ != this->expected_ &&
+      expected_ != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    VDBG_LVL((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: BestEffortSession::check_header ")
+               ACE_TEXT("expected %q received %q\n"),
+               this->expected_.getValue(), header.sequence_.getValue()), 2);
+    SequenceRange range(this->expected_, header.sequence_.previous());
+    this->reassembly_.data_unavailable(range);
+  }
+
+  this->expected_ = header.sequence_;
+  ++this->expected_;
+
   // Assume header is valid; this does not prevent duplicate
   // delivery of datagrams:
   return true;
 }
 
 bool
-BestEffortSession::check_header(const DataSampleHeader& header)
+BestEffortSession::check_header(const DataSampleHeader& /*header*/)
 {
-  if (header.sequence_ != this->expected_) {
-    VDBG_LVL((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: BestEffortSession::check_header ")
-               ACE_TEXT("expected %q received %q\n"),
-               this->expected_.getValue(), header.sequence_.getValue()), 2);
-    SequenceRange range(this->expected_, header.sequence_.previous());
-    this->link_->receive_strategy()->data_unavailable(range);
-  }
-
-  this->expected_ = header.sequence_;
-  ++this->expected_;
-
   // Assume header is valid; this does not prevent duplicate
   // delivery of datagrams:
   return true;

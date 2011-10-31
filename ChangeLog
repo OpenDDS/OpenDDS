@@ -1,3 +1,56 @@
+Mon Oct 31 21:25:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Fixed further issues with reassembly of fragments.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Adapted to new fragment reassembly interface.
+          Fixed MulticastSession reference counting in MulticastDataLink.
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Adapted to new fragment reassembly interface.
+          Fixed server_link_ refcount in UdpTransport.
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/LargeSample/tcp.ini:
+        * tests/DCPS/LargeSample/udp.ini:
+
+          Test multiple Writers per publisher process and multiple publisher
+          processes writing to the same subscriber.
+          Cleaned up the test -- removed redundant config files.
+
+        * tests/DCPS/LargeSample/pub.ini:
+        * tests/DCPS/LargeSample/pub_udp.ini:
+        * tests/DCPS/LargeSample/sub.ini:
+        * tests/DCPS/LargeSample/sub_udp.ini:
+
+          Removed these files.
+
 Fri Oct 28 15:51:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReassembly.h:

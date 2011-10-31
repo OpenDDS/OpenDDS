@@ -132,7 +132,7 @@ ReliableSession::expire_naks()
   if (this->nak_sequence_.lowest_valid(lastSeq, &dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
-      this->link_->receive_strategy()->data_unavailable(dropped[i]);
+      this->reassembly_.data_unavailable(dropped[i]);
     }
 
     ACE_ERROR((LM_WARNING,
@@ -386,7 +386,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   if (this->nak_sequence_.lowest_valid(low, &dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
-      this->link_->receive_strategy()->data_unavailable(dropped[i]);
+      this->reassembly_.data_unavailable(dropped[i]);
     }
 
     if (DCPS_debug_level > 0) {

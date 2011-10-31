@@ -47,22 +47,26 @@ throw(CORBA::SystemException)
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
       if (si.valid_data) {
-        num_samples_ ++;
+        ++num_samples_;
 
-        std::cout << "Message: subject    = " << message.subject.in() << std::endl
-                  << "         subject_id = " << message.subject_id   << std::endl
-                  << "         from       = " << message.from.in()    << std::endl
-                  << "         count      = " << message.count        << std::endl
-                  << "         text       = " << message.text.in()    << std::endl
-                  << "         data.length  = " << message.data.length() << std::endl;
+        std::cout << "Message: subject = " << message.subject.in()
+                  << " subject_id = " << message.subject_id
+                  << " count = " << message.count
+                  << " from = " << message.from.in()
+                  << "\n\t text = " << message.text.in()
+                  << " data.length = " << message.data.length() << "\n";
 
         for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
-          if (message.data[i] != i % 256) {
-            std::cout << "ERROR: Bad data at " << i << std::endl;
+          if ((message.subject_id == 1 &&
+               (message.data[i] != i % 256)) ||
+              (message.subject_id == 2 &&
+               (message.data[i] != 255 - (i % 256)))) {
+            std::cout << "ERROR: Bad data at index " << i << " subjid "
+                      << message.subject_id << " count " << message.count
+                      << "\n";
+            break;
           }
         }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {

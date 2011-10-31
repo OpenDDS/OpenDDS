@@ -16,7 +16,7 @@ namespace DCPS {
 
 UdpReceiveStrategy::UdpReceiveStrategy(UdpDataLink* link)
   : link_(link)
-  , expected_()
+  , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
 }
 
@@ -38,8 +38,9 @@ UdpReceiveStrategy::receive_bytes(iovec iov[],
                                   int n,
                                   ACE_INET_Addr& remote_address)
 {
-  ACE_SOCK_Dgram& socket = this->link_->socket();
-  return socket.recv(iov, n, remote_address);
+  const ssize_t ret = this->link_->socket().recv(iov, n, remote_address);
+  remote_address_ = remote_address;
+  return ret;
 }
 
 void
@@ -80,7 +81,6 @@ UdpReceiveStrategy::start_i()
                      -1);
   }
 
-  this->enable_reassembly();
   return 0;
 }
 
@@ -102,19 +102,31 @@ UdpReceiveStrategy::stop_i()
 bool
 UdpReceiveStrategy::check_header(const TransportHeader& header)
 {
-  if (header.sequence_ != this->expected_) {
+  ReassemblyInfo& info = reassembly_[remote_address_];
+
+  if (header.sequence_ != info.second &&
+      expected_ != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     VDBG_LVL((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: UdpReceiveStrategy::check_header ")
                ACE_TEXT("expected %q received %q\n"),
-               this->expected_.getValue(), header.sequence_.getValue()), 2);
-    SequenceRange range(this->expected_, header.sequence_.previous());
-    this->data_unavailable(range);
+               info.second.getValue(), header.sequence_.getValue()), 2);
+    SequenceRange range(info.second, header.sequence_.previous());
+    info.first.data_unavailable(range);
   }
 
-  this->expected_ = header.sequence_;
-  ++this->expected_;
+  info.second = header.sequence_;
+  ++info.second;
   return true;
 }
+
+bool
+UdpReceiveStrategy::reassemble(ReceivedDataSample& data)
+{
+  ReassemblyInfo& info = reassembly_[remote_address_];
+  const TransportHeader& header = received_header();
+  return info.first.reassemble(header.sequence_, header.first_fragment_, data);
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -42,12 +42,3 @@ OpenDDS::DCPS::TransportReceiveStrategy::relink(bool)
   // The subclass needs implement this function for re-establishing
   // the link upon recv failure.
 }
-
-ACE_INLINE void
-OpenDDS::DCPS::TransportReceiveStrategy::data_unavailable(
-  const SequenceRange& dropped)
-{
-  if (this->reassembly_) {
-    this->reassembly_->data_unavailable(dropped);
-  }
-}

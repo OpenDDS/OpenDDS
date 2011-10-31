@@ -98,8 +98,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
+    DDS::DataWriter_var dw2 =
+      pub->create_datawriter(topic.in(),
+                             DATAWRITER_QOS_DEFAULT,
+                             DDS::DataWriterListener::_nil(),
+                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil(dw2.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: create_datawriter 2 failed!\n")),
+                       -1);
+    }
+
     // Start writing threads
-    Writer* writer = new Writer(dw.in());
+    Writer* writer = new Writer(dw, dw2);
     writer->start();
 
     while (!writer->is_finished()) {
