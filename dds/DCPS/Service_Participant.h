@@ -140,6 +140,9 @@ public:
   /// Accessor of the DCPSInfo object reference.
   DCPSInfo_ptr get_repository(const DDS::DomainId_t domain);
 
+  /// Accessor of the Discovery object for a given domain.
+  Discovery_rch get_discovery(const DDS::DomainId_t domain);
+
   /** Accessors of the qos policy initial values. **/
   DDS::UserDataQosPolicy            initial_UserDataQosPolicy() const;
   DDS::TopicDataQosPolicy           initial_TopicDataQosPolicy() const;
@@ -328,9 +331,11 @@ public:
   DataDurabilityCache * get_data_durability_cache(
     DDS::DurabilityQosPolicy const & durability);
 
-  /// Needed for monitor code
+  /// For internal OpenDDS Use (needed for monitor code)
   typedef std::map<Discovery::RepoKey, Discovery_rch> RepoKeyDiscoveryMap;
   const RepoKeyDiscoveryMap& discoveryMap() const;
+  typedef std::map<DDS::DomainId_t, Discovery::RepoKey> DomainRepoMap;
+  const DomainRepoMap& domainRepoMap() const;
 
 private:
 
@@ -413,7 +418,6 @@ private:
   RepoKeyDiscoveryMap discoveryMap_;
 
   /// The DomainId to RepoKey mapping.
-  typedef std::map<DDS::DomainId_t, Discovery::RepoKey> DomainRepoMap;
   DomainRepoMap domainRepoMap_;
 
   /// The lock to serialize DomainParticipantFactory singleton

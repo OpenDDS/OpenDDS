@@ -14,10 +14,15 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use FileHandle;
 use Cwd;
+use File::Copy;
 
 my $status = 0;
 
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = "repo.ior";
+my $dcpsrepo2_ior = "repo2.ior";
+my $dcpsrepo3_ior = "repo3.ior";
+
+
 unlink $dcpsrepo_ior;
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                      " -o $dcpsrepo_ior ");
@@ -28,6 +33,9 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     $DCPSREPO->Kill ();
     exit 1;
 }
+
+copy($dcpsrepo_ior, $dcpsrepo2_ior);
+copy($dcpsrepo_ior, $dcpsrepo3_ior);
 
 $TST = PerlDDS::create_process("ConfigFile", "-DCPSConfigFile test1.ini");
 print $TST->CommandLine() . "\n";
@@ -43,6 +51,8 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
+unlink $dcpsrepo2_ior;
+unlink $dcpsrepo3_ior;
 if ($status == 0) {
   print "test PASSED.\n";
 }

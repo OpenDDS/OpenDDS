@@ -40,12 +40,10 @@ namespace RTPS {
  */
 class OpenDDS_Rtps_Export RtpsDiscovery : public OpenDDS::DCPS::Discovery {
 public:
-  RtpsDiscovery(RepoKey      key,
-                std::string  ior);
+  RtpsDiscovery(RepoKey      key);
   virtual OpenDDS::DCPS::DCPSInfo_ptr get_dcps_info();
 
 private:
-  std::string                  ior_;
   OpenDDS::DCPS::DCPSInfo_var  info_;
 
   /// Guids will be unique within this RTPS configuration

@@ -43,6 +43,7 @@ public:
 
   /// Key value for the default repository IOR.
   static const std::string DEFAULT_REPO;
+  static const std::string DEFAULT_RTPS;
 
   virtual std::string get_stringified_dcps_info_ior();
   virtual DCPSInfo_ptr get_dcps_info()=0;

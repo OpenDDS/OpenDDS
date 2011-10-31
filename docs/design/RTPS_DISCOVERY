@@ -57,32 +57,46 @@ Other Details
 Configuration
 -------------
 
-Existing domain configurations in the .ini file appear as follows:
+Existing domain configurations in the .ini file appear as follows,
+with all value required and <domain_id> and <repo_key> restricted
+to integer values.
 
-[domain/<domain_name>]
-DomainId=<domain_id>
-DomainRepoKey=<integer>
+  [domain/<domain_name>]
+  DomainId=<domain_id>
+  DomainRepoKey=<repo_key>
 
-where keystring refers to a repository section of the same file:
+  [repository/<repo_name>]
+  RepositoryKey=<repo_key>
+  RepositoryIor=<ior>
 
-[repository/<repo_name>]
-RepositoryKey=<integer>
-RepositoryIor=<inforepo_ior>
+Leaving the existing functionality as is, we've simplified the
+existing configuration by optionally using the section names
+for the domain id (still must be an integer) and repo key (can
+now be a string):
 
-Leaving the existing functionality as is, we'll add the ability to
-configure individual domains to use an RTPS configuration for discovery.
+  [domain/<domain_id>]
+  DomainRepoKey=<repo_name>
+
+  [repository/<repo_name>]
+  RepositoryIor=<ior>
+
+Additionally, we add the ability to configure individual
+domains to use an RTPS configuration for discovery.
 For example, to the default RTPS discovery configuration:
 
-[domain/<domain_name>]
-DomainId=<domain_id>
-DiscoveryConfig=RTPS
+  [domain/<domain_id>]
+  DiscoveryConfig=DEFAULT_RTPS
 
-To use a specific RTPS discovery configuration:
+To use a specific RTPS (or Repository) discovery configuration:
 
-[domain/<domain_name>]
-DomainId=<domain_id>
-DiscoveryConfig=RTPS:<config_name>
+  [domain/<domain_id>]
+  DiscoveryConfig=<config_name>
 
-To configure the default RTPS discovery configuration, simply define a
-section named [rtps_discovery].  to configure a specific RTPS discovery
-configuration, simply define a section named [rtps_discovery/<name>].
+<config_name> can be any of DEFAULT_RTPS, DEFAULT_REPO,
+any [repository/*] subsections as described above, or an
+[rtps_discovery/*] subsection.  For example:
+
+  [domain/999]
+  DiscoveryConfig=MyConfig
+
+  [rtps_discovery/MyConfig]

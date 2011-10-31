@@ -1,3 +1,28 @@
+Mon Oct 31 14:23:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Add some additional tests to ConfigFile for a variety of
+          discovery configuration scenarios.  Add some resulting
+          fixes, error checking, adn refactoring that the testing
+          directed.
+
+        * docs/design/RTPS_DISCOVERY:
+
+          Update the examples at the end of this file.  This is the
+          best documentation to start with.
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Fix an annoying spelling mistake in TEST_ASSERT.
+
 Fri Oct 28 18:54:25 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/Discovery.h:

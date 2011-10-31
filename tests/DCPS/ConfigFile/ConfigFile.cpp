@@ -111,6 +111,70 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TransportRegistry::instance()->global_config();
   TEST_CHECK(global_config->name() == "myconfig");
 
+  {
+    DDS::DomainId_t domain = 1234;
+    OpenDDS::DCPS::Discovery::RepoKey key = "333";
+    std::string ior = "file://repo2.ior";
+
+    const OpenDDS::DCPS::Service_Participant::DomainRepoMap& domainRepoMap =
+      TheServiceParticipant->domainRepoMap();
+    TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
+    TEST_CHECK(domainRepoMap.find(domain)->second == key);
+
+    const OpenDDS::DCPS::Service_Participant::RepoKeyDiscoveryMap& discoveryMap =
+      TheServiceParticipant->discoveryMap();
+    TEST_CHECK(discoveryMap.find(key) != discoveryMap.end());
+    OpenDDS::DCPS::Discovery_rch discovery = discoveryMap.find(key)->second;
+    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+  }
+
+  {
+    DDS::DomainId_t domain = 1235;
+    OpenDDS::DCPS::Discovery::RepoKey key = "xyz";
+    std::string ior = "file://repo3.ior";
+
+    const OpenDDS::DCPS::Service_Participant::DomainRepoMap& domainRepoMap =
+      TheServiceParticipant->domainRepoMap();
+    TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
+    TEST_CHECK(domainRepoMap.find(domain)->second == key);
+
+    const OpenDDS::DCPS::Service_Participant::RepoKeyDiscoveryMap& discoveryMap =
+      TheServiceParticipant->discoveryMap();
+    TEST_CHECK(discoveryMap.find(key) != discoveryMap.end());
+    OpenDDS::DCPS::Discovery_rch discovery = discoveryMap.find(key)->second;
+    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+  }
+
+  {
+    DDS::DomainId_t domain = 4321;
+    OpenDDS::DCPS::Discovery::RepoKey key = "DEFAULT_RTPS";
+    std::string ior = "";
+
+    const OpenDDS::DCPS::Service_Participant::DomainRepoMap& domainRepoMap =
+      TheServiceParticipant->domainRepoMap();
+    TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
+    TEST_CHECK(domainRepoMap.find(domain)->second == key);
+
+    OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
+    TEST_CHECK(discovery != 0);
+    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+  }
+
+  {
+    DDS::DomainId_t domain = 999;
+    OpenDDS::DCPS::Discovery::RepoKey key = "MyConfig";
+    std::string ior = "";
+
+    const OpenDDS::DCPS::Service_Participant::DomainRepoMap& domainRepoMap =
+      TheServiceParticipant->domainRepoMap();
+    TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
+    TEST_CHECK(domainRepoMap.find(domain)->second == key);
+
+    OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
+    TEST_CHECK(discovery != 0);
+    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+  }
+
   TheServiceParticipant->shutdown();
   orb->destroy();
 

@@ -1016,12 +1016,15 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
   ACE_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
 }
 
-DCPSInfo_ptr
-Service_Participant::get_repository(const DDS::DomainId_t domain)
+Discovery_rch
+Service_Participant::get_discovery(const DDS::DomainId_t domain)
 {
+  // Default to the Default InfoRepo-based discovery
   Discovery::RepoKey repo = Discovery::DEFAULT_REPO;
-  DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
 
+  // Find if this domain has a repo key (really a discovery key)
+  // mapped to it.
+  DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
   if (where != this->domainRepoMap_.end()) {
     repo = where->second;
   }
@@ -1034,18 +1037,14 @@ Service_Participant::get_repository(const DDS::DomainId_t domain)
       // Set the default repository IOR if it hasn't already happened
       // by this point.  This is why this can't be const.
       InfoRepoDiscovery_rch discovery = this->set_repo_ior(DEFAULT_REPO_IOR, Discovery::DEFAULT_REPO);
-      location = this->discoveryMap_.find(Discovery::DEFAULT_REPO);
 
-      if (location == this->discoveryMap_.end()) {
-        // The default IOR was invalid.
+      if (discovery == 0) {
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                      ACE_TEXT("failed attempt to set default IOR for domain %d.\n"),
                      domain));
         }
-
-        return OpenDDS::DCPS::DCPSInfo::_nil();
 
       } else {
         // Found the default!
@@ -1056,7 +1055,48 @@ Service_Participant::get_repository(const DDS::DomainId_t domain)
                      domain));
         }
 
-        return location->second->get_dcps_info();
+      }
+      return dynamic_rchandle_cast<Discovery, InfoRepoDiscovery>(discovery);
+
+    } else if (repo == Discovery::DEFAULT_RTPS) {
+
+      if (rtps_discovery_config == 0) {
+        // See if we can dynamically load the RTPS transport and libraries
+        TheTransportRegistry->load_transport_lib("rtps_udp");
+      }
+
+      if (rtps_discovery_config != 0) {
+        // RTPS code is loaded, process options (should cause default RTPS
+        // config to be loaded).
+        ACE_Configuration_Heap cf;
+        cf.open();
+        rtps_discovery_config(cf);
+      }
+
+      // Try to find it again
+      location = this->discoveryMap_.find(Discovery::DEFAULT_RTPS);
+
+      if (location == this->discoveryMap_.end()) {
+        // Unable to load DEFAULT_RTPS
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("failed attempt to set default RTPS discovery for domain %d.\n"),
+                     domain));
+        }
+
+        return 0;
+
+      } else {
+        // Found the default!
+        if (DCPS_debug_level > 4) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("returning default RTPS discovery for domain %d.\n"),
+                     domain));
+        }
+
+        return location->second;
       }
 
     } else {
@@ -1068,7 +1108,7 @@ Service_Participant::get_repository(const DDS::DomainId_t domain)
                    domain));
       }
 
-      return OpenDDS::DCPS::DCPSInfo::_nil();
+      return 0;
     }
   }
 
@@ -1079,7 +1119,19 @@ Service_Participant::get_repository(const DDS::DomainId_t domain)
                domain, repo.c_str()));
   }
 
-  return location->second->get_dcps_info();
+  return location->second;
+}
+
+DCPSInfo_ptr
+Service_Participant::get_repository(const DDS::DomainId_t domain)
+{
+  Discovery_rch discovery = this->get_discovery(domain);
+
+  if (discovery == 0) {
+    return OpenDDS::DCPS::DCPSInfo::_nil();
+  } else {
+    return discovery->get_dcps_info();
+  }
 }
 
 int
@@ -1239,16 +1291,6 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = this->load_domain_configuration(this->cf_);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_domain_configuration () returned %d\n"),
-                      status),
-                     -1);
-  }
-
   status = load_rtps_discovery_configuration(this->cf_);
 
   if (status != 0) {
@@ -1265,6 +1307,18 @@ Service_Participant::load_configuration()
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("load_repo_configuration () returned %d\n"),
+                      status),
+                     -1);
+  }
+
+  // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
+  // sections to allow error reporting on bad discovery config names.
+  status = this->load_domain_configuration(this->cf_);
+
+  if (status != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+                      ACE_TEXT("load_domain_configuration () returned %d\n"),
                       status),
                      -1);
   }
@@ -1494,10 +1548,6 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
       pullValues( cf, (*it).second, values );
       DDS::DomainId_t domainId = -1;
       Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
-      enum DiscoveryType {
-        REPO_DISCOVERY, RTPS_DISCOVERY
-      };
-      DiscoveryType discovery_type = REPO_DISCOVERY;
       for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
         std::string name = (*it).first;
         if (name == "DomainId") {
@@ -1528,29 +1578,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
                        domain_name.c_str(), repoKey.c_str()));
           }
         } else if (name == "DiscoveryConfig") {
-          std::string config = (*it).second;
-          std::string type;
-          size_t index = config.find(":");
-          if (index == std::string::npos) {
-            type = config;
-          } else {
-            type = config.substr(0, index);
-            if (config.length() > index+1) {
-              repoKey = config.substr(index+1);
-            }
-          }
-          std::transform(type.begin(), type.end(), type.begin(), ::toupper);
-          if (type == "RTPS") {
-            discovery_type = RTPS_DISCOVERY;
-          } else if (type == "REPO") {
-            discovery_type = REPO_DISCOVERY;
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                              ACE_TEXT("Unexpected DiscoveryConfig type (%s) in [domain/%s] section.\n"),
-                              type.c_str(), domain_name.c_str()),
-                             -1);
-          }
+          repoKey = (*it).second;
 
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -1562,10 +1590,24 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
       }
 
       if (domainId == -1) {
+        // DomainId parameter is not set, try using the domain name as an ID
+        if (!convertToInteger(domain_name, domainId)) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
+                            ACE_TEXT("Missing DomainId value in [domain/%s] section.\n"),
+                            domain_name.c_str()),
+                           -1);
+        }
+      }
+
+      // Check to see if the specified discovery configuration has been defined
+      if ((repoKey != Discovery::DEFAULT_REPO) &&
+          (repoKey != Discovery::DEFAULT_RTPS) &&
+          (this->discoveryMap_.find(repoKey) == this->discoveryMap_.end())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                          ACE_TEXT("Missing DomainId value in [domain/%s] section.\n"),
-                          domain_name.c_str()),
+                          ACE_TEXT("Specified configuration (%C) not found.  Referenced in [domain/%C] section.\n"),
+                          repoKey.c_str(), domain_name.c_str()),
                          -1);
       }
       this->set_repo_domain(domainId, repoKey);
@@ -1619,22 +1661,15 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
       ValueMap values;
       pullValues( cf, (*it).second, values );
       Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
+      bool repoKeySpecified = false;
       std::string repoIor;
       int bitPort = 0;
       std::string bitIp;
       for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
         std::string name = (*it).first;
         if (name == "RepositoryKey") {
-          std::string keyString = (*it).second;
-
-          if (!convertToInteger(keyString, repoKey)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                              ACE_TEXT("Illegal integer value for RepositoryKey (%s) in [repository/%s] section.\n"),
-                              keyString.c_str(), repo_name.c_str()),
-                             -1);
-          }
-
+          repoKey = (*it).second;
+          repoKeySpecified = true;
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
                        ACE_TEXT("(%P|%t) [repository/%C]: RepositoryKey == %C\n"),
@@ -1662,7 +1697,8 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
         } else if (name == "DCPSBitTransportPort") {
           std::string value = (*it).second;
           bitPort = ACE_OS::atoi(value.c_str());
-          if (!convertToInteger(value, bitPort)) {
+          if (convertToInteger(value, bitPort)) {
+          } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
                               ACE_TEXT("Illegal integer value for DCPSBitTransportPort (%s) in [repository/%s] section.\n"),
@@ -1686,13 +1722,6 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
         }
       }
 
-      if (values.find("RepositoryKey") == values.end()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                          ACE_TEXT("Repository section [repository/%s] section is missing RepositoryKey value.\n"),
-                          repo_name.c_str()),
-                         -1);
-      }
       if (values.find("RepositoryIor") == values.end()) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
@@ -1701,6 +1730,11 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
                          -1);
       }
 
+      if (!repoKeySpecified) {
+        // If the RepositoryKey option was not specified, use the section
+        // name as the repo key
+        repoKey = repo_name;
+      }
       InfoRepoDiscovery_rch discovery = this->set_repo_ior(repoIor.c_str(), repoKey);
       discovery->bit_transport_port(bitPort);
       discovery->bit_transport_ip(bitIp);
@@ -1807,6 +1841,12 @@ const Service_Participant::RepoKeyDiscoveryMap&
 Service_Participant::discoveryMap() const
 {
   return this->discoveryMap_;
+}
+
+const Service_Participant::DomainRepoMap&
+Service_Participant::domainRepoMap() const
+{
+  return this->domainRepoMap_;
 }
 
 int (*rtps_discovery_config)(ACE_Configuration_Heap& cf) = 0;
