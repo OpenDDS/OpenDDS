@@ -1,3 +1,11 @@
+Mon Oct 31 22:08:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Fixed a bug with memory management for the TransportCustomizedElement
+          used in publisher-side content filtering.
+          This was initially found and fixed in the RTPS branch r4958.
+
 Mon Oct 31 21:25:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
