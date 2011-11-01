@@ -53,13 +53,3 @@ OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::relink(bool)
   // The subclass needs implement this function for re-establishing
   // the link upon recv failure.
 }
-
-template<typename TH, typename DSH>
-ACE_INLINE void
-OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::data_unavailable(
-  const SequenceRange& dropped)
-{
-  if (this->reassembly_) {
-    this->reassembly_->data_unavailable(dropped);
-  }
-}

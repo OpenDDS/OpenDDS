@@ -200,8 +200,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                    0);
 
     transport_header.length_ =
-      static_cast<ACE_UINT32>(data_block->length()
-                              + sample_header_block->length());
+      static_cast<ACE_UINT32>(data_block->length() +
+                              sample_header_block->length());
     *transport_header_block << transport_header;
     transport_header_block->cont(sample_header_block);
 

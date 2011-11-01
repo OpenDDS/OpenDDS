@@ -21,25 +21,27 @@ my $sub_opts = "$logging -ORBLogFile sub.log ";
 my $repo_bit_opt = '';
 
 if ($ARGV[0] eq 'udp') {
-    $pub_opts .= "-DCPSConfigFile pub_udp.ini";
-    $sub_opts .= "-DCPSConfigFile sub_udp.ini";
+    $repo_bit_opt = '-NOBITS';
+    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile udp.ini";
+    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
-    $pub_opts .= "-DCPSConfigFile pub_multicast.ini";
-    $sub_opts .= "-DCPSConfigFile sub_multicast.ini";
+    $repo_bit_opt = '-NOBITS';
+    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile pub_multicast.ini";
+    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile sub_multicast.ini";
 }
 elsif ($ARGV[0] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';
-    $pub_opts .= ' -DCPSBit 0 -DCPSConfigFile pub.ini';
-    $sub_opts .= ' -DCPSBit 0 -DCPSConfigFile sub.ini';
+    $pub_opts .= ' -DCPSBit 0 -DCPSConfigFile tcp.ini';
+    $sub_opts .= ' -DCPSBit 0 -DCPSConfigFile tcp.ini';
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;
 }
 else {
-    $pub_opts .= ' -DCPSConfigFile pub.ini';
-    $sub_opts .= ' -DCPSConfigFile sub.ini';
+    $pub_opts .= ' -DCPSConfigFile tcp.ini';
+    $sub_opts .= ' -DCPSConfigFile tcp.ini';
 }
 
 my $dcpsrepo_ior = "repo.ior";
@@ -55,6 +57,10 @@ my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
 my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
 
+my $pub2_opts = $pub_opts;
+$pub2_opts =~ s/pub\.log/pub2.log/;
+my $Publisher2 = PerlDDS::create_process("publisher", $pub2_opts);
+
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn();
 if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
@@ -66,13 +72,22 @@ if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn();
 
+print $Publisher2->CommandLine() . "\n";
+$Publisher2->Spawn();
+
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn();
 
 
-my $PublisherResult = $Publisher->WaitKill(30);
+my $PublisherResult = $Publisher->WaitKill(60);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult\n";
+    $status = 1;
+}
+
+my $Publisher2Result = $Publisher2->WaitKill(10);
+if ($Publisher2Result != 0) {
+    print STDERR "ERROR: publisher #2 returned $PublisherResult\n";
     $status = 1;
 }
 
@@ -82,7 +97,7 @@ if ($SubscriberResult != 0) {
     $status = 1;
 }
 
-my $ir = $DCPSREPO->TerminateWaitKill(5);
+my $ir = $DCPSREPO->TerminateWaitKill(10);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;

@@ -319,5 +319,14 @@ MulticastSession::stop()
   this->syn_watchdog_.cancel();
 }
 
+bool
+MulticastSession::reassemble(ReceivedDataSample& data,
+                             const TransportHeader& header)
+{
+  return this->reassembly_.reassemble(header.sequence_,
+                                      header.first_fragment_,
+                                      data);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

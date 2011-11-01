@@ -1,3 +1,7 @@
+Tue Nov  1 15:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4989 through r5021.
+
 Mon Oct 31 20:35:59 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/DCPS/ConfigUtils.cpp:

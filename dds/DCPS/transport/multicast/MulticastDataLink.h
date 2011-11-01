@@ -76,6 +76,8 @@ public:
   bool check_header(const DataSampleHeader& header);
   void sample_received(ReceivedDataSample& sample);
 
+  bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
+
 private:
   MulticastTransport* transport_;
 

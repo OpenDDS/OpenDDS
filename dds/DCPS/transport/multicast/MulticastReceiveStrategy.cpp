@@ -61,6 +61,12 @@ MulticastReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   this->link_->sample_received(sample);
 }
 
+bool
+MulticastReceiveStrategy::reassemble(ReceivedDataSample& data)
+{
+  return this->link_->reassemble(data, received_header());
+}
+
 int
 MulticastReceiveStrategy::start_i()
 {
@@ -81,7 +87,6 @@ MulticastReceiveStrategy::start_i()
                      -1);
   }
 
-  this->enable_reassembly();
   return 0;
 }
 

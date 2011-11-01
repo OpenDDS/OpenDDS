@@ -202,7 +202,7 @@ tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN
-tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN
+tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !QNX
 tests/DCPS/Ownership/run_test.pl: !DCPS_MIN
 tests/DCPS/Ownership/run_test.pl update_strength: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/Ownership/run_test.pl liveliness_change: !DCPS_MIN
@@ -212,7 +212,7 @@ tests/DCPS/GroupPresentation/run_test.pl topic: !DCPS_MIN
 tests/DCPS/GroupPresentation/run_test.pl instance: !DCPS_MIN
 tests/DCPS/LargeSample/run_test.pl: !DCPS_MIN
 tests/DCPS/LargeSample/run_test.pl udp: !DCPS_MIN
-tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN
+tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN !QNX
 tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN

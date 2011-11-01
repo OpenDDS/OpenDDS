@@ -246,11 +246,11 @@ TransportClient::disassociate(const RepoId& peerId)
 
   DataLinkSetMap released;
   link->release_reservations(peerId, repo_id_, released);
+  data_link_index_.erase(found);
 
   if (!released.empty()) {
     // Datalink is no longer used for any remote peer
     link->remove_listener(repo_id_);
-    data_link_index_.erase(found);
     links_.remove_link(link);
   }
 }

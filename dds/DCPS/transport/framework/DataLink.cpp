@@ -558,6 +558,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
     // handle_timeout is called. This would avoid DataLink deletion while handling
     // timeout.
     this->_add_ref();
+    VDBG((LM_DEBUG, "(%P|%t) DataLink[%@]::release_reservations last "
+                    "reservation released\n", this));
 
     if (this->datalink_release_delay_ > ACE_Time_Value::zero) {
       // The samples has to be removed at this point, otherwise the sample
@@ -1286,7 +1288,8 @@ void DataLink::clear_associations()
 }
 
 int
-DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
+OpenDDS::DCPS::DataLink::handle_timeout(const ACE_Time_Value& /*tv*/,
+                                        const void* /*arg*/)
 {
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
     this->pre_stop_i();
@@ -1324,6 +1327,7 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
     this->stop_i();
   }
 
+  VDBG((LM_DEBUG, "(%P|%t) DataLink[%@]::handle_timeout\n", this));
   this->_remove_ref();
 
   return 0;

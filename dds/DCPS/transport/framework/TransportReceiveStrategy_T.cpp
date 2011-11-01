@@ -26,8 +26,7 @@ TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
     buffer_index_(0),
     payload_(0),
     good_pdu_(true),
-    pdu_remaining_(0),
-    reassembly_(0)
+    pdu_remaining_(0)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy", "TransportReceiveStrategy" ,6);
 
@@ -50,8 +49,6 @@ template<typename TH, typename DSH>
 TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",6);
-
-  delete this->reassembly_;
 
   if (this->receive_buffers_[this->buffer_index_] != 0) {
     size_t size = this->receive_buffers_[this->buffer_index_]->total_length();
@@ -77,13 +74,6 @@ bool
 TransportReceiveStrategy<TH, DSH>::check_header(const DSH& /*header*/)
 {
   return true;
-}
-
-template<typename TH, typename DSH>
-void
-TransportReceiveStrategy<TH, DSH>::enable_reassembly()
-{
-  this->reassembly_ = new TransportReassembly;
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -834,19 +824,12 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         this->payload_ = 0;  // rds takes ownership of payload_
         this->data_sample_header_.into_received_data_sample(rds);
 
-        if (this->reassembly_ &&
-            (this->data_sample_header_.more_fragments()
-             || this->receive_transport_header_.last_fragment())) {
+        if (this->data_sample_header_.more_fragments()
+            || this->receive_transport_header_.last_fragment()) {
+          VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
 
-          VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                "Attempt reassembly of fragments\n"));
-
-          if (this->reassembly_->reassemble(
-                this->receive_transport_header_.sequence(),
-                this->receive_transport_header_.first_fragment(),
-                rds)) {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                  "Reassembled complete message\n"));
+          if (this->reassemble(rds)) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
             this->deliver_sample(rds, remote_address);
           }
           // If reassemble() returned false, it takes ownership of the data
@@ -887,6 +870,16 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   //   pick up from where we left off correctly.
   //
   return 0;
+}
+
+template<typename TH, typename DSH>
+bool
+TransportReceiveStrategy<TH, DSH>::reassemble(ReceivedDataSample&)
+{
+  ACE_DEBUG((LM_WARNING, "(%P|%t) TransportReceiveStrategy::reassemble() "
+    "WARNING: derived class must override if specific transport type uses "
+    "fragmentation and reassembly\n"));
+  return false;
 }
 
 template<typename TH, typename DSH>

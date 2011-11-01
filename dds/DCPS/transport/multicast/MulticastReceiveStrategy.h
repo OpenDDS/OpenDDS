@@ -29,8 +29,6 @@ public:
   virtual ACE_HANDLE get_handle() const;
   virtual int handle_input(ACE_HANDLE fd);
 
-  using TransportReceiveStrategy<>::data_unavailable;
-
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
@@ -45,6 +43,8 @@ protected:
 
   virtual int start_i();
   virtual void stop_i();
+
+  virtual bool reassemble(ReceivedDataSample& data);
 
 private:
   MulticastDataLink* link_;
