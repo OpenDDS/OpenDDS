@@ -36,6 +36,8 @@ TransportCustomizedElement::release_element(bool dropped_by_transport)
 
   if (allocator_) {
     ACE_DES_FREE(this, allocator_->free, TransportCustomizedElement);
+  } else {
+    delete this;
   }
 }
 

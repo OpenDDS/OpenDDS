@@ -91,7 +91,7 @@ private:
   // Associated Impls and DataLinks:
 
   std::vector<TransportImpl_rch> impls_;
-  DataLinkSet links_;
+  DataLinkSet links_, send_links_;
   DataLinkIndex data_link_index_;
 
 

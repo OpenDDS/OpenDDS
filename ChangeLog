@@ -1,3 +1,17 @@
+Wed Nov  2 16:13:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Made the "send links" a class member instead of a local variable.
+          This more closely matches the OpenDDS 2.x behavior and it avoids
+          DataLinkSet construction/destruction during send.
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          More complete fix for the TransportCustomizedElement change in
+          the previous commit.
+
 Mon Oct 31 22:08:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.inl:
