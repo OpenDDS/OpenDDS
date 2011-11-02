@@ -27,29 +27,29 @@
 #endif
 
 namespace {
-  enum { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4, FLAG_K = 8 };
-  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_REGISTER   = { { 0, 0, 0, 0 } };
-  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_DISPOSE    = { { 0, 0, 0, 1 } };
-  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } };
-  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
+  enum { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4,
+         FLAG_K_IN_DATA = 8, FLAG_K_IN_FRAG = 4 };
 
+  const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_REGISTER = { { 0, 0, 0, 0 } },
+          STATUS_INFO_DISPOSE = { { 0, 0, 0, 1 } },
+          STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } },
+          STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
 }
 
 namespace OpenDDS {
-  namespace RTPS {
-    inline bool operator==(const OpenDDS::RTPS::StatusInfo_t& lhs,
-                           const OpenDDS::RTPS::StatusInfo_t& rhs)
-    {
-      return
-        (lhs.value[3] == rhs.value[3]) &&
-        (lhs.value[2] == rhs.value[2]) &&
-        (lhs.value[1] == rhs.value[1]) &&
-        (lhs.value[0] == rhs.value[0]);
-    }
-  }
+namespace RTPS {
+
+inline bool
+operator==(const StatusInfo_t& lhs, const StatusInfo_t& rhs)
+{
+  return
+    (lhs.value[3] == rhs.value[3]) &&
+    (lhs.value[2] == rhs.value[2]) &&
+    (lhs.value[1] == rhs.value[1]) &&
+    (lhs.value[0] == rhs.value[0]);
 }
 
-namespace OpenDDS {
+}
 namespace DCPS {
 
 void
@@ -57,9 +57,10 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 {
   using namespace OpenDDS::RTPS;
 
+  // valid_ is false here, it will only be set to true if there is a Submessage
+
   // Manually grab the first two bytes for the SubmessageKind and the byte order
   if (mb.length() == 0) {
-    valid_ = false;
     return;
   }
 
@@ -72,7 +73,6 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   } else if (mb.cont() && mb.cont()->length() > 0) {
     flags = mb.cont()->rd_ptr()[0];
   } else {
-    valid_ = false;
     return;
   }
 
@@ -93,7 +93,6 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     break;                                                        \
   }
 
-  valid_ = false;
   switch (kind) {
   CASE_SMKIND(PAD, PadSubmessage, pad)
   CASE_SMKIND(ACKNACK, AckNackSubmessage, acknack)
@@ -123,6 +122,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
   if (valid_) {
 
+    frag_ = (kind == DATA_FRAG);
+
     // marshaled_size_ is # of bytes of submessage we have read from "mb"
     marshaled_size_ = starting_length - mb.total_length();
 
@@ -134,7 +135,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
         static_cast<ACE_CDR::UShort>(message_length_ - SMHDR_SZ);
     }
 
-    if ((kind == DATA && (flags & (FLAG_D | FLAG_K))) || kind == DATA_FRAG) {
+    if ((kind == DATA && (flags & (FLAG_D | FLAG_K_IN_DATA)))
+        || kind == DATA_FRAG) {
       // These Submessages have a payload which we haven't deserialized yet.
       // The TransportReceiveStrategy will know this via message_length().
       // octetsToNextHeader does not count the SubmessageHeader (4 bytes)
@@ -147,7 +149,54 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(marshaled_size_);
       if (octetsToNextHeader + SMHDR_SZ > marshaled) {
         valid_ = ser.skip(octetsToNextHeader + SMHDR_SZ - marshaled);
+        marshaled_size_ = octetsToNextHeader + SMHDR_SZ;
       }
+    }
+  }
+}
+
+void
+RtpsSampleHeader::process_iqos(DataSampleHeader& opendds,
+                               const RTPS::ParameterList& iqos)
+{
+  using namespace OpenDDS::RTPS;
+#if defined(OPENDDS_TEST_INLINE_QOS)
+  std::stringstream os;
+  os << "into_received_data_sample(): " << iqos.length()
+     << " inline QoS parameters\n";
+  for (CORBA::ULong index = 0; index < iqos.length(); ++index) {
+    os << "  parameter type = " << iqos[index]._d() << "\n";
+  }
+  ACE_DEBUG((LM_DEBUG, "%C", os.str().c_str()));
+#endif
+  for (CORBA::ULong i = 0; i < iqos.length(); ++i) {
+    if (iqos[i]._d() == PID_STATUS_INFO) {
+      if (iqos[i].status_info() == STATUS_INFO_DISPOSE) {
+        opendds.message_id_ = DISPOSE_INSTANCE;
+      } else if (iqos[i].status_info() == STATUS_INFO_UNREGISTER) {
+        opendds.message_id_ = UNREGISTER_INSTANCE;
+      } else if (iqos[i].status_info() == STATUS_INFO_DISPOSE_UNREGISTER) {
+        opendds.message_id_ = DISPOSE_UNREGISTER_INSTANCE;
+      } else if (iqos[i].status_info() == STATUS_INFO_REGISTER) {
+        opendds.message_id_ = INSTANCE_REGISTRATION;
+      }
+#if defined(OPENDDS_TEST_INLINE_QOS)
+    } else if (iqos[i]._d() == PID_TOPIC_NAME) {
+      ACE_DEBUG((LM_DEBUG, "topic_name = %C\n", iqos[i].string_data()));
+    } else if (iqos[i]._d() == PID_PRESENTATION) {
+      DDS::PresentationQosPolicy pres_qos = iqos[i].presentation();
+      ACE_DEBUG((LM_DEBUG, "presentation qos, access_scope = %d, "
+                 "coherent_access = %d, ordered_access = %d\n",
+                 pres_qos.access_scope, pres_qos.coherent_access,
+                 pres_qos.ordered_access));
+    } else if (iqos[i]._d() == PID_PARTITION) {
+      DDS::PartitionQosPolicy part_qos = iqos[i].partition();
+      ACE_DEBUG((LM_DEBUG, "partition qos(%d): ", part_qos.name.length()));
+      for (CORBA::ULong j = 0; j < part_qos.name.length(); j++) {
+        ACE_DEBUG((LM_DEBUG, "'%C'  ", part_qos.name[j].in()));
+      }
+      ACE_DEBUG((LM_DEBUG, "\n"));
+#endif
     }
   }
 }
@@ -160,66 +209,47 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
   switch (submessage_._d()) {
   case DATA: {
-    const OpenDDS::RTPS::DataSubmessage& rtps = submessage_.data_sm();
+    const DataSubmessage& rtps = submessage_.data_sm();
     opendds.cdr_encapsulation_ = true;
     opendds.message_length_ = message_length();
     opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
     opendds.publication_id_.entityId = rtps.writerId;
-
     opendds.message_id_ = SAMPLE_DATA;
 
-#if defined(OPENDDS_TEST_INLINE_QOS)
-    std::stringstream os;
-    os << "into_received_data_sample(): " << rtps.inlineQos.length()
-       << " inline QoS parameters\n";
-    for (CORBA::ULong index = 0; index < rtps.inlineQos.length(); ++index) {
-      os << "  parameter type = " << rtps.inlineQos[index]._d() << "\n";
-    }
-    ACE_DEBUG((LM_DEBUG, "%s", os.str().c_str()));
-#endif
-    for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
-      if (rtps.inlineQos[i]._d() == PID_STATUS_INFO) {
-        if (rtps.inlineQos[i].status_info() == STATUS_INFO_DISPOSE) {
-          opendds.message_id_ = DISPOSE_INSTANCE;
-        } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_UNREGISTER) {
-          opendds.message_id_ = UNREGISTER_INSTANCE;
-        } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_DISPOSE_UNREGISTER) {
-          opendds.message_id_ = DISPOSE_UNREGISTER_INSTANCE;
-        } else if (rtps.inlineQos[i].status_info() == STATUS_INFO_REGISTER) {
-          // TODO: Remove this case if we decide not to send Register messages
-          opendds.message_id_ = INSTANCE_REGISTRATION;
-        }
-#if defined(OPENDDS_TEST_INLINE_QOS)
-      } else if (rtps.inlineQos[i]._d() == PID_TOPIC_NAME) {
-        ACE_DEBUG((LM_DEBUG, "topic_name = %s\n", rtps.inlineQos[i].string_data()));
-      } else if (rtps.inlineQos[i]._d() == PID_PRESENTATION) {
-        DDS::PresentationQosPolicy pres_qos = rtps.inlineQos[i].presentation();
-        ACE_DEBUG((LM_DEBUG, "presentation qos, access_scope = %d, "
-                   "coherent_access = %d, ordered_access = %d\n",
-                   pres_qos.access_scope, pres_qos.coherent_access, pres_qos.ordered_access));
-      } else if (rtps.inlineQos[i]._d() == PID_PARTITION) {
-        DDS::PartitionQosPolicy part_qos = rtps.inlineQos[i].partition();
-        ACE_DEBUG((LM_DEBUG, "partition qos(%d): ", part_qos.name.length()));
-        for (size_t i = 0; i < part_qos.name.length(); i++) {
-          ACE_DEBUG((LM_DEBUG, "'%s'  ", part_qos.name[i].in()));
-        }
-        ACE_DEBUG((LM_DEBUG, "\n"));
-#endif
-      }
-    }
+    process_iqos(opendds, rtps.inlineQos);
 
-    if (rtps.smHeader.flags & FLAG_K) {
+    if (rtps.smHeader.flags & FLAG_K_IN_DATA) {
       opendds.key_fields_only_ = true;
-    } else if (!(rtps.smHeader.flags & (FLAG_D | FLAG_K))) {
+    } else if (!(rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA))) {
       // TODO: Handle the case of D = 0 and K = 0 (used for Coherent Sets see 8.7.5)
     }
 
-    if (rtps.smHeader.flags & (FLAG_D | FLAG_K)) {
+    if (rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
       // Peek at the byte order from the encapsulation containing the payload.
       opendds.byte_order_ = rds.sample_->rd_ptr()[1] & FLAG_E;
     }
 
-    //TODO: all the rest...
+    break;
+  }
+  case DATA_FRAG: {
+    const DataFragSubmessage& rtps = submessage_.data_frag_sm();
+    opendds.cdr_encapsulation_ = true;
+    opendds.message_length_ = message_length();
+    opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
+    opendds.publication_id_.entityId = rtps.writerId;
+    opendds.message_id_ = SAMPLE_DATA;
+    opendds.key_fields_only_ = (rtps.smHeader.flags & FLAG_K_IN_FRAG);
+
+    // Peek at the byte order from the encapsulation containing the payload.
+    opendds.byte_order_ = rds.sample_->rd_ptr()[1] & FLAG_E;
+
+    process_iqos(opendds, rtps.inlineQos);
+
+    const CORBA::ULong lastFragInSubmsg =
+      rtps.fragmentStartingNum.value - 1 + rtps.fragmentsInSubmessage;
+    if (lastFragInSubmsg * rtps.fragmentSize < rtps.sampleSize) {
+      opendds.more_fragments_ = true;
+    }
     break;
   }
   default:
@@ -317,7 +347,7 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
       // TODO: Determine if we want to send a message here.
       // We should probably eat this message, but for now I am just going to
       // send it with none of the status info bits set (it is easier)
-      data.smHeader.flags |= FLAG_K;
+      data.smHeader.flags |= FLAG_K_IN_DATA;
       int qos_len = data.inlineQos.length();
       data.inlineQos.length(qos_len+1);
       data.inlineQos[qos_len].status_info(STATUS_INFO_REGISTER);
@@ -325,7 +355,7 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
     break;
   case UNREGISTER_INSTANCE:
     {
-      data.smHeader.flags |= FLAG_K;
+      data.smHeader.flags |= FLAG_K_IN_DATA;
       int qos_len = data.inlineQos.length();
       data.inlineQos.length(qos_len+1);
       data.inlineQos[qos_len].status_info(STATUS_INFO_UNREGISTER);
@@ -333,7 +363,7 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
     break;
   case DISPOSE_INSTANCE:
     {
-      data.smHeader.flags |= FLAG_K;
+      data.smHeader.flags |= FLAG_K_IN_DATA;
       int qos_len = data.inlineQos.length();
       data.inlineQos.length(qos_len+1);
       data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
@@ -341,7 +371,7 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
     break;
   case DISPOSE_UNREGISTER_INSTANCE:
     {
-      data.smHeader.flags |= FLAG_K;
+      data.smHeader.flags |= FLAG_K_IN_DATA;
       int qos_len = data.inlineQos.length();
       data.inlineQos.length(qos_len+1);
       data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);

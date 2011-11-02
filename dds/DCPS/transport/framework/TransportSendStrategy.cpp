@@ -1939,7 +1939,6 @@ TransportSendStrategy::space_available() const
 int
 TransportSendStrategy::mb_to_iov(const ACE_Message_Block& msg, iovec* iov)
 {
-  
   int num_blocks = 0;
 #ifdef _MSC_VER
 #pragma warning(push)

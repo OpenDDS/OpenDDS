@@ -45,10 +45,12 @@ public:
   /// Provides access to the received transport header
   /// for subclasses.
   const TH& received_header() const;
+  TH& received_header();
 
   /// Provides access to the received sample header
   /// for subclasses.
   const DSH& received_sample_header() const;
+  DSH& received_sample_header();
 
 protected:
   TransportReceiveStrategy();

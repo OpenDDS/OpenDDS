@@ -129,6 +129,11 @@ public:
 
   typedef BasicQueue<TransportQueueElement> QueueType;
 
+  /// Convert ACE_Message_Block chain into iovec[] entries for send(),
+  /// returns number of iovec[] entries used (up to MAX_SEND_BLOCKS).
+  /// Precondition: iov must be an iovec[] of size MAX_SEND_BLOCKS or greater.
+  static int mb_to_iov(const ACE_Message_Block& msg, iovec* iov);
+
 protected:
 
   TransportSendStrategy(const TransportInst_rch& transport_inst,
@@ -157,11 +162,6 @@ protected:
   virtual void prepare_packet_i();
 
   TransportQueueElement* current_packet_first_element() const;
-
-  /// Convert ACE_Message_Block chain into iovec[] entries for send(),
-  /// returns number of iovec[] entries used (up to MAX_SEND_BLOCKS).
-  /// Precondition: iov must be an iovec[] of size MAX_SEND_BLOCKS or greater.
-  int mb_to_iov(const ACE_Message_Block& msg, iovec* iov);
 
   /// The maximum size of a message allowed by the this TransportImpl, or 0
   /// if there is no such limit.  This is expected to be a constant, for example

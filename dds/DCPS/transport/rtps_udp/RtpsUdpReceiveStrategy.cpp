@@ -12,6 +12,7 @@
 #include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
+#include "dds/DCPS/RTPS/MessageTypes.h"
 
 #include "ace/Reactor.h"
 
@@ -97,6 +98,9 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                     receiver_.dest_guid_prefix_);
     break;
 
+  /* no case DATA_FRAG: by the time deliver_sample() is called, reassemble()
+     has successfully reassembled the fragments and we now have a DATA submsg
+   */
   default:
     break;
   }
@@ -134,7 +138,6 @@ RtpsUdpReceiveStrategy::start_i()
     }
   }
 
-  // enable_reassembly();
   return 0;
 }
 
@@ -170,7 +173,41 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
   receiver_.submsg(header.submessage_);
+
+  // save fragmentation details for use in reassemble()
+  if (header.valid() && header.submessage_._d() == RTPS::DATA_FRAG) {
+    const RTPS::DataFragSubmessage& rtps = header.submessage_.data_frag_sm();
+    frags_.first = rtps.fragmentStartingNum.value;
+    frags_.second = frags_.first + (rtps.fragmentsInSubmessage - 1);
+  }
+
   return header.valid();
+}
+
+bool
+RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
+{
+  using namespace OpenDDS::RTPS;
+  receiver_.fill_header(data.header_); // set publication_id_.guidPrefix
+  if (reassembly_.reassemble(frags_, data)) {
+
+    // Reassembly was successful, replace DataFrag with Data.  This doesn't have
+    // to be a fully-formed DataSubmessage, just enough for this class to use 
+    // in deliver_sample() which ends up calling RtpsUdpDataLink::received().
+    // In particular we will need the SequenceNumber, but ignore the iQoS.
+
+    RtpsSampleHeader& rsh = received_sample_header();
+    const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();
+
+    const CORBA::Octet data_flags = (data.header_.byte_order_ ? 1 : 0)
+                                  | (data.header_.key_fields_only_ ? 8 : 4);
+    const DataSubmessage dsm = {
+      {DATA, data_flags, 0}, 0, DATA_OCTETS_TO_IQOS,
+      dfsm.readerId, dfsm.writerId, dfsm.writerSN, ParameterList()};
+    rsh.submessage_.data_sm(dsm);
+    return true;
+  }
+  return false;
 }
 
 

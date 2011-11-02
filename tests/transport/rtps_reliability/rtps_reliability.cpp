@@ -56,7 +56,8 @@ struct SimpleTC: TransportClient {
 
 
 struct SimpleDataReader: SimpleTC, TransportReceiveListener {
-  explicit SimpleDataReader(const RepoId& sub_id) : SimpleTC(sub_id) {}
+  explicit SimpleDataReader(const RepoId& sub_id)
+    : SimpleTC(sub_id), have_frag_(false) {}
 
   void data_received(const ReceivedDataSample& sample)
   {
@@ -65,6 +66,16 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
     recvd_.insert(sample.header_.sequence_);
     if (sample.header_.sequence_ == 5) {
       recvd_.insert(4); // 4 is a deliberate GAP
+    }
+    if (sample.header_.sequence_ == 6) { // reassembled from DATA_FRAG
+      if (sample.header_.message_length_ != 3 * 1024
+          || sample.sample_->total_length() != 3 * 1024) {
+        ACE_DEBUG((LM_ERROR, "ERROR: unexpected reassembled sample length\n"));
+      }
+      if (have_frag_) {
+        ACE_DEBUG((LM_ERROR, "ERROR: duplicate delivery from DATA_FRAG\n"));
+      }
+      have_frag_ = true;
     }
   }
 
@@ -75,6 +86,7 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   void remove_associations(const WriterIdSeq&, bool) {}
 
   DisjointSequence recvd_;
+  bool have_frag_;
 };
 
 
@@ -126,7 +138,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
 };
 
 
-enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4, FLAG_K = 8 };
+enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4 };
 
 struct TestParticipant: ACE_Event_Handler {
   TestParticipant(ACE_SOCK_Dgram& sock,
@@ -141,6 +153,9 @@ struct TestParticipant: ACE_Event_Handler {
        prefix[6], prefix[7], prefix[8], prefix[9], prefix[10], prefix[11]}
     };
     hdr_ = hdr;
+    for (CORBA::ULong i = 0; i < FRAG_SIZE; ++i) {
+      data_for_frag_[i] = i % 256;
+    }
     if (ACE_Reactor::instance()->register_handler(sock_.get_handle(),
                                                   this, READ_MASK) == -1) {
       ACE_DEBUG((LM_ERROR, "ERROR in TestParticipant ctor, %p\n",
@@ -162,7 +177,8 @@ struct TestParticipant: ACE_Event_Handler {
   bool send(const ACE_Message_Block& mb, const ACE_INET_Addr& send_to)
   {
     if (sock_.send(mb.rd_ptr(), mb.length(), send_to) < 0) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: in send() %p\n", ACE_TEXT("send")));
+      ACE_DEBUG((LM_DEBUG, "ERROR: in TestParticipant::send() %p\n",
+                 ACE_TEXT("send")));
       return false;
     }
     return true;
@@ -189,6 +205,49 @@ struct TestParticipant: ACE_Event_Handler {
       return false;
     }
     return send(mb, send_to);
+  }
+
+  bool send_frags(const OpenDDS::DCPS::EntityId_t& writer,
+                  const SequenceNumber_t& seq, const ACE_INET_Addr& send_to)
+  {
+    static const CORBA::ULong N = 3; // number of fragments to send
+    ParameterList inlineQoS;
+    inlineQoS.length(1);
+    inlineQoS[0].string_data("my_topic_name");
+    inlineQoS[0]._d(PID_TOPIC_NAME);
+    DataFragSubmessage df = {
+      {DATA_FRAG, FLAG_E | FLAG_Q, 0},
+      0, DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq,
+      {1},           // fragmentStartingNum
+      1,             // fragmentsInSubmessage
+      FRAG_SIZE,     // fragmentSize (smallest fragmentSize allowed is 1KB)
+      N * FRAG_SIZE, // sampleSize
+      inlineQoS
+    };
+    for (CORBA::ULong i = 0; i < N; ++i) {
+      size_t size = 0, padding = 0;
+      gen_find_size(hdr_, size, padding);
+      gen_find_size(df, size, padding);
+      size += FRAG_SIZE;
+      ACE_Message_Block mb(size + padding);
+      Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+      const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
+      bool ok = (ser << hdr_) && (ser << df);
+      if (i == 0) ok &= (ser << encap);
+      ok &= ser.write_octet_array(data_for_frag_,
+                                  i ? FRAG_SIZE : FRAG_SIZE - 4);
+      if (!ok) {
+        ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data frag %d\n", i));
+        return false;
+      }
+      if (!send(mb, send_to)) {
+        return false;
+      }
+      df.inlineQos = ParameterList();
+      df.smHeader.flags &= ~FLAG_Q; // no iQoS in subsequent fragments
+      ++df.fragmentStartingNum.value;
+    }
+    return true;
   }
 
   bool send_gap(const OpenDDS::DCPS::EntityId_t& writer,
@@ -412,6 +471,8 @@ struct TestParticipant: ACE_Event_Handler {
   bool do_nack_;
   OpenDDS::DCPS::EntityId_t reader_ent_;
   DisjointSequence recvd_;
+  static const ACE_CDR::UShort FRAG_SIZE = 1024;
+  ACE_CDR::Octet data_for_frag_[FRAG_SIZE];
 };
 
 
@@ -597,6 +658,12 @@ bool run_test()
   reactor_wait();
   // further heartbeats should not generate any negative acks
   if (!part1.send_hb(writer1.entityId, first_seq, seq, part2_addr)) {
+    return false;
+  }
+  reactor_wait();
+
+  seq.low = 6; // send multiple DATA_FRAG submessages
+  if (!part1.send_frags(writer1.entityId, seq, part2_addr)) {
     return false;
   }
   reactor_wait();

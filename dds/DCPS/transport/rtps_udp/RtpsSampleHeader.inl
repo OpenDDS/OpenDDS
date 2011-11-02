@@ -12,6 +12,7 @@ namespace DCPS {
 ACE_INLINE
 RtpsSampleHeader::RtpsSampleHeader()
   : valid_(false)
+  , frag_(false)
   , marshaled_size_(0)
   , message_length_(0)
 {
@@ -20,6 +21,7 @@ RtpsSampleHeader::RtpsSampleHeader()
 ACE_INLINE
 RtpsSampleHeader::RtpsSampleHeader(ACE_Message_Block& mb)
   : valid_(false)
+  , frag_(false)
   , marshaled_size_(0)
   , message_length_(0)
 {
@@ -29,6 +31,10 @@ RtpsSampleHeader::RtpsSampleHeader(ACE_Message_Block& mb)
 ACE_INLINE RtpsSampleHeader&
 RtpsSampleHeader::operator=(ACE_Message_Block& mb)
 {
+  frag_ = false;
+  valid_ = false;
+  // message_length_ should not be reset here
+  // marshaled_size_ doesn't need to be reset, init() will set it (if valid_)
   init(mb);
   return *this;
 }
@@ -60,7 +66,7 @@ RtpsSampleHeader::message_length()
 ACE_INLINE bool
 RtpsSampleHeader::more_fragments() const
 {
-  return false;
+  return frag_;
 }
 
 }

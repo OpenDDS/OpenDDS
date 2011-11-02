@@ -33,8 +33,22 @@ OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::received_header() const
 }
 
 template<typename TH, typename DSH>
+ACE_INLINE TH&
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::received_header()
+{
+  return this->receive_transport_header_;
+}
+
+template<typename TH, typename DSH>
 ACE_INLINE const DSH&
 OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::received_sample_header() const
+{
+  return this->data_sample_header_;
+}
+
+template<typename TH, typename DSH>
+ACE_INLINE DSH&
+OpenDDS::DCPS::TransportReceiveStrategy<TH, DSH>::received_sample_header()
 {
   return this->data_sample_header_;
 }

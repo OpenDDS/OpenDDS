@@ -28,7 +28,6 @@ struct RtpsTransportHeader {
 
   bool valid() const;
 
-  bool first_fragment();
   bool last_fragment();
   void last_fragment(bool frag);
   const SequenceNumber& sequence();

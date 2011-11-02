@@ -45,12 +45,6 @@ RtpsTransportHeader::valid() const
 }
 
 ACE_INLINE bool
-RtpsTransportHeader::first_fragment()
-{
-  return false;
-}
-
-ACE_INLINE bool
 RtpsTransportHeader::last_fragment()
 {
   return false;

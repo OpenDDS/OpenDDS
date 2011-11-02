@@ -52,9 +52,14 @@ protected:
 
   virtual bool check_header(const RtpsSampleHeader& header);
 
+  virtual bool reassemble(ReceivedDataSample& data);
+
 private:
   RtpsUdpDataLink* link_;
   SequenceNumber last_received_;
+
+  SequenceRange frags_;
+  TransportReassembly reassembly_;
 
   struct MessageReceiver {
 

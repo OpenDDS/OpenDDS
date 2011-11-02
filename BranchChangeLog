@@ -1,3 +1,40 @@
+Wed Nov  2 16:19:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Changes to support use of TransportReassembly with RTPS data.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Handle incoming DATA_FRAG submessages.  Note that we are not
+          currently generating fragments from OpenDDS Data Writers.
+          Reliability for fragments (HEARTBEAT_FRAG, NACK_FRAG) is not yet
+          implemented.
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Use a common function in TransportSendStrategy for the
+          ACE_Message_Block to iovec[] conversion.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Added unit tests for TransportReassembly.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Added tests for DATA_FRAG.
+
 Tue Nov  1 15:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4989 through r5021.

@@ -23,7 +23,8 @@ class ReceivedDataSample;
 struct DataSampleListElement;
 
 /// Adapt the TransportReceiveStrategy for RTPS's "sample" (submessage) Header
-struct RtpsSampleHeader {
+class RtpsSampleHeader {
+public:
 
   // This is not really the max_marshaled_size, but it's used for determining
   // how much of the submessage to show in debugging hexdumps.  Since we don't
@@ -50,12 +51,15 @@ struct RtpsSampleHeader {
 
   bool more_fragments() const;
 
+  OpenDDS::RTPS::Submessage submessage_;
+
+private:
   void init(ACE_Message_Block& mb);
 
-  OpenDDS::RTPS::Submessage submessage_;
-  bool valid_;
+  bool valid_, frag_;
   size_t marshaled_size_, message_length_;
 
+public:
   // Unlike the rest of this class, which is used with the
   // TransportReceiveStrategy, thes functions do the inverse of
   // into_received_data_sample() so they are used on the sending side:
@@ -66,9 +70,12 @@ struct RtpsSampleHeader {
   static void populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
                                                 const TransportSendControlElement& tsce,
                                                 bool requires_inline_qos);
-
   static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
                                   OpenDDS::RTPS::DataSubmessage& data);
+
+private:
+  static void process_iqos(DataSampleHeader& opendds,
+                           const OpenDDS::RTPS::ParameterList& iqos);
 };
 
 }
