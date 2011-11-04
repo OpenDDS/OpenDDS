@@ -1,3 +1,19 @@
+Fri Nov  4 18:28:40 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Messenger.mpc:
+
+          Reworked Messenger dev guide example.
+          Incorporate sync and null listener utilities from support library.
+          Moved boilerplate code out of main.
+
 Wed Nov  2 16:13:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.h:
