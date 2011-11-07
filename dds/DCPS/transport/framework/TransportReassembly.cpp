@@ -11,6 +11,7 @@
 #include "TransportDebug.h"
 
 #include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/DisjointSequence.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -150,6 +151,59 @@ TransportReassembly::insert(std::list<FragRange>& flist,
 }
 
 bool
+TransportReassembly::has_frags(const SequenceNumber& seq,
+                               const RepoId& pub_id) const
+{
+  return fragments_.count(FragKey(pub_id, seq));
+}
+
+CORBA::ULong
+TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
+                              CORBA::Long bitmap[], CORBA::ULong length,
+                              CORBA::ULong& numBits) const
+{
+  const FragMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
+  if (iter == fragments_.end() || length == 0) {
+    return 0;
+  }
+
+  // RTPS's FragmentNumbers are 32-bit values, so we'll only be using the
+  // low 32 bits of the 64-bit generalized sequence numbers in
+  // FragRange::transport_seq_.
+
+  const std::list<FragRange>& flist = iter->second;
+  const SequenceNumber& first = flist.front().transport_seq_.first;
+  const CORBA::ULong base = (first == 1)
+    ? flist.front().transport_seq_.second.getLow() + 1
+    : 1;
+
+  if (first != 1) {
+    // Represent the "gap" before the first list element.
+    // base == 1 and the first 2 args to fill_bitmap_range() are deltas of base
+    DisjointSequence::fill_bitmap_range(0, first.getLow() - 2,
+                                        bitmap, length, numBits);
+  } else if (flist.size() == 1) {
+    // No gaps, but numBits must be positive
+    numBits = 1;
+    bitmap[0] = 0;
+    return 1;
+  }
+
+  typedef std::list<FragRange>::const_iterator list_iterator;
+  for (list_iterator it = flist.begin(); it != flist.end(); ++it) {
+    const list_iterator it_next = ++list_iterator(it);
+    if (it_next == flist.end()) {
+      break;
+    }
+    const CORBA::ULong low = it->transport_seq_.second.getLow() + 1 - base,
+                       high = it_next->transport_seq_.first.getLow() - 1 - base;
+    DisjointSequence::fill_bitmap_range(low, high, bitmap, length, numBits);
+  }
+
+  return base;
+}
+
+bool
 TransportReassembly::reassemble(const SequenceRange& seqRange,
                                 ReceivedDataSample& data)
 {
@@ -270,6 +324,15 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
       insert(flist, dropped, dummy);
     }
   }
+}
+
+void
+TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
+                                      const RepoId& pub_id)
+{
+  const FragKey key(pub_id, dataSampleSeq);
+  fragments_.erase(key);
+  have_first_.erase(key);
 }
 
 }

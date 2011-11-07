@@ -54,6 +54,8 @@ public:
   /// SequenceNumbers.
   bool disjoint() const;
 
+  bool contains(SequenceNumber value) const;
+
   /// All insert() methods return true upon modifying the set and false if
   /// the set already contained the SequenceNumber(s) that were to be inserted.
   /// This is the general form of insert() whereby the caller receives a list of
@@ -124,9 +126,11 @@ private:
 
   bool insert_bitmap_range(RangeSet::iterator& iter, const SequenceRange& sr);
 
-  static bool to_bitmap_helper(CORBA::ULong low, CORBA::ULong high,
-                               CORBA::Long bitmap[], CORBA::ULong length,
-                               CORBA::ULong& num_bits);
+public:
+  /// Set the bits in range [low, high] in the bitmap, updating num_bits.
+  static bool fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
+                                CORBA::Long bitmap[], CORBA::ULong length,
+                                CORBA::ULong& num_bits);
 };
 
 

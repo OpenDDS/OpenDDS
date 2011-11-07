@@ -114,6 +114,13 @@ template<typename T, size_t N>
 bool test(const T& foo, const CORBA::Octet (&expected)[N],
           const char* name, bool bigendian = false)
 {
+  size_t size = 0, padding = 0;
+  OpenDDS::DCPS::gen_find_size(foo, size, padding);
+  if (size + padding != N) {
+    std::cerr << "ERROR: " << name << " expected size " << N << " actual size "
+                 "from gen_find_size " << size << " padding " << padding
+              << std::endl;
+  }
   const bool swap =
 #ifdef ACE_LITTLE_ENDIAN
     bigendian;

@@ -98,6 +98,11 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                     receiver_.dest_guid_prefix_);
     break;
 
+  case HEARTBEAT_FRAG:
+    link_->received(rsh.submessage_.hb_frag_sm(), receiver_.source_guid_prefix_,
+                    receiver_.dest_guid_prefix_);
+    break;
+
   /* no case DATA_FRAG: by the time deliver_sample() is called, reassemble()
      has successfully reassembled the fragments and we now have a DATA submsg
    */
@@ -208,6 +213,73 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
     return true;
   }
   return false;
+}
+
+void
+RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
+                                                 CORBA::ULong num_bits,
+                                                 const SequenceNumber& base,
+                                                 const RepoId& pub_id)
+{
+  for (CORBA::ULong i = 0, x = 0, bit = 0; i < num_bits; ++i, ++bit) {
+    if (bit == 32) bit = 0;
+
+    if (bit == 0) {
+      x = static_cast<CORBA::ULong>(bitmap[i / 32]);
+      if (x == 0) {
+        // skip an entire Long if it's all 0's (adds 32 due to ++i)
+        i += 31;
+        bit = 31;
+        //FUTURE: this could be generalized with something like the x86 "bsr"
+        //        instruction using compiler intrinsics, VC++ _BitScanReverse()
+        //        and GCC __builtin_clz()
+        continue;
+      }
+    }
+
+    const CORBA::ULong mask = 1 << (31 - bit);
+    if (x & mask) {
+      if (reassembly_.has_frags(base + i, pub_id)) {
+        x &= ~mask;
+        bitmap[i / 32] = x;
+      }
+    }
+  }
+}
+
+void
+RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
+                                         const RepoId& pub_id)
+{
+  for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
+    reassembly_.data_unavailable(sn, pub_id);
+  }
+}
+
+bool
+RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
+                                      const RepoId& pub_id,
+                                      FragmentInfo* frag_info)
+{
+  for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
+    if (reassembly_.has_frags(sn, pub_id)) {
+      if (frag_info) {
+        std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
+        p.first = sn;
+        frag_info->push_back(p);
+        RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+        missing_frags.bitmap.length(8); // start at max length
+        missing_frags.bitmapBase.value =
+          reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),
+                               8, missing_frags.numBits);
+        // reduce length in case get_gaps() didn't need all that room
+        missing_frags.bitmap.length((missing_frags.numBits + 31) / 32);
+      } else {
+        return true;
+      }
+    }
+  }
+  return frag_info ? !frag_info->empty() : false;
 }
 
 

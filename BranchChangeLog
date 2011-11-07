@@ -1,3 +1,38 @@
+Mon Nov  7 21:29:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added a contains() method to allow clients to check if a number
+          is in the sequence.
+          Made the bitmap "helper" public so it can be used elsewhere.
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Added methods to support RTPS fragment reassembly.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Implemented reliability for receiving fragmented data (receive
+          HEARTBEAT_FRAG, send NACK_FRAG).
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed the size of serialized FragmentNumberSet (it's 4 bytes smaller
+          than SequenceNumberSet because the fragment numbers are 32-bit).
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Test for correct gen_find_size() results for all data types.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Test reliability features for fragmented data.
+
 Wed Nov  2 16:19:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReassembly.h:

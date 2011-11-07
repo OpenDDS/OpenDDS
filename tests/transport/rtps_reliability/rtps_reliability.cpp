@@ -36,6 +36,7 @@ const char* smkinds[] = {"RESERVED_0", "PAD", "RESERVED_2", "RESERVED_3",
   "RESERVED_10", "RESERVED_11", "INFO_SRC", "INFO_REPLY_IP4", "INFO_DST",
   "INFO_REPLY", "RESERVED_16", "RESERVED_17", "NACK_FRAG", "HEARTBEAT_FRAG",
   "RESERVED_20", "DATA", "DATA_FRAG"};
+const size_t n_smkinds = sizeof(smkinds) / sizeof(smkinds[0]);
 
 
 struct SimpleTC: TransportClient {
@@ -144,8 +145,8 @@ struct TestParticipant: ACE_Event_Handler {
   TestParticipant(ACE_SOCK_Dgram& sock,
                   const OpenDDS::DCPS::GuidPrefix_t& prefix,
                   const OpenDDS::DCPS::EntityId_t& reader_ent)
-    : sock_(sock), heartbeat_count_(0), acknack_count_(0), recv_mb_(64 * 1024)
-    , do_nack_(true), reader_ent_(reader_ent)
+    : sock_(sock), heartbeat_count_(0), acknack_count_(0), hbfrag_count_(0)
+    , recv_mb_(64 * 1024), do_nack_(true), reader_ent_(reader_ent)
   {
     const Header hdr = {
       {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
@@ -207,47 +208,41 @@ struct TestParticipant: ACE_Event_Handler {
     return send(mb, send_to);
   }
 
-  bool send_frags(const OpenDDS::DCPS::EntityId_t& writer,
-                  const SequenceNumber_t& seq, const ACE_INET_Addr& send_to)
+  bool send_frag(const OpenDDS::DCPS::EntityId_t& writer, CORBA::ULong i,
+                 const SequenceNumber_t& seq, const ACE_INET_Addr& send_to)
   {
     static const CORBA::ULong N = 3; // number of fragments to send
     ParameterList inlineQoS;
-    inlineQoS.length(1);
-    inlineQoS[0].string_data("my_topic_name");
-    inlineQoS[0]._d(PID_TOPIC_NAME);
+    if (i == 0) {
+      inlineQoS.length(1);
+      inlineQoS[0].string_data("my_topic_name");
+      inlineQoS[0]._d(PID_TOPIC_NAME);
+    }
     DataFragSubmessage df = {
-      {DATA_FRAG, FLAG_E | FLAG_Q, 0},
+      {DATA_FRAG, FLAG_E | (i ? 0 : FLAG_Q), 0},
       0, DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq,
-      {1},           // fragmentStartingNum
+      {i + 1},       // fragmentStartingNum
       1,             // fragmentsInSubmessage
       FRAG_SIZE,     // fragmentSize (smallest fragmentSize allowed is 1KB)
       N * FRAG_SIZE, // sampleSize
       inlineQoS
     };
-    for (CORBA::ULong i = 0; i < N; ++i) {
-      size_t size = 0, padding = 0;
-      gen_find_size(hdr_, size, padding);
-      gen_find_size(df, size, padding);
-      size += FRAG_SIZE;
-      ACE_Message_Block mb(size + padding);
-      Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
-      const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
-      bool ok = (ser << hdr_) && (ser << df);
-      if (i == 0) ok &= (ser << encap);
-      ok &= ser.write_octet_array(data_for_frag_,
-                                  i ? FRAG_SIZE : FRAG_SIZE - 4);
-      if (!ok) {
-        ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data frag %d\n", i));
-        return false;
-      }
-      if (!send(mb, send_to)) {
-        return false;
-      }
-      df.inlineQos = ParameterList();
-      df.smHeader.flags &= ~FLAG_Q; // no iQoS in subsequent fragments
-      ++df.fragmentStartingNum.value;
+    size_t size = 0, padding = 0;
+    gen_find_size(hdr_, size, padding);
+    gen_find_size(df, size, padding);
+    size += FRAG_SIZE;
+    ACE_Message_Block mb(size + padding);
+    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+    const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
+    bool ok = (ser << hdr_) && (ser << df);
+    if (i == 0) ok &= (ser << encap);
+    ok &= ser.write_octet_array(data_for_frag_,
+                                i ? FRAG_SIZE : FRAG_SIZE - 4);
+    if (!ok) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data frag %d\n", i));
+      return false;
     }
-    return true;
+    return send(mb, send_to);
   }
 
   bool send_gap(const OpenDDS::DCPS::EntityId_t& writer,
@@ -291,6 +286,27 @@ struct TestParticipant: ACE_Event_Handler {
     bool ok = (ser << hdr_) && (ser << hb);
     if (!ok) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize heartbeat\n"));
+      return false;
+    }
+    return send(mb, send_to);
+  }
+
+  bool send_hbfrag(const OpenDDS::DCPS::EntityId_t& writer,
+                   const SequenceNumber_t& seq, CORBA::ULong lastAvailFrag,
+                   const ACE_INET_Addr& send_to)
+  {
+    const HeartBeatFragSubmessage hbf = {
+      {HEARTBEAT_FRAG, FLAG_E, 0},
+      ENTITYID_UNKNOWN, writer, seq, {lastAvailFrag}, {++hbfrag_count_}
+    };
+    size_t size = 0, padding = 0;
+    gen_find_size(hdr_, size, padding);
+    gen_find_size(hbf, size, padding);
+    ACE_Message_Block mb(size + padding);
+    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+    bool ok = (ser << hdr_) && (ser << hbf);
+    if (!ok) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize heartbeatfrag\n"));
       return false;
     }
     return send(mb, send_to);
@@ -355,9 +371,17 @@ struct TestParticipant: ACE_Event_Handler {
       case HEARTBEAT:
         if (!recv_hb(ser, peer)) return false;
         break;
+      case NACK_FRAG:
+        if (!recv_nackfrag(ser, peer)) return false;
+        break;
       default:
-        ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                   smkinds[static_cast<unsigned char>(subm)]));
+        if (subm < n_smkinds) {
+          ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
+                     smkinds[static_cast<unsigned char>(subm)]));
+        } else {
+          ACE_DEBUG((LM_ERROR, "ERROR: Received unknown submessage type: %d\n",
+                     int(subm)));
+        }
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_DEBUG((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
@@ -393,7 +417,7 @@ struct TestParticipant: ACE_Event_Handler {
             return false;
           }
         } else {
-          ACE_DEBUG((LM_INFO, "recv_an() simulated retransmit %d\n", seq.low));
+          ACE_DEBUG((LM_INFO, "recv_an() data retransmit %d\n", seq.low));
           if (!send_data(an.writerId, seq, peer)) {
             return false;
           }
@@ -402,6 +426,42 @@ struct TestParticipant: ACE_Event_Handler {
     }
     if (!nack) {
       ACE_DEBUG((LM_DEBUG, "recv_an() no retransmission requested\n"));
+    }
+    return true;
+  }
+
+  bool recv_nackfrag(Serializer& ser, const ACE_INET_Addr& peer)
+  {
+    NackFragSubmessage nf;
+    if (!(ser >> nf)) {
+      ACE_DEBUG((LM_ERROR,
+        "ERROR: recv_nackfrag() failed to deserialize NackFragSubmessage\n"));
+      return false;
+    }
+    if (nf.writerSN.low != 6 && nf.writerSN.low != 7) {
+      ACE_DEBUG((LM_ERROR,
+                 "ERROR: recv_nackfrag() unexpected NACK_FRAG seq %d\n",
+                 nf.writerSN.low));
+      return true;
+    }
+    for (CORBA::ULong i = 0; i < nf.fragmentNumberState.numBits; ++i) {
+      if (nf.fragmentNumberState.bitmap[i / 32] & (1 << (31 - (i % 32)))) {
+        FragmentNumber_t frag = nf.fragmentNumberState.bitmapBase;
+        frag.value += i;
+        if (nf.writerSN.low == 6 && frag.value != 2) {
+          ACE_DEBUG((LM_ERROR,
+                     "ERROR: recv_nackfrag() unexpected NACK_FRAG frag %d\n",
+                     frag.value));
+          return true;
+        }
+        if (nf.writerSN.low == 6 || frag.value == 2) {
+          ACE_DEBUG((LM_INFO, "recv_nackfrag() retransmit %d:%d\n",
+                     nf.writerSN.low, frag.value));
+          if (!send_frag(nf.writerId, frag.value - 1, nf.writerSN, peer)) {
+            return false;
+          }
+        }
+      }
     }
     return true;
   }
@@ -455,7 +515,7 @@ struct TestParticipant: ACE_Event_Handler {
     // pretend #2 was lost
     if (do_nack_ && hb.firstSN.low <= 2 && hb.lastSN.low >= 2) {
       SequenceNumber_t nack = {0, 2};
-      ACE_DEBUG((LM_INFO, "\trequesting retransmit of #2\n"));
+      ACE_DEBUG((LM_INFO, "recv_hb() requesting retransmit of #2\n"));
       if (!send_an(hb.writerId, nack, peer)) {
         return false;
       }
@@ -465,7 +525,7 @@ struct TestParticipant: ACE_Event_Handler {
   }
 
   ACE_SOCK_Dgram& sock_;
-  CORBA::Long heartbeat_count_, acknack_count_;
+  CORBA::Long heartbeat_count_, acknack_count_, hbfrag_count_;
   Header hdr_, recv_hdr_;
   ACE_Message_Block recv_mb_;
   bool do_nack_;
@@ -628,6 +688,7 @@ bool run_test()
 
   // Associations are done, now test the real DR (SimpleDataReader) using our
   // TestParticipant class to interact with it over the socket directly.
+  ACE_DEBUG((LM_INFO, ">>> Starting test of DataReader\n"));
 
   TestParticipant part1(part1_sock, reader1.guidPrefix, reader1.entityId);
   SequenceNumber_t first_seq = {0, 1}, seq = first_seq;
@@ -662,8 +723,55 @@ bool run_test()
   }
   reactor_wait();
 
-  seq.low = 6; // send multiple DATA_FRAG submessages
-  if (!part1.send_frags(writer1.entityId, seq, part2_addr)) {
+  SequenceNumber_t seq_frag = {0, 6};
+  if (!part1.send_frag(writer1.entityId, 0, seq_frag, part2_addr)) {
+    return false;
+  }
+  if (!part1.send_frag(writer1.entityId, 2, seq_frag, part2_addr)) {
+    return false;
+  }
+  reactor_wait();
+  seq.low = 5; // can't heartbeat until all frags sent
+  if (!part1.send_hb(writer1.entityId, first_seq, seq, part2_addr)) {
+    return false;
+  }
+  if (!part1.send_hbfrag(writer1.entityId, seq_frag, 2, part2_addr)) {
+    return false;
+  }
+  reactor_wait(); // reader replies with its NACK_FRAG, part1 sends frag
+
+  seq = seq_frag; // 6 is now fully sent
+  if (!part1.send_hb(writer1.entityId, first_seq, seq, part2_addr)) {
+    return false;
+  }
+  reactor_wait();
+
+  seq_frag.low = 7; // send HBFrag before actually sending the fragment
+  if (!part1.send_hbfrag(writer1.entityId, seq_frag, 1, part2_addr)) {
+    return false;
+  }
+  reactor_wait();
+  if (!part1.send_frag(writer1.entityId, 0, seq_frag, part2_addr)) {
+    return false;
+  }
+  seq.low = 8;
+  if (!part1.send_data(writer1.entityId, seq, part2_addr)) {
+    return false;
+  }
+  SequenceNumber_t seq_hb = {0, 6};
+  if (!part1.send_hb(writer1.entityId, first_seq, seq_hb, part2_addr)) {
+    return false;
+  }
+  reactor_wait(); // HB 6 with missing frag 7 should result in NF
+
+  if (!part1.send_hbfrag(writer1.entityId, seq_frag, 2, part2_addr)) {
+    return false;
+  }
+  reactor_wait(); // HF should also result in NF
+  if (!part1.send_frag(writer1.entityId, 2, seq_frag, part2_addr)) {
+    return false;
+  }
+  if (!part1.send_hb(writer1.entityId, first_seq, seq, part2_addr)) {
     return false;
   }
   reactor_wait();
@@ -677,6 +785,7 @@ bool run_test()
 
 
   // Use the real DDS DataWriter (sdw2) against the test reader
+  ACE_DEBUG((LM_INFO, ">>> Starting test of DataWriter\n"));
 
   SequenceNumber seq_dw2;
   sdw2.send_data(seq_dw2++);  // send #1 - #3, test reader will nack #2

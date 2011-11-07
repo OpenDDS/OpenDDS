@@ -237,6 +237,9 @@ RtpsUdpDataLink::stop_i()
   heartbeat_.disable();
 }
 
+
+// Implementing MultiSendBuffer nested class
+
 void
 RtpsUdpDataLink::MultiSendBuffer::retain_all(RepoId pub_id)
 {
@@ -272,6 +275,9 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
 
   send_buff->insert(seq, q, chain);
 }
+
+
+// Support for the send() data handling path
 
 TransportQueueElement*
 RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
@@ -431,6 +437,9 @@ RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
   ++rw.expected_;
 }
 
+
+// DataReader's side of Reliability
+
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::DataSubmessage& data,
                           const GuidPrefix_t& src_prefix,
@@ -450,6 +459,7 @@ RtpsUdpDataLink::process_data_i(const OpenDDS::RTPS::DataSubmessage& data,
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
     wi->second.recvd_.insert(seq);
+    wi->second.frags_.erase(seq);
   }
 }
 
@@ -506,28 +516,25 @@ RtpsUdpDataLink::process_heartbeat_i(
 
   wi->second.heartbeat_recvd_count_ = heartbeat.count.value;
 
-  DisjointSequence& recvd = wi->second.recvd_;
-  // don't attempt to nack anything below heartbeat.firstSN or above .lastSN
-  if (!recvd.empty()) {
-    SequenceNumber first;
-    first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
-    if (recvd.cumulative_ack() < first) {
-      recvd.insert(SequenceRange(recvd.cumulative_ack(), first.previous()));
-    }
+  SequenceNumber& first = wi->second.hb_range_.first;
+  first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
+  SequenceNumber& last = wi->second.hb_range_.second;
+  last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
 
-    SequenceNumber last;
-    last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
-    if (recvd.last_ack() > last) {
-      recvd.insert(SequenceRange(++SequenceNumber(last), recvd.last_ack()));
-    }
-    //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
-    //        numbers we no longer expect to receive due to HEARTBEAT
+  DisjointSequence& recvd = wi->second.recvd_;
+  // the cumulative ack may only increase ("once acked, always acked" rule) and
+  // the cumultaive ack must be at least first - 1
+  if (!recvd.empty() && recvd.cumulative_ack() < first.previous()) {
+    recvd.insert(SequenceRange(recvd.cumulative_ack(), first.previous()));
   }
+  //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
+  //        numbers (dropped) we no longer expect to receive due to HEARTBEAT
 
   const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
-    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
+    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */,
+    frags = recv_strategy_->has_fragments(wi->second.hb_range_, wi->first);
 
-  if (!final || (!liveliness && recvd.disjoint())) {
+  if (!final || (!liveliness && (recvd.disjoint() || frags))) {
     wi->second.ack_pending_ = true;
     heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
   }
@@ -560,6 +567,11 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
         if (!recvd.empty()) {
           ack = ++SequenceNumber(recvd.cumulative_ack());
+          if (recvd.low() > 1) {
+            // since the "ack" really is cumulative, we need to make
+            // sure that a lower discontinuity is not possible later
+            recvd.insert(SequenceRange(1, recvd.cumulative_ack()));
+          }
         }
 
         if (recvd.disjoint()) {
@@ -567,6 +579,12 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
                                  CORBA::ULong((recvd.last_ack().getValue() -
                                                ack.getValue() + 31) / 32)));
           recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
+
+          // If the receive strategy is holding any fragments, those should
+          // not be "nacked" in the ACKNACK reply.  They will be accounted for
+          // in the NACK_FRAG(s) instead.
+          recv_strategy_->remove_frags_from_bitmap(bitmap.get_buffer(),
+                                                   num_bits, ack, wi->first);
         }
 
         AckNackSubmessage acknack = {
@@ -588,12 +606,20 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         gen_find_size(info_dst_, size, padding);
         gen_find_size(info_reply_, size, padding);
 
+        std::vector<NackFragSubmessage> nack_frags;
+        size += generate_nack_frags(nack_frags, wi->second, wi->first);
+
         ACE_Message_Block mb_acknack(size + padding); //TODO: allocators?
         // byte swapping is handled in the operator<<() implementation
         Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
         ser << info_dst_;
         ser << info_reply_;
         ser << acknack;
+        for (size_t i = 0; i < nack_frags.size(); ++i) {
+          nack_frags[i].readerId = rr->first.entityId;
+          nack_frags[i].writerId = wi->first.entityId;
+          ser << nack_frags[i]; // always 4-byte aligned
+        }
 
         if (!locators_.count(wi->first)) {
           //TODO: log error, don't know where to send it
@@ -606,6 +632,149 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
     }
   }
 }
+
+size_t
+RtpsUdpDataLink::generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nf,
+                                     WriterInfo& wi, const RepoId& pub_id)
+{
+  typedef std::map<SequenceNumber, RTPS::FragmentNumber_t>::iterator iter_t;
+  typedef RtpsUdpReceiveStrategy::FragmentInfo::value_type Frag_t;
+  RtpsUdpReceiveStrategy::FragmentInfo frag_info;
+
+  // Populate frag_info with two possible sources of NackFrags:
+  // 1. sequence #s in the reception gaps that we have partially received
+  std::vector<SequenceRange> missing = wi.recvd_.missing_sequence_ranges();
+  for (size_t i = 0; i < missing.size(); ++i) {
+    recv_strategy_->has_fragments(missing[i], pub_id, &frag_info);
+  }
+  for (size_t i = 0; i < frag_info.size(); ++i) {
+    // If we've received a HeartbeatFrag, we know the last (available) frag #
+    const iter_t iter = wi.frags_.find(frag_info[i].first);
+    if (iter != wi.frags_.end()) {
+      extend_bitmap_range(frag_info[i].second, iter->second.value);
+    }
+  }
+
+  // 2. sequence #s outside the recvd_ gaps for which we have a HeartbeatFrag
+  const iter_t low = wi.frags_.lower_bound(wi.recvd_.cumulative_ack()),
+              high = wi.frags_.upper_bound(wi.recvd_.last_ack()),
+               end = wi.frags_.end();
+  for (iter_t iter = wi.frags_.begin(); iter != end; ++iter) {
+    if (iter == low) {
+      // skip over the range covered by step #1 above
+      if (high == end) {
+        break;
+      }
+      iter = high;
+    }
+
+    const SequenceRange range(iter->first, iter->first);
+    if (recv_strategy_->has_fragments(range, pub_id, &frag_info)) {
+      extend_bitmap_range(frag_info.back().second, iter->second.value);
+    } else {
+      // it was not in the recv strategy, so the entire range is "missing"
+      frag_info.push_back(Frag_t(iter->first, RTPS::FragmentNumberSet()));
+      RTPS::FragmentNumberSet& fnSet = frag_info.back().second;
+      fnSet.bitmapBase.value = 1;
+      fnSet.numBits = std::min(CORBA::ULong(256), iter->second.value);
+      fnSet.bitmap.length((fnSet.numBits + 31) / 32);
+      for (CORBA::ULong i = 0; i < fnSet.bitmap.length(); ++i) {
+        fnSet.bitmap[i] = 0xFFFFFFFF;
+      }
+    }
+  }
+
+  if (frag_info.empty()) {
+    return 0;
+  }
+
+  const RTPS::NackFragSubmessage nackfrag_prototype = {
+    {RTPS::NACK_FRAG, 1 /*FLAG_E*/, 0 /* length set below */},
+    ENTITYID_UNKNOWN, // readerId will be filled-in by send_heartbeat_replies()
+    ENTITYID_UNKNOWN, // writerId will be filled-in by send_heartbeat_replies()
+    {0, 0}, // writerSN set below
+    RTPS::FragmentNumberSet(), // fragmentNumberState set below
+    {0} // count set below
+  };
+
+  size_t size = 0, padding = 0;
+  for (size_t i = 0; i < frag_info.size(); ++i) {
+    nf.push_back(nackfrag_prototype);
+    RTPS::NackFragSubmessage& nackfrag = nf.back();
+    nackfrag.writerSN.low = frag_info[i].first.getLow();
+    nackfrag.writerSN.high = frag_info[i].first.getHigh();
+    nackfrag.fragmentNumberState = frag_info[i].second;
+    nackfrag.count.value = ++wi.nackfrag_count_;
+    const size_t before_size = size;
+    gen_find_size(nackfrag, size, padding);
+    nackfrag.smHeader.submessageLength =
+      static_cast<CORBA::UShort>(size - before_size) - RTPS::SMHDR_SZ;
+  }
+  return size;
+}
+
+void
+RtpsUdpDataLink::extend_bitmap_range(OpenDDS::RTPS::FragmentNumberSet& fnSet,
+                                     CORBA::ULong extent)
+{
+  if (extent < fnSet.bitmapBase.value) {
+    return; // can't extend to some number under the base
+  }
+  const CORBA::ULong index = std::min(CORBA::ULong(255),
+                                      extent - fnSet.bitmapBase.value),
+                     len = (index + 31) / 32;
+  if (index < fnSet.numBits) {
+    return; // bitmap already extends past "extent"
+  }
+  fnSet.bitmap.length(len);
+  DisjointSequence::fill_bitmap_range(fnSet.numBits, index,
+                                      fnSet.bitmap.get_buffer(), len,
+                                      fnSet.numBits);
+}
+
+void
+RtpsUdpDataLink::received(const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
+                          const GuidPrefix_t& src_prefix,
+                          const GuidPrefix_t& dst_prefix)
+{
+  datareader_dispatch(hb_frag, src_prefix, dst_prefix,
+                      &RtpsUdpDataLink::process_hb_frag_i);
+}
+
+void
+RtpsUdpDataLink::process_hb_frag_i(
+  const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
+  const RepoId& src, RtpsReaderMap::value_type& rr)
+{
+  WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
+  if (wi == rr.second.remote_writers_.end()) {
+    // we may not be associated yet, even if the writer thinks we are
+    return;
+  }
+
+  if (hb_frag.count.value <= wi->second.hb_frag_recvd_count_) {
+    return;
+  }
+
+  wi->second.hb_frag_recvd_count_ = hb_frag.count.value;
+
+  SequenceNumber seq;
+  seq.setValue(hb_frag.writerSN.high, hb_frag.writerSN.low);
+
+  // If seq is outside the heartbeat range or we haven't completely received
+  // it yet, send a NackFrag along with the AckNack.  The heartbeat range needs
+  // to be checked first because recvd_ contains the numbers below the
+  // heartbeat range (so that we don't NACK those).
+  if (seq < wi->second.hb_range_.first || seq > wi->second.hb_range_.second
+      || !wi->second.recvd_.contains(seq)) {
+    wi->second.frags_[seq] = hb_frag.lastFragmentNum;
+    wi->second.ack_pending_ = true;
+    heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
+  }
+}
+
+
+// DataWriter's side of Reliability
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
@@ -796,6 +965,9 @@ RtpsUdpDataLink::send_heartbeats()
     send_strategy_->send_rtps_control(mb, recipients);
   }
 }
+
+
+// Implementing TimedDelay and HeartBeat nested classes (for ACE timers)
 
 void
 RtpsUdpDataLink::TimedDelay::schedule()

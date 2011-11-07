@@ -219,7 +219,7 @@ DisjointSequence::to_bitmap(CORBA::Long bitmap[], CORBA::ULong length,
       high = CORBA::ULong(iter->second.getValue() - base.getValue());
     }
 
-    if (!to_bitmap_helper(low, high, bitmap, length, num_bits)) {
+    if (!fill_bitmap_range(low, high, bitmap, length, num_bits)) {
       return false;
     }
   }
@@ -228,9 +228,9 @@ DisjointSequence::to_bitmap(CORBA::Long bitmap[], CORBA::ULong length,
 }
 
 bool
-DisjointSequence::to_bitmap_helper(CORBA::ULong low, CORBA::ULong high,
-                                   CORBA::Long bitmap[], CORBA::ULong length,
-                                   CORBA::ULong& num_bits)
+DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
+                                    CORBA::Long bitmap[], CORBA::ULong length,
+                                    CORBA::ULong& num_bits)
 {
   bool clamped = false;
   CORBA::ULong idx_low = low / 32, bit_low = low % 32,
@@ -318,6 +318,14 @@ DisjointSequence::present_sequence_ranges() const
   std::vector<SequenceRange> present;
   std::copy(sequences_.begin(), sequences_.end(), std::back_inserter(present));
   return present;
+}
+
+bool
+DisjointSequence::contains(SequenceNumber value) const
+{
+  RangeSet::const_iterator iter =
+    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
+  return iter != sequences_.end() && iter->first <= value;
 }
 
 void

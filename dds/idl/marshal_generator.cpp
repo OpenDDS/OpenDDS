@@ -985,7 +985,9 @@ namespace {
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       be_global->impl_ <<
-        "  size += 12 + 4 * ((stru.numBits + 31) / 32); // RTPS Custom\n";
+        "  size += "
+        << ((cxx == "OpenDDS::RTPS::SequenceNumberSet") ? "12" : "8")
+        << " + 4 * ((stru.numBits + 31) / 32); // RTPS Custom\n";
     }
     {
       Function insertion("operator<<", "bool");

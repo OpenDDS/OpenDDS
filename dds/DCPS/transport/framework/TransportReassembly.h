@@ -36,6 +36,17 @@ public:
   /// remaining fragments are not expected to arrive.
   void data_unavailable(const SequenceRange& transportSeqDropped);
 
+  void data_unavailable(const SequenceNumber& dataSampleSeq,
+                        const RepoId& pub_id);
+
+  /// Returns true if this object is storing fragments for the given
+  /// DataSampleHeader sequence number from the given publication.
+  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const;
+
+  CORBA::ULong get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
+                        CORBA::Long bitmap[], CORBA::ULong length,
+                        CORBA::ULong& numBits) const;
+
 private:
 
   bool reassemble_i(const SequenceRange& seqRange, bool firstFrag,

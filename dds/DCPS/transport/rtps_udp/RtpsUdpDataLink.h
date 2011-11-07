@@ -73,6 +73,10 @@ public:
                 const GuidPrefix_t& src_prefix,
                 const GuidPrefix_t& dst_prefix);
 
+  void received(const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
+                const GuidPrefix_t& src_prefix,
+                const GuidPrefix_t& dst_prefix);
+
   void received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
                 const GuidPrefix_t& src_prefix,
                 const GuidPrefix_t& dst_prefix);
@@ -166,11 +170,15 @@ private:
 
   struct WriterInfo {
     DisjointSequence recvd_;
+    SequenceRange hb_range_;
+    std::map<SequenceNumber, RTPS::FragmentNumber_t> frags_;
     bool ack_pending_;
-    CORBA::Long heartbeat_recvd_count_, acknack_count_;
+    CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_,
+      acknack_count_, nackfrag_count_;
 
     WriterInfo()
-      : ack_pending_(false), heartbeat_recvd_count_(0), acknack_count_(0) {}
+      : ack_pending_(false), heartbeat_recvd_count_(0), hb_frag_recvd_count_(0),
+        acknack_count_(0), nackfrag_count_(0) {}
   };
 
   typedef std::map<RepoId, WriterInfo, GUID_tKeyLessThan> WriterInfoMap;
@@ -186,8 +194,17 @@ private:
     RtpsReaderIndex;
   RtpsReaderIndex reader_index_; // keys are remote data writer GUIDs
 
+  size_t generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nack_frags,
+                             WriterInfo& wi, const RepoId& pub_id);
+
+  static void extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
+                                  CORBA::ULong extent);
+
   void process_heartbeat_i(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
                            const RepoId& src, RtpsReaderMap::value_type& rr);
+
+  void process_hb_frag_i(const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
+                         const RepoId& src, RtpsReaderMap::value_type& rr);
 
   void process_gap_i(const OpenDDS::RTPS::GapSubmessage& gap,
                      const RepoId& src, RtpsReaderMap::value_type& rr);

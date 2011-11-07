@@ -36,6 +36,23 @@ public:
 
   virtual int handle_input(ACE_HANDLE fd);
 
+  /// For each "1" bit in the bitmap, change it to a "0" if there are
+  /// fragments from publication "pub_id" for the sequence number represented
+  /// by that position in the bitmap.
+  void remove_frags_from_bitmap(CORBA::Long bitmap[], CORBA::ULong num_bits,
+                                const SequenceNumber& base,
+                                const RepoId& pub_id);
+
+  /// Remove any saved fragments.  We do not expect to receive any more
+  /// fragments with sequence numbers in "range" from publication "pub_id".
+  void remove_fragments(const SequenceRange& range, const RepoId& pub_id);
+
+  typedef std::vector<std::pair<SequenceNumber, RTPS::FragmentNumberSet> >
+    FragmentInfo;
+
+  bool has_fragments(const SequenceRange& range, const RepoId& pub_id,
+                     FragmentInfo* frag_info = 0);
+
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
