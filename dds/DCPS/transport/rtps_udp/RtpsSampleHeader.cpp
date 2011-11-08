@@ -201,7 +201,7 @@ RtpsSampleHeader::process_iqos(DataSampleHeader& opendds,
   }
 }
 
-void
+bool
 RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 {
   using namespace OpenDDS::RTPS;
@@ -221,7 +221,14 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     if (rtps.smHeader.flags & FLAG_K_IN_DATA) {
       opendds.key_fields_only_ = true;
     } else if (!(rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA))) {
-      // TODO: Handle the case of D = 0 and K = 0 (used for Coherent Sets see 8.7.5)
+      // FUTURE: Handle the case of D = 0 and K = 0
+      // used for Coherent Sets in PRESENTATION QoS (see 8.7.5)
+      if (Transport_debug_level) {
+        ACE_DEBUG((LM_WARNING,
+          "(%P|%t) RtpsSampleHeader::into_received_data_sample() - "
+          "Received a DATA Submessage with D = 0 and K = 0, dropping\n"));
+      }
+      return false;
     }
 
     if (rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
@@ -255,6 +262,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   default:
     break;
   }
+
+  return true;
 }
 
 void
@@ -291,10 +300,8 @@ RtpsSampleHeader::populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq&
     data.smHeader.flags |= FLAG_D;
     break;
   default:
-    // TODO: Figure out what to do here (if there are other cases)
-    ACE_DEBUG((LM_INFO,
-               "RtpsSampleHeader::populate_submessages(): Non-sample messages seen, message_id = %d\n",
-               message_id));
+    ACE_DEBUG((LM_INFO, "(%P|%t) RtpsSampleHeader::populate_submessages(): "
+               "Non-sample messages seen, message_id = %d\n", int(message_id)));
     break;
   }
 
@@ -342,43 +349,38 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
     ParameterList()
   };
   switch (header.message_id_) {
-  case INSTANCE_REGISTRATION:
-    {
-      // TODO: Determine if we want to send a message here.
-      // We should probably eat this message, but for now I am just going to
-      // send it with none of the status info bits set (it is easier)
-      data.smHeader.flags |= FLAG_K_IN_DATA;
-      int qos_len = data.inlineQos.length();
-      data.inlineQos.length(qos_len+1);
-      data.inlineQos[qos_len].status_info(STATUS_INFO_REGISTER);
-    }
+  case INSTANCE_REGISTRATION: {
+    // NOTE: The RTPS spec is not entirely clear about instance registration.
+    // We have decided to send a DATA Submessage containing the key and an
+    // inlineQoS StatusInfo of zero.
+    data.smHeader.flags |= FLAG_K_IN_DATA;
+    int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len+1);
+    data.inlineQos[qos_len].status_info(STATUS_INFO_REGISTER);
     break;
-  case UNREGISTER_INSTANCE:
-    {
-      data.smHeader.flags |= FLAG_K_IN_DATA;
-      int qos_len = data.inlineQos.length();
-      data.inlineQos.length(qos_len+1);
-      data.inlineQos[qos_len].status_info(STATUS_INFO_UNREGISTER);
-    }
+  }
+  case UNREGISTER_INSTANCE: {
+    data.smHeader.flags |= FLAG_K_IN_DATA;
+    int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len+1);
+    data.inlineQos[qos_len].status_info(STATUS_INFO_UNREGISTER);
     break;
-  case DISPOSE_INSTANCE:
-    {
-      data.smHeader.flags |= FLAG_K_IN_DATA;
-      int qos_len = data.inlineQos.length();
-      data.inlineQos.length(qos_len+1);
-      data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
-    }
+  }
+  case DISPOSE_INSTANCE: {
+    data.smHeader.flags |= FLAG_K_IN_DATA;
+    int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len+1);
+    data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
     break;
-  case DISPOSE_UNREGISTER_INSTANCE:
-    {
-      data.smHeader.flags |= FLAG_K_IN_DATA;
-      int qos_len = data.inlineQos.length();
-      data.inlineQos.length(qos_len+1);
-      data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
-    }
+  }
+  case DISPOSE_UNREGISTER_INSTANCE: {
+    data.smHeader.flags |= FLAG_K_IN_DATA;
+    int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len+1);
+    data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
     break;
+  }
   default:
-    // TODO: Figure out what to do here (if there are other cases)
     ACE_DEBUG((LM_INFO,
                "RtpsSampleHeader::populate_control_submessages(): Non-sample messages seen, message_id = %d\n",
                header.message_id_));

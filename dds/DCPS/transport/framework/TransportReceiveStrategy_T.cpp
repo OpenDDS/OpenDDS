@@ -822,21 +822,22 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 
         ReceivedDataSample rds(this->payload_);
         this->payload_ = 0;  // rds takes ownership of payload_
-        this->data_sample_header_.into_received_data_sample(rds);
+        if (this->data_sample_header_.into_received_data_sample(rds)) {
 
-        if (this->data_sample_header_.more_fragments()
-            || this->receive_transport_header_.last_fragment()) {
-          VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
+          if (this->data_sample_header_.more_fragments()
+              || this->receive_transport_header_.last_fragment()) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
 
-          if (this->reassemble(rds)) {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
+            if (this->reassemble(rds)) {
+              VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
+              this->deliver_sample(rds, remote_address);
+            }
+            // If reassemble() returned false, it takes ownership of the data
+            // just like deliver_sample() does.
+
+          } else {
             this->deliver_sample(rds, remote_address);
           }
-          // If reassemble() returned false, it takes ownership of the data
-          // just like deliver_sample() does.
-
-        } else {
-          this->deliver_sample(rds, remote_address);
         }
 
         // For the reassembly algorithm, the 'last_fragment_' header bit only

@@ -6,13 +6,15 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "dds/DCPS/RTPS/MessageTypes.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE size_t
 RtpsTransportHeader::max_marshaled_size()
 {
-  return 20;
+  return RTPS::RTPSHDR_SZ;
 }
 
 ACE_INLINE

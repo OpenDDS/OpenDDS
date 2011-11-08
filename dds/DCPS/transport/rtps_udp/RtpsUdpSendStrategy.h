@@ -13,7 +13,7 @@
 
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
-#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/RTPS/MessageTypes.h"
 
 #include "ace/INET_Addr.h"
 
@@ -59,8 +59,12 @@ private:
                        const std::set<ACE_INET_Addr>& addrs);
 
   RtpsUdpDataLink* link_;
-  OpenDDS::RTPS::Header rtps_header_;
   const std::set<ACE_INET_Addr>* override_dest_;
+
+  OpenDDS::RTPS::Header rtps_header_;
+  char rtps_header_data_[RTPS::RTPSHDR_SZ];
+  ACE_Data_Block rtps_header_db_;
+  ACE_Message_Block rtps_header_mb_;
 };
 
 } // namespace DCPS

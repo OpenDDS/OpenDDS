@@ -323,7 +323,6 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
               subm, *dsle, this->requires_inline_qos(dsle->publication_id_));
 
   } else {
-    //TODO: handle other types?
     return element;
   }
 
@@ -348,9 +347,6 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     }
   }
 
-  // TODO: Decide what to do with this allocator.  Currently, we use a locally
-  // created allocator.  Other options, pass a null reference (use the heap) or
-  // somehow get the allocator from the WriteDataContainer.
   TransportCustomizedElement* rtps =
     TransportCustomizedElement::alloc(element, false,
                                       &this->transport_customized_element_allocator_);
@@ -609,7 +605,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         std::vector<NackFragSubmessage> nack_frags;
         size += generate_nack_frags(nack_frags, wi->second, wi->first);
 
-        ACE_Message_Block mb_acknack(size + padding); //TODO: allocators?
+        ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
         // byte swapping is handled in the operator<<() implementation
         Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
         ser << info_dst_;
@@ -622,7 +618,12 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         }
 
         if (!locators_.count(wi->first)) {
-          //TODO: log error, don't know where to send it
+          if (Transport_debug_level) {
+            GuidConverter conv(wi->first);
+            ACE_DEBUG((LM_ERROR,
+              "(%P|%t) RtpsUdpDataLink::send_heartbeat_replies() - "
+              "no locator for remote %C\n", std::string(conv).c_str()));
+          }
         } else {
           std::set<ACE_INET_Addr> recipients;
           recipients.insert(locators_[wi->first]);
@@ -907,7 +908,7 @@ RtpsUdpDataLink::send_nack_replies()
     gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
 
-    ACE_Message_Block mb_gap(size + padding); //TODO: allocators?
+    ACE_Message_Block mb_gap(size + padding); //FUTURE: allocators?
     // byte swapping is handled in the operator<<() implementation
     Serializer ser(&mb_gap, false, Serializer::ALIGN_CDR);
     ser << gap;
@@ -952,7 +953,7 @@ RtpsUdpDataLink::send_heartbeats()
   }
 
   if (!subm.empty()) {
-    ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * subm.size()); //TODO: allocators?
+    ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * subm.size()); //FUTURE: allocators?
     // byte swapping is handled in the operator<<() implementation
     Serializer ser(&mb, false, Serializer::ALIGN_CDR);
     for (size_t i = 0; i < subm.size(); ++i) {

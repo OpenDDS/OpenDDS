@@ -375,7 +375,7 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_nackfrag(ser, peer)) return false;
         break;
       default:
-        if (subm < n_smkinds) {
+        if (static_cast<unsigned char>(subm) < n_smkinds) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
                      smkinds[static_cast<unsigned char>(subm)]));
         } else {

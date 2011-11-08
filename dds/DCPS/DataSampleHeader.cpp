@@ -536,10 +536,11 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
   return str;
 }
 
-void
+bool
 DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 {
   rds.header_ = *this;
+  return true;
 }
 
 } // namespace DCPS

@@ -30,7 +30,10 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
                           link->transport_priority(),
                           new NullSynchStrategy),
     link_(link),
-    override_dest_(0)
+    override_dest_(0),
+    rtps_header_db_(RTPS::RTPSHDR_SZ, ACE_Message_Block::MB_DATA,
+                    rtps_header_data_, 0, 0, ACE_Message_Block::DONT_DELETE, 0),
+    rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE)
 {
   rtps_header_.prefix[0] = 'R';
   rtps_header_.prefix[1] = 'T';
@@ -40,6 +43,9 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
   rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
   std::memcpy(rtps_header_.guidPrefix, link->local_prefix(),
               sizeof(GuidPrefix_t));
+  Serializer writer(&rtps_header_mb_);
+  // byte order doesn't matter for the RTPS Header
+  writer << rtps_header_;
 }
 
 ssize_t
@@ -82,25 +88,25 @@ void
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
   Serializer writer(mb); // byte order doesn't matter for the RTPS Header
-  writer << rtps_header_;
+  writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
+    RTPS::RTPSHDR_SZ);
 }
 
 void
 RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const std::set<ACE_INET_Addr>& addrs)
 {
-  ACE_Message_Block message(RtpsTransportHeader::max_marshaled_size());
-  //TODO: allocators?
-  marshal_transport_header(&message);
-  message.cont(&submessages);
+  rtps_header_mb_.cont(&submessages);
 
   iovec iov[MAX_SEND_BLOCKS];
-  int num_blocks = mb_to_iov(message, iov);
-  ssize_t result = send_multi_i(iov, num_blocks, addrs);
+  const int num_blocks = mb_to_iov(rtps_header_mb_, iov);
+  const ssize_t result = send_multi_i(iov, num_blocks, addrs);
   if (result < 0) {
     ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
+
+  rtps_header_mb_.cont(0);
 }
 
 ssize_t
@@ -112,7 +118,10 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
     ssize_t result_per_dest = link_->unicast_socket().send(iov, n, *iter);
     if (result_per_dest < 0) {
-      // TODO: log error?
+      ACE_TCHAR addr_buff[256] = {};
+      iter->addr_to_string(addr_buff, 256, 0);
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_multi_i() - "
+        "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
     } else {
       result = result_per_dest;
     }

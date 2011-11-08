@@ -47,7 +47,7 @@ public:
 
   bool valid() const;
 
-  void into_received_data_sample(ReceivedDataSample& rds);
+  bool into_received_data_sample(ReceivedDataSample& rds);
 
   bool more_fragments() const;
 

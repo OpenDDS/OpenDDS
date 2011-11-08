@@ -1,3 +1,41 @@
+Tue Nov  8 18:25:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          into_received_data_sample() now returns bool.
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Added a constant for the size of the RTPS Message Header.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          If we receive a DATA Submessage with D = 0 and K = 0, don't
+          deliver up to the datalink since we don't currently handle these.
+
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+
+          Use constant from MessageTypes.h.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Added error/warning logging.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Added error/warning logging.
+          Use a fixed message block, data block, and data buffer for the
+          message header either used directly by control messages or copied
+          into the send buffers for normal messages.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Fixed warning for signed vs. unsigned comparison.
+
 Mon Nov  7 21:29:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:

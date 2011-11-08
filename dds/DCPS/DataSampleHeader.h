@@ -220,7 +220,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Implement load from buffer.
   void init(ACE_Message_Block* buffer);
 
-  void into_received_data_sample(ReceivedDataSample& rds);
+  bool into_received_data_sample(ReceivedDataSample& rds);
 
   ACE_UINT32 message_length() { return this->message_length_; }
 
