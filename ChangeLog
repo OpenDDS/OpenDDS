@@ -1,3 +1,9 @@
+Tue Nov  8 19:50:02 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+
+          Inherit from dds_model, rather than appending to libs directly.
+
 Tue Nov  8 18:17:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * docs/getting_started.odt:
