@@ -1,3 +1,13 @@
+Tue Nov  8 21:57:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * java/tests/dcps_java_tests.lst:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Use the "NO_MCAST" Config value to prevent tests which require
+          multicast from running on platforms that don't have multicast
+          routing enabled.
+
 Tue Nov  8 21:09:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal:

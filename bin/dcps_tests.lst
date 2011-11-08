@@ -57,7 +57,7 @@ tests/DCPS/FooTest4_0/run_test.pl:
 
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl multicast: !DCPS_MIN !QNX
+tests/DCPS/FooTest5/run_test.pl multicast: !DCPS_MIN !NO_MCAST
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl nokey mi: !DCPS_MIN
@@ -68,7 +68,7 @@ tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl udp: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl multicast: !DCPS_MIN !QNX
+tests/DCPS/FooTest5/run_test_multi_trans.pl multicast: !DCPS_MIN !NO_MCAST
 tests/DCPS/FooTest5/run_test_multi_trans.pl mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl udp mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test_multi_trans.pl nokey mi: !DCPS_MIN
@@ -126,10 +126,10 @@ performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN
 #performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl: !DCPS_MIN
 
 ## N.B. There appear to be some bad assumptions in the following tests:
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN !QNX
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !QNX
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN !QNX
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !QNX
+#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN !NO_MCAST
+#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !NO_MCAST
+#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN !NO_MCAST
+#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !NO_MCAST
 
 DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN
 DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN
@@ -138,8 +138,8 @@ tests/DCPS/Messenger/run_test.pl: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl udp: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
-tests/DCPS/Messenger/run_test.pl multicast: !DCPS_MIN !QNX
-tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !QNX
+tests/DCPS/Messenger/run_test.pl multicast: !DCPS_MIN !NO_MCAST
+tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !NO_MCAST
 tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl stack: !DCPS_MIN
 tests/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
@@ -149,7 +149,7 @@ tests/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
 ##tests/DCPS/BidirMessenger/run_test.pl: !DCPS_MIN
 ##tests/DCPS/BidirMessenger/run_test.pl udp: !DCPS_MIN
-##tests/DCPS/BidirMessenger/run_test.pl multicast: !DCPS_MIN !QNX
+##tests/DCPS/BidirMessenger/run_test.pl multicast: !DCPS_MIN !NO_MCAST
 ##tests/DCPS/BidirMessenger/run_test.pl nobits: !DCPS_MIN
 ##tests/DCPS/BidirMessenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
@@ -200,7 +200,7 @@ tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN
-tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !QNX
+tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !NO_MCAST
 tests/DCPS/Ownership/run_test.pl: !DCPS_MIN
 tests/DCPS/Ownership/run_test.pl update_strength: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/Ownership/run_test.pl liveliness_change: !DCPS_MIN
@@ -210,6 +210,6 @@ tests/DCPS/GroupPresentation/run_test.pl topic: !DCPS_MIN
 tests/DCPS/GroupPresentation/run_test.pl instance: !DCPS_MIN
 tests/DCPS/LargeSample/run_test.pl: !DCPS_MIN
 tests/DCPS/LargeSample/run_test.pl udp: !DCPS_MIN
-tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN !QNX
+tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN !NO_MCAST
 tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN
