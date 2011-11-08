@@ -10,7 +10,7 @@
 #include "Boilerplate.h"
 
 #include <dds/DCPS/Service_Participant.h>
-#include <tools/modeling/codegen/model/Sync.h>
+#include <model/Sync.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>

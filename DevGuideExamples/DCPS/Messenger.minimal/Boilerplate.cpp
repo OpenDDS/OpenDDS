@@ -15,11 +15,12 @@ createParticipant(DDS::DomainParticipantFactory_var dpf)
 {
   // Create DomainParticipant
   DDS::DomainParticipant_var participant =
-    dpf->create_participant(42,
+    dpf->create_participant(42, // made-up domain ID
                             PARTICIPANT_QOS_DEFAULT,
-                            0,
+                            0,  // no listener
                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+  // Check for failure
   if (!participant) {
     throw std::string("failed to create domain participant");
   }
@@ -46,6 +47,7 @@ createTopic(DDS::DomainParticipant_var participant)
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+  // Check for failure
   if (!topic) {
     throw std::string("failed to create topic");
   }
@@ -61,6 +63,7 @@ createPublisher(DDS::DomainParticipant_var participant)
                                   0,
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+  // Check for failure
   if (!publisher) {
     throw std::string("failed to create publisher");
   }
@@ -76,6 +79,7 @@ createSubscriber(DDS::DomainParticipant_var participant)
                                      0,
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+  // Check for failure
   if (!subscriber) {
     throw std::string("failed to create subscriber");
   }
@@ -95,6 +99,7 @@ createDataWriter(
                                  0,
                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+  // Check for failure
   if (!writer) {
     throw std::string("failed to create data writer");
   }
@@ -114,6 +119,8 @@ createDataReader(
                                   DATAREADER_QOS_DEFAULT,
                                   listener,
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  // Check for failure
   if (!reader) {
     throw std::string("failed to create data reader");
   }
@@ -128,6 +135,7 @@ narrowWriter(DDS::DataWriter_var writer)
   Messenger::MessageDataWriter_var message_writer =
     Messenger::MessageDataWriter::_narrow(writer);
 
+  // Check for failure
   if (!message_writer) {
     throw std::string("failed to narrow data writer");
   }
@@ -142,6 +150,7 @@ narrowReader(DDS::DataReader_var reader)
   Messenger::MessageDataReader_var message_reader =
     Messenger::MessageDataReader::_narrow(reader);
 
+  // Check for failure
   if (!message_reader) {
     throw std::string("failed to narrow data reader");
   }

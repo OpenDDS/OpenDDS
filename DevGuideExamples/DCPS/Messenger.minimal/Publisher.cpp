@@ -8,7 +8,7 @@
 
 #include "Boilerplate.h"
 #include <dds/DCPS/Service_Participant.h>
-#include <tools/modeling/codegen/model/Sync.h>
+#include <model/Sync.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
@@ -50,7 +50,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       message.text       = "Worst. Movie. Ever.";
       message.count      = 0;
 
-      for (int i = 0; i < 10; ++i) {
+      int max_msgs = 10;
+      if (argc > 1) {
+        max_msgs = atoi(argv[1]);
+      }
+
+      for (int i = 0; i < max_msgs; ++i) {
         // Publish the message
         DDS::ReturnCode_t error = message_writer->write(message, 
                                                         DDS::HANDLE_NIL);
