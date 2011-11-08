@@ -19,7 +19,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try {
     // Initialize DomainParticipantFactory, handling command line args
-    DDS::DomainParticipantFactory_var dpf = 
+    DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
     // Create domain participant
@@ -37,7 +37,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Safely downcast data writer to type-specific data writer
     Messenger::MessageDataWriter_var message_writer = narrowWriter(writer);
 
-    { 
+    {
       // Block until Subscriber is available
       OpenDDS::Model::WriterSync ws(writer);
 
@@ -57,7 +57,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       for (int i = 0; i < max_msgs; ++i) {
         // Publish the message
-        DDS::ReturnCode_t error = message_writer->write(message, 
+        DDS::ReturnCode_t error = message_writer->write(message,
                                                         DDS::HANDLE_NIL);
         if (error != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,

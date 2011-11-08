@@ -1,3 +1,10 @@
+Tue Nov  8 22:00:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+
+          fuzz.
+
 Tue Nov  8 21:57:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

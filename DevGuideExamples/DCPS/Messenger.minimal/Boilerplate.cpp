@@ -114,7 +114,7 @@ createDataReader(
   DDS::DataReaderListener_var listener)
 {
   // Create DataReader
-  DDS::DataReader_var reader = 
+  DDS::DataReader_var reader =
     subscriber->create_datareader(topic,
                                   DATAREADER_QOS_DEFAULT,
                                   listener,
@@ -143,7 +143,7 @@ narrowWriter(DDS::DataWriter_var writer)
   return message_writer;
 }
 
-Messenger::MessageDataReader_var 
+Messenger::MessageDataReader_var
 narrowReader(DDS::DataReader_var reader)
 {
   // Safe cast to type-specific data reader
