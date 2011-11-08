@@ -22,8 +22,8 @@ DDS::DataReader_var createDataReader(DDS::Subscriber_var subscriber,
                                      DDS::Topic_var topic,
                                      DDS::DataReaderListener_var listener);
 
-Messenger::MessageDataWriter_var narrowWriter(DDS::DataWriter_var writer);
-Messenger::MessageDataReader_var narrowReader(DDS::DataReader_var reader);
+Messenger::MessageDataWriter_var narrow(DDS::DataWriter_var writer);
+Messenger::MessageDataReader_var narrow(DDS::DataReader_var reader);
 
 void cleanup(DDS::DomainParticipant_var participant,
              DDS::DomainParticipantFactory_var dpf);

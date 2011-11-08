@@ -35,7 +35,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataWriter_var writer = createDataWriter(publisher, topic);
 
     // Safely downcast data writer to type-specific data writer
-    Messenger::MessageDataWriter_var message_writer = narrowWriter(writer);
+    Messenger::MessageDataWriter_var message_writer = narrow(writer);
 
     {
       // Block until Subscriber is available

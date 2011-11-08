@@ -1,3 +1,16 @@
+Tue Nov  8 23:06:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+
+          Rename narrowXXX methods to narrow.
+
+        * docs/getting_started.odt:
+
+          Updates for publisher code.
+
 Tue Nov  8 22:00:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:

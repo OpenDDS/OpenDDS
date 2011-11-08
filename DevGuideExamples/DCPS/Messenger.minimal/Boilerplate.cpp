@@ -129,7 +129,7 @@ createDataReader(
 }
 
 Messenger::MessageDataWriter_var
-narrowWriter(DDS::DataWriter_var writer)
+narrow(DDS::DataWriter_var writer)
 {
   // Safe cast to type-specific data writer
   Messenger::MessageDataWriter_var message_writer =
@@ -144,7 +144,7 @@ narrowWriter(DDS::DataWriter_var writer)
 }
 
 Messenger::MessageDataReader_var
-narrowReader(DDS::DataReader_var reader)
+narrow(DDS::DataReader_var reader)
 {
   // Safe cast to type-specific data reader
   Messenger::MessageDataReader_var message_reader =
