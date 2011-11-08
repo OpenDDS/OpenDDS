@@ -1,3 +1,9 @@
+Tue Nov  8 20:05:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Model.mpc:
+
+          Inherit from install project to support lib is installed.
+
 Tue Nov  8 19:50:02 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
