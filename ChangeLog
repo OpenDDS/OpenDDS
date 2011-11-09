@@ -1,3 +1,13 @@
+Wed Nov  9 16:45:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Comments and formatting changes.
+
+        * docs/getting_started.odt:
+
+          Updates for Subscriber.cpp
+
 Wed Nov  9 16:20:26 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * docs/getting_started.odt:

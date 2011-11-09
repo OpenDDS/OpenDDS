@@ -33,11 +33,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create subscriber
     DDS::Subscriber_var subscriber = createSubscriber(participant);
 
-    // Create Listener and DataReader
+    // Create Listener
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
-    DDS::DataReader_var reader = createDataReader(subscriber, topic, listener);
+
+    // Create DataReader with the listener attached
+    DDS::DataReader_var reader = createDataReader(subscriber, 
+                                                  topic, 
+                                                  listener);
 
     {
+      // Block until reader has associated with a writer
+      // but is no longer associated with any writer
       OpenDDS::Model::ReaderSync rs(reader);
     }
 
