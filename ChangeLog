@@ -1,3 +1,14 @@
+Wed Nov  9 19:37:05 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+
+          Remove extraneous includes.
+
+        * docs/getting_started.odt:
+ 
+          Formatting changes for Entity names.
+          Start writing about DataReaderListenerImpl.cpp
+
 Wed Nov  9 16:45:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
