@@ -18,10 +18,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200
-# pragma warning( disable : 4231 )
-#endif
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -36,8 +32,7 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export InfoRepoDiscovery : public Discovery {
 public:
-  InfoRepoDiscovery(RepoKey      key,
-                    std::string  ior);
+  InfoRepoDiscovery(const RepoKey& key, const std::string& ior);
   virtual std::string get_stringified_dcps_info_ior();
   virtual DCPSInfo_ptr get_dcps_info();
 
@@ -62,7 +57,7 @@ private:
   std::string    ior_;
   DCPSInfo_var   info_;
 
-  // TODO: BIT transport information is now stored her on a per-repository
+  // TODO: BIT transport information is now stored here on a per-repository
   // basis but is still not used to configure the BIT transports (this is
   // done using the global settings).
 

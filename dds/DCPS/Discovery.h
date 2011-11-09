@@ -17,10 +17,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200
-# pragma warning( disable : 4231 )
-#endif
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -39,14 +35,14 @@ public:
   /// Probably should just be Discovery::Key
   typedef std::string RepoKey;
 
-  Discovery(RepoKey key) : key_(key) { }
+  explicit Discovery(const RepoKey& key) : key_(key) { }
 
   /// Key value for the default repository IOR.
   static const std::string DEFAULT_REPO;
   static const std::string DEFAULT_RTPS;
 
   virtual std::string get_stringified_dcps_info_ior();
-  virtual DCPSInfo_ptr get_dcps_info()=0;
+  virtual DCPSInfo_ptr get_dcps_info() = 0;
 
   // Need one or more virtual functions to abstract away Built-In Topic
   // variation between InfoRepo and RTPS Discovery.

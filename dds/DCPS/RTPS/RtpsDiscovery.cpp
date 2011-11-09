@@ -14,16 +14,16 @@
 namespace OpenDDS {
 namespace RTPS {
 
-RtpsDiscovery::RtpsDiscovery(RepoKey key)
-  : OpenDDS::DCPS::Discovery(key)
+RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
+  : DCPS::Discovery(key)
 {
 }
 
-OpenDDS::DCPS::DCPSInfo_ptr RtpsDiscovery::get_dcps_info()
+DCPS::DCPSInfo_ptr RtpsDiscovery::get_dcps_info()
 {
   // TODO: Write an RTPS DCPSInfo servant, incarnate a collocated
   // instance of it, and return an object reference to it.
-  return OpenDDS::DCPS::DCPSInfo::_nil();
+  return DCPS::DCPSInfo::_nil();
 }
 
 static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
@@ -36,8 +36,8 @@ int RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
   if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
 
     // Ensure there are no properties in this section
-    OpenDDS::DCPS::ValueMap vm;
-    if (OpenDDS::DCPS::pullValues(cf, rtps_sect, vm) > 0) {
+    DCPS::ValueMap vm;
+    if (DCPS::pullValues(cf, rtps_sect, vm) > 0) {
       // There are values inside [rtps_discovery]
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
@@ -45,8 +45,8 @@ int RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
                        -1);
     }
     // Process the subsections of this section (the individual rtps_discovery/*)
-    OpenDDS::DCPS::KeyList keys;
-    if (OpenDDS::DCPS::processSections( cf, rtps_sect, keys ) != 0) {
+    DCPS::KeyList keys;
+    if (DCPS::processSections( cf, rtps_sect, keys ) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
                         ACE_TEXT("too many nesting layers in the [rtps] section.\n")),
@@ -54,17 +54,17 @@ int RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
     }
 
     // Loop through the [rtps/*] sections
-    for (OpenDDS::DCPS::KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-      std::string rtps_name = (*it).first;
+    for (DCPS::KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
+      std::string rtps_name = it->first;
 
-      OpenDDS::DCPS::ValueMap values;
-      OpenDDS::DCPS::pullValues( cf, (*it).second, values );
-      for (OpenDDS::DCPS::ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-        std::string name = (*it).first;
+      DCPS::ValueMap values;
+      DCPS::pullValues( cf, it->second, values );
+      for (DCPS::ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
+        std::string name = it->first;
         if (name == "???") {
           // TODO: Implement other RTPS Discovery config parameters (including those
           // required by the spec.
-          std::string value = (*it).second;
+          std::string value = it->second;
 
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -77,17 +77,17 @@ int RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
 
       RtpsDiscovery_rch discovery = new RtpsDiscovery(rtps_name);
       TheServiceParticipant->add_discovery(
-        OpenDDS::DCPS::dynamic_rchandle_cast<Discovery, RtpsDiscovery>(discovery));
+        DCPS::dynamic_rchandle_cast<Discovery>(discovery));
     }
   }
 
   // If the default RTPS discovery object has not been configured,
   // instantiate it now.
-  const OpenDDS::DCPS::Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
+  const DCPS::Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
   if (discoveryMap.find(Discovery::DEFAULT_RTPS) == discoveryMap.end()) {
     RtpsDiscovery_rch discovery = new RtpsDiscovery(Discovery::DEFAULT_RTPS);
     TheServiceParticipant->add_discovery(
-      OpenDDS::DCPS::dynamic_rchandle_cast<Discovery, RtpsDiscovery>(discovery));
+      DCPS::dynamic_rchandle_cast<Discovery>(discovery));
   }
 
   return 0;

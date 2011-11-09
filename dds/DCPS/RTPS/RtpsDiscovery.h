@@ -36,7 +36,7 @@ namespace RTPS {
  */
 class OpenDDS_Rtps_Export RtpsDiscovery : public OpenDDS::DCPS::Discovery {
 public:
-  RtpsDiscovery(RepoKey      key);
+  explicit RtpsDiscovery(const RepoKey& key);
   virtual OpenDDS::DCPS::DCPSInfo_ptr get_dcps_info();
 
 private:

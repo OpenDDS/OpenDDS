@@ -14,8 +14,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
-InfoRepoDiscovery::InfoRepoDiscovery(RepoKey      key,
-                                     std::string  ior)
+InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
+                                     const std::string& ior)
   : Discovery(key),
     ior_(ior),
     bit_transport_port_(0)
@@ -35,17 +35,17 @@ DCPSInfo_ptr InfoRepoDiscovery::get_dcps_info()
                    ACE_TEXT("unable to narrow DCPSInfo (%C) for key %C. \n"),
                    this->ior_.c_str(),
                    this->key().c_str()));
-        return OpenDDS::DCPS::DCPSInfo::_nil();
+        return DCPSInfo::_nil();
       }
 
     } catch (const CORBA::Exception& ex) {
       ex._tao_print_exception(
                               "ERROR: InfoRepoDiscovery::get_repository: failed to resolve ior - ");
-      return OpenDDS::DCPS::DCPSInfo::_nil();
+      return DCPSInfo::_nil();
     }
   }
 
-  return OpenDDS::DCPS::DCPSInfo::_duplicate(this->info_);
+  return DCPSInfo::_duplicate(this->info_);
 }
 
 std::string

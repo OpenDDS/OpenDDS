@@ -1,3 +1,16 @@
+Wed Nov  9 23:32:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Transient_Kludge.h:
+
+          Minor code clean-up.  Removed VC6-specific warning disablers.
+
 Wed Nov  9 19:20:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
@@ -158,7 +171,7 @@ Mon Oct 31 14:23:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
           Add some additional tests to ConfigFile for a variety of
           discovery configuration scenarios.  Add some resulting
-          fixes, error checking, adn refactoring that the testing
+          fixes, error checking, and refactoring that the testing
           directed.
 
         * docs/design/RTPS_DISCOVERY:
