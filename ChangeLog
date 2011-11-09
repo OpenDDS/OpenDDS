@@ -1,3 +1,9 @@
+Wed Nov  9 16:20:26 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * docs/getting_started.odt:
+
+          Complete publisher.cpp explanation.
+
 Wed Nov  9 15:40:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
