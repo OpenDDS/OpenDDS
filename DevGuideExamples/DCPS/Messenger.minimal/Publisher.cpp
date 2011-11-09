@@ -35,30 +35,30 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataWriter_var writer = createDataWriter(publisher, topic);
 
     // Safely downcast data writer to type-specific data writer
-    Messenger::MessageDataWriter_var message_writer = narrow(writer);
+    Messenger::MessageDataWriter_var msg_writer = narrow(writer);
 
     {
       // Block until Subscriber is available
       OpenDDS::Model::WriterSync ws(writer);
 
-      // Write samples
+      // Initialize samples
       Messenger::Message message;
       message.subject_id = 99;
-
       message.from       = "Comic Book Guy";
       message.subject    = "Review";
       message.text       = "Worst. Movie. Ever.";
       message.count      = 0;
 
-      int max_msgs = 10;
+      // Override message count
+      int msg_count = 10;
       if (argc > 1) {
-        max_msgs = atoi(argv[1]);
+        msg_count = atoi(argv[1]);
       }
 
-      for (int i = 0; i < max_msgs; ++i) {
+      for (int i = 0; i < msg_count; ++i) {
         // Publish the message
-        DDS::ReturnCode_t error = message_writer->write(message,
-                                                        DDS::HANDLE_NIL);
+        DDS::ReturnCode_t error = msg_writer->write(message,
+                                                    DDS::HANDLE_NIL);
         if (error != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("ERROR: %N:%l: main() -")
@@ -70,7 +70,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ++message.subject_id;
       }
 
-      // End of WriterSyncScope - block until messages acknowedged
+      // End of WriterSync scope - block until messages acknowledged
     }
 
     // Clean-up!
