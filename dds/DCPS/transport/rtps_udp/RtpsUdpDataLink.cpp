@@ -152,7 +152,9 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
   for (CORBA::ULong i = 0; i < peers->length(); ++i) {
     const iter_t iter = locators_.find(peers[i]);
     if (iter == locators_.end()) {
-      // log error...
+      const GuidConverter conv(peers[i]);
+      ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locators() - "
+        "no locator found for peer %C\n", std::string(conv).c_str()));
     } else {
       addrs.insert(iter->second);
     }
@@ -167,8 +169,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     return;
   }
 
-  GuidConverter conv(local_id);
-  EntityKind kind = conv.entityKind();
+  const GuidConverter conv(local_id);
+  const EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER) {
     writers_[local_id].remote_readers_[remote_id];
     heartbeat_.enable();
@@ -189,10 +191,10 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
   using std::pair;
-  GuidConverter conv(local_id);
-  EntityKind kind = conv.entityKind();
+  const GuidConverter conv(local_id);
+  const EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER) {
-    RtpsWriterMap::iterator rw = writers_.find(local_id);
+    const RtpsWriterMap::iterator rw = writers_.find(local_id);
 
     if (rw != writers_.end()) {
       rw->second.remote_readers_.erase(remote_id);
@@ -207,7 +209,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
     }
 
   } else if (kind == KIND_READER) {
-    RtpsReaderMap::iterator rr = readers_.find(local_id);
+    const RtpsReaderMap::iterator rr = readers_.find(local_id);
 
     if (rr != readers_.end()) {
       rr->second.remote_writers_.erase(remote_id);
@@ -243,7 +245,7 @@ RtpsUdpDataLink::stop_i()
 void
 RtpsUdpDataLink::MultiSendBuffer::retain_all(RepoId pub_id)
 {
-  RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
+  const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
   if (wi != outer_->writers_.end() && !wi->second.send_buff_.is_nil()) {
     wi->second.send_buff_->retain_all(pub_id);
   }
@@ -261,7 +263,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
 
   const RepoId pub_id = q->peek()->publication_id();
 
-  RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
+  const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
   if (wi == outer_->writers_.end()) {
     return; // this datawriter is not reliable
   }
@@ -349,7 +351,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 
   TransportCustomizedElement* rtps =
     TransportCustomizedElement::alloc(element, false,
-                                      &this->transport_customized_element_allocator_);
+      &this->transport_customized_element_allocator_);
   rtps->set_msg(hdr);
 
   // Let the framework know each TransportCustomizedElement must be in its own
@@ -450,7 +452,7 @@ RtpsUdpDataLink::process_data_i(const OpenDDS::RTPS::DataSubmessage& data,
                                 const RepoId& src,
                                 RtpsReaderMap::value_type& rr)
 {
-  WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
+  const WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
   if (wi != rr.second.remote_writers_.end()) {
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
@@ -472,7 +474,7 @@ void
 RtpsUdpDataLink::process_gap_i(const OpenDDS::RTPS::GapSubmessage& gap,
                                const RepoId& src, RtpsReaderMap::value_type& rr)
 {
-  WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
+  const WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
   if (wi != rr.second.remote_writers_.end()) {
     SequenceRange sr;
     sr.first.setValue(gap.gapStart.high, gap.gapStart.low);
@@ -500,7 +502,7 @@ RtpsUdpDataLink::process_heartbeat_i(
   const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
   const RepoId& src, RtpsReaderMap::value_type& rr)
 {
-  WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
+  const WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
   if (wi == rr.second.remote_writers_.end()) {
     // we may not be associated yet, even if the writer thinks we are
     return;
@@ -619,7 +621,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
         if (!locators_.count(wi->first)) {
           if (Transport_debug_level) {
-            GuidConverter conv(wi->first);
+            const GuidConverter conv(wi->first);
             ACE_DEBUG((LM_ERROR,
               "(%P|%t) RtpsUdpDataLink::send_heartbeat_replies() - "
               "no locator for remote %C\n", std::string(conv).c_str()));
@@ -862,7 +864,7 @@ RtpsUdpDataLink::send_nack_replies()
     SingleSendBuffer& sb = *rw->second.send_buff_;
     {
       ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
-      RtpsUdpSendStrategy::OverrideToken ot =
+      const RtpsUdpSendStrategy::OverrideToken ot =
         send_strategy_->override_destinations(recipients);
       for (size_t i = 0; i < ranges.size(); ++i) {
         sb.resend_i(ranges[i], &gaps);
@@ -944,7 +946,7 @@ RtpsUdpDataLink::send_heartbeats()
     subm.push_back(hb);
 
     typedef ReaderInfoMap::iterator ri_iter;
-    ri_iter end = rw->second.remote_readers_.end();
+    const ri_iter end = rw->second.remote_readers_.end();
     for (ri_iter ri = rw->second.remote_readers_.begin(); ri != end; ++ri) {
       if (locators_.count(ri->first)) {
         recipients.insert(locators_[ri->first]);

@@ -41,6 +41,23 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 {
   TransportInst::load(cf, sect); // delegate to parent
 
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
+
+  ACE_TString group_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("multicast_group_address"),
+                           group_address_s);
+  if (!group_address_s.is_empty()) {
+    multicast_group_address_.set(group_address_s.c_str());
+  }
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
+
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_response_delay"),
+                        nak_response_delay_);
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_period"),
+                        heartbeat_period_);
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_response_delay"),
+                        heartbeat_response_delay_);
   return 0;
 }
 
@@ -48,6 +65,23 @@ void
 RtpsUdpInst::dump(std::ostream& os)
 {
   TransportInst::dump(os);
+  const std::ios::fmtflags flags = os.setf(ios::boolalpha);
+  os << formatNameForDump("local_address") << local_address_.get_host_addr()
+     << ':' << local_address_.get_port_number() << '\n'
+
+     << formatNameForDump("use_multicast") << use_multicast_ << '\n'
+     << formatNameForDump("multicast_group_address")
+     << multicast_group_address_.get_host_addr() << ':'
+     << multicast_group_address_.get_port_number() << '\n'
+
+     << formatNameForDump("nak_depth") << nak_depth_ << '\n'
+     << formatNameForDump("nak_response_delay") << nak_response_delay_.msec()
+     << '\n'
+     << formatNameForDump("heartbeat_period") << heartbeat_period_.msec()
+     << '\n'
+     << formatNameForDump("heartbeat_response_delay")
+     << heartbeat_response_delay_.msec() << std::endl;
+  os.flags(flags);
 }
 
 } // namespace DCPS

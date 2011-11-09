@@ -38,13 +38,15 @@ RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   TransportRegistry* registry = TheTransportRegistry;
   registry->register_type(new RtpsUdpType);
+  /*  Don't create a default for RTPS.  At least for the initial implementation,
+      the user needs to explicitly configure it.
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           "0600_RTPS_UDP",
                           RTPS_UDP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
-
+  */
   initialized = true;
 
   return 0;

@@ -1,0 +1,40 @@
+RTPS
+----
+- Spec is DDS-RTPS v2.1
+  - In this document, section numbers refer to RTPS v2.1 (formal/2010-11-01)
+- Implemented as an OpenDDS pluggable transport + a new discovery mechanism
+  - See RTPS_DISCOVERY in this directory for discovery details
+
+Not Currently Implemented
+-------------------------
+(Items in this list are not necessarily needed for compliance or interop)
+- Non-default LIVELINESS QoS (8.7.2.2.3 and 8.4.13)
+- Sending fragmented data (8.4.14.1), receiving is implemented
+- Writer-side content filtering (8.7.3)
+- Coherent sets for PRESENTATION QoS (8.7.5)
+- Directed writes (8.7.6) -- impacts DURABLE data
+- Property lists (8.7.7) -- these don't exist in the DDS spec
+- Original writer info for DURABLE data (8.7.8)
+- Key Hashes (8.7.9) are not generated, but they are optional anyway
+- wait_for_acknowledgements()
+- nackSuppressionDuration (Table 8.47) and heartbeatSuppressionDuration
+  (Table 8.62) are suggested but not described in the spec.  These may be
+  useful areas for future enhancements.
+
+Implementation Issues
+---------------------
+- (discovery) Generated GUIDs could suffer from effects of PID rollover
+- WRITER_DATA_LIFECYCLE (8.7.2.2.7) notes that the same Data submessage should
+  dispose and unregister an instance.  OpenDDS may use two Data submessages.
+- RTPS transport instances can not be shared by different Domain Participants.
+
+Notes for Maintainers
+---------------------
+- opendds_idl compiler has specially support for custom RTPS Serialization
+  - See dds/idl/marshal_generator.cpp
+- OpenDDS_Dcps library has no RTPS-specific data types, only has limited support
+  for RTPS features where necessary
+- OpenDDS_Rtps library (in dds/DCPS/RTPS) has RTPS data types, constants,
+  utility functions, and the Discovery implementation
+- OpenDDS_Rtps_Udp library (in dds/DCPS/transport/rtps_udp) contains the the
+  implementation of the OpenDDS pluggable transport for the RTPS UDP/IP PSM

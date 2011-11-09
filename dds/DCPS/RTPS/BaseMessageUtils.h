@@ -19,7 +19,7 @@ namespace OpenDDS {
 namespace RTPS {
 
 template <typename T>
-void marshal_key_hash(const T& msg, OpenDDS::RTPS::KeyHash_t& hash) {
+void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   using OpenDDS::DCPS::Serializer;
 
   OpenDDS::DCPS::KeyOnly<const T> ko(msg);

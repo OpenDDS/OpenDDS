@@ -1,3 +1,29 @@
+Wed Nov  9 19:20:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Implemented config file variables for the rtps_udp transport.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.cpp:
+
+          Disabled default transport.  We only want to provide an rtps_udp
+          transport if the user asks for it (in code or in config file).
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Code clean-up: removed unnecessary stuff, added const where possible,
+          added error logging.
+
+        * docs/design/RTPS:
+
+          Added design doc for RTPS, which includes list of items that
+          are not currently implemented.
+
 Tue Nov  8 18:25:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:

@@ -22,10 +22,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#if defined(_MSC_VER) && _MSC_VER < 1300 && _MSC_VER >= 1200
-# pragma warning( disable : 4231 )
-#endif
-
 namespace OpenDDS {
 namespace RTPS {
 

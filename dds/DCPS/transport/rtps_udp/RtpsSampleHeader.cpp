@@ -267,13 +267,14 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 }
 
 void
-RtpsSampleHeader::populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                                   const DataSampleListElement& dsle,
-                                                   bool requires_inline_qos)
+RtpsSampleHeader::populate_data_sample_submessages(
+  OpenDDS::RTPS::SubmessageSeq& subm,
+  const DataSampleListElement& dsle,
+  bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
-  ACE_CDR::Octet flags =
+  const ACE_CDR::Octet flags =
     DataSampleHeader::test_flag(BYTE_ORDER_FLAG, dsle.sample_);
   const ACE_CDR::UShort len = 8;
   const DDS::Time_t st = { dsle.header_.source_timestamp_sec_,
@@ -293,7 +294,7 @@ RtpsSampleHeader::populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq&
     {dsle.header_.sequence_.getHigh(), dsle.header_.sequence_.getLow()},
     ParameterList()
   };
-  char message_id = dsle.header_.message_id_;
+  const char message_id = dsle.header_.message_id_;
   switch (message_id) {
   case SAMPLE_DATA:
     // Must be a data message
@@ -322,17 +323,18 @@ RtpsSampleHeader::populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq&
 
 
 void
-RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
-                                                    const TransportSendControlElement& tsce,
-                                                    bool requires_inline_qos)
+RtpsSampleHeader::populate_data_control_submessages(
+  OpenDDS::RTPS::SubmessageSeq& subm,
+  const TransportSendControlElement& tsce,
+  bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
   const DataSampleHeader& header = tsce.header();
-  ACE_CDR::Octet flags = header.byte_order_ == true;
+  const ACE_CDR::Octet flags = (header.byte_order_ == true);
   const ACE_CDR::UShort len = 8;
-  ACE_INT32  st_sec  = header.source_timestamp_sec_;
-  ACE_UINT32 st_nsec = header.source_timestamp_nanosec_;
+  const ACE_INT32  st_sec  = header.source_timestamp_sec_;
+  const ACE_UINT32 st_nsec = header.source_timestamp_nanosec_;
   const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
     {st_sec, static_cast<ACE_UINT32>(st_nsec * NANOS_TO_RTPS_FRACS + .5)} };
   CORBA::ULong i = subm.length();
@@ -354,35 +356,36 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
     // We have decided to send a DATA Submessage containing the key and an
     // inlineQoS StatusInfo of zero.
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len+1);
+    const int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len + 1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_REGISTER);
     break;
   }
   case UNREGISTER_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    int qos_len = data.inlineQos.length();
+    const int qos_len = data.inlineQos.length();
     data.inlineQos.length(qos_len+1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_UNREGISTER);
     break;
   }
   case DISPOSE_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len+1);
+    const int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len + 1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
     break;
   }
   case DISPOSE_UNREGISTER_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len+1);
+    const int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len + 1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
     break;
   }
   default:
     ACE_DEBUG((LM_INFO,
-               "RtpsSampleHeader::populate_control_submessages(): Non-sample messages seen, message_id = %d\n",
+               "RtpsSampleHeader::populate_control_submessages(): "
+               "Non-sample messages seen, message_id = %d\n",
                header.message_id_));
     break;
   }
@@ -404,22 +407,25 @@ RtpsSampleHeader::populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq
 
 #define PROCESS_INLINE_QOS(QOS_NAME, DEFAULT_QOS, WRITER_QOS) \
   if (WRITER_QOS.QOS_NAME != DEFAULT_QOS.QOS_NAME) {          \
-    int qos_len = data.inlineQos.length();                    \
-    data.inlineQos.length(qos_len+1);                         \
+    const int qos_len = data.inlineQos.length();              \
+    data.inlineQos.length(qos_len + 1);                       \
     data.inlineQos[qos_len].QOS_NAME(WRITER_QOS.QOS_NAME);    \
   }
 
 void
-RtpsSampleHeader::populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
-                                      OpenDDS::RTPS::DataSubmessage& data)
+RtpsSampleHeader::populate_inline_qos(
+  const TransportSendListener::InlineQosData& qos_data,
+  OpenDDS::RTPS::DataSubmessage& data)
 {
   using namespace OpenDDS::RTPS;
 
   // Always include topic name (per the spec)
-  int qos_len = data.inlineQos.length();
-  data.inlineQos.length(qos_len+1);
-  data.inlineQos[qos_len].string_data(qos_data.topic_name.c_str());
-  data.inlineQos[qos_len]._d(PID_TOPIC_NAME);
+  {
+    const int qos_len = data.inlineQos.length();
+    data.inlineQos.length(qos_len + 1);
+    data.inlineQos[qos_len].string_data(qos_data.topic_name.c_str());
+    data.inlineQos[qos_len]._d(PID_TOPIC_NAME);
+  }
 
   // Conditionally include other QoS inline when the differ from the
   // default value.
@@ -439,6 +445,8 @@ RtpsSampleHeader::populate_inline_qos(const TransportSendListener::InlineQosData
   PROCESS_INLINE_QOS(lifespan, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(destination_order, default_dw_qos, qos_data.dw_qos);
 }
+
+#undef PROCESS_INLINE_QOS
 
 }
 }

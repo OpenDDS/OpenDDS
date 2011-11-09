@@ -39,16 +39,12 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       ACE_INET_Addr& remote_address,
                                       ACE_HANDLE fd)
 {
-  if (fd == link_->unicast_socket().get_handle()) {
-    const ssize_t ret = link_->unicast_socket().recv(iov, n, remote_address);
-    remote_address_ = remote_address;
-    return ret;
-
-  } else {
-    const ssize_t ret = link_->multicast_socket().recv(iov, n, remote_address);
-    remote_address_ = remote_address;
-    return ret;
-  }
+  const ACE_SOCK_Dgram& socket =
+    (fd == link_->unicast_socket().get_handle())
+    ? link_->unicast_socket() : link_->multicast_socket();
+  const ssize_t ret = socket.recv(iov, n, remote_address);
+  remote_address_ = remote_address;
+  return ret;
 }
 
 void
@@ -204,8 +200,8 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
     RtpsSampleHeader& rsh = received_sample_header();
     const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();
 
-    const CORBA::Octet data_flags = (data.header_.byte_order_ ? 1 : 0)
-                                  | (data.header_.key_fields_only_ ? 8 : 4);
+    const CORBA::Octet data_flags = (data.header_.byte_order_ ? 1 : 0) // FLAG_E
+      | (data.header_.key_fields_only_ ? 8 : 4); // FLAG_K : FLAG_D
     const DataSubmessage dsm = {
       {DATA, data_flags, 0}, 0, DATA_OCTETS_TO_IQOS,
       dfsm.readerId, dfsm.writerId, dfsm.writerSN, ParameterList()};
@@ -238,11 +234,9 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
     }
 
     const CORBA::ULong mask = 1 << (31 - bit);
-    if (x & mask) {
-      if (reassembly_.has_frags(base + i, pub_id)) {
-        x &= ~mask;
-        bitmap[i / 32] = x;
-      }
+    if ((x & mask) && reassembly_.has_frags(base + i, pub_id)) {
+      x &= ~mask;
+      bitmap[i / 32] = x;
     }
   }
 }
