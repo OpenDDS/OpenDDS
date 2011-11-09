@@ -1,3 +1,9 @@
+Wed Nov  9 15:40:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+
+          Don't use atoi() directly.
+
 Wed Nov  9 04:18:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:

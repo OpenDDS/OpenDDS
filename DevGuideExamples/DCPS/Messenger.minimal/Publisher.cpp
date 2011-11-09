@@ -52,7 +52,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Override message count
       int msg_count = 10;
       if (argc > 1) {
-        msg_count = atoi(argv[1]);
+        msg_count = ACE_OS::atoi(argv[1]);
       }
 
       for (int i = 0; i < msg_count; ++i) {
