@@ -158,6 +158,36 @@ narrow(DDS::DataReader_var reader)
   return message_reader;
 }
 
+Messenger::MessageDataWriter_var
+narrow(DDS::DataWriter_ptr writer)
+{
+  // Safe cast to type-specific data writer
+  Messenger::MessageDataWriter_var message_writer =
+    Messenger::MessageDataWriter::_narrow(writer);
+
+  // Check for failure
+  if (!message_writer) {
+    throw std::string("failed to narrow data writer");
+  }
+
+  return message_writer;
+}
+
+Messenger::MessageDataReader_var
+narrow(DDS::DataReader_ptr reader)
+{
+  // Safe cast to type-specific data reader
+  Messenger::MessageDataReader_var message_reader =
+    Messenger::MessageDataReader::_narrow(reader);
+
+  // Check for failure
+  if (!message_reader) {
+    throw std::string("failed to narrow data reader");
+  }
+
+  return message_reader;
+}
+
 void
 cleanup(
   DDS::DomainParticipant_var participant,

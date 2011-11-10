@@ -24,6 +24,8 @@ DDS::DataReader_var createDataReader(DDS::Subscriber_var subscriber,
 
 Messenger::MessageDataWriter_var narrow(DDS::DataWriter_var writer);
 Messenger::MessageDataReader_var narrow(DDS::DataReader_var reader);
+Messenger::MessageDataWriter_var narrow(DDS::DataWriter_ptr writer);
+Messenger::MessageDataReader_var narrow(DDS::DataReader_ptr reader);
 
 void cleanup(DDS::DomainParticipant_var participant,
              DDS::DomainParticipantFactory_var dpf);
