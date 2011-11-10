@@ -7,6 +7,8 @@
  */
 
 #include "RtpsDiscovery.h"
+#include "RtpsInfo.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/InfoRepoUtils.h"
 #include "dds/DCPS/ConfigUtils.h"
@@ -16,17 +18,28 @@ namespace RTPS {
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : DCPS::Discovery(key)
+  , servant_(new RtpsInfo)
 {
+  PortableServer::POA_var poa = TheServiceParticipant->the_poa();
+  PortableServer::ObjectId_var oid = poa->activate_object(servant_);
+  CORBA::Object_var obj = poa->id_to_reference(oid);
+  info_ = OpenDDS::DCPS::DCPSInfo::_narrow(obj);
+}
+
+RtpsDiscovery::~RtpsDiscovery()
+{
+  PortableServer::POA_var poa = TheServiceParticipant->the_poa();
+  PortableServer::ObjectId_var oid = poa->servant_to_id(servant_);
+  poa->deactivate_object(oid);
+  delete servant_;
 }
 
 DCPS::DCPSInfo_ptr RtpsDiscovery::get_dcps_info()
 {
-  // TODO: Write an RTPS DCPSInfo servant, incarnate a collocated
-  // instance of it, and return an object reference to it.
-  return DCPS::DCPSInfo::_nil();
+  return DCPS::DCPSInfo::_duplicate(info_);
 }
 
-static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
+static const ACE_TCHAR RTPS_SECTION_NAME[] = ACE_TEXT("rtps_discovery");
 
 int RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
 {

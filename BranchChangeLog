@@ -1,9 +1,19 @@
+Thu Nov 10 23:24:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Added a new class, RtpsInfo, which implementes the DCPSInfo
+          IDL interface.  So far this is mostly just stubbed-out.
+
 Thu Nov 10 22:35:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.h:
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
 
-          Converter for ParameterLists.  
+          Converter for ParameterLists.
           Converting parameter list to SPDPdiscoveredParticipantData.
 
         * tests/DCPS/UnitTests:

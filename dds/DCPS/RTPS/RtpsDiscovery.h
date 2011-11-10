@@ -14,7 +14,6 @@
 #include "dds/DdsDcpsInfoC.h"
 #include "rtps_export.h"
 #include "ace/Configuration.h"
-#include "GuidGenerator.h"
 
 #include <string>
 
@@ -24,6 +23,8 @@
 
 namespace OpenDDS {
 namespace RTPS {
+
+class RtpsInfo;
 
 /**
  * @class RtpsDiscovery
@@ -37,13 +38,12 @@ namespace RTPS {
 class OpenDDS_Rtps_Export RtpsDiscovery : public OpenDDS::DCPS::Discovery {
 public:
   explicit RtpsDiscovery(const RepoKey& key);
+  ~RtpsDiscovery();
   virtual OpenDDS::DCPS::DCPSInfo_ptr get_dcps_info();
 
 private:
-  OpenDDS::DCPS::DCPSInfo_var  info_;
-
-  /// Guids will be unique within this RTPS configuration
-  GuidGenerator                guid_generator_;
+  RtpsInfo* servant_;
+  OpenDDS::DCPS::DCPSInfo_var info_;
 
   static int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
 
