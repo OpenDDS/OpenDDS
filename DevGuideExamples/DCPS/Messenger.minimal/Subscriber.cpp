@@ -37,8 +37,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
     // Create DataReader with the listener attached
-    DDS::DataReader_var reader = createDataReader(subscriber, 
-                                                  topic, 
+    DDS::DataReader_var reader = createDataReader(subscriber,
+                                                  topic,
                                                   listener);
 
     {
