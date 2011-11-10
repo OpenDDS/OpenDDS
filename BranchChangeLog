@@ -1,3 +1,19 @@
+Thu Nov 10 22:35:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Converter for ParameterLists.  
+          Converting parameter list to SPDPdiscoveredParticipantData.
+
+        * tests/DCPS/UnitTests:
+
+          svn:ignore updates.
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Build UnitTests_ParameterListConverter.
+
 Wed Nov  9 23:32:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Discovery.h:

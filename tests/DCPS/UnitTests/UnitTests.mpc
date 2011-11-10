@@ -49,3 +49,11 @@ project(*GuidGenerator): dcps_rtpsexe {
     GuidGenerator.cpp
   }
 }
+
+project(*ParameterListConverter): dcps_rtpsexe {
+  exename   = *
+
+  Source_Files {
+    ParameterListConverter.cpp
+  }
+}
