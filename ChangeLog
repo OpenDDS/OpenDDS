@@ -1,3 +1,10 @@
+Fri Nov 11 17:30:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.cpp:
+
+        set status on readcondition condition of SUBSCRIPTION_MATCHED_STATUS,
+        instead of PUBLICATION_MATCHED_STATUS.
+
 Thu Nov 10 16:30:04 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
