@@ -126,15 +126,6 @@ public:
                    , OpenDDS::DCPS::Invalid_Participant
                    , OpenDDS::DCPS::Invalid_Topic));
 
-  virtual OpenDDS::DCPS::TopicStatus enable_topic(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& topicId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Topic));
-
   virtual OpenDDS::DCPS::RepoId add_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,

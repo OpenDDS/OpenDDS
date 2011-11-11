@@ -19,15 +19,13 @@ namespace DCPS {
   std::string Discovery::get_stringified_dcps_info_ior()
   {
     // Get the actual reference and generate the stringified IOR
-    CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
     DCPSInfo_var repo = this->get_dcps_info();
 
-    // TODO: Remove this check when the RtpsDiscovery has a real
-    // DCPSInfo object reference to return
     if (CORBA::is_nil(repo)) {
       return "";
     }
 
+    CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
     CORBA::String_var retval = orb->object_to_string(repo);
     return std::string(retval.in());
   }

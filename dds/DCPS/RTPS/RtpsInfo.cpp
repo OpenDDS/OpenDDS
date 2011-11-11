@@ -11,15 +11,14 @@
 
 namespace OpenDDS {
 namespace RTPS {
-
-using OpenDDS::DCPS::RepoId;
+using DCPS::RepoId;
 
 
 // Participant operations:
 
 bool
-RtpsInfo::attach_participant(DDS::DomainId_t domainId,
-                             const RepoId& participantId)
+RtpsInfo::attach_participant(DDS::DomainId_t /*domainId*/,
+                             const RepoId& /*participantId*/)
 {
   return false; // This is just for DCPSInfoRepo?
 }
@@ -31,7 +30,7 @@ RtpsInfo::add_domain_participant(DDS::DomainId_t domain,
   DCPS::AddDomainStatus ads = {RepoId(), false /*federated*/};
   guid_gen_.populate(ads.id);
   ads.id.entityId = RTPS::ENTITYID_PARTICIPANT;
-  participants_[domain][ads.id] = new SPDP(domain, ads.id, qos);
+  participants_[domain][ads.id] = new Spdp(domain, ads.id, qos);
   return ads;
 }
 
@@ -64,47 +63,90 @@ RtpsInfo::update_domain_participant_qos(DDS::DomainId_t domain,
 
 // Topic operations:
 
-OpenDDS::DCPS::TopicStatus
-RtpsInfo::assert_topic(OpenDDS::DCPS::RepoId_out topicId,
+DCPS::TopicStatus
+RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
                        DDS::DomainId_t domainId, const RepoId& participantId,
                        const char* topicName, const char* dataTypeName,
                        const DDS::TopicQos& qos)
 {
-  return DCPS::INTERNAL_ERROR;
+  if (topics_.count(domainId)) {
+    const std::map<std::string, Spdp::TopicDetails>::iterator it =
+      topics_[domainId].find(topicName);
+    if (it != topics_[domainId].end()
+        && it->second.data_type_ != dataTypeName) {
+      topicId = GUID_UNKNOWN;
+      return DCPS::CONFLICTING_TYPENAME;
+    }
+  }
+
+  const DCPS::TopicStatus stat =
+    participants_[domainId][participantId]->assert_topic(topicId, topicName,
+                                                         dataTypeName, qos);
+  if (stat == DCPS::CREATED || stat == DCPS::FOUND) { // qos change (FOUND)
+    Spdp::TopicDetails& td = topics_[domainId][topicName];
+    td.data_type_ = dataTypeName;
+    td.qos_ = qos;
+    td.repo_id_ = topicId;
+  }
+  return stat;
 }
 
-OpenDDS::DCPS::TopicStatus
+DCPS::TopicStatus
 RtpsInfo::find_topic(DDS::DomainId_t domainId, const char* topicName,
                      CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
-                     OpenDDS::DCPS::RepoId_out topicId)
+                     DCPS::RepoId_out topicId)
 {
-  return DCPS::INTERNAL_ERROR;
+  if (!topics_.count(domainId)) {
+    return DCPS::NOT_FOUND;
+  }
+  if (!topics_[domainId].count(topicName)) {
+    return DCPS::NOT_FOUND;
+  }
+  Spdp::TopicDetails& td = topics_[domainId][topicName];
+  dataTypeName = td.data_type_.c_str();
+  qos = new DDS::TopicQos(td.qos_);
+  topicId = td.repo_id_;
+  return DCPS::FOUND;
 }
 
-OpenDDS::DCPS::TopicStatus
+DCPS::TopicStatus
 RtpsInfo::remove_topic(DDS::DomainId_t domainId, const RepoId& participantId,
                        const RepoId& topicId)
 {
-  return DCPS::INTERNAL_ERROR;
-}
+  if (!topics_.count(domainId)) {
+    return DCPS::NOT_FOUND;
+  }
 
-OpenDDS::DCPS::TopicStatus
-RtpsInfo::enable_topic(DDS::DomainId_t domainId, const RepoId& participantId,
-                       const RepoId& topicId)
-{
-  return DCPS::INTERNAL_ERROR;
+  std::string name;
+  const DCPS::TopicStatus stat =
+    participants_[domainId][participantId]->remove_topic(topicId, name);
+
+  if (stat == DCPS::REMOVED) {
+    topics_[domainId].erase(name);
+    if (topics_[domainId].empty()) {
+      topics_.erase(domainId);
+    }
+  }
+  return stat;
 }
 
 void
 RtpsInfo::ignore_topic(DDS::DomainId_t domainId, const RepoId& myParticipantId,
                        const RepoId& ignoreId)
 {
+  participants_[domainId][myParticipantId]->ignore_topic(ignoreId);
 }
 
 bool
 RtpsInfo::update_topic_qos(const RepoId& topicId, DDS::DomainId_t domainId,
                            const RepoId& participantId, const DDS::TopicQos& qos)
 {
+  std::string name;
+  if (participants_[domainId][participantId]->update_topic_qos(topicId,
+                                                               qos, name)) {
+    topics_[domainId][name].qos_ = qos;
+    return true;
+  }
   return false;
 }
 
@@ -114,9 +156,9 @@ RtpsInfo::update_topic_qos(const RepoId& topicId, DDS::DomainId_t domainId,
 RepoId
 RtpsInfo::add_publication(DDS::DomainId_t domainId, const RepoId& participantId,
                           const RepoId& topicId,
-                          OpenDDS::DCPS::DataWriterRemote_ptr publication,
+                          DCPS::DataWriterRemote_ptr publication,
                           const DDS::DataWriterQos& qos,
-                          const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
+                          const DCPS::TransportLocatorSeq& transInfo,
                           const DDS::PublisherQos& publisherQos)
 {
   return RepoId();
@@ -151,9 +193,9 @@ RtpsInfo::update_publication_qos(DDS::DomainId_t domainId, const RepoId& partId,
 RepoId
 RtpsInfo::add_subscription(DDS::DomainId_t domainId,
                            const RepoId& participantId, const RepoId& topicId,
-                           OpenDDS::DCPS::DataReaderRemote_ptr subscription,
+                           DCPS::DataReaderRemote_ptr subscription,
                            const DDS::DataReaderQos& qos,
-                           const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
+                           const DCPS::TransportLocatorSeq& transInfo,
                            const DDS::SubscriberQos& subscriberQos,
                            const char* filterExpression,
                            const DDS::StringSeq& exprParams)

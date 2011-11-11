@@ -1,3 +1,37 @@
+Fri Nov 11 21:58:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.cpp:
+
+          Removed temporary code that was needed before RtpsDiscovery worked.
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing RTPS Discovery.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Changed shutdown order so that discovery objects are cleaned up
+          before the POA and ORB are shut down.
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Removed unused "enable_topic()" operation on DCPSInfo.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          Updated testing of RtpsDiscovery now that it returns an IOR.
+
+        * docs/design/RTPS:
+
+          fixed typo
+
 Fri Nov 11 21:31:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.h:

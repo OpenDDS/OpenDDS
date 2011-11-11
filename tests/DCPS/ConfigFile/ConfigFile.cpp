@@ -157,7 +157,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
-    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+    TEST_CHECK(discovery->get_stringified_dcps_info_ior() != ior);
   }
 
   {
@@ -172,7 +172,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
-    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+    TEST_CHECK(discovery->get_stringified_dcps_info_ior() != ior);
   }
 
   TheServiceParticipant->shutdown();

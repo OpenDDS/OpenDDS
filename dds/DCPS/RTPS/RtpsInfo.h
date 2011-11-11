@@ -12,14 +12,15 @@
 #include "dds/DdsDcpsInfoS.h"
 
 #include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/RcHandle_T.h"
 
 #include "GuidGenerator.h"
+#include "Spdp.h"
 
 #include "ace/Synch_Traits.h"
 
 #include <map>
+#include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,6 +29,9 @@
 namespace OpenDDS {
 namespace RTPS {
 
+/// The RtpsInfo object implements the DCPSInfo CORBA Interface for the
+/// RTPS-standard discovery protocol.  A single RtpsInfo is used per "discovery
+/// object" in DCPS (see class RtpsDiscovery).
 class RtpsInfo : public virtual POA_OpenDDS::DCPS::DCPSInfo {
 public:
 
@@ -75,11 +79,6 @@ public:
     OpenDDS::DCPS::RepoId_out topicId);
 
   virtual OpenDDS::DCPS::TopicStatus remove_topic(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& topicId);
-
-  virtual OpenDDS::DCPS::TopicStatus enable_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId);
@@ -192,19 +191,11 @@ public:
 
 private:
 
-  struct SPDP : DCPS::RcObject<ACE_SYNCH_MUTEX> {
-    SPDP(DDS::DomainId_t domain, const DCPS::RepoId& guid,
-         const DDS::DomainParticipantQos& qos) {}
-
-    void ignore_domain_participant(const DCPS::RepoId& ignoreId) {}
-    bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos) {
-      return false;
-    }
-  };
-
   std::map<DDS::DomainId_t,
-           std::map<DCPS::RepoId, DCPS::RcHandle<SPDP>, DCPS::GUID_tKeyLessThan>
+           std::map<DCPS::RepoId, DCPS::RcHandle<Spdp>, DCPS::GUID_tKeyLessThan>
           > participants_;
+
+  std::map<DDS::DomainId_t, std::map<std::string, Spdp::TopicDetails> > topics_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;
@@ -212,4 +203,5 @@ private:
 
 }
 }
-#endif OPENDDS_RTPS_RTPSINFO_H
+
+#endif // OPENDDS_RTPS_RTPSINFO_H

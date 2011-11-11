@@ -226,6 +226,9 @@ Service_Participant::shutdown()
 
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
+    domainRepoMap_.clear();
+    discoveryMap_.clear();
+
     if (!CORBA::is_nil(orb_.in())) {
       if (!orb_from_user_) {
         orb_->shutdown(0);
@@ -256,9 +259,6 @@ Service_Participant::shutdown()
     }
 
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
-
-    domainRepoMap_.clear();
-    discoveryMap_.clear();
 
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");

@@ -30,7 +30,7 @@ Implementation Issues
 
 Notes for Maintainers
 ---------------------
-- opendds_idl compiler has specially support for custom RTPS Serialization
+- opendds_idl compiler has special support for custom RTPS Serialization
   - See dds/idl/marshal_generator.cpp
 - OpenDDS_Dcps library has no RTPS-specific data types, only has limited support
   for RTPS features where necessary

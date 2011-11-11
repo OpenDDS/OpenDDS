@@ -201,7 +201,6 @@ namespace OpenDDS
       add_giop_decoder ("attach_participant", attach_participant);
       add_giop_decoder ("find_topic", find_topic);
       add_giop_decoder ("remove_topic", remove_topic);
-      add_giop_decoder ("enable_topic", enable_topic);
       add_giop_decoder ("disassociate_participant", disassociate_participant);
       add_giop_decoder ("disassociate_subscription", disassociate_subscription);
       add_giop_decoder ("disassociate_publication", disassociate_publication);

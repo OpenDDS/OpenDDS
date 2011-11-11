@@ -88,7 +88,6 @@ namespace OpenDDS
       static bool attach_participant             (::MessageHeader *);
       static bool find_topic                     (::MessageHeader *);
       static bool remove_topic                   (::MessageHeader *);
-      static bool enable_topic                   (::MessageHeader *);
       static bool remove_domain_participant      (::MessageHeader *);
       static bool disassociate_participant       (::MessageHeader *);
       static bool disassociate_subscription      (::MessageHeader *);
