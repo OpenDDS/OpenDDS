@@ -1,5 +1,13 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ParameterListConverter.h"
+#include "dds/DCPS/GuidUtils.h"
 
 namespace OpenDDS { namespace RTPS {
 
@@ -20,10 +28,16 @@ ParameterListConverter::to_param_list(
   pv_param.version(participant_data.participantProxy.protocolVersion);
   add_param(param_list, pv_param);
 
-  // Don't see guid prefix
-  //Parameter gp_param;
-  //gp_param.guid(participant_data.participantProxy.guidPrefix);
-  //add_param(param_list, gp_param);
+  // For guid prefix, copy into guid, and force some values
+  Parameter gp_param;
+  GUID_t guid;
+  ACE_OS::memcpy(guid.guidPrefix,
+                 participant_data.participantProxy.guidPrefix,
+                 sizeof(guid.guidPrefix));
+  guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
+
+  gp_param.guid(guid);
+  add_param(param_list, gp_param);
 
   Parameter vid_param;
   vid_param.vendor(participant_data.participantProxy.vendorId);
@@ -71,6 +85,28 @@ ParameterListConverter::to_param_list(
   add_param(param_list, ld_param);
 
   return 0;
+}
+
+int
+ParameterListConverter::from_param_list(
+    const ParameterList& param_list,
+    SPDPdiscoveredParticipantData& participant_data) const
+{
+  int length = param_list.length();
+  for (int i = 0; i < length; ++i)
+  {
+    Parameter param = param_list[i];
+    switch (param._d()) {
+      case PID_USER_DATA:
+        participant_data.ddsParticipantData.user_data = param.user_data();
+        break;
+      case PID_PROTOCOL_VERSION:
+        participant_data.participantProxy.protocolVersion = param.version();
+        break;
+      default:
+        return -1;
+    }
+  }
 }
 
 void

@@ -1,3 +1,15 @@
+Fri Nov 11 21:31:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Handle guid prefix in to_param_list for participant data.
+          Start of from_param_list for participant data.
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Some field-level validation of to_param_list for participant data.
+
 Thu Nov 10 23:24:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.h:
