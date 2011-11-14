@@ -1,3 +1,14 @@
+Mon Nov 14 17:01:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Force guid prefix to have PID_PARTICIPANT_GUID
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Test encoding of expects inline qos, builtin endpoints, locators,
+          and liveliness count.
+
 Fri Nov 11 21:58:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Discovery.cpp:

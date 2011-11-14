@@ -37,6 +37,7 @@ ParameterListConverter::to_param_list(
   guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
   gp_param.guid(guid);
+  gp_param._d(PID_PARTICIPANT_GUID);
   add_param(param_list, gp_param);
 
   Parameter vid_param;
@@ -92,9 +93,8 @@ ParameterListConverter::from_param_list(
     const ParameterList& param_list,
     SPDPdiscoveredParticipantData& participant_data) const
 {
-  int length = param_list.length();
-  for (int i = 0; i < length; ++i)
-  {
+  size_t length = param_list.length();
+  for (size_t i = 0; i < length; ++i) {
     Parameter param = param_list[i];
     switch (param._d()) {
       case PID_USER_DATA:
@@ -107,6 +107,7 @@ ParameterListConverter::from_param_list(
         return -1;
     }
   }
+  return 0;
 }
 
 void
@@ -114,7 +115,7 @@ ParameterListConverter::add_param(
     ParameterList& param_list,
     const Parameter& param) const
 {
-  int length = param_list.length();
+  size_t length = param_list.length();
   param_list.length(length + 1);
   param_list[length] = param;
 }
@@ -125,8 +126,8 @@ ParameterListConverter::add_param_locator_seq(
     const LocatorSeq& locator_seq,
     const ParameterId_t pid) const
 {
-  int length = locator_seq.length();
-  for (int i = 0; i < length; ++i) {
+  size_t length = locator_seq.length();
+  for (size_t i = 0; i < length; ++i) {
     Parameter param;
     param.locator(locator_seq[i]);
     param._d(pid);

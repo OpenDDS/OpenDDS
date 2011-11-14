@@ -16,13 +16,54 @@ using namespace OpenDDS::RTPS;
 namespace {
   ParameterListConverter plc;
   namespace Factory {
+    Locator_t locator(long kind,
+                      unsigned long port,
+                      unsigned int addr0, 
+                      unsigned int addr1, 
+                      unsigned int addr2,
+                      unsigned int addr3)
+    {
+      Locator_t result;
+      result.kind = kind;
+      result.port = port;
+      result.address[ 0] = addr0 & 0x000000FF;
+      result.address[ 1] = addr0 & 0x0000FF00;
+      result.address[ 2] = addr0 & 0x00FF0000;
+      result.address[ 3] = addr0 & 0xFF000000;
+      result.address[ 4] = addr1 & 0x000000FF;
+      result.address[ 5] = addr1 & 0x0000FF00;
+      result.address[ 6] = addr1 & 0x00FF0000;
+      result.address[ 7] = addr1 & 0xFF000000;
+      result.address[ 8] = addr2 & 0x000000FF;
+      result.address[ 9] = addr2 & 0x0000FF00;
+      result.address[10] = addr2 & 0x00FF0000;
+      result.address[11] = addr2 & 0xFF000000;
+      result.address[12] = addr3 & 0x000000FF;
+      result.address[13] = addr3 & 0x0000FF00;
+      result.address[14] = addr3 & 0x00FF0000;
+      result.address[15] = addr3 & 0xFF000000;
+
+      return result;
+    }
+
     SPDPdiscoveredParticipantData spdp_participant(
       const void* user_data = NULL,
       size_t user_data_len = 0,
       char major_protocol_version = 0,
       char minor_protocol_version = 0,
       char* vendor_id = NULL,
-      GUID_t* guid = NULL
+      GUID_t* guid = NULL,
+      bool expects_inline_qos = false,
+      unsigned long builtin_endpoints = 0,
+      Locator_t* mtu_locs = NULL,
+      size_t num_mtu_locs = 0,
+      Locator_t* mtm_locs = NULL,
+      size_t num_mtm_locs = 0,
+      Locator_t* du_locs = NULL,
+      size_t num_du_locs = 0,
+      Locator_t* dm_locs = NULL,
+      size_t num_dm_locs = 0,
+      long liveliness_count = 0
     )
     {
       SPDPdiscoveredParticipantData result;
@@ -45,24 +86,58 @@ namespace {
                guid->guidPrefix, 
                sizeof(guid->guidPrefix));
       }
+      result.participantProxy.expectsInlineQos = expects_inline_qos;
+      result.participantProxy.availableBuiltinEndpoints = builtin_endpoints;
 
+      if (num_mtu_locs && mtu_locs) {
+        result.participantProxy.metatrafficUnicastLocatorList.length(num_mtu_locs);
+        for (size_t i = 0; i < num_mtu_locs; ++i) {
+          result.participantProxy.metatrafficUnicastLocatorList[i] = 
+              mtu_locs[i];
+        }
+      }
+
+      if (num_mtm_locs && mtm_locs) {
+        result.participantProxy.metatrafficMulticastLocatorList.length(num_mtm_locs);
+        for (size_t i = 0; i < num_mtm_locs; ++i) {
+          result.participantProxy.metatrafficMulticastLocatorList[i] = 
+              mtm_locs[i];
+        }
+      }
+
+      if (num_du_locs && du_locs) {
+        result.participantProxy.defaultUnicastLocatorList.length(num_du_locs);
+        for (size_t i = 0; i < num_du_locs; ++i) {
+          result.participantProxy.defaultUnicastLocatorList[i] = du_locs[i];
+        }
+      }
+
+      if (num_dm_locs && dm_locs) {
+        result.participantProxy.defaultMulticastLocatorList.length(num_dm_locs);
+        for (size_t i = 0; i < num_dm_locs; ++i) {
+          result.participantProxy.defaultMulticastLocatorList[i] = dm_locs[i];
+        }
+      }
+
+      result.participantProxy.manualLivelinessCount.value = liveliness_count;
       return result;
     }
   }
 }
 
 bool is_present(const ParameterList& param_list, const ParameterId_t pid) {
-  int length = param_list.length();
-  for (int i = 0; i < length; ++i) {
+  size_t length = param_list.length();
+  for (size_t i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
       return true;
     }
   }
   return false;
 }
+
 bool is_missing(const ParameterList& param_list, const ParameterId_t pid) {
-  int length = param_list.length();
-  for (int i = 0; i < length; ++i) {
+  size_t length = param_list.length();
+  for (size_t i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
       return false;
     }
@@ -70,15 +145,22 @@ bool is_missing(const ParameterList& param_list, const ParameterId_t pid) {
   return true;
 }
 
-Parameter get(const ParameterList& param_list, const ParameterId_t pid) {
-  int length = param_list.length();
-  for (int i = 0; i < length; ++i) {
+Parameter get(const ParameterList& param_list, 
+              const ParameterId_t pid,
+              const size_t instance_num = 0) {
+
+  const size_t length = param_list.length();
+  size_t count = 0;
+  for (size_t i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
-      return param_list[i];
+      if (count++ == instance_num) {
+        return param_list[i];
+      }
     }
   }
   TEST_ASSERT(false); // Not found
 }
+
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
@@ -99,6 +181,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_missing(param_list, PID_DEFAULT_UNICAST_LOCATOR));
     TEST_ASSERT(is_missing(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
     TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
+    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT));
   }
 
   { // Should encode participant data with 1 locator to param list properly
@@ -224,6 +307,158 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Parameter param = get(param_list, PID_PARTICIPANT_GUID);
     GUID_t guid_out = param.guid();
     TEST_ASSERT(memcmp(guid_out.guidPrefix, "GUID-ABC    ", 12) == 0);
+  }
+
+  { // Should encode expects inline qos properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_EXPECTS_INLINE_QOS));
+    Parameter param = get(param_list, PID_EXPECTS_INLINE_QOS);
+    TEST_ASSERT(param.expects_inline_qos() == true);
+  }
+
+  { // Should encode builtin endpoints properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
+    Parameter param = get(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS);
+    TEST_ASSERT(param.participant_builtin_endpoints() == 72393L);
+  }
+
+  { // Should encode meta unicast locators properly
+    Locator_t locators[2];
+    Locator_t locator_out;
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0, 
+                                  locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
+    Parameter param = get(param_list, PID_METATRAFFIC_UNICAST_LOCATOR, 0);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[0].kind);
+    TEST_ASSERT(locator_out.port == locators[0].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[0].address, 16) == 0);
+
+    param = get(param_list, PID_METATRAFFIC_UNICAST_LOCATOR, 1);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[1].kind);
+    TEST_ASSERT(locator_out.port == locators[1].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
+  }
+
+  { // Should encode meta multicast locators properly
+    Locator_t locators[2];
+    Locator_t locator_out;
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
+    Parameter param = get(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR, 0);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[0].kind);
+    TEST_ASSERT(locator_out.port == locators[0].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[0].address, 16) == 0);
+
+    param = get(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR, 1);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[1].kind);
+    TEST_ASSERT(locator_out.port == locators[1].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
+  }
+
+  { // Should encode default unicast locators properly
+    Locator_t locators[2];
+    Locator_t locator_out;
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_DEFAULT_UNICAST_LOCATOR));
+    Parameter param = get(param_list, PID_DEFAULT_UNICAST_LOCATOR, 0);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[0].kind);
+    TEST_ASSERT(locator_out.port == locators[0].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[0].address, 16) == 0);
+
+    param = get(param_list, PID_DEFAULT_UNICAST_LOCATOR, 1);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[1].kind);
+    TEST_ASSERT(locator_out.port == locators[1].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
+  }
+
+  { // Should encode default multicast locators properly
+    Locator_t locators[2];
+    Locator_t locator_out;
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, NULL, 0,
+                                  locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
+    Parameter param = get(param_list, PID_DEFAULT_MULTICAST_LOCATOR, 0);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[0].kind);
+    TEST_ASSERT(locator_out.port == locators[0].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[0].address, 16) == 0);
+
+    param = get(param_list, PID_DEFAULT_MULTICAST_LOCATOR, 1);
+    locator_out = param.locator();
+    TEST_ASSERT(locator_out.kind == locators[1].kind);
+    TEST_ASSERT(locator_out.port == locators[1].port);
+    TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
+  }
+
+  { // Should encode liveliness count properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+                                  7);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT));
+    Parameter param = get(param_list, PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT);
+    TEST_ASSERT(param.count().value == 7);
   }
 
 /*
