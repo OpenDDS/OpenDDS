@@ -9,10 +9,13 @@
 #include "Boilerplate.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <model/Sync.h>
+#include <stdexcept>
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
+
+using namespace examples::boilerplate;
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -79,6 +82,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
+  } catch (std::runtime_error& err) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+                      err.what()), -1);
   } catch (std::string& msg) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
                       msg.c_str()), -1);

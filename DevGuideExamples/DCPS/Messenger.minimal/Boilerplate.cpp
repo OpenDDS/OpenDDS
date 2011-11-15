@@ -10,6 +10,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 
+namespace examples { namespace boilerplate {
+
 DDS::DomainParticipant_var
 createParticipant(DDS::DomainParticipantFactory_var dpf)
 {
@@ -200,3 +202,5 @@ cleanup(
   // Shut down info repo connection
   TheServiceParticipant->shutdown();
 }
+
+} } // End namespaces

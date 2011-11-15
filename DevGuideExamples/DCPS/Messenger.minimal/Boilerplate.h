@@ -8,6 +8,10 @@
 
 #include "MessengerTypeSupportImpl.h"
 
+// Boilerplate code pulled out of mains of publisher and subscriber 
+// in order to simplify this example.
+namespace examples { namespace boilerplate {
+
 DDS::DomainParticipant_var
 createParticipant(DDS::DomainParticipantFactory_var dpf);
 
@@ -29,3 +33,5 @@ Messenger::MessageDataReader_var narrow(DDS::DataReader_ptr reader);
 
 void cleanup(DDS::DomainParticipant_var participant,
              DDS::DomainParticipantFactory_var dpf);
+
+} } // End namespaces

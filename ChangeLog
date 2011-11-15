@@ -1,3 +1,24 @@
+Tue Nov 15 16:18:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+
+          Place in its own namespace.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+
+          Use boilerplate namespace.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Catch std::runtime_error
+          Use boilerplate namespace.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/README:
+
+          Description of motivation for example.
+
 Tue Nov 15 16:16:28 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Sync.h:

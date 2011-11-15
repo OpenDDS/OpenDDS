@@ -9,6 +9,8 @@
 #include "DataReaderListenerImpl.h"
 #include "Boilerplate.h"
 
+using namespace examples::boilerplate;
+
 void
 DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
