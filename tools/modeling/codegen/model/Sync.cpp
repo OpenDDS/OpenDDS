@@ -5,7 +5,7 @@
 
 using OpenDDS::DCPS::DCPS_debug_level;
 
-OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var& writer) :
+OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var writer) :
 writer_(writer)
 {
   if (wait_match(writer_)) {
@@ -82,7 +82,7 @@ OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer)
   return 0;
 }
 
-OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var& reader) :
+OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var reader) :
 reader_(reader)
 {
 }
@@ -144,7 +144,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
 }
 
 OpenDDS::Model::ReaderCondSync::ReaderCondSync(
-     DDS::DataReader_var& reader,
+     DDS::DataReader_var reader,
      ACE_Condition<ACE_SYNCH_MUTEX>& condition) :
 reader_(reader),
 complete_(false),
