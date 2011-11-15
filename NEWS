@@ -1,5 +1,10 @@
 Version 3.1 of OpenDDS.
 
+- The DCPSInfoRepo reassociates Built in Topic connections for existing
+  datareaders and datawriters when restarted from persistence.
+
+- The idl compiler will now print a warning about not including TAO's
+  orb.idl file when a file named orb.idl is included.
 
 ========================================================================
 
