@@ -6,6 +6,9 @@ Version 3.0.1 of OpenDDS.
 - The idl compiler will now print a warning about not including TAO's
   orb.idl file when a file named orb.idl is included.
 
+- New example Messenger.minimal - which is like messenger, but streamlined
+  for new users to understand the whole easier.
+
 ========================================================================
 
 Version 3.0 of OpenDDS.

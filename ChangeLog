@@ -1,3 +1,13 @@
+Tue Nov 15 16:44:59 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * NEWS:
+
+          Mention Messenger.minimal
+
+        * docs/getting_started.odt:
+
+          Remove for the time being, until after release.
+
 Tue Nov 15 16:35:11 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * NEWS:
