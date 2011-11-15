@@ -1,4 +1,4 @@
-Version 3.1 of OpenDDS.
+Version 3.0.1 of OpenDDS.
 
 - The DCPSInfoRepo reassociates Built in Topic connections for existing
   datareaders and datawriters when restarted from persistence.

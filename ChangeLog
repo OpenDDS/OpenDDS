@@ -1,3 +1,9 @@
+Tue Nov 15 16:35:11 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * NEWS:
+
+          Change release number to 3.0.1
+
 Tue Nov 15 16:18:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
