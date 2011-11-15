@@ -1,3 +1,13 @@
+Tue Nov 15 19:00:04 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * README:
+
+          Updating for release.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Adding release 3.0.1.
+
 Tue Nov 15 17:23:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/README:

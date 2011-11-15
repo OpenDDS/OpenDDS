@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 3.1
+This directory structure contains OpenDDS 3.0.1
 
 
 ======================================================================
@@ -279,8 +279,7 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
 
   The Thrasher test is designed to stress resource allocation/deallocation
   in running systems.  These tests are expected to fail given insufficient
-  resources.  Any failure reported above the `low' threshold should not be
-  considered a true test failure.
+  resources.
 
 ** multicast
 
