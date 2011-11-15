@@ -7,4 +7,4 @@ for a simpler view on how to publish samples and process received samples.
 Boilerplate also replaces NULL pointers with execptions to eliminate the need 
 for main to check return values and write out individual log messages.
 
-Explained in-depth in the getting started guide.
+To be explained in-depth in the upcoming getting started guide.
