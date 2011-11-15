@@ -26,6 +26,7 @@ namespace RTPS {
         ParameterList& param_list,
         const LocatorSeq& locator_seq, 
         const ParameterId_t pid) const;
+    void append_locator(LocatorSeq& list, const Locator_t& locator) const;
   };
 }
 }

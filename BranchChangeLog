@@ -1,3 +1,14 @@
+Tue Nov 15 18:50:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Fill out from_param_list() implementation.
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Test decoding param list in from_param_list().
+
 Mon Nov 14 17:01:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

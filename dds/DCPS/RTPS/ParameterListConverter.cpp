@@ -103,6 +103,49 @@ ParameterListConverter::from_param_list(
       case PID_PROTOCOL_VERSION:
         participant_data.participantProxy.protocolVersion = param.version();
         break;
+      case PID_PARTICIPANT_GUID:
+        memcpy(participant_data.participantProxy.guidPrefix,
+               param.guid().guidPrefix, sizeof(GuidPrefix_t));
+        break;
+      case PID_VENDORID:
+        memcpy(participant_data.participantProxy.vendorId.vendorId,
+               param.vendor().vendorId, sizeof(OctetArray2));
+        break;
+      case PID_EXPECTS_INLINE_QOS:
+        participant_data.participantProxy.expectsInlineQos = 
+            param.expects_inline_qos();
+        break;
+      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
+        participant_data.participantProxy.availableBuiltinEndpoints = 
+            param.builtin_endpoints();
+        break;
+      case PID_METATRAFFIC_UNICAST_LOCATOR:
+        append_locator(
+            participant_data.participantProxy.metatrafficUnicastLocatorList,
+            param.locator());
+        break;
+      case PID_METATRAFFIC_MULTICAST_LOCATOR:
+        append_locator(
+            participant_data.participantProxy.metatrafficMulticastLocatorList,
+            param.locator());
+        break;
+      case PID_DEFAULT_UNICAST_LOCATOR:
+        append_locator(
+            participant_data.participantProxy.defaultUnicastLocatorList,
+            param.locator());
+        break;
+      case PID_DEFAULT_MULTICAST_LOCATOR:
+        append_locator(
+            participant_data.participantProxy.defaultMulticastLocatorList,
+            param.locator());
+        break;
+      case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
+        participant_data.participantProxy.manualLivelinessCount.value = 
+            param.count().value;
+        break;
+      case PID_PARTICIPANT_LEASE_DURATION:
+        participant_data.leaseDuration = param.duration();
+        break;
       default:
         return -1;
     }
@@ -133,6 +176,16 @@ ParameterListConverter::add_param_locator_seq(
     param._d(pid);
     add_param(param_list, param);
   }
+}
+
+void
+ParameterListConverter::append_locator(
+    LocatorSeq& list, 
+    const Locator_t& locator) const
+{
+  size_t length = list.length();
+  list.length(length + 1); 
+  list[length] = locator;
 }
 
 } }

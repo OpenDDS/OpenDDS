@@ -10,6 +10,7 @@
 #include "../common/TestSupport.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include <iostream>
 
 using namespace OpenDDS::RTPS;
 
@@ -63,7 +64,9 @@ namespace {
       size_t num_du_locs = 0,
       Locator_t* dm_locs = NULL,
       size_t num_dm_locs = 0,
-      long liveliness_count = 0
+      long liveliness_count = 0,
+      long lease_dur_seconds = 0,
+      unsigned long lease_dur_fraction = 0
     )
     {
       SPDPdiscoveredParticipantData result;
@@ -119,7 +122,15 @@ namespace {
         }
       }
 
-      result.participantProxy.manualLivelinessCount.value = liveliness_count;
+      if (liveliness_count) {
+        result.participantProxy.manualLivelinessCount.value = liveliness_count;
+      }
+
+      if (lease_dur_seconds || lease_dur_fraction) {
+        result.leaseDuration.seconds = lease_dur_seconds;
+        result.leaseDuration.fraction = lease_dur_fraction;
+      }
+
       return result;
     }
   }
@@ -164,26 +175,6 @@ Parameter get(const ParameterList& param_list,
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  { // Should encode participant data with no locators to param list properly
-    SPDPdiscoveredParticipantData participant_data;
-    ParameterList param_list;
-    int status = plc.to_param_list(participant_data, param_list);
-    TEST_ASSERT(status == 0);
-    TEST_ASSERT(is_present(param_list, PID_USER_DATA));
-    // Built-in topic id missing
-    TEST_ASSERT(is_present(param_list, PID_PROTOCOL_VERSION));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_GUID));
-    TEST_ASSERT(is_present(param_list, PID_VENDORID));
-    TEST_ASSERT(is_present(param_list, PID_EXPECTS_INLINE_QOS));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
-    TEST_ASSERT(is_missing(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
-    TEST_ASSERT(is_missing(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
-    TEST_ASSERT(is_missing(param_list, PID_DEFAULT_UNICAST_LOCATOR));
-    TEST_ASSERT(is_missing(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT));
-  }
-
   { // Should encode participant data with 1 locator to param list properly
     SPDPdiscoveredParticipantData participant_data;
     ParameterList param_list;
@@ -268,6 +259,19 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(ud_qos.value[9] == 'r');
   }
 
+  { // Should decode user data properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant("hello user", 10);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[0] ==
+                part_data_out.ddsParticipantData.user_data.value[0]);
+  }
+
   { // Should encode protocol version properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 3, 8);
@@ -279,6 +283,21 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     OpenDDS::RTPS::ProtocolVersion_t pv = param.version();
     TEST_ASSERT(pv.major == 3);
     TEST_ASSERT(pv.minor == 8);
+  }
+
+  { // Should decode protocol version properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 9, 1);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(participant_data.participantProxy.protocolVersion.major ==
+                part_data_out.participantProxy.protocolVersion.major);
+    TEST_ASSERT(participant_data.participantProxy.protocolVersion.minor ==
+                part_data_out.participantProxy.protocolVersion.minor);
   }
 
   { // Should encode vendor id properly
@@ -295,6 +314,20 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(vid.vendorId[1] == 9);
   }
 
+  { // Should decode vendor id properly
+    char vendor_id[] = {7, 9};
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(!memcmp(participant_data.participantProxy.vendorId.vendorId,
+                        part_data_out.participantProxy.vendorId.vendorId,
+                        sizeof(OctetArray2)));
+  }
+
   { // Should encode guid prefix properly
     GUID_t guid_in;
     memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
@@ -309,6 +342,22 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(memcmp(guid_out.guidPrefix, "GUID-ABC    ", 12) == 0);
   }
 
+  { // Should decode guid prefix properly
+    GUID_t guid_in;
+    memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, &guid_in);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(memcmp(participant_data.participantProxy.guidPrefix,
+                       part_data_out.participantProxy.guidPrefix,
+                       sizeof(GuidPrefix_t)) == 0);
+  }
+
   { // Should encode expects inline qos properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
@@ -320,6 +369,25 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.expects_inline_qos() == true);
   }
 
+  { // Should decode expects inline qos properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == true);
+    // Change to false
+    participant_data.participantProxy.expectsInlineQos = false;
+    param_list.length(0);
+    plc.to_param_list(participant_data, param_list);
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == false);
+  }
+
   { // Should encode builtin endpoints properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
@@ -329,6 +397,20 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
     Parameter param = get(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS);
     TEST_ASSERT(param.participant_builtin_endpoints() == 72393L);
+  }
+
+  { // Should decode builtin endpoints properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(
+        participant_data.participantProxy.availableBuiltinEndpoints ==
+        part_data_out.participantProxy.availableBuiltinEndpoints);
   }
 
   { // Should encode meta unicast locators properly
@@ -360,9 +442,39 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
   }
 
+  { // Should decode meta unicast locators properly
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0, 
+                                  locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    {
+      Locator_t& locator = part_data_out.participantProxy.metatrafficUnicastLocatorList[0];
+      TEST_ASSERT(locators[0].kind == locator.kind);
+      TEST_ASSERT(locators[0].port == locator.port);
+      TEST_ASSERT(memcmp(locators[0].address, locator.address, 16) == 0);
+    }
+    {
+      Locator_t& locator = part_data_out.participantProxy.metatrafficUnicastLocatorList[1];
+      TEST_ASSERT(locators[1].kind == locator.kind);
+      TEST_ASSERT(locators[1].port == locator.port);
+      TEST_ASSERT(memcmp(locators[1].address, locator.address, 16) == 0);
+    }
+  }
+
   { // Should encode meta multicast locators properly
     Locator_t locators[2];
-    Locator_t locator_out;
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
@@ -375,18 +487,52 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ParameterList param_list;
     int status = plc.to_param_list(participant_data, param_list);
     TEST_ASSERT(status == 0);
-    TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
-    Parameter param = get(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR, 0);
-    locator_out = param.locator();
-    TEST_ASSERT(locator_out.kind == locators[0].kind);
-    TEST_ASSERT(locator_out.port == locators[0].port);
-    TEST_ASSERT(memcmp(locator_out.address, locators[0].address, 16) == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    {
+      Locator_t& locator = part_data_out.participantProxy.metatrafficMulticastLocatorList[0];
+      TEST_ASSERT(locators[0].kind == locator.kind);
+      TEST_ASSERT(locators[0].port == locator.port);
+      TEST_ASSERT(memcmp(locators[0].address, locator.address, 16) == 0);
+    }
+    {
+      Locator_t& locator = part_data_out.participantProxy.metatrafficMulticastLocatorList[1];
+      TEST_ASSERT(locators[1].kind == locator.kind);
+      TEST_ASSERT(locators[1].port == locator.port);
+      TEST_ASSERT(memcmp(locators[1].address, locator.address, 16) == 0);
+    }
+  }
 
-    param = get(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR, 1);
-    locator_out = param.locator();
-    TEST_ASSERT(locator_out.kind == locators[1].kind);
-    TEST_ASSERT(locator_out.port == locators[1].port);
-    TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
+  { // Should decode meta multicast locators properly
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    {
+      Locator_t& locator = part_data_out.participantProxy.metatrafficMulticastLocatorList[0];
+      TEST_ASSERT(locators[0].kind == locator.kind);
+      TEST_ASSERT(locators[0].port == locator.port);
+      TEST_ASSERT(memcmp(locators[0].address, locator.address, 16) == 0);
+    }
+    {
+      Locator_t& locator = part_data_out.participantProxy.metatrafficMulticastLocatorList[1];
+      TEST_ASSERT(locators[1].kind == locator.kind);
+      TEST_ASSERT(locators[1].port == locator.port);
+      TEST_ASSERT(memcmp(locators[1].address, locator.address, 16) == 0);
+    }
   }
 
   { // Should encode default unicast locators properly
@@ -416,6 +562,37 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(locator_out.kind == locators[1].kind);
     TEST_ASSERT(locator_out.port == locators[1].port);
     TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
+  }
+
+  { // Should decode default unicast locators properly
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    {
+      Locator_t& locator = part_data_out.participantProxy.defaultUnicastLocatorList[0];
+      TEST_ASSERT(locators[0].kind == locator.kind);
+      TEST_ASSERT(locators[0].port == locator.port);
+      TEST_ASSERT(memcmp(locators[0].address, locator.address, 16) == 0);
+    }
+    {
+      Locator_t& locator = part_data_out.participantProxy.defaultUnicastLocatorList[1];
+      TEST_ASSERT(locators[1].kind == locator.kind);
+      TEST_ASSERT(locators[1].port == locator.port);
+      TEST_ASSERT(memcmp(locators[1].address, locator.address, 16) == 0);
+    }
   }
 
   { // Should encode default multicast locators properly
@@ -448,6 +625,38 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
   }
 
+  { // Should decode default multicast locators properly
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, NULL, 0,
+                                  locators, 2);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    {
+      Locator_t& locator = part_data_out.participantProxy.defaultMulticastLocatorList[0];
+      TEST_ASSERT(locators[0].kind == locator.kind);
+      TEST_ASSERT(locators[0].port == locator.port);
+      TEST_ASSERT(memcmp(locators[0].address, locator.address, 16) == 0);
+    }
+    {
+      Locator_t& locator = part_data_out.participantProxy.defaultMulticastLocatorList[1];
+      TEST_ASSERT(locators[1].kind == locator.kind);
+      TEST_ASSERT(locators[1].port == locator.port);
+      TEST_ASSERT(memcmp(locators[1].address, locator.address, 16) == 0);
+    }
+  }
+
   { // Should encode liveliness count properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
@@ -461,6 +670,50 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.count().value == 7);
   }
 
+  { // Should decode liveliness count properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+                                  6);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(
+        part_data_out.participantProxy.manualLivelinessCount.value == 6);
+  }
+
+  { // Should encode lease duration properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
+                                  12, 300);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
+    Parameter param = get(param_list, PID_PARTICIPANT_LEASE_DURATION);
+    TEST_ASSERT(param.duration().seconds == 12);
+    TEST_ASSERT(param.duration().fraction == 300);
+  }
+
+  { // Should decode lease duration properly
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+                                  NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
+                                  12, 300);
+    ParameterList param_list;
+    int status = plc.to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    SPDPdiscoveredParticipantData part_data_out;
+    status = plc.from_param_list(param_list, part_data_out);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(part_data_out.leaseDuration.seconds == 
+                participant_data.leaseDuration.seconds);
+    TEST_ASSERT(part_data_out.leaseDuration.fraction == 
+                participant_data.leaseDuration.fraction);
+  }
 /*
   { // Should decode param list to participant data properly
     int a = 0;
