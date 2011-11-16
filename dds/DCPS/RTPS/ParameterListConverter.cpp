@@ -157,6 +157,31 @@ ParameterListConverter::to_param_list(
     param.ownership_strength(writer_data.ddsPublicationData.ownership_strength);
     add_param(param_list, param);
   }
+  {
+    Parameter param;
+    param.destination_order(writer_data.ddsPublicationData.destination_order);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.presentation(writer_data.ddsPublicationData.presentation);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.partition(writer_data.ddsPublicationData.partition);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.topic_data(writer_data.ddsPublicationData.topic_data);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.group_data(writer_data.ddsPublicationData.group_data);
+    add_param(param_list, param);
+  }
   return 0;
 }
 

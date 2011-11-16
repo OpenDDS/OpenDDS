@@ -1,3 +1,11 @@
+Wed Nov 16 23:04:30 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Complete to_param_list for DiscoveredWriterData and associated 
+          unit tests.
+
 Wed Nov 16 21:42:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * BranchChangeLog:
