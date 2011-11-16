@@ -1,3 +1,9 @@
+Wed Nov 16 17:44:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          Change PID_TOPIC_TYPE to PID_TYPE_NAME.
+
 Wed Nov 16 15:58:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
@@ -5,7 +11,7 @@ Wed Nov 16 15:58:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
           Explicit ignore of PID_SENTINEL and PID_PAD
           Test this too.
- 
+
 Wed Nov 16 14:50:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

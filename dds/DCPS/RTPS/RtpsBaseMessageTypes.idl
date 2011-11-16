@@ -219,7 +219,7 @@ module OpenDDS {
     const ParameterId_t PID_SENTINEL = 0x0001;
     const ParameterId_t PID_USER_DATA = 0x002c;
     const ParameterId_t PID_TOPIC_NAME = 0x0005;
-    const ParameterId_t PID_TOPIC_TYPE = 0x0007;
+    const ParameterId_t PID_TYPE_NAME = 0x0007;
     const ParameterId_t PID_GROUP_DATA = 0x002d;
     const ParameterId_t PID_TOPIC_DATA = 0x002e;
     const ParameterId_t PID_DURABILITY = 0x001d;
@@ -282,7 +282,7 @@ module OpenDDS {
     /* custom de/serializer implemented in opendds_idl */
     union Parameter switch (ParameterId_t) {
       case PID_TOPIC_NAME:
-      case PID_TOPIC_TYPE:
+      case PID_TYPE_NAME:
         String256 string_data;
 
       // DDS Quality-of-Service (QoS) structs
