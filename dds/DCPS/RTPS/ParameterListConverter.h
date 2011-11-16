@@ -18,6 +18,8 @@ namespace RTPS {
   public:
     int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
                       ParameterList& param_list) const;
+    int to_param_list(const DiscoveredWriterData& writer_data,
+                      ParameterList& param_list) const;
     int from_param_list(const ParameterList& param_list,
                         SPDPdiscoveredParticipantData& participant_data) const;
   private:

@@ -89,6 +89,14 @@ ParameterListConverter::to_param_list(
 }
 
 int
+ParameterListConverter::to_param_list(
+    const DiscoveredWriterData& /*writer_data*/,
+    ParameterList& /*param_list*/) const
+{
+  return 0;
+}
+
+int
 ParameterListConverter::from_param_list(
     const ParameterList& param_list,
     SPDPdiscoveredParticipantData& participant_data) const
@@ -99,8 +107,8 @@ ParameterListConverter::from_param_list(
   participant_data.leaseDuration.seconds = 100;
   participant_data.leaseDuration.fraction = 0;
 
-  size_t length = param_list.length();
-  for (size_t i = 0; i < length; ++i) {
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
     Parameter param = param_list[i];
     switch (param._d()) {
       case PID_USER_DATA:
@@ -177,7 +185,7 @@ ParameterListConverter::add_param(
     ParameterList& param_list,
     const Parameter& param) const
 {
-  size_t length = param_list.length();
+  CORBA::ULong length = param_list.length();
   param_list.length(length + 1);
   param_list[length] = param;
 }
@@ -188,8 +196,8 @@ ParameterListConverter::add_param_locator_seq(
     const LocatorSeq& locator_seq,
     const ParameterId_t pid) const
 {
-  size_t length = locator_seq.length();
-  for (size_t i = 0; i < length; ++i) {
+  CORBA::ULong length = locator_seq.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
     Parameter param;
     param.locator(locator_seq[i]);
     param._d(pid);
@@ -202,7 +210,7 @@ ParameterListConverter::append_locator(
     LocatorSeq& list, 
     const Locator_t& locator) const
 {
-  size_t length = list.length();
+  CORBA::ULong length = list.length();
   list.length(length + 1); 
   list[length] = locator;
 }

@@ -1,3 +1,11 @@
+Wed Nov 16 16:41:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Convert size_t to CORBA::ULong to eliminate 64-bit build warnings.
+          Shell of to_param_list for DiscoveredWriterData.
+
 Mon Oct 31 21:25:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
