@@ -90,9 +90,73 @@ ParameterListConverter::to_param_list(
 
 int
 ParameterListConverter::to_param_list(
-    const DiscoveredWriterData& /*writer_data*/,
-    ParameterList& /*param_list*/) const
+    const DiscoveredWriterData& writer_data,
+    ParameterList& param_list) const
 {
+  // Ignore builtin topic key
+
+  {
+    Parameter param;
+    param.string_data(writer_data.ddsPublicationData.topic_name);
+    param._d(PID_TOPIC_NAME);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.string_data(writer_data.ddsPublicationData.type_name);
+    param._d(PID_TYPE_NAME);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.durability(writer_data.ddsPublicationData.durability);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.durability_service(writer_data.ddsPublicationData.durability_service);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.deadline(writer_data.ddsPublicationData.deadline);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.latency_budget(writer_data.ddsPublicationData.latency_budget);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.liveliness(writer_data.ddsPublicationData.liveliness);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.reliability(writer_data.ddsPublicationData.reliability);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.lifespan(writer_data.ddsPublicationData.lifespan);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.user_data(writer_data.ddsPublicationData.user_data);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.ownership(writer_data.ddsPublicationData.ownership);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.ownership_strength(writer_data.ddsPublicationData.ownership_strength);
+    add_param(param_list, param);
+  }
   return 0;
 }
 

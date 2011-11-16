@@ -134,6 +134,73 @@ namespace {
 
       return result;
     }
+
+    DiscoveredWriterData 
+    writer_data(
+        const char* topic_name = NULL,
+        const char* type_name  = NULL,
+        DDS::DurabilityQosPolicyKind durability 
+                               = DDS::VOLATILE_DURABILITY_QOS,
+        long svc_del_sec = 0L,
+        unsigned long svc_del_nsec = 0L,
+        DDS::HistoryQosPolicyKind hist = DDS::KEEP_LAST_HISTORY_QOS, 
+        long hist_depth = 1L,
+        long max_samples = 1L,
+        long max_instances = 1L,
+        long max_samples_per_instance = 1L,
+        long deadline_sec = 0L, unsigned long deadline_nsec = 0L,
+        long lb_sec = 0L, unsigned long lb_nsec = 0L,
+        DDS::LivelinessQosPolicyKind liveliness = 
+              DDS::AUTOMATIC_LIVELINESS_QOS,
+        long ld_sec = 0L, unsigned long ld_nsec = 0L,
+        DDS::ReliabilityQosPolicyKind reliability = 
+              DDS::BEST_EFFORT_RELIABILITY_QOS,
+        long mbt_sec = 0L, unsigned long mbt_nsec = 0L,
+        long ls_sec = 0L, unsigned long ls_nsec = 0L,
+        const void* user_data = NULL, size_t user_data_len = 0,
+        DDS::OwnershipQosPolicyKind ownership =
+              DDS::SHARED_OWNERSHIP_QOS,
+        long ownership_strength = 0L
+    ) {
+      DiscoveredWriterData result;
+      if (topic_name) {
+        result.ddsPublicationData.topic_name = topic_name;
+      }
+      if (type_name) {
+        result.ddsPublicationData.type_name  = type_name;
+      }
+      result.ddsPublicationData.durability.kind = durability;
+      result.ddsPublicationData.durability_service.service_cleanup_delay.sec = svc_del_sec;
+      result.ddsPublicationData.durability_service.service_cleanup_delay.nanosec = svc_del_nsec;
+      result.ddsPublicationData.durability_service.history_kind = hist;
+      result.ddsPublicationData.durability_service.history_depth = hist_depth;
+      result.ddsPublicationData.durability_service.max_samples = max_samples;
+      result.ddsPublicationData.durability_service.max_instances = max_instances;
+      result.ddsPublicationData.durability_service.max_samples_per_instance = max_samples_per_instance;
+      result.ddsPublicationData.deadline.period.sec = deadline_sec;
+      result.ddsPublicationData.deadline.period.nanosec = deadline_nsec;
+      result.ddsPublicationData.latency_budget.duration.sec = lb_sec;
+      result.ddsPublicationData.latency_budget.duration.nanosec = lb_nsec;
+      result.ddsPublicationData.liveliness.kind = liveliness;
+      result.ddsPublicationData.liveliness.lease_duration.sec = ld_sec;
+      result.ddsPublicationData.liveliness.lease_duration.nanosec = ld_nsec;
+      result.ddsPublicationData.reliability.kind = reliability;
+      result.ddsPublicationData.reliability.max_blocking_time.sec = mbt_sec;
+      result.ddsPublicationData.reliability.max_blocking_time.nanosec = mbt_nsec;
+      result.ddsPublicationData.lifespan.duration.sec = ls_sec;
+      result.ddsPublicationData.lifespan.duration.nanosec = ls_nsec;
+      if (user_data_len && user_data) {
+        result.ddsPublicationData.user_data.value.length(user_data_len);
+        for (size_t i = 0; i < user_data_len; ++i) {
+          result.ddsPublicationData.user_data.value[i] = ((char*)user_data)[i];
+        }
+        
+      }
+      result.ddsPublicationData.ownership.kind = ownership;
+      result.ddsPublicationData.ownership_strength.value = ownership_strength;
+
+      return result;
+    }
   }
 }
 
@@ -845,5 +912,228 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!status);
   }
 
+  { // Should encode writer data
+    DiscoveredWriterData writer_data;
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+  }
+
+  { // Should encode writer topic name
+    DiscoveredWriterData writer_data = 
+        Factory::writer_data("TOPIC NAME TEST");
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_TOPIC_NAME));
+    Parameter param = get(param_list, PID_TOPIC_NAME);
+    TEST_ASSERT(!strncmp(param.string_data(), "TOPIC NAME TEST", 15));
+  }
+
+  { // Should encode writer type name
+    DiscoveredWriterData writer_data = 
+        Factory::writer_data("", "Messages");
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_TYPE_NAME));
+    Parameter param = get(param_list, PID_TYPE_NAME);
+    TEST_ASSERT(!strncmp(param.string_data(), "Messages", 8));
+  }
+
+  { // Should encode writer durability qos policy
+    DiscoveredWriterData writer_data = Factory::writer_data(
+            NULL, NULL, 
+            DDS::TRANSIENT_LOCAL_DURABILITY_QOS);
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_DURABILITY));
+    Parameter param = get(param_list, PID_DURABILITY);
+    TEST_ASSERT(param.durability().kind ==
+        DDS::TRANSIENT_LOCAL_DURABILITY_QOS);
+  }
+
+  { // Should encode durabiltiy service
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, 
+        DDS::TRANSIENT_LOCAL_DURABILITY_QOS,
+        4, 2000,
+        DDS::KEEP_LAST_HISTORY_QOS, 172,
+        389, 102, 20);
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_DURABILITY_SERVICE));
+    Parameter param = get(param_list, PID_DURABILITY_SERVICE);
+    DDS::DurabilityServiceQosPolicy dsqp = param.durability_service();
+    TEST_ASSERT(dsqp.service_cleanup_delay.sec = 4);
+    TEST_ASSERT(dsqp.service_cleanup_delay.nanosec = 2000);
+
+    TEST_ASSERT(dsqp.history_kind == DDS::KEEP_LAST_HISTORY_QOS);
+    TEST_ASSERT(dsqp.history_depth == 172);
+    TEST_ASSERT(dsqp.max_samples == 389);
+    TEST_ASSERT(dsqp.max_instances == 102);
+    TEST_ASSERT(dsqp.max_samples_per_instance == 20);
+  }
+
+  { // Should encode deadline
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
+        127, 35000);
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_DEADLINE));
+    Parameter param = get(param_list, PID_DEADLINE);
+    TEST_ASSERT(param.deadline().period.sec == 127);
+    TEST_ASSERT(param.deadline().period.nanosec == 35000);
+  }
+
+  { // Should enode latency budget
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
+        5, 25000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
+    Parameter param = get(param_list, PID_LATENCY_BUDGET);
+    TEST_ASSERT(param.deadline().period.sec == 5);
+    TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
+
+  { // Should encode liveliness
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_LIVELINESS));
+    Parameter param = get(param_list, PID_LIVELINESS);
+    TEST_ASSERT(param.liveliness().kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
+    TEST_ASSERT(param.liveliness().lease_duration.sec == 17);
+    TEST_ASSERT(param.liveliness().lease_duration.nanosec == 15000);
+  }
+
+  { // Should encode reliability
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        DDS::AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        DDS::RELIABLE_RELIABILITY_QOS, 8, 100);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
+    Parameter param = get(param_list, PID_RELIABILITY);
+    TEST_ASSERT(param.reliability().kind == DDS::RELIABLE_RELIABILITY_QOS);
+    TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
+    TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
+  }
+  { // Should encode lifespan
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        DDS::AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        DDS::BEST_EFFORT_RELIABILITY_QOS, 0, 0,
+        12, 90000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_LIFESPAN));
+    Parameter param = get(param_list, PID_LIFESPAN);
+    TEST_ASSERT(param.lifespan().duration.sec == 12);
+    TEST_ASSERT(param.lifespan().duration.nanosec == 90000);
+  }
+  { // Should encode user data
+    const char* ud = "USERDATA TEST";
+    size_t ud_len = strlen(ud);
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        DDS::AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        DDS::BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
+        ud, ud_len);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_USER_DATA));
+    Parameter param = get(param_list, PID_USER_DATA);
+    TEST_ASSERT(param.user_data().value.length() == ud_len);
+    for (size_t i = 0; i < ud_len; ++i) {
+      TEST_ASSERT(ud[i] == param.user_data().value[i]);
+    }
+  }
+  { // Should encode ownership
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        DDS::AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        DDS::BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        DDS::EXCLUSIVE_OWNERSHIP_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_OWNERSHIP));
+    Parameter param = get(param_list, PID_OWNERSHIP);
+    TEST_ASSERT(param.ownership().kind == DDS::EXCLUSIVE_OWNERSHIP_QOS);
+  }
+  { // Should encode ownership strength
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, DDS::VOLATILE_DURABILITY_QOS, 0, 0,
+        DDS::KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        DDS::AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        DDS::BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        DDS::SHARED_OWNERSHIP_QOS,
+        29);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_OWNERSHIP_STRENGTH));
+    Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
+    TEST_ASSERT(param.ownership_strength().value == 29);
+  }
+  { // Should encode destination order
+    DiscoveredWriterData writer_data = Factory::writer_data(NULL);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    //TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
+    //Parameter param = get(param_list, PID_LATENCY_BUDGET);
+    //TEST_ASSERT(param.deadline().period.sec == 5);
+    //TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
+  { // Should encode presentation
+    DiscoveredWriterData writer_data = Factory::writer_data(NULL);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    //TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
+    //Parameter param = get(param_list, PID_LATENCY_BUDGET);
+    //TEST_ASSERT(param.deadline().period.sec == 5);
+    //TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
+  { // Should encode partition
+    DiscoveredWriterData writer_data = Factory::writer_data(NULL);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    //TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
+    //Parameter param = get(param_list, PID_LATENCY_BUDGET);
+    //TEST_ASSERT(param.deadline().period.sec == 5);
+    //TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
+  { // Should encode topic data
+    DiscoveredWriterData writer_data = Factory::writer_data(NULL);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    //TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
+    //Parameter param = get(param_list, PID_LATENCY_BUDGET);
+    //TEST_ASSERT(param.deadline().period.sec == 5);
+    //TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
+  { // Should encode group data
+    DiscoveredWriterData writer_data = Factory::writer_data(NULL);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    //TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
+    //Parameter param = get(param_list, PID_LATENCY_BUDGET);
+    //TEST_ASSERT(param.deadline().period.sec == 5);
+    //TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
   return 0;
 }

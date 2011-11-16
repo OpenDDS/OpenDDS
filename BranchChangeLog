@@ -1,3 +1,15 @@
+Wed Nov 16 21:42:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * BranchChangeLog:
+        * ChangeLog:
+
+          Moved entry from Changelog to BranchChangeLog...
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Much of to_param_list for DiscoveredWriterData.
+
 Wed Nov 16 18:03:17 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
@@ -9,6 +21,14 @@ Wed Nov 16 17:44:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
 
           Change PID_TOPIC_TYPE to PID_TYPE_NAME.
+
+Wed Nov 16 16:41:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Convert size_t to CORBA::ULong to eliminate 64-bit build warnings.
+          Shell of to_param_list for DiscoveredWriterData.
 
 Wed Nov 16 15:58:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
