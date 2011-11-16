@@ -210,7 +210,7 @@ bool test_messages()
     iqos[0].string_data("my_topic_name"); // 14 with null
     iqos[0]._d(PID_TOPIC_NAME);
     iqos[1].string_data("my_type_name"); // 13 with null
-    iqos[1]._d(PID_TOPIC_TYPE);
+    iqos[1]._d(PID_TYPE_NAME);
     ds.inlineQos = iqos;
     ds.smHeader.submessageLength = 72;
     const CORBA::Octet expected_iqos[] = {
@@ -220,7 +220,7 @@ bool test_messages()
       0, 0, 0, 0, 2, 0, 0, 0,     // writerSN
       5, 0, 20, 0, 14, 0, 0, 0,   // PID_TOPIC_NAME, param len, string len
       'm', 'y', '_', 't', 'o', 'p', 'i', 'c', '_', 'n', 'a', 'm', 'e', 0, 0, 0,
-      7, 0, 20, 0, 13, 0, 0, 0,   // PID_TOPIC_TYPE, param len, string len
+      7, 0, 20, 0, 13, 0, 0, 0,   // PID_TYPE_NAME, param len, string len
       'm', 'y', '_', 't', 'y', 'p', 'e', '_', 'n', 'a', 'm', 'e', 0, 0, 0, 0,
       1, 0, 0, 0};                // PID_SENTINEL, ignored
     ok &= test(ds, expected_iqos, "DataSubmessage with inlineQos");
@@ -232,7 +232,7 @@ bool test_messages()
       0, 0, 0, 0, 0, 0, 0, 2,     // writerSN
       0, 5, 0, 20, 0, 0, 0, 14,   // PID_TOPIC_NAME, param len, string len
       'm', 'y', '_', 't', 'o', 'p', 'i', 'c', '_', 'n', 'a', 'm', 'e', 0, 0, 0,
-      0, 7, 0, 20, 0, 0, 0, 13,   // PID_TOPIC_TYPE, param len, string len
+      0, 7, 0, 20, 0, 0, 0, 13,   // PID_TYPE_NAME, param len, string len
       'm', 'y', '_', 't', 'y', 'p', 'e', '_', 'n', 'a', 'm', 'e', 0, 0, 0, 0,
       0, 1, 0, 0};                // PID_SENTINEL, ignored
     ok &= test(ds, expected_iqos_BE, "BE DataSubmessage with inlineQos", true);
@@ -244,7 +244,7 @@ bool test_messages()
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // unknown
       5, 0, 20, 0, 14, 0, 0, 0,   // PID_TOPIC_NAME, param len, string len
       'm', 'y', '_', 't', 'o', 'p', 'i', 'c', '_', 'n', 'a', 'm', 'e', 0, 0, 0,
-      7, 0, 20, 0, 13, 0, 0, 0,   // PID_TOPIC_TYPE, param len, string len
+      7, 0, 20, 0, 13, 0, 0, 0,   // PID_TYPE_NAME, param len, string len
       'm', 'y', '_', 't', 'y', 'p', 'e', '_', 'n', 'a', 'm', 'e', 0, 0, 0, 0,
       1, 0, 0, 0};                // PID_SENTINEL, ignored
     ACE_Message_Block mb(reinterpret_cast<const char*>(input_large_otiq),
@@ -254,7 +254,7 @@ bool test_messages()
     DataSubmessage ds2;
     if (!(ser >> ds2) || mb.length() || ds2.inlineQos.length() != 2
         || ds2.inlineQos[0]._d() != PID_TOPIC_NAME
-        || ds2.inlineQos[1]._d() != PID_TOPIC_TYPE
+        || ds2.inlineQos[1]._d() != PID_TYPE_NAME
         || 0 != std::strcmp(ds2.inlineQos[0].string_data(), "my_topic_name")
         || 0 != std::strcmp(ds2.inlineQos[1].string_data(), "my_type_name")) {
       std::cerr << "ERROR: failed to deserialize DataSubmessage with larger "

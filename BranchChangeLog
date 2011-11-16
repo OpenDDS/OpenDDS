@@ -1,3 +1,9 @@
+Wed Nov 16 18:03:17 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Change PID_TOPIC_TYPE to PID_TYPE_NAME.
+
 Wed Nov 16 17:44:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
