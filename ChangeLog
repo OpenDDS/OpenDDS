@@ -1,3 +1,10 @@
+Wed Nov 16 14:25:10 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/README:
+        * README:
+
+          Removed trailing whitespace to remove Fuzz build errors.
+
 Tue Nov 15 21:52:31 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
 
         * README:
