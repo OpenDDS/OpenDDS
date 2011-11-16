@@ -152,6 +152,10 @@ ParameterListConverter::from_param_list(
       case PID_PARTICIPANT_LEASE_DURATION:
         participant_data.leaseDuration = param.duration();
         break;
+      case PID_SENTINEL:
+      case PID_PAD:
+        // ignore
+        break;
       default:
         // If this param is vendor specific, ignore
         if (param._d() & PIDMASK_VENDOR_SPECIFIC) {

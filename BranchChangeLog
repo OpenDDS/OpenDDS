@@ -1,3 +1,11 @@
+Wed Nov 16 15:58:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Explicit ignore of PID_SENTINEL and PID_PAD
+          Test this too.
+ 
 Wed Nov 16 14:50:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

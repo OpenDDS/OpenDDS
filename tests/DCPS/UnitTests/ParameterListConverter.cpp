@@ -823,5 +823,27 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(status != 0);
   }
 
+  { // Should ignore SENTINEL
+    SPDPdiscoveredParticipantData part_data_out;
+    ParameterList vs_param_list;
+    Parameter vs_param;
+    vs_param._d(PID_SENTINEL);
+    vs_param_list.length(1);
+    vs_param_list[0] = vs_param;
+    int status = plc.from_param_list(vs_param_list, part_data_out);
+    TEST_ASSERT(!status);
+  }
+
+  { // Should ignore PAD
+    SPDPdiscoveredParticipantData part_data_out;
+    ParameterList vs_param_list;
+    Parameter vs_param;
+    vs_param._d(PID_PAD);
+    vs_param_list.length(1);
+    vs_param_list[0] = vs_param;
+    int status = plc.from_param_list(vs_param_list, part_data_out);
+    TEST_ASSERT(!status);
+  }
+
   return 0;
 }
