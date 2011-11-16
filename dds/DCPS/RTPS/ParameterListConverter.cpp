@@ -93,6 +93,12 @@ ParameterListConverter::from_param_list(
     const ParameterList& param_list,
     SPDPdiscoveredParticipantData& participant_data) const
 {
+  // Start by setting defaults
+  participant_data.ddsParticipantData.user_data.value.length(0);
+  participant_data.participantProxy.expectsInlineQos = false;
+  participant_data.leaseDuration.seconds = 100;
+  participant_data.leaseDuration.fraction = 0;
+
   size_t length = param_list.length();
   for (size_t i = 0; i < length; ++i) {
     Parameter param = param_list[i];
@@ -147,7 +153,16 @@ ParameterListConverter::from_param_list(
         participant_data.leaseDuration = param.duration();
         break;
       default:
-        return -1;
+        // If this param is vendor specific, ignore
+        if (param._d() & PIDMASK_VENDOR_SPECIFIC) {
+          // skip
+        // Else if this param is not required for compatibility, ignore
+        } else if (!(param._d() & PIDMASK_INCOMPATIBLE)) {
+          // skip
+        // Else error
+        } else {
+          return -1;
+        }
     }
   }
   return 0;

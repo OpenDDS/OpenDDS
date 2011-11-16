@@ -1,3 +1,14 @@
+Wed Nov 16 14:50:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Set default values in target when none specificed in param list.
+          Ignore vendor-specific params.
+          Ignore optional params.
+          Test the above.
+          Remove commented-out test code.
+
 Tue Nov 15 18:50:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.h:

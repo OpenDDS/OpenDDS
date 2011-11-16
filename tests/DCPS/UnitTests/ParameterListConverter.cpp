@@ -10,6 +10,7 @@
 #include "../common/TestSupport.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
 #include <iostream>
 
 using namespace OpenDDS::RTPS;
@@ -270,6 +271,24 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(status == 0);
     TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[0] ==
                 part_data_out.ddsParticipantData.user_data.value[0]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[1] ==
+                part_data_out.ddsParticipantData.user_data.value[1]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[2] ==
+                part_data_out.ddsParticipantData.user_data.value[2]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[3] ==
+                part_data_out.ddsParticipantData.user_data.value[3]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[4] ==
+                part_data_out.ddsParticipantData.user_data.value[4]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[5] ==
+                part_data_out.ddsParticipantData.user_data.value[5]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[6] ==
+                part_data_out.ddsParticipantData.user_data.value[6]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[7] ==
+                part_data_out.ddsParticipantData.user_data.value[7]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[8] ==
+                part_data_out.ddsParticipantData.user_data.value[8]);
+    TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[9] ==
+                part_data_out.ddsParticipantData.user_data.value[9]);
   }
 
   { // Should encode protocol version properly
@@ -714,97 +733,95 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(part_data_out.leaseDuration.fraction == 
                 participant_data.leaseDuration.fraction);
   }
-/*
-  { // Should decode param list to participant data properly
-    int a = 0;
+
+  { // Should set user data qos to default if not present in param list
+    SPDPdiscoveredParticipantData part_data_out;
+    ParameterList empty_param_list;
+    plc.from_param_list(empty_param_list, part_data_out);
+    size_t length = part_data_out.ddsParticipantData.user_data.value.length();
+    TEST_ASSERT(length == PARTICIPANT_QOS_DEFAULT.user_data.value.length());
+    for (size_t i = 0; i < length; ++i) {
+      TEST_ASSERT(part_data_out.ddsParticipantData.user_data.value[i] ==
+                  PARTICIPANT_QOS_DEFAULT.user_data.value[i]);
+    }
   }
 
-  { // Should fill in default QOS parameters when not specified
-    int a = 0;
+  { // Should set user data qos to default if not present in param list
+    SPDPdiscoveredParticipantData part_data_out;
+    part_data_out.ddsParticipantData.user_data.value.length(4);
+    ParameterList empty_param_list;
+    int status = plc.from_param_list(empty_param_list, part_data_out);
+    TEST_ASSERT(!status);
+    size_t length = part_data_out.ddsParticipantData.user_data.value.length();
+    TEST_ASSERT(length == PARTICIPANT_QOS_DEFAULT.user_data.value.length());
+    for (size_t i = 0; i < length; ++i) {
+      TEST_ASSERT(part_data_out.ddsParticipantData.user_data.value[i] ==
+                  PARTICIPANT_QOS_DEFAULT.user_data.value[i]);
+    }
   }
 
-  { // Should not endode default QOS parameters
-    int a = 0;
+  // There is no default protocol version
+  // There is no default guid prefix
+  // There is no defaul vendor id
+
+  { // Should set expects inline qos to default if not present in param list
+    SPDPdiscoveredParticipantData part_data_out;
+    part_data_out.participantProxy.expectsInlineQos = true;
+    ParameterList empty_param_list;
+    int status = plc.from_param_list(empty_param_list, part_data_out);
+    TEST_ASSERT(!status);
+    TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == false);
   }
 
-  { // Should ignore vendor-specific paramaters from other vendors
-    int a = 0;
-  }
-  */
-/*
-  // testing numerical sequence
-  TEST_CHECK(SequenceNumber(SN_MIN) < SequenceNumber(SN_MIN+1));
-  TEST_CHECK(!(SequenceNumber(SN_MIN+1) < SequenceNumber(SN_MIN)));
-  TEST_CHECK(SequenceNumber(SN_SEAM) < SequenceNumber(SN_SEAM+1));
-  TEST_CHECK(!(SequenceNumber(SN_SEAM+1) < SequenceNumber(SN_SEAM)));
-  TEST_CHECK(SequenceNumber(SN_MAX-1) < SequenceNumber(SN_MAX));
-  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_MAX-1)));
+  // There is no default available builtin endpoints 
+  // There is no default metatraffic unicast locator list
+  // There is no default metatraffic multicast locator list
+  // There is no default default unicast locator list
+  // There is no default default multicast locator list
+  // There is no default manual liveliness count
+  // The lease duration default is { 100, 0 }
 
-  // testing wide ranges
-  TEST_CHECK(SequenceNumber() < SequenceNumber(SN_RANGE/2));
-  TEST_CHECK(!(SequenceNumber(SN_RANGE/2) < SequenceNumber()));
-  TEST_CHECK(SequenceNumber(SN_RANGE/2+1) < SequenceNumber());
-  TEST_CHECK(!(SequenceNumber() < SequenceNumber(SN_RANGE/2+1)));
-  TEST_CHECK(SequenceNumber(SN_RANGE/2+1) < SequenceNumber(SN_MAX));
-  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_RANGE/2+1)));
-  TEST_CHECK(SequenceNumber(SN_MAX) < SequenceNumber(SN_RANGE/2));
-  TEST_CHECK(!(SequenceNumber(SN_RANGE/2) < SequenceNumber(SN_MAX)));
-  TEST_CHECK(SequenceNumber(SN_MAX) < SequenceNumber());
-  TEST_CHECK(!(SequenceNumber() < SequenceNumber(SN_MAX)));
-
-  // testing values and increment operator
-  {
-    SequenceNumber num(SN_MIN);
-    TEST_CHECK(num.getValue() == SN_MIN);
-    TEST_CHECK((++num).getValue() == SN_MIN+1);
+  { // Should set expects inline qos to default if not present in param list
+    SPDPdiscoveredParticipantData part_data_out;
+    ParameterList empty_param_list;
+    int status = plc.from_param_list(empty_param_list, part_data_out);
+    TEST_ASSERT(!status);
+    TEST_ASSERT(part_data_out.leaseDuration.seconds == 100);
+    TEST_ASSERT(part_data_out.leaseDuration.fraction == 0);
   }
 
-  {
-    SequenceNumber num(SN_SEAM);
-    TEST_CHECK(num.getValue() == SN_SEAM);
-    TEST_CHECK((++num).getValue() == SN_SEAM+1);
-    TEST_CHECK((++num).getValue() == SN_SEAM+2);
+  { // Should ignore vendor-specific parameters
+    SPDPdiscoveredParticipantData part_data_out;
+    ParameterList vs_param_list;
+    Parameter vs_param;
+    vs_param._d(0x8001);
+    vs_param_list.length(1);
+    vs_param_list[0] = vs_param;
+    int status = plc.from_param_list(vs_param_list, part_data_out);
+    TEST_ASSERT(!status);
   }
 
-  {
-    SequenceNumber num(SN_MAX);
-    TEST_CHECK(num.getValue() == SN_MAX);
-    TEST_CHECK((++num).getValue() == SN_MIN);
-    // test post-incrementer
-    TEST_CHECK((num++).getValue() == SN_MIN);
-    TEST_CHECK(num.getValue() == SN_MIN+1);
+  { // Should not fail on optional parameters
+    SPDPdiscoveredParticipantData part_data_out;
+    ParameterList vs_param_list;
+    Parameter vs_param;
+    vs_param._d(0x3FFF);
+    vs_param_list.length(1);
+    vs_param_list[0] = vs_param;
+    int status = plc.from_param_list(vs_param_list, part_data_out);
+    TEST_ASSERT(!status);
   }
 
-  // Test SEQUENCENUMBER_UNKNOWN
-  {
-    SequenceNumber num = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-    TEST_CHECK(num.getValue() == ACE_INT64(0xffffffff) << 32);
-    SequenceNumber min;
-    TEST_CHECK(num != min);
-    TEST_CHECK(num == SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+  { // Should fail on required parameters
+    SPDPdiscoveredParticipantData part_data_out;
+    ParameterList vs_param_list;
+    Parameter vs_param;
+    vs_param._d(0x4001);
+    vs_param_list.length(1);
+    vs_param_list[0] = vs_param;
+    int status = plc.from_param_list(vs_param_list, part_data_out);
+    TEST_ASSERT(status != 0);
   }
 
-  // Test previous() member function
-  {
-    SequenceNumber num(SN_MIN);
-    TEST_CHECK(num.previous() == SN_MAX);
-  }
-
-  {
-    SequenceNumber num(SN_SEAM+1);
-    TEST_CHECK(num.previous() == SN_SEAM);
-  }
-
-  {
-    SequenceNumber num(99);
-    TEST_CHECK(num.previous() == 98);
-  }
-
-  {
-    SequenceNumber num(SN_MAX);
-    TEST_CHECK(num.previous() == SN_MAX-1);
-  }
-
-*/
   return 0;
 }
