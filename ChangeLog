@@ -1,3 +1,32 @@
+Wed Nov 16 15:30:30 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+          Updating release to 3.0.1 (using update_version.pl).
+
 Wed Nov 16 14:25:10 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/README:
