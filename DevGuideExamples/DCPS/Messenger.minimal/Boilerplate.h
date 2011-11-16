@@ -8,7 +8,7 @@
 
 #include "MessengerTypeSupportImpl.h"
 
-// Boilerplate code pulled out of mains of publisher and subscriber 
+// Boilerplate code pulled out of mains of publisher and subscriber
 // in order to simplify this example.
 namespace examples { namespace boilerplate {
 

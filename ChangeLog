@@ -1,3 +1,9 @@
+Wed Nov 16 16:27:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+
+          Fuzz
+
 Wed Nov 16 15:30:30 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
