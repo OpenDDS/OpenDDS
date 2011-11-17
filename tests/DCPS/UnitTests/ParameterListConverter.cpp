@@ -51,7 +51,7 @@ namespace {
 
     SPDPdiscoveredParticipantData spdp_participant(
       const void* user_data = NULL,
-      size_t user_data_len = 0,
+      CORBA::ULong user_data_len = 0,
       char major_protocol_version = 0,
       char minor_protocol_version = 0,
       char* vendor_id = NULL,
@@ -59,13 +59,13 @@ namespace {
       bool expects_inline_qos = false,
       unsigned long builtin_endpoints = 0,
       Locator_t* mtu_locs = NULL,
-      size_t num_mtu_locs = 0,
+      CORBA::ULong num_mtu_locs = 0,
       Locator_t* mtm_locs = NULL,
-      size_t num_mtm_locs = 0,
+      CORBA::ULong num_mtm_locs = 0,
       Locator_t* du_locs = NULL,
-      size_t num_du_locs = 0,
+      CORBA::ULong num_du_locs = 0,
       Locator_t* dm_locs = NULL,
-      size_t num_dm_locs = 0,
+      CORBA::ULong num_dm_locs = 0,
       long liveliness_count = 0,
       long lease_dur_seconds = 0,
       unsigned long lease_dur_fraction = 0
@@ -74,7 +74,7 @@ namespace {
       SPDPdiscoveredParticipantData result;
       if (user_data_len && user_data) {
         result.ddsParticipantData.user_data.value.length(user_data_len);
-        for (size_t i = 0; i < user_data_len; ++i) {
+        for (CORBA::ULong i = 0; i < user_data_len; ++i) {
           result.ddsParticipantData.user_data.value[i] = ((char*)user_data)[i];
         }
       }
@@ -96,7 +96,7 @@ namespace {
 
       if (num_mtu_locs && mtu_locs) {
         result.participantProxy.metatrafficUnicastLocatorList.length(num_mtu_locs);
-        for (size_t i = 0; i < num_mtu_locs; ++i) {
+        for (CORBA::ULong i = 0; i < num_mtu_locs; ++i) {
           result.participantProxy.metatrafficUnicastLocatorList[i] = 
               mtu_locs[i];
         }
@@ -104,7 +104,7 @@ namespace {
 
       if (num_mtm_locs && mtm_locs) {
         result.participantProxy.metatrafficMulticastLocatorList.length(num_mtm_locs);
-        for (size_t i = 0; i < num_mtm_locs; ++i) {
+        for (CORBA::ULong i = 0; i < num_mtm_locs; ++i) {
           result.participantProxy.metatrafficMulticastLocatorList[i] = 
               mtm_locs[i];
         }
@@ -112,14 +112,14 @@ namespace {
 
       if (num_du_locs && du_locs) {
         result.participantProxy.defaultUnicastLocatorList.length(num_du_locs);
-        for (size_t i = 0; i < num_du_locs; ++i) {
+        for (CORBA::ULong i = 0; i < num_du_locs; ++i) {
           result.participantProxy.defaultUnicastLocatorList[i] = du_locs[i];
         }
       }
 
       if (num_dm_locs && dm_locs) {
         result.participantProxy.defaultMulticastLocatorList.length(num_dm_locs);
-        for (size_t i = 0; i < num_dm_locs; ++i) {
+        for (CORBA::ULong i = 0; i < num_dm_locs; ++i) {
           result.participantProxy.defaultMulticastLocatorList[i] = dm_locs[i];
         }
       }
@@ -158,7 +158,7 @@ namespace {
               BEST_EFFORT_RELIABILITY_QOS,
         long mbt_sec = 0L, unsigned long mbt_nsec = 0L,
         long ls_sec = 0L, unsigned long ls_nsec = 0L,
-        const void* user_data = NULL, size_t user_data_len = 0,
+        const void* user_data = NULL, CORBA::ULong user_data_len = 0,
         OwnershipQosPolicyKind ownership =
               SHARED_OWNERSHIP_QOS,
         long ownership_strength = 0L,
@@ -168,8 +168,8 @@ namespace {
               INSTANCE_PRESENTATION_QOS,
         bool coherent = false, bool ordered = false,
         const char* partition = NULL,
-        const void* topic_data = NULL, size_t topic_data_len = 0,
-        const void* group_data = NULL, size_t group_data_len = 0
+        const void* topic_data = NULL, CORBA::ULong topic_data_len = 0,
+        const void* group_data = NULL, CORBA::ULong group_data_len = 0
     ) {
       DiscoveredWriterData result;
       if (topic_name) {
@@ -200,7 +200,7 @@ namespace {
       result.ddsPublicationData.lifespan.duration.nanosec = ls_nsec;
       if (user_data_len && user_data) {
         result.ddsPublicationData.user_data.value.length(user_data_len);
-        for (size_t i = 0; i < user_data_len; ++i) {
+        for (CORBA::ULong i = 0; i < user_data_len; ++i) {
           result.ddsPublicationData.user_data.value[i] = ((char*)user_data)[i];
         }
         
@@ -217,13 +217,13 @@ namespace {
       }
       if (topic_data && topic_data_len) {
         result.ddsPublicationData.topic_data.value.length(topic_data_len);
-        for (size_t i = 0; i < topic_data_len; ++i) {
+        for (CORBA::ULong i = 0; i < topic_data_len; ++i) {
           result.ddsPublicationData.topic_data.value[i] = ((char*)topic_data)[i];
         }
       }
       if (group_data && group_data_len) {
         result.ddsPublicationData.group_data.value.length(group_data_len);
-        for (size_t i = 0; i < group_data_len; ++i) {
+        for (CORBA::ULong i = 0; i < group_data_len; ++i) {
           result.ddsPublicationData.group_data.value[i] = ((char*)group_data)[i];
         }
       }
@@ -234,8 +234,8 @@ namespace {
 }
 
 bool is_present(const ParameterList& param_list, const ParameterId_t pid) {
-  size_t length = param_list.length();
-  for (size_t i = 0; i < length; ++i) {
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
       return true;
     }
@@ -244,8 +244,8 @@ bool is_present(const ParameterList& param_list, const ParameterId_t pid) {
 }
 
 bool is_missing(const ParameterList& param_list, const ParameterId_t pid) {
-  size_t length = param_list.length();
-  for (size_t i = 0; i < length; ++i) {
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
       return false;
     }
@@ -255,11 +255,11 @@ bool is_missing(const ParameterList& param_list, const ParameterId_t pid) {
 
 Parameter get(const ParameterList& param_list, 
               const ParameterId_t pid,
-              const size_t instance_num = 0) {
+              const CORBA::ULong instance_num = 0) {
 
-  const size_t length = param_list.length();
-  size_t count = 0;
-  for (size_t i = 0; i < length; ++i) {
+  const CORBA::ULong length = param_list.length();
+  CORBA::ULong count = 0;
+  for (CORBA::ULong i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
       if (count++ == instance_num) {
         return param_list[i];
@@ -834,9 +834,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList empty_param_list;
     plc.from_param_list(empty_param_list, part_data_out);
-    size_t length = part_data_out.ddsParticipantData.user_data.value.length();
+    CORBA::ULong length = part_data_out.ddsParticipantData.user_data.value.length();
     TEST_ASSERT(length == PARTICIPANT_QOS_DEFAULT.user_data.value.length());
-    for (size_t i = 0; i < length; ++i) {
+    for (CORBA::ULong i = 0; i < length; ++i) {
       TEST_ASSERT(part_data_out.ddsParticipantData.user_data.value[i] ==
                   PARTICIPANT_QOS_DEFAULT.user_data.value[i]);
     }
@@ -848,9 +848,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ParameterList empty_param_list;
     int status = plc.from_param_list(empty_param_list, part_data_out);
     TEST_ASSERT(!status);
-    size_t length = part_data_out.ddsParticipantData.user_data.value.length();
+    CORBA::ULong length = part_data_out.ddsParticipantData.user_data.value.length();
     TEST_ASSERT(length == PARTICIPANT_QOS_DEFAULT.user_data.value.length());
-    for (size_t i = 0; i < length; ++i) {
+    for (CORBA::ULong i = 0; i < length; ++i) {
       TEST_ASSERT(part_data_out.ddsParticipantData.user_data.value[i] ==
                   PARTICIPANT_QOS_DEFAULT.user_data.value[i]);
     }
@@ -1076,7 +1076,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
   { // Should encode user data
     const char* ud = "USERDATA TEST";
-    size_t ud_len = strlen(ud);
+    CORBA::ULong ud_len = (CORBA::ULong)strlen(ud);
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1088,7 +1088,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_USER_DATA));
     Parameter param = get(param_list, PID_USER_DATA);
     TEST_ASSERT(param.user_data().value.length() == ud_len);
-    for (size_t i = 0; i < ud_len; ++i) {
+    for (CORBA::ULong i = 0; i < ud_len; ++i) {
       TEST_ASSERT(ud[i] == param.user_data().value[i]);
     }
   }

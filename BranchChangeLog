@@ -1,3 +1,9 @@
+Thu Nov 17 15:28:46 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Fix size_t to CORBA::ULong 64-bit warnings.
+
 Thu Nov 17 00:02:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Discovery.h:
