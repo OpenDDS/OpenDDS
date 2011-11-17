@@ -182,6 +182,18 @@ ParameterListConverter::to_param_list(
     param.group_data(writer_data.ddsPublicationData.group_data);
     add_param(param_list, param);
   }
+  {
+    Parameter param;
+    param.guid(writer_data.writerProxy.remoteWriterGuid);
+    param._d(PID_GROUP_GUID);
+    add_param(param_list, param);
+  }
+  add_param_locator_seq(param_list, 
+                        writer_data.writerProxy.unicastLocatorList,
+                        PID_UNICAST_LOCATOR);
+  add_param_locator_seq(param_list, 
+                        writer_data.writerProxy.multicastLocatorList,
+                        PID_MULTICAST_LOCATOR);
   return 0;
 }
 
@@ -207,11 +219,11 @@ ParameterListConverter::from_param_list(
         participant_data.participantProxy.protocolVersion = param.version();
         break;
       case PID_PARTICIPANT_GUID:
-        memcpy(participant_data.participantProxy.guidPrefix,
+        ACE_OS::memcpy(participant_data.participantProxy.guidPrefix,
                param.guid().guidPrefix, sizeof(GuidPrefix_t));
         break;
       case PID_VENDORID:
-        memcpy(participant_data.participantProxy.vendorId.vendorId,
+        ACE_OS::memcpy(participant_data.participantProxy.vendorId.vendorId,
                param.vendor().vendorId, sizeof(OctetArray2));
         break;
       case PID_EXPECTS_INLINE_QOS:
@@ -248,6 +260,100 @@ ParameterListConverter::from_param_list(
         break;
       case PID_PARTICIPANT_LEASE_DURATION:
         participant_data.leaseDuration = param.duration();
+        break;
+      case PID_SENTINEL:
+      case PID_PAD:
+        // ignore
+        break;
+      default:
+        // If this param is vendor specific, ignore
+        if (param._d() & PIDMASK_VENDOR_SPECIFIC) {
+          // skip
+        // Else if this param is not required for compatibility, ignore
+        } else if (!(param._d() & PIDMASK_INCOMPATIBLE)) {
+          // skip
+        // Else error
+        } else {
+          return -1;
+        }
+    }
+  }
+  return 0;
+}
+
+int
+ParameterListConverter::from_param_list(
+    const ParameterList& param_list,
+    DiscoveredWriterData& writer_data) const
+{
+  // Start by setting defaults
+  writer_data.ddsPublicationData.user_data.value.length(0);
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    Parameter param = param_list[i];
+    switch (param._d()) {
+      case PID_TOPIC_NAME:
+        writer_data.ddsPublicationData.topic_name = param.string_data();
+        break;
+      case PID_TYPE_NAME:
+        writer_data.ddsPublicationData.type_name = param.string_data();
+        break;
+      case PID_DURABILITY:
+        writer_data.ddsPublicationData.durability = param.durability();
+        break;
+      case PID_DURABILITY_SERVICE:
+        writer_data.ddsPublicationData.durability_service = 
+             param.durability_service();
+        break;
+      case PID_DEADLINE:
+        writer_data.ddsPublicationData.deadline = param.deadline();
+        break;
+      case PID_LATENCY_BUDGET:
+        writer_data.ddsPublicationData.latency_budget = param.latency_budget();
+        break;
+      case PID_LIVELINESS:
+        writer_data.ddsPublicationData.liveliness = param.liveliness();
+        break;
+      case PID_RELIABILITY:
+        writer_data.ddsPublicationData.reliability = param.reliability();
+        break;
+      case PID_USER_DATA:
+        writer_data.ddsPublicationData.user_data = param.user_data();
+        break;
+      case PID_OWNERSHIP:
+        writer_data.ddsPublicationData.ownership = param.ownership();
+        break;
+      case PID_OWNERSHIP_STRENGTH:
+        writer_data.ddsPublicationData.ownership_strength = param.ownership_strength();
+        break;
+      case PID_DESTINATION_ORDER:
+        writer_data.ddsPublicationData.destination_order = param.destination_order();
+        break;
+      case PID_PRESENTATION:
+        writer_data.ddsPublicationData.presentation = param.presentation();
+        break;
+      case PID_PARTITION:
+        writer_data.ddsPublicationData.partition = param.partition();
+        break;
+      case PID_TOPIC_DATA:
+        writer_data.ddsPublicationData.topic_data = param.topic_data();
+        break;
+      case PID_GROUP_DATA:
+        writer_data.ddsPublicationData.group_data = param.group_data();
+        break;
+      case PID_GROUP_GUID:
+        writer_data.writerProxy.remoteWriterGuid = param.guid();
+        break;
+      case PID_UNICAST_LOCATOR:
+        append_locator(
+            writer_data.writerProxy.unicastLocatorList,
+            param.locator());
+        break;
+      case PID_MULTICAST_LOCATOR:
+        append_locator(
+            writer_data.writerProxy.multicastLocatorList,
+            param.locator());
         break;
       case PID_SENTINEL:
       case PID_PAD:

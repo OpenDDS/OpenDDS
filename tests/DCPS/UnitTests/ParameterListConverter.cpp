@@ -11,6 +11,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/RTPS/GuidGenerator.h"
 #include <iostream>
 
 using namespace OpenDDS::RTPS;
@@ -18,6 +19,8 @@ using namespace DDS;
 
 namespace {
   ParameterListConverter plc;
+  GuidGenerator guid_generator;
+
   namespace Factory {
     Locator_t locator(long kind,
                       unsigned long port,
@@ -169,7 +172,9 @@ namespace {
         bool coherent = false, bool ordered = false,
         const char* partition = NULL,
         const void* topic_data = NULL, CORBA::ULong topic_data_len = 0,
-        const void* group_data = NULL, CORBA::ULong group_data_len = 0
+        const void* group_data = NULL, CORBA::ULong group_data_len = 0,
+        Locator_t* uc_locs = NULL, CORBA::ULong num_uc_locs = 0,
+        Locator_t* mc_locs = NULL, CORBA::ULong num_mc_locs = 0
     ) {
       DiscoveredWriterData result;
       if (topic_name) {
@@ -227,7 +232,19 @@ namespace {
           result.ddsPublicationData.group_data.value[i] = ((char*)group_data)[i];
         }
       }
-
+      guid_generator.populate(result.writerProxy.remoteWriterGuid);
+      if (num_uc_locs && uc_locs) {
+        result.writerProxy.unicastLocatorList.length(num_uc_locs);
+        for (CORBA::ULong i = 0; i < num_uc_locs; ++i) {
+          result.writerProxy.unicastLocatorList[i] = uc_locs[i];
+        }
+      }
+      if (num_mc_locs && mc_locs) {
+        result.writerProxy.multicastLocatorList.length(num_mc_locs);
+        for (CORBA::ULong i = 0; i < num_mc_locs; ++i) {
+          result.writerProxy.multicastLocatorList[i] = mc_locs[i];
+        }
+      }
       return result;
     }
   }
@@ -942,15 +959,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   { // Should encode writer data
-    DiscoveredWriterData writer_data;
-    ParameterList param_list;
+    DiscoveredWriterData writer_data; ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
   }
 
   { // Should encode writer topic name
     DiscoveredWriterData writer_data = 
         Factory::writer_data("TOPIC NAME TEST");
-
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_TOPIC_NAME));
@@ -958,9 +973,19 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!strncmp(param.string_data(), "TOPIC NAME TEST", 15));
   }
 
-  { // Should encode writer type name
+  { // Should decode writer topic name
     DiscoveredWriterData writer_data = 
-        Factory::writer_data("", "Messages");
+        Factory::writer_data("TOPIC NAME TEST");
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(!strcmp(writer_data.ddsPublicationData.topic_name,
+                        writer_data_out.ddsPublicationData.topic_name));
+  }
+
+  { // Should encode writer type name
+    DiscoveredWriterData writer_data = Factory::writer_data("", "Messages");
 
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
@@ -969,10 +994,20 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!strncmp(param.string_data(), "Messages", 8));
   }
 
+  { // Should decode writer type name
+    DiscoveredWriterData writer_data = Factory::writer_data("", "Messages");
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(!strcmp(writer_data.ddsPublicationData.type_name,
+                        writer_data_out.ddsPublicationData.type_name));
+  }
+
   { // Should encode writer durability qos policy
     DiscoveredWriterData writer_data = Factory::writer_data(
-            NULL, NULL, 
-            TRANSIENT_LOCAL_DURABILITY_QOS);
+        NULL, NULL, 
+        TRANSIENT_LOCAL_DURABILITY_QOS);
 
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
@@ -980,6 +1015,18 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Parameter param = get(param_list, PID_DURABILITY);
     TEST_ASSERT(param.durability().kind ==
         TRANSIENT_LOCAL_DURABILITY_QOS);
+  }
+
+  { // Should decode writer durability
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, 
+        TRANSIENT_LOCAL_DURABILITY_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.durability.kind ==
+                writer_data_out.ddsPublicationData.durability.kind);
   }
 
   { // Should encode durabiltiy service
@@ -1005,6 +1052,31 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(dsqp.max_samples_per_instance == 20);
   }
 
+  { // Should decode writer durability service
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, TRANSIENT_LOCAL_DURABILITY_QOS,
+        4, 2000,
+        KEEP_LAST_HISTORY_QOS, 172,
+        389, 102, 20);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    DurabilityServiceQosPolicy& ds_in = 
+        writer_data.ddsPublicationData.durability_service;
+    DurabilityServiceQosPolicy& ds_out = 
+        writer_data_out.ddsPublicationData.durability_service;
+    TEST_ASSERT(ds_in.service_cleanup_delay.sec ==
+                ds_out.service_cleanup_delay.sec);
+    TEST_ASSERT(ds_in.service_cleanup_delay.nanosec ==
+                ds_out.service_cleanup_delay.nanosec);
+    TEST_ASSERT(ds_in.history_kind == ds_out.history_kind);
+    TEST_ASSERT(ds_in.history_depth == ds_out.history_depth);
+    TEST_ASSERT(ds_in.max_samples == ds_out.max_samples);
+    TEST_ASSERT(ds_in.max_instances == ds_out.max_instances);
+    TEST_ASSERT(ds_in.max_samples_per_instance == ds_out.max_samples_per_instance);
+  }
+
   { // Should encode deadline
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1019,6 +1091,21 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.deadline().period.nanosec == 35000);
   }
 
+  { // Should decode writer deadline
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
+        127, 35000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.deadline.period.sec ==
+                writer_data_out.ddsPublicationData.deadline.period.sec);
+    TEST_ASSERT(writer_data.ddsPublicationData.deadline.period.nanosec ==
+                writer_data_out.ddsPublicationData.deadline.period.nanosec);
+  }
+
   { // Should enode latency budget
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1030,6 +1117,19 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Parameter param = get(param_list, PID_LATENCY_BUDGET);
     TEST_ASSERT(param.deadline().period.sec == 5);
     TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
+
+  { // Should decode writer latency budget
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
+        5, 25000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.latency_budget.duration.sec ==
+                writer_data_out.ddsPublicationData.latency_budget.duration.sec);
   }
 
   { // Should encode liveliness
@@ -1046,6 +1146,23 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.liveliness().lease_duration.nanosec == 15000);
   }
 
+  { // Should decode writer liveliness
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.liveliness.kind ==
+                writer_data_out.ddsPublicationData.liveliness.kind);
+    TEST_ASSERT(writer_data.ddsPublicationData.liveliness.lease_duration.sec ==
+                writer_data_out.ddsPublicationData.liveliness.lease_duration.sec);
+    TEST_ASSERT(writer_data.ddsPublicationData.liveliness.lease_duration.nanosec ==
+                writer_data_out.ddsPublicationData.liveliness.lease_duration.nanosec);
+  }
+
   { // Should encode reliability
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1060,6 +1177,25 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
     TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
   }
+
+  { // Should decode writer reliability
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        RELIABLE_RELIABILITY_QOS, 8, 100);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.reliability.kind ==
+                writer_data_out.ddsPublicationData.reliability.kind);
+    TEST_ASSERT(writer_data.ddsPublicationData.reliability.max_blocking_time.sec ==
+                writer_data_out.ddsPublicationData.reliability.max_blocking_time.sec);
+    TEST_ASSERT(writer_data.ddsPublicationData.reliability.max_blocking_time.nanosec ==
+                writer_data_out.ddsPublicationData.reliability.max_blocking_time.nanosec);
+  }
+
   { // Should encode lifespan
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1074,9 +1210,24 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.lifespan().duration.sec == 12);
     TEST_ASSERT(param.lifespan().duration.nanosec == 90000);
   }
+  { // Should decode writer lifespan
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0,
+        12, 90000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.durability.kind ==
+                writer_data_out.ddsPublicationData.durability.kind);
+  }
+
   { // Should encode user data
     const char* ud = "USERDATA TEST";
-    CORBA::ULong ud_len = (CORBA::ULong)strlen(ud);
+    CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1092,6 +1243,23 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(ud[i] == param.user_data().value[i]);
     }
   }
+  { // Should decode writer user data
+    const char* ud = "USERDATA TEST";
+    CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
+        ud, ud_len);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.user_data.value ==
+                writer_data_out.ddsPublicationData.user_data.value);
+  }
+
   { // Should encode ownership
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1105,6 +1273,22 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Parameter param = get(param_list, PID_OWNERSHIP);
     TEST_ASSERT(param.ownership().kind == EXCLUSIVE_OWNERSHIP_QOS);
   }
+
+  { // Should decode writer ownership
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        EXCLUSIVE_OWNERSHIP_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.ownership.kind ==
+                writer_data_out.ddsPublicationData.ownership.kind);
+  }
+
   { // Should encode ownership strength
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1119,6 +1303,22 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
     TEST_ASSERT(param.ownership_strength().value == 29);
   }
+  { // Should decode writer ownership strength
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
+        29);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.ownership_strength.value ==
+                writer_data_out.ddsPublicationData.ownership_strength.value);
+  }
+
   { // Should encode destination order
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1134,6 +1334,22 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.destination_order().kind == 
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
   }
+  { // Should decode writer destination order
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.destination_order.kind ==
+                writer_data_out.ddsPublicationData.destination_order.kind);
+  }
+
   { // Should encode presentation
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1152,6 +1368,27 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.presentation().coherent_access == true);
     TEST_ASSERT(param.presentation().ordered_access == true);
   }
+  { // Should decode writer presentation
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        GROUP_PRESENTATION_QOS, true, true);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.presentation.access_scope ==
+                writer_data_out.ddsPublicationData.presentation.access_scope);
+    TEST_ASSERT(writer_data.ddsPublicationData.presentation.coherent_access ==
+                writer_data_out.ddsPublicationData.presentation.coherent_access);
+    TEST_ASSERT(writer_data.ddsPublicationData.presentation.ordered_access ==
+                writer_data_out.ddsPublicationData.presentation.ordered_access);
+  }
+
   { // Should encode partition
     const char* part = "TESTPARTITION";
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -1170,6 +1407,26 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.partition().name.length() == 1);
     TEST_ASSERT(strncmp(param.partition().name[0], part, 12) == 0);
   }
+  { // Should decode writer partition
+    const char* part = "TESTPARTITION";
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false,
+        part);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data_out.ddsPublicationData.partition.name.length() == 1);
+    TEST_ASSERT(!strcmp(writer_data.ddsPublicationData.partition.name[0],
+                        writer_data_out.ddsPublicationData.partition.name[0]));
+  }
+
   { // Should encode topic data
     const char* topic_data = "TEST TD";
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -1191,6 +1448,25 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(param.topic_data().value[i] = topic_data[i]);
     }
   }
+  { // Should decode writer topic data
+    const char* topic_data = "TEST TD";
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL,
+        topic_data, 7);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.topic_data.value ==
+                writer_data_out.ddsPublicationData.topic_data.value);
+  }
+
   { // Should encode group data
     const char* group_data = "TEST GD";
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -1212,5 +1488,151 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(param.group_data().value[i] = group_data[i]);
     }
   }
+  { // Should decode writer group data
+    const char* group_data = "TEST GD";
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+        group_data, 7);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.ddsPublicationData.group_data.value ==
+                writer_data_out.ddsPublicationData.group_data.value);
+  }
+
+  { // Should encode writer guid
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_GROUP_GUID));
+  }
+  { // Should decode writer guid
+    DiscoveredWriterData writer_data;
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(!memcmp(&writer_data.writerProxy.remoteWriterGuid,
+                        &writer_data_out.writerProxy.remoteWriterGuid,
+                        sizeof(GUID_t)));
+  }
+
+  { // Should encode unicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        locators, 2
+        );
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
+  }
+  { // Should decode writer unicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        locators, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.writerProxy.unicastLocatorList.length() == 2);
+    TEST_ASSERT(!memcmp(&writer_data.writerProxy.unicastLocatorList[0],
+                        &locators[0],
+                        sizeof(Locator_t)));
+    TEST_ASSERT(!memcmp(&writer_data.writerProxy.unicastLocatorList[1],
+                        &locators[1],
+                        sizeof(Locator_t)));
+  }
+
+  { // Should encode multicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, locators, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
+  }
+  { // Should decode writer multicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredWriterData writer_data = Factory::writer_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, locators, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
+    DiscoveredWriterData writer_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
+    TEST_ASSERT(writer_data.writerProxy.multicastLocatorList.length() == 2);
+    TEST_ASSERT(!memcmp(&writer_data.writerProxy.multicastLocatorList[0],
+                        &locators[0],
+                        sizeof(Locator_t)));
+    TEST_ASSERT(!memcmp(&writer_data.writerProxy.multicastLocatorList[1],
+                        &locators[1],
+                        sizeof(Locator_t)));
+  }
+
   return 0;
 }
