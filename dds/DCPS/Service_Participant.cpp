@@ -17,10 +17,6 @@
 #include "ConfigUtils.h"
 #include "InfoRepoDiscovery.h"
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#endif
-
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/ORB_Core.h"
@@ -1134,6 +1130,12 @@ Service_Participant::get_repository(const DDS::DomainId_t domain)
   }
 }
 
+std::string
+Service_Participant::bit_transport_ip() const
+{
+  return ACE_TEXT_ALWAYS_CHAR(this->bit_transport_ip_.c_str());
+}
+
 int
 Service_Participant::bit_transport_port() const
 {
@@ -1146,64 +1148,6 @@ Service_Participant::bit_transport_port(int port)
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
   this->bit_transport_port_ = port;
   got_bit_transport_port = true;
-}
-
-int
-Service_Participant::init_bit_transport_config()
-{
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  if (this->bit_transport_config_ != 0) {
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) BIT transport config already loaded.\n")));
-    }
-
-    return 0;
-  }
-  std::string config_name = TransportRegistry::DEFAULT_INST_PREFIX
-    + "BITTransportConfig";
-  this->bit_transport_config_ =
-    TransportRegistry::instance()->create_config(config_name);
-
-  std::string inst_name = TransportRegistry::DEFAULT_INST_PREFIX
-    + "BITTCPTransportInst";
-  TransportInst_rch inst =
-    TransportRegistry::instance()->create_inst(inst_name, "tcp");
-  this->bit_transport_config_->instances_.push_back(inst);
-
-  // Use a static cast to avoid dependency on the Tcp library
-  TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
-
-  tcp_inst->datalink_release_delay_ = 0;
-  if (this->bit_transport_ip_ == ACE_TEXT("")) {
-    tcp_inst->local_address_.set_port_number(this->bit_transport_port_);
-  } else {
-    tcp_inst->local_address_ = ACE_INET_Addr(this->bit_transport_port_,
-                                             this->bit_transport_ip_.c_str());
-  }
-
-  std::stringstream out;
-  out << this->bit_transport_port_;
-
-  tcp_inst->local_address_str_ =
-    ACE_TEXT_ALWAYS_CHAR(this->bit_transport_ip_.c_str());
-  tcp_inst->local_address_str_ += ':' + out.str();
-
-  return 0;
-
-#else
-  return -1;
-#endif // DDS_HAS_MINIMUM_BIT
-}
-
-TransportConfig_rch
-Service_Participant::bit_transport_config()
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->bit_config_lock_, 0);
-  if (this->bit_transport_config_ == 0) {
-    this->init_bit_transport_config();
-  }
-  return this->bit_transport_config_;
 }
 
 int
@@ -1661,7 +1605,8 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
       ValueMap values;
       pullValues( cf, (*it).second, values );
       Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
-      bool repoKeySpecified = false;
+      bool repoKeySpecified = false, bitIpSpecified = false,
+        bitPortSpecified = false;
       std::string repoIor;
       int bitPort = 0;
       std::string bitIp;
@@ -1686,17 +1631,16 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
           }
         } else if (name == "DCPSBitTransportIPAddress") {
           bitIp = (*it).second;
+          bitIpSpecified = true;
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
                        ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportIPAddress == %C\n"),
                        repo_name.c_str(), bitIp.c_str()));
           }
-
-          // TODO: set this on a per-repo basis via the Discovery object.
-          this->bit_transport_ip_   = bitIp.c_str();
         } else if (name == "DCPSBitTransportPort") {
           std::string value = (*it).second;
           bitPort = ACE_OS::atoi(value.c_str());
+          bitPortSpecified = true;
           if (convertToInteger(value, bitPort)) {
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -1710,9 +1654,6 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
                        ACE_TEXT("(%P|%t) [repository/%s]: DCPSBitTransportPort == %d\n"),
                        repo_name.c_str(), bitPort));
           }
-
-          // TODO: set this on a per-repo basis via the Discovery object.
-          this->bit_transport_port_ = bitPort;
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
@@ -1736,8 +1677,8 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
         repoKey = repo_name;
       }
       InfoRepoDiscovery_rch discovery = this->set_repo_ior(repoIor.c_str(), repoKey);
-      discovery->bit_transport_port(bitPort);
-      discovery->bit_transport_ip(bitIp);
+      if (bitPortSpecified) discovery->bit_transport_port(bitPort);
+      if (bitIpSpecified) discovery->bit_transport_ip(bitIp);
     }
   }
 

@@ -11,6 +11,7 @@
 
 #include "Discovery.h"
 #include "dds/DdsDcpsInfoC.h"
+#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 
 #include <string>
 
@@ -36,38 +37,34 @@ public:
   virtual std::string get_stringified_dcps_info_ior();
   virtual DCPSInfo_ptr get_dcps_info();
 
-  /**
-   * Accessors for @c bit_transport_port_.
-   *
-   * The accessor is used for client application to configure
-   * the local transport listening port number.
-   *
-   * @note The default port is INVALID. The user needs call
-   *       this function to setup the desired port number.
-   */
-  //@{
   int bit_transport_port() const { return bit_transport_port_; }
-  void bit_transport_port(int port) { bit_transport_port_ = port; }
-  //@}
+  void bit_transport_port(int port) {
+    bit_transport_port_ = port;
+    use_local_bit_config_ = true;
+  }
 
   std::string bit_transport_ip() const { return bit_transport_ip_; }
-  void bit_transport_ip(const std::string& ip) { bit_transport_ip_ = ip; }
+  void bit_transport_ip(const std::string& ip) {
+    bit_transport_ip_ = ip;
+    use_local_bit_config_ = true;
+  }
 
   virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant);
 
 private:
+  TransportConfig_rch bit_config();
+
   std::string    ior_;
   DCPSInfo_var   info_;
-
-  // TODO: BIT transport information is now stored here on a per-repository
-  // basis but is still not used to configure the BIT transports (this is
-  // done using the global settings).
 
   /// The builtin topic transport address.
   std::string bit_transport_ip_;
 
   /// The builtin topic transport port number.
   int bit_transport_port_;
+
+  bool use_local_bit_config_;
+  TransportConfig_rch bit_config_;
 };
 
 typedef RcHandle<InfoRepoDiscovery> InfoRepoDiscovery_rch;

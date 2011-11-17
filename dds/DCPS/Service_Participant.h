@@ -300,8 +300,7 @@ public:
   void bit_transport_port(int port);
   //@}
 
-  /// Accessor of the TransportConfig used by the builtin topics
-  TransportConfig_rch bit_transport_config();
+  std::string bit_transport_ip() const;
 
   /**
    * Accessor for bit_lookup_duration_msec_.
@@ -334,9 +333,6 @@ public:
   const DomainRepoMap& domainRepoMap() const;
 
 private:
-
-  /// Create the TransportConfig for all builtin topics.
-  int init_bit_transport_config();
 
   /// Initalize default qos.
   void initialize();
@@ -471,12 +467,6 @@ private:
 
   /// The builtin topic transport address.
   ACE_TString bit_transport_ip_;
-
-  /// The builtin topic transport configuration
-  TransportConfig_rch bit_transport_config_;
-
-  /// Prevent concurrent attempts to initialize built-in topics
-  ACE_Thread_Mutex bit_config_lock_;
 
   /// The builtin topic transport port number.
   int bit_transport_port_;
