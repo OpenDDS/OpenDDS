@@ -39,7 +39,8 @@ RtpsDiscovery::~RtpsDiscovery()
   delete servant_;
 }
 
-DCPS::DCPSInfo_ptr RtpsDiscovery::get_dcps_info()
+DCPS::DCPSInfo_ptr
+RtpsDiscovery::get_dcps_info()
 {
   return DCPS::DCPSInfo::_duplicate(info_);
 }
@@ -117,7 +118,8 @@ RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
 
 static const ACE_TCHAR RTPS_SECTION_NAME[] = ACE_TEXT("rtps_discovery");
 
-int RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
+int
+RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key rtps_sect;

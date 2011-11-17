@@ -1,3 +1,14 @@
+Thu Nov 17 17:20:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing RTPS Discovery.
+          Forward calls from RtpsInfo to the corresponding Spdp object.
+
 Thu Nov 17 15:28:46 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/UnitTests/ParameterListConverter.cpp:

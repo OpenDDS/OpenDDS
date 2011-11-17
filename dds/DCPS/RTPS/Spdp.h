@@ -54,6 +54,43 @@ public:
     DCPS::RepoId repo_id_;
   };
 
+  // Publication
+  DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
+                               DCPS::DataWriterRemote_ptr publication,
+                               const DDS::DataWriterQos& qos,
+                               const DCPS::TransportLocatorSeq& transInfo,
+                               const DDS::PublisherQos& publisherQos);
+  void remove_publication(const DCPS::RepoId& publicationId);
+  void ignore_publication(const DCPS::RepoId& ignoreId);
+  bool update_publication_qos(const DCPS::RepoId& publicationId,
+                              const DDS::DataWriterQos& qos,
+                              const DDS::PublisherQos& publisherQos);
+
+  // Subscription
+  DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
+                                DCPS::DataReaderRemote_ptr subscription,
+                                const DDS::DataReaderQos& qos,
+                                const DCPS::TransportLocatorSeq& transInfo,
+                                const DDS::SubscriberQos& subscriberQos,
+                                const char* filterExpr,
+                                const DDS::StringSeq& params);
+  void remove_subscription(const DCPS::RepoId& subscriptionId);
+  void ignore_subscription(const DCPS::RepoId& ignoreId);
+  bool update_subscription_qos(const DCPS::RepoId& subscriptionId,
+                               const DDS::DataReaderQos& qos,
+                               const DDS::SubscriberQos& subscriberQos);
+  bool update_subscription_params(const DCPS::RepoId& subId,
+                                  const DDS::StringSeq& params);
+
+  // Managing reader/writer associations
+  void association_complete(const DCPS::RepoId& localId,
+                            const DCPS::RepoId& remoteId);
+  void disassociate_participant(const DCPS::RepoId& remoteId);
+  void disassociate_publication(const DCPS::RepoId& localId,
+                                const DCPS::RepoId& remoteId);
+  void disassociate_subscription(const DCPS::RepoId& localId,
+                                 const DCPS::RepoId& remoteId);
+
 private:
   const DDS::DomainId_t domain_;
   const DCPS::RepoId guid_;

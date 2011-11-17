@@ -68,6 +68,7 @@ Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
   td.repo_id_.entityId.entityKind = DCPS::ENTITYKIND_OPENDDS_TOPIC;
   assign(td.repo_id_.entityId.entityKey, topic_counter_++);
   topic_names_[td.repo_id_] = topicName;
+  topicId = td.repo_id_;
 
   if (topic_counter_ == 0x1000000) {
     ACE_ERROR((LM_ERROR,
@@ -109,6 +110,91 @@ Spdp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
     return true;
   }
   return false;
+}
+
+RepoId
+Spdp::add_publication(const RepoId& topicId,
+                      DCPS::DataWriterRemote_ptr publication,
+                      const DDS::DataWriterQos& qos,
+                      const DCPS::TransportLocatorSeq& transInfo,
+                      const DDS::PublisherQos& publisherQos)
+{
+  return RepoId();
+}
+
+void
+Spdp::remove_publication(const RepoId& publicationId)
+{
+}
+
+void
+Spdp::ignore_publication(const RepoId& ignoreId)
+{
+}
+
+bool
+Spdp::update_publication_qos(const RepoId& publicationId,
+                             const DDS::DataWriterQos& qos,
+                             const DDS::PublisherQos& publisherQos)
+{
+  return false;
+}
+
+RepoId
+Spdp::add_subscription(const RepoId& topicId,
+                       DCPS::DataReaderRemote_ptr subscription,
+                       const DDS::DataReaderQos& qos,
+                       const DCPS::TransportLocatorSeq& transInfo,
+                       const DDS::SubscriberQos& subscriberQos,
+                       const char* filterExpr,
+                       const DDS::StringSeq& params)
+{
+  return RepoId();
+}
+
+void
+Spdp::remove_subscription(const RepoId& subscriptionId)
+{
+}
+
+void
+Spdp::ignore_subscription(const RepoId& ignoreId)
+{
+}
+
+bool
+Spdp::update_subscription_qos(const RepoId& subscriptionId,
+                              const DDS::DataReaderQos& qos,
+                              const DDS::SubscriberQos& subscriberQos)
+{
+  return false;
+}
+
+bool
+Spdp::update_subscription_params(const RepoId& subId,
+                                 const DDS::StringSeq& params)
+{
+  return false;
+}
+
+void
+Spdp::association_complete(const RepoId& localId, const RepoId& remoteId)
+{
+}
+
+void
+Spdp::disassociate_participant(const RepoId& remoteId)
+{
+}
+
+void
+Spdp::disassociate_publication(const RepoId& localId, const RepoId& remoteId)
+{
+}
+
+void
+Spdp::disassociate_subscription(const RepoId& localId, const RepoId& remoteId)
+{
 }
 
 }

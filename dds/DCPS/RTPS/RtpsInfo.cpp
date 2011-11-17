@@ -174,7 +174,8 @@ RtpsInfo::add_publication(DDS::DomainId_t domainId, const RepoId& participantId,
                           const DCPS::TransportLocatorSeq& transInfo,
                           const DDS::PublisherQos& publisherQos)
 {
-  return RepoId();
+  return participants_[domainId][participantId]->add_publication(
+    topicId, publication, qos, transInfo, publisherQos);
 }
 
 void
@@ -182,13 +183,15 @@ RtpsInfo::remove_publication(DDS::DomainId_t domainId,
                              const RepoId& participantId,
                              const RepoId& publicationId)
 {
+  participants_[domainId][participantId]->remove_publication(publicationId);
 }
 
 void
 RtpsInfo::ignore_publication(DDS::DomainId_t domainId,
-                             const RepoId& myParticipantId,
+                             const RepoId& participantId,
                              const RepoId& ignoreId)
 {
+  participants_[domainId][participantId]->ignore_publication(ignoreId);
 }
 
 bool
@@ -197,7 +200,8 @@ RtpsInfo::update_publication_qos(DDS::DomainId_t domainId, const RepoId& partId,
                                  const DDS::DataWriterQos& qos,
                                  const DDS::PublisherQos& publisherQos)
 {
-  return false;
+  return participants_[domainId][partId]->update_publication_qos(dwId, qos,
+                                                                 publisherQos);
 }
 
 
@@ -210,10 +214,11 @@ RtpsInfo::add_subscription(DDS::DomainId_t domainId,
                            const DDS::DataReaderQos& qos,
                            const DCPS::TransportLocatorSeq& transInfo,
                            const DDS::SubscriberQos& subscriberQos,
-                           const char* filterExpression,
-                           const DDS::StringSeq& exprParams)
+                           const char* filterExpr,
+                           const DDS::StringSeq& params)
 {
-  return RepoId();
+  return participants_[domainId][participantId]->add_subscription(
+    topicId, subscription, qos, transInfo, subscriberQos, filterExpr, params);
 }
 
 void
@@ -221,33 +226,38 @@ RtpsInfo::remove_subscription(DDS::DomainId_t domainId,
                               const RepoId& participantId,
                               const RepoId& subscriptionId)
 {
+  participants_[domainId][participantId]->remove_subscription(subscriptionId);
 }
 
 void
 RtpsInfo::ignore_subscription(DDS::DomainId_t domainId,
-                              const RepoId& myParticipantId,
+                              const RepoId& participantId,
                               const RepoId& ignoreId)
 {
+  participants_[domainId][participantId]->ignore_subscription(ignoreId);
 }
 
 bool
 RtpsInfo::update_subscription_qos(DDS::DomainId_t domainId,
                                   const RepoId& partId, const RepoId& drId,
                                   const DDS::DataReaderQos& qos,
-                                  const DDS::SubscriberQos& subscriberQos)
+                                  const DDS::SubscriberQos& subQos)
 {
-  return false;
+  return participants_[domainId][partId]->update_subscription_qos(drId, qos,
+                                                                  subQos);
 }
 
 bool
 RtpsInfo::update_subscription_params(DDS::DomainId_t domainId,
-                                     const RepoId& participantId,
-                                     const RepoId& subscriptionId,
+                                     const RepoId& partId,
+                                     const RepoId& subId,
                                      const DDS::StringSeq& params)
 
 {
-  return false;
+  return participants_[domainId][partId]->update_subscription_params(subId,
+                                                                     params);
 }
+
 
 // Managing reader/writer associations:
 
@@ -256,29 +266,36 @@ RtpsInfo::association_complete(DDS::DomainId_t domainId,
                                const RepoId& participantId,
                                const RepoId& localId, const RepoId& remoteId)
 {
+  participants_[domainId][participantId]->association_complete(localId,
+                                                               remoteId);
 }
 
 void
 RtpsInfo::disassociate_participant(DDS::DomainId_t domainId,
-                                   const RepoId& local_id,
-                                   const RepoId& remote_id)
+                                   const RepoId& localId,
+                                   const RepoId& remoteId)
 {
+  participants_[domainId][localId]->disassociate_participant(remoteId);
 }
 
 void
 RtpsInfo::disassociate_subscription(DDS::DomainId_t domainId,
                                     const RepoId& participantId,
-                                    const RepoId& local_id,
-                                    const RepoId& remote_id)
+                                    const RepoId& localId,
+                                    const RepoId& remoteId)
 {
+  participants_[domainId][participantId]->disassociate_subscription(localId,
+                                                                    remoteId);
 }
 
 void
 RtpsInfo::disassociate_publication(DDS::DomainId_t domainId,
                                    const RepoId& participantId,
-                                   const RepoId& local_id,
-                                   const RepoId& remote_id)
+                                   const RepoId& localId,
+                                   const RepoId& remoteId)
 {
+  participants_[domainId][participantId]->disassociate_publication(localId,
+                                                                   remoteId);
 }
 
 

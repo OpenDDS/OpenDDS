@@ -171,20 +171,20 @@ public:
 
   virtual void disassociate_participant(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id);
+    const OpenDDS::DCPS::RepoId& localId,
+    const OpenDDS::DCPS::RepoId& remoteId);
 
   virtual void disassociate_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id);
+    const OpenDDS::DCPS::RepoId& localId,
+    const OpenDDS::DCPS::RepoId& remoteId);
 
   virtual void disassociate_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id);
+    const OpenDDS::DCPS::RepoId& localId,
+    const OpenDDS::DCPS::RepoId& remoteId);
 
 
   virtual void shutdown() {} // no-op for RTPS
