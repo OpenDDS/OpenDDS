@@ -35,13 +35,6 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
-enum BuiltInTopicTransportTypeId {
-  BIT_SIMPLE_TCP = 0xb17b17
-};
-
-enum BuiltInTopicTransportInstanceId {
-  BIT_ALL_TRAFFIC = 0xb17b17
-};
 
 class DomainParticipantImpl;
 

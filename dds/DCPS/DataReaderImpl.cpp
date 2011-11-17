@@ -76,7 +76,8 @@ DataReaderImpl::DataReaderImpl()
     raw_latency_buffer_size_(0),
     raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
     monitor_(0),
-    periodic_monitor_(0)
+    periodic_monitor_(0),
+    transport_disabled_(false)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
   reactor_ = orb->orb_core()->reactor();
@@ -1171,7 +1172,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   this->set_enabled();
 
-  if (topic_servant_) {
+  if (topic_servant_ && !transport_disabled_) {
 
     try {
       this->enable_transport(this->qos_.reliability.kind ==

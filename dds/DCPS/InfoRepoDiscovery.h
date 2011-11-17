@@ -53,6 +53,8 @@ public:
   std::string bit_transport_ip() const { return bit_transport_ip_; }
   void bit_transport_ip(const std::string& ip) { bit_transport_ip_ = ip; }
 
+  virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant);
+
 private:
   std::string    ior_;
   DCPSInfo_var   info_;

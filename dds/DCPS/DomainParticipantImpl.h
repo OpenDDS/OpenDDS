@@ -335,14 +335,16 @@ public:
 
   /** Accessor for ownership manager.
   */
-  OwnershipManager* ownership_manager ();
+  OwnershipManager* ownership_manager();
 
   /**
   * Called upon receiving new BIT publication data to
   * update the ownership strength of a publication.
   */
-  void update_ownership_strength (const PublicationId& pub_id,
-                                  const CORBA::Long& ownership_strength);
+  void update_ownership_strength(const PublicationId& pub_id,
+                                 const CORBA::Long& ownership_strength);
+
+  bool federated() const { return this->federated_; }
 
 private:
 
@@ -363,17 +365,6 @@ private:
   DDS::ReturnCode_t delete_topic_i(
     DDS::Topic_ptr a_topic,
     bool             remove_objref);
-
-  /// Initialize the built in topic.
-  DDS::ReturnCode_t init_bit();
-  /// Initialize the built in topic topics
-  DDS::ReturnCode_t init_bit_topics();
-  /// Create the built in topic subscriber.
-  DDS::ReturnCode_t init_bit_subscriber();
-  /// Initialize the built in topic datareaders.
-  DDS::ReturnCode_t init_bit_datareaders();
-  /// Attach the subscriber with the transport.
-  DDS::ReturnCode_t attach_bit_transport();
 
   DomainParticipantFactoryImpl* factory_;
   /// The default topic qos.
@@ -432,15 +423,6 @@ private:
   /// The built in topic subscriber.
   DDS::Subscriber_var        bit_subscriber_;
 
-  /// The topic for built in topic participant.
-  DDS::Topic_var       bit_part_topic_;
-  /// The topic for built in topic topic.
-  DDS::Topic_var       bit_topic_topic_;
-  /// The topic for built in topic publication.
-  DDS::Topic_var       bit_pub_topic_;
-  /// The topic for built in topic subscription.
-  DDS::Topic_var       bit_sub_topic_;
-
   /// Listener to initiate failover with.
   FailoverListener*    failoverListener_;
 
@@ -448,16 +430,6 @@ private:
   /// (i.e. subscribers and publishers).
   InstanceHandleGenerator participant_handles_;
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  /// The datareader for built in topic participant.
-  DDS::ParticipantBuiltinTopicDataDataReader_var  bit_part_dr_;
-  /// The datareader for built in topic topic.
-  DDS::TopicBuiltinTopicDataDataReader_var        bit_topic_dr_;
-  /// The datareader for built in topic publication.
-  DDS::PublicationBuiltinTopicDataDataReader_var  bit_pub_dr_;
-  /// The datareader for built in topic subscription.
-  DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
   Monitor* monitor_;
 
   OwnershipManager owner_man_;

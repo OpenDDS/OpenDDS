@@ -44,6 +44,11 @@ Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
   return true;
 }
 
+void
+Spdp::bit_subscriber(const DDS::Subscriber_var& bit_subscriber)
+{
+  bit_subscriber_ = bit_subscriber;
+}
 
 DCPS::TopicStatus
 Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,

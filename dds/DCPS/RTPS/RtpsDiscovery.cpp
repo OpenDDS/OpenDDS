@@ -12,6 +12,11 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/InfoRepoUtils.h"
 #include "dds/DCPS/ConfigUtils.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/Registered_Data_Types.h"
 
 namespace OpenDDS {
 namespace RTPS {
@@ -37,6 +42,77 @@ RtpsDiscovery::~RtpsDiscovery()
 DCPS::DCPSInfo_ptr RtpsDiscovery::get_dcps_info()
 {
   return DCPS::DCPSInfo::_duplicate(info_);
+}
+
+namespace {
+  void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
+                     DCPS::SubscriberImpl* sub, const DDS::DataReaderQos& qos,
+                     const DCPS::DataReaderQosExt& ext_qos)
+  {
+    using namespace DCPS;
+    TopicDescriptionImpl* bit_topic_i =
+      dynamic_cast<TopicDescriptionImpl*>(topic);
+
+    DDS::DomainParticipant_var participant = sub->get_participant();
+    DomainParticipantImpl* participant_i =
+      dynamic_cast<DomainParticipantImpl*>(participant.in());
+
+    TypeSupport_ptr type_support =
+      Registered_Data_Types->lookup(participant, type);
+
+    DDS::DataReader_var dr = type_support->create_datareader();
+    DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(dr.in());
+
+    dri->init(bit_topic_i, qos, ext_qos, 0 /*listener*/, 0 /*mask*/,
+              participant_i, sub, dr, 0 /*remote*/);
+    dri->disable_transport();
+    dri->enable();
+  }
+}
+
+DDS::Subscriber_ptr
+RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
+{
+  using namespace DCPS;
+  if (create_bit_topics(participant) != DDS::RETCODE_OK) {
+    return 0;
+  }
+
+  DDS::Subscriber_var bit_subscriber =
+    participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                   DDS::SubscriberListener::_nil(),
+                                   DEFAULT_STATUS_MASK);
+  SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber.in());
+
+  DDS::DataReaderQos dr_qos;
+  sub->get_default_datareader_qos(dr_qos);
+  dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+  DataReaderQosExt ext_qos;
+  sub->get_default_datareader_qos_ext(ext_qos);
+
+  DDS::TopicDescription_var bit_part_topic =
+    participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
+  create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
+                sub, dr_qos, ext_qos);
+
+  DDS::TopicDescription_var bit_topic_topic =
+    participant->lookup_topicdescription(BUILT_IN_TOPIC_TOPIC);
+  create_bit_dr(bit_topic_topic, BUILT_IN_TOPIC_TOPIC_TYPE,
+                sub, dr_qos, ext_qos);
+
+  DDS::TopicDescription_var bit_pub_topic =
+    participant->lookup_topicdescription(BUILT_IN_PUBLICATION_TOPIC);
+  create_bit_dr(bit_pub_topic, BUILT_IN_PUBLICATION_TOPIC_TYPE,
+                sub, dr_qos, ext_qos);
+
+  DDS::TopicDescription_var bit_sub_topic =
+    participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
+  create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
+                sub, dr_qos, ext_qos);
+
+  servant_->init_bit(bit_subscriber);
+
+  return bit_subscriber._retn();
 }
 
 static const ACE_TCHAR RTPS_SECTION_NAME[] = ACE_TEXT("rtps_discovery");

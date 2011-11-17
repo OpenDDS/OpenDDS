@@ -39,7 +39,9 @@ class OpenDDS_Rtps_Export RtpsDiscovery : public OpenDDS::DCPS::Discovery {
 public:
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();
+
   virtual OpenDDS::DCPS::DCPSInfo_ptr get_dcps_info();
+  virtual DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* dpi);
 
 private:
   RtpsInfo* servant_;

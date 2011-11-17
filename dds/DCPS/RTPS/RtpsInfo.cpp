@@ -9,6 +9,8 @@
 #include "RtpsInfo.h"
 #include "BaseMessageTypes.h"
 
+#include "dds/DCPS/DomainParticipantImpl.h"
+
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
@@ -60,6 +62,17 @@ RtpsInfo::update_domain_participant_qos(DDS::DomainId_t domain,
   return participants_[domain][participant]->update_domain_participant_qos(qos);
 }
 
+void
+RtpsInfo::init_bit(const DDS::Subscriber_var& bit_subscriber)
+{
+  DDS::DomainParticipant_var participant = bit_subscriber->get_participant();
+  DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<DCPS::DomainParticipantImpl*>(participant.in());
+  DCPS::RepoId participantId = dpi->get_id();
+  DDS::DomainId_t domainId = participant->get_domain_id();
+
+  participants_[domainId][participantId]->bit_subscriber(bit_subscriber);
+}
 
 // Topic operations:
 

@@ -189,6 +189,10 @@ public:
 
   virtual void shutdown() {} // no-op for RTPS
 
+
+  // used by RtpsDiscovery:
+  void init_bit(const DDS::Subscriber_var& bit_subscriber);
+
 private:
 
   std::map<DDS::DomainId_t,

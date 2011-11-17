@@ -20,6 +20,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class DomainParticipantImpl;
+
 /**
  * @class Discovery
  *
@@ -44,10 +46,12 @@ public:
   virtual std::string get_stringified_dcps_info_ior();
   virtual DCPSInfo_ptr get_dcps_info() = 0;
 
-  // Need one or more virtual functions to abstract away Built-In Topic
-  // variation between InfoRepo and RTPS Discovery.
+  virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) = 0;
 
   RepoKey key() const { return this->key_; }
+
+protected:
+  DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);
 
 private:
   RepoKey        key_;

@@ -957,18 +957,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
   }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  bit_part_topic_ = DDS::Topic::_nil();
-  bit_topic_topic_ = DDS::Topic::_nil();
-  bit_pub_topic_ = DDS::Topic::_nil();
-  bit_sub_topic_ = DDS::Topic::_nil();
-
-  bit_part_dr_ = DDS::ParticipantBuiltinTopicDataDataReader::_nil();
-  bit_topic_dr_ = DDS::TopicBuiltinTopicDataDataReader::_nil();
-  bit_pub_dr_ = DDS::PublicationBuiltinTopicDataDataReader::_nil();
-  bit_sub_dr_ = DDS::SubscriptionBuiltinTopicDataDataReader::_nil();
-#endif
-
   bit_subscriber_ = DDS::Subscriber::_nil();
 
   OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
@@ -1570,14 +1558,17 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   DDS::SampleInfoSeq info;
   DDS::ParticipantBuiltinTopicDataSeq data;
-  DDS::ReturnCode_t ret
-  = this->bit_part_dr_->read_instance(data,
-                                      info,
-                                      1,
-                                      participant_handle,
-                                      DDS::ANY_SAMPLE_STATE,
-                                      DDS::ANY_VIEW_STATE,
-                                      DDS::ANY_INSTANCE_STATE);
+  DDS::DataReader_var dr =
+    this->bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+  DDS::ParticipantBuiltinTopicDataDataReader_var bit_part_dr =
+    DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr);
+  DDS::ReturnCode_t ret = bit_part_dr->read_instance(data,
+                                                     info,
+                                                     1,
+                                                     participant_handle,
+                                                     DDS::ANY_SAMPLE_STATE,
+                                                     DDS::ANY_VIEW_STATE,
+                                                     DDS::ANY_INSTANCE_STATE);
 
   if (ret == DDS::RETCODE_OK) {
     if (info[0].valid_data)
@@ -1651,16 +1642,21 @@ ACE_THROW_SPEC((CORBA::SystemException))
       return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  DDS::DataReader_var dr =
+    bit_subscriber_->lookup_datareader(BUILT_IN_TOPIC_TOPIC);
+  DDS::TopicBuiltinTopicDataDataReader_var bit_topic_dr =
+    DDS::TopicBuiltinTopicDataDataReader::_narrow(dr);
+
   DDS::SampleInfoSeq info;
   DDS::TopicBuiltinTopicDataSeq data;
-  DDS::ReturnCode_t ret
-  = this->bit_topic_dr_->read_instance(data,
-                                       info,
-                                       1,
-                                       topic_handle,
-                                       DDS::ANY_SAMPLE_STATE,
-                                       DDS::ANY_VIEW_STATE,
-                                       DDS::ANY_INSTANCE_STATE);
+  DDS::ReturnCode_t ret =
+    bit_topic_dr->read_instance(data,
+                                info,
+                                1,
+                                topic_handle,
+                                DDS::ANY_SAMPLE_STATE,
+                                DDS::ANY_VIEW_STATE,
+                                DDS::ANY_INSTANCE_STATE);
 
   if (ret == DDS::RETCODE_OK) {
     if (info[0].valid_data)
@@ -1711,22 +1707,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-    if (TheServiceParticipant->get_BIT()) {
-      return init_bit();
-
-    } else {
-      return DDS::RETCODE_OK;
-    }
-
-#else
-    return DDS::RETCODE_OK;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-
-  } else {
-    return ret;
+    Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
+    this->bit_subscriber_ = disc->init_bit(this);
   }
+
+  return ret;
 }
 
 RepoId
@@ -1898,326 +1883,6 @@ DomainParticipantImpl::listener_for(DDS::StatusKind kind)
   }
 }
 
-DDS::ReturnCode_t
-DomainParticipantImpl::init_bit()
-{
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  DDS::ReturnCode_t ret;
-
-  if (((ret = init_bit_subscriber()) == DDS::RETCODE_OK)
-      && ((ret = attach_bit_transport()) == DDS::RETCODE_OK)
-      && ((ret = init_bit_topics()) == DDS::RETCODE_OK)
-      && ((ret = init_bit_datareaders()) == DDS::RETCODE_OK)) {
-    return DDS::RETCODE_OK;
-
-  } else {
-    return ret;
-  }
-
-#else
-  return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-}
-
-DDS::ReturnCode_t
-DomainParticipantImpl::init_bit_topics()
-{
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  try {
-    DDS::TopicQos topic_qos;
-    this->get_default_topic_qos(topic_qos);
-
-    OpenDDS::DCPS::TypeSupport_ptr type_support =
-      OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in(), BUILT_IN_PARTICIPANT_TOPIC_TYPE);
-
-    if (0 == type_support) {
-      // Participant topic
-      DDS::ParticipantBuiltinTopicDataTypeSupport_var participantTypeSupport_servant(
-        new DDS::ParticipantBuiltinTopicDataTypeSupportImpl());
-      DDS::ReturnCode_t ret
-      = participantTypeSupport_servant->register_type(participant_objref_.in(),
-                                                      BUILT_IN_PARTICIPANT_TOPIC_TYPE);
-
-      if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ")
-                          ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
-                          ACE_TEXT("register BUILT_IN_PARTICIPANT_TOPIC_TYPE returned %d.\n"),
-                          ret),
-                         ret);
-      }
-    }
-
-    bit_part_topic_ = this->create_topic(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
-                                         OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE,
-                                         topic_qos,
-                                         DDS::TopicListener::_nil(),
-                                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(bit_part_topic_.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
-                        ACE_TEXT("Nil %C Topic \n"),
-                        OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC),
-                       DDS::RETCODE_ERROR);
-    }
-
-    // Topic topic
-    type_support =
-      OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in(), BUILT_IN_TOPIC_TOPIC_TYPE);
-
-    if (0 == type_support) {
-      DDS::TopicBuiltinTopicDataTypeSupport_var topicTypeSupport_servant(
-        new DDS::TopicBuiltinTopicDataTypeSupportImpl());
-
-      DDS::ReturnCode_t ret
-      = topicTypeSupport_servant->register_type(participant_objref_.in(),
-                                                BUILT_IN_TOPIC_TOPIC_TYPE);
-
-      if (ret != DDS::RETCODE_OK) {
-
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ")
-                          ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
-                          ACE_TEXT("register BUILT_IN_TOPIC_TOPIC_TYPE returned %d.\n"),
-                          ret),
-                         ret);
-      }
-    }
-
-    bit_topic_topic_ = this->create_topic(OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
-                                          OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE,
-                                          topic_qos,
-                                          DDS::TopicListener::_nil(),
-                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(bit_topic_topic_.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
-                        ACE_TEXT("Nil %C Topic \n"),
-                        OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC),
-                       DDS::RETCODE_ERROR);
-    }
-
-    // Subscription topic
-    type_support =
-      OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in(), BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
-
-    if (0 == type_support) {
-      DDS::SubscriptionBuiltinTopicDataTypeSupport_var subscriptionTypeSupport_servant(
-        new DDS::SubscriptionBuiltinTopicDataTypeSupportImpl());
-
-      DDS::ReturnCode_t ret
-      = subscriptionTypeSupport_servant->register_type(participant_objref_.in(),
-                                                       BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
-
-      if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ")
-                          ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
-                          ACE_TEXT("register BUILT_IN_SUBSCRIPTION_TOPIC_TYPE returned %d.\n"),
-                          ret),
-                         ret);
-      }
-    }
-
-    bit_sub_topic_ =
-      this->create_topic(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
-                         OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
-                         topic_qos,
-                         DDS::TopicListener::_nil(),
-                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(bit_sub_topic_.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
-                        ACE_TEXT("Nil %C Topic \n"),
-                        OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC),
-                       DDS::RETCODE_ERROR);
-    }
-
-    // Publication topic
-    type_support =
-      OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in(), BUILT_IN_PUBLICATION_TOPIC_TYPE);
-
-    if (0 == type_support) {
-      DDS::PublicationBuiltinTopicDataTypeSupport_var publicationTypeSupport_servant(
-        new DDS::PublicationBuiltinTopicDataTypeSupportImpl());
-
-      DDS::ReturnCode_t ret
-      = publicationTypeSupport_servant->register_type(participant_objref_.in(),
-                                                      BUILT_IN_PUBLICATION_TOPIC_TYPE);
-
-      if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ")
-                          ACE_TEXT("DomainParticipantImpl::init_bit_topics, ")
-                          ACE_TEXT("register BUILT_IN_PUBLICATION_TOPIC_TYPE returned %d.\n"),
-                          ret),
-                         ret);
-      }
-    }
-
-    bit_pub_topic_ =
-      this->create_topic(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
-                         OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE,
-                         topic_qos,
-                         DDS::TopicListener::_nil(),
-                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(bit_pub_topic_.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::init_bit_topics, ")
-                        ACE_TEXT("Nil %C Topic \n"),
-                        OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC),
-                       DDS::RETCODE_ERROR);
-    }
-
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception(
-      "ERROR: Exception caught in DomainParticipant::init_bit_topics.");
-    return DDS::RETCODE_ERROR;
-  }
-
-  return DDS::RETCODE_OK;
-#else
-  return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-}
-
-DDS::ReturnCode_t
-DomainParticipantImpl::init_bit_subscriber()
-{
-  try {
-    DDS::SubscriberQos sub_qos;
-    this->get_default_subscriber_qos(sub_qos);
-
-    bit_subscriber_
-    = this->create_subscriber(sub_qos,
-                              DDS::SubscriberListener::_nil(),
-                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception(
-      "ERROR: Exception caught in DomainParticipant::create_bit_subscriber.");
-    return DDS::RETCODE_ERROR;
-  }
-
-  return DDS::RETCODE_OK;
-}
-
-DDS::ReturnCode_t
-DomainParticipantImpl::init_bit_datareaders()
-{
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  try {
-    DDS::TopicDescription_var bit_part_topic_desc
-    = this->lookup_topicdescription(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-
-    // QoS policies for the DCPSParticipant built-in topic reader.
-    DDS::DataReaderQos participantReaderQos;
-    bit_subscriber_->get_default_datareader_qos(participantReaderQos);
-    participantReaderQos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-
-    if (this->federated_) {
-      participantReaderQos.liveliness.lease_duration.nanosec = 0;
-      participantReaderQos.liveliness.lease_duration.sec
-      = TheServiceParticipant->federation_liveliness();
-    }
-
-    DDS::DataReader_var dr
-    = bit_subscriber_->create_datareader(bit_part_topic_desc.in(),
-                                         participantReaderQos,
-                                         DDS::DataReaderListener::_nil(),
-                                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    bit_part_dr_
-    = DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr.in());
-
-    if (this->federated_) {
-      // Determine the repository key to which we are attached.
-      Discovery::RepoKey key = TheServiceParticipant->domain_to_repo(this->domain_id_);
-
-      // Create and attach the listener.
-      this->failoverListener_ = new FailoverListener(key);
-      this->bit_part_dr_->set_listener(this->failoverListener_, DEFAULT_STATUS_MASK);
-    }
-
-    DDS::DataReaderQos dr_qos;
-    bit_subscriber_->get_default_datareader_qos(dr_qos);
-    dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-
-    DDS::TopicDescription_var bit_topic_topic_desc
-    = this->lookup_topicdescription(OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
-
-    dr = bit_subscriber_->create_datareader(bit_topic_topic_desc.in(),
-                                            dr_qos,
-                                            DDS::DataReaderListener::_nil(),
-                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    bit_topic_dr_ =
-      DDS::TopicBuiltinTopicDataDataReader::_narrow(dr.in());
-
-    DDS::TopicDescription_var bit_pub_topic_desc =
-      this->lookup_topicdescription(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
-
-    dr = bit_subscriber_->create_datareader(bit_pub_topic_desc.in(),
-                                            dr_qos,
-                                            DDS::DataReaderListener::_nil(),
-                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    bit_pub_dr_ =
-      DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr.in());
-
-    DDS::TopicDescription_var bit_sub_topic_desc =
-      this->lookup_topicdescription(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-
-    dr = bit_subscriber_->create_datareader(bit_sub_topic_desc.in(),
-                                            dr_qos,
-                                            DDS::DataReaderListener::_nil(),
-                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    bit_sub_dr_
-    = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(dr.in());
-
-  } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception(
-      "ERROR: Exception caught in DomainParticipant::init_bit_datareaders.");
-    return DDS::RETCODE_ERROR;
-  }
-
-  return DDS::RETCODE_OK;
-#else
-
-  return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-}
-
-DDS::ReturnCode_t
-DomainParticipantImpl::attach_bit_transport()
-{
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  try {
-    TransportConfig_rch config = TheServiceParticipant->bit_transport_config();
-
-    TransportRegistry::instance()->bind_config(config, bit_subscriber_.in());
-
-  } catch (const OpenDDS::DCPS::Transport::Exception&) {
-    return DDS::RETCODE_ERROR;
-  }
-
-  return DDS::RETCODE_OK;
-#else
-  return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-}
-
 void
 DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
 {
@@ -2233,15 +1898,21 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
 }
 
 OwnershipManager*
-DomainParticipantImpl::ownership_manager ()
+DomainParticipantImpl::ownership_manager()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (! CORBA::is_nil (this->bit_pub_dr_.in())) {
-    DDS::DataReaderListener_var listener = this->bit_pub_dr_->get_listener ();
-    if (CORBA::is_nil (listener.in())) {
-      DDS::DataReaderListener_var bit_pub_listener(new BitPubListenerImpl(this));
-      this->bit_pub_dr_->set_listener (bit_pub_listener.in (), ::DDS::DATA_AVAILABLE_STATUS);
+  DDS::DataReader_var dr =
+    bit_subscriber_->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
+  DDS::PublicationBuiltinTopicDataDataReader_var bit_pub_dr =
+    DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
+
+  if (!CORBA::is_nil(bit_pub_dr.in())) {
+    DDS::DataReaderListener_var listener = bit_pub_dr->get_listener();
+    if (CORBA::is_nil(listener.in())) {
+      DDS::DataReaderListener_var bit_pub_listener =
+        new BitPubListenerImpl(this);
+      bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
     }
   }
 

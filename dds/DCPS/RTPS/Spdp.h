@@ -36,6 +36,7 @@ public:
   // Participant
   void ignore_domain_participant(const DCPS::RepoId& ignoreId);
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
+  void bit_subscriber(const DDS::Subscriber_var& bit_subscriber);
 
   // Topic
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
@@ -57,6 +58,7 @@ private:
   const DDS::DomainId_t domain_;
   const DCPS::RepoId guid_;
   DDS::DomainParticipantQos qos_;
+  DDS::Subscriber_var bit_subscriber_;
   std::map<std::string, TopicDetails> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;

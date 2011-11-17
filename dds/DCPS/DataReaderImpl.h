@@ -583,6 +583,8 @@ public:
 
   virtual EntityImpl* parent() const;
 
+  void disable_transport();
+
 protected:
 
   SubscriberImpl* get_subscriber_servant();
@@ -786,6 +788,8 @@ private:
 
   /// Periodic Monitor object for this entity
   Monitor* periodic_monitor_;
+
+  bool transport_disabled_;
 };
 
 } // namespace DCPS
