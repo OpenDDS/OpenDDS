@@ -253,13 +253,6 @@ namespace {
         const char* type_name  = NULL,
         DurabilityQosPolicyKind durability 
                                = VOLATILE_DURABILITY_QOS,
-        long svc_del_sec = 0L,
-        unsigned long svc_del_nsec = 0L,
-        HistoryQosPolicyKind hist = KEEP_LAST_HISTORY_QOS, 
-        long hist_depth = 1L,
-        long max_samples = 1L,
-        long max_instances = 1L,
-        long max_samples_per_instance = 1L,
         long deadline_sec = 0L, unsigned long deadline_nsec = 0L,
         long lb_sec = 0L, unsigned long lb_nsec = 0L,
         LivelinessQosPolicyKind liveliness = 
@@ -268,11 +261,9 @@ namespace {
         ReliabilityQosPolicyKind reliability = 
               BEST_EFFORT_RELIABILITY_QOS,
         long mbt_sec = 0L, unsigned long mbt_nsec = 0L,
-        long ls_sec = 0L, unsigned long ls_nsec = 0L,
         const void* user_data = NULL, CORBA::ULong user_data_len = 0,
         OwnershipQosPolicyKind ownership =
               SHARED_OWNERSHIP_QOS,
-        long ownership_strength = 0L,
         DestinationOrderQosPolicyKind destination_order = 
               BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
         PresentationQosPolicyAccessScopeKind presentation = 
@@ -1798,8 +1789,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should encode reader deadline
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
+        NULL, NULL, VOLATILE_DURABILITY_QOS,
         127, 35000);
 
     ParameterList param_list;
@@ -1812,8 +1802,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should decode reader deadline
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
+        NULL, NULL, VOLATILE_DURABILITY_QOS,
         127, 35000);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1828,7 +1817,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should enode reader latency budget
     DiscoveredReaderData reader_data = Factory::reader_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
         5, 25000);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1841,7 +1829,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should decode reader latency budget
     DiscoveredReaderData reader_data = Factory::reader_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
         5, 25000);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1853,8 +1840,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should encode reader liveliness
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1867,8 +1853,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should decode reader liveliness
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1884,8 +1869,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should encode reader reliability
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
         RELIABLE_RELIABILITY_QOS, 8, 100);
     ParameterList param_list;
@@ -1899,8 +1883,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should decode reader reliability
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
         RELIABLE_RELIABILITY_QOS, 8, 100);
     ParameterList param_list;
@@ -1919,10 +1902,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0,
         ud, ud_len);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1937,10 +1919,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0,
         ud, ud_len);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1952,10 +1933,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should encode reader ownership
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
         EXCLUSIVE_OWNERSHIP_QOS);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1966,10 +1946,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should decode reader ownership
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
         EXCLUSIVE_OWNERSHIP_QOS);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1981,11 +1960,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should encode reader destination order
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -1996,11 +1974,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
   { // Should decode reader destination order
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
     ParameterList param_list;
     TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
@@ -2012,11 +1989,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should encode reader presentation
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         GROUP_PRESENTATION_QOS, true, true);
     ParameterList param_list;
@@ -2030,11 +2006,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
   { // Should decode reader presentation
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         GROUP_PRESENTATION_QOS, true, true);
     ParameterList param_list;
@@ -2052,11 +2027,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should encode reader partition
     const char* part = "TESTPARTITION";
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false,
         part);
@@ -2070,11 +2044,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should decode reader partition
     const char* part = "TESTPARTITION";
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false,
         part);
@@ -2090,11 +2063,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should encode reader topic data
     const char* topic_data = "TEST TD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL,
         topic_data, 7);
@@ -2111,11 +2083,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should decode reader topic data
     const char* topic_data = "TEST TD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL,
         topic_data, 7);
@@ -2130,11 +2101,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should encode reader group data
     const char* group_data = "TEST GD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
         group_data, 7);
@@ -2151,11 +2121,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should decode reader group data
     const char* group_data = "TEST GD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
         group_data, 7);
@@ -2169,11 +2138,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should encode reader guid
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
     ParameterList param_list;
@@ -2200,11 +2168,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
         locators, 2
@@ -2222,11 +2189,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
         locators, 2);
@@ -2252,11 +2218,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
         NULL, 0, locators, 2);
@@ -2273,11 +2238,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
         NULL, 0, locators, 2);
