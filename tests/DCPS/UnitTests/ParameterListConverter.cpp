@@ -2540,6 +2540,82 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                         sizeof(Locator_t)));
   }
   { // Should set reader defaults
+    Locator_t uc_locators[2];
+    Locator_t mc_locators[2];
+    uc_locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                      1234,
+                                      127, 0, 0, 1);
+    uc_locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                      7734,
+                                      107, 9, 8, 21);
+    mc_locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                      1234,
+                                      127, 0, 0, 1);
+    mc_locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                      7734,
+                                      107, 9, 8, 21);
+    const char* ud = "USERDATA TEST";
+    const char* part = "TESTPARTITION";
+    const char* topic_data = "TEST TD";
+    const char* group_data = "TEST GD";
+    CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
+    DiscoveredReaderData reader_data_out = Factory::reader_data(
+        "ABC", "DEF", TRANSIENT_LOCAL_DURABILITY_QOS, 2, 3, 4, 5,
+        MANUAL_BY_TOPIC_LIVELINESS_QOS, 6, 7,
+        RELIABLE_RELIABILITY_QOS, 8, 9, ud, ud_len,
+        EXCLUSIVE_OWNERSHIP_QOS,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        TOPIC_PRESENTATION_QOS, true, true, part, topic_data, 7, group_data, 7,
+        uc_locators, 2, mc_locators, 2);
+    ParameterList empty_param_list;
+    TEST_ASSERT(!from_param_list(empty_param_list, reader_data_out));
+    TEST_ASSERT(!strcmp(reader_data_out.ddsSubscriptionData.topic_name, ""));
+    TEST_ASSERT(!strcmp(reader_data_out.ddsSubscriptionData.type_name, ""));
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.durability.kind ==
+                TheServiceParticipant->initial_DurabilityQosPolicy().kind);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.deadline.period.sec ==
+                TheServiceParticipant->initial_DeadlineQosPolicy().period.sec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.deadline.period.nanosec ==
+                TheServiceParticipant->initial_DeadlineQosPolicy().period.nanosec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.latency_budget.duration.sec ==
+                TheServiceParticipant->initial_LatencyBudgetQosPolicy().duration.sec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.latency_budget.duration.nanosec ==
+                TheServiceParticipant->initial_LatencyBudgetQosPolicy().duration.nanosec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.liveliness.kind ==
+                TheServiceParticipant->initial_LivelinessQosPolicy().kind);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.liveliness.lease_duration.sec ==
+                TheServiceParticipant->initial_LivelinessQosPolicy().lease_duration.sec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.liveliness.lease_duration.nanosec ==
+                TheServiceParticipant->initial_LivelinessQosPolicy().lease_duration.nanosec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.reliability.kind ==
+                TheServiceParticipant->initial_ReliabilityQosPolicy().kind);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.sec ==
+                TheServiceParticipant->initial_ReliabilityQosPolicy().max_blocking_time.sec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.nanosec ==
+                TheServiceParticipant->initial_ReliabilityQosPolicy().max_blocking_time.nanosec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.ownership.kind ==
+                TheServiceParticipant->initial_OwnershipQosPolicy().kind);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.destination_order.kind ==
+                TheServiceParticipant->initial_DestinationOrderQosPolicy().kind);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.user_data.value ==
+                TheServiceParticipant->initial_UserDataQosPolicy().value);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.time_based_filter.minimum_separation.sec ==
+                TheServiceParticipant->initial_TimeBasedFilterQosPolicy().minimum_separation.sec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec ==
+                TheServiceParticipant->initial_TimeBasedFilterQosPolicy().minimum_separation.nanosec);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.presentation.access_scope ==
+                TheServiceParticipant->initial_PresentationQosPolicy().access_scope);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.presentation.coherent_access ==
+                TheServiceParticipant->initial_PresentationQosPolicy().coherent_access);
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.presentation.ordered_access ==
+                TheServiceParticipant->initial_PresentationQosPolicy().ordered_access);
+    TEST_ASSERT(!reader_data_out.ddsSubscriptionData.partition.name.length());
+    TEST_ASSERT(!reader_data_out.ddsSubscriptionData.topic_data.value.length());
+    TEST_ASSERT(!reader_data_out.ddsSubscriptionData.group_data.value.length());
+    /*
+    TEST_ASSERT(!reader_data_out.readerProxy.unicastLocatorList.length());
+    */
+    TEST_ASSERT(!reader_data_out.readerProxy.multicastLocatorList.length());
   }
   return 0;
 }

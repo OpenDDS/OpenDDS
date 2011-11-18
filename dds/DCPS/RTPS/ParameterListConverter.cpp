@@ -221,6 +221,7 @@ int to_param_list(const DiscoveredWriterData& writer_data,
   return 0;
 }
 
+// TODO: convert contentFilterProperty
 int to_param_list(const DiscoveredReaderData& reader_data,
                   ParameterList& param_list)
 {
@@ -522,6 +523,7 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
+// TODO: convert contentFilterProperty
 int from_param_list(const ParameterList& param_list,
                     DiscoveredReaderData& reader_data)
 {
@@ -537,12 +539,14 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_LivelinessQosPolicy();
   reader_data.ddsSubscriptionData.reliability =
       TheServiceParticipant->initial_ReliabilityQosPolicy();
-  reader_data.ddsSubscriptionData.user_data =
-      TheServiceParticipant->initial_UserDataQosPolicy();
   reader_data.ddsSubscriptionData.ownership =
       TheServiceParticipant->initial_OwnershipQosPolicy();
   reader_data.ddsSubscriptionData.destination_order =
       TheServiceParticipant->initial_DestinationOrderQosPolicy();
+  reader_data.ddsSubscriptionData.user_data =
+      TheServiceParticipant->initial_UserDataQosPolicy();
+  reader_data.ddsSubscriptionData.time_based_filter =
+      TheServiceParticipant->initial_TimeBasedFilterQosPolicy();
   reader_data.ddsSubscriptionData.presentation =
       TheServiceParticipant->initial_PresentationQosPolicy();
   reader_data.ddsSubscriptionData.partition =
@@ -553,6 +557,7 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_GroupDataQosPolicy();
   reader_data.readerProxy.unicastLocatorList.length(0);
   reader_data.readerProxy.multicastLocatorList.length(0);
+
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     Parameter param = param_list[i];
