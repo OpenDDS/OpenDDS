@@ -11,10 +11,11 @@
 #include "dds/DCPS/RTPS/rtps_export.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 
-namespace OpenDDS {
-namespace RTPS {
+namespace OpenDDS { namespace RTPS {
+
+
   // Converter to and from parameter lists
-  class OpenDDS_Rtps_Export ParameterListConverter {
+  class OpenDDS_Rtps_Export ParamListConverter {
   public:
     int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
                       ParameterList& param_list) const;
@@ -36,7 +37,27 @@ namespace RTPS {
         const ParameterId_t pid) const;
     void append_locator(LocatorSeq& list, const Locator_t& locator) const;
   };
+
+namespace ParameterListConverter {
+  OpenDDS_Rtps_Export
+  int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
+                    ParameterList& param_list);
+  OpenDDS_Rtps_Export
+  int to_param_list(const DiscoveredWriterData& writer_data,
+                    ParameterList& param_list);
+  OpenDDS_Rtps_Export
+  int to_param_list(const DiscoveredReaderData& writer_data,
+                    ParameterList& param_list);
+  OpenDDS_Rtps_Export
+  int from_param_list(const ParameterList& param_list,
+                      SPDPdiscoveredParticipantData& participant_data);
+  OpenDDS_Rtps_Export
+  int from_param_list(const ParameterList& param_list,
+                      DiscoveredWriterData& writer_data);
+  OpenDDS_Rtps_Export
+  int from_param_list(const ParameterList& param_list,
+                      DiscoveredReaderData& writer_data);
 }
-}
+} }
 
 #endif

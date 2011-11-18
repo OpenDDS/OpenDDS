@@ -12,8 +12,53 @@
 
 namespace OpenDDS { namespace RTPS {
 
+namespace ParameterListConverter {
+int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
+                  ParameterList& param_list)
+{
+  ParamListConverter plc;
+  return plc.to_param_list(participant_data, param_list);
+}
+
+int to_param_list(const DiscoveredWriterData& writer_data,
+                  ParameterList& param_list)
+{
+  ParamListConverter plc;
+  return plc.to_param_list(writer_data, param_list);
+}
+
+int to_param_list(const DiscoveredReaderData& reader_data,
+                  ParameterList& param_list)
+{
+  ParamListConverter plc;
+  return plc.to_param_list(reader_data, param_list);
+}
+
+int from_param_list(const ParameterList& param_list,
+                    SPDPdiscoveredParticipantData& participant_data)
+{
+  ParamListConverter plc;
+  return plc.from_param_list(param_list, participant_data);
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DiscoveredWriterData& writer_data)
+{
+  ParamListConverter plc;
+  return plc.from_param_list(param_list, writer_data);
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DiscoveredReaderData& reader_data)
+{
+  ParamListConverter plc;
+  return plc.from_param_list(param_list, reader_data);
+}
+
+};
+
 int
-ParameterListConverter::to_param_list(
+ParamListConverter::to_param_list(
     const SPDPdiscoveredParticipantData& participant_data,
     ParameterList& param_list) const
 {
@@ -90,7 +135,7 @@ ParameterListConverter::to_param_list(
 }
 
 int
-ParameterListConverter::to_param_list(
+ParamListConverter::to_param_list(
     const DiscoveredWriterData& writer_data,
     ParameterList& param_list) const
 {
@@ -199,7 +244,7 @@ ParameterListConverter::to_param_list(
 }
 
 int
-ParameterListConverter::to_param_list(
+ParamListConverter::to_param_list(
     const DiscoveredReaderData& reader_data,
     ParameterList& param_list) const
 {
@@ -292,7 +337,7 @@ ParameterListConverter::to_param_list(
 }
 
 int
-ParameterListConverter::from_param_list(
+ParamListConverter::from_param_list(
     const ParameterList& param_list,
     SPDPdiscoveredParticipantData& participant_data) const
 {
@@ -376,7 +421,7 @@ ParameterListConverter::from_param_list(
 }
 
 int
-ParameterListConverter::from_param_list(
+ParamListConverter::from_param_list(
     const ParameterList& param_list,
     DiscoveredWriterData& writer_data) const
 {
@@ -479,7 +524,7 @@ ParameterListConverter::from_param_list(
 }
 
 int
-ParameterListConverter::from_param_list(
+ParamListConverter::from_param_list(
     const ParameterList& param_list,
     DiscoveredReaderData& reader_data) const
 {
@@ -563,7 +608,7 @@ ParameterListConverter::from_param_list(
 }
 
 void
-ParameterListConverter::add_param(
+ParamListConverter::add_param(
     ParameterList& param_list,
     const Parameter& param) const
 {
@@ -573,7 +618,7 @@ ParameterListConverter::add_param(
 }
 
 void
-ParameterListConverter::add_param_locator_seq(
+ParamListConverter::add_param_locator_seq(
     ParameterList& param_list,
     const LocatorSeq& locator_seq,
     const ParameterId_t pid) const
@@ -588,7 +633,7 @@ ParameterListConverter::add_param_locator_seq(
 }
 
 void
-ParameterListConverter::append_locator(
+ParamListConverter::append_locator(
     LocatorSeq& list, 
     const Locator_t& locator) const
 {

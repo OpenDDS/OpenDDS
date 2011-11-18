@@ -1,3 +1,11 @@
+Fri Nov 18 18:36:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Introduce ParameterListConverter namespace.
+
 Fri Nov 18 18:21:05 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
