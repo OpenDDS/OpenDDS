@@ -185,7 +185,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                                            DDS::DataReaderListener::_nil(),
                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  } catch (const CORBA::Exception& e) {
+  } catch (const CORBA::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during DataReader initialization\n"));
     return 0;
