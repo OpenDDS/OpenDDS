@@ -12,55 +12,35 @@
 
 namespace OpenDDS { namespace RTPS {
 
+namespace {
+  void add_param(ParameterList& param_list, const Parameter& param) {
+    CORBA::ULong length = param_list.length();
+    param_list.length(length + 1);
+    param_list[length] = param;
+  }
+
+  void add_param_locator_seq(ParameterList& param_list,
+                             const LocatorSeq& locator_seq, 
+                             const ParameterId_t pid) {
+    CORBA::ULong length = locator_seq.length();
+    for (CORBA::ULong i = 0; i < length; ++i) {
+      Parameter param;
+      param.locator(locator_seq[i]);
+      param._d(pid);
+      add_param(param_list, param);
+    }
+  }
+
+  void append_locator(LocatorSeq& list, const Locator_t& locator) {
+    CORBA::ULong length = list.length();
+    list.length(length + 1); 
+    list[length] = locator;
+  }
+};
+
 namespace ParameterListConverter {
 int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
                   ParameterList& param_list)
-{
-  ParamListConverter plc;
-  return plc.to_param_list(participant_data, param_list);
-}
-
-int to_param_list(const DiscoveredWriterData& writer_data,
-                  ParameterList& param_list)
-{
-  ParamListConverter plc;
-  return plc.to_param_list(writer_data, param_list);
-}
-
-int to_param_list(const DiscoveredReaderData& reader_data,
-                  ParameterList& param_list)
-{
-  ParamListConverter plc;
-  return plc.to_param_list(reader_data, param_list);
-}
-
-int from_param_list(const ParameterList& param_list,
-                    SPDPdiscoveredParticipantData& participant_data)
-{
-  ParamListConverter plc;
-  return plc.from_param_list(param_list, participant_data);
-}
-
-int from_param_list(const ParameterList& param_list,
-                    DiscoveredWriterData& writer_data)
-{
-  ParamListConverter plc;
-  return plc.from_param_list(param_list, writer_data);
-}
-
-int from_param_list(const ParameterList& param_list,
-                    DiscoveredReaderData& reader_data)
-{
-  ParamListConverter plc;
-  return plc.from_param_list(param_list, reader_data);
-}
-
-};
-
-int
-ParamListConverter::to_param_list(
-    const SPDPdiscoveredParticipantData& participant_data,
-    ParameterList& param_list) const
 {
   // Parameterize ParticipantBuiltinTopicData
   // Ignore participant builtin topic key 
@@ -134,10 +114,8 @@ ParamListConverter::to_param_list(
   return 0;
 }
 
-int
-ParamListConverter::to_param_list(
-    const DiscoveredWriterData& writer_data,
-    ParameterList& param_list) const
+int to_param_list(const DiscoveredWriterData& writer_data,
+                  ParameterList& param_list)
 {
   // Ignore builtin topic key
 
@@ -243,10 +221,8 @@ ParamListConverter::to_param_list(
   return 0;
 }
 
-int
-ParamListConverter::to_param_list(
-    const DiscoveredReaderData& reader_data,
-    ParameterList& param_list) const
+int to_param_list(const DiscoveredReaderData& reader_data,
+                  ParameterList& param_list)
 {
   // Ignore builtin topic key
   {
@@ -336,10 +312,8 @@ ParamListConverter::to_param_list(
   return 0;
 }
 
-int
-ParamListConverter::from_param_list(
-    const ParameterList& param_list,
-    SPDPdiscoveredParticipantData& participant_data) const
+int from_param_list(const ParameterList& param_list,
+                    SPDPdiscoveredParticipantData& participant_data)
 {
   // Start by setting defaults
   participant_data.ddsParticipantData.user_data.value.length(0);
@@ -420,10 +394,8 @@ ParamListConverter::from_param_list(
   return 0;
 }
 
-int
-ParamListConverter::from_param_list(
-    const ParameterList& param_list,
-    DiscoveredWriterData& writer_data) const
+int from_param_list(const ParameterList& param_list,
+                    DiscoveredWriterData& writer_data)
 {
   // Start by setting defaults
   writer_data.ddsPublicationData.topic_name = "";
@@ -523,10 +495,8 @@ ParamListConverter::from_param_list(
   return 0;
 }
 
-int
-ParamListConverter::from_param_list(
-    const ParameterList& param_list,
-    DiscoveredReaderData& reader_data) const
+int from_param_list(const ParameterList& param_list,
+                    DiscoveredReaderData& reader_data)
 {
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -607,40 +577,7 @@ ParamListConverter::from_param_list(
   return 0;
 }
 
-void
-ParamListConverter::add_param(
-    ParameterList& param_list,
-    const Parameter& param) const
-{
-  CORBA::ULong length = param_list.length();
-  param_list.length(length + 1);
-  param_list[length] = param;
-}
-
-void
-ParamListConverter::add_param_locator_seq(
-    ParameterList& param_list,
-    const LocatorSeq& locator_seq,
-    const ParameterId_t pid) const
-{
-  CORBA::ULong length = locator_seq.length();
-  for (CORBA::ULong i = 0; i < length; ++i) {
-    Parameter param;
-    param.locator(locator_seq[i]);
-    param._d(pid);
-    add_param(param_list, param);
-  }
-}
-
-void
-ParamListConverter::append_locator(
-    LocatorSeq& list, 
-    const Locator_t& locator) const
-{
-  CORBA::ULong length = list.length();
-  list.length(length + 1); 
-  list[length] = locator;
-}
+};
 
 } }
 

@@ -13,31 +13,6 @@
 
 namespace OpenDDS { namespace RTPS {
 
-
-  // Converter to and from parameter lists
-  class OpenDDS_Rtps_Export ParamListConverter {
-  public:
-    int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
-                      ParameterList& param_list) const;
-    int to_param_list(const DiscoveredWriterData& writer_data,
-                      ParameterList& param_list) const;
-    int to_param_list(const DiscoveredReaderData& writer_data,
-                      ParameterList& param_list) const;
-    int from_param_list(const ParameterList& param_list,
-                        SPDPdiscoveredParticipantData& participant_data) const;
-    int from_param_list(const ParameterList& param_list,
-                        DiscoveredWriterData& writer_data) const;
-    int from_param_list(const ParameterList& param_list,
-                        DiscoveredReaderData& writer_data) const;
-  private:
-    void add_param(ParameterList& param_list, const Parameter& param) const;
-    void add_param_locator_seq(
-        ParameterList& param_list,
-        const LocatorSeq& locator_seq, 
-        const ParameterId_t pid) const;
-    void append_locator(LocatorSeq& list, const Locator_t& locator) const;
-  };
-
 namespace ParameterListConverter {
   OpenDDS_Rtps_Export
   int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
