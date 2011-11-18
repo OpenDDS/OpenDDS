@@ -386,6 +386,8 @@ ParameterListConverter::from_param_list(
   writer_data.ddsPublicationData.user_data.value.length(0);
   writer_data.ddsPublicationData.durability =
       TheServiceParticipant->initial_DurabilityQosPolicy();
+  writer_data.ddsPublicationData.durability_service =
+      TheServiceParticipant->initial_DurabilityServiceQosPolicy();
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {

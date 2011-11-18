@@ -1118,7 +1118,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.durability.kind);
   }
 
-  { // Should set writer topic type to default if not present in param list
+  { // Should set writer durability default if not present in param list
     DiscoveredWriterData writer_data_out = Factory::writer_data(
         NULL, NULL, TRANSIENT_LOCAL_DURABILITY_QOS);
     ParameterList empty_param_list;
@@ -1175,6 +1175,29 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(ds_in.max_samples == ds_out.max_samples);
     TEST_ASSERT(ds_in.max_instances == ds_out.max_instances);
     TEST_ASSERT(ds_in.max_samples_per_instance == ds_out.max_samples_per_instance);
+  }
+
+  { // Should set writer durability service default if not present in param list
+    DiscoveredWriterData writer_data_out = Factory::writer_data(
+        NULL, NULL, PERSISTENT_DURABILITY_QOS,
+        4, 2000,
+        KEEP_LAST_HISTORY_QOS, 172,
+        389, 102, 20);
+    ParameterList empty_param_list;
+    TEST_ASSERT(!plc.from_param_list(empty_param_list, writer_data_out));
+    DurabilityServiceQosPolicy defaultQos = 
+        TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+    DurabilityServiceQosPolicy& ds_out =
+        writer_data_out.ddsPublicationData.durability_service;
+    TEST_ASSERT(defaultQos.service_cleanup_delay.sec ==
+                ds_out.service_cleanup_delay.sec);
+    TEST_ASSERT(defaultQos.service_cleanup_delay.nanosec ==
+                ds_out.service_cleanup_delay.nanosec);
+    TEST_ASSERT(defaultQos.history_kind == ds_out.history_kind);
+    TEST_ASSERT(defaultQos.history_depth == ds_out.history_depth);
+    TEST_ASSERT(defaultQos.max_samples == ds_out.max_samples);
+    TEST_ASSERT(defaultQos.max_instances == ds_out.max_instances);
+    TEST_ASSERT(defaultQos.max_samples_per_instance == ds_out.max_samples_per_instance);
   }
 
   { // Should encode writer deadline
