@@ -8,6 +8,7 @@
 
 #include "ParameterListConverter.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Service_Participant.h"
 
 namespace OpenDDS { namespace RTPS {
 
@@ -380,7 +381,11 @@ ParameterListConverter::from_param_list(
     DiscoveredWriterData& writer_data) const
 {
   // Start by setting defaults
+  writer_data.ddsPublicationData.topic_name = "";
+  writer_data.ddsPublicationData.type_name  = "";
   writer_data.ddsPublicationData.user_data.value.length(0);
+  writer_data.ddsPublicationData.durability =
+      TheServiceParticipant->initial_DurabilityQosPolicy();
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {

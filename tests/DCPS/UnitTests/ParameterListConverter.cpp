@@ -9,6 +9,7 @@
 #include "dds/DCPS/RTPS/ParameterListConverter.h"
 #include "../common/TestSupport.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include <iostream>
@@ -938,14 +939,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   { // Should set participant user data qos to default if not present in param list
     SPDPdiscoveredParticipantData part_data_out;
-    ParameterList empty_param_list;
-    plc.from_param_list(empty_param_list, part_data_out);
-    CORBA::ULong length = part_data_out.ddsParticipantData.user_data.value.length();
-    TEST_ASSERT(length == 0);
-  }
-
-  { // Should set participant user data qos to default if not present in param list
-    SPDPdiscoveredParticipantData part_data_out;
     part_data_out.ddsParticipantData.user_data.value.length(4);
     ParameterList empty_param_list;
     int status = plc.from_param_list(empty_param_list, part_data_out);
@@ -1065,6 +1058,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                         writer_data_out.ddsPublicationData.topic_name));
   }
 
+  { // Should set writer topic name to default if not present in param list
+    DiscoveredWriterData writer_data_out;
+    writer_data_out.ddsPublicationData.topic_name = "TEST TOPIC";
+    ParameterList empty_param_list;
+    TEST_ASSERT(!plc.from_param_list(empty_param_list, writer_data_out));
+    TEST_ASSERT(!strcmp(writer_data_out.ddsPublicationData.topic_name, ""));
+  }
+
   { // Should encode writer type name
     DiscoveredWriterData writer_data = Factory::writer_data("", "Messages");
 
@@ -1083,6 +1084,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
     TEST_ASSERT(!strcmp(writer_data.ddsPublicationData.type_name,
                         writer_data_out.ddsPublicationData.type_name));
+  }
+
+  { // Should set writer topic type to default if not present in param list
+    DiscoveredWriterData writer_data_out;
+    writer_data_out.ddsPublicationData.type_name = "TEST TYPE";
+    ParameterList empty_param_list;
+    TEST_ASSERT(!plc.from_param_list(empty_param_list, writer_data_out));
+    TEST_ASSERT(!strcmp(writer_data_out.ddsPublicationData.type_name, ""));
   }
 
   { // Should encode writer durability qos policy
@@ -1106,6 +1115,17 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     DiscoveredWriterData writer_data_out;
     TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
     TEST_ASSERT(writer_data.ddsPublicationData.durability.kind ==
+                writer_data_out.ddsPublicationData.durability.kind);
+  }
+
+  { // Should set writer topic type to default if not present in param list
+    DiscoveredWriterData writer_data_out = Factory::writer_data(
+        NULL, NULL, TRANSIENT_LOCAL_DURABILITY_QOS);
+    ParameterList empty_param_list;
+    TEST_ASSERT(!plc.from_param_list(empty_param_list, writer_data_out));
+    DurabilityQosPolicy defaultQos = 
+        TheServiceParticipant->initial_DurabilityQosPolicy();
+    TEST_ASSERT(defaultQos.kind ==
                 writer_data_out.ddsPublicationData.durability.kind);
   }
 
