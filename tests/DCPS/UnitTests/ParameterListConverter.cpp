@@ -10,7 +10,6 @@
 #include "../common/TestSupport.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include <iostream>
 
@@ -247,6 +246,105 @@ namespace {
       }
       return result;
     }
+
+    DiscoveredReaderData 
+    reader_data(
+        const char* topic_name = NULL,
+        const char* type_name  = NULL,
+        DurabilityQosPolicyKind durability 
+                               = VOLATILE_DURABILITY_QOS,
+        long svc_del_sec = 0L,
+        unsigned long svc_del_nsec = 0L,
+        HistoryQosPolicyKind hist = KEEP_LAST_HISTORY_QOS, 
+        long hist_depth = 1L,
+        long max_samples = 1L,
+        long max_instances = 1L,
+        long max_samples_per_instance = 1L,
+        long deadline_sec = 0L, unsigned long deadline_nsec = 0L,
+        long lb_sec = 0L, unsigned long lb_nsec = 0L,
+        LivelinessQosPolicyKind liveliness = 
+              AUTOMATIC_LIVELINESS_QOS,
+        long ld_sec = 0L, unsigned long ld_nsec = 0L,
+        ReliabilityQosPolicyKind reliability = 
+              BEST_EFFORT_RELIABILITY_QOS,
+        long mbt_sec = 0L, unsigned long mbt_nsec = 0L,
+        long ls_sec = 0L, unsigned long ls_nsec = 0L,
+        const void* user_data = NULL, CORBA::ULong user_data_len = 0,
+        OwnershipQosPolicyKind ownership =
+              SHARED_OWNERSHIP_QOS,
+        long ownership_strength = 0L,
+        DestinationOrderQosPolicyKind destination_order = 
+              BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
+        PresentationQosPolicyAccessScopeKind presentation = 
+              INSTANCE_PRESENTATION_QOS,
+        bool coherent = false, bool ordered = false,
+        const char* partition = NULL,
+        const void* topic_data = NULL, CORBA::ULong topic_data_len = 0,
+        const void* group_data = NULL, CORBA::ULong group_data_len = 0,
+        Locator_t* uc_locs = NULL, CORBA::ULong num_uc_locs = 0,
+        Locator_t* mc_locs = NULL, CORBA::ULong num_mc_locs = 0
+    ) {
+      DiscoveredReaderData result;
+      if (topic_name) {
+        result.ddsSubscriptionData.topic_name = topic_name;
+      }
+      if (type_name) {
+        result.ddsSubscriptionData.type_name  = type_name;
+      }
+      result.ddsSubscriptionData.durability.kind = durability;
+      result.ddsSubscriptionData.deadline.period.sec = deadline_sec;
+      result.ddsSubscriptionData.deadline.period.nanosec = deadline_nsec;
+      result.ddsSubscriptionData.latency_budget.duration.sec = lb_sec;
+      result.ddsSubscriptionData.latency_budget.duration.nanosec = lb_nsec;
+      result.ddsSubscriptionData.liveliness.kind = liveliness;
+      result.ddsSubscriptionData.liveliness.lease_duration.sec = ld_sec;
+      result.ddsSubscriptionData.liveliness.lease_duration.nanosec = ld_nsec;
+      result.ddsSubscriptionData.reliability.kind = reliability;
+      result.ddsSubscriptionData.reliability.max_blocking_time.sec = mbt_sec;
+      result.ddsSubscriptionData.reliability.max_blocking_time.nanosec = mbt_nsec;
+      if (user_data_len && user_data) {
+        result.ddsSubscriptionData.user_data.value.length(user_data_len);
+        for (CORBA::ULong i = 0; i < user_data_len; ++i) {
+          result.ddsSubscriptionData.user_data.value[i] = ((char*)user_data)[i];
+        }
+        
+      }
+      result.ddsSubscriptionData.ownership.kind = ownership;
+      result.ddsSubscriptionData.destination_order.kind = destination_order;
+      result.ddsSubscriptionData.presentation.access_scope = presentation;
+      result.ddsSubscriptionData.presentation.coherent_access = coherent;
+      result.ddsSubscriptionData.presentation.ordered_access = ordered;
+      if (partition) {
+        result.ddsSubscriptionData.partition.name.length(1);
+        result.ddsSubscriptionData.partition.name[0] = partition;
+      }
+      if (topic_data && topic_data_len) {
+        result.ddsSubscriptionData.topic_data.value.length(topic_data_len);
+        for (CORBA::ULong i = 0; i < topic_data_len; ++i) {
+          result.ddsSubscriptionData.topic_data.value[i] = ((char*)topic_data)[i];
+        }
+      }
+      if (group_data && group_data_len) {
+        result.ddsSubscriptionData.group_data.value.length(group_data_len);
+        for (CORBA::ULong i = 0; i < group_data_len; ++i) {
+          result.ddsSubscriptionData.group_data.value[i] = ((char*)group_data)[i];
+        }
+      }
+      guid_generator.populate(result.readerProxy.remoteReaderGuid);
+      if (num_uc_locs && uc_locs) {
+        result.readerProxy.unicastLocatorList.length(num_uc_locs);
+        for (CORBA::ULong i = 0; i < num_uc_locs; ++i) {
+          result.readerProxy.unicastLocatorList[i] = uc_locs[i];
+        }
+      }
+      if (num_mc_locs && mc_locs) {
+        result.readerProxy.multicastLocatorList.length(num_mc_locs);
+        for (CORBA::ULong i = 0; i < num_mc_locs; ++i) {
+          result.readerProxy.multicastLocatorList[i] = mc_locs[i];
+        }
+      }
+      return result;
+    }
   }
 }
 
@@ -351,7 +449,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
   }
 
-  { // Should encode user data properly
+  { // Should encode participant user data properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant("hello user", 10);
     ParameterList param_list;
@@ -373,7 +471,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(ud_qos.value[9] == 'r');
   }
 
-  { // Should decode user data properly
+  { // Should decode participant user data properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant("hello user", 10);
     ParameterList param_list;
@@ -404,7 +502,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 part_data_out.ddsParticipantData.user_data.value[9]);
   }
 
-  { // Should encode protocol version properly
+  { // Should encode participant protocol version properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 3, 8);
     ParameterList param_list;
@@ -417,7 +515,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(pv.minor == 8);
   }
 
-  { // Should decode protocol version properly
+  { // Should decode participant protocol version properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 9, 1);
     ParameterList param_list;
@@ -432,7 +530,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 part_data_out.participantProxy.protocolVersion.minor);
   }
 
-  { // Should encode vendor id properly
+  { // Should encode participant vendor id properly
     char vendor_id[] = {7, 9};
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
@@ -446,7 +544,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(vid.vendorId[1] == 9);
   }
 
-  { // Should decode vendor id properly
+  { // Should decode participant vendor id properly
     char vendor_id[] = {7, 9};
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
@@ -460,7 +558,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                         sizeof(OctetArray2)));
   }
 
-  { // Should encode guid prefix properly
+  { // Should encode participant guid prefix properly
     GUID_t guid_in;
     memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
     SPDPdiscoveredParticipantData participant_data = 
@@ -474,7 +572,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(memcmp(guid_out.guidPrefix, "GUID-ABC    ", 12) == 0);
   }
 
-  { // Should decode guid prefix properly
+  { // Should decode participant guid prefix properly
     GUID_t guid_in;
     memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
     SPDPdiscoveredParticipantData participant_data = 
@@ -490,7 +588,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                        sizeof(GuidPrefix_t)) == 0);
   }
 
-  { // Should encode expects inline qos properly
+  { // Should encode participant expects inline qos properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
     ParameterList param_list;
@@ -501,7 +599,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.expects_inline_qos() == true);
   }
 
-  { // Should decode expects inline qos properly
+  { // Should decode participant expects inline qos properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
     ParameterList param_list;
@@ -520,7 +618,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == false);
   }
 
-  { // Should encode builtin endpoints properly
+  { // Should encode participant builtin endpoints properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
     ParameterList param_list;
@@ -531,7 +629,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.participant_builtin_endpoints() == 72393L);
   }
 
-  { // Should decode builtin endpoints properly
+  { // Should decode participant builtin endpoints properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
     ParameterList param_list;
@@ -545,7 +643,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         part_data_out.participantProxy.availableBuiltinEndpoints);
   }
 
-  { // Should encode meta unicast locators properly
+  { // Should encode participant meta unicast locators properly
     Locator_t locators[2];
     Locator_t locator_out;
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
@@ -574,7 +672,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
   }
 
-  { // Should decode meta unicast locators properly
+  { // Should decode participant meta unicast locators properly
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -605,7 +703,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
   }
 
-  { // Should encode meta multicast locators properly
+  { // Should encode participant meta multicast locators properly
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -636,7 +734,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
   }
 
-  { // Should decode meta multicast locators properly
+  { // Should decode participant meta multicast locators properly
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -667,7 +765,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
   }
 
-  { // Should encode default unicast locators properly
+  { // Should encode participant default unicast locators properly
     Locator_t locators[2];
     Locator_t locator_out;
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
@@ -696,7 +794,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
   }
 
-  { // Should decode default unicast locators properly
+  { // Should decode participant default unicast locators properly
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -727,7 +825,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
   }
 
-  { // Should encode default multicast locators properly
+  { // Should encode participant default multicast locators properly
     Locator_t locators[2];
     Locator_t locator_out;
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
@@ -757,7 +855,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(memcmp(locator_out.address, locators[1].address, 16) == 0);
   }
 
-  { // Should decode default multicast locators properly
+  { // Should decode participant default multicast locators properly
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -789,7 +887,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
   }
 
-  { // Should encode liveliness count properly
+  { // Should encode participant liveliness count properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                   NULL, 0, NULL, 0, NULL, 0, NULL, 0,
@@ -802,7 +900,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.count().value == 7);
   }
 
-  { // Should decode liveliness count properly
+  { // Should decode participant liveliness count properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                   NULL, 0, NULL, 0, NULL, 0, NULL, 0,
@@ -816,7 +914,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         part_data_out.participantProxy.manualLivelinessCount.value == 6);
   }
 
-  { // Should encode lease duration properly
+  { // Should encode participant lease duration properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                   NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
@@ -830,7 +928,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(param.duration().fraction == 300);
   }
 
-  { // Should decode lease duration properly
+  { // Should decode participant lease duration properly
     SPDPdiscoveredParticipantData participant_data = 
         Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                   NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
@@ -847,37 +945,29 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 participant_data.leaseDuration.fraction);
   }
 
-  { // Should set user data qos to default if not present in param list
+  { // Should set participant user data qos to default if not present in param list
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList empty_param_list;
     plc.from_param_list(empty_param_list, part_data_out);
     CORBA::ULong length = part_data_out.ddsParticipantData.user_data.value.length();
-    TEST_ASSERT(length == PARTICIPANT_QOS_DEFAULT.user_data.value.length());
-    for (CORBA::ULong i = 0; i < length; ++i) {
-      TEST_ASSERT(part_data_out.ddsParticipantData.user_data.value[i] ==
-                  PARTICIPANT_QOS_DEFAULT.user_data.value[i]);
-    }
+    TEST_ASSERT(length == 0);
   }
 
-  { // Should set user data qos to default if not present in param list
+  { // Should set participant user data qos to default if not present in param list
     SPDPdiscoveredParticipantData part_data_out;
     part_data_out.ddsParticipantData.user_data.value.length(4);
     ParameterList empty_param_list;
     int status = plc.from_param_list(empty_param_list, part_data_out);
     TEST_ASSERT(!status);
     CORBA::ULong length = part_data_out.ddsParticipantData.user_data.value.length();
-    TEST_ASSERT(length == PARTICIPANT_QOS_DEFAULT.user_data.value.length());
-    for (CORBA::ULong i = 0; i < length; ++i) {
-      TEST_ASSERT(part_data_out.ddsParticipantData.user_data.value[i] ==
-                  PARTICIPANT_QOS_DEFAULT.user_data.value[i]);
-    }
+    TEST_ASSERT(length == 0);
   }
 
   // There is no default protocol version
   // There is no default guid prefix
   // There is no defaul vendor id
 
-  { // Should set expects inline qos to default if not present in param list
+  { // Should set participant expects inline qos to default if not present in param list
     SPDPdiscoveredParticipantData part_data_out;
     part_data_out.participantProxy.expectsInlineQos = true;
     ParameterList empty_param_list;
@@ -894,7 +984,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // There is no default manual liveliness count
   // The lease duration default is { 100, 0 }
 
-  { // Should set expects inline qos to default if not present in param list
+  { // Should set participant lease duration to default if not present in param list
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList empty_param_list;
     int status = plc.from_param_list(empty_param_list, part_data_out);
@@ -903,7 +993,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(part_data_out.leaseDuration.fraction == 0);
   }
 
-  { // Should ignore vendor-specific parameters
+  { // Should ignore participant vendor-specific parameters
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList vs_param_list;
     Parameter vs_param;
@@ -914,7 +1004,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!status);
   }
 
-  { // Should not fail on optional parameters
+  { // Should not fail on participant optional parameters
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList vs_param_list;
     Parameter vs_param;
@@ -925,7 +1015,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!status);
   }
 
-  { // Should fail on required parameters
+  { // Should fail on participant required parameters
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList vs_param_list;
     Parameter vs_param;
@@ -936,7 +1026,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(status != 0);
   }
 
-  { // Should ignore SENTINEL
+  { // Should ignore participant SENTINEL
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList vs_param_list;
     Parameter vs_param;
@@ -947,7 +1037,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!status);
   }
 
-  { // Should ignore PAD
+  { // Should ignore participant PAD
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList vs_param_list;
     Parameter vs_param;
@@ -1013,8 +1103,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_DURABILITY));
     Parameter param = get(param_list, PID_DURABILITY);
-    TEST_ASSERT(param.durability().kind ==
-        TRANSIENT_LOCAL_DURABILITY_QOS);
+    TEST_ASSERT(param.durability().kind == TRANSIENT_LOCAL_DURABILITY_QOS);
   }
 
   { // Should decode writer durability
@@ -1029,7 +1118,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.durability.kind);
   }
 
-  { // Should encode durabiltiy service
+  { // Should encode writer durabiltiy service
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, 
         TRANSIENT_LOCAL_DURABILITY_QOS,
@@ -1077,7 +1166,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(ds_in.max_samples_per_instance == ds_out.max_samples_per_instance);
   }
 
-  { // Should encode deadline
+  { // Should encode writer deadline
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
@@ -1106,7 +1195,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.deadline.period.nanosec);
   }
 
-  { // Should enode latency budget
+  { // Should enode writer latency budget
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
@@ -1132,7 +1221,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.latency_budget.duration.sec);
   }
 
-  { // Should encode liveliness
+  { // Should encode writer liveliness
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1163,7 +1252,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.liveliness.lease_duration.nanosec);
   }
 
-  { // Should encode reliability
+  { // Should encode writer reliability
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1196,7 +1285,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.reliability.max_blocking_time.nanosec);
   }
 
-  { // Should encode lifespan
+  { // Should encode writer lifespan
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1221,11 +1310,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
     DiscoveredWriterData writer_data_out;
     TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
-    TEST_ASSERT(writer_data.ddsPublicationData.durability.kind ==
-                writer_data_out.ddsPublicationData.durability.kind);
+    TEST_ASSERT(writer_data.ddsPublicationData.lifespan.duration.sec ==
+                writer_data_out.ddsPublicationData.lifespan.duration.sec);
+    TEST_ASSERT(writer_data.ddsPublicationData.lifespan.duration.nanosec ==
+                writer_data_out.ddsPublicationData.lifespan.duration.nanosec);
   }
 
-  { // Should encode user data
+  { // Should encode writer user data
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -1260,7 +1351,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.user_data.value);
   }
 
-  { // Should encode ownership
+  { // Should encode writer ownership
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1289,7 +1380,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.ownership.kind);
   }
 
-  { // Should encode ownership strength
+  { // Should encode writer ownership strength
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1319,7 +1410,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.ownership_strength.value);
   }
 
-  { // Should encode destination order
+  { // Should encode writer destination order
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1350,7 +1441,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.destination_order.kind);
   }
 
-  { // Should encode presentation
+  { // Should encode writer presentation
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -1389,7 +1480,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.presentation.ordered_access);
   }
 
-  { // Should encode partition
+  { // Should encode writer partition
     const char* part = "TESTPARTITION";
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1427,7 +1518,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                         writer_data_out.ddsPublicationData.partition.name[0]));
   }
 
-  { // Should encode topic data
+  { // Should encode writer topic data
     const char* topic_data = "TEST TD";
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1467,7 +1558,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.topic_data.value);
   }
 
-  { // Should encode group data
+  { // Should encode writer group data
     const char* group_data = "TEST GD";
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1531,7 +1622,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                         sizeof(GUID_t)));
   }
 
-  { // Should encode unicast locators
+  { // Should encode writer unicast locators
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -1574,16 +1665,16 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
     DiscoveredWriterData writer_data_out;
     TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
-    TEST_ASSERT(writer_data.writerProxy.unicastLocatorList.length() == 2);
-    TEST_ASSERT(!memcmp(&writer_data.writerProxy.unicastLocatorList[0],
+    TEST_ASSERT(writer_data_out.writerProxy.unicastLocatorList.length() == 2);
+    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.unicastLocatorList[0],
                         &locators[0],
                         sizeof(Locator_t)));
-    TEST_ASSERT(!memcmp(&writer_data.writerProxy.unicastLocatorList[1],
+    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.unicastLocatorList[1],
                         &locators[1],
                         sizeof(Locator_t)));
   }
 
-  { // Should encode multicast locators
+  { // Should encode writer multicast locators
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -1625,14 +1716,582 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!plc.to_param_list(writer_data, param_list));
     DiscoveredWriterData writer_data_out;
     TEST_ASSERT(!plc.from_param_list(param_list, writer_data_out));
-    TEST_ASSERT(writer_data.writerProxy.multicastLocatorList.length() == 2);
-    TEST_ASSERT(!memcmp(&writer_data.writerProxy.multicastLocatorList[0],
+    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList.length() == 2);
+    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.multicastLocatorList[0],
                         &locators[0],
                         sizeof(Locator_t)));
-    TEST_ASSERT(!memcmp(&writer_data.writerProxy.multicastLocatorList[1],
+    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.multicastLocatorList[1],
                         &locators[1],
                         sizeof(Locator_t)));
   }
 
+  { // Should encode reader data
+    DiscoveredReaderData reader_data; 
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+  }
+
+  { // Should encode reader topic name
+    DiscoveredReaderData reader_data = 
+        Factory::reader_data("TOPIC NAME TEST");
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_TOPIC_NAME));
+    Parameter param = get(param_list, PID_TOPIC_NAME);
+    TEST_ASSERT(!strncmp(param.string_data(), "TOPIC NAME TEST", 15));
+  }
+
+  { // Should decode reader topic name
+    DiscoveredReaderData reader_data = 
+        Factory::reader_data("TOPIC NAME TEST");
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(!strcmp(reader_data.ddsSubscriptionData.topic_name,
+                        reader_data_out.ddsSubscriptionData.topic_name));
+  }
+
+  { // Should encode reader type name
+    DiscoveredReaderData reader_data = Factory::reader_data("", "Messages");
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_TYPE_NAME));
+    Parameter param = get(param_list, PID_TYPE_NAME);
+    TEST_ASSERT(!strncmp(param.string_data(), "Messages", 8));
+  }
+
+  { // Should decode reader type name
+    DiscoveredReaderData reader_data = Factory::reader_data("", "Messages");
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(!strcmp(reader_data.ddsSubscriptionData.type_name,
+                        reader_data_out.ddsSubscriptionData.type_name));
+  }
+
+  { // Should encode reader durability qos policy
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, 
+        TRANSIENT_LOCAL_DURABILITY_QOS);
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_DURABILITY));
+    Parameter param = get(param_list, PID_DURABILITY);
+    TEST_ASSERT(param.durability().kind == TRANSIENT_LOCAL_DURABILITY_QOS);
+  }
+
+  { // Should decode reader durability
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, 
+        TRANSIENT_LOCAL_DURABILITY_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.durability.kind ==
+                reader_data_out.ddsSubscriptionData.durability.kind);
+  }
+
+  { // Should encode reader deadline
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
+        127, 35000);
+
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_DEADLINE));
+    Parameter param = get(param_list, PID_DEADLINE);
+    TEST_ASSERT(param.deadline().period.sec == 127);
+    TEST_ASSERT(param.deadline().period.nanosec == 35000);
+  }
+
+  { // Should decode reader deadline
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
+        127, 35000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.deadline.period.sec ==
+                reader_data_out.ddsSubscriptionData.deadline.period.sec);
+    TEST_ASSERT(reader_data.ddsSubscriptionData.deadline.period.nanosec ==
+                reader_data_out.ddsSubscriptionData.deadline.period.nanosec);
+  }
+
+  { // Should enode reader latency budget
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
+        5, 25000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
+    Parameter param = get(param_list, PID_LATENCY_BUDGET);
+    TEST_ASSERT(param.deadline().period.sec == 5);
+    TEST_ASSERT(param.deadline().period.nanosec == 25000);
+  }
+
+  { // Should decode reader latency budget
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
+        5, 25000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.latency_budget.duration.sec ==
+                reader_data_out.ddsSubscriptionData.latency_budget.duration.sec);
+  }
+
+  { // Should encode reader liveliness
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_LIVELINESS));
+    Parameter param = get(param_list, PID_LIVELINESS);
+    TEST_ASSERT(param.liveliness().kind == MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
+    TEST_ASSERT(param.liveliness().lease_duration.sec == 17);
+    TEST_ASSERT(param.liveliness().lease_duration.nanosec == 15000);
+  }
+
+  { // Should decode reader liveliness
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.liveliness.kind ==
+                reader_data_out.ddsSubscriptionData.liveliness.kind);
+    TEST_ASSERT(reader_data.ddsSubscriptionData.liveliness.lease_duration.sec ==
+                reader_data_out.ddsSubscriptionData.liveliness.lease_duration.sec);
+    TEST_ASSERT(reader_data.ddsSubscriptionData.liveliness.lease_duration.nanosec ==
+                reader_data_out.ddsSubscriptionData.liveliness.lease_duration.nanosec);
+  }
+
+  { // Should encode reader reliability
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        RELIABLE_RELIABILITY_QOS, 8, 100);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
+    Parameter param = get(param_list, PID_RELIABILITY);
+    TEST_ASSERT(param.reliability().kind == RELIABLE_RELIABILITY_QOS);
+    TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
+    TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
+  }
+
+  { // Should decode reader reliability
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        RELIABLE_RELIABILITY_QOS, 8, 100);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.reliability.kind ==
+                reader_data_out.ddsSubscriptionData.reliability.kind);
+    TEST_ASSERT(reader_data.ddsSubscriptionData.reliability.max_blocking_time.sec ==
+                reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.sec);
+    TEST_ASSERT(reader_data.ddsSubscriptionData.reliability.max_blocking_time.nanosec ==
+                reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.nanosec);
+  }
+
+  { // Should encode reader user data
+    const char* ud = "USERDATA TEST";
+    CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
+        ud, ud_len);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_USER_DATA));
+    Parameter param = get(param_list, PID_USER_DATA);
+    TEST_ASSERT(param.user_data().value.length() == ud_len);
+    for (CORBA::ULong i = 0; i < ud_len; ++i) {
+      TEST_ASSERT(ud[i] == param.user_data().value[i]);
+    }
+  }
+  { // Should decode reader user data
+    const char* ud = "USERDATA TEST";
+    CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
+        ud, ud_len);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.user_data.value ==
+                reader_data_out.ddsSubscriptionData.user_data.value);
+  }
+
+  { // Should encode reader ownership
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        EXCLUSIVE_OWNERSHIP_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_OWNERSHIP));
+    Parameter param = get(param_list, PID_OWNERSHIP);
+    TEST_ASSERT(param.ownership().kind == EXCLUSIVE_OWNERSHIP_QOS);
+  }
+
+  { // Should decode reader ownership
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        EXCLUSIVE_OWNERSHIP_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.ownership.kind ==
+                reader_data_out.ddsSubscriptionData.ownership.kind);
+  }
+
+  { // Should encode reader destination order
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_DESTINATION_ORDER));
+    Parameter param = get(param_list, PID_DESTINATION_ORDER);
+    TEST_ASSERT(param.destination_order().kind == 
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
+  }
+  { // Should decode reader destination order
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.destination_order.kind ==
+                reader_data_out.ddsSubscriptionData.destination_order.kind);
+  }
+
+  { // Should encode reader presentation
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        GROUP_PRESENTATION_QOS, true, true);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_PRESENTATION));
+    Parameter param = get(param_list, PID_PRESENTATION);
+    TEST_ASSERT(param.presentation().access_scope == 
+           GROUP_PRESENTATION_QOS);
+    TEST_ASSERT(param.presentation().coherent_access == true);
+    TEST_ASSERT(param.presentation().ordered_access == true);
+  }
+  { // Should decode reader presentation
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        GROUP_PRESENTATION_QOS, true, true);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.presentation.access_scope ==
+                reader_data_out.ddsSubscriptionData.presentation.access_scope);
+    TEST_ASSERT(reader_data.ddsSubscriptionData.presentation.coherent_access ==
+                reader_data_out.ddsSubscriptionData.presentation.coherent_access);
+    TEST_ASSERT(reader_data.ddsSubscriptionData.presentation.ordered_access ==
+                reader_data_out.ddsSubscriptionData.presentation.ordered_access);
+  }
+
+  { // Should encode reader partition
+    const char* part = "TESTPARTITION";
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false,
+        part);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_PARTITION));
+    Parameter param = get(param_list, PID_PARTITION);
+    TEST_ASSERT(param.partition().name.length() == 1);
+    TEST_ASSERT(strncmp(param.partition().name[0], part, 12) == 0);
+  }
+  { // Should decode reader partition
+    const char* part = "TESTPARTITION";
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false,
+        part);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data_out.ddsSubscriptionData.partition.name.length() == 1);
+    TEST_ASSERT(!strcmp(reader_data.ddsSubscriptionData.partition.name[0],
+                        reader_data_out.ddsSubscriptionData.partition.name[0]));
+  }
+
+  { // Should encode reader topic data
+    const char* topic_data = "TEST TD";
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL,
+        topic_data, 7);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_TOPIC_DATA));
+    Parameter param = get(param_list, PID_TOPIC_DATA);
+    CORBA::ULong len = param.topic_data().value.length();
+    TEST_ASSERT(len == 7);
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      TEST_ASSERT(param.topic_data().value[i] = topic_data[i]);
+    }
+  }
+  { // Should decode reader topic data
+    const char* topic_data = "TEST TD";
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL,
+        topic_data, 7);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.topic_data.value ==
+                reader_data_out.ddsSubscriptionData.topic_data.value);
+  }
+
+  { // Should encode reader group data
+    const char* group_data = "TEST GD";
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+        group_data, 7);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_GROUP_DATA));
+    Parameter param = get(param_list, PID_GROUP_DATA);
+    CORBA::ULong len = param.group_data().value.length();
+    TEST_ASSERT(len == 7);
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      TEST_ASSERT(param.group_data().value[i] = group_data[i]);
+    }
+  }
+  { // Should decode reader group data
+    const char* group_data = "TEST GD";
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+        group_data, 7);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data.ddsSubscriptionData.group_data.value ==
+                reader_data_out.ddsSubscriptionData.group_data.value);
+  }
+
+  { // Should encode reader guid
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_GROUP_GUID));
+  }
+  { // Should decode reader guid
+    DiscoveredReaderData reader_data;
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(!memcmp(&reader_data.readerProxy.remoteReaderGuid,
+                        &reader_data_out.readerProxy.remoteReaderGuid,
+                        sizeof(GUID_t)));
+  }
+
+  { // Should encode reader unicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        locators, 2
+        );
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
+  }
+  { // Should decode reader unicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        locators, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data_out.readerProxy.unicastLocatorList.length() == 2);
+    TEST_ASSERT(!memcmp(&reader_data.readerProxy.unicastLocatorList[0],
+                        &locators[0],
+                        sizeof(Locator_t)));
+    TEST_ASSERT(!memcmp(&reader_data.readerProxy.unicastLocatorList[1],
+                        &locators[1],
+                        sizeof(Locator_t)));
+  }
+
+  { // Should encode reader multicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, locators, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
+  }
+  { // Should decode reader multicast locators
+    Locator_t locators[2];
+    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+                                   1234,
+                                   127, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   7734,
+                                   107, 9, 8, 21);
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, locators, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!plc.to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!plc.from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList.length() == 2);
+    TEST_ASSERT(!memcmp(&reader_data.readerProxy.multicastLocatorList[0],
+                        &locators[0],
+                        sizeof(Locator_t)));
+    TEST_ASSERT(!memcmp(&reader_data.readerProxy.multicastLocatorList[1],
+                        &locators[1],
+                        sizeof(Locator_t)));
+  }
   return 0;
 }

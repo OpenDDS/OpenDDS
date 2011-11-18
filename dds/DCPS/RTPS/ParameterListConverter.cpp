@@ -198,6 +198,99 @@ ParameterListConverter::to_param_list(
 }
 
 int
+ParameterListConverter::to_param_list(
+    const DiscoveredReaderData& reader_data,
+    ParameterList& param_list) const
+{
+  // Ignore builtin topic key
+  {
+    Parameter param;
+    param.string_data(reader_data.ddsSubscriptionData.topic_name);
+    param._d(PID_TOPIC_NAME);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.string_data(reader_data.ddsSubscriptionData.type_name);
+    param._d(PID_TYPE_NAME);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.durability(reader_data.ddsSubscriptionData.durability);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.deadline(reader_data.ddsSubscriptionData.deadline);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.latency_budget(reader_data.ddsSubscriptionData.latency_budget);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.liveliness(reader_data.ddsSubscriptionData.liveliness);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.reliability(reader_data.ddsSubscriptionData.reliability);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.user_data(reader_data.ddsSubscriptionData.user_data);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.ownership(reader_data.ddsSubscriptionData.ownership);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.destination_order(reader_data.ddsSubscriptionData.destination_order);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.presentation(reader_data.ddsSubscriptionData.presentation);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.partition(reader_data.ddsSubscriptionData.partition);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.topic_data(reader_data.ddsSubscriptionData.topic_data);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.group_data(reader_data.ddsSubscriptionData.group_data);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.guid(reader_data.readerProxy.remoteReaderGuid);
+    param._d(PID_GROUP_GUID);
+    add_param(param_list, param);
+  }
+  add_param_locator_seq(param_list, 
+                        reader_data.readerProxy.unicastLocatorList,
+                        PID_UNICAST_LOCATOR);
+  add_param_locator_seq(param_list, 
+                        reader_data.readerProxy.multicastLocatorList,
+                        PID_MULTICAST_LOCATOR);
+  return 0;
+}
+
+int
 ParameterListConverter::from_param_list(
     const ParameterList& param_list,
     SPDPdiscoveredParticipantData& participant_data) const
@@ -318,6 +411,9 @@ ParameterListConverter::from_param_list(
       case PID_RELIABILITY:
         writer_data.ddsPublicationData.reliability = param.reliability();
         break;
+      case PID_LIFESPAN:
+        writer_data.ddsPublicationData.lifespan = param.lifespan();
+        break;
       case PID_USER_DATA:
         writer_data.ddsPublicationData.user_data = param.user_data();
         break;
@@ -353,6 +449,90 @@ ParameterListConverter::from_param_list(
       case PID_MULTICAST_LOCATOR:
         append_locator(
             writer_data.writerProxy.multicastLocatorList,
+            param.locator());
+        break;
+      case PID_SENTINEL:
+      case PID_PAD:
+        // ignore
+        break;
+      default:
+        // If this param is vendor specific, ignore
+        if (param._d() & PIDMASK_VENDOR_SPECIFIC) {
+          // skip
+        // Else if this param is not required for compatibility, ignore
+        } else if (!(param._d() & PIDMASK_INCOMPATIBLE)) {
+          // skip
+        // Else error
+        } else {
+          return -1;
+        }
+    }
+  }
+  return 0;
+}
+
+int
+ParameterListConverter::from_param_list(
+    const ParameterList& param_list,
+    DiscoveredReaderData& reader_data) const
+{
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    Parameter param = param_list[i];
+    switch (param._d()) {
+      case PID_TOPIC_NAME:
+        reader_data.ddsSubscriptionData.topic_name = param.string_data();
+        break;
+      case PID_TYPE_NAME:
+        reader_data.ddsSubscriptionData.type_name = param.string_data();
+        break;
+      case PID_DURABILITY:
+        reader_data.ddsSubscriptionData.durability = param.durability();
+        break;
+      case PID_DEADLINE:
+        reader_data.ddsSubscriptionData.deadline = param.deadline();
+        break;
+      case PID_LATENCY_BUDGET:
+        reader_data.ddsSubscriptionData.latency_budget = param.latency_budget();
+        break;
+      case PID_LIVELINESS:
+        reader_data.ddsSubscriptionData.liveliness = param.liveliness();
+        break;
+      case PID_RELIABILITY:
+        reader_data.ddsSubscriptionData.reliability = param.reliability();
+        break;
+      case PID_USER_DATA:
+        reader_data.ddsSubscriptionData.user_data = param.user_data();
+        break;
+      case PID_OWNERSHIP:
+        reader_data.ddsSubscriptionData.ownership = param.ownership();
+        break;
+      case PID_DESTINATION_ORDER:
+        reader_data.ddsSubscriptionData.destination_order = param.destination_order();
+        break;
+      case PID_PRESENTATION:
+        reader_data.ddsSubscriptionData.presentation = param.presentation();
+        break;
+      case PID_PARTITION:
+        reader_data.ddsSubscriptionData.partition = param.partition();
+        break;
+      case PID_TOPIC_DATA:
+        reader_data.ddsSubscriptionData.topic_data = param.topic_data();
+        break;
+      case PID_GROUP_DATA:
+        reader_data.ddsSubscriptionData.group_data = param.group_data();
+        break;
+      case PID_GROUP_GUID:
+        reader_data.readerProxy.remoteReaderGuid = param.guid();
+        break;
+      case PID_UNICAST_LOCATOR:
+        append_locator(
+            reader_data.readerProxy.unicastLocatorList,
+            param.locator());
+        break;
+      case PID_MULTICAST_LOCATOR:
+        append_locator(
+            reader_data.readerProxy.multicastLocatorList,
             param.locator());
         break;
       case PID_SENTINEL:
