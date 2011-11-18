@@ -209,7 +209,7 @@ int to_param_list(const DiscoveredWriterData& writer_data,
   {
     Parameter param;
     param.guid(writer_data.writerProxy.remoteWriterGuid);
-    param._d(PID_GROUP_GUID);
+    param._d(PID_PARTICIPANT_GUID);
     add_param(param_list, param);
   }
   add_param_locator_seq(param_list, 
@@ -300,7 +300,7 @@ int to_param_list(const DiscoveredReaderData& reader_data,
   {
     Parameter param;
     param.guid(reader_data.readerProxy.remoteReaderGuid);
-    param._d(PID_GROUP_GUID);
+    param._d(PID_PARTICIPANT_GUID);
     add_param(param_list, param);
   }
   add_param_locator_seq(param_list, 
@@ -400,11 +400,38 @@ int from_param_list(const ParameterList& param_list,
   // Start by setting defaults
   writer_data.ddsPublicationData.topic_name = "";
   writer_data.ddsPublicationData.type_name  = "";
-  writer_data.ddsPublicationData.user_data.value.length(0);
   writer_data.ddsPublicationData.durability =
       TheServiceParticipant->initial_DurabilityQosPolicy();
   writer_data.ddsPublicationData.durability_service =
       TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+  writer_data.ddsPublicationData.deadline =
+      TheServiceParticipant->initial_DeadlineQosPolicy();
+  writer_data.ddsPublicationData.latency_budget =
+      TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+  writer_data.ddsPublicationData.liveliness =
+      TheServiceParticipant->initial_LivelinessQosPolicy();
+  writer_data.ddsPublicationData.reliability =
+      TheServiceParticipant->initial_ReliabilityQosPolicy();
+  writer_data.ddsPublicationData.lifespan =
+      TheServiceParticipant->initial_LifespanQosPolicy();
+  writer_data.ddsPublicationData.user_data =
+      TheServiceParticipant->initial_UserDataQosPolicy();
+  writer_data.ddsPublicationData.ownership =
+      TheServiceParticipant->initial_OwnershipQosPolicy();
+  writer_data.ddsPublicationData.ownership_strength =
+      TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+  writer_data.ddsPublicationData.destination_order =
+      TheServiceParticipant->initial_DestinationOrderQosPolicy();
+  writer_data.ddsPublicationData.presentation =
+      TheServiceParticipant->initial_PresentationQosPolicy();
+  writer_data.ddsPublicationData.partition =
+      TheServiceParticipant->initial_PartitionQosPolicy();
+  writer_data.ddsPublicationData.topic_data =
+      TheServiceParticipant->initial_TopicDataQosPolicy();
+  writer_data.ddsPublicationData.group_data =
+      TheServiceParticipant->initial_GroupDataQosPolicy();
+  writer_data.writerProxy.unicastLocatorList.length(0);
+  writer_data.writerProxy.multicastLocatorList.length(0);
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -462,7 +489,7 @@ int from_param_list(const ParameterList& param_list,
       case PID_GROUP_DATA:
         writer_data.ddsPublicationData.group_data = param.group_data();
         break;
-      case PID_GROUP_GUID:
+      case PID_PARTICIPANT_GUID:
         writer_data.writerProxy.remoteWriterGuid = param.guid();
         break;
       case PID_UNICAST_LOCATOR:
@@ -498,6 +525,34 @@ int from_param_list(const ParameterList& param_list,
 int from_param_list(const ParameterList& param_list,
                     DiscoveredReaderData& reader_data)
 {
+  reader_data.ddsSubscriptionData.topic_name = "";
+  reader_data.ddsSubscriptionData.type_name  = "";
+  reader_data.ddsSubscriptionData.durability =
+      TheServiceParticipant->initial_DurabilityQosPolicy();
+  reader_data.ddsSubscriptionData.deadline =
+      TheServiceParticipant->initial_DeadlineQosPolicy();
+  reader_data.ddsSubscriptionData.latency_budget =
+      TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+  reader_data.ddsSubscriptionData.liveliness =
+      TheServiceParticipant->initial_LivelinessQosPolicy();
+  reader_data.ddsSubscriptionData.reliability =
+      TheServiceParticipant->initial_ReliabilityQosPolicy();
+  reader_data.ddsSubscriptionData.user_data =
+      TheServiceParticipant->initial_UserDataQosPolicy();
+  reader_data.ddsSubscriptionData.ownership =
+      TheServiceParticipant->initial_OwnershipQosPolicy();
+  reader_data.ddsSubscriptionData.destination_order =
+      TheServiceParticipant->initial_DestinationOrderQosPolicy();
+  reader_data.ddsSubscriptionData.presentation =
+      TheServiceParticipant->initial_PresentationQosPolicy();
+  reader_data.ddsSubscriptionData.partition =
+      TheServiceParticipant->initial_PartitionQosPolicy();
+  reader_data.ddsSubscriptionData.topic_data =
+      TheServiceParticipant->initial_TopicDataQosPolicy();
+  reader_data.ddsSubscriptionData.group_data =
+      TheServiceParticipant->initial_GroupDataQosPolicy();
+  reader_data.readerProxy.unicastLocatorList.length(0);
+  reader_data.readerProxy.multicastLocatorList.length(0);
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     Parameter param = param_list[i];
@@ -544,7 +599,7 @@ int from_param_list(const ParameterList& param_list,
       case PID_GROUP_DATA:
         reader_data.ddsSubscriptionData.group_data = param.group_data();
         break;
-      case PID_GROUP_GUID:
+      case PID_PARTICIPANT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();
         break;
       case PID_UNICAST_LOCATOR:
