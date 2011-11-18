@@ -15,8 +15,14 @@
 
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Definitions.h"
+
+#include "RtpsMessageTypesC.h"
+
+#include "ace/SOCK_Dgram.h"
 
 #include <map>
+#include <set>
 #include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -92,10 +98,33 @@ public:
                                  const DCPS::RepoId& remoteId);
 
 private:
+  ACE_Thread_Mutex lock_;
+  // Participant:
   const DDS::DomainId_t domain_;
   const DCPS::RepoId guid_;
   DDS::DomainParticipantQos qos_;
   DDS::Subscriber_var bit_subscriber_;
+  ACE_Time_Value lease_duration_;
+  LocatorSeq sedp_unicast_, sedp_multicast_;
+
+  struct SpdpTransport : ACE_Event_Handler {
+    explicit SpdpTransport(Spdp* outer);
+
+    int handle_timeout(const ACE_Time_Value&, const void*);
+    int handle_input(ACE_HANDLE h);
+
+    void write();
+
+    Spdp* outer_;
+    Header hdr_;
+    DataSubmessage data_;
+    DCPS::SequenceNumber seq_;
+    ACE_SOCK_Dgram unicast_socket_;
+    std::set<ACE_INET_Addr> send_addrs_;
+
+  } spdp_;
+
+  // Topic:
   std::map<std::string, TopicDetails> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;

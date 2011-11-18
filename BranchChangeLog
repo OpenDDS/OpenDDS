@@ -1,3 +1,11 @@
+Fri Nov 18 22:57:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Started implementing writing of local participant data to
+          the mini-transport.
+
 Fri Nov 18 21:54:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
