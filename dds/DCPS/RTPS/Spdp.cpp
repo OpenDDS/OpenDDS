@@ -47,9 +47,20 @@ namespace {
 
 Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
-  : disco_(disco), domain_(domain), guid_(guid), qos_(qos), spdp_(this)
-  , topic_counter_(0)
+  : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
+  , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
+  , shutdown_cond_(lock_), topic_counter_(0)
 {
+}
+
+Spdp::~Spdp()
+{
+  tport_->close();
+  eh_.reset();
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  while (!eh_shutdown_) {
+    shutdown_cond_.wait();
+  }
 }
 
 void
@@ -158,6 +169,8 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   send_addrs_.insert(default_multicast);
   //TODO: allow user-configured addresses to be added here
 
+  reference_counting_policy().value(Reference_Counting_Policy::ENABLED);
+
   if (outer_->reactor()->register_handler(unicast_socket_.get_handle(),
         this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast input handler");
@@ -175,6 +188,16 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+    outer_->eh_shutdown_ = true;
+  }
+  outer_->shutdown_cond_.signal();
+}
+
+void
+Spdp::SpdpTransport::close()
 {
   outer_->reactor()->cancel_timer(this);
   const ACE_Reactor_Mask mask =
@@ -219,7 +242,7 @@ Spdp::SpdpTransport::write()
       outer_->sedp_multicast_,
       emptyList /*defaultMulticastLocatorList*/,
       emptyList /*defaultUnicastLocatorList*/,
-      0 /*manualLivelinessCount*/   //FUTURE: implement manual liveliness
+      {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(lease_duration_.sec()),
@@ -331,7 +354,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     }
     if (submessageLength && buff_.length()) {
       const size_t read = start - buff_.length();
-      if (read < submessageLength + SMHDR_SZ) {
+      if (read < static_cast<size_t>(submessageLength + SMHDR_SZ)) {
         ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ - read));
       }
     }

@@ -1,3 +1,20 @@
+Tue Nov 22 22:41:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          RTPSDiscovery's BIT data readers need to be registered with the
+          owning subscriber in order to get cleaned up properly.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Use ACE Event Handler reference counting to avoid a crash when
+          a reactor upcall is in progress during destruction of the Spdp.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Added cleanup and error checking to test.
+
 Tue Nov 22 19:06:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DCPS_Utils.h:

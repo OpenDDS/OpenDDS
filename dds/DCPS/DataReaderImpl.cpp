@@ -1231,7 +1231,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
         " in DataReaderImpl::enable");
       return DDS::RETCODE_ERROR;
     }
+  }
 
+  if (topic_servant_) {
     const CORBA::String_var name = topic_servant_->get_name();
     DDS::ReturnCode_t return_value =
       this->subscriber_servant_->reader_enabled(name.in(), this);

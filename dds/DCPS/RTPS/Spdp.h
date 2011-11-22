@@ -21,6 +21,7 @@
 
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Mcast.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 #include <map>
 #include <set>
@@ -41,6 +42,7 @@ class Spdp : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
 public:
   Spdp(DDS::DomainId_t domain, const DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco);
+  ~Spdp();
 
   // Participant
   void ignore_domain_participant(const DCPS::RepoId& ignoreId);
@@ -124,6 +126,7 @@ private:
     int handle_input(ACE_HANDLE h);
 
     void write();
+    void close();
 
     Spdp* outer_;
     Header hdr_;
@@ -135,7 +138,10 @@ private:
     std::set<ACE_INET_Addr> send_addrs_;
     ACE_Message_Block buff_;
 
-  } spdp_;
+  } *tport_;
+  ACE_Event_Handler_var eh_; // manages our refcount on tport_
+  bool eh_shutdown_;
+  ACE_Condition_Thread_Mutex shutdown_cond_;
 
   // Topic:
   std::map<std::string, TopicDetails> topics_;
