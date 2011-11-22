@@ -1,3 +1,22 @@
+Tue Nov 22 17:36:45 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/DCPS_Utils.cpp:
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Moved the DCPS Utils to DCPS so that they can be used by either the
+          InfoRepo or the new RTPS discovery infrastructure. The CompatibleQOS
+          functions were modified slightly to remove a dependency on other
+          InfoRepo classes, thus the changes to the DCPS_IR* classes.
+
 Tue Nov 22 16:35:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.inl:

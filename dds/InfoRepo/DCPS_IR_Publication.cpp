@@ -14,7 +14,7 @@
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
-#include /**/ "DCPS_Utils.h"
+#include /**/ "dds/DCPS/DCPS_Utils.h"
 #include /**/ "dds/DdsDcpsInfoUtilsC.h"
 #include /**/ "dds/DCPS/RepoIdConverter.h"
 #include /**/ "dds/DCPS/Qos_Helper.h"
@@ -759,7 +759,16 @@ DCPS_IR_Publication::reevaluate_association(DCPS_IR_Subscription* subscription)
 
   if (status == 0) {
     // verify if they are still compatiable after change
-    if (!::compatibleQOS(this, subscription)) {
+
+
+    if (!::compatibleQOS(this->get_incompatibleQosStatus(),
+                         subscription->get_incompatibleQosStatus(),
+                         this->get_transportLocatorSeq(),
+                         subscription->get_transportLocatorSeq(),
+                         this->get_datawriter_qos(),
+                         subscription->get_datareader_qos(),
+                         this->get_publisher_qos(),
+                         subscription->get_subscriber_qos())) {
       bool sendNotify = true; // inform datawriter
       bool notify_lost = true; // invoke listerner callback
 

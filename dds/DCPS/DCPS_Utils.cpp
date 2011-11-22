@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DcpsInfo_pch.h"
+#include "DdsDcps_pch.h"
 #include "DCPS_Utils.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Definitions.h"
@@ -156,6 +156,50 @@ compatibleTransports(const OpenDDS::DCPS::TransportLocatorSeq& s1,
 }
 
 bool
+compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
+              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus,
+              const OpenDDS::DCPS::TransportLocatorSeq& pubTLS,
+              const OpenDDS::DCPS::TransportLocatorSeq& subTLS,
+              DDS::DataWriterQos const * const writerQos,
+              DDS::DataReaderQos const * const readerQos,
+              DDS::PublisherQos const * const pubQos,
+              DDS::SubscriberQos const * const subQos)
+{
+  bool compatible = true;
+
+  // Check transport-type compatibility
+  if (!compatibleTransports(pubTLS, subTLS)) {
+    compatible = false;
+    increment_incompatibility_count(writerStatus,
+                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
+    increment_incompatibility_count(readerStatus,
+                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
+  }
+
+  // Verify compatibility of DataWriterQos and DataReaderQos
+  compatible = compatible && compatibleQOS(writerQos, readerQos,
+                                           writerStatus, readerStatus);
+
+  // Verify compatibility of PublisherQos and SubscriberQos
+  compatible = compatible && compatibleQOS(pubQos, subQos,
+                                           writerStatus, readerStatus);
+
+  // Verify publisher and subscriber are in a matching partition.
+  //
+  // According to the DDS spec:
+  //
+  //   Failure to match partitions is not considered an incompatible
+  //   QoS and does not trigger any listeners nor conditions.
+  //
+  // Don't increment the incompatibity count.
+  compatible = compatible && matching_partitions(pubQos->partition,
+                                                 subQos->partition);
+
+  return compatible;
+}
+
+#if 0
+bool
 compatibleQOS(DCPS_IR_Publication  * publication,
               DCPS_IR_Subscription * subscription)
 {
@@ -206,6 +250,7 @@ compatibleQOS(DCPS_IR_Publication  * publication,
 
   return compatible;
 }
+#endif
 
 bool
 compatibleQOS(const DDS::PublisherQos*  pubQos,
