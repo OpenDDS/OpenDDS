@@ -201,6 +201,15 @@ Service_Participant::get_ORB() const
   return CORBA::ORB::_duplicate(orb_.in());
 }
 
+ACE_Reactor*
+Service_Participant::discovery_reactor() const
+{
+  // In the initial implementation, the discovery_reactor() is the one used
+  // by TAO's ORB.  In the future this may be a separate reactor managed here.
+  CORBA::ORB_var orb = this->get_ORB();
+  return orb->orb_core()->reactor();
+}
+
 PortableServer::POA_ptr
 Service_Participant::the_poa()
 {

@@ -1,3 +1,10 @@
+Tue Nov 22 16:35:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Moved new method from inl to cpp in order to get TAO headers.
+
 Tue Nov 22 15:29:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.h:
