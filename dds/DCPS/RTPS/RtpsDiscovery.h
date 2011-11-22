@@ -43,9 +43,44 @@ public:
   virtual OpenDDS::DCPS::DCPSInfo_ptr get_dcps_info();
   virtual DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* dpi);
 
+  // configuration parameters:
+
+  ACE_Time_Value resend_period() const { return resend_period_; }
+  void resend_period(const ACE_Time_Value& period) {
+    resend_period_ = period;
+  }
+
+  u_short pb() const { return pb_; }
+  void pb(u_short port_base) {
+    pb_ = port_base;
+  }
+
+  u_short dg() const { return dg_; }
+  void dg(u_short domain_gain) {
+    dg_ = domain_gain;
+  }
+
+  u_short pg() const { return pg_; }
+  void pg(u_short participant_gain) {
+    pg_ = participant_gain;
+  }
+
+  u_short d0() const { return d0_; }
+  void d0(u_short offset_zero) {
+    d0_ = offset_zero;
+  }
+
+  u_short d1() const { return d1_; }
+  void d1(u_short offset_one) {
+    d1_ = offset_one;
+  }
+
 private:
   RtpsInfo* servant_;
   OpenDDS::DCPS::DCPSInfo_var info_;
+
+  ACE_Time_Value resend_period_;
+  u_short pb_, dg_, pg_, d0_, d1_;
 
   static int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
 

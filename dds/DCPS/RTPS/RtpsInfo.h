@@ -34,6 +34,7 @@ namespace RTPS {
 /// object" in DCPS (see class RtpsDiscovery).
 class RtpsInfo : public virtual POA_OpenDDS::DCPS::DCPSInfo {
 public:
+  explicit RtpsInfo(RtpsDiscovery* disco);
 
 
   // Participant operations:
@@ -194,6 +195,8 @@ public:
   void init_bit(const DDS::Subscriber_var& bit_subscriber);
 
 private:
+
+  RtpsDiscovery* disco_;
 
   std::map<DDS::DomainId_t,
            std::map<DCPS::RepoId, DCPS::RcHandle<Spdp>, DCPS::GUID_tKeyLessThan>

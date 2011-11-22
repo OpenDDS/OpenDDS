@@ -192,7 +192,7 @@ Service_Participant::set_ORB(CORBA::ORB_ptr orb)
 }
 
 CORBA::ORB_ptr
-Service_Participant::get_ORB()
+Service_Participant::get_ORB() const
 {
   // This method should be called after either set_ORB is called
   // or get_domain_participant_factory is called.
@@ -1645,19 +1645,19 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                              ACE_TEXT("Illegal integer value for DCPSBitTransportPort (%s) in [repository/%s] section.\n"),
+                              ACE_TEXT("Illegal integer value for DCPSBitTransportPort (%C) in [repository/%C] section.\n"),
                               value.c_str(), repo_name.c_str()),
                              -1);
           }
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%s]: DCPSBitTransportPort == %d\n"),
+                       ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportPort == %d\n"),
                        repo_name.c_str(), bitPort));
           }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                            ACE_TEXT("Unexpected entry (%s) in [repository/%s] section.\n"),
+                            ACE_TEXT("Unexpected entry (%C) in [repository/%C] section.\n"),
                             name.c_str(), repo_name.c_str()),
                            -1);
         }
@@ -1666,7 +1666,7 @@ Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
       if (values.find("RepositoryIor") == values.end()) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                          ACE_TEXT("Repository section [repository/%s] section is missing RepositoryIor value.\n"),
+                          ACE_TEXT("Repository section [repository/%C] section is missing RepositoryIor value.\n"),
                           repo_name.c_str()),
                          -1);
       }

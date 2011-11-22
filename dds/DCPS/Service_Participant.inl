@@ -331,5 +331,15 @@ Service_Participant::publisher_content_filter() const
   return this->publisher_content_filter_;
 }
 
+ACE_INLINE
+ACE_Reactor*
+Service_Participant::discovery_reactor() const
+{
+  // In the initial implementation, the discovery_reactor() is the one used
+  // by TAO's ORB.  In the future this may be a separate reactor managed here.
+  CORBA::ORB_var orb = this->get_ORB();
+  return orb->orb_core()->reactor();
+}
+
 } // namespace DDS
 } // namespace OpenDDS

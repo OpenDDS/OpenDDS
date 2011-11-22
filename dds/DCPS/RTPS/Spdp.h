@@ -20,6 +20,7 @@
 #include "RtpsMessageTypesC.h"
 
 #include "ace/SOCK_Dgram.h"
+#include "ace/SOCK_Dgram_Mcast.h"
 
 #include <map>
 #include <set>
@@ -32,12 +33,14 @@
 namespace OpenDDS {
 namespace RTPS {
 
+class RtpsDiscovery;
+
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class Spdp : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
 public:
   Spdp(DDS::DomainId_t domain, const DCPS::RepoId& guid,
-       const DDS::DomainParticipantQos& qos);
+       const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco);
 
   // Participant
   void ignore_domain_participant(const DCPS::RepoId& ignoreId);
@@ -98,17 +101,21 @@ public:
                                  const DCPS::RepoId& remoteId);
 
 private:
+  ACE_Reactor* reactor() const;
+
   ACE_Thread_Mutex lock_;
+  RtpsDiscovery* disco_;
+
   // Participant:
   const DDS::DomainId_t domain_;
   const DCPS::RepoId guid_;
   DDS::DomainParticipantQos qos_;
   DDS::Subscriber_var bit_subscriber_;
-  ACE_Time_Value lease_duration_;
   LocatorSeq sedp_unicast_, sedp_multicast_;
 
   struct SpdpTransport : ACE_Event_Handler {
     explicit SpdpTransport(Spdp* outer);
+    ~SpdpTransport();
 
     int handle_timeout(const ACE_Time_Value&, const void*);
     int handle_input(ACE_HANDLE h);
@@ -119,8 +126,11 @@ private:
     Header hdr_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
+    ACE_Time_Value lease_duration_;
     ACE_SOCK_Dgram unicast_socket_;
+    ACE_SOCK_Dgram_Mcast multicast_socket_;
     std::set<ACE_INET_Addr> send_addrs_;
+    ACE_Message_Block buff_;
 
   } spdp_;
 

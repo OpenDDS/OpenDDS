@@ -95,7 +95,11 @@ public:
    * Only valid after @c set_ORB() or
    * @c get_domain_participant_factory() called.
    */
-  CORBA::ORB_ptr get_ORB();
+  CORBA::ORB_ptr get_ORB() const;
+
+  /// Get the common reactor used for Discovery tasks.
+  /// Inteneded for use by OpenDDS internals only.
+  ACE_Reactor* discovery_reactor() const;
 
   /**
    * Initialize the DDS client environment and get the

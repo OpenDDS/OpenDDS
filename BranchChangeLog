@@ -1,3 +1,35 @@
+Tue Nov 22 15:29:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added error handling and configurable parameters.
+          Sending side of SPDP is done.  Receiving side is started, it opens
+          sockets and registers with the reactor.
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added a method for getting the reactor which can be used
+          for discovery.  Currently, this is the ORB's reactor.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Change default multicast addr to not conflict with discovery.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/dcps.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Started a test for discovery.  Not yet enough to run in a nighltly,
+          but the generated SPDP packets can be observed in Wireshark.
+
 Fri Nov 18 23:05:08 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

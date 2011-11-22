@@ -12,8 +12,16 @@
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "RtpsMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"
+#include "RtpsDiscovery.h"
 
 #include "dds/DdsDcpsGuidC.h"
+
+#include "dds/DCPS/Service_Participant.h"
+
+#include "ace/Reactor.h"
+
+#include <cstring>
+#include <stdexcept>
 
 
 namespace OpenDDS {
@@ -21,6 +29,11 @@ namespace RTPS {
 using DCPS::RepoId;
 
 namespace {
+  // Multiplier for resend period -> lease duration conversion,
+  // if a remote discovery misses this many resends from us it will consider
+  // us offline / unreachable.
+  const int LEASE_MULT = 10;
+
   void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
   {
     lhs[0] = static_cast<CORBA::Octet>(rhs);
@@ -31,8 +44,9 @@ namespace {
 
 
 Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
-           const DDS::DomainParticipantQos& qos)
-  : domain_(domain), guid_(guid), qos_(qos), spdp_(this), topic_counter_(0)
+           const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
+  : disco_(disco), domain_(domain), guid_(guid), qos_(qos), spdp_(this)
+  , topic_counter_(0)
 {
 }
 
@@ -56,8 +70,15 @@ Spdp::bit_subscriber(const DDS::Subscriber_var& bit_subscriber)
   bit_subscriber_ = bit_subscriber;
 }
 
+ACE_Reactor* 
+Spdp::reactor() const
+{
+  return TheServiceParticipant->discovery_reactor();
+}
+
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
-  : outer_(outer)
+  : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
+  , buff_(64 * 1024)
 {
   hdr_.prefix[0] = 'R';
   hdr_.prefix[1] = 'T';
@@ -75,6 +96,82 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   data_.writerId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
   data_.writerSN.high = 0;
   data_.writerSN.low = 0;
+
+  const u_short participantId = (hdr_.guidPrefix[10] << 8)
+                                | hdr_.guidPrefix[11];
+
+  // Ports are set by the formulas in RTPS v2.1 Table 9.8
+  const u_short port_common = outer_->disco_->pb() +
+                              (outer_->disco_->dg() * outer_->domain_),
+    uni_port = port_common + outer_->disco_->d1() +
+               (outer_->disco_->pg() * participantId),
+    mc_port = port_common + outer_->disco_->d0();
+
+  ACE_INET_Addr local_addr;
+  if (0 != local_addr.set(uni_port)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+        "failed setting unicast local_addr to port %hd %p\n",
+        uni_port, ACE_TEXT("ACE_INET_Addr::set")));
+    }
+    throw std::runtime_error("failed to set unicast local address");
+  }
+
+  if (0 != unicast_socket_.open(local_addr)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+        "failed to open unicast socket on port %hd %p\n",
+        uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
+    }
+    throw std::runtime_error("failed to open unicast socket");
+  }
+
+  const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
+  ACE_INET_Addr default_multicast;
+  if (0 != default_multicast.set(mc_port, mc_addr)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+        "failed setting default_multicast address %C:%hd %p\n",
+        mc_addr, mc_port, ACE_TEXT("ACE_INET_Addr::set")));
+    }
+    throw std::runtime_error("failed to set default_multicast address");
+  }
+
+  if (0 != multicast_socket_.join(default_multicast)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+        "failed to join multicast group %C:%hd %p\n",
+        mc_addr, mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+    }
+    throw std::runtime_error("failed to join multicast group");
+  }
+
+  send_addrs_.insert(default_multicast);
+  //TODO: allow user-configured addresses to be added here
+
+  if (outer_->reactor()->register_handler(unicast_socket_.get_handle(),
+        this, ACE_Event_Handler::READ_MASK) != 0) {
+    throw std::runtime_error("failed to register unicast input handler");
+  }
+
+  if (outer_->reactor()->register_handler(multicast_socket_.get_handle(),
+        this, ACE_Event_Handler::READ_MASK) != 0) {
+    throw std::runtime_error("failed to register multicast input handler");
+  }
+
+  const ACE_Time_Value per = outer_->disco_->resend_period();
+  if (-1 == outer_->reactor()->schedule_timer(this, 0, per, per)) {
+    throw std::runtime_error("failed to schedule timer with reactor");
+  }
+}
+
+Spdp::SpdpTransport::~SpdpTransport()
+{
+  outer_->reactor()->cancel_timer(this);
+  const ACE_Reactor_Mask mask =
+    ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
+  outer_->reactor()->remove_handler(multicast_socket_.get_handle(), mask);
+  outer_->reactor()->remove_handler(unicast_socket_.get_handle(), mask);
 }
 
 void
@@ -114,25 +211,19 @@ Spdp::SpdpTransport::write()
       outer_->sedp_multicast_,
       emptyList /*defaultMulticastLocatorList*/,
       emptyList /*defaultUnicastLocatorList*/,
-      0 /*manualLivelinessCount*/
+      0 /*manualLivelinessCount*/   //FUTURE: implement manual liveliness
     },
     { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>(outer_->lease_duration_.sec()),
+      static_cast<CORBA::Long>(lease_duration_.sec()),
       0 // we are not supporting fractional seconds in the lease duration
     }
   };
 
   ParameterList plist;
   ParameterListConverter::to_param_list(pdata, plist);
-  size_t size = 0, padding = 0;
-  using DCPS::gen_find_size;
-  gen_find_size(hdr_, size, padding);
-  gen_find_size(data_, size, padding);
-  size += DCPS::max_marshaled_size_ulong(); // encap
-  gen_find_size(plist, size, padding);
 
-  ACE_Message_Block send_buff(size + padding);
-  DCPS::Serializer ser(&send_buff, false, DCPS::Serializer::ALIGN_CDR);
+  buff_.reset();
+  DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     //TODO: error
   }
@@ -140,7 +231,7 @@ Spdp::SpdpTransport::write()
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
     ssize_t res =
-      unicast_socket_.send(send_buff.rd_ptr(), send_buff.length(), *iter);
+      unicast_socket_.send(buff_.rd_ptr(), buff_.length(), *iter);
     //TODO: check
   }
 }
@@ -149,14 +240,26 @@ int
 Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value&, const void*)
 {
   write();
+  //TODO: expire stale discovered participants
   return 0;
 }
 
 int
 Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 {
+  const ACE_SOCK_Dgram& socket = (h == unicast_socket_.get_handle())
+                                 ? unicast_socket_ : multicast_socket_;
+  ACE_INET_Addr remote;
+  buff_.reset();
+  ssize_t bytes = socket.recv(buff_.wr_ptr(), buff_.space(), remote);
+  if (bytes > 0) {
+    buff_.wr_ptr(bytes);
+  } else {
+    //TODO: error/close handling
+  }
   return 0;
 }
+
 
 DCPS::TopicStatus
 Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,

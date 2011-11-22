@@ -15,6 +15,10 @@ namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
 
+RtpsInfo::RtpsInfo(RtpsDiscovery* disco)
+  : disco_(disco)
+{
+}
 
 // Participant operations:
 
@@ -32,7 +36,14 @@ RtpsInfo::add_domain_participant(DDS::DomainId_t domain,
   DCPS::AddDomainStatus ads = {RepoId(), false /*federated*/};
   guid_gen_.populate(ads.id);
   ads.id.entityId = RTPS::ENTITYID_PARTICIPANT;
-  participants_[domain][ads.id] = new Spdp(domain, ads.id, qos);
+  try {
+    participants_[domain][ads.id] = new Spdp(domain, ads.id, qos, disco_);
+  } catch (const std::exception& e) {
+    ads.id = GUID_UNKNOWN;
+    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsInfo::add_domain_participant() - "
+      "failed to initialize RTPS Simple Participant Discovery Protocol: %C\n",
+      e.what()));
+  }
   return ads;
 }
 
