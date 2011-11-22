@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DdsDcps_pch.h"
-#include "DCPS_Utils.h"
+#include "DCPS/DdsDcps_pch.h"
+#include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Definitions.h"
 

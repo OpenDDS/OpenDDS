@@ -33,6 +33,8 @@ namespace {
   // if a remote discovery misses this many resends from us it will consider
   // us offline / unreachable.
   const int LEASE_MULT = 10;
+  const CORBA::ULong encap_LE = 0x00000300; // {options, PL_CDR_LE} in LE
+  const CORBA::ULong encap_BE = 0x00000200; // {options, PL_CDR_BE} in LE
 
   void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
   {
@@ -62,6 +64,13 @@ Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   qos_ = qos;
   return true;
+}
+
+void
+Spdp::data_received(const Header& header, const DataSubmessage& data,
+                    const ParameterList& plist, const Time_t& timestamp)
+{
+  //TODO
 }
 
 void
@@ -110,7 +119,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   ACE_INET_Addr local_addr;
   if (0 != local_addr.set(uni_port)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
         "failed setting unicast local_addr to port %hd %p\n",
         uni_port, ACE_TEXT("ACE_INET_Addr::set")));
     }
@@ -119,7 +128,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
 
   if (0 != unicast_socket_.open(local_addr)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
         "failed to open unicast socket on port %hd %p\n",
         uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
@@ -130,7 +139,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   ACE_INET_Addr default_multicast;
   if (0 != default_multicast.set(mc_port, mc_addr)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
         "failed setting default_multicast address %C:%hd %p\n",
         mc_addr, mc_port, ACE_TEXT("ACE_INET_Addr::set")));
     }
@@ -139,7 +148,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
 
   if (0 != multicast_socket_.join(default_multicast)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
         "failed to join multicast group %C:%hd %p\n",
         mc_addr, mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
@@ -186,7 +195,6 @@ Spdp::SpdpTransport::write()
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
-  static const CORBA::ULong encap = 0x00000300; // {options, PL_CDR_LE}
 
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
@@ -224,7 +232,8 @@ Spdp::SpdpTransport::write()
 
   buff_.reset();
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) ||
+      !(ser << plist)) {
     //TODO: error
   }
 
@@ -251,12 +260,83 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
                                  ? unicast_socket_ : multicast_socket_;
   ACE_INET_Addr remote;
   buff_.reset();
-  ssize_t bytes = socket.recv(buff_.wr_ptr(), buff_.space(), remote);
+  const ssize_t bytes = socket.recv(buff_.wr_ptr(), buff_.space(), remote);
+
   if (bytes > 0) {
     buff_.wr_ptr(bytes);
+  } else if (bytes == 0) {
+    return -1;
   } else {
-    //TODO: error/close handling
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::handle_input() - "
+        "error reading from %C socket %p\n", (h == unicast_socket_.get_handle())
+        ? "unicast" : "multicast", ACE_TEXT("ACE_SOCK_Dgram::recv")));
+    }
+    return -1;
   }
+
+  DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
+  Header header;
+  if (!(ser >> header)) {
+    //TODO
+  }
+
+  Time_t timestamp = TIME_INVALID;
+
+  while (buff_.length() > 3) {
+    const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
+    ser.swap_bytes((flags & 1 /*FLAG_E*/) != ACE_CDR_BYTE_ORDER);
+    const size_t start = buff_.length();
+    CORBA::UShort submessageLength = 0;
+    switch (subm) {
+    case INFO_TS: {
+      InfoTimestampSubmessage it;
+      if (!(ser >> it)) {
+        //TODO
+      }
+      submessageLength = it.smHeader.submessageLength;
+      if (!(it.smHeader.flags & 2 /*FLAG_I*/)) {
+        timestamp = it.timestamp;
+      } else {
+        timestamp = TIME_INVALID;
+      }
+    }
+    case DATA: {
+      DataSubmessage data;
+      if (!(ser >> data)) {
+        //TODO
+      }
+      submessageLength = data.smHeader.submessageLength;
+      ParameterList plist;
+      if (data.smHeader.flags & (4 /*FLAG_D*/ | 8 /*FLAG_K*/)) {
+        ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
+        CORBA::ULong encap;
+        if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+          //TODO
+        }
+        // bit 8 in encap is on if it's PL_CDR_LE
+        ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+        if (!(ser >> plist)) {
+          //TODO
+        }
+      }
+      outer_->data_received(header, data, plist, timestamp);
+    }
+    default:
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_WARNING, "(%P|%t) Spdp::SpdpTransport::handle_input() - "
+          "unrecognized submessage type: %d\n", int(subm)));
+      }
+      break;
+    }
+    if (submessageLength && buff_.length()) {
+      const size_t read = start - buff_.length();
+      if (read < submessageLength + SMHDR_SZ) {
+        ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ - read));
+      }
+    }
+  }
+
   return 0;
 }
 

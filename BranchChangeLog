@@ -1,3 +1,19 @@
+Tue Nov 22 19:06:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/DCPS_Utils.cpp:
+
+          Cleaned up #includes, fixed PCH include.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing receiving side of SPDP.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated comments only.
+
 Tue Nov 22 17:36:45 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/DCPS/DCPS_Utils.h:

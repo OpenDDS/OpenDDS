@@ -113,6 +113,9 @@ private:
   DDS::Subscriber_var bit_subscriber_;
   LocatorSeq sedp_unicast_, sedp_multicast_;
 
+  void data_received(const Header& header, const DataSubmessage& data,
+                     const ParameterList& plist, const Time_t& timestamp);
+
   struct SpdpTransport : ACE_Event_Handler {
     explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();

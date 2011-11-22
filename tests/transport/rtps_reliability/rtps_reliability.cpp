@@ -103,7 +103,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     dsle_.header_.message_length_ = 8;
     dsle_.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
     payload_.init(dsle_.header_.message_length_);
-    const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in BE format
+    const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in LE format
       data = 0xDCBADCBA;
     Serializer ser(&payload_, host_is_bigendian, Serializer::ALIGN_CDR);
     ser << encap;
@@ -233,7 +233,7 @@ struct TestParticipant: ACE_Event_Handler {
     size += FRAG_SIZE;
     ACE_Message_Block mb(size + padding);
     Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
-    const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
+    const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in LE format
     bool ok = (ser << hdr_) && (ser << df);
     if (i == 0) ok &= (ser << encap);
     ok &= ser.write_octet_array(data_for_frag_,

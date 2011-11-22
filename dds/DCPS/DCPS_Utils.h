@@ -9,15 +9,11 @@
 #ifndef DCPS_UTILS_H
 #define DCPS_UTILS_H
 
-#include  "dcps_export.h"
-#include /**/ "dds/DdsDcpsInfrastructureC.h"
-#if 0
-#include /**/ "DCPS_IR_Subscription.h"
-#include /**/ "DCPS_IR_Publication.h"
-#endif
-#include /**/ "dds/DdsDcpsPublicationC.h"
-#include /**/ "dds/DdsDcpsInfoC.h"
-#include /**/ "dds/DdsDcpsDataWriterRemoteC.h"
+#include "dcps_export.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsPublicationC.h"
+#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsDataWriterRemoteC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
