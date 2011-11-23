@@ -363,14 +363,14 @@ DCPS_IR_Topic_Description::try_associate(DCPS_IR_Publication* publication,
                  std::string(sub_converter).c_str()));
     }
 
-    if (::compatibleQOS(publication->get_incompatibleQosStatus(),
-                        subscription->get_incompatibleQosStatus(),
-                        publication->get_transportLocatorSeq(),
-                        subscription->get_transportLocatorSeq(),
-                        publication->get_datawriter_qos(),
-                        subscription->get_datareader_qos(),
-                        publication->get_publisher_qos(),
-                        subscription->get_subscriber_qos())) {
+    if (OpenDDS::DCPS::compatibleQOS(publication->get_incompatibleQosStatus(),
+                                     subscription->get_incompatibleQosStatus(),
+                                     publication->get_transportLocatorSeq(),
+                                     subscription->get_transportLocatorSeq(),
+                                     publication->get_datawriter_qos(),
+                                     subscription->get_datareader_qos(),
+                                     publication->get_publisher_qos(),
+                                     subscription->get_subscriber_qos())) {
       associate(publication, subscription);
       return true;
     }

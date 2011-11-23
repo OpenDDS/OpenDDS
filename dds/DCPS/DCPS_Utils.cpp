@@ -16,7 +16,8 @@
 
 #include <cstring>
 
-namespace {
+namespace OpenDDS {
+namespace DCPS {
 
 bool
 is_wildcard(const char *str)
@@ -112,8 +113,6 @@ matching_partitions(const DDS::PartitionQosPolicy& pub,
   return false;
 }
 
-} // namespace
-
 void
 increment_incompatibility_count(OpenDDS::DCPS::IncompatibleQosStatus* status,
                                 DDS::QosPolicyId_t incompatible_policy)
@@ -197,60 +196,6 @@ compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
 
   return compatible;
 }
-
-#if 0
-bool
-compatibleQOS(DCPS_IR_Publication  * publication,
-              DCPS_IR_Subscription * subscription)
-{
-  bool compatible = true;
-  OpenDDS::DCPS::IncompatibleQosStatus* writerStatus
-  = publication->get_incompatibleQosStatus();
-  OpenDDS::DCPS::IncompatibleQosStatus* readerStatus
-  = subscription->get_incompatibleQosStatus();
-
-  // Check transport-type compatibility
-  if (!compatibleTransports(publication->get_transportLocatorSeq(),
-                            subscription->get_transportLocatorSeq())) {
-    compatible = false;
-    increment_incompatibility_count(writerStatus,
-                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
-    increment_incompatibility_count(readerStatus,
-                                    OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
-  }
-
-  DDS::DataWriterQos const * const writerQos =
-    publication->get_datawriter_qos();
-  DDS::DataReaderQos const * const readerQos =
-    subscription->get_datareader_qos();
-
-  // Verify compatibility of DataWriterQos and DataReaderQos
-  compatible = compatible && compatibleQOS(writerQos, readerQos,
-                                           writerStatus, readerStatus);
-
-  DDS::PublisherQos const * const pubQos =
-    publication->get_publisher_qos();
-  DDS::SubscriberQos const * const subQos =
-    subscription->get_subscriber_qos();
-
-  // Verify compatibility of PublisherQos and SubscriberQos
-  compatible = compatible && compatibleQOS(pubQos, subQos,
-                                           writerStatus, readerStatus);
-
-  // Verify publisher and subscriber are in a matching partition.
-  //
-  // According to the DDS spec:
-  //
-  //   Failure to match partitions is not considered an incompatible
-  //   QoS and does not trigger any listeners nor conditions.
-  //
-  // Don't increment the incompatibity count.
-  compatible = compatible && matching_partitions(pubQos->partition,
-                                                 subQos->partition);
-
-  return compatible;
-}
-#endif
 
 bool
 compatibleQOS(const DDS::PublisherQos*  pubQos,
@@ -515,3 +460,5 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
 {
   return false;
 }
+
+}}

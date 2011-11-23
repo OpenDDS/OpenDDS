@@ -19,6 +19,9 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+namespace OpenDDS {
+namespace DCPS {
+
 /// Increments the count of occurances of the incompatible policy
 ///  for the status
 OpenDDS_Dcps_Export
@@ -105,5 +108,7 @@ bool should_check_association_upon_change(const DDS::TopicQos & qos1,
 OpenDDS_Dcps_Export
 bool should_check_association_upon_change(const DDS::DomainParticipantQos & qos1,
                                           const DDS::DomainParticipantQos & qos2);
+
+}}
 
 #endif /* DCPS_UTILS_H */

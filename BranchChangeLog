@@ -1,3 +1,14 @@
+Wed Nov 23 03:08:38 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/DCPS_Utils.cpp:
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Fix the namespace for the utils.
+
 Tue Nov 22 22:41:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

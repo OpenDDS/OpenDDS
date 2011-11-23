@@ -499,13 +499,14 @@ void
 DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos& qos)
 {
   if (false == (qos == this->qos_)) {
-    if (::should_check_compatibility_upon_change(qos, this->qos_)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos, this->qos_)
         && (false == this->compatibleQosChange(qos))) {
       return;
     }
 
     // Check if we should check while we have both values.
-    bool check = ::should_check_association_upon_change(qos, this->qos_);
+    bool check =
+      OpenDDS::DCPS::should_check_association_upon_change(qos, this->qos_);
 
     // Store the new, compatible, value.
     this->qos_ = qos;
@@ -533,13 +534,13 @@ void
 DCPS_IR_Subscription::set_qos(const DDS::SubscriberQos& qos)
 {
   if (false == (qos == this->subscriberQos_)) {
-    if (::should_check_compatibility_upon_change(qos, this->subscriberQos_)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos, this->subscriberQos_)
         && (false == this->compatibleQosChange(qos))) {
       return;
     }
 
     // Check if we should check while we have both values.
-    bool check = ::should_check_association_upon_change(qos, this->subscriberQos_);
+    bool check = OpenDDS::DCPS::should_check_association_upon_change(qos, this->subscriberQos_);
 
     // Store the new, compatible, value.
     this->subscriberQos_ = qos;
@@ -571,12 +572,12 @@ bool DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos & qos,
   bool u_dr_qos = !(qos_ == qos);
 
   if (u_dr_qos) {
-    if (::should_check_compatibility_upon_change(qos_, qos)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos_, qos)
         && !compatibleQosChange(qos)) {
       return false;
     }
 
-    if (::should_check_association_upon_change(qos_, qos)) {
+    if (OpenDDS::DCPS::should_check_association_upon_change(qos_, qos)) {
       need_evaluate = true;
     }
 
@@ -586,12 +587,12 @@ bool DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos & qos,
   bool u_sub_qos = !(subscriberQos_ == subscriberQos);
 
   if (u_sub_qos) {
-    if (::should_check_compatibility_upon_change(subscriberQos_, subscriberQos)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(subscriberQos_, subscriberQos)
         && !compatibleQosChange(subscriberQos)) {
       return false;
     }
 
-    if (::should_check_association_upon_change(subscriberQos_, subscriberQos)) {
+    if (OpenDDS::DCPS::should_check_association_upon_change(subscriberQos_, subscriberQos)) {
       need_evaluate = true;
     }
 
@@ -632,8 +633,8 @@ bool DCPS_IR_Subscription::compatibleQosChange(const DDS::DataReaderQos & qos)
     readerStatus.total_count = 0;
     readerStatus.count_since_last_send = 0;
 
-    if (!::compatibleQOS(pub->get_datawriter_qos(), &qos,
-                          &writerStatus, &readerStatus))
+    if (!OpenDDS::DCPS::compatibleQOS(pub->get_datawriter_qos(), &qos,
+                                      &writerStatus, &readerStatus))
       return false;
   }
 
@@ -658,8 +659,8 @@ bool DCPS_IR_Subscription::compatibleQosChange(const DDS::SubscriberQos & qos)
     pub = *iter;
     ++iter;
 
-    if (!::compatibleQOS(pub->get_publisher_qos(), &qos,
-                          &writerStatus, &readerStatus))
+    if (!OpenDDS::DCPS::compatibleQOS(pub->get_publisher_qos(), &qos,
+                                      &writerStatus, &readerStatus))
       return false;
   }
 
@@ -712,14 +713,14 @@ DCPS_IR_Subscription::reevaluate_association(DCPS_IR_Publication* publication)
   if (status == 0) {
     // verify if they are still compatiable after change
 
-    if (!::compatibleQOS(publication->get_incompatibleQosStatus(),
-                         this->get_incompatibleQosStatus(),
-                         publication->get_transportLocatorSeq(),
-                         this->get_transportLocatorSeq(),
-                         publication->get_datawriter_qos(),
-                         this->get_datareader_qos(),
-                         publication->get_publisher_qos(),
-                         this->get_subscriber_qos())) {
+    if (!OpenDDS::DCPS::compatibleQOS(publication->get_incompatibleQosStatus(),
+                                      this->get_incompatibleQosStatus(),
+                                      publication->get_transportLocatorSeq(),
+                                      this->get_transportLocatorSeq(),
+                                      publication->get_datawriter_qos(),
+                                      this->get_datareader_qos(),
+                                      publication->get_publisher_qos(),
+                                      this->get_subscriber_qos())) {
       bool sendNotify = true; // inform datareader
       bool notify_lost = true; // invoke listerner callback
 
