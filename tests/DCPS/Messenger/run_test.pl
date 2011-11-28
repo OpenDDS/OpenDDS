@@ -58,14 +58,18 @@ elsif ($ARGV[0] eq 'stack') {
     $stack_based = 1;
 }
 elsif ($ARGV[0] eq 'rtps') {
+    $pub_opts .= " -DCPSConfigFile rtps.ini";
+    $sub_opts .= " -DCPSConfigFile rtps.ini";
+}
+elsif ($ARGV[0] eq 'rtps_unicast') {
     $repo_bit_opt = '-NOBITS';
-    $pub_opts .= " -DCPSConfigFile rtps.ini -DCPSBit 0";
-    $sub_opts .= " -DCPSConfigFile rtps.ini -DCPSBit 0";
+    $pub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
+    $sub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
 }
 elsif ($ARGV[0] eq 'all') {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
-                        nobits stack rtps/);
+                        nobits stack rtps rtps_unicast/);
     push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
     for my $test (@tests) {
         $status += system($^X, $0, @original_ARGV, $test);

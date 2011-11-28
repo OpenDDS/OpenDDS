@@ -70,6 +70,8 @@ private:
   /// is not possible because the network location returned by
   /// connection_info_i() can't be shared among participants.
   RtpsUdpDataLink_rch link_;
+
+  ACE_SOCK_Dgram unicast_socket_;
 };
 
 } // namespace DCPS

@@ -45,7 +45,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   ACE_NEW_RETURN(recv_strategy, RtpsUdpReceiveStrategy(link_.in()), 0);
   link_->receive_strategy(recv_strategy);
 
-  if (!link_->open()) {
+  if (!link_->open(unicast_socket_)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::make_datalink: ")
@@ -225,6 +225,39 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                       ACE_TEXT("RtpsUdpTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
                      false);
+  }
+
+  // Open the socket here so that any addresses/ports left
+  // unspecified in the RtpsUdpInst are known by the time we get to
+  // connection_info_i().  Opening the sockets here also allows us to
+  // detect and report errors during DataReader/Writer setup instead
+  // of during association.
+
+  if (unicast_socket_.open(config_i_->local_address_) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpTransport::configure_i: socket open:")
+                      ACE_TEXT("%m\n")),
+                     false);
+  }
+
+  if (config_i_->local_address_.is_any()) {
+
+    if (unicast_socket_.get_local_addr(config_i_->local_address_) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p"),
+        ACE_TEXT("cannot get local addr\n")), false);
+    }
+
+  } else if (config_i_->local_address_.get_port_number() == 0) {
+
+    ACE_INET_Addr address;
+    if (unicast_socket_.get_local_addr(address) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p"),
+        ACE_TEXT("cannot get local addr\n")), false);
+    }
+    config_i_->local_address_.set_port_number(address.get_port_number());
   }
 
   create_reactor_task();

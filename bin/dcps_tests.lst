@@ -144,6 +144,7 @@ tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl stack: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl rtps: !DCPS_MIN
+tests/DCPS/Messenger/run_test.pl rtps_unicast: !DCPS_MIN
 
 tests/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
 tests/DCPS/Messenger/run_corbaloc_test.pl host_port_only: !DCPS_MIN

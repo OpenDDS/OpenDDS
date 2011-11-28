@@ -59,7 +59,7 @@ public:
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();
 
-  bool open();
+  bool open(const ACE_SOCK_Dgram& unicast_socket);
 
   void received(const OpenDDS::RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix,

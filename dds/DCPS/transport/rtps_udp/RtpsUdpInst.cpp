@@ -41,6 +41,11 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 {
   TransportInst::load(cf, sect); // delegate to parent
 
+  ACE_TString local_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
+                           local_address_s);
+  local_address_.set(local_address_s.c_str());
+
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
 
   ACE_TString group_address_s;

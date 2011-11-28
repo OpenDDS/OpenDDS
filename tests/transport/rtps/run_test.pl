@@ -29,7 +29,7 @@ sub do_test {
   }
 
   my $PUB = PerlDDS::create_process('publisher',
-              $mcast ? "-h 239.255.0.1 -p 7401" : "-h localhost -p $port");
+              $mcast ? "-h 239.255.0.2 -p 7401" : "-h localhost -p $port");
   $result = $PUB->SpawnWaitKill(60);
   print $PUB->CommandLine() . "\n";
   if ($result != 0) {
