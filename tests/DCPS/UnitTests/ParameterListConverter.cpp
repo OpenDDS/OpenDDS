@@ -274,7 +274,10 @@ namespace {
         const void* topic_data = NULL, CORBA::ULong topic_data_len = 0,
         const void* group_data = NULL, CORBA::ULong group_data_len = 0,
         Locator_t* uc_locs = NULL, CORBA::ULong num_uc_locs = 0,
-        Locator_t* mc_locs = NULL, CORBA::ULong num_mc_locs = 0
+        Locator_t* mc_locs = NULL, CORBA::ULong num_mc_locs = 0,
+        const char* cf_topic_name = NULL, const char* rel_topic_name = NULL, 
+        const char* filter_name = NULL, const char* filter_expr = NULL, 
+        const char** params = NULL, CORBA::ULong num_params = 0
     ) {
       DiscoveredReaderData result;
       if (topic_name) {
@@ -333,6 +336,24 @@ namespace {
         result.readerProxy.multicastLocatorList.length(num_mc_locs);
         for (CORBA::ULong i = 0; i < num_mc_locs; ++i) {
           result.readerProxy.multicastLocatorList[i] = mc_locs[i];
+        }
+      }
+      if (cf_topic_name) {
+        result.contentFilterProperty.contentFilteredTopicName = cf_topic_name;
+      }
+      if (rel_topic_name) {
+        result.contentFilterProperty.relatedTopicName = rel_topic_name;
+      }
+      if (filter_name) {
+        result.contentFilterProperty.filterClassName = filter_name;
+      }
+      if (filter_expr) {
+        result.contentFilterProperty.filterExpression = filter_expr;
+      }
+      result.contentFilterProperty.expressionParameters.length(num_params);
+      if (params && num_params) {
+        for (CORBA::ULong i = 0; i < num_params; ++i) {
+          result.contentFilterProperty.expressionParameters[i] = params[i];
         }
       }
       return result;
@@ -2539,6 +2560,64 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                         &locators[1],
                         sizeof(Locator_t)));
   }
+  { // Should encode reader content filter property
+    const char* cf_topic_name = "CFTopic test";
+    const char* rel_topic_name = "CFTopic rel";
+    const char* filter_name = "Filter test";
+    const char* filter_expr = "sequence > 10";
+    const char* params[] = { "17", "32" };
+
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, NULL, 0,
+        cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!to_param_list(reader_data, param_list));
+    TEST_ASSERT(is_present(param_list, PID_CONTENT_FILTER_PROPERTY));
+  }
+  { // Should decode reader content filter property
+    const char* cf_topic_name = "CFTopic test";
+    const char* rel_topic_name = "CFTopic rel";
+    const char* filter_name = "Filter test";
+    const char* filter_expr = "sequence > 10";
+    const char* params[] = { "17", "32" };
+
+    DiscoveredReaderData reader_data = Factory::reader_data(
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, NULL, 0,
+        cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
+    ParameterList param_list;
+    TEST_ASSERT(!to_param_list(reader_data, param_list));
+    DiscoveredReaderData reader_data_out;
+    TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+    TEST_ASSERT(
+        !strcmp(reader_data.contentFilterProperty.contentFilteredTopicName,
+            reader_data_out.contentFilterProperty.contentFilteredTopicName));
+    TEST_ASSERT(
+        !strcmp(reader_data.contentFilterProperty.relatedTopicName,
+            reader_data_out.contentFilterProperty.relatedTopicName));
+    TEST_ASSERT(
+        !strcmp(reader_data.contentFilterProperty.filterClassName,
+            reader_data_out.contentFilterProperty.filterClassName));
+    TEST_ASSERT(
+        !strcmp(reader_data.contentFilterProperty.filterExpression,
+            reader_data_out.contentFilterProperty.filterExpression));
+    TEST_ASSERT(reader_data_out.contentFilterProperty.expressionParameters.length() == 2);
+    TEST_ASSERT(!strcmp("17",
+                reader_data_out.contentFilterProperty.expressionParameters[0]));
+    TEST_ASSERT(!strcmp("32",
+                reader_data_out.contentFilterProperty.expressionParameters[1]));
+  }
   { // Should set reader defaults
     Locator_t uc_locators[2];
     Locator_t mc_locators[2];
@@ -2558,6 +2637,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     const char* part = "TESTPARTITION";
     const char* topic_data = "TEST TD";
     const char* group_data = "TEST GD";
+    const char* cf_topic_name = "CFTopic test";
+    const char* rel_topic_name = "CFTopic rel";
+    const char* filter_name = "Filter test";
+    const char* filter_expr = "sequence > 10";
+    const char* params[] = { "17", "32" };
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredReaderData reader_data_out = Factory::reader_data(
         "ABC", "DEF", TRANSIENT_LOCAL_DURABILITY_QOS, 2, 3, 4, 5,
@@ -2566,7 +2650,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         EXCLUSIVE_OWNERSHIP_QOS,
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         TOPIC_PRESENTATION_QOS, true, true, part, topic_data, 7, group_data, 7,
-        uc_locators, 2, mc_locators, 2);
+        uc_locators, 2, mc_locators, 2,
+        cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
     ParameterList empty_param_list;
     TEST_ASSERT(!from_param_list(empty_param_list, reader_data_out));
     TEST_ASSERT(!strcmp(reader_data_out.ddsSubscriptionData.topic_name, ""));
@@ -2612,10 +2697,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!reader_data_out.ddsSubscriptionData.partition.name.length());
     TEST_ASSERT(!reader_data_out.ddsSubscriptionData.topic_data.value.length());
     TEST_ASSERT(!reader_data_out.ddsSubscriptionData.group_data.value.length());
-    /*
     TEST_ASSERT(!reader_data_out.readerProxy.unicastLocatorList.length());
-    */
     TEST_ASSERT(!reader_data_out.readerProxy.multicastLocatorList.length());
+    TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.contentFilteredTopicName));
+    TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.relatedTopicName));
+    TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.filterClassName));
+    TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.filterExpression));
+    TEST_ASSERT(!reader_data_out.contentFilterProperty.expressionParameters.length());
   }
   return 0;
 }

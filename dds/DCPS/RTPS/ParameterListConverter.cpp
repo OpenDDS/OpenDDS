@@ -221,7 +221,6 @@ int to_param_list(const DiscoveredWriterData& writer_data,
   return 0;
 }
 
-// TODO: convert contentFilterProperty
 int to_param_list(const DiscoveredReaderData& reader_data,
                   ParameterList& param_list)
 {
@@ -310,6 +309,11 @@ int to_param_list(const DiscoveredReaderData& reader_data,
   add_param_locator_seq(param_list, 
                         reader_data.readerProxy.multicastLocatorList,
                         PID_MULTICAST_LOCATOR);
+  {
+    Parameter param;
+    param.content_filter_property(reader_data.contentFilterProperty);
+    add_param(param_list, param);
+  }
   return 0;
 }
 
@@ -523,7 +527,6 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-// TODO: convert contentFilterProperty
 int from_param_list(const ParameterList& param_list,
                     DiscoveredReaderData& reader_data)
 {
@@ -557,6 +560,12 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_GroupDataQosPolicy();
   reader_data.readerProxy.unicastLocatorList.length(0);
   reader_data.readerProxy.multicastLocatorList.length(0);
+  reader_data.contentFilterProperty.contentFilteredTopicName = "";
+  reader_data.contentFilterProperty.relatedTopicName = "";
+  reader_data.contentFilterProperty.filterClassName = "";
+  reader_data.contentFilterProperty.filterExpression = "";
+  reader_data.contentFilterProperty.expressionParameters.length(0);
+
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -616,6 +625,9 @@ int from_param_list(const ParameterList& param_list,
         append_locator(
             reader_data.readerProxy.multicastLocatorList,
             param.locator());
+        break;
+      case PID_CONTENT_FILTER_PROPERTY:
+        reader_data.contentFilterProperty = param.content_filter_property();
         break;
       case PID_SENTINEL:
       case PID_PAD:
