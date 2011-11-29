@@ -2618,6 +2618,548 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!strcmp("32",
                 reader_data_out.contentFilterProperty.expressionParameters[1]));
   }
+  { // Should decode writer multicast ip address
+    Parameter param;
+    param.ipv4_address(1507329);
+    param._d(PID_MULTICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    DiscoveredWriterData writer_data_out;
+    from_param_list(param_list, writer_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x17, 0x00, 0x01 };
+    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList.length() == 1);
+    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                writer_data_out.writerProxy.multicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+    /*
+    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].address[0] == 0x01);
+    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].address[1] == 0x00);
+    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].address[2] == 0x17);*/
+  }
+  { // Should decode reader multicast ip address
+    Parameter param;
+    param.ipv4_address(897);
+    param._d(PID_MULTICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    DiscoveredReaderData reader_data_out;
+    from_param_list(param_list, reader_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x03, 0x81 };
+    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList.length() == 1);
+    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                reader_data_out.readerProxy.multicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant default unicast ip address
+    Parameter param;
+    param.ipv4_address(4157);
+    param._d(PID_DEFAULT_UNICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x10, 0x3D };
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.defaultUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic unicast ip address
+    Parameter param;
+    param.ipv4_address(4157);
+    param._d(PID_METATRAFFIC_UNICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x10, 0x3D };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic multicast ip address
+    Parameter param;
+    param.ipv4_address(4157);
+    param._d(PID_METATRAFFIC_MULTICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x10, 0x3D };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficMulticastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant default unicast port
+    Parameter param;
+    param.udpv4_port(2218);
+    param._d(PID_DEFAULT_UNICAST_PORT);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    OctetArray16 zero_address;
+    memset(zero_address, 0, sizeof(OctetArray16));
+    TEST_ASSERT(!memcmp(
+        part_data_out.participantProxy.defaultUnicastLocatorList[0].address,
+        zero_address,
+        sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 2218);
+  }
+  { // Should decode participant metatraffic unicast port
+    Parameter param;
+    param.udpv4_port(2218);
+    param._d(PID_METATRAFFIC_UNICAST_PORT);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    OctetArray16 zero_address;
+    memset(zero_address, 0, sizeof(OctetArray16));
+    TEST_ASSERT(!memcmp(
+        part_data_out.participantProxy.metatrafficUnicastLocatorList[0].address,
+        zero_address,
+        sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 2218);
+  }
+  { // Should decode participant metatraffic multicast port
+    Parameter param;
+    param.udpv4_port(2218);
+    param._d(PID_METATRAFFIC_MULTICAST_PORT);
+    ParameterList param_list;
+    param_list.length(1);
+    param_list[0] = param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    OctetArray16 zero_address;
+    memset(zero_address, 0, sizeof(OctetArray16));
+    TEST_ASSERT(!memcmp(
+        part_data_out.participantProxy.metatrafficMulticastLocatorList[0].address,
+        zero_address,
+        sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 2218);
+  }
+  { // Should decode participant default unicast ip address then port
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_DEFAULT_UNICAST_IPADDRESS);
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_DEFAULT_UNICAST_PORT);
+    ParameterList param_list;
+    param_list.length(2);
+    param_list[0] = addr_param;
+    param_list[1] = port_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.defaultUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic unicast ip address then port
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_METATRAFFIC_UNICAST_IPADDRESS);
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_METATRAFFIC_UNICAST_PORT);
+    ParameterList param_list;
+    param_list.length(2);
+    param_list[0] = addr_param;
+    param_list[1] = port_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic multicast ip address then port
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_METATRAFFIC_MULTICAST_IPADDRESS);
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_METATRAFFIC_MULTICAST_PORT);
+    ParameterList param_list;
+    param_list.length(2);
+    param_list[0] = addr_param;
+    param_list[1] = port_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficMulticastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant default unicast port then ip address
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_DEFAULT_UNICAST_PORT);
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_DEFAULT_UNICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(2);
+    param_list[0] = port_param;
+    param_list[1] = addr_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.defaultUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic unicast port then ip address
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_METATRAFFIC_UNICAST_PORT);
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_METATRAFFIC_UNICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(2);
+    param_list[0] = port_param;
+    param_list[1] = addr_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic multicast port then ip address
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_METATRAFFIC_MULTICAST_PORT);
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_METATRAFFIC_MULTICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(2);
+    param_list[0] = port_param;
+    param_list[1] = addr_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficMulticastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant default unicast port then port then ip address
+    Parameter port1_param;
+    port1_param.udpv4_port(12772);
+    port1_param._d(PID_DEFAULT_UNICAST_PORT);
+    Parameter port2_param;
+    port2_param.udpv4_port(12777);
+    port1_param._d(PID_DEFAULT_UNICAST_PORT);
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_DEFAULT_UNICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(3);
+    param_list[0] = port1_param;
+    param_list[1] = port2_param;
+    param_list[2] = addr_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 2);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[1].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[1].port == 12777);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.defaultUnicastLocatorList[1].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic unicast port then port then ip address
+    Parameter port1_param;
+    port1_param.udpv4_port(12772);
+    port1_param._d(PID_METATRAFFIC_UNICAST_PORT);
+    Parameter port2_param;
+    port2_param.udpv4_port(12777);
+    port2_param._d(PID_METATRAFFIC_UNICAST_PORT);
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_METATRAFFIC_UNICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(3);
+    param_list[0] = port1_param;
+    param_list[1] = port2_param;
+    param_list[2] = addr_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 2);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[1].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[1].port == 12777);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficUnicastLocatorList[1].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Should decode participant metatraffic multicast port then port then ip address
+    Parameter port1_param;
+    port1_param.udpv4_port(12772);
+    port1_param._d(PID_METATRAFFIC_MULTICAST_PORT);
+    Parameter port2_param;
+    port2_param.udpv4_port(12777);
+    port2_param._d(PID_METATRAFFIC_MULTICAST_PORT);
+    Parameter addr_param;
+    addr_param.ipv4_address(415709);
+    addr_param._d(PID_METATRAFFIC_MULTICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(3);
+    param_list[0] = port1_param;
+    param_list[1] = port2_param;
+    param_list[2] = addr_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 2);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[1].kind ==
+                LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 12772);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[1].port == 12777);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficMulticastLocatorList[1].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Partial default unicast locator should not interfere with others
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_DEFAULT_UNICAST_PORT);
+    Parameter addr1_param;
+    addr1_param.ipv4_address(415709);
+    addr1_param._d(PID_METATRAFFIC_UNICAST_IPADDRESS);
+    Parameter addr2_param;
+    addr2_param.ipv4_address(415709);
+    addr2_param._d(PID_METATRAFFIC_MULTICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(3);
+    param_list[0] = port_param;
+    param_list[1] = addr1_param;
+    param_list[2] = addr2_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    OctetArray16 zero_address   = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00 };
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 1);
+
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.defaultUnicastLocatorList[0].address,
+                zero_address, sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficMulticastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Partial metatraffic unicast locator should not interfere with others
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_METATRAFFIC_UNICAST_PORT);
+    Parameter addr1_param;
+    addr1_param.ipv4_address(415709);
+    addr1_param._d(PID_DEFAULT_UNICAST_IPADDRESS);
+    Parameter addr2_param;
+    addr2_param.ipv4_address(415709);
+    addr2_param._d(PID_METATRAFFIC_MULTICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(3);
+    param_list[0] = port_param;
+    param_list[1] = addr1_param;
+    param_list[2] = addr2_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    OctetArray16 zero_address   = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00 };
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 1);
+
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.defaultUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficUnicastLocatorList[0].address,
+                zero_address, sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficMulticastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+  }
+  { // Partial metatraffic multicast locator should not interfere with others
+    Parameter port_param;
+    port_param.udpv4_port(12772);
+    port_param._d(PID_METATRAFFIC_MULTICAST_PORT);
+    Parameter addr1_param;
+    addr1_param.ipv4_address(415709);
+    addr1_param._d(PID_METATRAFFIC_UNICAST_IPADDRESS);
+    Parameter addr2_param;
+    addr2_param.ipv4_address(415709);
+    addr2_param._d(PID_DEFAULT_UNICAST_IPADDRESS);
+    ParameterList param_list;
+    param_list.length(3);
+    param_list[0] = port_param;
+    param_list[1] = addr1_param;
+    param_list[2] = addr2_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    from_param_list(param_list, part_data_out);
+    OctetArray16 target_address = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x06, 0x57, 0xDD };
+    OctetArray16 zero_address   = { 0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00 };
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList.length() == 1);
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList.length() == 1);
+
+    TEST_ASSERT(part_data_out.participantProxy.defaultUnicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.defaultUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficUnicastLocatorList[0].port == 0);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficUnicastLocatorList[0].address,
+                target_address, sizeof(OctetArray16)));
+    TEST_ASSERT(part_data_out.participantProxy.metatrafficMulticastLocatorList[0].port == 12772);
+    TEST_ASSERT(!memcmp(
+                part_data_out.participantProxy.metatrafficMulticastLocatorList[0].address,
+                zero_address, sizeof(OctetArray16)));
+  }
+
   { // Should set reader defaults
     Locator_t uc_locators[2];
     Locator_t mc_locators[2];

@@ -9,6 +9,7 @@
 #include "ParameterListConverter.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h"
 
 namespace OpenDDS { namespace RTPS {
 
@@ -36,6 +37,64 @@ namespace {
     list.length(length + 1); 
     list[length] = locator;
   }
+
+  enum LocatorState {
+    locator_undefined,
+    locator_complete,
+    locator_address_only,
+    locator_port_only
+  };
+
+  void set_ipaddress(LocatorSeq& locators, 
+                     LocatorState& last_state, 
+                     const unsigned long addr) {
+    CORBA::ULong length = locators.length();
+    // Update last locator if the last state is port only
+    if (last_state == locator_port_only && length > 0) {
+      // Update last locator
+      Locator_t& partial = locators[length - 1];
+      OpenDDS::DCPS::RtpsUdpReceiveStrategy::assign(partial.address, addr);
+      // there is no longer a partially complete locator, set state
+      last_state = locator_complete;
+    // Else there is no partially complete locator available
+    } else {
+      // initialize and append new locator 
+      Locator_t locator;
+      locator.kind = LOCATOR_KIND_UDPv4;
+      locator.port = 0;
+      OpenDDS::DCPS::RtpsUdpReceiveStrategy::assign(locator.address, addr);
+      locators.length(length + 1);
+      locators[length] = locator;
+      // there is now a paritally complete locator, set state
+      last_state = locator_address_only;
+    }
+  }
+
+  void set_port(LocatorSeq& locators, 
+                     LocatorState& last_state, 
+                     const unsigned long port) {
+    CORBA::ULong length = locators.length();
+    // Update last locator if the last state is address only
+    if (last_state == locator_address_only && length > 0) {
+      // Update last locator
+      Locator_t& partial = locators[length - 1];
+      partial.port = port;
+      // there is no longer a partially complete locator, set state
+      last_state = locator_complete;
+    // Else there is no partially complete locator available
+    } else {
+      // initialize and append new locator 
+      Locator_t locator;
+      locator.kind = LOCATOR_KIND_UDPv4;
+      locator.port = port;
+      OpenDDS::DCPS::RtpsUdpReceiveStrategy::assign(locator.address, 0);
+      locators.length(length + 1);
+      locators[length] = locator;
+      // there is now a paritally complete locator, set state
+      last_state = locator_port_only;
+    }
+  }
+
 };
 
 namespace ParameterListConverter {
@@ -320,6 +379,11 @@ int to_param_list(const DiscoveredReaderData& reader_data,
 int from_param_list(const ParameterList& param_list,
                     SPDPdiscoveredParticipantData& participant_data)
 {
+  // Track the state of our locators
+  LocatorState du_last_state = locator_undefined;
+  LocatorState mu_last_state = locator_undefined;
+  LocatorState mm_last_state = locator_undefined;
+
   // Start by setting defaults
   participant_data.ddsParticipantData.user_data.value.length(0);
   participant_data.participantProxy.expectsInlineQos = false;
@@ -379,6 +443,39 @@ int from_param_list(const ParameterList& param_list,
       case PID_PARTICIPANT_LEASE_DURATION:
         participant_data.leaseDuration = param.duration();
         break;
+      case PID_DEFAULT_UNICAST_IPADDRESS:
+        set_ipaddress(
+          participant_data.participantProxy.defaultUnicastLocatorList,
+          du_last_state,
+          param.ipv4_address());
+        break;
+      case PID_METATRAFFIC_UNICAST_IPADDRESS:
+        set_ipaddress(
+          participant_data.participantProxy.metatrafficUnicastLocatorList,
+          mu_last_state,
+          param.ipv4_address());
+        break;
+      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
+        set_ipaddress(
+          participant_data.participantProxy.metatrafficMulticastLocatorList,
+          mm_last_state,
+          param.ipv4_address());
+        break;
+      case PID_DEFAULT_UNICAST_PORT:
+        set_port(participant_data.participantProxy.defaultUnicastLocatorList,
+                 du_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_METATRAFFIC_UNICAST_PORT:
+        set_port(participant_data.participantProxy.metatrafficUnicastLocatorList,
+                 mu_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_METATRAFFIC_MULTICAST_PORT:
+        set_port(participant_data.participantProxy.metatrafficMulticastLocatorList,
+                 mm_last_state,
+                 param.udpv4_port());
+        break;
       case PID_SENTINEL:
       case PID_PAD:
         // ignore
@@ -402,6 +499,7 @@ int from_param_list(const ParameterList& param_list,
 int from_param_list(const ParameterList& param_list,
                     DiscoveredWriterData& writer_data)
 {
+  LocatorState last_state = locator_undefined;  // Track state of locator
   // Start by setting defaults
   writer_data.ddsPublicationData.topic_name = "";
   writer_data.ddsPublicationData.type_name  = "";
@@ -507,6 +605,11 @@ int from_param_list(const ParameterList& param_list,
             writer_data.writerProxy.multicastLocatorList,
             param.locator());
         break;
+      case PID_MULTICAST_IPADDRESS:
+        set_ipaddress(writer_data.writerProxy.multicastLocatorList,
+                      last_state,
+                      param.ipv4_address());
+        break;
       case PID_SENTINEL:
       case PID_PAD:
         // ignore
@@ -530,6 +633,8 @@ int from_param_list(const ParameterList& param_list,
 int from_param_list(const ParameterList& param_list,
                     DiscoveredReaderData& reader_data)
 {
+  LocatorState last_state = locator_undefined;  // Track state of locator
+  // Start by setting defaults
   reader_data.ddsSubscriptionData.topic_name = "";
   reader_data.ddsSubscriptionData.type_name  = "";
   reader_data.ddsSubscriptionData.durability =
@@ -628,6 +733,11 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_CONTENT_FILTER_PROPERTY:
         reader_data.contentFilterProperty = param.content_filter_property();
+        break;
+      case PID_MULTICAST_IPADDRESS:
+        set_ipaddress(reader_data.readerProxy.multicastLocatorList, 
+                      last_state,
+                      param.ipv4_address());
         break;
       case PID_SENTINEL:
       case PID_PAD:

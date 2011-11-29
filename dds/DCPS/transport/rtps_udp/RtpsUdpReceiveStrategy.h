@@ -53,6 +53,15 @@ public:
   bool has_fragments(const SequenceRange& range, const RepoId& pub_id,
                      FragmentInfo* frag_info = 0);
 
+  static inline void assign(OpenDDS::RTPS::GuidPrefix_t& dest,
+                            const OpenDDS::RTPS::GuidPrefix_t& src);
+
+  static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
+                            const OpenDDS::RTPS::OctetArray16& src);
+
+  static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
+                            const ACE_CDR::ULong& ipv4addr_be);
+
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
@@ -94,15 +103,6 @@ private:
 
     void fill_header(DataSampleHeader& header) const;
 
-    static inline void assign(OpenDDS::RTPS::GuidPrefix_t& dest,
-                              const OpenDDS::RTPS::GuidPrefix_t& src);
-
-    static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
-                              const OpenDDS::RTPS::OctetArray16& src);
-
-    static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
-                              const ACE_CDR::ULong& ipv4addr_be);
-
     OpenDDS::RTPS::GuidPrefix_t local_;
     OpenDDS::RTPS::ProtocolVersion_t source_version_;
     OpenDDS::RTPS::VendorId_t source_vendor_;
@@ -119,7 +119,7 @@ private:
 };
 
 inline void
-RtpsUdpReceiveStrategy::MessageReceiver::assign(
+RtpsUdpReceiveStrategy::assign(
   OpenDDS::RTPS::GuidPrefix_t& dest,
   const OpenDDS::RTPS::GuidPrefix_t& src)
 {
@@ -127,7 +127,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::assign(
 }
 
 inline void
-RtpsUdpReceiveStrategy::MessageReceiver::assign(
+RtpsUdpReceiveStrategy::assign(
   OpenDDS::RTPS::OctetArray16& dest,
   const OpenDDS::RTPS::OctetArray16& src)
 {
@@ -135,7 +135,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::assign(
 }
 
 inline void
-RtpsUdpReceiveStrategy::MessageReceiver::assign(
+RtpsUdpReceiveStrategy::assign(
   OpenDDS::RTPS::OctetArray16& dest, const ACE_CDR::ULong& ipv4addr_be)
 {
   std::memset(&dest[0], 0, 12);

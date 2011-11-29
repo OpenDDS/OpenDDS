@@ -1,3 +1,15 @@
+Tue Nov 29 18:00:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+
+          Move static assign() methods from private MessageReceiver class
+          to public RtpsUdpReceiveStrategy class.
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Handle partially described locators and test.
+
 Tue Nov 29 17:11:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsInfo.h:
