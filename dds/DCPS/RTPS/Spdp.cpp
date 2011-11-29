@@ -110,9 +110,12 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
   const ParticipantIter iter = participants_.find(guid);
 
   if (iter == participants_.end()) {
+    // copy guid prefix (octet[12]) into BIT key (long[3])
+    memcpy(pdata.ddsParticipantData.key.value,
+           pdata.participantProxy.guidPrefix,
+           sizeof(pdata.ddsParticipantData.key.value));
     // add a new participant
     participants_[guid] = ParticipantDetails(pdata, time);
-    //TODO: need BIT key
     participants_[guid].bit_ih_ =
       part_bit()->store_synthetic_data(pdata.ddsParticipantData,
                                        DDS::NEW_VIEW_STATE);
