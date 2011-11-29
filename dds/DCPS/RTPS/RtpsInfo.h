@@ -203,6 +203,7 @@ private:
           > participants_;
 
   std::map<DDS::DomainId_t, std::map<std::string, Spdp::TopicDetails> > topics_;
+  std::map<DDS::DomainId_t, std::map<std::string, unsigned int> > topic_use_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

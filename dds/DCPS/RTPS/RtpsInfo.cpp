@@ -111,6 +111,7 @@ RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
     td.data_type_ = dataTypeName;
     td.qos_ = qos;
     td.repo_id_ = topicId;
+    ++topic_use_[domainId][topicName];
   }
   return stat;
 }
@@ -130,6 +131,7 @@ RtpsInfo::find_topic(DDS::DomainId_t domainId, const char* topicName,
   dataTypeName = td.data_type_.c_str();
   qos = new DDS::TopicQos(td.qos_);
   topicId = td.repo_id_;
+  ++topic_use_[domainId][topicName];
   return DCPS::FOUND;
 }
 
@@ -146,9 +148,15 @@ RtpsInfo::remove_topic(DDS::DomainId_t domainId, const RepoId& participantId,
     participants_[domainId][participantId]->remove_topic(topicId, name);
 
   if (stat == DCPS::REMOVED) {
-    topics_[domainId].erase(name);
-    if (topics_[domainId].empty()) {
-      topics_.erase(domainId);
+    if (0 == --topic_use_[domainId][name]) {
+      topic_use_[domainId].erase(name);
+      if (topic_use_[domainId].empty()) {
+        topic_use_.erase(domainId);
+      }
+      topics_[domainId].erase(name);
+      if (topics_[domainId].empty()) {
+        topics_.erase(domainId);
+      }
     }
   }
   return stat;

@@ -31,6 +31,13 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+namespace DDS {
+  class ParticipantBuiltinTopicDataDataReaderImpl;
+  class TopicBuiltinTopicDataDataReaderImpl;
+  class PublicationBuiltinTopicDataDataReaderImpl;
+  class SubscriptionBuiltinTopicDataDataReaderImpl;
+}
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -116,7 +123,12 @@ private:
   LocatorSeq sedp_unicast_, sedp_multicast_;
 
   void data_received(const Header& header, const DataSubmessage& data,
-                     const ParameterList& plist, const Time_t& timestamp);
+                     const ParameterList& plist);
+
+  DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
+  DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
+  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 
   struct SpdpTransport : ACE_Event_Handler {
     explicit SpdpTransport(Spdp* outer);
@@ -125,6 +137,7 @@ private:
     int handle_timeout(const ACE_Time_Value&, const void*);
     int handle_input(ACE_HANDLE h);
 
+    void open();
     void write();
     void close();
 
@@ -142,6 +155,19 @@ private:
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;
+
+  struct ParticipantDetails {
+    ParticipantDetails() {}
+    ParticipantDetails(const SPDPdiscoveredParticipantData& p,
+                       const ACE_Time_Value& t)
+      : pdata_(p), last_seen_(t) {}
+
+    SPDPdiscoveredParticipantData pdata_;
+    ACE_Time_Value last_seen_;
+    DDS::InstanceHandle_t bit_ih_;
+  };
+  std::map<DCPS::RepoId, ParticipantDetails, DCPS::GUID_tKeyLessThan>
+    participants_;
 
   // Topic:
   std::map<std::string, TopicDetails> topics_;

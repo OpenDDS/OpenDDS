@@ -15,8 +15,10 @@
 #include "RtpsDiscovery.h"
 
 #include "dds/DdsDcpsGuidC.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 
 #include "ace/Reactor.h"
 
@@ -41,6 +43,16 @@ namespace {
     lhs[0] = static_cast<CORBA::Octet>(rhs);
     lhs[1] = static_cast<CORBA::Octet>(rhs >> 8);
     lhs[2] = static_cast<CORBA::Octet>(rhs >> 16);
+  }
+
+  bool disposed(const ParameterList& inlineQos)
+  {
+    for (CORBA::ULong i = 0; i < inlineQos.length(); ++i) {
+      if (inlineQos[i]._d() == PID_STATUS_INFO) {
+        return inlineQos[i].status_info().value[3] & 1;
+      }
+    }
+    return false;
   }
 }
 
@@ -79,18 +91,86 @@ Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
 
 void
 Spdp::data_received(const Header& header, const DataSubmessage& data,
-                    const ParameterList& plist, const Time_t& timestamp)
+                    const ParameterList& plist)
 {
-  //TODO
+  const ACE_Time_Value time = ACE_OS::gettimeofday();
+  SPDPdiscoveredParticipantData pdata;
+  if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
+    //TODO
+  }
+
+  DCPS::RepoId guid;
+  std::memcpy(guid.guidPrefix, pdata.participantProxy.guidPrefix,
+              sizeof(guid.guidPrefix));
+  guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  typedef std::map<DCPS::RepoId, ParticipantDetails, DCPS::GUID_tKeyLessThan
+                  >::iterator ParticipantIter;
+  const ParticipantIter iter = participants_.find(guid);
+
+  if (iter == participants_.end()) {
+    // add a new participant
+    participants_[guid] = ParticipantDetails(pdata, time);
+    //TODO: need BIT key
+    participants_[guid].bit_ih_ =
+      part_bit()->store_synthetic_data(pdata.ddsParticipantData,
+                                       DDS::NEW_VIEW_STATE);
+    //TODO: inform SEDP
+  } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
+    // remove an existing participant
+    part_bit()->set_instance_state(iter->second.bit_ih_,
+                                   DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+    participants_.erase(iter);
+    //TODO: inform SEDP
+  } else {
+    // update an existing participant
+    participants_[guid].pdata_ = pdata;
+    participants_[guid].last_seen_ = time;
+    //TODO: update BIT if user_data changed
+  }
 }
 
 void
 Spdp::bit_subscriber(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
+  tport_->open();
 }
 
-ACE_Reactor* 
+DDS::ParticipantBuiltinTopicDataDataReaderImpl*
+Spdp::part_bit()
+{
+  DDS::DataReader_var d =
+    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+  return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
+}
+
+DDS::TopicBuiltinTopicDataDataReaderImpl*
+Spdp::topic_bit()
+{
+  DDS::DataReader_var d =
+    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
+  return dynamic_cast<DDS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
+}
+
+DDS::PublicationBuiltinTopicDataDataReaderImpl*
+Spdp::pub_bit()
+{
+  DDS::DataReader_var d =
+    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
+  return dynamic_cast<DDS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
+}
+
+DDS::SubscriptionBuiltinTopicDataDataReaderImpl*
+Spdp::sub_bit()
+{
+  DDS::DataReader_var d =
+    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
+  return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
+}
+
+ACE_Reactor*
 Spdp::reactor() const
 {
   return TheServiceParticipant->discovery_reactor();
@@ -170,7 +250,11 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   //TODO: allow user-configured addresses to be added here
 
   reference_counting_policy().value(Reference_Counting_Policy::ENABLED);
+}
 
+void
+Spdp::SpdpTransport::open()
+{
   if (outer_->reactor()->register_handler(unicast_socket_.get_handle(),
         this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast input handler");
@@ -304,26 +388,12 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     //TODO
   }
 
-  Time_t timestamp = TIME_INVALID;
-
   while (buff_.length() > 3) {
     const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
     ser.swap_bytes((flags & 1 /*FLAG_E*/) != ACE_CDR_BYTE_ORDER);
     const size_t start = buff_.length();
     CORBA::UShort submessageLength = 0;
     switch (subm) {
-    case INFO_TS: {
-      InfoTimestampSubmessage it;
-      if (!(ser >> it)) {
-        //TODO
-      }
-      submessageLength = it.smHeader.submessageLength;
-      if (!(it.smHeader.flags & 2 /*FLAG_I*/)) {
-        timestamp = it.timestamp;
-      } else {
-        timestamp = TIME_INVALID;
-      }
-    }
     case DATA: {
       DataSubmessage data;
       if (!(ser >> data)) {
@@ -343,12 +413,14 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           //TODO
         }
       }
-      outer_->data_received(header, data, plist, timestamp);
+      if (data.writerId == ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
+        outer_->data_received(header, data, plist);
+      }
     }
     default:
-      if (DCPS::DCPS_debug_level) {
+      if (subm != INFO_TS && DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) Spdp::SpdpTransport::handle_input() - "
-          "unrecognized submessage type: %d\n", int(subm)));
+          "ignored submessage type: %d\n", int(subm)));
       }
       break;
     }

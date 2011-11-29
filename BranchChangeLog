@@ -1,3 +1,21 @@
+Tue Nov 29 17:11:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Need to keep a topic reference count for the case where multiple
+          participants using the same RtpsDiscovery reference the same topic.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing SPDP: add/remove from participant BIT,
+          keep track of discovered remote participants.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Extended test to create 2 participants and read from participant BIT.
+
 Mon Nov 28 20:27:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
