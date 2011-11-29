@@ -53,15 +53,6 @@ public:
   bool has_fragments(const SequenceRange& range, const RepoId& pub_id,
                      FragmentInfo* frag_info = 0);
 
-  static inline void assign(OpenDDS::RTPS::GuidPrefix_t& dest,
-                            const OpenDDS::RTPS::GuidPrefix_t& src);
-
-  static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
-                            const OpenDDS::RTPS::OctetArray16& src);
-
-  static inline void assign(OpenDDS::RTPS::OctetArray16& dest,
-                            const ACE_CDR::ULong& ipv4addr_be);
-
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
@@ -117,33 +108,6 @@ private:
   MessageReceiver receiver_;
   ACE_INET_Addr remote_address_;
 };
-
-inline void
-RtpsUdpReceiveStrategy::assign(
-  OpenDDS::RTPS::GuidPrefix_t& dest,
-  const OpenDDS::RTPS::GuidPrefix_t& src)
-{
-  std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
-}
-
-inline void
-RtpsUdpReceiveStrategy::assign(
-  OpenDDS::RTPS::OctetArray16& dest,
-  const OpenDDS::RTPS::OctetArray16& src)
-{
-  std::memcpy(&dest[0], &src[0], sizeof(OpenDDS::RTPS::OctetArray16));
-}
-
-inline void
-RtpsUdpReceiveStrategy::assign(
-  OpenDDS::RTPS::OctetArray16& dest, const ACE_CDR::ULong& ipv4addr_be)
-{
-  std::memset(&dest[0], 0, 12);
-  dest[12] = ipv4addr_be >> 24;
-  dest[13] = ipv4addr_be >> 16;
-  dest[14] = ipv4addr_be >> 8;
-  dest[15] = ipv4addr_be;
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

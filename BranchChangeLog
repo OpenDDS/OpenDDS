@@ -1,3 +1,13 @@
+Tue Nov 29 20:58:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Move assign() methods from RtpsUdpReceiveStrategy class
+          to RTPS namespace.
+
 Tue Nov 29 18:00:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:

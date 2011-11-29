@@ -59,6 +59,28 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   }
 }
 
+void assign(OpenDDS::RTPS::GuidPrefix_t& dest,
+            const OpenDDS::RTPS::GuidPrefix_t& src)
+{
+  std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
+}
+
+void assign(OpenDDS::RTPS::OctetArray16& dest,
+            const OpenDDS::RTPS::OctetArray16& src)
+{
+  std::memcpy(&dest[0], &src[0], sizeof(OpenDDS::RTPS::OctetArray16));
+}
+
+void assign(OpenDDS::RTPS::OctetArray16& dest,
+            const ACE_CDR::ULong& ipv4addr_be)
+{
+  std::memset(&dest[0], 0, 12);
+  dest[12] = ipv4addr_be >> 24;
+  dest[13] = ipv4addr_be >> 16;
+  dest[14] = ipv4addr_be >> 8;
+  dest[15] = ipv4addr_be;
+}
+
 
 }
 }

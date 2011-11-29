@@ -12,6 +12,7 @@
 #include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
 #include "ace/Reactor.h"
@@ -282,7 +283,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
 RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(
   const OpenDDS::RTPS::GuidPrefix_t& local)
 {
-  assign(local_, local);
+  OpenDDS::RTPS::assign(local_, local);
 }
 
 void
@@ -353,11 +354,11 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   // see RTPS spec v2.1 section 8.3.7.7.4
   for (size_t i = 0; i < sizeof(GuidPrefix_t); ++i) {
     if (id.guidPrefix[i]) { // if some byte is > 0, it's not UNKNOWN
-      assign(dest_guid_prefix_, id.guidPrefix);
+      OpenDDS::RTPS::assign(dest_guid_prefix_, id.guidPrefix);
       return;
     }
   }
-  assign(dest_guid_prefix_, local_);
+  OpenDDS::RTPS::assign(dest_guid_prefix_, local_);
 }
 
 void
@@ -389,14 +390,15 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   unicast_reply_locator_list_.length(1);
   unicast_reply_locator_list_[0].kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
   unicast_reply_locator_list_[0].port = iri4.unicastLocator.port;
-  assign(unicast_reply_locator_list_[0].address, iri4.unicastLocator.address);
+  OpenDDS::RTPS::assign(unicast_reply_locator_list_[0].address, 
+                        iri4.unicastLocator.address);
 
   if (iri4.smHeader.flags & 2 /* MulticastFlag */) {
     multicast_reply_locator_list_.length(1);
     multicast_reply_locator_list_[0].kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
     multicast_reply_locator_list_[0].port = iri4.multicastLocator.port;
-    assign(multicast_reply_locator_list_[0].address,
-           iri4.multicastLocator.address);
+    OpenDDS::RTPS::assign(multicast_reply_locator_list_[0].address,
+                          iri4.multicastLocator.address);
   } else {
     multicast_reply_locator_list_.length(0);
   }
@@ -420,7 +422,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   const OpenDDS::RTPS::InfoSourceSubmessage& is)
 {
   // see RTPS spec v2.1 section 8.3.7.9.4
-  assign(source_guid_prefix_, is.guidPrefix);
+  OpenDDS::RTPS::assign(source_guid_prefix_, is.guidPrefix);
   source_version_ = is.version;
   source_vendor_ = is.vendorId;
   unicast_reply_locator_list_.length(1);

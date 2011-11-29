@@ -9,7 +9,7 @@
 #include "ParameterListConverter.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h"
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
 namespace OpenDDS { namespace RTPS {
 
@@ -53,7 +53,7 @@ namespace {
     if (last_state == locator_port_only && length > 0) {
       // Update last locator
       Locator_t& partial = locators[length - 1];
-      OpenDDS::DCPS::RtpsUdpReceiveStrategy::assign(partial.address, addr);
+      OpenDDS::RTPS::assign(partial.address, addr);
       // there is no longer a partially complete locator, set state
       last_state = locator_complete;
     // Else there is no partially complete locator available
@@ -62,7 +62,7 @@ namespace {
       Locator_t locator;
       locator.kind = LOCATOR_KIND_UDPv4;
       locator.port = 0;
-      OpenDDS::DCPS::RtpsUdpReceiveStrategy::assign(locator.address, addr);
+      OpenDDS::RTPS::assign(locator.address, addr);
       locators.length(length + 1);
       locators[length] = locator;
       // there is now a paritally complete locator, set state
@@ -87,7 +87,7 @@ namespace {
       Locator_t locator;
       locator.kind = LOCATOR_KIND_UDPv4;
       locator.port = port;
-      OpenDDS::DCPS::RtpsUdpReceiveStrategy::assign(locator.address, 0);
+      OpenDDS::RTPS::assign(locator.address, 0);
       locators.length(length + 1);
       locators[length] = locator;
       // there is now a paritally complete locator, set state
