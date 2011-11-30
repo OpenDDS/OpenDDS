@@ -1,5 +1,27 @@
 Version 3.1 of OpenDDS.
 
+========================================================================
+
+Version 3.0.1 of OpenDDS.
+
+- The DCPSInfoRepo reassociates Built in Topic connections for existing
+  datareaders and datawriters when restarted from persistence.
+
+- The opendds_idl compiler will now print a warning about not including TAO's
+  orb.idl file when a file named orb.idl is included.
+
+- Fixed a bug where the timeout for passive_connect_duration was ignored.
+
+- Fixed multiple bugs in fragmentation/reassembly used for udp and multicast.
+
+- Fixed multicast loopback and session re-use problems.
+
+- Fixed a bug with memory management for the TransportCustomizedElement
+  used in publisher-side content filtering.
+
+- New example Messenger.minimal - which is like messenger, but streamlined
+  for new users to understand the whole easier.
+
 
 ========================================================================
 

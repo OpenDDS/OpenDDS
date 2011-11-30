@@ -7,7 +7,7 @@ tools/modeling/tests/MultiInstance/run_test.pl
 tools/modeling/tests/MultiDCPS/run_test.pl
 tools/modeling/tests/MessengerMixed/run_test.pl
 tools/modeling/tests/CompositeKey/run_test.pl
-tools/modeling/tests/MessengerMC/run_test.pl
+tools/modeling/tests/MessengerMC/run_test.pl: !NO_MCAST
 tools/modeling/tests/SubscriberQos/run_test.pl
 tools/modeling/tests/MessengerMulti/run_test.pl
 tools/modeling/tests/Messenger/run_test.pl

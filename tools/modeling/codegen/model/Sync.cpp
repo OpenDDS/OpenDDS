@@ -5,7 +5,7 @@
 
 using OpenDDS::DCPS::DCPS_debug_level;
 
-OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var& writer) :
+OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var writer) :
 writer_(writer)
 {
   if (wait_match(writer_)) {
@@ -82,7 +82,7 @@ OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer)
   return 0;
 }
 
-OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var& reader) :
+OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var reader) :
 reader_(reader)
 {
 }
@@ -99,7 +99,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
 {
   DDS::ReturnCode_t stat;
   DDS::StatusCondition_var condition = reader->get_statuscondition();
-  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+  condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
   DDS::WaitSet_var ws = new DDS::WaitSet;
   ws->attach_condition(condition);
   DDS::ConditionSeq conditions;
@@ -144,7 +144,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
 }
 
 OpenDDS::Model::ReaderCondSync::ReaderCondSync(
-     DDS::DataReader_var& reader,
+     DDS::DataReader_var reader,
      ACE_Condition<ACE_SYNCH_MUTEX>& condition) :
 reader_(reader),
 complete_(false),

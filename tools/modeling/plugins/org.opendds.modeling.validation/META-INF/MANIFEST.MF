@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Validation
 Bundle-SymbolicName: org.opendds.modeling.validation
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.0.1.qualifier
 Bundle-ClassPath: .,
  lib/commons-cli-1.2.jar,
  xsd/

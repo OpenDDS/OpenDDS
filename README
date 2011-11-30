@@ -85,6 +85,7 @@ At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
 *** TAO 1.6a patch 11
+*** TAO 2.0a
 *** TAO 2.0.3 (DOC Group)
 
 Note that the 1.6a release is from OCI and can be obtained from
@@ -279,8 +280,7 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
 
   The Thrasher test is designed to stress resource allocation/deallocation
   in running systems.  These tests are expected to fail given insufficient
-  resources.  Any failure reported above the `low' threshold should not be
-  considered a true test failure.
+  resources.
 
 ** multicast
 

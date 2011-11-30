@@ -1,4 +1,4 @@
-project(*Lib): dcps {
+project(*Lib): dcps, install {
   sharedname = OpenDDS_Model
   dynamicflags = OPENDDS_MODEL_BUILD_DLL
   libout = $(DDS_ROOT)/lib

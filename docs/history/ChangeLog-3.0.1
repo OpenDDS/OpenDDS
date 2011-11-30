@@ -1,0 +1,684 @@
+Wed Nov 16 20:51:22 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * OpenDDS version 3.0.1 released.
+
+Wed Nov 16 16:27:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+
+          Fuzz
+
+Wed Nov 16 15:30:30 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+          Updating release to 3.0.1 (using update_version.pl).
+
+Wed Nov 16 14:25:10 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/README:
+        * README:
+
+          Removed trailing whitespace to remove Fuzz build errors.
+
+Tue Nov 15 21:52:31 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * README:
+
+          Updating TAO version.
+
+Tue Nov 15 19:18:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          Updating for release.
+
+Tue Nov 15 19:13:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Updating for release.
+
+Tue Nov 15 19:00:04 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * README:
+
+          Updating for release.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+          Adding release 3.0.1.
+
+Tue Nov 15 17:23:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/README:
+
+          Updated to remove reference to getting started doc.
+
+Tue Nov 15 16:44:59 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * NEWS:
+
+          Mention Messenger.minimal
+
+        * docs/getting_started.odt:
+
+          Remove for the time being, until after release.
+
+Tue Nov 15 16:35:11 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * NEWS:
+
+          Change release number to 3.0.1
+
+Tue Nov 15 16:18:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+
+          Place in its own namespace.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+
+          Use boilerplate namespace.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Catch std::runtime_error
+          Use boilerplate namespace.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/README:
+
+          Description of motivation for example.
+
+Tue Nov 15 16:16:28 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Change _var references to _var instances, so that temporaries
+          are usable.
+
+Tue Nov 15 16:13:54 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * NEWS:
+
+          Updates for release.
+
+Fri Nov 11 17:30:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.cpp:
+
+        set status on readcondition condition of SUBSCRIPTION_MATCHED_STATUS,
+        instead of PUBLICATION_MATCHED_STATUS.
+
+Thu Nov 10 16:30:04 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+
+          Provide narrow() that accepts ptrs, rather than vars.
+
+Thu Nov 10 14:32:26 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Fuzz.
+
+Wed Nov  9 22:48:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * docs/getting_started.odt:
+
+          DataReaderListenerImpl explanation.
+
+Wed Nov  9 19:37:05 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+
+          Remove extraneous includes.
+
+        * docs/getting_started.odt:
+
+          Formatting changes for Entity names.
+          Start writing about DataReaderListenerImpl.cpp
+
+Wed Nov  9 16:45:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Comments and formatting changes.
+
+        * docs/getting_started.odt:
+
+          Updates for Subscriber.cpp
+
+Wed Nov  9 16:20:26 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * docs/getting_started.odt:
+
+          Complete publisher.cpp explanation.
+
+Wed Nov  9 15:40:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+
+          Don't use atoi() directly.
+
+Wed Nov  9 04:18:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+
+          Fix typos, reformat
+
+        * docs/getting_started.odt:
+
+          Finsish publisher code description.
+
+Tue Nov  8 23:06:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+
+          Rename narrowXXX methods to narrow.
+
+        * docs/getting_started.odt:
+
+          Updates for publisher code.
+
+Tue Nov  8 22:00:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+
+          fuzz.
+
+Tue Nov  8 21:57:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * java/tests/dcps_java_tests.lst:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Use the "NO_MCAST" Config value to prevent tests which require
+          multicast from running on platforms that don't have multicast
+          routing enabled.
+
+Tue Nov  8 21:09:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal:
+
+          update svn:ignore
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+
+          additional comments.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          #include changes using relative path.
+          Make publisher accept number of messages as commnand line arg.
+
+Tue Nov  8 20:05:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Model.mpc:
+
+          Inherit from install project to support lib is installed.
+
+Tue Nov  8 19:50:02 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+
+          Inherit from dds_model, rather than appending to libs directly.
+
+Tue Nov  8 18:17:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * docs/getting_started.odt:
+
+          Update to draft.
+
+Mon Nov  7 17:13:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * docs/getting_started.odt:
+
+          Getting started guide, draft in progress.
+
+Fri Nov  4 18:28:40 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Messenger.mpc:
+
+          Reworked Messenger dev guide example.
+          Incorporate sync and null listener utilities from support library.
+          Moved boilerplate code out of main.
+
+Wed Nov  2 16:13:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Made the "send links" a class member instead of a local variable.
+          This more closely matches the OpenDDS 2.x behavior and it avoids
+          DataLinkSet construction/destruction during send.
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          More complete fix for the TransportCustomizedElement change in
+          the previous commit.
+
+Mon Oct 31 22:08:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Fixed a bug with memory management for the TransportCustomizedElement
+          used in publisher-side content filtering.
+          This was initially found and fixed in the RTPS branch r4958.
+
+Mon Oct 31 21:25:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Fixed further issues with reassembly of fragments.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Adapted to new fragment reassembly interface.
+          Fixed MulticastSession reference counting in MulticastDataLink.
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Adapted to new fragment reassembly interface.
+          Fixed server_link_ refcount in UdpTransport.
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/LargeSample/tcp.ini:
+        * tests/DCPS/LargeSample/udp.ini:
+
+          Test multiple Writers per publisher process and multiple publisher
+          processes writing to the same subscriber.
+          Cleaned up the test -- removed redundant config files.
+
+        * tests/DCPS/LargeSample/pub.ini:
+        * tests/DCPS/LargeSample/pub_udp.ini:
+        * tests/DCPS/LargeSample/sub.ini:
+        * tests/DCPS/LargeSample/sub_udp.ini:
+
+          Removed these files.
+
+Fri Oct 28 15:51:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Fixed a bug with reassembly of fragments.  Prior to this fix,
+          sometimes a sample with a lost fragment would be delivered.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Fixed a spurious runtime warning that was due to bad tracking
+          of sequence numbers.
+
+Fri Oct 14 21:47:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added another potential location of TAO orbsvcs executables.
+
+Fri Oct 14 14:37:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude more multicasts tests on QNX.
+
+Wed Oct 12 21:28:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Syntax error, but darn templates don't compile!
+
+Wed Oct 12 18:42:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Don't return a reference to a temporary.
+
+Tue Oct 11 03:43:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Expose transportConfigName.
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          Handle empty transport tags.
+
+Tue Oct  4 19:00:04 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Removed "is_loopback" from the data link.  Multicast data links are
+          shared among many sessions, and each session could be loopback or
+          not.  This removes the check for "messages we just sent" in the
+          check_header(TransportHeader) method.  These messages may be needed
+          in the case of an associated reader/writer pair in the same transport
+          instance.  In cases they are not needed, they are properly ignored
+          by the higher layers.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Updated make_datalink() due to changes noted above.
+          Fixed wchar bug in error logging for when multicast join fails.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+          Added debug logging for syn/synack.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Continued test enhancement from yesterday -- handle errors better.
+
+Mon Oct  3 18:18:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Fixed a bug in fragmentation of samples that require more
+          than two fragments.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Fixed a bug in managing the 'last fragment' state across
+          multiple receive buffers.
+
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Added debug logging only.
+
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Extended tests to cover more fragmentation cases.
+
+Mon Oct  3 17:55:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * **/README:
+
+          Removed trailing whitespace.
+
+Fri Sep 30 20:22:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed a bug where the timeout for
+          passive_connect_duration was ignored.
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Enhanced logging so that multiple transport
+          instances can be disambiguated.
+
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+
+          Added optional transport debug logging for this test.
+
+        * DDS_TAOv2.mwc:
+
+          Renamed from DDS_docgroup_TAO.mwc to indicate
+          that it works with TAO version 2.0.x.
+
+        * DDS_docgroup_TAO.mwc:
+
+          Removed this file.  It was renamed (see above).
+
+Thu Sep 29 19:29:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/Arrays/Arrays.gen:
+        * tools/modeling/tests/CompositeKey/CompositeKey.gen:
+        * tools/modeling/tests/DataLibRef/DataLibRef.gen:
+        * tools/modeling/tests/DomainZero/DomainZero.gen:
+        * tools/modeling/tests/InvalidNames/InvalidNames.gen:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.gen:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.gen:
+        * tools/modeling/tests/MessengerMC/MessengerMC.gen:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.gen:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.gen:
+        * tools/modeling/tests/UDP/UDP.gen:
+
+          Removed these files.  *.gen files are no longer used, they all have
+          corresponding *.codegen files which are actually used by the tests.
+
+Tue Sep 27 20:27:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          call work_available() when transport packet is partially sent
+          to wake up the background thread immediately.  Background thread
+          will complete the partial.
+
+Wed Sep 21 22:34:38 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Print a warning if and orb.idl file is being included to
+          specify the correct path to use for a tao orb.idl include.
+
+Fri Sep 16 19:22:58 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+          Exclude using mlockall on Android since it is defined but not
+          implemented on the platform.
+
+Fri Sep 16 14:31:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/simple/run_test.pl:
+
+          Use PerlACE::random_port() to get a random port number.
+
+Wed Sep 14 20:49:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mwc:
+
+          Look in model dir for mpb files.
+
+Mon Sep 12 15:46:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mpc:
+
+          Use project base to get dependencies.
+
+Mon Sep 12 14:38:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * INSTALL:
+
+          Trying to make it clear that the "Compilation on Widnows..."
+          paragraph only applies to the android cross-compile.
+
+        * java/build_scripts/generate_javadoc.pl:
+
+          Updated URL for Java SE javadocs, sun.com no longer works.
+
+Thu Sep  8 18:26:40 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Change to not define DDS_HAS_WCHAR for android as it is not complete
+          on the platform.
+
+Tue Aug 30 17:25:37 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/build-external.xml:
+        * tools/modeling/plugins/org.opendds.modeling.validation/build.properties:
+        * tools/modeling/tests/setup.pl:
+
+          Add supoort to fail fast (default) when ant run.tests taget fails,
+          or use -f arg on setup.pl to force the script to keep running.
+
+Tue Aug 30 14:41:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+
+          Validation error.
+
+Tue Aug 30 13:54:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.cpp:
+
+          More warnings.
+
+Mon Aug 29 14:31:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/Puller.cpp:
+        * tests/DCPS/ConfigTransports/common.cpp:
+
+          Fixed warnings.
+
+Fri Aug 26 14:52:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/MessengerTopics.codegen:
+        * tools/modeling/tests/MessengerSplit/MessengerTopics.opendds:
+
+          Add missing codegen file.
+          Fix model name in model.
+
+Thu Aug 25 23:30:25 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+
+          Cleaned up extra whitespace.
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+
+          Marked the subscriber as requiring built_in_topics
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+
+          Removed unnecessary constructor call.
+
+Thu Aug 25 18:55:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerTopics.opendds:
+
+          Fix and test case for RT14906 Support transitive topic references
+          in same directory.
+
+Wed Aug 24 22:29:27 UTC 2011  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Added reassociation of built in topic datawriters and datareaders
+          for reincarnating InfoRepo with persistence.
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Changed test to detect missing bit connection after a persistent
+          restart of the InfoRepo.
+
+Mon Aug 22 19:01:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          make char* const char* to reflect xsl changes.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          remove CORBA::string_dup of literals, and keep them in const char*
+          arrays.
+
+Fri Aug 19 16:10:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated to set up for next release (3.1?)
+
+        * docs/history/ChangeLog-3.0:
+
+          Archived old changelog.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Noted new script for updating Eclipse plugin version numbers.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

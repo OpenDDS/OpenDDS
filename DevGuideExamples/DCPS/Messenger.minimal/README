@@ -1,0 +1,10 @@
+Minimal Messenger Example
+
+This example is provided so users can have a simpler example than the
+current Messenger.  It makes use of the Sync objects for syncronization
+and moves the setup/cleanup code out of main to boilerplate namespace
+for a simpler view on how to publish samples and process received samples.
+Boilerplate also replaces NULL pointers with execptions to eliminate the need
+for main to check return values and write out individual log messages.
+
+To be explained in-depth in the upcoming getting started guide.

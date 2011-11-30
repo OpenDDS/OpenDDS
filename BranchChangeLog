@@ -1,3 +1,7 @@
+Wed Nov 30 22:55:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r5022 through r5110.
+
 Wed Nov 30 20:37:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.h:

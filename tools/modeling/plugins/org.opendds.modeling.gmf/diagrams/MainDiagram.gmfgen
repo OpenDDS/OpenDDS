@@ -723,7 +723,7 @@
       iD="org.opendds.modeling.diagram.main"
       name="OpenDDS Main Diagram Plugin"
       provider="Object Computing, Inc."
-      version="3.0.0.qualifier">
+      version="3.0.1.qualifier">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
   </plugin>
   <editor/>
