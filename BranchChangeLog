@@ -1,3 +1,32 @@
+Wed Nov 30 19:05:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Set initial delay for ACE timer to 0.
+          Send dispose/unregister submessage when deleting participant.
+
+        * dds/DCPS/RTPS/md5.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Minor code style cleanup
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Close sockets.  Use ACE::get_ip_interfaces() to get IP address
+          if local_address_ is 0 (any).  This probably needs more work.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Include rtps_udp transport for static builds.
+
 Wed Nov 30 17:07:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:

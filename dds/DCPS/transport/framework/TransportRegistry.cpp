@@ -68,7 +68,6 @@ int
 TransportRegistry::load_transport_configuration(const std::string& file_name,
                                                 ACE_Configuration_Heap& cf)
 {
-  int status = 0;
   const ACE_Configuration_Section_Key &root = cf.root_section();
 
   // Create a vector to hold configuration information so we can populate
@@ -83,7 +82,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
   ACE_TString sect_name;
 
   for (int index = 0;
-       (status = cf.enumerate_sections(root, index, sect_name)) == 0;
+       cf.enumerate_sections(root, index, sect_name) == 0;
        ++index) {
     if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0) {
       // found the [transport/*] section, now iterate through subsections...
@@ -283,7 +282,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
 
   // Create and populate the default configuration for this
   // file with all the instances from this file.
-  if (instances.size() > 0) {
+  if (!instances.empty()) {
     TransportConfig_rch config = this->create_config(file_name);
     if (config == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -292,8 +291,8 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                         file_name.c_str()),
                        -1);
     }
-    instances.sort( predicate );
-    for (std::list<TransportInst_rch>::const_iterator it=instances.begin();
+    instances.sort(predicate);
+    for (std::list<TransportInst_rch>::const_iterator it = instances.begin();
          it != instances.end(); ++it) {
       config->instances_.push_back(*it);
     }

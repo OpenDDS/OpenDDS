@@ -269,18 +269,39 @@ Spdp::SpdpTransport::open()
   }
 
   const ACE_Time_Value per = outer_->disco_->resend_period();
-  if (-1 == outer_->reactor()->schedule_timer(this, 0, per, per)) {
+  if (-1 == outer_->reactor()->schedule_timer(this, 0,
+                                              ACE_Time_Value(0), per)) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
 {
+  // Send the dispose/unregister SPDP sample
+  data_.writerSN.high = seq_.getHigh();
+  data_.writerSN.low = seq_.getLow();
+  data_.smHeader.flags = 1 /*FLAG_E*/ | 2 /*FLAG_Q*/; // note no FLAG_D
+  data_.inlineQos.length(1);
+  static const StatusInfo_t dispose_unregister = { {0, 0, 0, 3} };
+  data_.inlineQos[0].status_info(dispose_unregister);
+  buff_.reset();
+  DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
+  if (!(ser << hdr_) || !(ser << data_)) {
+    //TODO
+  }
+  typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
+  for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
+    ssize_t res =
+      unicast_socket_.send(buff_.rd_ptr(), buff_.length(), *iter);
+    //TODO: check
+  }
   {
     ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
     outer_->eh_shutdown_ = true;
   }
   outer_->shutdown_cond_.signal();
+  unicast_socket_.close();
+  multicast_socket_.close();
 }
 
 void

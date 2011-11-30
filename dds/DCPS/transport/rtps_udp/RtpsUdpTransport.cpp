@@ -11,13 +11,15 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
-#include "ace/CDR_Base.h"
-#include "ace/Log_Msg.h"
-
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+
+#include "ace/CDR_Base.h"
+#include "ace/Log_Msg.h"
+#include "ace/SOCK_Connect.h"
+
 
 namespace OpenDDS {
 namespace DCPS {
@@ -52,6 +54,9 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
                       ACE_TEXT("failed to open DataLink!\n")),
                      0);
   }
+
+  // RtpsUdpDataLink now owns the socket
+  unicast_socket_.set_handle(ACE_INVALID_HANDLE);
 
   return RtpsUdpDataLink_rch(link_)._retn();
 }
@@ -243,19 +248,35 @@ RtpsUdpTransport::configure_i(TransportInst* config)
 
   if (config_i_->local_address_.is_any()) {
 
-    if (unicast_socket_.get_local_addr(config_i_->local_address_) != 0) {
+    size_t count;
+    ACE_INET_Addr* addrs_raw = 0;
+    const int res = ACE::get_ip_interfaces(count, addrs_raw);
+    ACE_Auto_Array_Ptr<ACE_INET_Addr> addrs(addrs_raw);
+    if (res != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p"),
-        ACE_TEXT("cannot get local addr\n")), false);
+        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
+        ACE_TEXT("ACE::get_ip_interfaces")), false);
     }
 
-  } else if (config_i_->local_address_.get_port_number() == 0) {
+    for (size_t i = 0; i < count; ++i) {
+      if (!addrs[i].is_loopback()) {
+        config_i_->local_address_ = addrs[i];
+      }
+    }
+
+    // if it's still "any" at this point, we may only have loopback interface
+    if (config_i_->local_address_.is_any() && count > 0) {
+      config_i_->local_address_ = addrs[0];
+    }
+  } 
+
+  if (config_i_->local_address_.get_port_number() == 0) {
 
     ACE_INET_Addr address;
     if (unicast_socket_.get_local_addr(address) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p"),
-        ACE_TEXT("cannot get local addr\n")), false);
+        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
+        ACE_TEXT("cannot get local addr")), false);
     }
     config_i_->local_address_.set_port_number(address.get_port_number());
   }

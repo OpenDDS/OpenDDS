@@ -564,8 +564,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   DataReaderMap::iterator it;
 
-  for (it = datareader_map_.begin() ; it != datareader_map_.end() ;
-       it ++) {
+  for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (!CORBA::is_nil (listener)) {

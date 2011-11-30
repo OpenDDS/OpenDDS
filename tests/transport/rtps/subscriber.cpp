@@ -1,4 +1,7 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"

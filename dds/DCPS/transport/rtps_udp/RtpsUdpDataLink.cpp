@@ -232,6 +232,8 @@ RtpsUdpDataLink::stop_i()
   nack_reply_.cancel();
   heartbeat_reply_.cancel();
   heartbeat_.disable();
+  unicast_socket_.close();
+  multicast_socket_.close();
 }
 
 
@@ -820,7 +822,7 @@ RtpsUdpDataLink::send_nack_replies()
   // Reply from local DW to remote DR: GAP or DATA
   using namespace OpenDDS::RTPS;
   typedef RtpsWriterMap::iterator rw_iter;
-  for (rw_iter rw = writers_.begin(); rw != writers_.end(); rw++) {
+  for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
     if (rw->second.send_buff_.is_nil() || rw->second.send_buff_->empty()) {
       continue; // no data available
@@ -921,7 +923,7 @@ RtpsUdpDataLink::send_heartbeats()
   std::set<ACE_INET_Addr> recipients;
 
   typedef RtpsWriterMap::iterator rw_iter;
-  for (rw_iter rw = writers_.begin(); rw != writers_.end(); rw++) {
+  for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
     if (rw->second.send_buff_.is_nil() || rw->second.send_buff_->empty()) {
       continue; // no data available -> no need to heartbeat (8.4.2.2.3)

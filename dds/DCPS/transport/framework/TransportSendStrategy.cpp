@@ -714,7 +714,7 @@ TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
 
     num_delayed_notifications = this->num_delayed_notifications_;
 
-    if (num_delayed_notifications <= 0) {
+    if (num_delayed_notifications == 0) {
       return;
 
     } else if (num_delayed_notifications == 1) {

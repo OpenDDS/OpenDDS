@@ -559,7 +559,6 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   DBG_ENTRY_LVL("TcpConnection","active_reconnect_i",6);
 
   GuardType guard(this->reconnect_lock_);
-  int ret = -1;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %d\n",
@@ -592,7 +591,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     // notify_lost() without delay.
 
     double retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
-
+    int ret = -1;
     for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i) {
       ret = this->active_establishment(this->remote_address_,
                                        this->local_address_,

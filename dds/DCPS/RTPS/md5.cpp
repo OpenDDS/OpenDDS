@@ -210,7 +210,7 @@ void MD5_Init(MD5_CTX *ctx)
 void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
 {
         MD5_u32plus saved_lo;
-        unsigned long used, free;
+        unsigned long used;
 
         saved_lo = ctx->lo;
         if ((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo)
@@ -220,7 +220,7 @@ void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
         used = saved_lo & 0x3f;
 
         if (used) {
-                free = 64 - used;
+                unsigned long free = 64 - used;
 
                 if (size < free) {
                         memcpy(&ctx->buffer[used], data, size);

@@ -34,7 +34,7 @@ namespace {
 void cleanup_directory(const std::vector<std::string> & path,
                        const ACE_CString & data_dir)
 {
-  if (path.size() == 0) return;
+  if (path.empty()) return;
 
   using OpenDDS::FileSystemStorage::Directory;
   Directory::Ptr dir = Directory::create(data_dir.c_str());

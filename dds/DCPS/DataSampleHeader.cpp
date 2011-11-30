@@ -298,8 +298,9 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 void
 DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 {
-  size_t size = 0, padding = 0;
+  size_t size = 0;
   if (guids) {
+    size_t padding = 0; // GUIDs are always aligned
     gen_find_size(*guids, size, padding);
   } else {
     size = sizeof(CORBA::ULong);
