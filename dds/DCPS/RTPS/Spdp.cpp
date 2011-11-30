@@ -464,7 +464,10 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
   Header header;
   if (!(ser >> header)) {
-    //TODO
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::handle_input() - ")
+      ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
+    return 0;
   }
 
   while (buff_.length() > 3) {
