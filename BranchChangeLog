@@ -1,3 +1,16 @@
+Wed Nov 30 20:37:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added error logging for SPDP handling methods.
+          Check if remote participants have exceeded their lease duration.
+          Update BIT data if Participant QoS changes (USER_DATA only).
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fixed spelling of an ACE header.
+
 Wed Nov 30 19:05:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.cpp:

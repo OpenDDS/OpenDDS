@@ -18,7 +18,7 @@
 
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
-#include "ace/SOCK_Connect.h"
+#include "ace/Sock_Connect.h"
 
 
 namespace OpenDDS {

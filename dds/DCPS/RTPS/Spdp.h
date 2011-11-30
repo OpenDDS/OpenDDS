@@ -140,6 +140,7 @@ private:
     void open();
     void write();
     void close();
+    void dispose_unregister();
 
     Spdp* outer_;
     Header hdr_;
@@ -166,8 +167,11 @@ private:
     ACE_Time_Value last_seen_;
     DDS::InstanceHandle_t bit_ih_;
   };
-  std::map<DCPS::RepoId, ParticipantDetails, DCPS::GUID_tKeyLessThan>
-    participants_;
+  typedef std::map<DCPS::RepoId, ParticipantDetails,
+                   DCPS::GUID_tKeyLessThan> ParticipantMap;
+  typedef ParticipantMap::iterator ParticipantIter;
+  ParticipantMap participants_;
+  void remove_discovered_participant(ParticipantIter iter);
 
   // Topic:
   std::map<std::string, TopicDetails> topics_;

@@ -19,6 +19,7 @@
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/Qos_Helper.h"
 
 #include "ace/Reactor.h"
 
@@ -96,7 +97,10 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
   const ACE_Time_Value time = ACE_OS::gettimeofday();
   SPDPdiscoveredParticipantData pdata;
   if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
-    //TODO
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR Spdp::data_received - ")
+      ACE_TEXT("failed to convert from ParameterList to ")
+      ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    return;
   }
 
   DCPS::RepoId guid;
@@ -105,15 +109,13 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
   guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  typedef std::map<DCPS::RepoId, ParticipantDetails, DCPS::GUID_tKeyLessThan
-                  >::iterator ParticipantIter;
   const ParticipantIter iter = participants_.find(guid);
 
   if (iter == participants_.end()) {
     // copy guid prefix (octet[12]) into BIT key (long[3])
-    memcpy(pdata.ddsParticipantData.key.value,
-           pdata.participantProxy.guidPrefix,
-           sizeof(pdata.ddsParticipantData.key.value));
+    std::memcpy(pdata.ddsParticipantData.key.value,
+                pdata.participantProxy.guidPrefix,
+                sizeof(pdata.ddsParticipantData.key.value));
     // add a new participant
     participants_[guid] = ParticipantDetails(pdata, time);
     participants_[guid].bit_ih_ =
@@ -121,17 +123,28 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
                                        DDS::NEW_VIEW_STATE);
     //TODO: inform SEDP
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
-    // remove an existing participant
-    part_bit()->set_instance_state(iter->second.bit_ih_,
-                                   DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-    participants_.erase(iter);
-    //TODO: inform SEDP
+    remove_discovered_participant(iter);
   } else {
     // update an existing participant
-    participants_[guid].pdata_ = pdata;
-    participants_[guid].last_seen_ = time;
-    //TODO: update BIT if user_data changed
+    pdata.ddsParticipantData.key = iter->second.pdata_.ddsParticipantData.key;
+    using OpenDDS::DCPS::operator!=;
+    if (iter->second.pdata_.ddsParticipantData.user_data !=
+        pdata.ddsParticipantData.user_data) {
+      part_bit()->store_synthetic_data(pdata.ddsParticipantData,
+                                       DDS::NOT_NEW_VIEW_STATE);
+    }
+    iter->second.pdata_ = pdata;
+    iter->second.last_seen_ = time;
   }
+}
+
+void
+Spdp::remove_discovered_participant(ParticipantIter iter)
+{
+  part_bit()->set_instance_state(iter->second.bit_ih_,
+                                 DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  participants_.erase(iter);
+  //TODO: inform SEDP
 }
 
 void
@@ -277,6 +290,19 @@ Spdp::SpdpTransport::open()
 
 Spdp::SpdpTransport::~SpdpTransport()
 {
+  dispose_unregister();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+    outer_->eh_shutdown_ = true;
+  }
+  outer_->shutdown_cond_.signal();
+  unicast_socket_.close();
+  multicast_socket_.close();
+}
+
+void
+Spdp::SpdpTransport::dispose_unregister()
+{
   // Send the dispose/unregister SPDP sample
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
@@ -287,21 +313,23 @@ Spdp::SpdpTransport::~SpdpTransport()
   buff_.reset();
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
   if (!(ser << hdr_) || !(ser << data_)) {
-    //TODO
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::dispose_unregister() - ")
+      ACE_TEXT("failed to serialize headers for dispose/unregister\n")));
+    return;
   }
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
-    ssize_t res =
+    const ssize_t res =
       unicast_socket_.send(buff_.rd_ptr(), buff_.length(), *iter);
-    //TODO: check
+    if (res < 0) {
+      ACE_TCHAR addr_buff[256] = {};
+      iter->addr_to_string(addr_buff, 256, 0);
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::dispose_unregister() - ")
+        ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
+    }
   }
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-    outer_->eh_shutdown_ = true;
-  }
-  outer_->shutdown_cond_.signal();
-  unicast_socket_.close();
-  multicast_socket_.close();
 }
 
 void
@@ -365,14 +393,23 @@ Spdp::SpdpTransport::write()
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) ||
       !(ser << plist)) {
-    //TODO: error
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::write() - ")
+      ACE_TEXT("failed to serialize headers for SPDP\n")));
+    return;
   }
 
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
-    ssize_t res =
+    const ssize_t res =
       unicast_socket_.send(buff_.rd_ptr(), buff_.length(), *iter);
-    //TODO: check
+    if (res < 0) {
+      ACE_TCHAR addr_buff[256] = {};
+      iter->addr_to_string(addr_buff, 256, 0);
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
+    }
   }
 }
 
@@ -380,7 +417,25 @@ int
 Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value&, const void*)
 {
   write();
-  //TODO: expire stale discovered participants
+
+  // Find and remove any expired discovered participant
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer_->lock_, 0);
+  for (ParticipantIter it = outer_->participants_.begin();
+       it != outer_->participants_.end();) {
+    if (it->second.last_seen_ <
+        ACE_OS::gettimeofday() - it->second.pdata_.leaseDuration.seconds) {
+      if (DCPS::DCPS_debug_level > 1) {
+        DCPS::GuidConverter conv(it->first);
+        ACE_DEBUG((LM_WARNING,
+          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_timeout() - ")
+          ACE_TEXT("participant %C exceeded lease duration, removing\n"),
+          std::string(conv).c_str()));
+      }
+      outer_->remove_discovered_participant(it++);
+    } else {
+      ++it;
+    }
+  }
   return 0;
 }
 
@@ -421,7 +476,10 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     case DATA: {
       DataSubmessage data;
       if (!(ser >> data)) {
-        //TODO
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::handle_input() - ")
+          ACE_TEXT("failed to deserialize DATA header for SPDP\n")));
+        return 0;
       }
       submessageLength = data.smHeader.submessageLength;
       ParameterList plist;
@@ -429,12 +487,18 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
         CORBA::ULong encap;
         if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
-          //TODO
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::handle_input() - ")
+            ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+          return 0;
         }
         // bit 8 in encap is on if it's PL_CDR_LE
         ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
         if (!(ser >> plist)) {
-          //TODO
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR Spdp::SpdpTransport::handle_input() - ")
+            ACE_TEXT("failed to deserialize data payload for SPDP\n")));
+          return 0;
         }
       }
       if (data.writerId == ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
@@ -466,7 +530,6 @@ Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
 {
   if (topics_.count(topicName)) { // types must match, RtpsInfo checked for us
     topics_[topicName].qos_ = qos;
-    //TODO: write to transport if QoS changed
     topicId = topics_[topicName].repo_id_;
     return DCPS::FOUND;
   }
@@ -488,7 +551,6 @@ Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
     topic_counter_ = 0;
   }
 
-  //TODO: write to transport
   return DCPS::CREATED;
 }
 
@@ -498,8 +560,6 @@ Spdp::remove_topic(const RepoId& topicId, std::string& name)
   name = topic_names_[topicId];
   topics_.erase(name);
   topic_names_.erase(topicId);
-
-  //TODO: write to transport (dispose/unregister?)
   return DCPS::REMOVED;
 }
 
@@ -516,7 +576,6 @@ Spdp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   if (topic_names_.count(topicId)) {
     name = topic_names_[topicId];
     topics_[name].qos_ = qos;
-    //TODO: write to transport
     return true;
   }
   return false;
