@@ -1,3 +1,16 @@
+Thu Dec  1 19:28:32 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Reformatting.
+
+        * docs/getting_started.odt:
+
+          Document describing minimal messenger.
+
 Mon Nov 21 16:19:46 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
 
         * ChangeLog:
