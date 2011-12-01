@@ -21,9 +21,13 @@ using OpenDDS::Model::NullReaderListener;
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<NullReaderListener> {
 public:
+  DataReaderListenerImpl();
+
   virtual void on_data_available(
     DDS::DataReader_ptr reader)
   ACE_THROW_SPEC((CORBA::SystemException));
+
+  int sample_count;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL_H */

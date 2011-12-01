@@ -11,6 +11,10 @@
 
 using namespace examples::boilerplate;
 
+DataReaderListenerImpl::DataReaderListenerImpl() : sample_count(0)
+{
+}
+
 void
 DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
@@ -24,14 +28,16 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // Remove (take) the next sample from the data reader
   DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
 
+  // Make sure take was successful
   if (error == DDS::RETCODE_OK) {
-    // Make sure this is not a sample disposed message
+    // Make sure this is not a sample dispose message
     if (info.valid_data) {
-      std::cout << "Message: subject    = " << msg.subject.in() << std::endl
-                << "         subject_id = " << msg.subject_id   << std::endl
-                << "         from       = " << msg.from.in()    << std::endl
-                << "         count      = " << msg.count        << std::endl
-                << "         text       = " << msg.text.in()    << std::endl;
+      ++sample_count;
+      std::cout << "Msg: subject    " << msg.subject.in() << std::endl
+                << "     subject_id " << msg.subject_id   << std::endl
+                << "     from       " << msg.from.in()    << std::endl
+                << "     count      " << msg.count        << std::endl
+                << "     text       " << msg.text.in()    << std::endl;
     }
   } else {
     ACE_ERROR((LM_ERROR,
