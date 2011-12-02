@@ -1,3 +1,10 @@
+Fri Dec  2 19:01:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Suppress addition of params with default values in to_param_list.
+
 Wed Nov 30 22:55:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r5022 through r5110.

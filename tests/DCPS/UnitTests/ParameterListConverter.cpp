@@ -139,6 +139,85 @@ namespace {
       return result;
     }
 
+    SPDPdiscoveredParticipantData default_participant_data()
+    {
+      SPDPdiscoveredParticipantData part_data;
+      part_data.ddsParticipantData.user_data = 
+          TheServiceParticipant->initial_UserDataQosPolicy();
+      part_data.participantProxy.expectsInlineQos = false;
+      part_data.leaseDuration.seconds = 100;
+      part_data.leaseDuration.fraction = 0;
+      return part_data;
+    }
+
+    DiscoveredWriterData default_writer_data()
+    {
+      DiscoveredWriterData writer_data;
+      writer_data.ddsPublicationData.durability = 
+          TheServiceParticipant->initial_DurabilityQosPolicy();
+      writer_data.ddsPublicationData.durability_service = 
+          TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+      writer_data.ddsPublicationData.deadline = 
+          TheServiceParticipant->initial_DeadlineQosPolicy();
+      writer_data.ddsPublicationData.latency_budget = 
+          TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+      writer_data.ddsPublicationData.liveliness = 
+          TheServiceParticipant->initial_LivelinessQosPolicy();
+      writer_data.ddsPublicationData.reliability = 
+          TheServiceParticipant->initial_ReliabilityQosPolicy();
+      writer_data.ddsPublicationData.lifespan = 
+          TheServiceParticipant->initial_LifespanQosPolicy();
+      writer_data.ddsPublicationData.user_data = 
+          TheServiceParticipant->initial_UserDataQosPolicy();
+      writer_data.ddsPublicationData.ownership = 
+          TheServiceParticipant->initial_OwnershipQosPolicy();
+      writer_data.ddsPublicationData.ownership_strength = 
+          TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+      writer_data.ddsPublicationData.destination_order = 
+          TheServiceParticipant->initial_DestinationOrderQosPolicy();
+      writer_data.ddsPublicationData.presentation = 
+          TheServiceParticipant->initial_PresentationQosPolicy();
+      writer_data.ddsPublicationData.partition = 
+          TheServiceParticipant->initial_PartitionQosPolicy();
+      writer_data.ddsPublicationData.topic_data = 
+          TheServiceParticipant->initial_TopicDataQosPolicy();
+      writer_data.ddsPublicationData.group_data = 
+          TheServiceParticipant->initial_GroupDataQosPolicy();
+
+      return writer_data;
+    }
+
+    DiscoveredReaderData default_reader_data()
+    {
+      DiscoveredReaderData reader_data;
+      reader_data.ddsSubscriptionData.durability = 
+          TheServiceParticipant->initial_DurabilityQosPolicy();
+      reader_data.ddsSubscriptionData.deadline = 
+          TheServiceParticipant->initial_DeadlineQosPolicy();
+      reader_data.ddsSubscriptionData.latency_budget = 
+          TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+      reader_data.ddsSubscriptionData.liveliness = 
+          TheServiceParticipant->initial_LivelinessQosPolicy();
+      reader_data.ddsSubscriptionData.reliability = 
+          TheServiceParticipant->initial_ReliabilityQosPolicy();
+      reader_data.ddsSubscriptionData.ownership = 
+          TheServiceParticipant->initial_OwnershipQosPolicy();
+      reader_data.ddsSubscriptionData.destination_order = 
+          TheServiceParticipant->initial_DestinationOrderQosPolicy();
+      reader_data.ddsSubscriptionData.user_data = 
+          TheServiceParticipant->initial_UserDataQosPolicy();
+      reader_data.ddsSubscriptionData.time_based_filter = 
+          TheServiceParticipant->initial_TimeBasedFilterQosPolicy();
+      reader_data.ddsSubscriptionData.partition = 
+          TheServiceParticipant->initial_PartitionQosPolicy();
+      reader_data.ddsSubscriptionData.topic_data = 
+          TheServiceParticipant->initial_TopicDataQosPolicy();
+      reader_data.ddsSubscriptionData.group_data = 
+          TheServiceParticipant->initial_GroupDataQosPolicy();
+
+      return reader_data;
+    }
+
     DiscoveredWriterData 
     writer_data(
         const char* topic_name = NULL,
@@ -3246,6 +3325,55 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.filterClassName));
     TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.filterExpression));
     TEST_ASSERT(!reader_data_out.contentFilterProperty.expressionParameters.length());
+  }
+  { // Should not encode participant default data
+    SPDPdiscoveredParticipantData participant_data = 
+        Factory::default_participant_data();
+    ParameterList param_list;
+    int status = to_param_list(participant_data, param_list);
+    TEST_ASSERT(status == 0);
+    TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
+    TEST_ASSERT(!is_present(param_list, PID_EXPECTS_INLINE_QOS));
+    TEST_ASSERT(!is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
+  }
+  { // Should not encode writer default data
+    DiscoveredWriterData writer_data = Factory::default_writer_data();
+
+    ParameterList param_list;
+    TEST_ASSERT(!to_param_list(writer_data, param_list));
+    TEST_ASSERT(!is_present(param_list, PID_DURABILITY));
+    TEST_ASSERT(!is_present(param_list, PID_DURABILITY_SERVICE));
+    TEST_ASSERT(!is_present(param_list, PID_DEADLINE));
+    TEST_ASSERT(!is_present(param_list, PID_LATENCY_BUDGET));
+    TEST_ASSERT(!is_present(param_list, PID_LIVELINESS));
+    TEST_ASSERT(!is_present(param_list, PID_RELIABILITY));
+    TEST_ASSERT(!is_present(param_list, PID_LIFESPAN));
+    TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
+    TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP));
+    TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP_STRENGTH));
+    TEST_ASSERT(!is_present(param_list, PID_DESTINATION_ORDER));
+    TEST_ASSERT(!is_present(param_list, PID_PRESENTATION));
+    TEST_ASSERT(!is_present(param_list, PID_PARTITION));
+    TEST_ASSERT(!is_present(param_list, PID_TOPIC_DATA));
+    TEST_ASSERT(!is_present(param_list, PID_GROUP_DATA));
+  }
+  { // Should not encode reader default data
+    DiscoveredReaderData reader_data = Factory::default_reader_data();
+    ParameterList param_list;
+    TEST_ASSERT(!to_param_list(reader_data, param_list));
+    TEST_ASSERT(!is_present(param_list, PID_DURABILITY));
+    TEST_ASSERT(!is_present(param_list, PID_DEADLINE));
+    TEST_ASSERT(!is_present(param_list, PID_LATENCY_BUDGET));
+    TEST_ASSERT(!is_present(param_list, PID_LIVELINESS));
+    TEST_ASSERT(!is_present(param_list, PID_RELIABILITY));
+    TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP));
+    TEST_ASSERT(!is_present(param_list, PID_DESTINATION_ORDER));
+    TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
+    TEST_ASSERT(!is_present(param_list, PID_TIME_BASED_FILTER));
+    TEST_ASSERT(!is_present(param_list, PID_PRESENTATION));
+    TEST_ASSERT(!is_present(param_list, PID_PARTITION));
+    TEST_ASSERT(!is_present(param_list, PID_TOPIC_DATA));
+    TEST_ASSERT(!is_present(param_list, PID_GROUP_DATA));
   }
   return 0;
 }
