@@ -1124,18 +1124,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  RepoId ignoreId = RepoIdBuilder::create();
-
-  BIT_Helper_1 < DDS::ParticipantBuiltinTopicDataDataReader,
-  DDS::ParticipantBuiltinTopicDataDataReader_var,
-  DDS::ParticipantBuiltinTopicDataSeq > hh;
-  DDS::ReturnCode_t ret
-  = hh.instance_handle_to_repo_key(this, BUILT_IN_PARTICIPANT_TOPIC, handle, ignoreId);
-
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
+  RepoId ignoreId = get_repoid(handle);
   HandleMap::const_iterator location = this->ignored_participants_.find(ignoreId);
 
   if (location == this->ignored_participants_.end()) {
@@ -1202,18 +1191,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  RepoId ignoreId = RepoIdBuilder::create();
-
-  BIT_Helper_1 < DDS::TopicBuiltinTopicDataDataReader,
-  DDS::TopicBuiltinTopicDataDataReader_var,
-  DDS::TopicBuiltinTopicDataSeq > hh;
-  DDS::ReturnCode_t ret =
-    hh.instance_handle_to_repo_key(this, BUILT_IN_TOPIC_TOPIC, handle, ignoreId);
-
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
+  RepoId ignoreId = get_repoid(handle);
   HandleMap::const_iterator location = this->ignored_topics_.find(ignoreId);
 
   if (location == this->ignored_topics_.end()) {
@@ -1272,18 +1250,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  RepoId ignoreId = RepoIdBuilder::create();
-
-  BIT_Helper_1 < DDS::PublicationBuiltinTopicDataDataReader,
-  DDS::PublicationBuiltinTopicDataDataReader_var,
-  DDS::PublicationBuiltinTopicDataSeq > hh;
-  DDS::ReturnCode_t ret =
-    hh.instance_handle_to_repo_key(this, BUILT_IN_PUBLICATION_TOPIC, handle, ignoreId);
-
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
   try {
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
@@ -1294,6 +1260,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                  handle));
     }
 
+    RepoId ignoreId = get_repoid(handle);
     DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
     repo->ignore_publication(domain_id_,
                              dp_id_,
@@ -1333,18 +1300,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  RepoId ignoreId = RepoIdBuilder::create();
-
-  BIT_Helper_1 < DDS::SubscriptionBuiltinTopicDataDataReader,
-  DDS::SubscriptionBuiltinTopicDataDataReader_var,
-  DDS::SubscriptionBuiltinTopicDataSeq > hh;
-  DDS::ReturnCode_t ret =
-    hh.instance_handle_to_repo_key(this, BUILT_IN_SUBSCRIPTION_TOPIC, handle, ignoreId);
-
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
   try {
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
@@ -1355,6 +1310,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
                  handle));
     }
 
+    
+    RepoId ignoreId = get_repoid(handle);
     DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
     repo->ignore_subscription(domain_id_,
                               dp_id_,
@@ -1756,12 +1713,33 @@ DomainParticipantImpl::get_handle(const RepoId& id)
                    HANDLE_UNKNOWN);
 
   HandleMap::const_iterator location = this->handles_.find(id);
+  DDS::InstanceHandle_t result;
 
   if (location == this->handles_.end()) {
-    this->handles_[ id] = this->participant_handles_.next();
+    // Map new handle in both directions
+    result = this->participant_handles_.next();
+    this->handles_[ id] = result;
+    this->repoIds_[ result] = id;
+  } else {
+    result = location->second;
   }
 
-  return this->handles_[ id];
+  return result;
+}
+
+RepoId
+DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
+{
+  RepoId result = GUID_UNKNOWN;
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->handle_protector_,
+                   GUID_UNKNOWN);
+  RepoIdMap::const_iterator location = this->repoIds_.find(handle);
+  if (location != this->repoIds_.end()) {
+    result = location->second;
+  }
+  return result;
 }
 
 DDS::Topic_ptr

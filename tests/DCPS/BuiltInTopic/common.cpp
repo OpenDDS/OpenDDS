@@ -61,33 +61,15 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %C ignore participant %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      ::DDS::InstanceHandleSeq handles;
-      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
-      ignore_ids.length (1);
-      ignore_ids[0] = ignore_id;
-
-      ::OpenDDS::DCPS::BIT_Helper_2 < ::DDS::ParticipantBuiltinTopicDataDataReader,
-                    ::DDS::ParticipantBuiltinTopicDataDataReader_var,
-                    ::DDS::ParticipantBuiltinTopicDataSeq,
-                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
-
-      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
-      if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT, ")
-          ACE_TEXT(" repo_ids_to_instance_handles returned error %d\n"),
-          ret));
-        return -1;
-      }
+      InstanceHandle_t handle = participant_servant->get_handle(ignore_id);
 
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  ignored participant %C has handle 0x%x.\n"),
+        ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT, ignored participant %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
-        handles[0]
+        handle
       ));
 
-      ret = participant->ignore_participant (handles[0]);
+      DDS::ReturnCode_t ret = participant->ignore_participant(handle);
 
       if (ret != ::DDS::RETCODE_OK)
       {
@@ -113,40 +95,21 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %C ignore topic %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      ::DDS::InstanceHandleSeq handles;
-      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
-      ignore_ids.length (1);
-      ignore_ids[0] = ignore_id;
-
-      ::OpenDDS::DCPS::BIT_Helper_2 < ::DDS::TopicBuiltinTopicDataDataReader,
-                    ::DDS::TopicBuiltinTopicDataDataReader_var,
-                    ::DDS::TopicBuiltinTopicDataSeq,
-                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
-
-      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
-      if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) IGNORE_TOPIC, ")
-          ACE_TEXT(" repo_ids_to_instance_handles returned error %d.\n"),
-          ret));
-        return -1;
-      }
-
+      InstanceHandle_t handle = participant_servant->get_handle(ignore_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
-        handles[0]
+        handle
       ));
 
-      ret = participant->ignore_topic (handles[0]);
+      DDS::ReturnCode_t ret = participant->ignore_topic(handle);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_TOPIC, ")
                     ACE_TEXT(" ignore_topic 0x%x return error %d\n"),
-                    handles[0], ret));
+                    handle, ret));
         return -1;
       }
     }
@@ -164,41 +127,21 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %C ignore publication %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      ::DDS::InstanceHandleSeq handles;
-      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
-      ignore_ids.length (1);
-      ignore_ids[0] = ignore_id;
-
-      ::OpenDDS::DCPS::BIT_Helper_2 <
-                    ::DDS::PublicationBuiltinTopicDataDataReader,
-                    ::DDS::PublicationBuiltinTopicDataDataReader_var,
-                    ::DDS::PublicationBuiltinTopicDataSeq,
-                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
-
-      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
-      if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, ")
-          ACE_TEXT(" repo_ids_to_instance_handles returned error %d\n"),
-          ret));
-        return -1;
-      }
-
+      InstanceHandle_t handle = participant_servant->get_handle(ignore_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
-        handles[0]
+        handle
       ));
 
-      ret = participant->ignore_publication (handles[0]);
+      DDS::ReturnCode_t ret = participant->ignore_publication(handle);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, ")
                     ACE_TEXT(" ignore_publication 0x%x return error %d\n"),
-                    handles[0], ret));
+                    handle, ret));
         return -1;
       }
     }
@@ -216,40 +159,21 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %C ignore subscription %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      ::DDS::InstanceHandleSeq handles;
-      ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
-      ignore_ids.length (1);
-      ignore_ids[0] = ignore_id;
-
-      ::OpenDDS::DCPS::BIT_Helper_2 < ::DDS::SubscriptionBuiltinTopicDataDataReader,
-                    ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
-                    ::DDS::SubscriptionBuiltinTopicDataSeq,
-                    ::OpenDDS::DCPS::ReaderIdSeq > hh;
-
-      DDS::ReturnCode_t ret = hh.repo_ids_to_instance_handles(ignore_ids, handles);
-      if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, ")
-          ACE_TEXT(" repo_ids_to_instance_handles returned error %d\n"),
-          ret));
-        return -1;
-      }
-
+      InstanceHandle_t handle = participant_servant->get_handle(ignore_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
-        handles[0]
+        handle
       ));
 
-      ret = participant->ignore_subscription (handles[0]);
+      DDS::ReturnCode_t ret = participant->ignore_subscription(handle);
 
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, ")
                     ACE_TEXT(" ignore_subscription 0x%x returned error %d\n"),
-                    handles[0], ret));
+                    handle, ret));
         return -1;
       }
     }

@@ -65,31 +65,6 @@ DDS::BuiltinTopicKey_t keyFromSample(TopicType* sample);
 template <class BIT_Reader, class BIT_Reader_var, class BIT_DataSeq>
 class BIT_Helper_1 {
 public:
-  DDS::ReturnCode_t instance_handle_to_repo_key(
-    DomainParticipantImpl*         dp,
-    const char*                    bit_name,
-    const DDS::InstanceHandle_t&   handle,
-    OpenDDS::DCPS::RepoId&         repoId)
-  {
-    BIT_DataSeq data;
-    DDS::ReturnCode_t ret
-      = instance_handle_to_bit_data(dp, bit_name, handle, data);
-
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_key: ")
-                        ACE_TEXT("failed to find builtin topic data for instance 0x%x, ")
-                        ACE_TEXT("error %d.\n"),
-                        handle,
-                        ret), ret);
-    }
-
-    OpenDDS::DCPS::RepoIdBuilder builder(repoId);
-    builder.from_BuiltinTopicKey(data[0].key);
-
-    return DDS::RETCODE_OK;
-  }
-
   DDS::ReturnCode_t instance_handle_to_bit_data(
     DomainParticipantImpl*       dp,
     const char*                  bit_name,
@@ -169,25 +144,6 @@ public:
         return DDS::RETCODE_TIMEOUT;
       }
     }
-  }
-};
-
-template <class BIT_Reader, class BIT_Reader_var, class BIT_DataSeq, class IdSeq>
-class BIT_Helper_2 {
-public:
-  DDS::ReturnCode_t repo_ids_to_instance_handles(
-    const IdSeq&                    repoids,
-    DDS::InstanceHandleSeq&         handles)
-  {
-    CORBA::ULong repoids_len = repoids.length();
-    handles.length(repoids_len);
-
-    for (CORBA::ULong i = 0; i < repoids_len; ++i) {
-      OpenDDS::DCPS::RepoIdConverter converter(repoids[i]);
-      handles[i] = DDS::InstanceHandle_t(converter);
-    }
-
-    return DDS::RETCODE_OK;
   }
 };
 

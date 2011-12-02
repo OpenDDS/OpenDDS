@@ -102,6 +102,7 @@ public:
   typedef std::map<std::string, DDS::TopicDescription_var> TopicDescriptionMap;
 
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
+  typedef std::map<DDS::InstanceHandle_t, RepoId> RepoIdMap;
 
   ///Constructor
   DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
@@ -306,6 +307,11 @@ public:
    * Obtain a local handle representing a GUID.
    */
   DDS::InstanceHandle_t get_handle(const RepoId& id = GUID_UNKNOWN);
+  /**
+   * Obtain a GUID representing a local hande.
+   * @return GUID_UNKNOWN if not found.
+   */
+  RepoId get_repoid(const DDS::InstanceHandle_t& id);
 
   /**
   *  Associate the servant with the object reference.
@@ -402,8 +408,9 @@ private:
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
-  /// Collection of handles.
+  /// Bidirectional collection of handles <--> RepoIds.
   HandleMap      handles_;
+  RepoIdMap      repoIds_;
   /// Collection of ignored participants.
   HandleMap      ignored_participants_;
   /// Collection of ignored topics.

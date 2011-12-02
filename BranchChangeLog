@@ -1,3 +1,21 @@
+Fri Dec  2 22:26:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Track bidirectional InstanceHandle_t <-> RepoId.
+          Remove use of BIT_Helper_1.
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Remove BIT_Helper_2 and not needed method in BIT_Helper_1
+
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/DistributedContent/main.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+
+          Remove references to BIT_Helper_2.
+
 Fri Dec  2 19:01:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
