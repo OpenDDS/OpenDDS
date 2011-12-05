@@ -113,7 +113,7 @@ namespace {
   bool not_default(const DDS::DurabilityQosPolicy& qos) {
     DDS::DurabilityQosPolicy def_qos = 
         TheServiceParticipant->initial_DurabilityQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos.kind != def_qos.kind;
   }
   bool not_default(const DDS::DurabilityServiceQosPolicy& qos) {
     DDS::DurabilityServiceQosPolicy def_qos = 
@@ -148,17 +148,17 @@ namespace {
   bool not_default(const DDS::OwnershipQosPolicy& qos) {
     DDS::OwnershipQosPolicy def_qos = 
         TheServiceParticipant->initial_OwnershipQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos.kind != def_qos.kind;
   }
   bool not_default(const DDS::OwnershipStrengthQosPolicy& qos) {
     DDS::OwnershipStrengthQosPolicy def_qos = 
         TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos.value != def_qos.value;
   }
   bool not_default(const DDS::DestinationOrderQosPolicy& qos) {
     DDS::DestinationOrderQosPolicy def_qos = 
         TheServiceParticipant->initial_DestinationOrderQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos.kind != def_qos.kind;
   }
   bool not_default(const DDS::PresentationQosPolicy& qos) {
     DDS::PresentationQosPolicy def_qos = 
@@ -168,7 +168,17 @@ namespace {
   bool not_default(const DDS::PartitionQosPolicy& qos) {
     DDS::PartitionQosPolicy def_qos = 
         TheServiceParticipant->initial_PartitionQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    CORBA::ULong length = qos.name.length();
+    if (length != def_qos.name.length()) {
+      return true; // not same as default
+    } else {
+      for (CORBA::ULong i = 0; i < length; ++i) {
+        if (qos.name[i] != def_qos.name[i]) {
+          return true; // not same as default
+        }
+      }
+      return false; // same as default
+    }
   }
 };
 
