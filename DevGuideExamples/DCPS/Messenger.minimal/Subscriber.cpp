@@ -55,7 +55,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               << " samples" << std::endl;
 
     // Clean-up!
-    cleanup(participant, dpf); 
+    cleanup(participant, dpf);
 
     // Listener will be cleaned up when reader goes out of scope
   } catch (const CORBA::Exception& e) {
