@@ -1,16 +1,3 @@
-Tue Dec  6 16:27:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
-
-        * dds/DCPS/RTPS/ParameterListConverter.cpp:
-
-          fix - use strcmp.
-
-Mon Dec  5 18:51:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
-
-        * dds/DCPS/RTPS/ParameterListConverter.cpp:
-
-          Compare partition names, rather than memcmp, when comparing to default
-          for to_param_list
-
 Mon Nov 21 16:19:46 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
 
         * ChangeLog:
