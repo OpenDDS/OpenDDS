@@ -173,7 +173,7 @@ namespace {
       return true; // not same as default
     } else {
       for (CORBA::ULong i = 0; i < length; ++i) {
-        if (qos.name[i] != def_qos.name[i]) {
+        if (strcmp(qos.name[i], def_qos.name[i])) {
           return true; // not same as default
         }
       }
