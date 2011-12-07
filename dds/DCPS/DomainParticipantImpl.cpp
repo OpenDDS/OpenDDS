@@ -1136,7 +1136,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   try {
     if (DCPS_debug_level >= 4) {
-      RepoIdConverter converter(dp_id_);
+      GuidConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
                  ACE_TEXT("%C ignoring handle %x.\n"),
@@ -1150,7 +1150,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                     ignoreId);
 
     if (DCPS_debug_level >= 4) {
-      RepoIdConverter converter(dp_id_);
+      GuidConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
                  ACE_TEXT("%C repo call returned.\n"),
@@ -1203,7 +1203,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   try {
     if (DCPS_debug_level >= 4) {
-      RepoIdConverter converter(dp_id_);
+      GuidConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_topic: ")
                  ACE_TEXT("%C ignoring handle %x.\n"),
@@ -1252,7 +1252,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   try {
     if (DCPS_debug_level >= 4) {
-      RepoIdConverter converter(dp_id_);
+      GuidConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_publication: ")
                  ACE_TEXT("%C ignoring handle %x.\n"),
@@ -1302,7 +1302,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   try {
     if (DCPS_debug_level >= 4) {
-      RepoIdConverter converter(dp_id_);
+      GuidConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_subscription: ")
                  ACE_TEXT("%C ignoring handle %d.\n"),

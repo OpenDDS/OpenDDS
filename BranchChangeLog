@@ -1,3 +1,14 @@
+Wed Dec  7 17:10:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Renamed this file.
+          Added assertion to verify list is empty at start of test.
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        
+          Account for rename
 Tue Dec  6 16:27:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

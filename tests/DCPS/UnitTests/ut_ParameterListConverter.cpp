@@ -3360,6 +3360,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should not encode reader default data
     DiscoveredReaderData reader_data = Factory::default_reader_data();
     ParameterList param_list;
+    TEST_ASSERT(param_list.length() == 0);
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     TEST_ASSERT(!is_present(param_list, PID_DURABILITY));
     TEST_ASSERT(!is_present(param_list, PID_DEADLINE));

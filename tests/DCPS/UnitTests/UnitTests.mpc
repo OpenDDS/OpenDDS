@@ -54,6 +54,6 @@ project(*ParameterListConverter): dcps_rtpsexe {
   exename   = *
 
   Source_Files {
-    ParameterListConverter.cpp
+    ut_ParameterListConverter.cpp
   }
 }

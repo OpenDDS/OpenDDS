@@ -30,6 +30,7 @@ public:
 
   void participantId(long participantId);
 
+private:
   void from_BuiltinTopicKey(const DDS::BuiltinTopicKey_t& key);
 };
 
