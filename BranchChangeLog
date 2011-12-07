@@ -1,4 +1,18 @@
+Wed Dec  7 21:08:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RepoIdBuilder.h:
+
+          Revert accidental checkin change.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Remove commented-out code.
+
 Wed Dec  7 17:10:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp
+
+          Change RepoIdConverter to GuidConverter where it makes sense.
 
         * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
         * tests/DCPS/UnitTests/ParameterListConverter.cpp:
@@ -7,7 +21,7 @@ Wed Dec  7 17:10:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
           Added assertion to verify list is empty at start of test.
 
         * tests/DCPS/UnitTests/UnitTests.mpc:
-        
+
           Account for rename
 Tue Dec  6 16:27:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
