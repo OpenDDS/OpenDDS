@@ -12,7 +12,7 @@
 #include "DataReaderRemoteImpl.h"
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "TopicImpl.h"
 #include "MonitorFactory.h"
 #include "DataReaderImpl.h"
@@ -312,7 +312,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
     if (dr_subscriber.in() != this) {
       RepoId id = dr_servant->get_subscription_id();
-      RepoIdConverter converter(id);
+      GuidConverter converter(id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
                  ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
@@ -357,7 +357,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       }
 #endif
       RepoId id = dr_servant->get_subscription_id();
-      RepoIdConverter converter(id);
+      GuidConverter converter(id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("SubscriberImpl::delete_datareader: ")
@@ -629,7 +629,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
           = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
 
           if (pair.second == false) {
-            RepoIdConverter converter(id);
+            GuidConverter converter(id);
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
                               ACE_TEXT("insert %C to DrIdToQosMap failed.\n"),

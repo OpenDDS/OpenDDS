@@ -12,7 +12,7 @@
 #include "InfoRepoUtils.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
 #include "InfoRepoDiscovery.h"
@@ -876,7 +876,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
               repoList.push_back(std::make_pair(disc_iter->second, id));
 
               if (DCPS_debug_level > 0) {
-                RepoIdConverter converter(id);
+                GuidConverter converter(id);
                 ACE_DEBUG((LM_DEBUG,
                            ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                            ACE_TEXT("participant %C attached to Repo[ %C].\n"),
@@ -898,7 +898,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
   // Make all of the remote calls after releasing the lock.
   for (unsigned int index = 0; index < repoList.size(); ++index) {
     if (DCPS_debug_level > 0) {
-      RepoIdConverter converter(repoList[ index].second);
+      GuidConverter converter(repoList[ index].second);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                  ACE_TEXT("(%d of %d) attaching domain %d participant %C to Repo[ %C].\n"),

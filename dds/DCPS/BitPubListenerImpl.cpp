@@ -13,7 +13,7 @@
 #include "BitPubListenerImpl.h"
 #include "DomainParticipantImpl.h"
 #include "RepoIdBuilder.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 
 
 namespace OpenDDS {
@@ -53,7 +53,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
         PublicationId pub_id (build);
         CORBA::Long ownership_strength = data.ownership_strength.value;
         this->partipant_->update_ownership_strength (pub_id,ownership_strength);
-        RepoIdConverter writer_converter(pub_id);
+        GuidConverter writer_converter(pub_id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available: %X ")
           ACE_TEXT("reset ownership strength %d for writer %C.\n"),

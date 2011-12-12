@@ -16,7 +16,7 @@
 #include "PublicationInstance.h"
 #include "Util.h"
 #include "Qos_Helper.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
@@ -202,7 +202,7 @@ WriteDataContainer::reenqueue_all(ReaderIdSeq const & rds,
                           lifespan);
 
     if (DCPS_debug_level > 9) {
-      RepoIdConverter converter(publication_id_);
+      GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
                  ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend.\n"),
@@ -545,7 +545,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
       release_buffer(stale);
     } else {
       if (DCPS_debug_level > 9) {
-        RepoIdConverter converter(publication_id_);
+        GuidConverter converter(publication_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                    ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
@@ -704,7 +704,7 @@ WriteDataContainer::remove_oldest_sample(
     released = true;
 
     if (DCPS_debug_level > 9) {
-      RepoIdConverter converter(publication_id_);
+      GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
                  ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),

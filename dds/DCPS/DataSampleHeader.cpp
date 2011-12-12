@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataSampleHeader.h"
 #include "Serializer.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
@@ -519,16 +519,16 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
           << std::dec << value.lifespan_duration_nanosec_ << ", ";
     }
 
-    str << "Publication: " << RepoIdConverter(value.publication_id_);
+    str << "Publication: " << GuidConverter(value.publication_id_);
     if (value.group_coherent_) {
-      str << ", Publisher: " << RepoIdConverter(value.publisher_id_);
+      str << ", Publisher: " << GuidConverter(value.publisher_id_);
     }
 
     if (value.content_filter_) {
       const CORBA::ULong len = value.content_filter_entries_.length();
       str << ", Content-Filter Entries (" << len << "): [";
       for (CORBA::ULong i(0); i < len; ++i) {
-        str << RepoIdConverter(value.content_filter_entries_[i]) << ' ';
+        str << GuidConverter(value.content_filter_entries_[i]) << ' ';
       }
       str << ']';
     }
