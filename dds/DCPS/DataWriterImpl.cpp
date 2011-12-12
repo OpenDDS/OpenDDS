@@ -11,7 +11,7 @@
 #include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
 #include "Service_Participant.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "TopicImpl.h"
 #include "PublicationInstance.h"
 #include "Serializer.h"
@@ -224,8 +224,8 @@ DataWriterImpl::add_association(const RepoId& yourId,
   DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
 
   if (DCPS_debug_level >= 1) {
-    RepoIdConverter writer_converter(yourId);
-    RepoIdConverter reader_converter(reader.readerId);
+    GuidConverter writer_converter(yourId);
+    GuidConverter reader_converter(reader.readerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
@@ -252,7 +252,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     // Add to pending_readers_
 
     if (OpenDDS::DCPS::insert(pending_readers_, reader.readerId) == -1) {
-      RepoIdConverter converter(reader.readerId);
+      GuidConverter converter(reader.readerId);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_association: ")
                  ACE_TEXT("failed to mark %C as pending.\n"),
@@ -260,7 +260,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
 
     } else {
       if (DCPS_debug_level > 0) {
-        RepoIdConverter converter(reader.readerId);
+        GuidConverter converter(reader.readerId);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::add_association: ")
                    ACE_TEXT("marked %C as pending.\n"),
@@ -278,7 +278,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   if (DCPS_debug_level > 4) {
-    RepoIdConverter converter(get_publication_id());
+    GuidConverter converter(get_publication_id());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
@@ -339,8 +339,8 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete", 6);
 
   if (DCPS_debug_level >= 1) {
-    RepoIdConverter writer_converter(this->publication_id_);
-    RepoIdConverter reader_converter(remote_id);
+    GuidConverter writer_converter(this->publication_id_);
+    GuidConverter reader_converter(remote_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
@@ -357,7 +357,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
     // removed by remove_association. In other words, the remove_association()
     // is called before assocation_complete() call.
     if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-      RepoIdConverter converter(remote_id);
+      GuidConverter converter(remote_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::association_complete: ")
                  ACE_TEXT("reader %C is not in pending list ")
@@ -370,7 +370,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
     // list.
 
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
-      RepoIdConverter converter(remote_id);
+      GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
@@ -398,7 +398,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
       ++publication_match_status_.current_count_change;
 
       if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
-        RepoIdConverter converter(remote_id);
+        GuidConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
@@ -407,7 +407,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
         return;
 
       } else if (DCPS_debug_level > 4) {
-        RepoIdConverter converter(remote_id);
+        GuidConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) DataWriterImpl::association_complete: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
@@ -472,8 +472,8 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                                     CORBA::Boolean notify_lost)
 {
   if (DCPS_debug_level >= 1) {
-    RepoIdConverter writer_converter(publication_id_);
-    RepoIdConverter reader_converter(readers[0]);
+    GuidConverter writer_converter(publication_id_);
+    GuidConverter reader_converter(readers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
@@ -534,7 +534,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         rds.length(rds_len);
         rds [rds_len - 1] = readers[i];
 
-        RepoIdConverter converter(readers[i]);
+        GuidConverter converter(readers[i]);
         ACE_DEBUG((LM_WARNING,
                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_associations: ")
                   ACE_TEXT("removing reader %C before association_complete() call.\n"),
@@ -709,7 +709,7 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
     iter->second.expression_params_ = params;
   } else if (DCPS_debug_level > 4 &&
              TheServiceParticipant->publisher_content_filter()) {
-    RepoIdConverter pubConv(this->publication_id_), subConv(readerId);
+    GuidConverter pubConv(this->publication_id_), subConv(readerId);
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::update_subscription_params()")
       ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
@@ -890,7 +890,7 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
   }
 
   if (DCPS_debug_level > 0) {
-    RepoIdConverter converter(this->publication_id_);
+    GuidConverter converter(this->publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::send_ack_requests() - ")
                ACE_TEXT("%C sending REQUEST_ACK message for sequence %q ")
@@ -1091,7 +1091,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
         if (this->idToSequence_[*current] < token.expected(*current)) {
           done = false;
           if (DCPS_debug_level > 0) {
-            RepoIdConverter conv(*current);
+            GuidConverter conv(*current);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
               ACE_TEXT("waiting for seq %q from sub %C, got %q\n"),
@@ -1105,7 +1105,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
 
     if (done) {
       if (DCPS_debug_level > 0) {
-        RepoIdConverter converter(this->publication_id_);
+        GuidConverter converter(this->publication_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
                    ACE_TEXT("%C unblocking for sequence %q.\n"),
@@ -1118,7 +1118,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
 
   } while (0 == this->wfaCondition_.wait(&deadline));
 
-  RepoIdConverter converter(this->publication_id_);
+  GuidConverter converter(this->publication_id_);
   ACE_DEBUG((LM_WARNING,
              ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_ack_responses() - ")
              ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
@@ -1135,7 +1135,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (!should_ack()) {
     if (DCPS_debug_level > 0) {
-      RepoIdConverter converter(this->publication_id_);
+      GuidConverter converter(this->publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
                  ACE_TEXT("%C not blocking due to no associated subscriptions.\n"),
@@ -1254,7 +1254,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       || now - last_liveliness_activity_time_ >= liveliness_check_interval_) {
     //Not recent enough then send liveliness message.
     if (DCPS_debug_level > 9) {
-      RepoIdConverter converter(publication_id_);
+      GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
                  ACE_TEXT("%C sending LIVELINESS message.\n"),
@@ -2002,8 +2002,8 @@ DataWriterImpl::data_delivered(const DataSampleListElement* sample)
   DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
 
   if (!(sample->publication_id_ == this->publication_id_)) {
-    RepoIdConverter sample_converter(sample->publication_id_);
-    RepoIdConverter writer_converter(publication_id_);
+    GuidConverter sample_converter(sample->publication_id_);
+    GuidConverter writer_converter(publication_id_);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
                ACE_TEXT(" The publication id %C from delivered element ")
@@ -2038,8 +2038,8 @@ DataWriterImpl::deliver_ack(
   serializer >> ack;
 
   if (DCPS_debug_level > 0) {
-    RepoIdConverter debugConverter(this->publication_id_);
-    RepoIdConverter debugConverter2(header.publication_id_);
+    GuidConverter debugConverter(this->publication_id_);
+    GuidConverter debugConverter2(header.publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::deliver_ack() - ")
                ACE_TEXT("publication %C received update for ")
@@ -2055,7 +2055,7 @@ DataWriterImpl::deliver_ack(
     this->idToSequence_[ header.publication_id_] = ack;
 
     if (DCPS_debug_level > 0) {
-      RepoIdConverter debugConverter(header.publication_id_);
+      GuidConverter debugConverter(header.publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::deliver_ack() - ")
                  ACE_TEXT("broadcasting update.\n")));
@@ -2202,7 +2202,7 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
     if (this->qos_.liveliness.kind == DDS::AUTOMATIC_LIVELINESS_QOS) {
       //Not recent enough then send liveliness message.
       if (DCPS_debug_level > 9) {
-        RepoIdConverter converter(publication_id_);
+        GuidConverter converter(publication_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
                    ACE_TEXT("%C sending LIVELINESS message.\n"),
@@ -2428,7 +2428,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
     std::stringstream buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer << separator << RepoIdConverter(ids[i]);
+      buffer << separator << GuidConverter(ids[i]);
       separator = ", ";
     }
 
