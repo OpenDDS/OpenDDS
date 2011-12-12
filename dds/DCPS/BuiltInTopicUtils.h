@@ -15,7 +15,6 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Service_Participant.h"
 #include "RepoIdBuilder.h"
-#include "RepoIdConverter.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
 #include <sstream>
