@@ -1,3 +1,14 @@
+Mon Dec 12 19:38:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Remove unnecessary includes of RepoIdConverter.h
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Add needed include of GuidConverter.h
+
 Mon Dec 12 16:18:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
