@@ -210,6 +210,8 @@ namespace {
           TheServiceParticipant->initial_TimeBasedFilterQosPolicy();
       reader_data.ddsSubscriptionData.partition = 
           TheServiceParticipant->initial_PartitionQosPolicy();
+      reader_data.ddsSubscriptionData.presentation = 
+          TheServiceParticipant->initial_PresentationQosPolicy();
       reader_data.ddsSubscriptionData.topic_data = 
           TheServiceParticipant->initial_TopicDataQosPolicy();
       reader_data.ddsSubscriptionData.group_data = 

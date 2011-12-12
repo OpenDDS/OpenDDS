@@ -1,3 +1,9 @@
+Mon Dec 12 16:18:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Initialize default reader presentation properly.
+
 Wed Dec  7 21:08:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RepoIdBuilder.h:
