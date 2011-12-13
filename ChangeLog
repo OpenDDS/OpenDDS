@@ -1,3 +1,12 @@
+Tue Dec 13 17:03:58 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+
+          Added to idl tests to expose error in opendds_idl due to changes
+          in TAO_IDL in DOC/2.0a for processing multiple openings of the 
+          same module with forward declared structures.
+
 Mon Dec 12 15:56:19 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * MPC/config/dds4ccm_opendds.mpb:

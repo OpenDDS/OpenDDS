@@ -121,9 +121,34 @@ module Xyz {
   case TRUE:
     StructWithTypedefedEnum swte;
   };
-
 };
 
+module N1 {
+  struct FwdDeclStruct;
+};
+
+module N1 {
+  typedef sequence<FwdDeclStruct> FwdDeclNoScopeStructs;
+};
+  
+module N2 {
+  typedef sequence<N1::FwdDeclStruct> FwdDeclDiffNamespaceStructs;
+};
+  
+module N1 {
+  typedef sequence<N1::FwdDeclStruct> FwdDeclSameNamespaceStructs;
+};
+  
+module N1 {
+  struct FwdDeclStruct {
+    long v1;
+  };
+};
+
+module N1 {
+  typedef sequence<N1::FwdDeclStruct> FwdDeclSameNamespaceAfterDefStructs;
+};
+  
 //Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
 //of a module in IDL.
 #pragma DCPS_DATA_TYPE "Bar"

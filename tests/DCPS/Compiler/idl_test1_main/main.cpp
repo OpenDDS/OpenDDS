@@ -83,6 +83,40 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   }
 
   {
+  N1::FwdDeclSameNamespaceStructs fwddeclstructs;
+  fwddeclstructs.length(2);
+  fwddeclstructs[0].v1 = -5;
+  fwddeclstructs[1].v1 = 43;
+  size_t size_fwddeclstructs = OpenDDS::DCPS::gen_find_size(fwddeclstructs);
+  ACE_Message_Block* b = new ACE_Message_Block( 100000) ;
+  OpenDDS::DCPS::Serializer serializer( b, false) ;
+
+  serializer << fwddeclstructs;
+
+  OpenDDS::DCPS::Serializer deserializer( b, false) ;
+  N1::FwdDeclSameNamespaceStructs fwddeclstructs2;
+  deserializer >> fwddeclstructs2;
+
+  if (fwddeclstructs2.length() != 2)
+    {
+      ACE_ERROR((LM_ERROR, "AStructs Size failed\n"));
+      failed = true;
+    }
+
+  if (fwddeclstructs2[0].v1 != -5)
+    {
+      ACE_ERROR((LM_ERROR, "AStructs array index 0 failed\n"));
+      failed = true;
+    }
+
+  if (fwddeclstructs2[1].v1 != 43)
+    {
+      ACE_ERROR((LM_ERROR, "AStructs array index 1 failed\n"));
+      failed = true;
+    }
+  }
+
+  {
   Xyz::StructOfArrayOfArrayOfShorts2 aas;
   size_t size_aas = OpenDDS::DCPS::gen_find_size(aas);
   if (size_aas != 18)
