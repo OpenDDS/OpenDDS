@@ -1,3 +1,9 @@
+Tue Dec 13 20:43:05 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
+          Change RepoIdConverter references to GuidConverter where appropriate.
+
 Mon Dec 12 21:16:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

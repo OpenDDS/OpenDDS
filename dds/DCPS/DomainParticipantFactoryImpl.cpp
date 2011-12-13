@@ -10,7 +10,7 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "DomainParticipantImpl.h"
 #include "dds/DdsDcpsInfoC.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "Util.h"
@@ -190,7 +190,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (the_servant->is_clean() == 0) {
     RepoId id = the_servant->get_id();
-    RepoIdConverter converter(id);
+    GuidConverter converter(id);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
@@ -204,7 +204,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DPSet* entry = 0;
 
   if (find(participants_, domain_id, entry) == -1) {
-    RepoIdConverter converter(dp_id);
+    GuidConverter converter(dp_id);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
