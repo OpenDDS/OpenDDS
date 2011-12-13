@@ -10,7 +10,7 @@
 #include "DomainParticipantImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "PublisherImpl.h"
 #include "SubscriberImpl.h"
 #include "Marked_Default_Qos.h"
@@ -82,10 +82,7 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     federated_(federated),
     failoverListener_(0),
     monitor_(0),
-    pub_id_generator_ (
-      0,
-      OpenDDS::DCPS::RepoIdConverter(this->dp_id_).participantId(),
-      OpenDDS::DCPS::KIND_PUBLISHER)
+    pub_id_gen_(dp_id_)
 {
   (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
@@ -134,7 +131,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   PublisherImpl* pub = 0;
   ACE_NEW_RETURN(pub,
                  PublisherImpl(participant_handles_.next(),
-                               pub_id_generator_.next (),
+                               pub_id_gen_.next(),
                                pub_qos,
                                a_listener,
                                mask,
@@ -1684,22 +1681,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return this->get_handle(this->dp_id_);
 }
 
-CORBA::Long
-DomainParticipantImpl::get_federation_id()
-ACE_THROW_SPEC((CORBA::SystemException))
-{
-  RepoIdConverter converter(dp_id_);
-  return converter.federationId();
-}
-
-CORBA::Long
-DomainParticipantImpl::get_participant_id()
-ACE_THROW_SPEC((CORBA::SystemException))
-{
-  RepoIdConverter converter(dp_id_);
-  return converter.participantId();
-}
-
 DDS::InstanceHandle_t
 DomainParticipantImpl::get_handle(const RepoId& id)
 {
@@ -1917,6 +1898,21 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
     it->svt_->update_ownership_strength(pub_id, ownership_strength);
   }
 }
+
+DomainParticipantImpl::RepoIdSequence::RepoIdSequence(RepoId& base) :
+  base_(base),
+  serial_(0),
+  builder_(base_)
+{
+}
+
+RepoId
+DomainParticipantImpl::RepoIdSequence::next()
+{
+  builder_.entityKey(++serial_);
+  return builder_;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

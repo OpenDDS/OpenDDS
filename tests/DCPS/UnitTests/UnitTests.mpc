@@ -57,3 +57,12 @@ project(*ParameterListConverter): dcps_rtpsexe {
     ut_ParameterListConverter.cpp
   }
 }
+
+project(*RepoIdSequence) : dcps_rtpsexe {
+  exename   = *
+
+    Source_Files {
+        ut_RepoIdSequence.cpp
+    }
+}
+

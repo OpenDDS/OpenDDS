@@ -51,7 +51,6 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_option
     DdsDcpsInfoUtils.idl
     DdsDcpsTypeSupportExt.idl
     DdsDcpsSubscriptionExt.idl
-    DdsDcpsDomainExt.idl
     DdsDcpsGuid.idl
   }
 

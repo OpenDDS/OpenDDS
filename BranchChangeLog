@@ -1,3 +1,22 @@
+Tue Dec 13 22:12:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Remove references to RepoIdConverter.
+          Inherit directly from DDS::DomainParticipant.
+
+        * tests/DCPS/UnitTests:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/ut_RepoIdSequence.cpp:
+
+          New unit test for RepoIdSequence class.
+
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDomainExt.idl:
+
+          Removed DdsDcpsDomainExt.idl
+
 Tue Dec 13 20:43:05 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:

@@ -14,11 +14,11 @@
 #include "TopicImpl.h"
 #include "InstanceHandle.h"
 #include "OwnershipManager.h"
-#include "RepoIdGenerator.h"
+#include "GuidBuilder.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsDomainExtS.h"
+#include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -66,7 +66,7 @@ class FilterEvaluator;
 * the interface this class is implementing.
 */
 class OpenDDS_Dcps_Export DomainParticipantImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DomainParticipantExt>,
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
     public virtual OpenDDS::DCPS::EntityImpl {
 public:
   typedef Objref_Servant_Pair <SubscriberImpl, DDS::Subscriber,
@@ -80,6 +80,16 @@ public:
 
   typedef std::set<Subscriber_Pair> SubscriberSet;
   typedef std::set<Publisher_Pair> PublisherSet;
+
+  class RepoIdSequence {
+  public:
+    RepoIdSequence(RepoId& base);
+    RepoId next();
+  private:
+    RepoId      base_;     // will be combined with serial to produce next
+    long        serial_;   // will be incremeneted each time
+    GuidBuilder builder_;  // used to modify base
+  };
 
   struct RefCounted_Topic {
     RefCounted_Topic()
@@ -297,12 +307,6 @@ public:
   */
   RepoId get_id();
 
-  CORBA::Long get_federation_id()
-  ACE_THROW_SPEC((CORBA::SystemException));
-
-  CORBA::Long get_participant_id()
-  ACE_THROW_SPEC((CORBA::SystemException));
-
   /**
    * Obtain a local handle representing a GUID.
    */
@@ -442,7 +446,8 @@ private:
   OwnershipManager owner_man_;
 
   /// Publisher ID generator.
-  RepoIdGenerator  pub_id_generator_;
+  RepoIdSequence   pub_id_gen_;
+  RepoId nextPubId();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;
