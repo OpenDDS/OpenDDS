@@ -43,6 +43,11 @@ namespace RTPS {
 
 class RtpsDiscovery;
 
+class SepdBuiltinPublicationsWriter;
+class SepdBuiltinPublicationsReader;
+class SepdBuiltinSubscriptionsWriter;
+class SepdBuiltinSubscriptionsReader;
+
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class Spdp : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
@@ -84,6 +89,15 @@ public:
                               const DDS::DataWriterQos& qos,
                               const DDS::PublisherQos& publisherQos);
 
+  struct PublisherDetails {
+    DCPS::RepoId topic_id_;
+    DCPS::DataWriterRemote_ptr publication_;
+    DDS::DataWriterQos qos_;
+    DCPS::TransportLocatorSeq trans_info_;
+    DDS::PublisherQos publisher_qos_;
+    DCPS::RepoId repo_id_;
+  };
+
   // Subscription
   DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
                                 DCPS::DataReaderRemote_ptr subscription,
@@ -99,6 +113,16 @@ public:
                                const DDS::SubscriberQos& subscriberQos);
   bool update_subscription_params(const DCPS::RepoId& subId,
                                   const DDS::StringSeq& params);
+
+  struct SubscriberDetails {
+    DCPS::RepoId topic_id_;
+    DCPS::DataReaderRemote_ptr subscription_;
+    DDS::DataReaderQos qos_;
+    DCPS::TransportLocatorSeq trans_info_;
+    DDS::SubscriberQos subscriber_qos_;
+    DDS::StringSeq params_;
+    DCPS::RepoId repo_id_;
+  };
 
   // Managing reader/writer associations
   void association_complete(const DCPS::RepoId& localId,
@@ -153,6 +177,13 @@ private:
     ACE_Message_Block buff_;
 
   } *tport_;
+
+  SepdBuiltinPublicationsWriter* sepd_pub_bit_writer();
+  SepdBuiltinPublicationsReader* sepd_pub_bit_reader();
+
+  SepdBuiltinSubscriptionsWriter* sepd_sub_bit_writer();
+  SepdBuiltinSubscriptionsReader* sepd_sub_bit_reader();
+
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;
@@ -172,6 +203,13 @@ private:
   typedef ParticipantMap::iterator ParticipantIter;
   ParticipantMap participants_;
   void remove_discovered_participant(ParticipantIter iter);
+  void remove_expired_participants();
+
+  // Endpoints:
+
+  std::map<DCPS::RepoId, PublisherDetails, DCPS::GUID_tKeyLessThan> publishers_;
+  std::map<DCPS::RepoId, SubscriberDetails, DCPS::GUID_tKeyLessThan> subscribers_;
+  unsigned int endpoint_counter_;
 
   // Topic:
   std::map<std::string, TopicDetails> topics_;

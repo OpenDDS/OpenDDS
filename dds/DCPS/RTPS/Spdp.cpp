@@ -13,6 +13,7 @@
 #include "RtpsMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
+#include "Sedp.h"
 
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
@@ -63,7 +64,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
   : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), topic_counter_(0)
+  , shutdown_cond_(lock_), endpoint_counter_(0), topic_counter_(0)
 {
 }
 
@@ -117,14 +118,27 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
     std::memcpy(pdata.ddsParticipantData.key.value,
                 pdata.participantProxy.guidPrefix,
                 sizeof(pdata.ddsParticipantData.key.value));
+
+    if (DCPS::DCPS_debug_level)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("Data received called part key= %x %x %x\n"),
+                  pdata.ddsParticipantData.key.value[0],
+                  pdata.ddsParticipantData.key.value[1],
+                  pdata.ddsParticipantData.key.value[2]));
+
     // add a new participant
     participants_[guid] = ParticipantDetails(pdata, time);
     participants_[guid].bit_ih_ =
       part_bit()->store_synthetic_data(pdata.ddsParticipantData,
                                        DDS::NEW_VIEW_STATE);
     //TODO: inform SEDP
+//     sepd_send_to(participants_[guid]);
+
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
     remove_discovered_participant(iter);
+    //TODO: inform SEDP
+//     sepd_remove_participant(iter->second);
+
   } else {
     // update an existing participant
     pdata.ddsParticipantData.key = iter->second.pdata_.ddsParticipantData.key;
@@ -145,7 +159,29 @@ Spdp::remove_discovered_participant(ParticipantIter iter)
   part_bit()->set_instance_state(iter->second.bit_ih_,
                                  DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   participants_.erase(iter);
-  //TODO: inform SEDP
+}
+
+void
+Spdp::remove_expired_participants()
+{
+  // Find and remove any expired discovered participant
+  ACE_GUARD (ACE_Thread_Mutex, g, lock_);
+  for (ParticipantIter it = participants_.begin();
+       it != participants_.end();) {
+    if (it->second.last_seen_ <
+        ACE_OS::gettimeofday() - it->second.pdata_.leaseDuration.seconds) {
+      if (DCPS::DCPS_debug_level > 1) {
+        DCPS::GuidConverter conv(it->first);
+        ACE_DEBUG((LM_WARNING,
+          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_timeout() - ")
+          ACE_TEXT("participant %C exceeded lease duration, removing\n"),
+          std::string(conv).c_str()));
+      }
+      remove_discovered_participant(it++);
+    } else {
+      ++it;
+    }
+  }
 }
 
 void
@@ -418,25 +454,7 @@ int
 Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value&, const void*)
 {
   write();
-
-  // Find and remove any expired discovered participant
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer_->lock_, 0);
-  for (ParticipantIter it = outer_->participants_.begin();
-       it != outer_->participants_.end();) {
-    if (it->second.last_seen_ <
-        ACE_OS::gettimeofday() - it->second.pdata_.leaseDuration.seconds) {
-      if (DCPS::DCPS_debug_level > 1) {
-        DCPS::GuidConverter conv(it->first);
-        ACE_DEBUG((LM_WARNING,
-          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_timeout() - ")
-          ACE_TEXT("participant %C exceeded lease duration, removing\n"),
-          std::string(conv).c_str()));
-      }
-      outer_->remove_discovered_participant(it++);
-    } else {
-      ++it;
-    }
-  }
+  outer_->remove_expired_participants();
   return 0;
 }
 
@@ -508,11 +526,12 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       if (data.writerId == ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
         outer_->data_received(header, data, plist);
       }
+      break;
     }
     default:
       if (subm != INFO_TS && DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) Spdp::SpdpTransport::handle_input() - "
-          "ignored submessage type: %d\n", int(subm)));
+                   "ignored submessage type: %x, DATA is %x\n", int(subm), int(DATA)));
       }
       break;
     }
@@ -592,17 +611,32 @@ Spdp::add_publication(const RepoId& topicId,
                       const DCPS::TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos)
 {
-  return RepoId();
+  RepoId rid;
+  assign (rid.entityId.entityKey, endpoint_counter_++);
+  PublisherDetails &pb = publishers_[rid];
+  pb.topic_id_ = topicId;
+  pb.publication_ = publication;
+  pb.qos_ = qos;
+  pb.trans_info_ = transInfo;
+  pb.publisher_qos_ = publisherQos;
+  pb.repo_id_ = rid;
+
+  // TODO: use SEDP to advertise the new publication
+
+  return rid;
 }
 
 void
 Spdp::remove_publication(const RepoId& publicationId)
 {
+  publishers_.erase(publicationId);
+  // TODO: what to do with SEDP? Anything?
 }
 
 void
 Spdp::ignore_publication(const RepoId& ignoreId)
 {
+  // TODO
 }
 
 bool
@@ -610,6 +644,14 @@ Spdp::update_publication_qos(const RepoId& publicationId,
                              const DDS::DataWriterQos& qos,
                              const DDS::PublisherQos& publisherQos)
 {
+  if (publishers_.count(publicationId)) {
+    PublisherDetails &pb = publishers_[publicationId];
+    pb.qos_ = qos;
+    pb.publisher_qos_ = publisherQos;
+    // TODO: tell the world about the change with SEDP
+
+    return true;
+  }
   return false;
 }
 
@@ -622,17 +664,34 @@ Spdp::add_subscription(const RepoId& topicId,
                        const char* filterExpr,
                        const DDS::StringSeq& params)
 {
-  return RepoId();
+  RepoId rid;
+  assign (rid.entityId.entityKey, endpoint_counter_++);
+  SubscriberDetails &sb = subscribers_[rid];
+  sb.topic_id_ = topicId;
+  sb.subscription_ = subscription;
+  sb.qos_ = qos;
+  sb.trans_info_ = transInfo;
+  sb.subscriber_qos_ = subscriberQos;
+  sb.params_ = params;
+  sb.repo_id_ = rid;
+
+  // TODO: use SEDP to advertise the new subscription
+
+  return rid;
+
 }
 
 void
 Spdp::remove_subscription(const RepoId& subscriptionId)
 {
+  subscribers_.erase(subscriptionId);
+  // TODO: what to do with SEDP? Anything?
 }
 
 void
 Spdp::ignore_subscription(const RepoId& ignoreId)
 {
+  // TODO
 }
 
 bool
@@ -640,6 +699,14 @@ Spdp::update_subscription_qos(const RepoId& subscriptionId,
                               const DDS::DataReaderQos& qos,
                               const DDS::SubscriberQos& subscriberQos)
 {
+  if (subscribers_.count(subscriptionId)) {
+    SubscriberDetails &sb = subscribers_[subscriptionId];
+    sb.qos_ = qos;
+    sb.subscriber_qos_ = subscriberQos;
+    // TODO: tell the world about the change with SEDP
+
+    return true;
+  }
   return false;
 }
 
@@ -647,6 +714,13 @@ bool
 Spdp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
+  if (subscribers_.count(subId)) {
+    SubscriberDetails &sb = subscribers_[subId];
+    sb.params_ = params;
+    // TODO: tell the world about the change with SEDP
+
+    return true;
+  }
   return false;
 }
 

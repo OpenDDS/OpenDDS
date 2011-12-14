@@ -58,8 +58,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     if (data.length() > 0) {
-      ACE_DEBUG((LM_DEBUG, "Read Participant BIT with key: %d %d %d\n",
-        data[0].key.value[0], data[0].key.value[1], data[0].key.value[2]));
+      if (&data[0] == 0)
+        ACE_DEBUG((LM_DEBUG, "ERROR: key value is empty!\n"));
+      else
+        ACE_DEBUG((LM_DEBUG, "Read Participant BIT with key: %x %x %x\n",
+                   data[0].key.value[0],
+                   data[0].key.value[1],
+                   data[0].key.value[2]));
     }
 
     part_bit->return_loan(data, infos);
