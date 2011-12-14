@@ -1,3 +1,9 @@
+Wed Dec 14 17:18:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * java/dds/dcps_java.mpc:
+
+          Remove reference to DdsDcpsDomainExt.idl
+
 Wed Dec 14 16:13:11 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:
