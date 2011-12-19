@@ -1,6 +1,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/WaitSet.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -42,11 +43,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  ACE_OS::sleep(60);
-
   {
     Subscriber_var bit_sub = dp->get_builtin_subscriber();
     DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE, 
+                                                    ANY_VIEW_STATE, 
+                                                    ALIVE_INSTANCE_STATE);
+    WaitSet waiter;
+    waiter.attach_condition(rc);
+    ConditionSeq activeConditions;
+    Duration_t forever = { DDS::DURATION_INFINITE_SEC,
+                           DDS::DURATION_INFINITE_NSEC };
+    ReturnCode_t result = waiter.wait(activeConditions, forever);
+    if (result != RETCODE_OK) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: could not wait for condition: %d\n", result));
+    }
+
     ParticipantBuiltinTopicDataDataReader_var part_bit =
       ParticipantBuiltinTopicDataDataReader::_narrow(dr);
     ParticipantBuiltinTopicDataSeq data;
@@ -69,8 +81,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     part_bit->return_loan(data, infos);
   }
-
-  ACE_OS::sleep(60);
 
   cleanup(dpf, dp);
   cleanup(dpf, dp2);
