@@ -1,9 +1,16 @@
+Tue Dec 20 18:22:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Export macro needed on nested class in order to use outside of the
+          OpenDDS_Dcps library.
+
 Mon Dec 19 21:57:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
 
           Replace sleep with WaitSet.
-          
+
 Wed Dec 14 17:18:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * java/dds/dcps_java.mpc:

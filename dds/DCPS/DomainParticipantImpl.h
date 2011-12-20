@@ -81,7 +81,7 @@ public:
   typedef std::set<Subscriber_Pair> SubscriberSet;
   typedef std::set<Publisher_Pair> PublisherSet;
 
-  class RepoIdSequence {
+  class OpenDDS_Dcps_Export RepoIdSequence {
   public:
     RepoIdSequence(RepoId& base);
     RepoId next();
