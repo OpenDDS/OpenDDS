@@ -123,6 +123,26 @@ operator<<(std::wostream& os, const GuidConverter& rhs)
 }
 #endif
 
+std::string
+GuidConverter::uniqueId() const
+{
+  char id[64];
+  sprintf(id, "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", 
+          guid_.guidPrefix[ 0],
+          guid_.guidPrefix[ 1],
+          guid_.guidPrefix[ 2],
+          guid_.guidPrefix[ 3],
+          guid_.guidPrefix[ 4],
+          guid_.guidPrefix[ 5],
+          guid_.guidPrefix[ 6],
+          guid_.guidPrefix[ 7],
+          guid_.guidPrefix[ 8],
+          guid_.guidPrefix[ 9],
+          guid_.guidPrefix[10],
+          guid_.guidPrefix[11]);
+  return id;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

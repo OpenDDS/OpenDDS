@@ -91,6 +91,8 @@ public:
   operator std::wstring() const;
 #endif
 
+  std::string uniqueId() const;
+
 protected:
   const GUID_t guid_;
 };

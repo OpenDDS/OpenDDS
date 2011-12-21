@@ -1,9 +1,17 @@
+Wed Dec 21 20:41:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/GuidConverter.cpp:
+        * tests/DCPS/UnitTests/GuidGenerator.cpp:
+
+          Methods to generate a string ID from first 12 bytes of a GUID.
+
 Wed Dec 21 20:22:18 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:
 
           Export RepoIdSequence inner class.
-          
+
 Wed Dec 21 17:50:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
