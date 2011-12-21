@@ -44,7 +44,11 @@ sub run_unit_tests {
         my $TST;
         if ($file =~ /$testExe/o) {
           my $executable = $1;
-          $TST = PerlDDS::create_process("$executable", "");
+          if ($executable == "UnitTests_UnitTests_BIT_DataReader") {
+            $TST = PerlDDS::create_process("$executable", "-DCPSConfigFile rtps.ini");
+          } else {
+            $TST = PerlDDS::create_process("$executable", "");
+          }
         }
         else {
           next;

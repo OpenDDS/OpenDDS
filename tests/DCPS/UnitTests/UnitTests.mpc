@@ -66,3 +66,11 @@ project(*RepoIdSequence) : dcps_rtpsexe {
     }
 }
 
+project(*BIT_DataReader) : dcps_rtpsexe {
+  exename   = *
+
+    Source_Files {
+        ut_BIT_DataReader.cpp
+    }
+}
+

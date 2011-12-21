@@ -1,3 +1,16 @@
+Wed Dec 21 17:50:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Check valid_data before accessing.
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/rtps.ini:
+        * tests/DCPS/UnitTests/run_test.pl:
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          Unit test for generated BuiltInTopic data readers.
+
 Tue Dec 20 18:22:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:

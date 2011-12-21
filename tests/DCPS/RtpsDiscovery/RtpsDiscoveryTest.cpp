@@ -63,28 +63,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ParticipantBuiltinTopicDataDataReader::_narrow(dr);
     ParticipantBuiltinTopicDataSeq data;
     SampleInfoSeq infos;
-    ReturnCode_t ret = part_bit->read(data, infos, 1, ANY_SAMPLE_STATE,
-                                      ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+    sleep(20);
+    ReturnCode_t ret = part_bit->read(data, infos, LENGTH_UNLIMITED, 
+                                      ANY_SAMPLE_STATE, ANY_VIEW_STATE, 
+                                      ALIVE_INSTANCE_STATE);
     if (ret != RETCODE_OK) {
       ACE_DEBUG((LM_DEBUG, "ERROR: could not read participant BIT: %d\n", ret));
     }
 
     if (data.length() > 0) {
-      if (&data[0] == 0)
-        ACE_DEBUG((LM_DEBUG, "ERROR: key value is empty!\n"));
-      else
-        ACE_DEBUG((LM_DEBUG, "Read Participant BIT with key: %x %x %x\n",
-                   data[0].key.value[0],
-                   data[0].key.value[1],
-                   data[0].key.value[2]));
+      for (CORBA::ULong i = 0; i < data.length(); ++i) {
+        if (infos[i].valid_data) {
+          if (&data[i] == 0)
+            ACE_DEBUG((LM_DEBUG, "ERROR: key value is empty!\n"));
+          else
+            ACE_DEBUG((LM_DEBUG, "Read Participant BIT with key: %x %x %x\n",
+                       data[i].key.value[0],
+                       data[i].key.value[1],
+                       data[i].key.value[2]));
+        }
+      }
     }
 
     part_bit->return_loan(data, infos);
   }
 
   cleanup(dpf, dp);
+  sleep(5);
   cleanup(dpf, dp2);
-
   TheServiceParticipant->shutdown();
   return 0;
 }
