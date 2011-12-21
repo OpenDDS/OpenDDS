@@ -1,3 +1,9 @@
+Wed Dec 21 20:22:18 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Export RepoIdSequence inner class.
+          
 Wed Dec 21 17:50:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
@@ -18,6 +24,7 @@ Tue Dec 20 18:22:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
           Export macro needed on nested class in order to use outside of the
           OpenDDS_Dcps library.
 
+>>>>>>> .r5137
 Mon Dec 19 21:57:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
