@@ -7,7 +7,7 @@
  */
 
 #ifndef OPENDDS_RTPS_SEDP_H
-#define OPENDDS_RTPS_SPDP_H
+#define OPENDDS_RTPS_SEDP_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"

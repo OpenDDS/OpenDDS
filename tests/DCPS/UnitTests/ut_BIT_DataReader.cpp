@@ -8,7 +8,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/WaitSet.h"
 
-
+#include "ace/OS_NS_unistd.h"
 #include "ace/Log_Msg.h"
 
 using namespace DDS;
@@ -185,6 +185,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     TEST_ASSERT(matched);
   }
-  sleep(5);
+  ACE_OS::sleep(5);
   TheServiceParticipant->shutdown();
 }
