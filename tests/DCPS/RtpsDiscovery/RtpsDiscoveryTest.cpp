@@ -63,7 +63,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ParticipantBuiltinTopicDataDataReader::_narrow(dr);
     ParticipantBuiltinTopicDataSeq data;
     SampleInfoSeq infos;
-    sleep(20);
+    ACE_OS::sleep(20);
     ReturnCode_t ret = part_bit->read(data, infos, LENGTH_UNLIMITED, 
                                       ANY_SAMPLE_STATE, ANY_VIEW_STATE, 
                                       ALIVE_INSTANCE_STATE);
@@ -89,7 +89,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   cleanup(dpf, dp);
-  sleep(5);
+  ACE_OS::sleep(5);
   cleanup(dpf, dp2);
   TheServiceParticipant->shutdown();
   return 0;

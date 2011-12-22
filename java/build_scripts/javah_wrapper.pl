@@ -15,11 +15,33 @@ if ($#ARGV < 0 || $ARGV[0] =~ /\.java$/) {
         "without \".class\"\n";
     exit 1;
 }
+my $sep = ($^O eq 'MSWin32') ? ';' : ':';
+my @classpath;
+
+my $prevarg;
+my $i = 0;
+for my $arg (@ARGV) {
+  if ($prevarg eq '-classpath') {
+    push(@classpath, $arg);
+	# remove two args
+	splice(@ARGV, $i - 1, 2);
+  }
+  if ($arg eq '-cp' || $arg eq '-classpath') {
+    $prevarg = '-classpath';
+  }
+  $i += 1;
+}
+undef $prevarg;
 
 my $class = shift @ARGV;
 $class =~ s/\.class$//;
 if ($class =~ s(^classes[/\\])()) {
-    @ARGV = ('-classpath classes');
+    push(@classpath, 'classes');
+}
+
+if (scalar(@classpath)) {
+  $classpath = join($sep, @classpath);
+  push(@ARGV, '-classpath', $classpath);
 }
 
 my $file = "$class.h";
