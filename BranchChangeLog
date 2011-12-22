@@ -1,3 +1,9 @@
+Thu Dec 22 23:53:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_RepoIdSequence.cpp:
+
+          main() must return 0 to indicate a successful test.
+
 Thu Dec 22 23:41:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

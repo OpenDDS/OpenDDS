@@ -83,4 +83,5 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(repoId.entityId.entityKind == result.entityId.entityKind);
     }
   }
+  return 0;
 }
