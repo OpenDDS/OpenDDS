@@ -1674,6 +1674,13 @@ DomainParticipantImpl::get_id()
   return dp_id_;
 }
 
+std::string
+DomainParticipantImpl::get_unique_id()
+{
+  return GuidConverter(dp_id_).uniqueId();
+}
+
+
 DDS::InstanceHandle_t
 DomainParticipantImpl::get_instance_handle()
 ACE_THROW_SPEC((CORBA::SystemException))

@@ -308,6 +308,11 @@ public:
   RepoId get_id();
 
   /**
+   * Return a unique string based on repo ID.
+   */
+  std::string get_unique_id();
+
+  /**
    * Obtain a local handle representing a GUID.
    */
   DDS::InstanceHandle_t get_handle(const RepoId& id = GUID_UNKNOWN);

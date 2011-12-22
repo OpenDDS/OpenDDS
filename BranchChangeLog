@@ -1,3 +1,10 @@
+Thu Dec 22 17:26:31 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          add get_unique_id() to return a unique string based on GUID.
+
 Wed Dec 21 20:41:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/GuidConverter.h:
