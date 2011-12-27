@@ -13,9 +13,11 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "rtps_export.h"
+
 #include "ace/Configuration.h"
 
 #include <string>
+#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -75,12 +77,17 @@ public:
     d1_ = offset_one;
   }
 
+  typedef std::vector<std::string> AddrVec;
+  const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
+  AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
+
 private:
   RtpsInfo* servant_;
   OpenDDS::DCPS::DCPSInfo_var info_;
 
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_;
+  AddrVec spdp_send_addrs_;
 
   static int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
 

@@ -305,7 +305,12 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   }
 
   send_addrs_.insert(default_multicast);
-  //TODO: allow user-configured addresses to be added here
+
+  typedef RtpsDiscovery::AddrVec::iterator iter;
+  for (iter it = outer_->disco_->spdp_send_addrs().begin(),
+       end = outer_->disco_->spdp_send_addrs().end(); it != end; ++it) {
+    send_addrs_.insert(ACE_INET_Addr(it->c_str()));
+  }
 
   reference_counting_policy().value(Reference_Counting_Policy::ENABLED);
 }

@@ -17,6 +17,8 @@
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
+#include "dds/DCPS/RTPS/RtpsDiscovery.h"
+
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #include "dds/DCPS/transport/udp/Udp.h"
@@ -99,7 +101,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   //for (unsigned int i = 0; i < default_config->instances_.size(); ++i) {
   //  std::cout << "  " << default_config->instances_[i]->name() << std::endl;
   //}
-  // Should be in alpa-sorted order
+  // Should be in alpha-sorted order
   TEST_CHECK(default_config->instances_.size() == 11);
   TEST_CHECK(default_config->instances_[0] == inst2);  // anothertcp
   TEST_CHECK(default_config->instances_[2] == inst);   // mytcp
@@ -143,10 +145,15 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(discoveryMap.find(key) != discoveryMap.end());
     OpenDDS::DCPS::Discovery_rch discovery = discoveryMap.find(key)->second;
     TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+    OpenDDS::DCPS::InfoRepoDiscovery_rch ird =
+      dynamic_rchandle_cast<OpenDDS::DCPS::InfoRepoDiscovery>(discovery);
+    TEST_CHECK(!ird.is_nil());
+    TEST_CHECK(ird->bit_transport_ip() == "1.2.3.4");
+    TEST_CHECK(ird->bit_transport_port() == 4321);
   }
 
   {
-    DDS::DomainId_t domain = 4321;
+    DDS::DomainId_t domain = 21;
     OpenDDS::DCPS::Discovery::RepoKey key = "DEFAULT_RTPS";
     std::string ior = "";
 
@@ -161,7 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   {
-    DDS::DomainId_t domain = 999;
+    DDS::DomainId_t domain = 99;
     OpenDDS::DCPS::Discovery::RepoKey key = "MyConfig";
     std::string ior = "";
 
@@ -173,6 +180,38 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
     TEST_CHECK(discovery->get_stringified_dcps_info_ior() != ior);
+    OpenDDS::RTPS::RtpsDiscovery_rch rd =
+      dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
+    TEST_CHECK(!rd.is_nil());
+    TEST_CHECK(rd->resend_period().sec() == 29);
+    TEST_CHECK(rd->pb() == 7399);
+    TEST_CHECK(rd->dg() == 249);
+    TEST_CHECK(rd->pg() == 2);
+    TEST_CHECK(rd->d0() == 1);
+    TEST_CHECK(rd->d1() == 9);
+    TEST_CHECK(rd->spdp_send_addrs().size() == 1);
+    TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
+  }
+
+  {
+    DDS::DomainId_t domain = 98;
+    OpenDDS::DCPS::Discovery::RepoKey key = "MultiSendAddr";
+    const OpenDDS::DCPS::Service_Participant::DomainRepoMap& domainRepoMap =
+      TheServiceParticipant->domainRepoMap();
+    TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
+    TEST_CHECK(domainRepoMap.find(domain)->second == key);
+
+    OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
+    TEST_CHECK(discovery != 0);
+    OpenDDS::RTPS::RtpsDiscovery_rch rd =
+      dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
+    TEST_CHECK(!rd.is_nil());
+    TEST_CHECK(rd->spdp_send_addrs().size() == 5);
+    TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
+    TEST_CHECK(rd->spdp_send_addrs()[1] == "host2:10002");
+    TEST_CHECK(rd->spdp_send_addrs()[2] == "host3:10003");
+    TEST_CHECK(rd->spdp_send_addrs()[3] == "host4:10004");
+    TEST_CHECK(rd->spdp_send_addrs()[4] == "host5:10005");
   }
 
   TheServiceParticipant->shutdown();

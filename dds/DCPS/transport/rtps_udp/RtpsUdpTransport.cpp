@@ -258,7 +258,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
         ACE_TEXT("ACE::get_ip_interfaces")), false);
     }
 
-    for (size_t i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) {
       if (!addrs[i].is_loopback()) {
         config_i_->local_address_ = addrs[i];
       }

@@ -187,4 +187,5 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   ACE_OS::sleep(5);
   TheServiceParticipant->shutdown();
+  return 0;
 }

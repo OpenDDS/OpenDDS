@@ -157,6 +157,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
 
       int resend;
       u_short pb, dg, pg, d0, d1;
+      AddrVec spdp_send_addrs;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false;
 
@@ -225,6 +226,15 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "SpdpSendAddrs") {
+          const std::string& value = it->second;
+          size_t i = 0;
+          do {
+            i = value.find_first_not_of(' ', i); // skip spaces
+            const size_t n = value.find_first_of(", ", i);
+            spdp_send_addrs.push_back(value.substr(i, (n == std::string::npos) ? n : n - i));
+            i = value.find(',', i);
+          } while (i++ != std::string::npos); // skip past comma if there is one
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
@@ -240,7 +250,8 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
       if (has_dg) discovery->dg(dg);
       if (has_pg) discovery->pg(pg);
       if (has_d0) discovery->d0(d0);
-      if (has_d1) discovery->d0(d1);
+      if (has_d1) discovery->d1(d1);
+      discovery->spdp_send_addrs().swap(spdp_send_addrs);
       TheServiceParticipant->add_discovery(
         DCPS::static_rchandle_cast<Discovery>(discovery));
     }
