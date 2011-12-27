@@ -1,3 +1,9 @@
+Tue Dec 27 21:41:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Don't process data_received from our own domain participant.
+
 Thu Dec 22 23:53:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/UnitTests/ut_RepoIdSequence.cpp:

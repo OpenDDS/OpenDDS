@@ -110,6 +110,11 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
               sizeof(guid.guidPrefix));
   guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
+  if (guid == guid_) {
+    // Ignore, this is our domain participant
+    return;
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const ParticipantIter iter = participants_.find(guid);
 
