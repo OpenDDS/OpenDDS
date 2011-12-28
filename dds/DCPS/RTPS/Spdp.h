@@ -222,6 +222,8 @@ private:
 
   unsigned int endpoint_counter_;
 
+  std::set< ::OpenDDS::DCPS::RepoId> ignored_guids_;
+
   // Topic:
   std::map<std::string, TopicDetails> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;

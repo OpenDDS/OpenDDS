@@ -28,7 +28,6 @@
 #include <cstring>
 #include <stdexcept>
 
-
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
@@ -66,6 +65,8 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
   , shutdown_cond_(lock_), endpoint_counter_(0), topic_counter_(0)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ignored_guids_.insert(guid);
 }
 
 Spdp::~Spdp()
@@ -81,7 +82,8 @@ Spdp::~Spdp()
 void
 Spdp::ignore_domain_participant(const RepoId& ignoreId)
 {
-  //TODO
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ignored_guids_.insert(ignoreId);
 }
 
 bool
@@ -110,12 +112,12 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
               sizeof(guid.guidPrefix));
   guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
-  if (guid == guid_) {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  if (ignored_guids_.find(guid) != ignored_guids_.end()) {
     // Ignore, this is our domain participant
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const ParticipantIter iter = participants_.find(guid);
 
   if (iter == participants_.end()) {
@@ -792,3 +794,22 @@ Spdp::disassociate_subscription(const RepoId& localId, const RepoId& remoteId)
 
 }
 }
+
+namespace OpenDDS { namespace DCPS {
+bool operator<(const RepoId& lhs, const RepoId& rhs)
+{
+  for (int i = 0; i < 12; ++i) {
+    if (lhs.guidPrefix[i] < rhs.guidPrefix[i]) {
+      return true;
+    }
+  }
+  for (int j = 0; j < 3; ++j) {
+    if (lhs.entityId.entityKey[j] < rhs.entityId.entityKey[j]) {
+      return true;
+    }
+  }
+
+  return lhs.entityId.entityKind < rhs.entityId.entityKind;
+}
+
+} }

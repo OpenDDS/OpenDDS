@@ -61,6 +61,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     ParticipantBuiltinTopicDataDataReader_var part_bit =
       ParticipantBuiltinTopicDataDataReader::_narrow(dr);
+
     ParticipantBuiltinTopicDataSeq data;
     SampleInfoSeq infos;
     ACE_OS::sleep(20);
@@ -77,10 +78,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           if (&data[i] == 0)
             ACE_DEBUG((LM_DEBUG, "ERROR: key value is empty!\n"));
           else
-            ACE_DEBUG((LM_DEBUG, "Read Participant BIT with key: %x %x %x\n",
+            ACE_DEBUG((LM_DEBUG, "Read Participant BIT with key: %x %x %x and handle %d\n",
                        data[i].key.value[0],
                        data[i].key.value[1],
-                       data[i].key.value[2]));
+                       data[i].key.value[2],
+                       infos[i].instance_handle));
         }
       }
     }
