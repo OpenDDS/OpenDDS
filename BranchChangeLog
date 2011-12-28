@@ -1,3 +1,12 @@
+Wed Dec 28 14:16:15 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Start to add endpoint discovery.
+
 Tue Dec 27 23:08:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

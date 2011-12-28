@@ -735,6 +735,42 @@ Spdp::update_subscription_params(const RepoId& subId,
 }
 
 void
+Spdp::add_discovered_writer (const DiscoveredWriterData &data)
+{
+  // TODO: match up discovered writer with a reader if possible
+#if 0
+  DCPS::GuidConverter pub(sample.header_.publication_id_);
+  DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
+                    sample.header_.source_timestamp_nanosec_};
+  ACE_Time_Value atv = DCPS::time_to_time_value(ts);
+  std::time_t seconds = atv.sec();
+  std::ostringstream oss;
+  oss << "data_received():\n\t"
+    "id = " << int(sample.header_.message_id_) << "\n\t"
+    "timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
+    "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
+    "byte order = " << sample.header_.byte_order_ << "\n\t"
+    "length = " << sample.header_.message_length_ << "\n\t"
+    "publication = " << pub << "\n";
+  ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
+
+  if (sample.header_.message_id_ != DCPS::SAMPLE_DATA
+      || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
+        || sample.header_.message_length_ != 533
+      || pub.checksum() != DCPS::GuidConverter(pub_id_).checksum()) {
+    ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
+  }
+#endif
+
+}
+
+void
+Spdp::add_discovered_reader (const DiscoveredReaderData &data)
+{
+  // TODO: match up discovered reader with a writer if possible
+}
+
+void
 Spdp::association_complete(const RepoId& localId, const RepoId& remoteId)
 {
 }

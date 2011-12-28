@@ -124,6 +124,9 @@ public:
     DCPS::RepoId repo_id_;
   };
 
+  void add_discovered_writer (const DiscoveredWriterData &data);
+  void add_discovered_reader (const DiscoveredReaderData &data);
+
   // Managing reader/writer associations
   void association_complete(const DCPS::RepoId& localId,
                             const DCPS::RepoId& remoteId);
@@ -207,8 +210,16 @@ private:
 
   // Endpoints:
 
-  std::map<DCPS::RepoId, PublisherDetails, DCPS::GUID_tKeyLessThan> publishers_;
-  std::map<DCPS::RepoId, SubscriberDetails, DCPS::GUID_tKeyLessThan> subscribers_;
+  typedef std::map<DCPS::RepoId, PublisherDetails,
+                   DCPS::GUID_tKeyLessThan> PublisherMap;
+  typedef PublisherMap::iterator PublisherIter;
+  PublisherMap publishers_;
+
+  typedef std::map<DCPS::RepoId, SubscriberDetails,
+                   DCPS::GUID_tKeyLessThan> SubscriberMap;
+  typedef SubscriberMap::iterator SubscriberIter;
+  SubscriberMap subscribers_;
+
   unsigned int endpoint_counter_;
 
   // Topic:
