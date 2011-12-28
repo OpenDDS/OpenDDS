@@ -63,7 +63,8 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
   : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), endpoint_counter_(0), topic_counter_(0)
+  , shutdown_cond_(lock_), publication_counter_(0), subscription_counter_(0)
+  , topic_counter_(0)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   ignored_guids_.insert(guid);
@@ -126,12 +127,13 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
                 pdata.participantProxy.guidPrefix,
                 sizeof(pdata.ddsParticipantData.key.value));
 
-    if (DCPS::DCPS_debug_level)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("Data received called part key= %x %x %x\n"),
-                  pdata.ddsParticipantData.key.value[0],
-                  pdata.ddsParticipantData.key.value[1],
-                  pdata.ddsParticipantData.key.value[2]));
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("Data received called part key = %x %x %x\n"),
+                 pdata.ddsParticipantData.key.value[0],
+                 pdata.ddsParticipantData.key.value[1],
+                 pdata.ddsParticipantData.key.value[2]));
+    }
 
     // add a new participant
     participants_[guid] = ParticipantDetails(pdata, time);
@@ -139,12 +141,10 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
       part_bit()->store_synthetic_data(pdata.ddsParticipantData,
                                        DDS::NEW_VIEW_STATE);
     //TODO: inform SEDP
-//     sepd_send_to(participants_[guid]);
+//     sedp_->associate(pdata);
 
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
     remove_discovered_participant(iter);
-    //TODO: inform SEDP
-//     sepd_remove_participant(iter->second);
 
   } else {
     // update an existing participant
@@ -163,6 +163,8 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
 void
 Spdp::remove_discovered_participant(ParticipantIter iter)
 {
+  //TODO: inform SEDP
+//  sedp_->disassociate(iter->second.pdata_);
   part_bit()->set_instance_state(iter->second.bit_ih_,
                                  DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   participants_.erase(iter);
@@ -623,15 +625,15 @@ Spdp::add_publication(const RepoId& topicId,
                       const DCPS::TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos)
 {
-  RepoId rid;
-  assign (rid.entityId.entityKey, endpoint_counter_++);
-  PublisherDetails &pb = publishers_[rid];
+  RepoId rid = guid_;
+  rid.entityId.entityKind = DCPS::ENTITYKIND_USER_WRITER_WITH_KEY; //TODO: WITH_KEY ???
+  assign(rid.entityId.entityKey, publication_counter_++);
+  PublicationDetails& pb = publications_[rid];
   pb.topic_id_ = topicId;
   pb.publication_ = publication;
   pb.qos_ = qos;
   pb.trans_info_ = transInfo;
   pb.publisher_qos_ = publisherQos;
-  pb.repo_id_ = rid;
 
   // TODO: use SEDP to advertise the new publication
 
@@ -641,8 +643,8 @@ Spdp::add_publication(const RepoId& topicId,
 void
 Spdp::remove_publication(const RepoId& publicationId)
 {
-  publishers_.erase(publicationId);
-  // TODO: what to do with SEDP? Anything?
+  // TODO: use SEDP to dispose the publication
+  publications_.erase(publicationId);
 }
 
 void
@@ -656,8 +658,8 @@ Spdp::update_publication_qos(const RepoId& publicationId,
                              const DDS::DataWriterQos& qos,
                              const DDS::PublisherQos& publisherQos)
 {
-  if (publishers_.count(publicationId)) {
-    PublisherDetails &pb = publishers_[publicationId];
+  if (publications_.count(publicationId)) {
+    PublicationDetails& pb = publications_[publicationId];
     pb.qos_ = qos;
     pb.publisher_qos_ = publisherQos;
     // TODO: tell the world about the change with SEDP
@@ -676,16 +678,16 @@ Spdp::add_subscription(const RepoId& topicId,
                        const char* filterExpr,
                        const DDS::StringSeq& params)
 {
-  RepoId rid;
-  assign (rid.entityId.entityKey, endpoint_counter_++);
-  SubscriberDetails &sb = subscribers_[rid];
+  RepoId rid = guid_;
+  rid.entityId.entityKind = DCPS::ENTITYKIND_USER_READER_WITH_KEY; //TODO: WITH_KEY ???
+  assign(rid.entityId.entityKey, subscription_counter_++);
+  SubscriptionDetails& sb = subscriptions_[rid];
   sb.topic_id_ = topicId;
   sb.subscription_ = subscription;
   sb.qos_ = qos;
   sb.trans_info_ = transInfo;
   sb.subscriber_qos_ = subscriberQos;
   sb.params_ = params;
-  sb.repo_id_ = rid;
 
   // TODO: use SEDP to advertise the new subscription
 
@@ -696,8 +698,8 @@ Spdp::add_subscription(const RepoId& topicId,
 void
 Spdp::remove_subscription(const RepoId& subscriptionId)
 {
-  subscribers_.erase(subscriptionId);
-  // TODO: what to do with SEDP? Anything?
+  // TODO: use SEDP to dispose the subscription
+  subscriptions_.erase(subscriptionId);
 }
 
 void
@@ -711,8 +713,8 @@ Spdp::update_subscription_qos(const RepoId& subscriptionId,
                               const DDS::DataReaderQos& qos,
                               const DDS::SubscriberQos& subscriberQos)
 {
-  if (subscribers_.count(subscriptionId)) {
-    SubscriberDetails &sb = subscribers_[subscriptionId];
+  if (subscriptions_.count(subscriptionId)) {
+    SubscriptionDetails& sb = subscriptions_[subscriptionId];
     sb.qos_ = qos;
     sb.subscriber_qos_ = subscriberQos;
     // TODO: tell the world about the change with SEDP
@@ -726,8 +728,8 @@ bool
 Spdp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
-  if (subscribers_.count(subId)) {
-    SubscriberDetails &sb = subscribers_[subId];
+  if (subscriptions_.count(subId)) {
+    SubscriptionDetails& sb = subscriptions_[subId];
     sb.params_ = params;
     // TODO: tell the world about the change with SEDP
 
@@ -737,9 +739,12 @@ Spdp::update_subscription_params(const RepoId& subId,
 }
 
 void
-Spdp::add_discovered_writer (const DiscoveredWriterData &data)
+Spdp::add_discovered_endpoint(const ParameterList& data)
 {
-  // TODO: match up discovered writer with a reader if possible
+  // 'data' may be either publication or subscription data
+  // not sure yet if that actually works
+
+  // TODO: match up discovered writer with local readers, or discovere reader with local writers
 #if 0
   DCPS::GuidConverter pub(sample.header_.publication_id_);
   DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
@@ -763,14 +768,9 @@ Spdp::add_discovered_writer (const DiscoveredWriterData &data)
     ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
   }
 #endif
-
 }
 
-void
-Spdp::add_discovered_reader (const DiscoveredReaderData &data)
-{
-  // TODO: match up discovered reader with a writer if possible
-}
+// Managing reader/writer associations
 
 void
 Spdp::association_complete(const RepoId& localId, const RepoId& remoteId)

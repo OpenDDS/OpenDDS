@@ -43,11 +43,6 @@ namespace RTPS {
 
 class RtpsDiscovery;
 
-class SepdBuiltinPublicationsWriter;
-class SepdBuiltinPublicationsReader;
-class SepdBuiltinSubscriptionsWriter;
-class SepdBuiltinSubscriptionsReader;
-
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class Spdp : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
@@ -89,15 +84,6 @@ public:
                               const DDS::DataWriterQos& qos,
                               const DDS::PublisherQos& publisherQos);
 
-  struct PublisherDetails {
-    DCPS::RepoId topic_id_;
-    DCPS::DataWriterRemote_ptr publication_;
-    DDS::DataWriterQos qos_;
-    DCPS::TransportLocatorSeq trans_info_;
-    DDS::PublisherQos publisher_qos_;
-    DCPS::RepoId repo_id_;
-  };
-
   // Subscription
   DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
                                 DCPS::DataReaderRemote_ptr subscription,
@@ -114,18 +100,9 @@ public:
   bool update_subscription_params(const DCPS::RepoId& subId,
                                   const DDS::StringSeq& params);
 
-  struct SubscriberDetails {
-    DCPS::RepoId topic_id_;
-    DCPS::DataReaderRemote_ptr subscription_;
-    DDS::DataReaderQos qos_;
-    DCPS::TransportLocatorSeq trans_info_;
-    DDS::SubscriberQos subscriber_qos_;
-    DDS::StringSeq params_;
-    DCPS::RepoId repo_id_;
-  };
-
-  void add_discovered_writer (const DiscoveredWriterData &data);
-  void add_discovered_reader (const DiscoveredReaderData &data);
+  //TODO: move this?
+  // Callback from Sedp
+  void add_discovered_endpoint(const ParameterList& data);
 
   // Managing reader/writer associations
   void association_complete(const DCPS::RepoId& localId,
@@ -181,12 +158,6 @@ private:
 
   } *tport_;
 
-  SepdBuiltinPublicationsWriter* sepd_pub_bit_writer();
-  SepdBuiltinPublicationsReader* sepd_pub_bit_reader();
-
-  SepdBuiltinSubscriptionsWriter* sepd_sub_bit_writer();
-  SepdBuiltinSubscriptionsReader* sepd_sub_bit_reader();
-
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;
@@ -208,21 +179,39 @@ private:
   void remove_discovered_participant(ParticipantIter iter);
   void remove_expired_participants();
 
+
   // Endpoints:
 
-  typedef std::map<DCPS::RepoId, PublisherDetails,
-                   DCPS::GUID_tKeyLessThan> PublisherMap;
-  typedef PublisherMap::iterator PublisherIter;
-  PublisherMap publishers_;
+  struct PublicationDetails {
+    DCPS::RepoId topic_id_;
+    DCPS::DataWriterRemote_ptr publication_;
+    DDS::DataWriterQos qos_;
+    DCPS::TransportLocatorSeq trans_info_;
+    DDS::PublisherQos publisher_qos_;
+  };
 
-  typedef std::map<DCPS::RepoId, SubscriberDetails,
-                   DCPS::GUID_tKeyLessThan> SubscriberMap;
-  typedef SubscriberMap::iterator SubscriberIter;
-  SubscriberMap subscribers_;
+  typedef std::map<DCPS::RepoId, PublicationDetails,
+                   DCPS::GUID_tKeyLessThan> PublicationMap;
+  typedef PublicationMap::iterator PublicationIter;
+  PublicationMap publications_;
 
-  unsigned int endpoint_counter_;
+  struct SubscriptionDetails {
+    DCPS::RepoId topic_id_;
+    DCPS::DataReaderRemote_ptr subscription_;
+    DDS::DataReaderQos qos_;
+    DCPS::TransportLocatorSeq trans_info_;
+    DDS::SubscriberQos subscriber_qos_;
+    DDS::StringSeq params_;
+  };
 
-  std::set< ::OpenDDS::DCPS::RepoId> ignored_guids_;
+  typedef std::map<DCPS::RepoId, SubscriptionDetails,
+                   DCPS::GUID_tKeyLessThan> SubscriptionMap;
+  typedef SubscriptionMap::iterator SubscriptionIter;
+  SubscriptionMap subscriptions_;
+
+  unsigned int publication_counter_, subscription_counter_;
+
+  std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> ignored_guids_;
 
   // Topic:
   std::map<std::string, TopicDetails> topics_;
