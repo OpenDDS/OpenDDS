@@ -38,19 +38,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
   ParticipantBuiltinTopicDataDataReaderImpl* bit_dr =
       dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(dr.in());
-  // Wait for BIT data
-  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE, 
-                                                  ANY_VIEW_STATE, 
-                                                  ALIVE_INSTANCE_STATE);
-  //sleep(60);
-  WaitSet waiter;
-  waiter.attach_condition(rc);
-  DDS::ConditionSeq activeConditions;
-  DDS::Duration_t forever = { DDS::DURATION_INFINITE_SEC,
-                              DDS::DURATION_INFINITE_NSEC };
-
-  ReturnCode_t result = waiter.wait(activeConditions, forever);
-  TEST_ASSERT(result == RETCODE_OK);
+  ReturnCode_t result;
 
   { // Should be able to read synthetic data
     ParticipantBuiltinTopicData part_data_in = Factory::bit_data();
