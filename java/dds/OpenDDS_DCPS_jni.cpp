@@ -36,6 +36,7 @@
 #include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/GuardCondition.h"
@@ -46,6 +47,9 @@
 
 #include "ace/Service_Config.h"
 #include "ace/Service_Repository.h"
+
+template <typename CppClass>
+CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
 
 // TheParticipantFactory
 
@@ -115,6 +119,15 @@ void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_set_1repo_1ior
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(envp, se);
   }
+}
+
+jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
+(JNIEnv * jni, jclass, jobject participant)
+{
+  DDS::DomainParticipant* part = recoverCppObj<DDS::DomainParticipant>(jni, participant);
+  OpenDDS::DCPS::DomainParticipantImpl* impl = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part);
+  jstring retStr = jni->NewStringUTF(impl->get_unique_id().c_str());
+  return retStr;
 }
 
 // Exception translation

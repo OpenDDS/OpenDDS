@@ -29,8 +29,6 @@ import DDS.DomainParticipantFactory;
 import DDS.DomainParticipantQosHolder;
 import DDS.RETCODE_OK;
 import OpenDDS.DCPS.DEFAULT_STATUS_MASK;
-import OpenDDS.DCPS.DomainParticipantExt;
-import OpenDDS.DCPS.DomainParticipantExtHelper;
 import OpenDDS.DCPS.TheParticipantFactory;
 import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
@@ -129,8 +127,7 @@ public class ManagedConnectionImpl implements ManagedConnection {
     }
 
     public String getConnectionId() {
-        DomainParticipantExt ext = DomainParticipantExtHelper.narrow(participant);
-        return String.format("%08x%08x", ext.get_federation_id(), ext.get_participant_id());
+        return OpenDDS.DCPS.TheServiceParticipant.get_unique_id(participant);
     }
 
     public DomainParticipant getParticipant() {
