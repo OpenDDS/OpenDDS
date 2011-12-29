@@ -49,23 +49,7 @@ class Spdp;
 
 class Sedp {
 public:
-  Sedp(const DCPS::RepoId& participant_id, Spdp& owner)
-    : participant_id_(participant_id)
-    , spdp_(owner)
-    , publications_writer_(make_id(participant_id,
-                                   ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
-                           owner)
-    , subscriptions_writer_(make_id(participant_id,
-                                    ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER),
-                            owner)
-    , publications_reader_(make_id(participant_id,
-                                   ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
-                           owner)
-    , subscriptions_reader_(make_id(participant_id,
-                                    ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
-                            owner)
-    , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
-  {}
+  Sedp(const DCPS::RepoId& participant_id, Spdp& owner);
 
   DDS::ReturnCode_t init(const DCPS::RepoId& guid, 
                          RtpsDiscovery& disco, 
@@ -74,6 +58,7 @@ public:
   void ignore(const DCPS::RepoId& to_ignore) {
     ignored_guids_.insert(to_ignore);
   }
+
   bool ignoring(const DCPS::RepoId& guid) const {
     return ignored_guids_.count(guid);
   }
@@ -131,14 +116,6 @@ public:
                                  const DCPS::RepoId& remoteId);
 
 private:
-  static DCPS::RepoId
-  make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
-  {
-    DCPS::RepoId id = participant_id;
-    id.entityId = entity;
-    return id;
-  }
-
   DCPS::RepoId participant_id_;
   Spdp& spdp_;
 
@@ -234,7 +211,6 @@ private:
     DCPS::TransportLocatorSeq trans_info_;
     DDS::PublisherQos publisher_qos_;
   };
-
   typedef std::map<DCPS::RepoId, LocalPublication,
                    DCPS::GUID_tKeyLessThan> LocalPublicationMap;
   typedef LocalPublicationMap::iterator LocalPublicationIter;
@@ -248,13 +224,30 @@ private:
     DDS::SubscriberQos subscriber_qos_;
     DDS::StringSeq params_;
   };
-
   typedef std::map<DCPS::RepoId, LocalSubscription,
                    DCPS::GUID_tKeyLessThan> LocalSubscriptionMap;
   typedef LocalSubscriptionMap::iterator LocalSubscriptionIter;
   LocalSubscriptionMap local_subscriptions_;
 
   unsigned int publication_counter_, subscription_counter_;
+
+  struct DiscoveredPublication {
+    DiscoveredWriterData writer_data_;
+    DDS::InstanceHandle_t bit_ih_;
+  };
+  typedef std::map<DCPS::RepoId, DiscoveredPublication,
+                   DCPS::GUID_tKeyLessThan> DiscoveredPublicationMap;
+  typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
+  DiscoveredPublicationMap discovered_publications_;
+
+  struct DiscoveredSubscription {
+    DiscoveredReaderData reader_data_;
+    DDS::InstanceHandle_t bit_ih_;
+  };
+  typedef std::map<DCPS::RepoId, DiscoveredSubscription,
+                   DCPS::GUID_tKeyLessThan> DiscoveredSubscriptionMap;
+  typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
+  DiscoveredSubscriptionMap discovered_subscriptions_;
 
   std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> ignored_guids_;
 
@@ -263,6 +256,9 @@ private:
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
   bool has_dcps_key(const DCPS::RepoId& topicId) const;
+
+  static DCPS::RepoId
+  make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity);
 };
 
 }

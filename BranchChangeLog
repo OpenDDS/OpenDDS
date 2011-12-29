@@ -1,3 +1,12 @@
+Thu Dec 29 23:12:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Moved some methods that were defined in-line in the class
+          to the cpp file.
+          Added data structures for Discovered Publication and Subscription.
+
 Thu Dec 29 22:15:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcpsInfo.idl:

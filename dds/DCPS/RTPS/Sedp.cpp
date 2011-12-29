@@ -42,14 +42,40 @@ namespace DCPS {
 namespace RTPS {
 using DCPS::RepoId;
 
+Sedp::Sedp(const RepoId& participant_id, Spdp& owner)
+  : participant_id_(participant_id)
+  , spdp_(owner)
+  , publications_writer_(make_id(participant_id,
+                                 ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
+                         owner)
+  , subscriptions_writer_(make_id(participant_id,
+                                  ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER),
+                          owner)
+  , publications_reader_(make_id(participant_id,
+                                 ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
+                         owner)
+  , subscriptions_reader_(make_id(participant_id,
+                                  ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
+                          owner)
+  , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
+{}
+
+RepoId
+Sedp::make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
+{
+  RepoId id = participant_id;
+  id.entityId = entity;
+  return id;
+}
+
 DDS::ReturnCode_t
-Sedp::init(const DCPS::RepoId& guid, 
-           RtpsDiscovery& disco, 
+Sedp::init(const RepoId& guid,
+           RtpsDiscovery& disco,
            DDS::DomainId_t domainId)
 {
   std::string key = OpenDDS::DCPS::GuidConverter(guid).uniqueId();
 
-  // allocate one transport and two sockets
+  // allocate one transport
   transport_ = TheTransportRegistry->create_inst(
                    DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                    "_SEDPTransportInst_" + key, "rtps_udp");
@@ -58,7 +84,7 @@ Sedp::init(const DCPS::RepoId& guid,
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_);
 
   // Bind to a specific multicast group
-  const u_short mc_port = disco.pb() + 
+  const u_short mc_port = disco.pb() +
                           disco.dg() * domainId +
                           disco.dx();
 
