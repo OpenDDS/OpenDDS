@@ -34,6 +34,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+namespace DDS {
+  class TopicBuiltinTopicDataDataReaderImpl;
+  class PublicationBuiltinTopicDataDataReaderImpl;
+  class SubscriptionBuiltinTopicDataDataReaderImpl;
+}
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -42,7 +48,9 @@ class Spdp;
 class Sedp {
 public:
   Sedp(const DCPS::RepoId& participant_id, Spdp& owner)
-    : publications_writer_(make_id(participant_id,
+    : participant_id_(participant_id)
+    , spdp_(owner)
+    , publications_writer_(make_id(participant_id,
                                    ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
                            owner)
     , subscriptions_writer_(make_id(participant_id,
@@ -54,7 +62,65 @@ public:
     , subscriptions_reader_(make_id(participant_id,
                                     ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
                             owner)
+    , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
   {}
+
+  void ignore(const DCPS::RepoId& to_ignore) {
+    ignored_guids_.insert(to_ignore);
+  }
+  bool ignoring(const DCPS::RepoId& guid) const {
+    return ignored_guids_.count(guid);
+  }
+
+  // Topic
+  DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
+                                 const char* topicName,
+                                 const char* dataTypeName,
+                                 const DDS::TopicQos& qos);
+  DCPS::TopicStatus remove_topic(const DCPS::RepoId& topicId,
+                                 std::string& name);
+  bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
+                        std::string& name);
+  struct TopicDetails {
+    std::string data_type_;
+    DDS::TopicQos qos_;
+    DCPS::RepoId repo_id_;
+  };
+
+  // Publication
+  DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
+                               DCPS::DataWriterRemote_ptr publication,
+                               const DDS::DataWriterQos& qos,
+                               const DCPS::TransportLocatorSeq& transInfo,
+                               const DDS::PublisherQos& publisherQos);
+  void remove_publication(const DCPS::RepoId& publicationId);
+  bool update_publication_qos(const DCPS::RepoId& publicationId,
+                              const DDS::DataWriterQos& qos,
+                              const DDS::PublisherQos& publisherQos);
+
+  // Subscription
+  DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
+                                DCPS::DataReaderRemote_ptr subscription,
+                                const DDS::DataReaderQos& qos,
+                                const DCPS::TransportLocatorSeq& transInfo,
+                                const DDS::SubscriberQos& subscriberQos,
+                                const char* filterExpr,
+                                const DDS::StringSeq& params);
+  void remove_subscription(const DCPS::RepoId& subscriptionId);
+  bool update_subscription_qos(const DCPS::RepoId& subscriptionId,
+                               const DDS::DataReaderQos& qos,
+                               const DDS::SubscriberQos& subscriberQos);
+  bool update_subscription_params(const DCPS::RepoId& subId,
+                                  const DDS::StringSeq& params);
+
+  // Managing reader/writer associations
+  void association_complete(const DCPS::RepoId& localId,
+                            const DCPS::RepoId& remoteId);
+  void disassociate_participant(const DCPS::RepoId& remoteId);
+  void disassociate_publication(const DCPS::RepoId& localId,
+                                const DCPS::RepoId& remoteId);
+  void disassociate_subscription(const DCPS::RepoId& localId,
+                                 const DCPS::RepoId& remoteId);
 
 private:
   static DCPS::RepoId
@@ -64,6 +130,9 @@ private:
     id.entityId = entity;
     return id;
   }
+
+  DCPS::RepoId participant_id_;
+  Spdp& spdp_;
 
   class Endpoint : public DCPS::TransportClient {
   public:
@@ -142,6 +211,46 @@ private:
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
   } publications_reader_, subscriptions_reader_;
+
+  DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
+  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+
+  struct PublicationDetails {
+    DCPS::RepoId topic_id_;
+    DCPS::DataWriterRemote_ptr publication_;
+    DDS::DataWriterQos qos_;
+    DCPS::TransportLocatorSeq trans_info_;
+    DDS::PublisherQos publisher_qos_;
+  };
+
+  typedef std::map<DCPS::RepoId, PublicationDetails,
+                   DCPS::GUID_tKeyLessThan> PublicationMap;
+  typedef PublicationMap::iterator PublicationIter;
+  PublicationMap publications_;
+
+  struct SubscriptionDetails {
+    DCPS::RepoId topic_id_;
+    DCPS::DataReaderRemote_ptr subscription_;
+    DDS::DataReaderQos qos_;
+    DCPS::TransportLocatorSeq trans_info_;
+    DDS::SubscriberQos subscriber_qos_;
+    DDS::StringSeq params_;
+  };
+
+  typedef std::map<DCPS::RepoId, SubscriptionDetails,
+                   DCPS::GUID_tKeyLessThan> SubscriptionMap;
+  typedef SubscriptionMap::iterator SubscriptionIter;
+  SubscriptionMap subscriptions_;
+
+  unsigned int publication_counter_, subscription_counter_;
+
+  std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> ignored_guids_;
+
+  // Topic:
+  std::map<std::string, TopicDetails> topics_;
+  std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
+  unsigned int topic_counter_;
 
 };
 

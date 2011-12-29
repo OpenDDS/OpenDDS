@@ -94,7 +94,7 @@ RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
                        const DDS::TopicQos& qos)
 {
   if (topics_.count(domainId)) {
-    const std::map<std::string, Spdp::TopicDetails>::iterator it =
+    const std::map<std::string, Sedp::TopicDetails>::iterator it =
       topics_[domainId].find(topicName);
     if (it != topics_[domainId].end()
         && it->second.data_type_ != dataTypeName) {
@@ -107,7 +107,7 @@ RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
     participants_[domainId][participantId]->assert_topic(topicId, topicName,
                                                          dataTypeName, qos);
   if (stat == DCPS::CREATED || stat == DCPS::FOUND) { // qos change (FOUND)
-    Spdp::TopicDetails& td = topics_[domainId][topicName];
+    Sedp::TopicDetails& td = topics_[domainId][topicName];
     td.data_type_ = dataTypeName;
     td.qos_ = qos;
     td.repo_id_ = topicId;
@@ -127,7 +127,7 @@ RtpsInfo::find_topic(DDS::DomainId_t domainId, const char* topicName,
   if (!topics_[domainId].count(topicName)) {
     return DCPS::NOT_FOUND;
   }
-  Spdp::TopicDetails& td = topics_[domainId][topicName];
+  Sedp::TopicDetails& td = topics_[domainId][topicName];
   dataTypeName = td.data_type_.c_str();
   qos = new DDS::TopicQos(td.qos_);
   topicId = td.repo_id_;

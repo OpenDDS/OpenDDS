@@ -39,13 +39,6 @@ namespace {
   const CORBA::ULong encap_LE = 0x00000300; // {options, PL_CDR_LE} in LE
   const CORBA::ULong encap_BE = 0x00000200; // {options, PL_CDR_BE} in LE
 
-  void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
-  {
-    lhs[0] = static_cast<CORBA::Octet>(rhs);
-    lhs[1] = static_cast<CORBA::Octet>(rhs >> 8);
-    lhs[2] = static_cast<CORBA::Octet>(rhs >> 16);
-  }
-
   bool disposed(const ParameterList& inlineQos)
   {
     for (CORBA::ULong i = 0; i < inlineQos.length(); ++i) {
@@ -62,11 +55,10 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
   : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), publication_counter_(0), subscription_counter_(0)
-  , topic_counter_(0), sedp_(guid, *this)
+  , shutdown_cond_(lock_), sedp_(guid, *this)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  ignored_guids_.insert(guid);
+  sedp_.ignore(guid);
 }
 
 Spdp::~Spdp()
@@ -83,7 +75,7 @@ void
 Spdp::ignore_domain_participant(const RepoId& ignoreId)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  ignored_guids_.insert(ignoreId);
+  sedp_.ignore(ignoreId);
 }
 
 bool
@@ -113,7 +105,7 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
   guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  if (ignored_guids_.find(guid) != ignored_guids_.end()) {
+  if (sedp_.ignoring(guid)) {
     // Ignore, this is our domain participant
     return;
   }
@@ -205,30 +197,6 @@ Spdp::part_bit()
   DDS::DataReader_var d =
     bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DDS::TopicBuiltinTopicDataDataReaderImpl*
-Spdp::topic_bit()
-{
-  DDS::DataReader_var d =
-    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
-  return dynamic_cast<DDS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DDS::PublicationBuiltinTopicDataDataReaderImpl*
-Spdp::pub_bit()
-{
-  DDS::DataReader_var d =
-    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
-  return dynamic_cast<DDS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DDS::SubscriptionBuiltinTopicDataDataReaderImpl*
-Spdp::sub_bit()
-{
-  DDS::DataReader_var d =
-    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-  return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
 ACE_Reactor*
@@ -560,61 +528,32 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 }
 
 
+// start of methods that just forward to sedp_
+
 DCPS::TopicStatus
 Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
                    const char* dataTypeName, const DDS::TopicQos& qos)
 {
-  if (topics_.count(topicName)) { // types must match, RtpsInfo checked for us
-    topics_[topicName].qos_ = qos;
-    topicId = topics_[topicName].repo_id_;
-    return DCPS::FOUND;
-  }
-
-  TopicDetails& td = topics_[topicName];
-  td.data_type_ = dataTypeName;
-  td.qos_ = qos;
-  td.repo_id_ = guid_;
-  td.repo_id_.entityId.entityKind = DCPS::ENTITYKIND_OPENDDS_TOPIC;
-  assign(td.repo_id_.entityId.entityKey, topic_counter_++);
-  topic_names_[td.repo_id_] = topicName;
-  topicId = td.repo_id_;
-
-  if (topic_counter_ == 0x1000000) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::assert_topic: ")
-               ACE_TEXT("Exceeded Maximum number of topic entity keys!")
-               ACE_TEXT("Next key will be a duplicate!\n")));
-    topic_counter_ = 0;
-  }
-
-  return DCPS::CREATED;
+  return sedp_.assert_topic(topicId, topicName, dataTypeName, qos);
 }
 
 DCPS::TopicStatus
 Spdp::remove_topic(const RepoId& topicId, std::string& name)
 {
-  name = topic_names_[topicId];
-  topics_.erase(name);
-  topic_names_.erase(topicId);
-  return DCPS::REMOVED;
+  return sedp_.remove_topic(topicId, name);
 }
 
 void
 Spdp::ignore_topic(const RepoId& ignoreId)
 {
-  //TODO
+  sedp_.ignore(ignoreId);
 }
 
 bool
 Spdp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
                        std::string& name)
 {
-  if (topic_names_.count(topicId)) {
-    name = topic_names_[topicId];
-    topics_[name].qos_ = qos;
-    return true;
-  }
-  return false;
+  return sedp_.update_topic_qos(topicId, qos, name);
 }
 
 RepoId
@@ -624,32 +563,20 @@ Spdp::add_publication(const RepoId& topicId,
                       const DCPS::TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos)
 {
-  RepoId rid = guid_;
-  rid.entityId.entityKind = DCPS::ENTITYKIND_USER_WRITER_WITH_KEY; //TODO: WITH_KEY ???
-  assign(rid.entityId.entityKey, publication_counter_++);
-  PublicationDetails& pb = publications_[rid];
-  pb.topic_id_ = topicId;
-  pb.publication_ = publication;
-  pb.qos_ = qos;
-  pb.trans_info_ = transInfo;
-  pb.publisher_qos_ = publisherQos;
-
-  // TODO: use SEDP to advertise the new publication
-
-  return rid;
+  return sedp_.add_publication(topicId, publication, qos,
+                               transInfo, publisherQos);
 }
 
 void
 Spdp::remove_publication(const RepoId& publicationId)
 {
-  // TODO: use SEDP to dispose the publication
-  publications_.erase(publicationId);
+  sedp_.remove_publication(publicationId);
 }
 
 void
 Spdp::ignore_publication(const RepoId& ignoreId)
 {
-  // TODO
+  return sedp_.ignore(ignoreId);
 }
 
 bool
@@ -657,15 +584,7 @@ Spdp::update_publication_qos(const RepoId& publicationId,
                              const DDS::DataWriterQos& qos,
                              const DDS::PublisherQos& publisherQos)
 {
-  if (publications_.count(publicationId)) {
-    PublicationDetails& pb = publications_[publicationId];
-    pb.qos_ = qos;
-    pb.publisher_qos_ = publisherQos;
-    // TODO: tell the world about the change with SEDP
-
-    return true;
-  }
-  return false;
+  return sedp_.update_publication_qos(publicationId, qos, publisherQos);
 }
 
 RepoId
@@ -677,34 +596,20 @@ Spdp::add_subscription(const RepoId& topicId,
                        const char* filterExpr,
                        const DDS::StringSeq& params)
 {
-  RepoId rid = guid_;
-  rid.entityId.entityKind = DCPS::ENTITYKIND_USER_READER_WITH_KEY; //TODO: WITH_KEY ???
-  assign(rid.entityId.entityKey, subscription_counter_++);
-  SubscriptionDetails& sb = subscriptions_[rid];
-  sb.topic_id_ = topicId;
-  sb.subscription_ = subscription;
-  sb.qos_ = qos;
-  sb.trans_info_ = transInfo;
-  sb.subscriber_qos_ = subscriberQos;
-  sb.params_ = params;
-
-  // TODO: use SEDP to advertise the new subscription
-
-  return rid;
-
+  return sedp_.add_subscription(topicId, subscription, qos, transInfo,
+                                subscriberQos, filterExpr, params);
 }
 
 void
 Spdp::remove_subscription(const RepoId& subscriptionId)
 {
-  // TODO: use SEDP to dispose the subscription
-  subscriptions_.erase(subscriptionId);
+  sedp_.remove_subscription(subscriptionId);
 }
 
 void
 Spdp::ignore_subscription(const RepoId& ignoreId)
 {
-  // TODO
+  return sedp_.ignore(ignoreId);
 }
 
 bool
@@ -712,103 +617,42 @@ Spdp::update_subscription_qos(const RepoId& subscriptionId,
                               const DDS::DataReaderQos& qos,
                               const DDS::SubscriberQos& subscriberQos)
 {
-  if (subscriptions_.count(subscriptionId)) {
-    SubscriptionDetails& sb = subscriptions_[subscriptionId];
-    sb.qos_ = qos;
-    sb.subscriber_qos_ = subscriberQos;
-    // TODO: tell the world about the change with SEDP
-
-    return true;
-  }
-  return false;
+  return sedp_.update_subscription_qos(subscriptionId, qos, subscriberQos);
 }
 
 bool
 Spdp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
-  if (subscriptions_.count(subId)) {
-    SubscriptionDetails& sb = subscriptions_[subId];
-    sb.params_ = params;
-    // TODO: tell the world about the change with SEDP
-
-    return true;
-  }
-  return false;
+  return sedp_.update_subscription_params(subId, params);
 }
 
-void
-Spdp::add_discovered_endpoint(const ParameterList& data)
-{
-  // 'data' may be either publication or subscription data
-  // not sure yet if that actually works
-
-  // TODO: match up discovered writer with local readers, or discovere reader with local writers
-#if 0
-  DCPS::GuidConverter pub(sample.header_.publication_id_);
-  DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
-                    sample.header_.source_timestamp_nanosec_};
-  ACE_Time_Value atv = DCPS::time_to_time_value(ts);
-  std::time_t seconds = atv.sec();
-  std::ostringstream oss;
-  oss << "data_received():\n\t"
-    "id = " << int(sample.header_.message_id_) << "\n\t"
-    "timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
-    "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
-    "byte order = " << sample.header_.byte_order_ << "\n\t"
-    "length = " << sample.header_.message_length_ << "\n\t"
-    "publication = " << pub << "\n";
-  ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
-
-  if (sample.header_.message_id_ != DCPS::SAMPLE_DATA
-      || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
-        || sample.header_.message_length_ != 533
-      || pub.checksum() != DCPS::GuidConverter(pub_id_).checksum()) {
-    ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
-  }
-#endif
-}
 
 // Managing reader/writer associations
 
 void
 Spdp::association_complete(const RepoId& localId, const RepoId& remoteId)
 {
+  sedp_.association_complete(localId, remoteId);
 }
 
 void
 Spdp::disassociate_participant(const RepoId& remoteId)
 {
+  sedp_.disassociate_participant(remoteId);
 }
 
 void
 Spdp::disassociate_publication(const RepoId& localId, const RepoId& remoteId)
 {
+  sedp_.disassociate_publication(localId, remoteId);
 }
 
 void
 Spdp::disassociate_subscription(const RepoId& localId, const RepoId& remoteId)
 {
+  sedp_.disassociate_subscription(localId, remoteId);
 }
 
 }
 }
-
-namespace OpenDDS { namespace DCPS {
-bool operator<(const RepoId& lhs, const RepoId& rhs)
-{
-  for (int i = 0; i < 12; ++i) {
-    if (lhs.guidPrefix[i] < rhs.guidPrefix[i]) {
-      return true;
-    }
-  }
-  for (int j = 0; j < 3; ++j) {
-    if (lhs.entityId.entityKey[j] < rhs.entityId.entityKey[j]) {
-      return true;
-    }
-  }
-
-  return lhs.entityId.entityKind < rhs.entityId.entityKind;
-}
-
-} }

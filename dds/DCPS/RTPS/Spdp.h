@@ -34,9 +34,6 @@
 
 namespace DDS {
   class ParticipantBuiltinTopicDataDataReaderImpl;
-  class TopicBuiltinTopicDataDataReaderImpl;
-  class PublicationBuiltinTopicDataDataReaderImpl;
-  class SubscriptionBuiltinTopicDataDataReaderImpl;
 }
 
 namespace OpenDDS {
@@ -56,6 +53,7 @@ public:
   void ignore_domain_participant(const DCPS::RepoId& ignoreId);
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
   void bit_subscriber(const DDS::Subscriber_var& bit_subscriber);
+  DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
 
   // Topic
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
@@ -67,11 +65,6 @@ public:
   void ignore_topic(const DCPS::RepoId& ignoreId);
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
                         std::string& name);
-  struct TopicDetails {
-    std::string data_type_;
-    DDS::TopicQos qos_;
-    DCPS::RepoId repo_id_;
-  };
 
   // Publication
   DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
@@ -101,10 +94,6 @@ public:
   bool update_subscription_params(const DCPS::RepoId& subId,
                                   const DDS::StringSeq& params);
 
-  //TODO: move this?
-  // Callback from Sedp
-  void add_discovered_endpoint(const ParameterList& data);
-
   // Managing reader/writer associations
   void association_complete(const DCPS::RepoId& localId,
                             const DCPS::RepoId& remoteId);
@@ -131,9 +120,6 @@ private:
                      const ParameterList& plist);
 
   DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
-  DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 
   struct SpdpTransport : ACE_Event_Handler {
     explicit SpdpTransport(Spdp* outer);
@@ -177,47 +163,9 @@ private:
                    DCPS::GUID_tKeyLessThan> ParticipantMap;
   typedef ParticipantMap::iterator ParticipantIter;
   ParticipantMap participants_;
+
   void remove_discovered_participant(ParticipantIter iter);
   void remove_expired_participants();
-
-
-  // Endpoints:
-
-  struct PublicationDetails {
-    DCPS::RepoId topic_id_;
-    DCPS::DataWriterRemote_ptr publication_;
-    DDS::DataWriterQos qos_;
-    DCPS::TransportLocatorSeq trans_info_;
-    DDS::PublisherQos publisher_qos_;
-  };
-
-  typedef std::map<DCPS::RepoId, PublicationDetails,
-                   DCPS::GUID_tKeyLessThan> PublicationMap;
-  typedef PublicationMap::iterator PublicationIter;
-  PublicationMap publications_;
-
-  struct SubscriptionDetails {
-    DCPS::RepoId topic_id_;
-    DCPS::DataReaderRemote_ptr subscription_;
-    DDS::DataReaderQos qos_;
-    DCPS::TransportLocatorSeq trans_info_;
-    DDS::SubscriberQos subscriber_qos_;
-    DDS::StringSeq params_;
-  };
-
-  typedef std::map<DCPS::RepoId, SubscriptionDetails,
-                   DCPS::GUID_tKeyLessThan> SubscriptionMap;
-  typedef SubscriptionMap::iterator SubscriptionIter;
-  SubscriptionMap subscriptions_;
-
-  unsigned int publication_counter_, subscription_counter_;
-
-  std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> ignored_guids_;
-
-  // Topic:
-  std::map<std::string, TopicDetails> topics_;
-  std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
-  unsigned int topic_counter_;
 
   Sedp sedp_;
 };

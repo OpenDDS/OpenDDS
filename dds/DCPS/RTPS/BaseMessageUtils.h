@@ -81,6 +81,13 @@ inline void assign(OpenDDS::RTPS::OctetArray16& dest,
   dest[15] = ipv4addr_be;
 }
 
+inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
+{
+  lhs[0] = static_cast<CORBA::Octet>(rhs);
+  lhs[1] = static_cast<CORBA::Octet>(rhs >> 8);
+  lhs[2] = static_cast<CORBA::Octet>(rhs >> 16);
+}
+
 
 }
 }
