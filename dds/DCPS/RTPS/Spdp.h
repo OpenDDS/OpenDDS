@@ -18,6 +18,7 @@
 #include "dds/DCPS/Definitions.h"
 
 #include "RtpsMessageTypesC.h"
+#include "Sedp.h"
 
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Mcast.h"
@@ -217,6 +218,8 @@ private:
   std::map<std::string, TopicDetails> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
+
+  Sedp sedp_;
 };
 
 }

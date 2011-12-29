@@ -25,8 +25,6 @@
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 
-#include "Spdp.h"
-
 #include <map>
 #include <set>
 #include <string>
@@ -39,82 +37,112 @@
 namespace OpenDDS {
 namespace RTPS {
 
-class SedpTransportClient : public DCPS::TransportClient {
+class Spdp;
+
+class Sedp {
 public:
-  SedpTransportClient(const DCPS::RepoId& repo_id, DCPS::RcHandle<Spdp>& owner)
-    : repo_id_(repo_id)
-    , owner_(owner)
+  Sedp(const DCPS::RepoId& participant_id, Spdp& owner)
+    : publications_writer_(make_id(participant_id,
+                                   ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
+                           owner)
+    , subscriptions_writer_(make_id(participant_id,
+                                    ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER),
+                            owner)
+    , publications_reader_(make_id(participant_id,
+                                   ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
+                           owner)
+    , subscriptions_reader_(make_id(participant_id,
+                                    ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
+                            owner)
   {}
 
-  virtual ~SedpTransportClient();
+private:
+  static DCPS::RepoId
+  make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
+  {
+    DCPS::RepoId id = participant_id;
+    id.entityId = entity;
+    return id;
+  }
 
-  // Implementing TransportClient
-  bool check_transport_qos(const DCPS::TransportInst&)
-    { return true; }
-  const DCPS::RepoId& get_repo_id() const
-    { return repo_id_; }
-  CORBA::Long get_priority_value(const DCPS::AssociationData&) const
-    { return 0; }
+  class Endpoint : public DCPS::TransportClient {
+  public:
+    Endpoint(const DCPS::RepoId& repo_id, Spdp& spdp)
+      : repo_id_(repo_id)
+      , spdp_(spdp)
+    {}
 
-protected:
-  using DCPS::TransportClient::enable_transport;
-  using DCPS::TransportClient::disassociate;
-  using DCPS::TransportClient::send;
-  using DCPS::TransportClient::send_control;
+    virtual ~Endpoint();
 
-  DCPS::RepoId repo_id_;
-  DCPS::RcHandle<Spdp> owner_;
-};
+    // Implementing TransportClient
+    bool check_transport_qos(const DCPS::TransportInst&)
+      { return true; }
+    const DCPS::RepoId& get_repo_id() const
+      { return repo_id_; }
+    CORBA::Long get_priority_value(const DCPS::AssociationData&) const
+      { return 0; }
 
-class SedpWriter : public DCPS::TransportSendListener,
-                   public SedpTransportClient {
-public:
-  SedpWriter(const DCPS::RepoId& pub_id, DCPS::RcHandle<Spdp>& owner)
-    : SedpTransportClient(pub_id, owner)
-  {}
+  protected:
+    using DCPS::TransportClient::enable_transport;
+    using DCPS::TransportClient::disassociate;
+    using DCPS::TransportClient::send;
+    using DCPS::TransportClient::send_control;
 
-  virtual ~SedpWriter();
+    DCPS::RepoId repo_id_;
+    Spdp& spdp_;
+  };
 
-  bool assoc(const DCPS::AssociationData& subscription);
+  class Writer : public DCPS::TransportSendListener, public Endpoint {
+  public:
+    Writer(const DCPS::RepoId& pub_id, Spdp& spdp)
+      : Endpoint(pub_id, spdp)
+    {}
 
-  // Implementing TransportSendListener
-  void data_delivered(const DCPS::DataSampleListElement*);
+    virtual ~Writer();
 
-  void data_dropped(const DCPS::DataSampleListElement*, bool by_transport);
+    bool assoc(const DCPS::AssociationData& subscription);
 
-  void control_delivered(ACE_Message_Block* /*sample*/);
+    // Implementing TransportSendListener
+    void data_delivered(const DCPS::DataSampleListElement*);
 
-  void control_dropped(ACE_Message_Block* /*sample*/,
-                       bool /*dropped_by_transport*/);
+    void data_dropped(const DCPS::DataSampleListElement*, bool by_transport);
 
-  void notify_publication_disconnected(const DCPS::ReaderIdSeq&) {}
-  void notify_publication_reconnected(const DCPS::ReaderIdSeq&) {}
-  void notify_publication_lost(const DCPS::ReaderIdSeq&) {}
-  void notify_connection_deleted() {}
-  void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
-  void retrieve_inline_qos_data(InlineQosData&) const {}
-};
+    void control_delivered(ACE_Message_Block* /*sample*/);
 
-class SedpReader : public DCPS::TransportReceiveListener,
-                   public SedpTransportClient {
-public:
-  SedpReader(const DCPS::RepoId& sub_id, DCPS::RcHandle<Spdp>& owner)
-    : SedpTransportClient(sub_id, owner)
-  {}
+    void control_dropped(ACE_Message_Block* /*sample*/,
+                         bool /*dropped_by_transport*/);
 
-  virtual ~SedpReader();
+    void notify_publication_disconnected(const DCPS::ReaderIdSeq&) {}
+    void notify_publication_reconnected(const DCPS::ReaderIdSeq&) {}
+    void notify_publication_lost(const DCPS::ReaderIdSeq&) {}
+    void notify_connection_deleted() {}
+    void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
+    void retrieve_inline_qos_data(InlineQosData&) const {}
 
-  bool assoc(const DCPS::AssociationData& publication);
+  } publications_writer_, subscriptions_writer_;
 
-  // Implementing TransportReceiveListener
+  class Reader : public DCPS::TransportReceiveListener, public Endpoint {
+  public:
+    Reader(const DCPS::RepoId& sub_id, Spdp& spdp)
+      : Endpoint(sub_id, spdp)
+    {}
 
-  void data_received(const DCPS::ReceivedDataSample& sample);
+    virtual ~Reader();
 
-  void notify_subscription_disconnected(const DCPS::WriterIdSeq&) {}
-  void notify_subscription_reconnected(const DCPS::WriterIdSeq&) {}
-  void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
-  void notify_connection_deleted() {}
-  void remove_associations(const DCPS::WriterIdSeq&, bool) {}
+    bool assoc(const DCPS::AssociationData& publication);
+
+    // Implementing TransportReceiveListener
+
+    void data_received(const DCPS::ReceivedDataSample& sample);
+
+    void notify_subscription_disconnected(const DCPS::WriterIdSeq&) {}
+    void notify_subscription_reconnected(const DCPS::WriterIdSeq&) {}
+    void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
+    void notify_connection_deleted() {}
+    void remove_associations(const DCPS::WriterIdSeq&, bool) {}
+
+  } publications_reader_, subscriptions_reader_;
+
 };
 
 }

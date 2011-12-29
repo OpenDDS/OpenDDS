@@ -1,3 +1,12 @@
+Thu Dec 29 17:36:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing discovery.
+
 Thu Dec 29 17:13:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * java/dds/OpenDDS_DCPS_jni.cpp:

@@ -32,42 +32,49 @@
 namespace OpenDDS {
 namespace RTPS {
 
-SedpTransportClient::~SedpTransportClient()
+Sedp::Endpoint::~Endpoint()
 {
 }
 
 //---------------------------------------------------------------
 
+Sedp::Writer::~Writer()
+{
+}
+
 bool
-SedpWriter::assoc(const DCPS::AssociationData& subscription)
+Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
 {
   return associate(subscription, true);
 }
 
 void
-SedpWriter::data_delivered(const DCPS::DataSampleListElement*)
+Sedp::Writer::data_delivered(const DCPS::DataSampleListElement*)
 {
 }
 
 void
-SedpWriter::data_dropped(const DCPS::DataSampleListElement*, bool)
+Sedp::Writer::data_dropped(const DCPS::DataSampleListElement*, bool)
 {
 }
 
 void
-SedpWriter::control_delivered(ACE_Message_Block*)
+Sedp::Writer::control_delivered(ACE_Message_Block*)
 {
 }
 
 void
-SedpWriter::control_dropped(ACE_Message_Block*, bool)
+Sedp::Writer::control_dropped(ACE_Message_Block*, bool)
 {
 }
 
 //-------------------------------------------------------------------------
 
+Sedp::Reader::~Reader()
+{}
+
 bool
-SedpReader::assoc(const DCPS::AssociationData& publication)
+Sedp::Reader::assoc(const DCPS::AssociationData& publication)
 {
   return associate(publication, false);
 }
@@ -76,7 +83,7 @@ SedpReader::assoc(const DCPS::AssociationData& publication)
 // Implementing TransportReceiveListener
 
 void
-SedpReader::data_received(const DCPS::ReceivedDataSample& sample)
+Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
   switch (sample.header_.message_id_) {
   case DCPS::SAMPLE_DATA: {
@@ -93,7 +100,7 @@ SedpReader::data_received(const DCPS::ReceivedDataSample& sample)
       return;
     }
 
-    owner_->add_discovered_endpoint(data);
+    spdp_.add_discovered_endpoint(data);
 
     break;
   }

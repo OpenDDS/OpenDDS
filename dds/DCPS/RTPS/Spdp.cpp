@@ -13,7 +13,6 @@
 #include "RtpsMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
-#include "Sedp.h"
 
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
@@ -64,7 +63,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
   : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
   , shutdown_cond_(lock_), publication_counter_(0), subscription_counter_(0)
-  , topic_counter_(0)
+  , topic_counter_(0), sedp_(guid, *this)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   ignored_guids_.insert(guid);
