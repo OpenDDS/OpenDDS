@@ -105,7 +105,8 @@ Sedp::sub_bit()
 
 DCPS::TopicStatus
 Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
-                   const char* dataTypeName, const DDS::TopicQos& qos)
+                   const char* dataTypeName, const DDS::TopicQos& qos,
+                   bool hasDcpsKey)
 {
   if (topics_.count(topicName)) { // types must match, RtpsInfo checked for us
     topics_[topicName].qos_ = qos;
@@ -116,6 +117,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
   TopicDetails& td = topics_[topicName];
   td.data_type_ = dataTypeName;
   td.qos_ = qos;
+  td.has_dcps_key_ = hasDcpsKey;
   td.repo_id_ = participant_id_;
   td.repo_id_.entityId.entityKind = DCPS::ENTITYKIND_OPENDDS_TOPIC;
   assign(td.repo_id_.entityId.entityKey, topic_counter_++);
@@ -154,6 +156,20 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   return false;
 }
 
+bool
+Sedp::has_dcps_key(const RepoId& topicId) const
+{
+  typedef std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> TNMap;
+  TNMap::const_iterator tn = topic_names_.find(topicId);
+  if (tn == topic_names_.end()) return false;
+
+  typedef std::map<std::string, TopicDetails> TDMap;
+  TDMap::const_iterator td = topics_.find(tn->second);
+  if (td == topics_.end()) return false;
+
+  return td->second.has_dcps_key_;
+}
+
 RepoId
 Sedp::add_publication(const RepoId& topicId,
                       DCPS::DataWriterRemote_ptr publication,
@@ -162,9 +178,12 @@ Sedp::add_publication(const RepoId& topicId,
                       const DDS::PublisherQos& publisherQos)
 {
   RepoId rid = participant_id_;
-  rid.entityId.entityKind = DCPS::ENTITYKIND_USER_WRITER_WITH_KEY; //TODO: WITH_KEY ???
+  rid.entityId.entityKind =
+    has_dcps_key(topicId)
+    ? DCPS::ENTITYKIND_USER_WRITER_WITH_KEY
+    : DCPS::ENTITYKIND_USER_WRITER_NO_KEY;
   assign(rid.entityId.entityKey, publication_counter_++);
-  PublicationDetails& pb = publications_[rid];
+  LocalPublication& pb = local_publications_[rid];
   pb.topic_id_ = topicId;
   pb.publication_ = publication;
   pb.qos_ = qos;
@@ -180,7 +199,7 @@ void
 Sedp::remove_publication(const RepoId& publicationId)
 {
   // TODO: use SEDP to dispose the publication
-  publications_.erase(publicationId);
+  local_publications_.erase(publicationId);
 }
 
 bool
@@ -188,8 +207,8 @@ Sedp::update_publication_qos(const RepoId& publicationId,
                              const DDS::DataWriterQos& qos,
                              const DDS::PublisherQos& publisherQos)
 {
-  if (publications_.count(publicationId)) {
-    PublicationDetails& pb = publications_[publicationId];
+  if (local_publications_.count(publicationId)) {
+    LocalPublication& pb = local_publications_[publicationId];
     pb.qos_ = qos;
     pb.publisher_qos_ = publisherQos;
     // TODO: tell the world about the change with SEDP
@@ -209,9 +228,12 @@ Sedp::add_subscription(const RepoId& topicId,
                        const DDS::StringSeq& params)
 {
   RepoId rid = participant_id_;
-  rid.entityId.entityKind = DCPS::ENTITYKIND_USER_READER_WITH_KEY; //TODO: WITH_KEY ???
+  rid.entityId.entityKind =
+    has_dcps_key(topicId)
+    ? DCPS::ENTITYKIND_USER_READER_WITH_KEY
+    : DCPS::ENTITYKIND_USER_READER_NO_KEY;
   assign(rid.entityId.entityKey, subscription_counter_++);
-  SubscriptionDetails& sb = subscriptions_[rid];
+  LocalSubscription& sb = local_subscriptions_[rid];
   sb.topic_id_ = topicId;
   sb.subscription_ = subscription;
   sb.qos_ = qos;
@@ -229,7 +251,7 @@ void
 Sedp::remove_subscription(const RepoId& subscriptionId)
 {
   // TODO: use SEDP to dispose the subscription
-  subscriptions_.erase(subscriptionId);
+  local_subscriptions_.erase(subscriptionId);
 }
 
 bool
@@ -237,8 +259,8 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
                               const DDS::DataReaderQos& qos,
                               const DDS::SubscriberQos& subscriberQos)
 {
-  if (subscriptions_.count(subscriptionId)) {
-    SubscriptionDetails& sb = subscriptions_[subscriptionId];
+  if (local_subscriptions_.count(subscriptionId)) {
+    LocalSubscription& sb = local_subscriptions_[subscriptionId];
     sb.qos_ = qos;
     sb.subscriber_qos_ = subscriberQos;
     // TODO: tell the world about the change with SEDP
@@ -252,8 +274,8 @@ bool
 Sedp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
-  if (subscriptions_.count(subId)) {
-    SubscriptionDetails& sb = subscriptions_[subId];
+  if (local_subscriptions_.count(subId)) {
+    LocalSubscription& sb = local_subscriptions_[subId];
     sb.params_ = params;
     // TODO: tell the world about the change with SEDP
 

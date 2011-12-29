@@ -160,7 +160,8 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
   const OpenDDS::DCPS::RepoId& participantId,
   const char * topicName,
   const char * dataTypeName,
-  const DDS::TopicQos & qos)
+  const DDS::TopicQos & qos,
+  bool /*hasDcpsKey -- only used for RTPS Discovery*/)
 ACE_THROW_SPEC((CORBA::SystemException
                  , OpenDDS::DCPS::Invalid_Domain
                  , OpenDDS::DCPS::Invalid_Participant))

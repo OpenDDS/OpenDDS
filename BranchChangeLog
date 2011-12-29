@@ -1,3 +1,38 @@
+Thu Dec 29 22:15:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsTypeSupportExt.idl:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Provide a way for TypeSupport to determine if the underlying
+          data type has DCPS keys or not.  Supply this nugget of info
+          to the DCPSInfo object when creating topics.
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Use the topic's keyedness when generating publication/subscription
+          GUIDs for RTPS Discovery.
+          Renamed ParticipantDetails to DiscoveredParticipant to make it clear
+          that this is referring to a "remote" participant.
+          Renamed PublicationDetails and SubscriptionDetails to LocalPublication
+          and LocalSubscription (in Sedp) as these are owned by our participant.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Adapt to the changed IDL interfaces.
+
 Thu Dec 29 21:18:30 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.h:

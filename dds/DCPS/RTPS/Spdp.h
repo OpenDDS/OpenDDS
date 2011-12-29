@@ -59,7 +59,8 @@ public:
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
                                  const char* topicName,
                                  const char* dataTypeName,
-                                 const DDS::TopicQos& qos);
+                                 const DDS::TopicQos& qos,
+                                 bool hasDcpsKey);
   DCPS::TopicStatus remove_topic(const DCPS::RepoId& topicId,
                                  std::string& name);
   void ignore_topic(const DCPS::RepoId& ignoreId);
@@ -149,22 +150,22 @@ private:
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;
 
-  struct ParticipantDetails {
-    ParticipantDetails() {}
-    ParticipantDetails(const SPDPdiscoveredParticipantData& p,
-                       const ACE_Time_Value& t)
+  struct DiscoveredParticipant {
+    DiscoveredParticipant() {}
+    DiscoveredParticipant(const SPDPdiscoveredParticipantData& p,
+                          const ACE_Time_Value& t)
       : pdata_(p), last_seen_(t) {}
 
     SPDPdiscoveredParticipantData pdata_;
     ACE_Time_Value last_seen_;
     DDS::InstanceHandle_t bit_ih_;
   };
-  typedef std::map<DCPS::RepoId, ParticipantDetails,
-                   DCPS::GUID_tKeyLessThan> ParticipantMap;
-  typedef ParticipantMap::iterator ParticipantIter;
-  ParticipantMap participants_;
+  typedef std::map<DCPS::RepoId, DiscoveredParticipant,
+                   DCPS::GUID_tKeyLessThan> DiscoveredParticipantMap;
+  typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+  DiscoveredParticipantMap participants_;
 
-  void remove_discovered_participant(ParticipantIter iter);
+  void remove_discovered_participant(DiscoveredParticipantIter iter);
   void remove_expired_participants();
 
   Sedp sedp_;

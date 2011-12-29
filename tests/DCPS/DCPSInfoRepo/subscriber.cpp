@@ -99,7 +99,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                            dpId,
                                                            tname,
                                                            dname,
-                                                           topicQos.in());
+                                                           topicQos.in(),
+                                                           false);
 
       if (topicStatus != OpenDDS::DCPS::CREATED)
         {

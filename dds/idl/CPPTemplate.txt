@@ -77,6 +77,13 @@ const OpenDDS::DCPS::MetaStruct&
 
 #endif
 
+bool
+<%TYPE%>TypeSupportImpl::has_dcps_key()
+{
+  return OpenDDS::DCPS::gen_has_key(<%TYPE%>());
+}
+
+
 <%TYPE%>DataWriterImpl::<%TYPE%>DataWriterImpl ()
   : marshaled_size_ (0)
   , key_marshaled_size_ (0)

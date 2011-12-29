@@ -82,7 +82,8 @@ public:
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
                                  const char* topicName,
                                  const char* dataTypeName,
-                                 const DDS::TopicQos& qos);
+                                 const DDS::TopicQos& qos,
+                                 bool hasDcpsKey);
   DCPS::TopicStatus remove_topic(const DCPS::RepoId& topicId,
                                  std::string& name);
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
@@ -91,6 +92,7 @@ public:
     std::string data_type_;
     DDS::TopicQos qos_;
     DCPS::RepoId repo_id_;
+    bool has_dcps_key_;
   };
 
   // Publication
@@ -225,7 +227,7 @@ private:
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 
-  struct PublicationDetails {
+  struct LocalPublication {
     DCPS::RepoId topic_id_;
     DCPS::DataWriterRemote_ptr publication_;
     DDS::DataWriterQos qos_;
@@ -233,12 +235,12 @@ private:
     DDS::PublisherQos publisher_qos_;
   };
 
-  typedef std::map<DCPS::RepoId, PublicationDetails,
-                   DCPS::GUID_tKeyLessThan> PublicationMap;
-  typedef PublicationMap::iterator PublicationIter;
-  PublicationMap publications_;
+  typedef std::map<DCPS::RepoId, LocalPublication,
+                   DCPS::GUID_tKeyLessThan> LocalPublicationMap;
+  typedef LocalPublicationMap::iterator LocalPublicationIter;
+  LocalPublicationMap local_publications_;
 
-  struct SubscriptionDetails {
+  struct LocalSubscription {
     DCPS::RepoId topic_id_;
     DCPS::DataReaderRemote_ptr subscription_;
     DDS::DataReaderQos qos_;
@@ -247,10 +249,10 @@ private:
     DDS::StringSeq params_;
   };
 
-  typedef std::map<DCPS::RepoId, SubscriptionDetails,
-                   DCPS::GUID_tKeyLessThan> SubscriptionMap;
-  typedef SubscriptionMap::iterator SubscriptionIter;
-  SubscriptionMap subscriptions_;
+  typedef std::map<DCPS::RepoId, LocalSubscription,
+                   DCPS::GUID_tKeyLessThan> LocalSubscriptionMap;
+  typedef LocalSubscriptionMap::iterator LocalSubscriptionIter;
+  LocalSubscriptionMap local_subscriptions_;
 
   unsigned int publication_counter_, subscription_counter_;
 
@@ -260,6 +262,7 @@ private:
   std::map<std::string, TopicDetails> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
+  bool has_dcps_key(const DCPS::RepoId& topicId) const;
 };
 
 }

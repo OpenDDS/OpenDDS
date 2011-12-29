@@ -111,7 +111,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                            dpId,
                                                            tname,
                                                            dname,
-                                                           topicQos.in());
+                                                           topicQos.in(),
+                                                           false);
 
       if (topicStatus != OpenDDS::DCPS::CREATED)
         {
@@ -160,7 +161,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                             dpId,
                                                             tname2,
                                                             dname2,
-                                                            topicQos2.in());
+                                                            topicQos2.in(),
+                                                            false);
 
       if (topicStatus2 != OpenDDS::DCPS::CONFLICTING_TYPENAME)
         {
@@ -221,7 +223,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                          dpIdAlmost,
                                          tname,
                                          dname,
-                                         topicQos.in());
+                                         topicQos.in(),
+                                         false);
 
         if (topicStatus != OpenDDS::DCPS::CREATED)
           {

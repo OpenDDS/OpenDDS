@@ -106,11 +106,12 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (sedp_.ignoring(guid)) {
-    // Ignore, this is our domain participant
+    // Ignore, this is our domain participant or one that the user has
+    // asked us to ignore.
     return;
   }
 
-  const ParticipantIter iter = participants_.find(guid);
+  const DiscoveredParticipantIter iter = participants_.find(guid);
 
   if (iter == participants_.end()) {
     // copy guid prefix (octet[12]) into BIT key (long[3])
@@ -127,7 +128,7 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
     }
 
     // add a new participant
-    participants_[guid] = ParticipantDetails(pdata, time);
+    participants_[guid] = DiscoveredParticipant(pdata, time);
     participants_[guid].bit_ih_ =
       part_bit()->store_synthetic_data(pdata.ddsParticipantData,
                                        DDS::NEW_VIEW_STATE);
@@ -152,7 +153,7 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
 }
 
 void
-Spdp::remove_discovered_participant(ParticipantIter iter)
+Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
 {
   //TODO: inform SEDP
 //  sedp_->disassociate(iter->second.pdata_);
@@ -166,7 +167,7 @@ Spdp::remove_expired_participants()
 {
   // Find and remove any expired discovered participant
   ACE_GUARD (ACE_Thread_Mutex, g, lock_);
-  for (ParticipantIter it = participants_.begin();
+  for (DiscoveredParticipantIter it = participants_.begin();
        it != participants_.end();) {
     if (it->second.last_seen_ <
         ACE_OS::gettimeofday() - it->second.pdata_.leaseDuration.seconds) {
@@ -532,9 +533,10 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
 DCPS::TopicStatus
 Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
-                   const char* dataTypeName, const DDS::TopicQos& qos)
+                   const char* dataTypeName, const DDS::TopicQos& qos,
+                   bool hasDcpsKey)
 {
-  return sedp_.assert_topic(topicId, topicName, dataTypeName, qos);
+  return sedp_.assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey);
 }
 
 DCPS::TopicStatus

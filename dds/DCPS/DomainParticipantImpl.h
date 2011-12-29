@@ -83,7 +83,7 @@ public:
 
   class OpenDDS_Dcps_Export RepoIdSequence {
   public:
-    RepoIdSequence(RepoId& base);
+    explicit RepoIdSequence(RepoId& base);
     RepoId next();
   private:
     RepoId      base_;     // will be combined with serial to produce next
@@ -96,7 +96,7 @@ public:
       : client_refs_(0)
     {}
 
-    RefCounted_Topic(const Topic_Pair & pair)
+    explicit RefCounted_Topic(const Topic_Pair& pair)
       : pair_(pair),
         client_refs_(1)
     {}

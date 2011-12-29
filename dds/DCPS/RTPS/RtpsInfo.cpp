@@ -91,7 +91,7 @@ DCPS::TopicStatus
 RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
                        DDS::DomainId_t domainId, const RepoId& participantId,
                        const char* topicName, const char* dataTypeName,
-                       const DDS::TopicQos& qos)
+                       const DDS::TopicQos& qos, bool hasDcpsKey)
 {
   if (topics_.count(domainId)) {
     const std::map<std::string, Sedp::TopicDetails>::iterator it =
@@ -105,12 +105,14 @@ RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
 
   const DCPS::TopicStatus stat =
     participants_[domainId][participantId]->assert_topic(topicId, topicName,
-                                                         dataTypeName, qos);
+                                                         dataTypeName, qos,
+                                                         hasDcpsKey);
   if (stat == DCPS::CREATED || stat == DCPS::FOUND) { // qos change (FOUND)
     Sedp::TopicDetails& td = topics_[domainId][topicName];
     td.data_type_ = dataTypeName;
     td.qos_ = qos;
     td.repo_id_ = topicId;
+    td.has_dcps_key_ = hasDcpsKey;
     ++topic_use_[domainId][topicName];
   }
   return stat;

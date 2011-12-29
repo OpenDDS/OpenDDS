@@ -74,7 +74,8 @@ module OpenDDS {
                                 in RepoId  participantId,
                                 in string          topicName,
                                 in string          DataTypeName,
-                                in ::DDS::TopicQos   qos)
+                                in ::DDS::TopicQos   qos,
+                                in boolean hasDcpsKey)
         raises (Invalid_Domain,
                 Invalid_Participant);
 

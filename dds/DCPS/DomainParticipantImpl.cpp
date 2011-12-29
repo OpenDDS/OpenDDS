@@ -420,6 +420,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
 
   } else {
+    OpenDDS::DCPS::TypeSupport_ptr type_support =
+      Registered_Data_Types->lookup(this, type_name);
+
     RepoId topic_id;
 
     try {
@@ -429,7 +432,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                               dp_id_,
                                               topic_name,
                                               type_name,
-                                              topic_qos);
+                                              topic_qos,
+                                              type_support->has_dcps_key());
 
       if (status == CREATED || status == FOUND) {
         DDS::Topic_ptr new_topic = create_topic_i(topic_id,
@@ -1753,7 +1757,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 
   OpenDDS::DCPS::TypeSupport_ptr type_support =
-    OpenDDS::DCPS::Registered_Data_Types->lookup(this->participant_objref_.in(),type_name);
+    Registered_Data_Types->lookup(this, type_name);
 
   if (0 == type_support) {
     if (DCPS_debug_level) {

@@ -70,7 +70,8 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const char* topicName,
     const char* dataTypeName,
-    const DDS::TopicQos& qos);
+    const DDS::TopicQos& qos,
+    bool hasDcpsKey);
 
   virtual OpenDDS::DCPS::TopicStatus find_topic(
     DDS::DomainId_t domainId,

@@ -79,7 +79,8 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const char * topicName,
     const char * dataTypeName,
-    const DDS::TopicQos & qos)
+    const DDS::TopicQos & qos,
+    bool hasDcpsKey)
   ACE_THROW_SPEC((CORBA::SystemException
                    , OpenDDS::DCPS::Invalid_Domain
                    , OpenDDS::DCPS::Invalid_Participant));
