@@ -124,8 +124,9 @@ void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_set_1repo_1ior
 jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
 (JNIEnv * jni, jclass, jobject participant)
 {
-  DDS::DomainParticipant* part = recoverCppObj<DDS::DomainParticipant>(jni, participant);
-  OpenDDS::DCPS::DomainParticipantImpl* impl = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part);
+  DDS::DomainParticipant_var part;
+  copyToCxx(jni, part, participant);
+  OpenDDS::DCPS::DomainParticipantImpl* impl = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part.in());
   jstring retStr = jni->NewStringUTF(impl->get_unique_id().c_str());
   return retStr;
 }

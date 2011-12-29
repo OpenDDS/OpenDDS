@@ -1,10 +1,16 @@
+Thu Dec 29 17:13:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Prefer copyToCxx ro recoverCppObj in jni code.
+
 Thu Dec 29 14:47:32 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * java/dds/OpenDDS/DCPS/TheServiceParticipant.java:
         * java/dds/OpenDDS_DCPS_jni.cpp:
         * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
 
-          Eliminate dependency on DomainParticipantExt, and implement native 
+          Eliminate dependency on DomainParticipantExt, and implement native
           get_unique_id.
 
 Wed Dec 28 23:47:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
