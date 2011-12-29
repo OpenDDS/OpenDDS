@@ -24,6 +24,7 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include <map>
 #include <set>
@@ -43,6 +44,7 @@ namespace DDS {
 namespace OpenDDS {
 namespace RTPS {
 
+class RtpsDiscovery;
 class Spdp;
 
 class Sedp {
@@ -64,6 +66,10 @@ public:
                             owner)
     , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
   {}
+
+  DDS::ReturnCode_t init(const DCPS::RepoId& guid, 
+                         RtpsDiscovery& disco, 
+                         DDS::DomainId_t domainId);
 
   void ignore(const DCPS::RepoId& to_ignore) {
     ignored_guids_.insert(to_ignore);
@@ -212,6 +218,9 @@ private:
 
   } publications_reader_, subscriptions_reader_;
 
+  // Transport
+  OpenDDS::DCPS::TransportInst_rch transport_;
+
   DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
@@ -251,7 +260,6 @@ private:
   std::map<std::string, TopicDetails> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
-
 };
 
 }

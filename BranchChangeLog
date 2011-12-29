@@ -1,3 +1,15 @@
+Thu Dec 29 21:18:30 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Handle dx tunable parameter.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Spdp::init() partial implementation.
+
 Thu Dec 29 18:49:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:

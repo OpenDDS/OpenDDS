@@ -77,6 +77,11 @@ public:
     d1_ = offset_one;
   }
 
+  u_short dx() const { return dx_; }
+  void dx(u_short offset_two) {
+    dx_ = offset_two;
+  }
+
   typedef std::vector<std::string> AddrVec;
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
@@ -86,7 +91,7 @@ private:
   OpenDDS::DCPS::DCPSInfo_var info_;
 
   ACE_Time_Value resend_period_;
-  u_short pb_, dg_, pg_, d0_, d1_;
+  u_short pb_, dg_, pg_, d0_, d1_, dx_;
   AddrVec spdp_send_addrs_;
 
   static int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);

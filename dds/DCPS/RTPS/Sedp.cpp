@@ -8,11 +8,13 @@
 
 #include "Sedp.h"
 #include "Spdp.h"
+#include "RtpsDiscovery.h"
 
 #include "RtpsMessageTypesC.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/RepoIdBuilder.h"
@@ -33,8 +35,46 @@
 
 
 namespace OpenDDS {
+namespace DCPS {
+  typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
+}
+
 namespace RTPS {
 using DCPS::RepoId;
+
+DDS::ReturnCode_t
+Sedp::init(const DCPS::RepoId& guid, 
+           RtpsDiscovery& disco, 
+           DDS::DomainId_t domainId)
+{
+  std::string key = OpenDDS::DCPS::GuidConverter(guid).uniqueId();
+
+  // allocate one transport and two sockets
+  transport_ = TheTransportRegistry->create_inst(
+                   DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
+                   "_SEDPTransportInst_" + key, "rtps_udp");
+  // Use a static cast to avoid dependency on the RtpsUdp library
+  DCPS::RtpsUdpInst_rch rtps_inst = 
+      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_);
+
+  // Bind to a specific multicast group
+  const u_short mc_port = disco.pb() + 
+                          disco.dg() * domainId +
+                          disco.dx();
+
+  const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
+  if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr)) {
+    ACE_DEBUG((LM_ERROR, "(%P|%t) Sedp::init() - "
+                         "failed setting multicast local_addr to port %hd\n",
+                         mc_port));
+    return DDS::RETCODE_ERROR;
+  }
+
+  // Todo: TransportConfig
+  // Todo: reader/writer -> transport_config()
+  // Todo: reader/writer -> enable(true)
+  return DDS::RETCODE_OK;
+}
 
 DDS::TopicBuiltinTopicDataDataReaderImpl*
 Sedp::topic_bit()

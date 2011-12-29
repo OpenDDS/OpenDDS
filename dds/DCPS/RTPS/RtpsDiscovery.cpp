@@ -30,6 +30,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , pg_(2)
   , d0_(0)
   , d1_(10)
+  , dx_(2)
 {
   PortableServer::POA_var poa = TheServiceParticipant->the_poa();
   PortableServer::ObjectId_var oid = poa->activate_object(servant_);
@@ -156,10 +157,10 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
       const std::string& rtps_name = it->first;
 
       int resend;
-      u_short pb, dg, pg, d0, d1;
+      u_short pb, dg, pg, d0, d1, dx;
       AddrVec spdp_send_addrs;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
-        has_d0 = false, has_d1 = false;
+        has_d0 = false, has_d1 = false, has_dx = false;
 
       DCPS::ValueMap values;
       DCPS::pullValues(cf, it->second, values);
@@ -226,6 +227,16 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "DX") {
+          const std::string& value = it->second;
+          has_dx = DCPS::convertToInteger(value, dx);
+          if (!has_dx) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+               ACE_TEXT("Invalid entry (%C) for DX in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
         } else if (name == "SpdpSendAddrs") {
           const std::string& value = it->second;
           size_t i = 0;
@@ -251,6 +262,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
       if (has_pg) discovery->pg(pg);
       if (has_d0) discovery->d0(d0);
       if (has_d1) discovery->d1(d1);
+      if (has_dx) discovery->dx(dx);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
       TheServiceParticipant->add_discovery(
         DCPS::static_rchandle_cast<Discovery>(discovery));
