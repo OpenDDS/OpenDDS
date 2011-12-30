@@ -63,13 +63,27 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
 
-  // Append metatraffic unicast locator
-  Locator_t uc_locator;
-  uc_locator.kind = LOCATOR_KIND_UDPv4; // TODO: Could this be IPV6?
-  uc_locator.port = sedp_.local_address_port();
-  address_to_bytes(uc_locator.address, sedp_.local_address());
-  sedp_unicast_.length(1);
-  sedp_unicast_[0] = uc_locator;
+  { // Append metatraffic unicast locator
+    const ACE_INET_Addr& local_addr = sedp_.local_address();
+    Locator_t uc_locator;
+    uc_locator.kind = (local_addr.get_type() == AF_INET6) ?
+                       LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    uc_locator.port = local_addr.get_port_number();
+    address_to_bytes(uc_locator.address, local_addr);
+    sedp_unicast_.length(1);
+    sedp_unicast_[0] = uc_locator;
+  }
+
+  { // Append metatraffic multicast locator
+    const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
+    Locator_t mc_locator;
+    mc_locator.kind = (mc_addr.get_type() == AF_INET6) ?
+                       LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    mc_locator.port = mc_addr.get_port_number();
+    address_to_bytes(mc_locator.address, mc_addr);
+    sedp_multicast_.length(1);
+    sedp_multicast_[0] = mc_locator;
+  }
 }
 
 Spdp::~Spdp()

@@ -1,3 +1,12 @@
+Fri Dec 30 19:47:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Refactor setting of sedp_unicast_.
+          Set sedp_multicast_ also.
+
 Fri Dec 30 19:26:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:
