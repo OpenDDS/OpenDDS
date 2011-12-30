@@ -117,8 +117,7 @@ private:
   DDS::Subscriber_var bit_subscriber_;
   LocatorSeq sedp_unicast_, sedp_multicast_;
 
-  void data_received(const Header& header, const DataSubmessage& data,
-                     const ParameterList& plist);
+  void data_received(const DataSubmessage& data, const ParameterList& plist);
 
   DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 

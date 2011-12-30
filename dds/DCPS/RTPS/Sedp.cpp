@@ -9,9 +9,9 @@
 #include "Sedp.h"
 #include "Spdp.h"
 #include "RtpsDiscovery.h"
-
 #include "RtpsMessageTypesC.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
+#include "ParameterListConverter.h"
 
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
@@ -49,16 +49,16 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner)
   , spdp_(owner)
   , publications_writer_(make_id(participant_id,
                                  ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
-                         owner)
+                         *this)
   , subscriptions_writer_(make_id(participant_id,
                                   ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER),
-                          owner)
+                          *this)
   , publications_reader_(make_id(participant_id,
                                  ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
-                         owner)
+                         *this)
   , subscriptions_reader_(make_id(participant_id,
                                   ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
-                          owner)
+                          *this)
   , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
 {}
 
@@ -435,6 +435,64 @@ Sedp::update_subscription_params(const RepoId& subId,
 }
 
 void
+Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
+{
+  const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
+  const DiscoveredPublicationIter iter = discovered_publications_.find(guid);
+
+  if (message_id == DCPS::SAMPLE_DATA) {
+    if (iter == discovered_publications_.end()) { // add new
+      DiscoveredPublication& pub =
+        discovered_publications_[guid] = DiscoveredPublication(wdata);
+      //TODO: need to set BIT Key here
+      pub.bit_ih_ =
+        pub_bit()->store_synthetic_data(pub.writer_data_.ddsPublicationData,
+                                        DDS::NEW_VIEW_STATE);
+      //TODO: match local subscription(s)
+    } else { // update existing
+      //TODO
+    }
+
+  } else { // this is some combination of dispose and/or unregister
+    if (iter != discovered_publications_.end()) {
+      pub_bit()->set_instance_state(iter->second.bit_ih_,
+                                    DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      discovered_publications_.erase(iter);
+      //TODO: unmatch local subscription(s)
+    }
+  }
+}
+
+void
+Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
+{
+  const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
+  const DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
+
+  if (message_id == DCPS::SAMPLE_DATA) {
+    if (iter == discovered_subscriptions_.end()) { // add new
+      DiscoveredSubscription& sub =
+        discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
+      //TODO: need to set BIT Key here
+      sub.bit_ih_ =
+        sub_bit()->store_synthetic_data(sub.reader_data_.ddsSubscriptionData,
+                                        DDS::NEW_VIEW_STATE);
+      //TODO: match local publication(s)
+    } else { // update existing
+      //TODO
+    }
+
+  } else { // this is some combination of dispose and/or unregister
+    if (iter != discovered_subscriptions_.end()) {
+      sub_bit()->set_instance_state(iter->second.bit_ih_,
+                                    DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      discovered_subscriptions_.erase(iter);
+      //TODO: unmatch local publication(s)
+    }
+  }
+}
+
+void
 Sedp::association_complete(const RepoId& /*localId*/,
                            const RepoId& /*remoteId*/)
 {
@@ -515,24 +573,7 @@ void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
   switch (sample.header_.message_id_) {
-  case DCPS::SAMPLE_DATA: {
-    DCPS::Serializer ser(sample.sample_,
-                         sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                         DCPS::Serializer::ALIGN_CDR);
-    bool ok = true;
-    ACE_CDR::ULong encap;
-    ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
-    ParameterList data;
-    ok &= (ser >> data);
-    if (!ok) {
-      ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
-      return;
-    }
-
-//TODO:    spdp_.add_discovered_endpoint(data);
-
-    break;
-  }
+  case DCPS::SAMPLE_DATA:
   case DCPS::DISPOSE_INSTANCE:
   case DCPS::UNREGISTER_INSTANCE:
   case DCPS::DISPOSE_UNREGISTER_INSTANCE: {
@@ -541,17 +582,41 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                          DCPS::Serializer::ALIGN_CDR);
     bool ok = true;
     ACE_CDR::ULong encap;
-    ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
-    DiscoveredWriterData data;
+    ok &= (ser >> encap);
+    // Ignore the 'encap' header since we use sample.header_.byte_order_
+    // to determine whether or not to swap bytes.
+    ParameterList data;
     ok &= (ser >> data);
-
     if (!ok) {
-      ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize key data\n"));
+      ACE_DEBUG((LM_ERROR,
+        "ERROR: Sedp::Reader::data_received() failed to deserialize data\n"));
       return;
     }
 
-    //TODO: process dispose/unregister
-    break;
+    switch (repo_id_.entityId.entityKey[2]) {
+    case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER
+      DiscoveredWriterData wdata;
+      if (ParameterListConverter::from_param_list(data, wdata) < 0) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR Sedp::Reader::data_received - "
+          "failed to convert from ParameterList to DiscoveredWriterData\n"));
+        return;
+      }
+      sedp_.data_received(sample.header_.message_id_, wdata);
+      break;
+    }
+    case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER
+      DiscoveredReaderData rdata;
+      if (ParameterListConverter::from_param_list(data, rdata) < 0) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR Sedp::Reader::data_received - "
+          "failed to convert from ParameterList to DiscoveredReaderData\n"));
+        return;
+      }
+      sedp_.data_received(sample.header_.message_id_, rdata);
+      break;
+    }
+    default:
+      break;
+    }
   }
   default:
     break;

@@ -121,8 +121,7 @@ Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
 }
 
 void
-Spdp::data_received(const Header& header, const DataSubmessage& data,
-                    const ParameterList& plist)
+Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 {
   const ACE_Time_Value time = ACE_OS::gettimeofday();
   SPDPdiscoveredParticipantData pdata;
@@ -177,6 +176,8 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
     using OpenDDS::DCPS::operator!=;
     if (iter->second.pdata_.ddsParticipantData.user_data !=
         pdata.ddsParticipantData.user_data) {
+      iter->second.pdata_.ddsParticipantData.user_data =
+        pdata.ddsParticipantData.user_data;
       part_bit()->store_synthetic_data(pdata.ddsParticipantData,
                                        DDS::NOT_NEW_VIEW_STATE);
     }
@@ -541,7 +542,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         }
       }
       if (data.writerId == ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
-        outer_->data_received(header, data, plist);
+        outer_->data_received(data, plist);
       }
       break;
     }

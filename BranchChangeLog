@@ -1,3 +1,17 @@
+Fri Dec 30 21:50:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Starting to implement the two readers for receiving
+          info about remote publications and subscriptions.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Update discovered participant struct if QoS changes.
+          Remove an unused argument of data_received().
+
 Fri Dec 30 20:48:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

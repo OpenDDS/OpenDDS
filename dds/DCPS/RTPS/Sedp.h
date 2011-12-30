@@ -132,9 +132,9 @@ private:
 
   class Endpoint : public DCPS::TransportClient {
   public:
-    Endpoint(const DCPS::RepoId& repo_id, Spdp& spdp)
+    Endpoint(const DCPS::RepoId& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
-      , spdp_(spdp)
+      , sedp_(sedp)
     {}
 
     virtual ~Endpoint();
@@ -152,13 +152,13 @@ private:
 
   protected:
     DCPS::RepoId repo_id_;
-    Spdp& spdp_;
+    Sedp& sedp_;
   };
 
   class Writer : public DCPS::TransportSendListener, public Endpoint {
   public:
-    Writer(const DCPS::RepoId& pub_id, Spdp& spdp)
-      : Endpoint(pub_id, spdp)
+    Writer(const DCPS::RepoId& pub_id, Sedp& sedp)
+      : Endpoint(pub_id, sedp)
     {}
 
     virtual ~Writer();
@@ -186,8 +186,8 @@ private:
 
   class Reader : public DCPS::TransportReceiveListener, public Endpoint {
   public:
-    Reader(const DCPS::RepoId& sub_id, Spdp& spdp)
-      : Endpoint(sub_id, spdp)
+    Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
+      : Endpoint(sub_id, sedp)
     {}
 
     virtual ~Reader();
@@ -207,8 +207,8 @@ private:
   } publications_reader_, subscriptions_reader_;
 
   // Transport
-  OpenDDS::DCPS::TransportInst_rch transport_inst_;
-  OpenDDS::DCPS::TransportConfig_rch transport_cfg_;
+  DCPS::TransportInst_rch transport_inst_;
+  DCPS::TransportConfig_rch transport_cfg_;
 
   DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
@@ -241,7 +241,13 @@ private:
 
   unsigned int publication_counter_, subscription_counter_;
 
+  void data_received(char message_id, const DiscoveredWriterData& wdata);
+  void data_received(char message_id, const DiscoveredReaderData& rdata);
+
   struct DiscoveredPublication {
+    DiscoveredPublication() {}
+    explicit DiscoveredPublication(const DiscoveredWriterData& w)
+      : writer_data_(w) {}
     DiscoveredWriterData writer_data_;
     DDS::InstanceHandle_t bit_ih_;
   };
@@ -251,6 +257,9 @@ private:
   DiscoveredPublicationMap discovered_publications_;
 
   struct DiscoveredSubscription {
+    DiscoveredSubscription() {}
+    explicit DiscoveredSubscription(const DiscoveredReaderData& r)
+      : reader_data_(r) {}
     DiscoveredReaderData reader_data_;
     DDS::InstanceHandle_t bit_ih_;
   };
