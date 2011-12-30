@@ -57,11 +57,17 @@ public:
 
   void ignore(const DCPS::RepoId& to_ignore) {
     ignored_guids_.insert(to_ignore);
+    //TODO: if we already have discovered data for 'to_ignore', we need to
+    //      remove it from discovered data, from BIT, and possibly undo any
+    //      user entity associations.
   }
 
   bool ignoring(const DCPS::RepoId& guid) const {
     return ignored_guids_.count(guid);
   }
+
+  void associate(const SPDPdiscoveredParticipantData& pdata);
+  void disassociate(const SPDPdiscoveredParticipantData& pdata);
 
   // Topic
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
@@ -137,6 +143,8 @@ private:
       { return 0; }
 
     using DCPS::TransportClient::enable_transport;
+    using DCPS::TransportClient::disassociate;
+
   protected:
     DCPS::RepoId repo_id_;
     Spdp& spdp_;

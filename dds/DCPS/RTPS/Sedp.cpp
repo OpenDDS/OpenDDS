@@ -28,6 +28,8 @@
 
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
+#include "ace/OS_NS_stdio.h"
+
 #include <cstdio>
 #include <ctime>
 #include <iostream>
@@ -74,7 +76,7 @@ Sedp::init(const RepoId& guid,
            DDS::DomainId_t domainId)
 {
   char domainStr[16];
-  snprintf(domainStr, 16, "%d", domainId);
+  ACE_OS::snprintf(domainStr, 16, "%d", domainId);
 
   std::string key = OpenDDS::DCPS::GuidConverter(guid).uniqueId();
 
@@ -113,6 +115,99 @@ Sedp::init(const RepoId& guid,
   subscriptions_reader_.enable_transport(force_reliability, transport_cfg_);
 
   return DDS::RETCODE_OK;
+}
+
+void
+Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
+{
+  // First create a 'prototypical' instance of AssociationData.  It will
+  // be copied and modified for each of the (up to) four SEDP Endpoints.
+  DCPS::AssociationData proto;
+  proto.publication_transport_priority_ = 0;
+  std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
+              sizeof(GuidPrefix_t));
+
+  const LocatorSeq& mll =
+    pdata.participantProxy.metatrafficMulticastLocatorList;
+  const LocatorSeq& ull =
+    pdata.participantProxy.metatrafficUnicastLocatorList;
+  const CORBA::ULong locator_count = mll.length() + ull.length();
+
+  ACE_Message_Block mb_locator(4 + locator_count * sizeof(Locator_t));
+  using DCPS::Serializer;
+  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  ser_loc << locator_count;
+
+  for (CORBA::ULong i = 0; i < mll.length(); ++i) {
+    ser_loc << mll[i];
+  }
+  for (CORBA::ULong i = 0; i < ull.length(); ++i) {
+    ser_loc << ull[i];
+  }
+
+  proto.remote_data_.length(1);
+  proto.remote_data_[0].transport_type = "rtps_udp";
+  proto.remote_data_[0].data.replace(
+    static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+
+  const BuiltinEndpointSet_t& avail =
+    pdata.participantProxy.availableBuiltinEndpoints;
+
+  // See RTPS v2.1 section 8.5.5.1
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    publications_writer_.assoc(peer);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    publications_reader_.assoc(peer);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    subscriptions_writer_.assoc(peer);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+    subscriptions_reader_.assoc(peer);
+  }
+  //FUTURE: if/when topic propagation is supported, add it here
+}
+
+void
+Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
+{
+  RepoId part;
+  std::memcpy(part.guidPrefix, pdata.participantProxy.guidPrefix,
+              sizeof(GuidPrefix_t));
+  const BuiltinEndpointSet_t& avail =
+    pdata.participantProxy.availableBuiltinEndpoints;
+
+  // See RTPS v2.1 section 8.5.5.2
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    RepoId id = part;
+    id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    publications_writer_.disassociate(id);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    RepoId id = part;
+    id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    publications_reader_.disassociate(id);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    RepoId id = part;
+    id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    subscriptions_writer_.disassociate(id);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    RepoId id = part;
+    id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+    subscriptions_reader_.disassociate(id);
+  }
+  //FUTURE: if/when topic propagation is supported, add it here
 }
 
 DDS::TopicBuiltinTopicDataDataReaderImpl*
@@ -324,23 +419,30 @@ Sedp::update_subscription_params(const RepoId& subId,
 }
 
 void
-Sedp::association_complete(const RepoId& localId, const RepoId& remoteId)
+Sedp::association_complete(const RepoId& /*localId*/,
+                           const RepoId& /*remoteId*/)
 {
+  //TODO
 }
 
 void
-Sedp::disassociate_participant(const RepoId& remoteId)
+Sedp::disassociate_participant(const RepoId& /*remoteId*/)
 {
+  // no-op: not called from DCPS
 }
 
 void
-Sedp::disassociate_publication(const RepoId& localId, const RepoId& remoteId)
+Sedp::disassociate_publication(const RepoId& /*localId*/,
+                               const RepoId& /*remoteId*/)
 {
+  // no-op: not called from DCPS
 }
 
 void
-Sedp::disassociate_subscription(const RepoId& localId, const RepoId& remoteId)
+Sedp::disassociate_subscription(const RepoId& /*localId*/,
+                                const RepoId& /*remoteId*/)
 {
+  // no-op: not called from DCPS
 }
 
 Sedp::Endpoint::~Endpoint()

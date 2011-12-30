@@ -77,6 +77,11 @@ Spdp::ignore_domain_participant(const RepoId& ignoreId)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   sedp_.ignore(ignoreId);
+
+  const DiscoveredParticipantIter iter = participants_.find(ignoreId);
+  if (iter != participants_.end()) {
+    remove_discovered_participant(iter);
+  }
 }
 
 bool
@@ -133,8 +138,7 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
     participants_[guid].bit_ih_ =
       part_bit()->store_synthetic_data(pdata.ddsParticipantData,
                                        DDS::NEW_VIEW_STATE);
-    //TODO: inform SEDP
-//     sedp_->associate(pdata);
+    sedp_.associate(pdata);
 
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
     remove_discovered_participant(iter);
@@ -156,8 +160,7 @@ Spdp::data_received(const Header& header, const DataSubmessage& data,
 void
 Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
 {
-  //TODO: inform SEDP
-//  sedp_->disassociate(iter->second.pdata_);
+  sedp_.disassociate(iter->second.pdata_);
   part_bit()->set_instance_state(iter->second.bit_ih_,
                                  DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   participants_.erase(iter);

@@ -1,14 +1,28 @@
+Fri Dec 30 19:00:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Provide methods to associate/disassociate SEDP endpoints with
+          corresponding endpoints in remote participants.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Invoke Sedp::associate() and disassociate() when remote participants
+          are discovered / removed.
+          If we're ignoring a previously-discovered participant, remove it.
+
 Fri Dec 30 15:40:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:
         * dds/DCPS/RTPS/Sedp.cpp:
-        
+
           define init() to configure and enable readers and writers.
 
         * dds/DCPS/RTPS/Spdp.cpp:
 
           Call Sedp::init().
-          
+
         * dds/DCPS/transport/framework/TransportClient.h:
         * dds/DCPS/transport/framework/TransportClient.cpp:
 
