@@ -88,6 +88,10 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
 
 Spdp::~Spdp()
 {
+  for (DiscoveredParticipantIter part = participants_.begin();
+       part != participants_.end();) {
+    remove_discovered_participant(part++);
+  }
   tport_->close();
   eh_.reset();
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -185,8 +189,11 @@ void
 Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
 {
   sedp_.disassociate(iter->second.pdata_);
-  part_bit()->set_instance_state(iter->second.bit_ih_,
-                                 DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+  if (bit) { // bit may be null if the DomainParticipant is shutting down
+    bit->set_instance_state(iter->second.bit_ih_,
+                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  }
   participants_.erase(iter);
 }
 

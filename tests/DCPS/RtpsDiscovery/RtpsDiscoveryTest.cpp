@@ -9,7 +9,6 @@
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 using OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC;
-using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
 void cleanup(const DDS::DomainParticipantFactory_var& dpf,
              const DDS::DomainParticipant_var& dp)

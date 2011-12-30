@@ -55,9 +55,6 @@ public:
                          RtpsDiscovery& disco, 
                          DDS::DomainId_t domainId);
 
-  // @brief return the udp port we have bound to.  
-  // Valid after init() call
-  //CORBA::ULong local_address_port() const;
   // @brief return the ip address we have bound to.  
   // Valid after init() call
   const ACE_INET_Addr& local_address() const;

@@ -1,3 +1,18 @@
+Fri Dec 30 20:48:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Removed unused method local_address_port().
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          In destructor, clean up all discovered participants.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Removed duplicated "using" directive.
+
 Fri Dec 30 19:49:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
