@@ -22,6 +22,8 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h"
+
 #include "ace/Reactor.h"
 
 #include <cstring>
@@ -60,6 +62,14 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
+
+  // Append metatraffic unicast locator
+  Locator_t uc_locator;
+  uc_locator.kind = LOCATOR_KIND_UDPv4; // TODO: Could this be IPV6?
+  uc_locator.port = sedp_.local_address_port();
+  address_to_bytes(uc_locator.address, sedp_.local_address());
+  sedp_unicast_.length(1);
+  sedp_unicast_[0] = uc_locator;
 }
 
 Spdp::~Spdp()
@@ -659,6 +669,8 @@ Spdp::disassociate_subscription(const RepoId& localId, const RepoId& remoteId)
 {
   sedp_.disassociate_subscription(localId, remoteId);
 }
+
+
 
 }
 }

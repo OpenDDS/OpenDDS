@@ -591,7 +591,7 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
   part1_locators[0].kind = (part1_addr.get_type() == AF_INET6)
                            ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   part1_locators[0].port = part1_addr.get_port_number();
-  RtpsUdpTransport::address_to_bytes(part1_locators[0].address, part1_addr);
+  address_to_bytes(part1_locators[0].address, part1_addr);
   size_t size_locator = 0, padding_locator = 0;
   gen_find_size(part1_locators, size_locator, padding_locator);
   mb_locator.init(size_locator + padding_locator);

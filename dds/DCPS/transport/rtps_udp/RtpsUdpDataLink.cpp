@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
 
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
@@ -87,8 +88,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   info_reply_.unicastLocatorList[0].port =
     config_->local_address_.get_port_number();
-  RtpsUdpTransport::address_to_bytes(info_reply_.unicastLocatorList[0].address,
-                                     config_->local_address_);
+  RTPS::address_to_bytes(info_reply_.unicastLocatorList[0].address,
+                         config_->local_address_);
   if (config_->use_multicast_) {
     info_reply_.smHeader.flags |= 2 /*FLAG_M*/;
     info_reply_.multicastLocatorList.length(1);
@@ -97,9 +98,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
       ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
     info_reply_.multicastLocatorList[0].port =
       config_->multicast_group_address_.get_port_number();
-    RtpsUdpTransport::address_to_bytes(
-      info_reply_.multicastLocatorList[0].address,
-      config_->multicast_group_address_);
+    RTPS::address_to_bytes(info_reply_.multicastLocatorList[0].address,
+                           config_->multicast_group_address_);
   }
 
   size_t size = 0, padding = 0;

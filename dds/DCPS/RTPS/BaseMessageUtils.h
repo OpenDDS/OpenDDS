@@ -12,6 +12,7 @@
 #include "dds/DCPS/Serializer.h"
 #include "RtpsBaseMessageTypesC.h"
 #include "md5.h"
+#include "ace/INET_Addr.h"
 
 #include <cstring>
 
@@ -88,6 +89,20 @@ inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
   lhs[2] = static_cast<CORBA::Octet>(rhs >> 16);
 }
 
+
+inline void
+address_to_bytes(OpenDDS::RTPS::OctetArray16& dest, const ACE_INET_Addr& addr)
+{
+  const void* raw = addr.get_addr();
+  if (addr.get_type() == AF_INET6) {
+    const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
+    std::memcpy(&dest[0], &in->sin6_addr, 16);
+  } else {
+    const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
+    std::memset(&dest[0], 0, 12);
+                std::memcpy(&dest[12], &in->sin_addr, 4);
+  }
+}
 
 }
 }

@@ -117,6 +117,22 @@ Sedp::init(const RepoId& guid,
   return DDS::RETCODE_OK;
 }
 
+CORBA::ULong
+Sedp::local_address_port() const
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = 
+      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  return rtps_inst->local_address_.get_port_number();
+}
+
+const ACE_INET_Addr&
+Sedp::local_address() const
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = 
+      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  return rtps_inst->local_address_;
+}
+
 void
 Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
 {

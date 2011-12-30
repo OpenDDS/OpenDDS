@@ -1,3 +1,4 @@
+#include "TestMsgTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -8,6 +9,7 @@
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 using OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC;
+using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
 void cleanup(const DDS::DomainParticipantFactory_var& dpf,
              const DDS::DomainParticipant_var& dp)
@@ -26,6 +28,11 @@ void cleanup(const DDS::DomainParticipantFactory_var& dpf,
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  TestMsgTypeSupport_var ts;
+  DDS::Topic_var topic;
+  DDS::Publisher_var pub;
+  DDS::DataWriter_var dw;
+
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp = dpf->create_participant(9, PARTICIPANT_QOS_DEFAULT,
                                                      0, DEFAULT_STATUS_MASK);
@@ -46,8 +53,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   {
     Subscriber_var bit_sub = dp->get_builtin_subscriber();
     DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE, 
-                                                    ANY_VIEW_STATE, 
+    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                    ANY_VIEW_STATE,
                                                     ALIVE_INSTANCE_STATE);
     WaitSet waiter;
     waiter.attach_condition(rc);
@@ -65,8 +72,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ParticipantBuiltinTopicDataSeq data;
     SampleInfoSeq infos;
     ACE_OS::sleep(20);
-    ReturnCode_t ret = part_bit->read(data, infos, LENGTH_UNLIMITED, 
-                                      ANY_SAMPLE_STATE, ANY_VIEW_STATE, 
+    ReturnCode_t ret = part_bit->read(data, infos, LENGTH_UNLIMITED,
+                                      ANY_SAMPLE_STATE, ANY_VIEW_STATE,
                                       ALIVE_INSTANCE_STATE);
     if (ret != RETCODE_OK) {
       ACE_DEBUG((LM_DEBUG, "ERROR: could not read participant BIT: %d\n", ret));
@@ -90,6 +97,50 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     part_bit->return_loan(data, infos);
   }
 
+  {
+    // Register TypeSupport (Messenger::Message)
+    ts = new TestMsgTypeSupportImpl;
+
+    if (ts->register_type(dp2, "") != DDS::RETCODE_OK) {
+      throw std::string("failed to register type support");
+    }
+
+    // Create Topic (Movie Discussion List)
+    CORBA::String_var type_name = ts->get_type_name();
+    topic = dp2->create_topic("Movie Discussion List",
+                              type_name,
+                              TOPIC_QOS_DEFAULT,
+                              0,
+                              DEFAULT_STATUS_MASK);
+
+    // Check for failure
+    if (!topic) {
+      throw std::string("failed to create topic");
+    }
+
+    // Create Publisher
+    pub = dp2->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                0,
+                                DEFAULT_STATUS_MASK);
+
+    // Check for failure
+    if (!pub) {
+      throw std::string("failed to create publisher");
+    }
+
+    // Create DataWriter
+    dw = pub->create_datawriter(topic,
+                                DATAWRITER_QOS_DEFAULT,
+                                0,
+                                DEFAULT_STATUS_MASK);
+
+    // Check for failure
+    if (!dw) {
+      throw std::string("failed to create data writer");
+    }
+  }
+
+  sleep(10);
   cleanup(dpf, dp);
   ACE_OS::sleep(5);
   cleanup(dpf, dp2);

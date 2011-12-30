@@ -302,8 +302,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   unicast_reply_locator_list_[0].kind =
     addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   unicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
-  RtpsUdpTransport::address_to_bytes(unicast_reply_locator_list_[0].address,
-                                     addr);
+  RTPS::address_to_bytes(unicast_reply_locator_list_[0].address, addr);
 
   multicast_reply_locator_list_.length(1);
   multicast_reply_locator_list_[0].kind =

@@ -1,3 +1,7 @@
 project: dcpsexe, dcps_rtps {
   exename = RtpsDiscoveryTest
+
+  TypeSupport_Files {
+    TestMsg.idl
+  }
 }

@@ -30,9 +30,6 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
 
-  static void address_to_bytes(OpenDDS::RTPS::OctetArray16& dest,
-                               const ACE_INET_Addr& addr);
-
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,

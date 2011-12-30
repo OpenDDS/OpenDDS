@@ -227,7 +227,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   locators[0].kind = (remote_addr.get_type() == AF_INET6)
                      ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   locators[0].port = port;
-  RtpsUdpTransport::address_to_bytes(locators[0].address, remote_addr);
+  address_to_bytes(locators[0].address, remote_addr);
 
   size_t size_locator = 0, padding_locator = 0;
   gen_find_size(locators, size_locator, padding_locator);

@@ -14,6 +14,7 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
 
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 
 #include "ace/CDR_Base.h"
@@ -178,7 +179,8 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
       (config_i_->multicast_group_address_.get_type() == AF_INET6)
       ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
     locators[0].port = config_i_->multicast_group_address_.get_port_number();
-    address_to_bytes(locators[0].address, config_i_->multicast_group_address_);
+    RTPS::address_to_bytes(locators[0].address, 
+                           config_i_->multicast_group_address_);
     idx = 1;
 
   } else {
@@ -188,7 +190,8 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
   locators[idx].kind = (config_i_->local_address_.get_type() == AF_INET6)
                        ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   locators[idx].port = config_i_->local_address_.get_port_number();
-  address_to_bytes(locators[idx].address, config_i_->local_address_);
+  RTPS::address_to_bytes(locators[idx].address, 
+                         config_i_->local_address_);
 
   size_t size = 0, padding = 0;
   gen_find_size(locators, size, padding);
@@ -202,21 +205,6 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
   info.transport_type = "rtps_udp";
   info.data.replace(static_cast<CORBA::ULong>(mb.length()), &mb);
   return true;
-}
-
-void
-RtpsUdpTransport::address_to_bytes(OpenDDS::RTPS::OctetArray16& dest,
-                                   const ACE_INET_Addr& addr)
-{
-  const void* raw = addr.get_addr();
-  if (addr.get_type() == AF_INET6) {
-    const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
-    std::memcpy(&dest[0], &in->sin6_addr, 16);
-  } else {
-    const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
-    std::memset(&dest[0], 0, 12);
-    std::memcpy(&dest[12], &in->sin_addr, 4);
-  }
 }
 
 bool
