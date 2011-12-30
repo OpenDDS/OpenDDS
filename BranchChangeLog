@@ -1,3 +1,9 @@
+Fri Dec 30 19:49:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          ACE_OSize sleep() call.
+
 Fri Dec 30 19:47:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

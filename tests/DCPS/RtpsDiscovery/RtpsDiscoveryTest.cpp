@@ -140,7 +140,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  sleep(10);
+  ACE_OS::sleep(10);
   cleanup(dpf, dp);
   ACE_OS::sleep(5);
   cleanup(dpf, dp2);
