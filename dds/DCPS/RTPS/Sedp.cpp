@@ -73,15 +73,18 @@ Sedp::init(const RepoId& guid,
            RtpsDiscovery& disco,
            DDS::DomainId_t domainId)
 {
+  char domainStr[16];
+  snprintf(domainStr, 16, "%d", domainId);
+
   std::string key = OpenDDS::DCPS::GuidConverter(guid).uniqueId();
 
-  // allocate one transport
-  transport_ = TheTransportRegistry->create_inst(
-                   DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                   "_SEDPTransportInst_" + key, "rtps_udp");
+  // configure one transport
+  transport_inst_ = TheTransportRegistry->create_inst(
+                       DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
+                       "_SEDPTransportInst_" + key + domainStr, "rtps_udp");
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst = 
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_);
+      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
 
   // Bind to a specific multicast group
   const u_short mc_port = disco.pb() +
@@ -96,9 +99,19 @@ Sedp::init(const RepoId& guid,
     return DDS::RETCODE_ERROR;
   }
 
-  // Todo: TransportConfig
-  // Todo: reader/writer -> transport_config()
-  // Todo: reader/writer -> enable(true)
+  // Crete a config
+  std::string config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
+                            "_SEDP_TransportCfg_" + key + domainStr;
+  transport_cfg_ = TheTransportRegistry->create_config(config_name);
+  transport_cfg_->instances_.push_back(transport_inst_);
+
+  // Configure and enable each reader/writer
+  bool force_reliability = true;
+  publications_writer_.enable_transport(force_reliability, transport_cfg_);
+  publications_reader_.enable_transport(force_reliability, transport_cfg_);
+  subscriptions_writer_.enable_transport(force_reliability, transport_cfg_);
+  subscriptions_reader_.enable_transport(force_reliability, transport_cfg_);
+
   return DDS::RETCODE_OK;
 }
 

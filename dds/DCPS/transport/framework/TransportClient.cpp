@@ -79,6 +79,12 @@ TransportClient::enable_transport(bool reliable)
     throw Transport::NotConfigured();
   }
 
+  enable_transport(reliable, tc);
+}
+
+void
+TransportClient::enable_transport(bool reliable, TransportConfig_rch tc)
+{
   swap_bytes_ = tc->swap_bytes_;
   cdr_encapsulation_ = false;
   reliable_ = reliable;

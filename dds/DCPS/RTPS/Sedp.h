@@ -136,12 +136,8 @@ private:
     CORBA::Long get_priority_value(const DCPS::AssociationData&) const
       { return 0; }
 
-  protected:
     using DCPS::TransportClient::enable_transport;
-    using DCPS::TransportClient::disassociate;
-    using DCPS::TransportClient::send;
-    using DCPS::TransportClient::send_control;
-
+  protected:
     DCPS::RepoId repo_id_;
     Spdp& spdp_;
   };
@@ -198,7 +194,8 @@ private:
   } publications_reader_, subscriptions_reader_;
 
   // Transport
-  OpenDDS::DCPS::TransportInst_rch transport_;
+  OpenDDS::DCPS::TransportInst_rch transport_inst_;
+  OpenDDS::DCPS::TransportConfig_rch transport_cfg_;
 
   DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();

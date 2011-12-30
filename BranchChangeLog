@@ -1,3 +1,19 @@
+Fri Dec 30 15:40:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        
+          define init() to configure and enable readers and writers.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Call Sedp::init().
+          
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          add enable_transport(bool, TransportConfig_rch)
+
 Thu Dec 29 23:12:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

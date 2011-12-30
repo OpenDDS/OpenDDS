@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_TRANSPORT_CLIENT_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "TransportConfig_rch.h"
 #include "TransportImpl.h"
 #include "DataLinkSet.h"
 
@@ -43,10 +44,12 @@ protected:
   TransportClient();
   virtual ~TransportClient();
 
-
   // Local setup:
 
   void enable_transport(bool reliable);
+  void enable_transport(bool reliable, TransportConfig_rch tc);
+
+protected:
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }

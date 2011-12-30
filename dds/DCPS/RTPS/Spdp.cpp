@@ -59,6 +59,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   sedp_.ignore(guid);
+  sedp_.init(guid_, *disco, domain_);
 }
 
 Spdp::~Spdp()
