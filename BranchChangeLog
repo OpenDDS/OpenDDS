@@ -1,3 +1,15 @@
+Tue Jan  3 17:29:34 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Use const& to avoid copying Parameters unnecessarily.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented "update" and "remove" cases for discovered
+          publication/subscription data.
+
 Fri Dec 30 21:50:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

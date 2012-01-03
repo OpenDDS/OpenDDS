@@ -268,6 +268,16 @@ private:
   typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
   DiscoveredSubscriptionMap discovered_subscriptions_;
 
+  template<typename Map>
+  void remove_entities_belonging_to(Map& m, const DCPS::RepoId& participant);
+  void remove_from_bit(const DiscoveredPublication& pub);
+  void remove_from_bit(const DiscoveredSubscription& sub);
+
+  bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
+                  const DDS::PublicationBuiltinTopicData& src);
+  bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
+                  const DDS::SubscriptionBuiltinTopicData& src);
+
   std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> ignored_guids_;
 
   // Topic:

@@ -71,8 +71,8 @@ namespace {
   }
 
   void set_port(LocatorSeq& locators, 
-                     LocatorState& last_state, 
-                     const unsigned long port) {
+                LocatorState& last_state, 
+                const unsigned long port) {
     CORBA::ULong length = locators.length();
     // Update last locator if the last state is address only
     if (last_state == locator_address_only && length > 0) {
@@ -543,7 +543,7 @@ int from_param_list(const ParameterList& param_list,
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
-    Parameter param = param_list[i];
+    const Parameter& param = param_list[i];
     switch (param._d()) {
       case PID_USER_DATA:
         participant_data.ddsParticipantData.user_data = param.user_data();
@@ -689,7 +689,7 @@ int from_param_list(const ParameterList& param_list,
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
-    Parameter param = param_list[i];
+    const Parameter& param = param_list[i];
     switch (param._d()) {
       case PID_TOPIC_NAME:
         writer_data.ddsPublicationData.topic_name = param.string_data();
@@ -825,7 +825,7 @@ int from_param_list(const ParameterList& param_list,
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
-    Parameter param = param_list[i];
+    const Parameter& param = param_list[i];
     switch (param._d()) {
       case PID_TOPIC_NAME:
         reader_data.ddsSubscriptionData.topic_name = param.string_data();
@@ -910,7 +910,6 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-};
+}
 
 } }
-

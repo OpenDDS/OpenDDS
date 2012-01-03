@@ -224,6 +224,42 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
     subscriptions_reader_.disassociate(id);
   }
   //FUTURE: if/when topic propagation is supported, add it here
+
+  remove_entities_belonging_to(discovered_publications_, part);
+  remove_entities_belonging_to(discovered_subscriptions_, part);
+}
+
+template<typename Map>
+void
+Sedp::remove_entities_belonging_to(Map& m, const RepoId& participant)
+{
+  for (typename Map::iterator i = m.lower_bound(participant);
+       i != m.end() && 0 == std::memcmp(i->first.guidPrefix,
+                                        participant.guidPrefix,
+                                        sizeof(GuidPrefix_t));) {
+    remove_from_bit(i->second);
+    m.erase(i++);
+  }
+}
+
+void
+Sedp::remove_from_bit(const DiscoveredPublication& pub)
+{
+  DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+  if (bit) { // bit may be null if the DomainParticipant is shutting down
+    bit->set_instance_state(pub.bit_ih_,
+                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  }
+}
+
+void
+Sedp::remove_from_bit(const DiscoveredSubscription& sub)
+{
+  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+  if (bit) { // bit may be null if the DomainParticipant is shutting down
+    bit->set_instance_state(sub.bit_ih_,
+                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  }
 }
 
 DDS::TopicBuiltinTopicDataDataReaderImpl*
@@ -444,21 +480,25 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
     if (iter == discovered_publications_.end()) { // add new
       DiscoveredPublication& pub =
         discovered_publications_[guid] = DiscoveredPublication(wdata);
+      std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
+                  guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
       //TODO: need to set BIT Key here
       pub.bit_ih_ =
         pub_bit()->store_synthetic_data(pub.writer_data_.ddsPublicationData,
                                         DDS::NEW_VIEW_STATE);
       //TODO: match local subscription(s)
-    } else { // update existing
-      //TODO
+    } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
+                          wdata.ddsPublicationData)) { // update existing
+      pub_bit()->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
+                                      DDS::NOT_NEW_VIEW_STATE);
+      //TODO: match/unmatch local subscription(s)
     }
 
   } else { // this is some combination of dispose and/or unregister
     if (iter != discovered_publications_.end()) {
-      pub_bit()->set_instance_state(iter->second.bit_ih_,
-                                    DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-      discovered_publications_.erase(iter);
       //TODO: unmatch local subscription(s)
+      remove_from_bit(iter->second);
+      discovered_publications_.erase(iter);
     }
   }
 }
@@ -473,23 +513,126 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
     if (iter == discovered_subscriptions_.end()) { // add new
       DiscoveredSubscription& sub =
         discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
+      std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
+                  guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
       //TODO: need to set BIT Key here
       sub.bit_ih_ =
         sub_bit()->store_synthetic_data(sub.reader_data_.ddsSubscriptionData,
                                         DDS::NEW_VIEW_STATE);
       //TODO: match local publication(s)
-    } else { // update existing
-      //TODO
+    } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
+                          rdata.ddsSubscriptionData)) { // update existing
+      sub_bit()->store_synthetic_data(iter->second.reader_data_.ddsSubscriptionData,
+                                      DDS::NOT_NEW_VIEW_STATE);
+      //TODO: match/unmatch local publication(s)
     }
 
   } else { // this is some combination of dispose and/or unregister
     if (iter != discovered_subscriptions_.end()) {
-      sub_bit()->set_instance_state(iter->second.bit_ih_,
-                                    DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-      discovered_subscriptions_.erase(iter);
       //TODO: unmatch local publication(s)
+      remove_from_bit(iter->second);
+      discovered_subscriptions_.erase(iter);
     }
   }
+}
+
+bool
+Sedp::qosChanged(DDS::PublicationBuiltinTopicData& dest,
+                 const DDS::PublicationBuiltinTopicData& src)
+{
+  using OpenDDS::DCPS::operator!=;
+  bool changed = false;
+
+  // check each Changeable QoS policy value in Publication BIT Data
+
+  if (dest.deadline != src.deadline) {
+    changed = true;
+    dest.deadline = src.deadline;
+  }
+
+  if (dest.latency_budget != src.latency_budget) {
+    changed = true;
+    dest.latency_budget = src.latency_budget;
+  }
+
+  if (dest.lifespan != src.lifespan) {
+    changed = true;
+    dest.lifespan = src.lifespan;
+  }
+
+  if (dest.user_data != src.user_data) {
+    changed = true;
+    dest.user_data = src.user_data;
+  }
+
+  if (dest.ownership_strength != src.ownership_strength) {
+    changed = true;
+    dest.ownership_strength = src.ownership_strength;
+  }
+
+  if (dest.partition != src.partition) {
+    changed = true;
+    dest.partition = src.partition;
+  }
+
+  if (dest.topic_data != src.topic_data) {
+    changed = true;
+    dest.topic_data = src.topic_data;
+  }
+
+  if (dest.group_data != src.group_data) {
+    changed = true;
+    dest.group_data = src.group_data;
+  }
+
+  return changed;
+}
+
+bool
+Sedp::qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
+                 const DDS::SubscriptionBuiltinTopicData& src)
+{
+  using OpenDDS::DCPS::operator!=;
+  bool changed = false;
+
+  // check each Changeable QoS policy value in Subcription BIT Data
+
+  if (dest.deadline != src.deadline) {
+    changed = true;
+    dest.deadline = src.deadline;
+  }
+
+  if (dest.latency_budget != src.latency_budget) {
+    changed = true;
+    dest.latency_budget = src.latency_budget;
+  }
+
+  if (dest.user_data != src.user_data) {
+    changed = true;
+    dest.user_data = src.user_data;
+  }
+
+  if (dest.time_based_filter != src.time_based_filter) {
+    changed = true;
+    dest.time_based_filter = src.time_based_filter;
+  }
+
+  if (dest.partition != src.partition) {
+    changed = true;
+    dest.partition = src.partition;
+  }
+
+  if (dest.topic_data != src.topic_data) {
+    changed = true;
+    dest.topic_data = src.topic_data;
+  }
+
+  if (dest.group_data != src.group_data) {
+    changed = true;
+    dest.group_data = src.group_data;
+  }
+
+  return changed;
 }
 
 void
@@ -594,7 +737,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     }
 
     switch (repo_id_.entityId.entityKey[2]) {
-    case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER
+    case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER.entityKey[2]
       DiscoveredWriterData wdata;
       if (ParameterListConverter::from_param_list(data, wdata) < 0) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR Sedp::Reader::data_received - "
@@ -604,7 +747,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.data_received(sample.header_.message_id_, wdata);
       break;
     }
-    case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER
+    case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER.entityKey[2]
       DiscoveredReaderData rdata;
       if (ParameterListConverter::from_param_list(data, rdata) < 0) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR Sedp::Reader::data_received - "
