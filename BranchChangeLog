@@ -1,3 +1,11 @@
+Tue Jan  3 20:50:00 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Moved Sedp::ignore() to the cpp file and continued adding
+          more of its implementation.
+
 Tue Jan  3 17:29:34 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

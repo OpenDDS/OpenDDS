@@ -134,6 +134,40 @@ Sedp::multicast_group() const
 }
 
 void
+Sedp::ignore(const DCPS::RepoId& to_ignore)
+{
+  ignored_guids_.insert(to_ignore);
+  {
+    const DiscoveredPublicationIter iter =
+      discovered_publications_.find(to_ignore);
+    if (iter != discovered_publications_.end()) {
+      //TODO: break associations
+      remove_from_bit(iter->second);
+      discovered_publications_.erase(iter);
+      return;
+    }
+  }
+  {
+    const DiscoveredSubscriptionIter iter =
+      discovered_subscriptions_.find(to_ignore);
+    if (iter != discovered_subscriptions_.end()) {
+      //TODO: break associations
+      remove_from_bit(iter->second);
+      discovered_subscriptions_.erase(iter);
+      return;
+    }
+  }
+  {
+    const std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator
+      iter = topic_names_.find(to_ignore);
+    if (iter != topic_names_.end()) {
+      //TODO: if we know of any publication(s) and/or subscription(s) on this
+      //      topic remove them and break any associations.
+    }
+  }
+}
+
+void
 Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
 {
   // First create a 'prototypical' instance of AssociationData.  It will
@@ -312,7 +346,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
 
   if (topic_counter_ == 0x1000000) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::assert_topic: ")
+               ACE_TEXT("(%P|%t) ERROR: Sedp::assert_topic: ")
                ACE_TEXT("Exceeded Maximum number of topic entity keys!")
                ACE_TEXT("Next key will be a duplicate!\n")));
     topic_counter_ = 0;

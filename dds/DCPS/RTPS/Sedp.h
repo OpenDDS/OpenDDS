@@ -60,12 +60,7 @@ public:
   const ACE_INET_Addr& local_address() const;
   const ACE_INET_Addr& multicast_group() const;
 
-  void ignore(const DCPS::RepoId& to_ignore) {
-    ignored_guids_.insert(to_ignore);
-    //TODO: if we already have discovered data for 'to_ignore', we need to
-    //      remove it from discovered data, from BIT, and possibly undo any
-    //      user entity associations.
-  }
+  void ignore(const DCPS::RepoId& to_ignore);
 
   bool ignoring(const DCPS::RepoId& guid) const {
     return ignored_guids_.count(guid);
