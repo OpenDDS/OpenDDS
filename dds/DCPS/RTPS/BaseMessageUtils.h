@@ -107,10 +107,41 @@ address_to_bytes(OpenDDS::RTPS::OctetArray16& dest, const ACE_INET_Addr& addr)
   }
 }
 
+inline int
+locator_to_address(ACE_INET_Addr& dest, const Locator_t& locator)
+{
+  switch (locator.kind) {
+#ifdef ACE_HAS_IPV6
+  case LOCATOR_KIND_UDPv6:
+    dest.set_type(AF_INET6);
+    if (dest.set_address(reinterpret_cast<const char*>(locator.address),
+                         16) == -1) {
+      return -1;
+    }
+    dest.set_port_number(locator.port);
+    return 0;
+    break;
+#endif
+  case LOCATOR_KIND_UDPv4:
+    dest.set_type(AF_INET);
+    if (dest.set_address(reinterpret_cast<const char*>(locator.address)
+                         + 12, 4, 0 /*network order*/) == -1) {
+      return -1;
+    }
+    dest.set_port_number(locator.port);
+    return 0;
+    break;
+  default:
+    return -1;  // Unknown kind
+  }
+
+  return -1;
+}
+
 inline DDS::ReturnCode_t
 blob_to_locators(
     const OpenDDS::DCPS::TransportBLOB& blob, 
-    LocatorSeq locators)
+    LocatorSeq& locators)
 {
   ACE_Data_Block db(blob.length(), ACE_Message_Block::MB_DATA,
       reinterpret_cast<const char*>(blob.get_buffer()),
