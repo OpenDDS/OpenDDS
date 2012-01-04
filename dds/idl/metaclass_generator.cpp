@@ -54,7 +54,7 @@ namespace {
       std::string prefix, suffix;
       if (cls & CL_ENUM) {
         AST_Type* enum_type = field->field_type();
-        unTypeDef(enum_type);
+        resolveActualType(enum_type);
         prefix = "gen_" +
           dds_generator::scoped_helper(enum_type->name(), "_")
           + "_names[";
@@ -136,7 +136,7 @@ namespace {
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_ARRAY) {
       AST_Type* unTD = field->field_type();
-      unTypeDef(unTD);
+      resolveActualType(unTD);
       AST_Array* arr = AST_Array::narrow_from_decl(unTD);
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
@@ -147,7 +147,7 @@ namespace {
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
       AST_Type* elem = arr->base_type();
       AST_Type* elemUnTD = elem;
-      unTypeDef(elemUnTD);
+      resolveActualType(elemUnTD);
       if (classify(elemUnTD) & CL_ARRAY) {
         // array-of-array case, fall back on the Serializer
         be_global->impl_ <<

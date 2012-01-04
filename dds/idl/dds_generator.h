@@ -13,6 +13,11 @@
 
 #include "utl_scoped_name.h"
 #include "ast.h"
+#include "ast_component_fwd.h"
+#include "ast_eventtype_fwd.h"
+#include "ast_structure_fwd.h"
+#include "ast_union_fwd.h"
+#include "ast_valuetype_fwd.h"
 
 #include <string>
 #include <vector>
@@ -157,11 +162,50 @@ inline std::string scoped(UTL_ScopedName* sn)
 }
 
 namespace AstTypeClassification {
-  inline void unTypeDef(AST_Type*& element)
+  inline void resolveActualType(AST_Type*& element)
   {
     if (element->node_type() == AST_Decl::NT_typedef) {
       AST_Typedef* td = AST_Typedef::narrow_from_decl(element);
       element = td->primitive_base_type();
+    }
+
+    switch(element->node_type()) {
+    case AST_Decl::NT_interface_fwd:
+    {
+      AST_InterfaceFwd* td = AST_InterfaceFwd::narrow_from_decl(element);
+      element = td->full_definition();
+      break;
+    }
+    case AST_Decl::NT_valuetype_fwd:
+    {
+      AST_ValueTypeFwd* td = AST_ValueTypeFwd::narrow_from_decl(element);
+      element = td->full_definition();
+      break;
+    }
+    case AST_Decl::NT_union_fwd:
+    {
+      AST_UnionFwd* td = AST_UnionFwd::narrow_from_decl(element);
+      element = td->full_definition();
+      break;
+    }
+    case AST_Decl::NT_struct_fwd:
+    {
+      AST_StructureFwd* td = AST_StructureFwd::narrow_from_decl(element);
+      element = td->full_definition();
+      break;
+    }
+    case AST_Decl::NT_component_fwd:
+    {
+      AST_ComponentFwd* td = AST_ComponentFwd::narrow_from_decl(element);
+      element = td->full_definition();
+      break;
+    }
+    case AST_Decl::NT_eventtype_fwd:
+    {
+      AST_EventTypeFwd* td = AST_EventTypeFwd::narrow_from_decl(element);
+      element = td->full_definition();
+      break;
+    }
     }
   }
 
@@ -172,7 +216,7 @@ namespace AstTypeClassification {
 
   inline Classification classify(AST_Type* type)
   {
-    unTypeDef(type);
+    resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);

@@ -128,15 +128,11 @@ module N1 {
 };
 
 module N1 {
-  typedef sequence<FwdDeclStruct> FwdDeclNoScopeStructs;
+  typedef sequence<N1::FwdDeclStruct> FwdDeclSameNamespaceStructs;
 };
 
 module N2 {
   typedef sequence<N1::FwdDeclStruct> FwdDeclDiffNamespaceStructs;
-};
-
-module N1 {
-  typedef sequence<N1::FwdDeclStruct> FwdDeclSameNamespaceStructs;
 };
 
 module N1 {
