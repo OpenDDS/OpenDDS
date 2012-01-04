@@ -10,7 +10,7 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $TEST = PerlDDS::create_process('RtpsDiscoveryTest',
-                                   '-DCPSConfigFile dcps.ini -ORBLogFile test.log');
+                                   '-DCPSConfigFile dcps.ini');
 my $result = $TEST->SpawnWaitKill(150);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";

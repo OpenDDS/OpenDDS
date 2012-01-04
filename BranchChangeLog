@@ -1,9 +1,15 @@
+Wed Jan  4 22:27:09 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Revert capture to test.log
+
 Wed Jan  4 22:24:27 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:
 
           Added locator_to_address().
-          Make blob_to_locators() accept a reference. 
+          Make blob_to_locators() accept a reference.
 
 Wed Jan  4 20:49:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
