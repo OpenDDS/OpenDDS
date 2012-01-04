@@ -20,6 +20,7 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/DataSampleList.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
@@ -43,6 +44,8 @@ namespace DDS {
 
 namespace OpenDDS {
 namespace RTPS {
+
+enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4 };
 
 class RtpsDiscovery;
 class Spdp;
@@ -121,9 +124,11 @@ public:
   void disassociate_subscription(const DCPS::RepoId& localId,
                                  const DCPS::RepoId& remoteId);
 
+  static const bool host_is_bigendian_;
 private:
   DCPS::RepoId participant_id_;
   Spdp& spdp_;
+  struct LocalPublication;
 
   class Endpoint : public DCPS::TransportClient {
   public:
@@ -153,8 +158,28 @@ private:
   class Writer : public DCPS::TransportSendListener, public Endpoint {
   public:
     Writer(const DCPS::RepoId& pub_id, Sedp& sedp)
-      : Endpoint(pub_id, sedp)
-    {}
+      : Endpoint(pub_id, sedp),
+        alloc_(2, sizeof(DCPS::TransportSendElementAllocator))
+    {
+      header_.prefix[0] = 'R';
+      header_.prefix[1] = 'T';
+      header_.prefix[2] = 'P';
+      header_.prefix[3] = 'S';
+      header_.version = PROTOCOLVERSION;
+      header_.vendorId = VENDORID_OPENDDS;
+      header_.guidPrefix[0] = pub_id.guidPrefix[0];
+      header_.guidPrefix[1] = pub_id.guidPrefix[1],
+      header_.guidPrefix[2] = pub_id.guidPrefix[2];
+      header_.guidPrefix[3] = pub_id.guidPrefix[3];
+      header_.guidPrefix[4] = pub_id.guidPrefix[4];
+      header_.guidPrefix[5] = pub_id.guidPrefix[5];
+      header_.guidPrefix[6] = pub_id.guidPrefix[6];
+      header_.guidPrefix[7] = pub_id.guidPrefix[7];
+      header_.guidPrefix[8] = pub_id.guidPrefix[8];
+      header_.guidPrefix[9] = pub_id.guidPrefix[9];
+      header_.guidPrefix[10] = pub_id.guidPrefix[10];
+      header_.guidPrefix[11] = pub_id.guidPrefix[11];
+    }
 
     virtual ~Writer();
 
@@ -176,6 +201,17 @@ private:
     void notify_connection_deleted() {}
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
+
+    DDS::ReturnCode_t publish_sample(const DiscoveredWriterData& dwd);
+  private:
+    DCPS::TransportSendElementAllocator alloc_;
+    Header header_;
+    SequenceNumber_t seq_;
+
+    DDS::ReturnCode_t build_message(const DiscoveredWriterData& dwd,
+                                    ACE_Message_Block& payload);
+
+    void publish_sample(ACE_Message_Block& payload, size_t size);
 
   } publications_writer_, subscriptions_writer_;
 
@@ -220,6 +256,11 @@ private:
                    DCPS::GUID_tKeyLessThan> LocalPublicationMap;
   typedef LocalPublicationMap::iterator LocalPublicationIter;
   LocalPublicationMap local_publications_;
+
+  DDS::ReturnCode_t populate_discovered_writer_msg(
+      DiscoveredWriterData& dwd,
+      const DCPS::RepoId& publication_id,
+      const LocalPublication& pub);
 
   struct LocalSubscription {
     DCPS::RepoId topic_id_;

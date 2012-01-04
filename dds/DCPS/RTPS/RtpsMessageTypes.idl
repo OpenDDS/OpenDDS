@@ -11,6 +11,7 @@
 
 #include "RtpsBaseMessageTypes.idl"
 #include "../../DdsDcpsInfrastructure.idl"
+#include "../../DdsDcpsInfoUtils.idl"
 
 module OpenDDS {
   module RTPS {
@@ -337,6 +338,7 @@ module OpenDDS {
       GUID_t remoteWriterGuid;  // optional in DiscoveredWriterData
       LocatorSeq unicastLocatorList;
       LocatorSeq multicastLocatorList;
+      OpenDDS::DCPS::TransportLocatorSeq allLocators;
     };
 
     // top-level data type for SEDPbuiltinPublications 
@@ -350,6 +352,7 @@ module OpenDDS {
       boolean expectsInlineQos;
       LocatorSeq unicastLocatorList;
       LocatorSeq multicastLocatorList;
+      OpenDDS::DCPS::TransportLocatorSeq allLocators;
     };
 
     // top-level data type for SEDPbuiltinSubscriptions

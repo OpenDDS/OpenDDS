@@ -9,10 +9,13 @@
 #ifndef RTPS_BASEMESSAGEUTILS_H
 #define RTPS_BASEMESSAGEUTILS_H
 
+#include "RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/Serializer.h"
 #include "RtpsBaseMessageTypesC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "md5.h"
 #include "ace/INET_Addr.h"
+#include "ace/Message_Block.h"
 
 #include <cstring>
 
@@ -102,6 +105,28 @@ address_to_bytes(OpenDDS::RTPS::OctetArray16& dest, const ACE_INET_Addr& addr)
     std::memset(&dest[0], 0, 12);
                 std::memcpy(&dest[12], &in->sin_addr, 4);
   }
+}
+
+inline DDS::ReturnCode_t
+blob_to_locators(
+    const OpenDDS::DCPS::TransportBLOB& blob, 
+    LocatorSeq locators)
+{
+  ACE_Data_Block db(blob.length(), ACE_Message_Block::MB_DATA,
+      reinterpret_cast<const char*>(blob.get_buffer()),
+      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
+  ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
+  mb.wr_ptr(mb.space());
+
+  using OpenDDS::DCPS::Serializer;
+  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  if (!(ser >> locators)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) blob_to_locators: ")
+                      ACE_TEXT(" Failed to deserialize blob\n")), 
+                      DDS::RETCODE_ERROR);
+  }
+  return DDS::RETCODE_OK;
 }
 
 }

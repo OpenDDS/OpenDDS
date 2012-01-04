@@ -52,7 +52,8 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::make_datalink: ")
-                      ACE_TEXT("failed to open DataLink!\n")),
+                      ACE_TEXT("failed to open DataLink for socket %d\n"),
+                      unicast_socket_),
                      0);
   }
 
@@ -117,15 +118,9 @@ ACE_INET_Addr
 RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote) const
 {
   using namespace OpenDDS::RTPS;
-  ACE_Data_Block db(remote.length(), ACE_Message_Block::MB_DATA,
-    reinterpret_cast<const char*>(remote.get_buffer()),
-    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
-  ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
-  mb.wr_ptr(mb.space());
-
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   LocatorSeq locators;
-  if (!(ser >> locators)) {
+  DDS::ReturnCode_t result = blob_to_locators(remote, locators);
+  if (result != DDS::RETCODE_OK) {
     return ACE_INET_Addr();
   }
 

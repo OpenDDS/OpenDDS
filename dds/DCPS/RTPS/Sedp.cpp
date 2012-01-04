@@ -8,6 +8,7 @@
 
 #include "Sedp.h"
 #include "Spdp.h"
+#include "MessageTypes.h"
 #include "RtpsDiscovery.h"
 #include "RtpsMessageTypesC.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
@@ -18,22 +19,26 @@
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "ace/OS_NS_stdio.h"
+//#include "ace/Message_Block.h"
 
 #include <cstdio>
 #include <ctime>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 
 namespace OpenDDS {
@@ -43,6 +48,8 @@ namespace DCPS {
 
 namespace RTPS {
 using DCPS::RepoId;
+
+const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner)
   : participant_id_(participant_id)
@@ -410,7 +417,17 @@ Sedp::add_publication(const RepoId& topicId,
   pb.trans_info_ = transInfo;
   pb.publisher_qos_ = publisherQos;
 
-  // TODO: use SEDP to advertise the new publication
+  DiscoveredWriterData dwd;
+  if (DDS::RETCODE_OK == populate_discovered_writer_msg(dwd, rid, pb)) {
+    ACE_DEBUG((LM_ERROR, "Successfully populated DiscoveredWriterData msg\n"));
+    if (DDS::RETCODE_OK != publications_writer_.publish_sample(dwd)) {
+      ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
+      // TODO: should this be removed from the local_publications map?
+    }
+  } else {
+    ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
+    // TODO: should this be removed from the local_publications map?
+  }
 
   return rid;
 }
@@ -732,6 +749,60 @@ Sedp::Writer::control_dropped(ACE_Message_Block*, bool)
 {
 }
 
+DDS::ReturnCode_t
+Sedp::Writer::publish_sample(const DiscoveredWriterData& dwd)
+{
+  // Determine message length
+  size_t size = 0, padding = 0;
+  DCPS::find_size_ulong(size, padding);
+  DCPS::gen_find_size(dwd, size, padding);
+
+  // Build RTPS message
+  ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
+                            ACE_Message_Block::MB_DATA,
+                            new ACE_Message_Block(size));
+  DDS::ReturnCode_t result = build_message(dwd, payload);
+  if (result != DDS::RETCODE_OK) {
+    return result;
+  }
+
+  // Send sample
+  publish_sample(payload, size);
+}
+
+DDS::ReturnCode_t
+Sedp::Writer::build_message(
+    const DiscoveredWriterData& dwd,
+    ACE_Message_Block& payload)
+{
+  using DCPS::Serializer;
+  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  ParameterList plist;
+  DDS::ReturnCode_t result = ParameterListConverter::to_param_list(dwd, plist);
+  if (result == DDS::RETCODE_OK) {
+    ser << plist;
+  }
+  return result;
+}
+
+void
+Sedp::Writer::publish_sample(ACE_Message_Block& payload, size_t size)
+{
+  DCPS::DataSampleListElement list_el(repo_id_, this, 0, &alloc_, 0);
+  list_el.header_.message_id_ = DCPS::SAMPLE_DATA;
+  list_el.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
+  list_el.header_.message_length_ = size;
+
+  DCPS::DataSampleList list;  // Container of list elements
+  list.head_ = list.tail_ = &list_el;
+  list.size_ = 1;
+  list_el.sample_ = new ACE_Message_Block(size);
+  *list_el.sample_ << list_el.header_;
+  list_el.sample_->cont(payload.duplicate());
+
+  send(list);
+}
+
 //-------------------------------------------------------------------------
 
 Sedp::Reader::~Reader()
@@ -799,6 +870,75 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     break;
   }
 }
+
+DDS::ReturnCode_t
+Sedp::populate_discovered_writer_msg(
+    DiscoveredWriterData& dwd,
+    const RepoId& publication_id,
+    const LocalPublication& pub)
+{
+  // Ignored on the wire dwd.ddsPublicationData.key
+  // Ignored on the wire dwd.ddsPublicationData.participant_key
+  std::string topic_name = topic_names_[pub.topic_id_];
+  dwd.ddsPublicationData.topic_name = topic_name.c_str();
+  TopicDetails& topic_details = topics_[topic_name];
+  dwd.ddsPublicationData.type_name = topic_details.data_type_.c_str();
+  dwd.ddsPublicationData.durability = pub.qos_.durability;
+  dwd.ddsPublicationData.durability_service = pub.qos_.durability_service;
+  dwd.ddsPublicationData.deadline = pub.qos_.deadline;
+  dwd.ddsPublicationData.latency_budget = pub.qos_.latency_budget;
+  dwd.ddsPublicationData.liveliness = pub.qos_.liveliness;
+  dwd.ddsPublicationData.reliability = pub.qos_.reliability;
+  dwd.ddsPublicationData.lifespan = pub.qos_.lifespan;
+  dwd.ddsPublicationData.user_data = pub.qos_.user_data;
+  dwd.ddsPublicationData.ownership = pub.qos_.ownership;
+  dwd.ddsPublicationData.ownership_strength = pub.qos_.ownership_strength;
+  dwd.ddsPublicationData.destination_order = pub.qos_.destination_order;
+  dwd.ddsPublicationData.presentation = pub.publisher_qos_.presentation;
+  dwd.ddsPublicationData.partition = pub.publisher_qos_.partition;
+  dwd.ddsPublicationData.topic_data = topic_details.qos_.topic_data;
+  CORBA::ULong gd_length = pub.publisher_qos_.group_data.value.length();
+  dwd.ddsPublicationData.group_data.value.length(gd_length);
+  CORBA::ULong i = 0;
+  for (i = 0; i < gd_length; ++i) {
+    dwd.ddsPublicationData.group_data.value[i] = pub.publisher_qos_.group_data.value[i];
+  }
+  dwd.writerProxy.remoteWriterGuid = publication_id;
+  CORBA::ULong tx_length = pub.trans_info_.length();
+  for (i = 0; i < tx_length; ++i) {
+    ACE_DEBUG((LM_INFO, "got trans type of %s\n", 
+               pub.trans_info_[i].transport_type.in()));
+    std::string trans_type = pub.trans_info_[i].transport_type.in();
+    if (trans_type == "rtps_udp") {
+      LocatorSeq locators;
+      DDS::ReturnCode_t result = blob_to_locators(pub.trans_info_[i].data, 
+                                                  locators);
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      } else {
+        CORBA::ULong locators_len = locators.length();
+        for (CORBA::ULong j = 0; j < locators_len; ++j) {
+          CORBA::ULong unicast_len = 
+                dwd.writerProxy.unicastLocatorList.length();
+          // TODO Append to unicast locators or multicast locators?
+          dwd.writerProxy.unicastLocatorList.length(unicast_len + 1);
+          dwd.writerProxy.unicastLocatorList[unicast_len] = locators[j];
+        }
+      }
+    }
+    // Append to WriterProxy
+    CORBA::ULong len = dwd.writerProxy.allLocators.length();
+    dwd.writerProxy.allLocators.length(len + 1);
+    dwd.writerProxy.allLocators[len].transport_type = 
+          pub.trans_info_[i].transport_type;
+    dwd.writerProxy.allLocators[len].data = 
+          pub.trans_info_[i].data;
+  }
+
+  dwd.writerProxy.multicastLocatorList;  // TODO
+  return DDS::RETCODE_OK;
+}
+
 
 
 }

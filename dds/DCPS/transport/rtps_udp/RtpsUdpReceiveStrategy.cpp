@@ -125,7 +125,9 @@ RtpsUdpReceiveStrategy::start_i()
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for unicast\n")),
+                      ACE_TEXT("failed to register handler for unicast ")
+                      ACE_TEXT("socket %d\n"), 
+                      link_->unicast_socket().get_handle()),
                      -1);
   }
 

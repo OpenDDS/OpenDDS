@@ -139,6 +139,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  ACE_DEBUG((LM_INFO, "Cleaning up test\n"));
+
   ACE_OS::sleep(10);
   cleanup(dpf, dp);
   ACE_OS::sleep(5);
