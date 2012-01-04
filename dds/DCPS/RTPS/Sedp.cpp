@@ -768,6 +768,7 @@ Sedp::Writer::publish_sample(const DiscoveredWriterData& dwd)
 
   // Send sample
   publish_sample(payload, size);
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t

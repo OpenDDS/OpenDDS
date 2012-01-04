@@ -1,3 +1,9 @@
+Wed Jan  4 19:45:46 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          missing return statement.
+
 Wed Jan  4 19:33:38 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsMessageTypes.idl:
