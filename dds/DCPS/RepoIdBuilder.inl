@@ -21,13 +21,6 @@ RepoIdBuilder::participantId(long participantId)
   guidPrefix2(participantId);
 }
 
-ACE_INLINE void
-RepoIdBuilder::from_BuiltinTopicKey(const DDS::BuiltinTopicKey_t& key)
-{
-  federationId(key.value[0]);
-  participantId(key.value[1]);
-  entityId(key.value[2]);
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

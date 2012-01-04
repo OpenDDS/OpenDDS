@@ -193,7 +193,13 @@ public:
 
 
   // used by RtpsDiscovery:
+
   void init_bit(const DDS::Subscriber_var& bit_subscriber);
+
+  DCPS::RepoId bit_key_to_repo_id(DDS::DomainId_t domainId,
+                                  const DCPS::RepoId& participantId,
+                                  const char* bit_topic_name,
+                                  const DDS::BuiltinTopicKey_t& key);
 
 private:
 

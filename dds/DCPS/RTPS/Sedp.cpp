@@ -18,7 +18,6 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
 
 #include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -67,7 +66,10 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner)
                                   ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
                           *this)
   , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
-{}
+{
+  pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
+  sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
+}
 
 RepoId
 Sedp::make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
@@ -172,6 +174,51 @@ Sedp::ignore(const DCPS::RepoId& to_ignore)
       //      topic remove them and break any associations.
     }
   }
+}
+
+RepoId
+Sedp::bit_key_to_repo_id(const char* bit_topic_name,
+                         const DDS::BuiltinTopicKey_t& key)
+{
+  if (0 == std::strcmp(bit_topic_name, DCPS::BUILT_IN_PUBLICATION_TOPIC)) {
+    return pub_key_to_id_[key];
+  }
+  if (0 == std::strcmp(bit_topic_name, DCPS::BUILT_IN_SUBSCRIPTION_TOPIC)) {
+    return sub_key_to_id_[key];
+  }
+  return RepoId();
+}
+
+void
+Sedp::assign_bit_key(DiscoveredPublication& pub)
+{
+  increment_key(pub_bit_key_);
+  pub_key_to_id_[pub_bit_key_] = pub.writer_data_.writerProxy.remoteWriterGuid;
+  pub.writer_data_.ddsPublicationData.key = pub_bit_key_;
+}
+
+void
+Sedp::assign_bit_key(DiscoveredSubscription& sub)
+{
+  increment_key(sub_bit_key_);
+  sub_key_to_id_[sub_bit_key_] = sub.reader_data_.readerProxy.remoteReaderGuid;
+  sub.reader_data_.ddsSubscriptionData.key = sub_bit_key_;
+}
+
+void
+Sedp::increment_key(DDS::BuiltinTopicKey_t& key)
+{
+  for (int idx = 0; idx < 3; ++idx) {
+    CORBA::ULong ukey = static_cast<CORBA::ULong>(key.value[idx]);
+    if (ukey == 0xFFFFFFFF) {
+      key.value[idx] = 0;
+    } else {
+      ++ukey;
+      key.value[idx] = ukey;
+      return;
+    }
+  }
+  //TODO: error, we ran out of keys (2^96 available)
 }
 
 void
@@ -286,6 +333,7 @@ Sedp::remove_entities_belonging_to(Map& m, const RepoId& participant)
 void
 Sedp::remove_from_bit(const DiscoveredPublication& pub)
 {
+  pub_key_to_id_.erase(pub.writer_data_.ddsPublicationData.key);
   DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
   if (bit) { // bit may be null if the DomainParticipant is shutting down
     bit->set_instance_state(pub.bit_ih_,
@@ -296,6 +344,7 @@ Sedp::remove_from_bit(const DiscoveredPublication& pub)
 void
 Sedp::remove_from_bit(const DiscoveredSubscription& sub)
 {
+  sub_key_to_id_.erase(sub.reader_data_.ddsSubscriptionData.key);
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
   if (bit) { // bit may be null if the DomainParticipant is shutting down
     bit->set_instance_state(sub.bit_ih_,
@@ -533,7 +582,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         discovered_publications_[guid] = DiscoveredPublication(wdata);
       std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                   guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
-      //TODO: need to set BIT Key here
+      assign_bit_key(pub);
       pub.bit_ih_ =
         pub_bit()->store_synthetic_data(pub.writer_data_.ddsPublicationData,
                                         DDS::NEW_VIEW_STATE);
@@ -566,7 +615,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
       std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                   guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
-      //TODO: need to set BIT Key here
+      assign_bit_key(sub);
       sub.bit_ih_ =
         sub_bit()->store_synthetic_data(sub.reader_data_.ddsSubscriptionData,
                                         DDS::NEW_VIEW_STATE);

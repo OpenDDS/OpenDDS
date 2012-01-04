@@ -20,7 +20,7 @@
 
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/AssociationData.h"
 
 #include "ace/Reverse_Lock_T.h"
@@ -35,7 +35,7 @@ TransportClient::TransportClient()
 TransportClient::~TransportClient()
 {
   if (Transport_debug_level > 5) {
-    RepoIdConverter converter(repo_id_);
+    GuidConverter converter(repo_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
                std::string(converter).c_str()));
@@ -236,7 +236,7 @@ TransportClient::disassociate(const RepoId& peerId)
   DataLinkIndex::iterator found = data_link_index_.find(peerId);
   if (found == data_link_index_.end()) {
     if (DCPS_debug_level > 4) {
-      RepoIdConverter converter(peerId);
+      GuidConverter converter(peerId);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
                  ACE_TEXT("no link for remote peer %C\n"),
@@ -270,7 +270,7 @@ TransportClient::send_response(const RepoId& peer,
   if (found == data_link_index_.end()) {
     payload->release();
     if (DCPS_debug_level > 4) {
-      RepoIdConverter converter(peer);
+      GuidConverter converter(peer);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::send_response: ")
                  ACE_TEXT("no link for publication %C, ")
@@ -312,7 +312,7 @@ TransportClient::send(const DataSampleList& samples)
       //       associated with any remote subscriber ids" case.
 
       if (DCPS_debug_level > 4) {
-        RepoIdConverter converter(cur->publication_id_);
+        GuidConverter converter(cur->publication_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportClient::send: ")
                    ACE_TEXT("no links for publication %C, ")

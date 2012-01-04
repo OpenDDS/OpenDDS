@@ -21,7 +21,10 @@
 #include "MonitorData.h"
 #include "TreeNode.h"
 #include "QosFormatter.h"
-#include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/Discovery.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 
 namespace Monitor {
 
@@ -137,8 +140,10 @@ class MonitorDataStorage {
     /// @{
 
     /// Add, modify, or remove a data element in the model.
-    template< typename DataType>
-    void update( const DataType& data, bool remove = false);
+    template<typename DataType>
+    void update(const DataType& data,
+                DDS::DomainParticipant_ptr participant,
+                bool remove = false);
 
     /// Completely delete a process node from the model.
     void deleteProcessNode( TreeNode* node);

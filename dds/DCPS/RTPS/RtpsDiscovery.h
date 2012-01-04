@@ -43,7 +43,12 @@ public:
   ~RtpsDiscovery();
 
   virtual OpenDDS::DCPS::DCPSInfo_ptr get_dcps_info();
+
   virtual DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* dpi);
+
+  virtual DCPS::RepoId bit_key_to_repo_id(DCPS::DomainParticipantImpl* part,
+                                          const char* bit_topic_name,
+                                          const DDS::BuiltinTopicKey_t& key) const;
 
   // configuration parameters:
 

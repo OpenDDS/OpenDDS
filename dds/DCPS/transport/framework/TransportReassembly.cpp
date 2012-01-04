@@ -10,7 +10,7 @@
 #include "TransportReassembly.h"
 #include "TransportDebug.h"
 
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/DisjointSequence.h"
 
 namespace OpenDDS {
@@ -225,7 +225,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
                                   ReceivedDataSample& data)
 {
   if (Transport_debug_level > 5) {
-    RepoIdConverter conv(data.header_.publication_id_);
+    GuidConverter conv(data.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "tseq %q-%q first %d dseq %q pub %C\n", seqRange.first.getValue(),
       seqRange.second.getValue(), firstFrag ? 1 : 0,

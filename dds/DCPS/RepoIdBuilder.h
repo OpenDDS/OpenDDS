@@ -29,8 +29,6 @@ public:
   void federationId(long federationId);
 
   void participantId(long participantId);
-
-  void from_BuiltinTopicKey(const DDS::BuiltinTopicKey_t& key);
 };
 
 } // namespace DCPS

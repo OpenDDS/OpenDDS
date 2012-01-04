@@ -20,7 +20,7 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/Util.h"
 
@@ -178,8 +178,8 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
   bool first_pub = false;
 
   if (DCPS_debug_level > 9) {
-    RepoIdConverter local(publisher_id);
-    RepoIdConverter remote(subscriber_id);
+    GuidConverter local(publisher_id);
+    GuidConverter remote(subscriber_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
                ACE_TEXT("creating association local: publisher %C ")
@@ -239,8 +239,8 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
 
   if (pub_result == 0) {
     if (sub_result != 0) {
-      RepoIdConverter sub_converter(subscriber_id);
-      RepoIdConverter pub_converter(publisher_id);
+      GuidConverter sub_converter(subscriber_id);
+      GuidConverter pub_converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to insert remote subscriber %C ")
@@ -250,8 +250,8 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
     }
 
     if (pub_undo_result != 0) {
-      RepoIdConverter pub_converter(publisher_id);
-      RepoIdConverter sub_converter(subscriber_id);
+      GuidConverter pub_converter(publisher_id);
+      GuidConverter sub_converter(subscriber_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) local publisher %C ")
@@ -261,8 +261,8 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
     }
 
     if (sub_undo_result != 0) {
-      RepoIdConverter sub_converter(subscriber_id);
-      RepoIdConverter pub_converter(publisher_id);
+      GuidConverter sub_converter(subscriber_id);
+      GuidConverter pub_converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) local subscriber %C ")
@@ -272,8 +272,8 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
     }
 
   } else {
-    RepoIdConverter pub_converter(publisher_id);
-    RepoIdConverter sub_converter(subscriber_id);
+    GuidConverter pub_converter(publisher_id);
+    GuidConverter sub_converter(subscriber_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                ACE_TEXT("failed to insert local publisher %C to remote ")
@@ -300,8 +300,8 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
   bool first_sub = false;
 
   if (DCPS_debug_level > 9) {
-    RepoIdConverter local(subscriber_id);
-    RepoIdConverter remote(publisher_id);
+    GuidConverter local(subscriber_id);
+    GuidConverter remote(publisher_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
                ACE_TEXT("creating association local subscriber: %C ")
@@ -367,8 +367,8 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
 
   if (sub_result == 0) {
     if (pub_result != 0) {
-      RepoIdConverter pub_converter(publisher_id);
-      RepoIdConverter sub_converter(subscriber_id);
+      GuidConverter pub_converter(publisher_id);
+      GuidConverter sub_converter(subscriber_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("Failed to insert remote publisher %C to local ")
@@ -378,8 +378,8 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
     }
 
     if (sub_undo_result != 0) {
-      RepoIdConverter sub_converter(subscriber_id);
-      RepoIdConverter pub_converter(publisher_id);
+      GuidConverter sub_converter(subscriber_id);
+      GuidConverter pub_converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
                  ACE_TEXT("failed to remove (undo) local subscriber %C to remote ")
@@ -389,8 +389,8 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
     }
 
     if (pub_undo_result != 0) {
-      RepoIdConverter pub_converter(publisher_id);
-      RepoIdConverter sub_converter(subscriber_id);
+      GuidConverter pub_converter(publisher_id);
+      GuidConverter sub_converter(subscriber_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
                  ACE_TEXT("failed to remove (undo) local publisher %C to remote ")
@@ -400,8 +400,8 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
     }
 
   } else {
-    RepoIdConverter sub_converter(subscriber_id);
-    RepoIdConverter pub_converter(publisher_id);
+    GuidConverter sub_converter(subscriber_id);
+    GuidConverter pub_converter(publisher_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
                ACE_TEXT("failed to insert local subscriber %C to remote ")
@@ -467,8 +467,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
   if (DCPS_debug_level > 9) {
-    RepoIdConverter local(local_id);
-    RepoIdConverter remote(remote_id);
+    GuidConverter local(local_id);
+    GuidConverter remote(remote_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::release_reservations() - ")
                ACE_TEXT("releasing association local: %C ")
@@ -497,7 +497,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
 
     if (id_set.is_nil()) {
       // We don't know about the remote_id.
-      RepoIdConverter converter(remote_id);
+      GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::release_reservations: ")
                  ACE_TEXT("unable to locate remote %C in pub_map_ or sub_map_.\n"),
@@ -683,7 +683,7 @@ DataLink::data_received(ReceivedDataSample& sample)
   if (Transport_debug_level > 9) {
     std::stringstream buffer;
     buffer << sample.header_;
-    RepoIdConverter converter(publisher_id);
+    GuidConverter converter(publisher_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::data_received: ")
                ACE_TEXT(" publisher %C received sample: %C.\n"),
@@ -699,7 +699,7 @@ DataLink::data_received(ReceivedDataSample& sample)
   if (listener_set.is_nil()) {
     // Nobody has any interest in this message.  Drop it on the floor.
     if (Transport_debug_level > 4) {
-      RepoIdConverter converter(publisher_id);
+      GuidConverter converter(publisher_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::data_received: ")
                  ACE_TEXT(" discarding sample from publisher %C due to no listeners.\n"),
@@ -745,7 +745,7 @@ DataLink::ack_received(ReceivedDataSample& sample)
     = this->send_listeners_.find(publication);
 
     if (where == this->send_listeners_.end()) {
-      RepoIdConverter converter(publication);
+      GuidConverter converter(publication);
 
       // Ack could be for a different publisher.
       if (this->pub_map_.find(publication) == 0) {
@@ -809,7 +809,7 @@ DataLink::release_remote_subscriber(RepoId subscriber_id, RepoId publisher_id,
 
   // remove the publisher_id from the pubset that associate with the remote sub.
   if (pubid_set->remove_id(publisher_id) == -1) {
-    RepoIdConverter converter(publisher_id);
+    GuidConverter converter(publisher_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_subscriber: ")
                ACE_TEXT(" failed to remove pub %C from PubSet.\n"),
@@ -848,7 +848,7 @@ DataLink::release_remote_publisher(RepoId publisher_id, RepoId subscriber_id,
   }
 
   if (listener_set->remove(subscriber_id) == -1) {
-    RepoIdConverter converter(subscriber_id);
+    GuidConverter converter(subscriber_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_publisher: ")
                ACE_TEXT(" failed to remove sub %C from ListenerSet.\n"),
@@ -921,7 +921,7 @@ DataLink::notify(ConnectionNotice notice)
       TransportSendListener* tsl = send_listener_for(itr->first);
       if (tsl != 0) {
         if (Transport_debug_level > 0) {
-          RepoIdConverter converter(itr->first);
+          GuidConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
                      ACE_TEXT("notify pub %C %C.\n"),
@@ -953,7 +953,7 @@ DataLink::notify(ConnectionNotice notice)
 
       } else {
         if (Transport_debug_level > 0) {
-          RepoIdConverter converter(itr->first);
+          GuidConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
                      ACE_TEXT("not notify pub %C %C \n"),
@@ -979,7 +979,7 @@ DataLink::notify(ConnectionNotice notice)
       TransportReceiveListener* trl = recv_listener_for(itr->first);
       if (trl != 0) {
         if (Transport_debug_level > 0) {
-          RepoIdConverter converter(itr->first);
+          GuidConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
                      ACE_TEXT("notify sub %C %C.\n"),
@@ -1019,7 +1019,7 @@ DataLink::notify(ConnectionNotice notice)
 
       } else {
         if (Transport_debug_level > 0) {
-          RepoIdConverter converter(itr->first);
+          GuidConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
                      ACE_TEXT("not notify sub %C subscription lost.\n"),
@@ -1053,7 +1053,7 @@ DataLink::notify_connection_deleted()
     TransportSendListener* tsl = send_listener_for(itr->first);
     if (tsl != 0) {
       if (Transport_debug_level > 0) {
-        RepoIdConverter converter(itr->first);
+        GuidConverter converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
                    ACE_TEXT("notify pub %C connection deleted.\n"),
@@ -1074,7 +1074,7 @@ DataLink::notify_connection_deleted()
 
     if (trl != 0) {
       if (Transport_debug_level > 0) {
-        RepoIdConverter converter(itr2->first);
+        GuidConverter converter(itr2->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
                    ACE_TEXT("notify sub %C connection deleted.\n"),
@@ -1416,8 +1416,8 @@ operator<<(std::ostream& str, const DataLink& value)
          subLocation = pubLocation->second->map().begin();
          subLocation != pubLocation->second->map().end();
          ++subLocation) {
-      str << RepoIdConverter(pubLocation->first) << " --> "
-      << RepoIdConverter(subLocation->first) << "   " << std::endl;
+      str << GuidConverter(pubLocation->first) << " --> "
+      << GuidConverter(subLocation->first) << "   " << std::endl;
     }
   }
 

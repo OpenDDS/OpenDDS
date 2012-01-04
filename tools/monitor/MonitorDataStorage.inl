@@ -57,10 +57,10 @@ MonitorDataStorage::manageQosPolicy(
   return this->manageChildValue( node, child, label, QosToQString( value));
 }
 
-template< typename DataType>
+template<typename DataType>
 inline
 void
-MonitorDataStorage::update( const DataType&, bool)
+MonitorDataStorage::update(const DataType&, DDS::DomainParticipant_ptr, bool)
 {
   // Error condition.
   ACE_ERROR((LM_ERROR,
@@ -72,8 +72,9 @@ MonitorDataStorage::update( const DataType&, bool)
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::ServiceParticipantReport>(
   const OpenDDS::DCPS::ServiceParticipantReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -145,8 +146,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::ServiceParticipantReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::DomainParticipantReport>(
   const OpenDDS::DCPS::DomainParticipantReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -226,8 +228,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::TopicReport>(
   const OpenDDS::DCPS::TopicReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -289,8 +292,8 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
 
   // Move any references to this topic node to the more useful name node
   // just obtained.
-  if( node->reassignValueRefs( nameNode)) {
-nameNode->setColor( 1, QColor("#bfffbf"));
+  if (node->reassignValueRefs(nameNode)) {
+    nameNode->setColor(1, QColor("#bfffbf"));
     dataChanged = true;
   }
 
@@ -312,8 +315,9 @@ nameNode->setColor( 1, QColor("#bfffbf"));
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::PublisherReport>(
   const OpenDDS::DCPS::PublisherReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -388,8 +392,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::SubscriberReport>(
   const OpenDDS::DCPS::SubscriberReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -464,8 +469,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::DataWriterReport>(
   const OpenDDS::DCPS::DataWriterReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -553,8 +559,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::DataWriterPeriodicReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::DataWriterPeriodicReport>(
   const OpenDDS::DCPS::DataWriterPeriodicReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -703,8 +710,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterPeriodicReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::DataReaderReport>(
   const OpenDDS::DCPS::DataReaderReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -793,8 +801,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::DataReaderPeriodicReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::DataReaderPeriodicReport>(
   const OpenDDS::DCPS::DataReaderPeriodicReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -884,8 +893,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderPeriodicReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
+MonitorDataStorage::update<OpenDDS::DCPS::TransportReport>(
   const OpenDDS::DCPS::TransportReport& data,
+  DDS::DomainParticipant_ptr,
   bool remove
 )
 {
@@ -947,8 +957,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
 template<>
 inline
 void
-MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
+MonitorDataStorage::update<DDS::ParticipantBuiltinTopicData>(
   const DDS::ParticipantBuiltinTopicData& data,
+  DDS::DomainParticipant_ptr participant,
   bool remove
 )
 {
@@ -958,11 +969,16 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
-  OpenDDS::DCPS::RepoIdBuilder builder(id);
-  builder.from_BuiltinTopicKey(data.key);
+  OpenDDS::DCPS::Discovery_rch disc =
+    TheServiceParticipant->get_discovery(participant->get_domain_id());
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
+  OpenDDS::DCPS::RepoId id =
+    disc->bit_key_to_repo_id(dpi,
+                             OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                             data.key);
 
-  OpenDDS::DCPS::GuidConverter converter( id);
+  OpenDDS::DCPS::GuidConverter converter(id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s Participant Builtin Topic %C, key: ")
@@ -1011,8 +1027,9 @@ MonitorDataStorage::update< DDS::ParticipantBuiltinTopicData>(
 template<>
 inline
 void
-MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
+MonitorDataStorage::update<DDS::TopicBuiltinTopicData>(
   const DDS::TopicBuiltinTopicData& data,
+  DDS::DomainParticipant_ptr participant,
   bool remove
 )
 {
@@ -1036,9 +1053,14 @@ MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
-  OpenDDS::DCPS::RepoIdBuilder builder(id);
-  builder.from_BuiltinTopicKey(data.key);
+  OpenDDS::DCPS::Discovery_rch disc =
+    TheServiceParticipant->get_discovery(participant->get_domain_id());
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
+  OpenDDS::DCPS::RepoId id =
+    disc->bit_key_to_repo_id(dpi,
+                             OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
+                             data.key);
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
@@ -1095,8 +1117,9 @@ MonitorDataStorage::update< DDS::TopicBuiltinTopicData>(
 template<>
 inline
 void
-MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
+MonitorDataStorage::update<DDS::PublicationBuiltinTopicData>(
   const DDS::PublicationBuiltinTopicData& data,
+  DDS::DomainParticipant_ptr participant,
   bool remove
 )
 {
@@ -1123,9 +1146,14 @@ MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
-  OpenDDS::DCPS::RepoIdBuilder builder(id);
-  builder.from_BuiltinTopicKey(data.key);
+  OpenDDS::DCPS::Discovery_rch disc =
+    TheServiceParticipant->get_discovery(participant->get_domain_id());
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
+  OpenDDS::DCPS::RepoId id =
+    disc->bit_key_to_repo_id(dpi,
+                             OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC,
+                             data.key);
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,
@@ -1182,8 +1210,9 @@ MonitorDataStorage::update< DDS::PublicationBuiltinTopicData>(
 template<>
 inline
 void
-MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
+MonitorDataStorage::update<DDS::SubscriptionBuiltinTopicData>(
   const DDS::SubscriptionBuiltinTopicData& data,
+  DDS::DomainParticipant_ptr participant,
   bool remove
 )
 {
@@ -1208,9 +1237,14 @@ MonitorDataStorage::update< DDS::SubscriptionBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
-  OpenDDS::DCPS::RepoIdBuilder builder(id);
-  builder.from_BuiltinTopicKey(data.key);
+  OpenDDS::DCPS::Discovery_rch disc =
+    TheServiceParticipant->get_discovery(participant->get_domain_id());
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant);
+  OpenDDS::DCPS::RepoId id =
+    disc->bit_key_to_repo_id(dpi,
+                             OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC,
+                             data.key);
 
   OpenDDS::DCPS::GuidConverter converter( id);
   ACE_DEBUG((LM_DEBUG,

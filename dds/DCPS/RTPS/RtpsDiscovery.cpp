@@ -52,6 +52,17 @@ RtpsDiscovery::get_dcps_info()
   return DCPS::DCPSInfo::_duplicate(info_);
 }
 
+DCPS::RepoId
+RtpsDiscovery::bit_key_to_repo_id(DCPS::DomainParticipantImpl* participant,
+                                  const char* bit_topic_name,
+                                  const DDS::BuiltinTopicKey_t& key) const
+{
+  return servant_->bit_key_to_repo_id(participant->get_domain_id(),
+                                      participant->get_id(),
+                                      bit_topic_name, key);
+}
+
+
 namespace {
   void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
                      DCPS::SubscriberImpl* sub, const DDS::DataReaderQos& qos,

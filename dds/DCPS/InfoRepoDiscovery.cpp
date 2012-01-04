@@ -10,6 +10,7 @@
 #include "InfoRepoDiscovery.h"
 #include "Service_Participant.h"
 #include "InfoRepoUtils.h"
+#include "RepoIdBuilder.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "DomainParticipantImpl.h"
@@ -193,6 +194,20 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
   return bit_subscriber._retn();
 #endif
 }
+
+RepoId
+InfoRepoDiscovery::bit_key_to_repo_id(DomainParticipantImpl* /*participant*/,
+                                      const char* /*bit_topic_name*/,
+                                      const DDS::BuiltinTopicKey_t& key) const
+{
+  RepoId id = RepoIdBuilder::create();
+  RepoIdBuilder builder(id);
+  builder.federationId(key.value[0]);
+  builder.participantId(key.value[1]);
+  builder.entityId(key.value[2]);
+  return id;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

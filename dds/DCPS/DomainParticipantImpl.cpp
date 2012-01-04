@@ -1710,8 +1710,8 @@ DomainParticipantImpl::get_handle(const RepoId& id)
   if (location == this->handles_.end()) {
     // Map new handle in both directions
     result = this->participant_handles_.next();
-    this->handles_[ id] = result;
-    this->repoIds_[ result] = id;
+    this->handles_[id] = result;
+    this->repoIds_[result] = id;
   } else {
     result = location->second;
   }

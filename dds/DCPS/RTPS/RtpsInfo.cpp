@@ -35,7 +35,7 @@ RtpsInfo::add_domain_participant(DDS::DomainId_t domain,
 {
   DCPS::AddDomainStatus ads = {RepoId(), false /*federated*/};
   guid_gen_.populate(ads.id);
-  ads.id.entityId = RTPS::ENTITYID_PARTICIPANT;
+  ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
     participants_[domain][ads.id] = new Spdp(domain, ads.id, qos, disco_);
   } catch (const std::exception& e) {
@@ -83,6 +83,15 @@ RtpsInfo::init_bit(const DDS::Subscriber_var& bit_subscriber)
   DDS::DomainId_t domainId = participant->get_domain_id();
 
   participants_[domainId][participantId]->bit_subscriber(bit_subscriber);
+}
+
+RepoId
+RtpsInfo::bit_key_to_repo_id(DDS::DomainId_t domainId,
+                             const RepoId& partId,
+                             const char* bit_topic_name,
+                             const DDS::BuiltinTopicKey_t& key)
+{
+  return participants_[domainId][partId]->bit_key_to_repo_id(bit_topic_name, key);
 }
 
 // Topic operations:

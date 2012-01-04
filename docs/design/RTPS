@@ -47,6 +47,10 @@ Implementation Issues
 - WRITER_DATA_LIFECYCLE (8.7.2.2.7) notes that the same Data submessage should
   dispose and unregister an instance.  OpenDDS may use two Data submessages.
 - RTPS transport instances can not be shared by different Domain Participants.
+- Transport auto-selection (negotiation) is partially supported with RTPS.
+  The rtps_udp transport doesn't ever fail in the handshaking phase, so from
+  the framework's point of view, once it's attempted it is the selected
+  transport and no subsequent transports will be tried.
 
 Notes for Maintainers
 ---------------------

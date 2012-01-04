@@ -15,7 +15,6 @@
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
-#include "RepoIdBuilder.h"
 #include "TopicImpl.h"
 #include "Serializer.h"
 #include "SubscriberImpl.h"
@@ -2705,14 +2704,14 @@ DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 DDS::InstanceHandle_t
 DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 {
-  if (this->is_bit()) {
-    OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
-    OpenDDS::DCPS::RepoIdBuilder builder(id);
-    builder.from_BuiltinTopicKey(key);
-    return this->participant_servant_->get_handle(id);
+  if (is_bit()) {
+    Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
+    CORBA::String_var topic = get_topic_name();
+    RepoId id = disc->bit_key_to_repo_id(participant_servant_, topic, key);
+    return participant_servant_->get_handle(id);
 
   } else {
-    return this->participant_servant_->get_handle();
+    return participant_servant_->get_handle();
   }
 }
 

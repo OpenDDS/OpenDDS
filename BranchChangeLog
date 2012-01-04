@@ -1,3 +1,104 @@
+Wed Jan  4 20:49:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.inl:
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/RepoIdConverter.cpp:
+
+          Removed methods that required assumptions about the way that
+          InstanceHandles and BuiltinTopicKeys were assigned.  Those
+          asssumptions are no longer valid with RTPS discovery.
+
+        * dds/DCPS/Discovery.h:
+
+          Provide a new pure-virtual method, bit_key_to_repo_id().
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Use bit_key_to_repo_id() instead of RepoIdBuilder.
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Removed instance handle "hack", it should no longer be needed.
+          Instead we can directly read_instance() on the BIT Data Reader.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed crazy whitespace.
+
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+
+          Implemented bit_key_to_repo_id() for use with
+          DCPSInfoRepo-assigned GUIDs.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Implemented bit_key_to_repo_id() for use with
+          RTPS Discovery-assigned GUIDs.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented bit_key_to_repo_id() and methods to manage assignment
+          of BIT Keys (12 bytes) from arbitrary GUIDs (16 bytes) which may
+          come from foreign DDS implementations.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Replaced RepoIdConverter with GuidConverter when it's only
+          being used to create strings for logging.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+
+          Removed an unused #include.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Moved logic which used to be in RepoIdConverter for generating
+          BIT Keys into the InfoRepo code.  This is an implementation detail
+          of the DCPSInfoRepo.
+
+        * performance-tests/DCPS/Priority/Writer.cpp:
+
+          Get the Writer's instance handle directly.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Updated for RepoIdConverter changes.
+          This will currently not work with RTPS discovery.
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Updated to use the new way of converting from BIT Keys to GUIDs.
+
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorDataStorage.inl:
+        * tools/monitor/MonitorTask.cpp:
+
+          Updated the monitoring tool to use the new way of converting
+          from BIT Keys to GUIDs.
+
+        * docs/design/RTPS:
+
+          Added more notes on how the rtps_udp transport works.
+
 Wed Jan  4 20:09:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:

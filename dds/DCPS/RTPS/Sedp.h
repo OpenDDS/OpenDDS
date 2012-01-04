@@ -20,6 +20,7 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataSampleList.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -68,6 +69,9 @@ public:
   bool ignoring(const DCPS::RepoId& guid) const {
     return ignored_guids_.count(guid);
   }
+
+  DCPS::RepoId bit_key_to_repo_id(const char* bit_topic_name,
+                                  const DDS::BuiltinTopicKey_t& key);
 
   void associate(const SPDPdiscoveredParticipantData& pdata);
   void disassociate(const SPDPdiscoveredParticipantData& pdata);
@@ -303,6 +307,15 @@ private:
                    DCPS::GUID_tKeyLessThan> DiscoveredSubscriptionMap;
   typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
   DiscoveredSubscriptionMap discovered_subscriptions_;
+
+  void assign_bit_key(DiscoveredPublication& pub);
+  void assign_bit_key(DiscoveredSubscription& sub);
+  void increment_key(DDS::BuiltinTopicKey_t& key);
+
+  DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
+  typedef std::map<DDS::BuiltinTopicKey_t, DCPS::RepoId,
+                   DCPS::BuiltinTopicKeyLess> BitKeyMap;
+  BitKeyMap pub_key_to_id_, sub_key_to_id_;
 
   template<typename Map>
   void remove_entities_belonging_to(Map& m, const DCPS::RepoId& participant);

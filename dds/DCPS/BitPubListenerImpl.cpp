@@ -12,9 +12,10 @@
 
 #include "BitPubListenerImpl.h"
 #include "DomainParticipantImpl.h"
-#include "RepoIdBuilder.h"
 #include "GuidConverter.h"
-
+#include "Discovery.h"
+#include "Service_Participant.h"
+#include "BuiltInTopicUtils.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -44,15 +45,16 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ::DDS::PublicationBuiltinTopicData data;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = bit_dr->take_next_sample(data, si) ;
+    DDS::ReturnCode_t status = bit_dr->take_next_sample(data, si);
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
-        RepoIdBuilder build;
-        build.from_BuiltinTopicKey (data.key);
-        PublicationId pub_id (build);
+        Discovery_rch disc =
+          TheServiceParticipant->get_discovery(partipant_->get_domain_id());
+        PublicationId pub_id =
+          disc->bit_key_to_repo_id(partipant_, BUILT_IN_PUBLICATION_TOPIC, data.key);
         CORBA::Long ownership_strength = data.ownership_strength.value;
-        this->partipant_->update_ownership_strength (pub_id,ownership_strength);
+        this->partipant_->update_ownership_strength(pub_id, ownership_strength);
         GuidConverter writer_converter(pub_id);
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available: %X ")

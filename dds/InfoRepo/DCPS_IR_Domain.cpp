@@ -1029,6 +1029,17 @@ DCPS_IR_Domain::last_participant_key(long key)
   this->participantIdGenerator_.last(key);
 }
 
+namespace {
+  void get_BuiltinTopicKey(DDS::BuiltinTopicKey_t& key,
+                           const OpenDDS::DCPS::RepoId& id)
+  {
+    OpenDDS::DCPS::RepoIdConverter c(id);
+    key.value[0] = c.federationId();
+    key.value[1] = c.participantId();
+    key.value[2] = c.entityId();
+  }
+}
+
 void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -1037,10 +1048,9 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
     if (!participant->is_bit()) {
       try {
         const DDS::DomainParticipantQos* participantQos = participant->get_qos();
-        OpenDDS::DCPS::RepoIdConverter converter(participant->get_id());
 
         DDS::ParticipantBuiltinTopicData data;
-        converter.get_BuiltinTopicKey(data.key);
+        get_BuiltinTopicKey(data.key, participant->get_id());
         data.user_data = participantQos->user_data;
 
         DDS::InstanceHandle_t handle
@@ -1091,10 +1101,9 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
     if (isNotBIT) {
       try {
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
-        OpenDDS::DCPS::RepoIdConverter converter(topic->get_id());
 
         DDS::TopicBuiltinTopicData data;
-        converter.get_BuiltinTopicKey(data.key);
+        get_BuiltinTopicKey(data.key, topic->get_id());
         data.name = desc->get_name();
         data.type_name = desc->get_dataTypeName();
         data.durability = topicQos->durability;
@@ -1163,12 +1172,10 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
         DCPS_IR_Topic* topic = subscription->get_topic();
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
-        OpenDDS::DCPS::RepoIdConverter part_converter(subscription->get_participant_id());
-        OpenDDS::DCPS::RepoIdConverter sub_converter(subscription->get_id());
-
         DDS::SubscriptionBuiltinTopicData data;
-        sub_converter.get_BuiltinTopicKey(data.key);
-        part_converter.get_BuiltinTopicKey(data.participant_key);
+        get_BuiltinTopicKey(data.key, subscription->get_id());
+        get_BuiltinTopicKey(data.participant_key,
+                            subscription->get_participant_id());
         data.topic_name = desc->get_name();
         data.type_name = desc->get_dataTypeName();
         data.durability = readerQos->durability;
@@ -1238,12 +1245,10 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
         DCPS_IR_Topic* topic = publication->get_topic();
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
-        OpenDDS::DCPS::RepoIdConverter part_converter(publication->get_participant_id());
-        OpenDDS::DCPS::RepoIdConverter pub_converter(publication->get_id());
-
         DDS::PublicationBuiltinTopicData data;
-        pub_converter.get_BuiltinTopicKey(data.key);
-        part_converter.get_BuiltinTopicKey(data.participant_key);
+        get_BuiltinTopicKey(data.key, publication->get_id());
+        get_BuiltinTopicKey(data.participant_key,
+                            publication->get_participant_id());
         data.topic_name = desc->get_name();
         data.type_name = desc->get_dataTypeName();
         data.durability = writerQos->durability;

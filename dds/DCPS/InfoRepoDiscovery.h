@@ -51,6 +51,9 @@ public:
 
   virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant);
 
+  virtual RepoId bit_key_to_repo_id(DomainParticipantImpl* participant,
+                                    const char* bit_topic_name,
+                                    const DDS::BuiltinTopicKey_t& key) const;
 private:
   TransportConfig_rch bit_config();
 

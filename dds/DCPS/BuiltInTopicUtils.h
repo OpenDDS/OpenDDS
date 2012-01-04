@@ -14,7 +14,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Service_Participant.h"
-#include "RepoIdBuilder.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
 #include <sstream>
@@ -70,10 +69,10 @@ public:
     const DDS::InstanceHandle_t& handle,
     BIT_DataSeq&                 data)
   {
-    DDS::Subscriber_var bit_subscriber = dp->get_builtin_subscriber() ;
+    DDS::Subscriber_var bit_subscriber = dp->get_builtin_subscriber();
 
     DDS::DataReader_var reader =
-      bit_subscriber->lookup_datareader(bit_name) ;
+      bit_subscriber->lookup_datareader(bit_name);
 
     BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
@@ -91,12 +90,13 @@ public:
     while (1) {
       DDS::SampleInfoSeq the_info;
       BIT_DataSeq the_data;
-      ret = bit_reader->read(the_data,
-                             the_info,
-                             DDS::LENGTH_UNLIMITED, // zero-copy
-                             DDS::ANY_SAMPLE_STATE,
-                             DDS::ANY_VIEW_STATE,
-                             DDS::ANY_INSTANCE_STATE);
+      ret = bit_reader->read_instance(the_data,
+                                      the_info,
+                                      DDS::LENGTH_UNLIMITED, // zero-copy
+                                      handle,
+                                      DDS::ANY_SAMPLE_STATE,
+                                      DDS::ANY_VIEW_STATE,
+                                      DDS::ANY_INSTANCE_STATE);
 
       if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -106,17 +106,10 @@ public:
                          ret);
       }
 
-      // This is a temporary hack to work around the entity/data
-      // instance handle mismatch when data handles are passed
-      // to ignore_*. see: docs/design/instance-handles.txt
-      for (CORBA::ULong i = 0; i < the_data.length(); ++i) {
-        if (the_info[i].instance_handle == handle ||
-            the_data[i].key.value[2] == handle) {
-          data.length(1);
-          data[0] = the_data[i];
-
-          return DDS::RETCODE_OK;
-        }
+      if (ret == DDS::RETCODE_OK) {
+        data.length(1);
+        data[0] = the_data[0];
+        return ret;
       }
 
       ACE_Time_Value now = ACE_OS::gettimeofday();

@@ -221,6 +221,21 @@ Spdp::remove_expired_participants()
   }
 }
 
+RepoId
+Spdp::bit_key_to_repo_id(const char* bit_topic_name,
+                         const DDS::BuiltinTopicKey_t& key)
+{
+  if (0 == std::strcmp(bit_topic_name, DCPS::BUILT_IN_PARTICIPANT_TOPIC)) {
+    RepoId guid;
+    std::memcpy(guid.guidPrefix, key.value, sizeof(DDS::BuiltinTopicKeyValue));
+    guid.entityId = ENTITYID_PARTICIPANT;
+    return guid;
+
+  } else {
+    return sedp_.bit_key_to_repo_id(bit_topic_name, key);
+  }
+}
+
 void
 Spdp::bit_subscriber(const DDS::Subscriber_var& bit_subscriber)
 {

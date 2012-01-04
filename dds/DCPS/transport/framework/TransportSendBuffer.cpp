@@ -17,7 +17,7 @@
 
 #include "ace/Log_Msg.h"
 
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #ifndef __ACE_INLINE__
 # include "TransportSendBuffer.inl"
@@ -86,7 +86,7 @@ void
 SingleSendBuffer::retain_all(RepoId pub_id)
 {
   if (Transport_debug_level >= 4) {
-    RepoIdConverter converter(pub_id);
+    GuidConverter converter(pub_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::retain_all() - ")
       ACE_TEXT("copying out blocks for publication: %C\n"),
@@ -108,7 +108,7 @@ SingleSendBuffer::retain_all(RepoId pub_id)
 
     buffer.first->accept_replace_visitor(visitor);
     if (visitor.status() == REMOVE_ERROR) {
-      RepoIdConverter converter(pub_id);
+      GuidConverter converter(pub_id);
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("SingleSendBuffer::retain_all: ")

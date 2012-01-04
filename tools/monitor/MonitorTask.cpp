@@ -17,7 +17,7 @@
 #include "dds/monitor/monitorTypeSupportImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
@@ -773,11 +773,11 @@ Monitor::MonitorTask::dataUpdate(
   DDS::SampleInfo info;
   while( DDS::RETCODE_OK == typedReader->take_next_sample( data, info)) {
     if( info.valid_data) {
-      this->data_->update( data);
+      this->data_->update(data, this->participant_);
       ++valid;
 
     } else if( info.instance_state & DDS::NOT_ALIVE_INSTANCE_STATE) {
-      this->data_->update( data, true);
+      this->data_->update(data, this->participant_, true);
       ++invalid;
     }
   }
@@ -818,11 +818,11 @@ Monitor::MonitorTask::builtinTopicUpdate(
   DDS::SampleInfo info;
   while( DDS::RETCODE_OK == typedReader->read_next_sample( data, info)) {
     if( info.valid_data) {
-      this->data_->update( data);
+      this->data_->update(data, this->participant_);
       ++valid;
 
     } else if( info.instance_state & DDS::NOT_ALIVE_INSTANCE_STATE) {
-      this->data_->update( data, true);
+      this->data_->update(data, this->participant_, true);
       ++invalid;
     }
   }
@@ -857,13 +857,12 @@ Monitor::MonitorTask::readBuiltinTopicData(
     = ReaderType::_narrow(reader.in());
 
   // Find the instance to read.
-  OpenDDS::DCPS::RepoIdConverter converter( id);
-  converter.get_BuiltinTopicKey( data.key);
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(this->participant_.in());
+  DDS::InstanceHandle_t instance = dpi->get_handle(id);
 
-  // Find the instance we are interested in.
-  DDS::InstanceHandle_t instance = typedReader->lookup_instance( data);
-
-  if( this->options_.verbose()) {
+  if (this->options_.verbose()) {
+    OpenDDS::DCPS::GuidConverter converter(id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
       ACE_TEXT("id: %C ==> BuiltinTopic key: ")
@@ -875,7 +874,8 @@ Monitor::MonitorTask::readBuiltinTopicData(
     ));
   }
 
-  if( instance == DDS::HANDLE_NIL) {
+  if (instance == DDS::HANDLE_NIL) {
+    OpenDDS::DCPS::GuidConverter converter(id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
       ACE_TEXT("no data for id %C at this time.\n"),

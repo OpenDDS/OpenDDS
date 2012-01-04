@@ -19,7 +19,6 @@
 
 #include "tao/ORB_Core.h"
 
-#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #ifndef __ACE_INLINE__
