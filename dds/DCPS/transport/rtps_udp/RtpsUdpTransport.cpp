@@ -53,7 +53,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                       ACE_TEXT("failed to open DataLink for socket %d\n"),
-                      unicast_socket_),
+                      unicast_socket_.get_handle()),
                      0);
   }
 

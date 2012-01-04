@@ -1,3 +1,9 @@
+Wed Jan  4 20:08:01 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fix log message error.
+
 Wed Jan  4 19:45:46 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
