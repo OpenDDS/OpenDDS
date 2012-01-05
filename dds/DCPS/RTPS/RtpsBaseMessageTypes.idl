@@ -10,6 +10,7 @@
 #define RTPS_RTPSBASEMESSAGETYPES_IDL
 
 #include "../../DdsDcpsGuid.idl"
+#include "../../DdsDcpsInfoUtils.idl"
 #include "../../DdsDcpsInfrastructure.idl"
 
 module OpenDDS {
@@ -278,6 +279,9 @@ module OpenDDS {
     const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
     const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
 
+    // Vendor-specific parameters
+    const ParameterId_t PID_OPENDDS_LOCATOR = PIDMASK_VENDOR_SPECIFIC + 1;
+
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
     union Parameter switch (ParameterId_t) {
@@ -409,6 +413,9 @@ module OpenDDS {
 
       case PID_ORIGINAL_WRITER_INFO:
         OriginalWriterInfo_t original_writer_info;
+
+      case PID_OPENDDS_LOCATOR:
+        DCPS::TransportLocator opendds_locator;
 
       default:
         OctetSeq unknown_data;

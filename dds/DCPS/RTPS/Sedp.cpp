@@ -1033,10 +1033,8 @@ Sedp::populate_discovered_writer_msg(
           pub.trans_info_[i].data;
   }
 
-  dwd.writerProxy.multicastLocatorList;  // TODO
   return DDS::RETCODE_OK;
 }
-
 
 
 }

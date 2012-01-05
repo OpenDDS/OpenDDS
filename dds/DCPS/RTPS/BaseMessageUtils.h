@@ -9,6 +9,7 @@
 #ifndef RTPS_BASEMESSAGEUTILS_H
 #define RTPS_BASEMESSAGEUTILS_H
 
+#include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/Serializer.h"
 #include "RtpsBaseMessageTypesC.h"
@@ -158,6 +159,18 @@ blob_to_locators(
                       DDS::RETCODE_ERROR);
   }
   return DDS::RETCODE_OK;
+}
+
+inline void
+locators_to_blob(const LocatorSeq& locators, DCPS::TransportBLOB& blob)
+{
+  using OpenDDS::DCPS::Serializer;
+  size_t size_locator = 0, padding_locator = 0;
+  DCPS::gen_find_size(locators, size_locator, padding_locator);
+  ACE_Message_Block mb_locator(size_locator + padding_locator);
+  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  ser_loc << locators;
+  blob.replace(static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
 }
 
 }

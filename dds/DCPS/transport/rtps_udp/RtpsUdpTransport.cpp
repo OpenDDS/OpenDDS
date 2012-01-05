@@ -126,36 +126,16 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote) const
 
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
-    switch (locators[i].kind) {
-#ifdef ACE_HAS_IPV6
-    case LOCATOR_KIND_UDPv6:
-      addr.set_type(AF_INET6);
-      if (addr.set_address(reinterpret_cast<const char*>(locators[i].address),
-                           16) == -1) {
-        break;
-      }
-      addr.set_port_number(locators[i].port);
+    // If conversion was successful
+    if (locator_to_address(addr, locators[i]) == 0) {
+      // if this is a unicast address, or if we are allowing multicast
       if (!addr.is_multicast() || config_i_->use_multicast_) {
         return addr;
       }
-      break;
-#endif
-    case LOCATOR_KIND_UDPv4:
-      addr.set_type(AF_INET);
-      if (addr.set_address(reinterpret_cast<const char*>(locators[i].address)
-                           + 12, 4, 0 /*network order*/) == -1) {
-        break;
-      }
-      addr.set_port_number(locators[i].port);
-      if (!addr.is_multicast() || config_i_->use_multicast_) {
-        return addr;
-      }
-      break;
-    default:
-      break;
     }
   }
 
+  // Return default address
   return ACE_INET_Addr();
 }
 
