@@ -93,7 +93,6 @@ public:
     std::string data_type_;
     DDS::TopicQos qos_;
     DCPS::RepoId repo_id_;
-    bool has_dcps_key_;
   };
 
   // Publication
@@ -163,30 +162,7 @@ private:
 
   class Writer : public DCPS::TransportSendListener, public Endpoint {
   public:
-    Writer(const DCPS::RepoId& pub_id, Sedp& sedp)
-      : Endpoint(pub_id, sedp),
-        alloc_(2, sizeof(DCPS::TransportSendElementAllocator))
-    {
-      header_.prefix[0] = 'R';
-      header_.prefix[1] = 'T';
-      header_.prefix[2] = 'P';
-      header_.prefix[3] = 'S';
-      header_.version = PROTOCOLVERSION;
-      header_.vendorId = VENDORID_OPENDDS;
-      header_.guidPrefix[0] = pub_id.guidPrefix[0];
-      header_.guidPrefix[1] = pub_id.guidPrefix[1],
-      header_.guidPrefix[2] = pub_id.guidPrefix[2];
-      header_.guidPrefix[3] = pub_id.guidPrefix[3];
-      header_.guidPrefix[4] = pub_id.guidPrefix[4];
-      header_.guidPrefix[5] = pub_id.guidPrefix[5];
-      header_.guidPrefix[6] = pub_id.guidPrefix[6];
-      header_.guidPrefix[7] = pub_id.guidPrefix[7];
-      header_.guidPrefix[8] = pub_id.guidPrefix[8];
-      header_.guidPrefix[9] = pub_id.guidPrefix[9];
-      header_.guidPrefix[10] = pub_id.guidPrefix[10];
-      header_.guidPrefix[11] = pub_id.guidPrefix[11];
-    }
-
+    Writer(const DCPS::RepoId& pub_id, Sedp& sedp);
     virtual ~Writer();
 
     bool assoc(const DCPS::AssociationData& subscription);
@@ -196,10 +172,10 @@ private:
 
     void data_dropped(const DCPS::DataSampleListElement*, bool by_transport);
 
-    void control_delivered(ACE_Message_Block* /*sample*/);
+    void control_delivered(ACE_Message_Block* sample);
 
-    void control_dropped(ACE_Message_Block* /*sample*/,
-                         bool /*dropped_by_transport*/);
+    void control_dropped(ACE_Message_Block* sample,
+                         bool dropped_by_transport);
 
     void notify_publication_disconnected(const DCPS::ReaderIdSeq&) {}
     void notify_publication_reconnected(const DCPS::ReaderIdSeq&) {}
@@ -321,25 +297,38 @@ private:
 
   template<typename Map>
   void remove_entities_belonging_to(Map& m, const DCPS::RepoId& participant);
+
   void remove_from_bit(const DiscoveredPublication& pub);
   void remove_from_bit(const DiscoveredSubscription& sub);
+
+  const char* get_topic_name(const DiscoveredPublication& pub) {
+    return pub.writer_data_.ddsPublicationData.topic_name;
+  }
+  const char* get_topic_name(const DiscoveredSubscription& sub) {
+    return sub.reader_data_.ddsSubscriptionData.topic_name;
+  }
 
   bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
                   const DDS::PublicationBuiltinTopicData& src);
   bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
                   const DDS::SubscriptionBuiltinTopicData& src);
 
-  std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> ignored_guids_;
+  typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
+  RepoIdSet ignored_guids_;
   std::set<std::string> ignored_topics_;
 
   // Topic:
-  std::map<std::string, TopicDetails> topics_;
+  struct TopicDetailsEx : TopicDetails {
+    bool has_dcps_key_;
+    RepoIdSet endpoints_;
+  };
+  std::map<std::string, TopicDetailsEx> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
   bool has_dcps_key(const DCPS::RepoId& topicId) const;
 
-  static DCPS::RepoId
-  make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity);
+  static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
+                              const EntityId_t& entity);
 };
 
 }

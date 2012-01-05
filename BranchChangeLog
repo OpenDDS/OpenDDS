@@ -1,3 +1,16 @@
+Thu Jan  5 17:23:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Improve use of std::map operations.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Moved Writer constructor to the cpp file.
+          Added set of GUIDs (publications/subscriptions) to the Topic info.
+          Improve use of std::map operations.
+
 Thu Jan  5 15:54:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

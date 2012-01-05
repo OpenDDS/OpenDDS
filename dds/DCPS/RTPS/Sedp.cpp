@@ -146,6 +146,7 @@ Sedp::ignore(const DCPS::RepoId& to_ignore)
       discovered_publications_.find(to_ignore);
     if (iter != discovered_publications_.end()) {
       //TODO: break associations
+      topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
       discovered_publications_.erase(iter);
       return;
@@ -156,6 +157,7 @@ Sedp::ignore(const DCPS::RepoId& to_ignore)
       discovered_subscriptions_.find(to_ignore);
     if (iter != discovered_subscriptions_.end()) {
       //TODO: break associations
+      topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
       discovered_subscriptions_.erase(iter);
       return;
@@ -321,6 +323,7 @@ Sedp::remove_entities_belonging_to(Map& m, const RepoId& participant)
        i != m.end() && 0 == std::memcmp(i->first.guidPrefix,
                                         participant.guidPrefix,
                                         sizeof(GuidPrefix_t));) {
+    topics_[get_topic_name(i->second)].endpoints_.erase(i->first);
     remove_from_bit(i->second);
     m.erase(i++);
   }
@@ -380,13 +383,15 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
                    const char* dataTypeName, const DDS::TopicQos& qos,
                    bool hasDcpsKey)
 {
-  if (topics_.count(topicName)) { // types must match, RtpsInfo checked for us
-    topics_[topicName].qos_ = qos;
-    topicId = topics_[topicName].repo_id_;
+  std::map<std::string, TopicDetailsEx>::iterator iter =
+    topics_.find(topicName);
+  if (iter != topics_.end()) { // types must match, RtpsInfo checked for us
+    iter->second.qos_ = qos;
+    topicId = iter->second.repo_id_;
     return DCPS::FOUND;
   }
 
-  TopicDetails& td = topics_[topicName];
+  TopicDetailsEx& td = iter->second;
   td.data_type_ = dataTypeName;
   td.qos_ = qos;
   td.has_dcps_key_ = hasDcpsKey;
@@ -420,8 +425,10 @@ bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
                        std::string& name)
 {
-  if (topic_names_.count(topicId)) {
-    name = topic_names_[topicId];
+  std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator iter =
+    topic_names_.find(topicId);
+  if (iter != topic_names_.end()) {
+    name = iter->second;
     topics_[name].qos_ = qos;
     return true;
   }
@@ -435,7 +442,7 @@ Sedp::has_dcps_key(const RepoId& topicId) const
   TNMap::const_iterator tn = topic_names_.find(topicId);
   if (tn == topic_names_.end()) return false;
 
-  typedef std::map<std::string, TopicDetails> TDMap;
+  typedef std::map<std::string, TopicDetailsEx> TDMap;
   TDMap::const_iterator td = topics_.find(tn->second);
   if (td == topics_.end()) return false;
 
@@ -461,6 +468,7 @@ Sedp::add_publication(const RepoId& topicId,
   pb.qos_ = qos;
   pb.trans_info_ = transInfo;
   pb.publisher_qos_ = publisherQos;
+  topics_[topic_names_[topicId]].endpoints_.insert(rid);
 
   DiscoveredWriterData dwd;
   if (DDS::RETCODE_OK == populate_discovered_writer_msg(dwd, rid, pb)) {
@@ -489,8 +497,9 @@ Sedp::update_publication_qos(const RepoId& publicationId,
                              const DDS::DataWriterQos& qos,
                              const DDS::PublisherQos& publisherQos)
 {
-  if (local_publications_.count(publicationId)) {
-    LocalPublication& pb = local_publications_[publicationId];
+  LocalPublicationIter iter = local_publications_.find(publicationId);
+  if (iter != local_publications_.end()) {
+    LocalPublication& pb = iter->second;
     pb.qos_ = qos;
     pb.publisher_qos_ = publisherQos;
     // TODO: tell the world about the change with SEDP
@@ -522,6 +531,7 @@ Sedp::add_subscription(const RepoId& topicId,
   sb.trans_info_ = transInfo;
   sb.subscriber_qos_ = subscriberQos;
   sb.params_ = params;
+  topics_[topic_names_[topicId]].endpoints_.insert(rid);
 
   // TODO: use SEDP to advertise the new subscription
 
@@ -541,8 +551,9 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
                               const DDS::DataReaderQos& qos,
                               const DDS::SubscriberQos& subscriberQos)
 {
-  if (local_subscriptions_.count(subscriptionId)) {
-    LocalSubscription& sb = local_subscriptions_[subscriptionId];
+  LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
+  if (iter != local_subscriptions_.end()) {
+    LocalSubscription& sb = iter->second;
     sb.qos_ = qos;
     sb.subscriber_qos_ = subscriberQos;
     // TODO: tell the world about the change with SEDP
@@ -556,8 +567,9 @@ bool
 Sedp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
-  if (local_subscriptions_.count(subId)) {
-    LocalSubscription& sb = local_subscriptions_[subId];
+  LocalSubscriptionIter iter = local_subscriptions_.find(subId);
+  if (iter != local_subscriptions_.end()) {
+    LocalSubscription& sb = iter->second;
     sb.params_ = params;
     // TODO: tell the world about the change with SEDP
 
@@ -591,6 +603,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
       pub.bit_ih_ =
         pub_bit()->store_synthetic_data(pub.writer_data_.ddsPublicationData,
                                         DDS::NEW_VIEW_STATE);
+      topics_[get_topic_name(pub)].endpoints_.insert(guid);
       //TODO: match local subscription(s)
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
@@ -601,6 +614,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 
   } else { // this is some combination of dispose and/or unregister
     if (iter != discovered_publications_.end()) {
+      topics_[get_topic_name(iter->second)].endpoints_.erase(guid);
       //TODO: unmatch local subscription(s)
       remove_from_bit(iter->second);
       discovered_publications_.erase(iter);
@@ -633,6 +647,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       sub.bit_ih_ =
         sub_bit()->store_synthetic_data(sub.reader_data_.ddsSubscriptionData,
                                         DDS::NEW_VIEW_STATE);
+      topics_[get_topic_name(sub)].endpoints_.insert(guid);
       //TODO: match local publication(s)
     } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                           rdata.ddsSubscriptionData)) { // update existing
@@ -643,6 +658,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
 
   } else { // this is some combination of dispose and/or unregister
     if (iter != discovered_subscriptions_.end()) {
+      topics_[get_topic_name(iter->second)].endpoints_.erase(guid);
       //TODO: unmatch local publication(s)
       remove_from_bit(iter->second);
       discovered_subscriptions_.erase(iter);
@@ -781,6 +797,29 @@ Sedp::Endpoint::~Endpoint()
 }
 
 //---------------------------------------------------------------
+Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
+  : Endpoint(pub_id, sedp),
+    alloc_(2, sizeof(DCPS::TransportSendElementAllocator))
+{
+  header_.prefix[0] = 'R';
+  header_.prefix[1] = 'T';
+  header_.prefix[2] = 'P';
+  header_.prefix[3] = 'S';
+  header_.version = PROTOCOLVERSION;
+  header_.vendorId = VENDORID_OPENDDS;
+  header_.guidPrefix[0] = pub_id.guidPrefix[0];
+  header_.guidPrefix[1] = pub_id.guidPrefix[1],
+  header_.guidPrefix[2] = pub_id.guidPrefix[2];
+  header_.guidPrefix[3] = pub_id.guidPrefix[3];
+  header_.guidPrefix[4] = pub_id.guidPrefix[4];
+  header_.guidPrefix[5] = pub_id.guidPrefix[5];
+  header_.guidPrefix[6] = pub_id.guidPrefix[6];
+  header_.guidPrefix[7] = pub_id.guidPrefix[7];
+  header_.guidPrefix[8] = pub_id.guidPrefix[8];
+  header_.guidPrefix[9] = pub_id.guidPrefix[9];
+  header_.guidPrefix[10] = pub_id.guidPrefix[10];
+  header_.guidPrefix[11] = pub_id.guidPrefix[11];
+}
 
 Sedp::Writer::~Writer()
 {

@@ -102,10 +102,13 @@ RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
                        const char* topicName, const char* dataTypeName,
                        const DDS::TopicQos& qos, bool hasDcpsKey)
 {
-  if (topics_.count(domainId)) {
+  std::map<DDS::DomainId_t,
+           std::map<std::string, Sedp::TopicDetails> >::iterator topic_it =
+    topics_.find(domainId);
+  if (topic_it != topics_.end()) {
     const std::map<std::string, Sedp::TopicDetails>::iterator it =
-      topics_[domainId].find(topicName);
-    if (it != topics_[domainId].end()
+      topic_it->second.find(topicName);
+    if (it != topic_it->second.end()
         && it->second.data_type_ != dataTypeName) {
       topicId = GUID_UNKNOWN;
       return DCPS::CONFLICTING_TYPENAME;
@@ -121,7 +124,6 @@ RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
     td.data_type_ = dataTypeName;
     td.qos_ = qos;
     td.repo_id_ = topicId;
-    td.has_dcps_key_ = hasDcpsKey;
     ++topic_use_[domainId][topicName];
   }
   return stat;
@@ -132,13 +134,18 @@ RtpsInfo::find_topic(DDS::DomainId_t domainId, const char* topicName,
                      CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
                      DCPS::RepoId_out topicId)
 {
-  if (!topics_.count(domainId)) {
+  std::map<DDS::DomainId_t,
+           std::map<std::string, Sedp::TopicDetails> >::iterator topic_it =
+    topics_.find(domainId);
+  if (topic_it == topics_.end()) {
     return DCPS::NOT_FOUND;
   }
-  if (!topics_[domainId].count(topicName)) {
+  std::map<std::string, Sedp::TopicDetails>::iterator iter =
+    topic_it->second.find(topicName);
+  if (iter == topic_it->second.end()) {
     return DCPS::NOT_FOUND;
   }
-  Sedp::TopicDetails& td = topics_[domainId][topicName];
+  Sedp::TopicDetails& td = iter->second;
   dataTypeName = td.data_type_.c_str();
   qos = new DDS::TopicQos(td.qos_);
   topicId = td.repo_id_;
@@ -150,7 +157,10 @@ DCPS::TopicStatus
 RtpsInfo::remove_topic(DDS::DomainId_t domainId, const RepoId& participantId,
                        const RepoId& topicId)
 {
-  if (!topics_.count(domainId)) {
+  std::map<DDS::DomainId_t,
+           std::map<std::string, Sedp::TopicDetails> >::iterator topic_it =
+    topics_.find(domainId);
+  if (topic_it == topics_.end()) {
     return DCPS::NOT_FOUND;
   }
 
@@ -161,12 +171,12 @@ RtpsInfo::remove_topic(DDS::DomainId_t domainId, const RepoId& participantId,
   if (stat == DCPS::REMOVED) {
     if (0 == --topic_use_[domainId][name]) {
       topic_use_[domainId].erase(name);
-      if (topic_use_[domainId].empty()) {
+      if (topic_it->second.empty()) {
         topic_use_.erase(domainId);
       }
-      topics_[domainId].erase(name);
-      if (topics_[domainId].empty()) {
-        topics_.erase(domainId);
+      topic_it->second.erase(name);
+      if (topic_it->second.empty()) {
+        topics_.erase(topic_it);
       }
     }
   }
