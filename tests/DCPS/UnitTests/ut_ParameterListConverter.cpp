@@ -5,11 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "ace/OS_main.h"
 #include "dds/DCPS/RTPS/ParameterListConverter.h"
 #include "../common/TestSupport.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include <iostream>
@@ -24,30 +26,19 @@ namespace {
   namespace Factory {
     Locator_t locator(long kind,
                       unsigned long port,
-                      unsigned int addr0, 
-                      unsigned int addr1, 
-                      unsigned int addr2,
-                      unsigned int addr3)
+                      unsigned char addr0, 
+                      unsigned char addr1, 
+                      unsigned char addr2,
+                      unsigned char addr3)
     {
       Locator_t result;
       result.kind = kind;
       result.port = port;
-      result.address[ 0] = addr0 & 0x000000FF;
-      result.address[ 1] = addr0 & 0x0000FF00;
-      result.address[ 2] = addr0 & 0x00FF0000;
-      result.address[ 3] = addr0 & 0xFF000000;
-      result.address[ 4] = addr1 & 0x000000FF;
-      result.address[ 5] = addr1 & 0x0000FF00;
-      result.address[ 6] = addr1 & 0x00FF0000;
-      result.address[ 7] = addr1 & 0xFF000000;
-      result.address[ 8] = addr2 & 0x000000FF;
-      result.address[ 9] = addr2 & 0x0000FF00;
-      result.address[10] = addr2 & 0x00FF0000;
-      result.address[11] = addr2 & 0xFF000000;
-      result.address[12] = addr3 & 0x000000FF;
-      result.address[13] = addr3 & 0x0000FF00;
-      result.address[14] = addr3 & 0x00FF0000;
-      result.address[15] = addr3 & 0xFF000000;
+      memset(result.address, 0, sizeof(result.address));
+      result.address[12] = addr0;
+      result.address[13] = addr1;
+      result.address[14] = addr2;
+      result.address[15] = addr3;
 
       return result;
     }
@@ -314,17 +305,27 @@ namespace {
         }
       }
       guid_generator.populate(result.writerProxy.remoteWriterGuid);
-      if (num_uc_locs && uc_locs) {
-        result.writerProxy.unicastLocatorList.length(num_uc_locs);
-        for (CORBA::ULong i = 0; i < num_uc_locs; ++i) {
-          result.writerProxy.unicastLocatorList[i] = uc_locs[i];
+      // One DCPS locator for all unicast and multicast locators
+      if ((num_uc_locs && uc_locs) || (num_mc_locs || mc_locs)) {
+        CORBA::ULong len = result.writerProxy.allLocators.length();
+        result.writerProxy.allLocators.length(len + 1);
+        OpenDDS::DCPS::TransportLocator& loc = result.writerProxy.allLocators[len];
+        // Combine unicast and multicast locators into one seq
+        LocatorSeq rtps_locators;
+        CORBA::ULong i;
+        for (i = 0; i < num_uc_locs; ++i) {
+          CORBA::ULong rtps_len = rtps_locators.length();
+          rtps_locators.length(rtps_len +1);
+          rtps_locators[rtps_len] = uc_locs[i];
         }
-      }
-      if (num_mc_locs && mc_locs) {
-        result.writerProxy.multicastLocatorList.length(num_mc_locs);
-        for (CORBA::ULong i = 0; i < num_mc_locs; ++i) {
-          result.writerProxy.multicastLocatorList[i] = mc_locs[i];
+        for (i = 0; i < num_mc_locs; ++i) {
+          CORBA::ULong rtps_len = rtps_locators.length();
+          rtps_locators.length(rtps_len +1);
+          rtps_locators[rtps_len] = mc_locs[i];
         }
+        loc.transport_type = "rtps_udp";
+        // Add that seq to the blob
+        locators_to_blob(rtps_locators, loc.data);
       }
       return result;
     }
@@ -1942,7 +1943,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_GUID));
+    TEST_ASSERT(is_present(param_list, PID_ENDPOINT_GUID));
   }
   { // Should decode writer guid
     DiscoveredWriterData writer_data;
@@ -1976,8 +1977,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
+    TEST_ASSERT(!is_present(param_list, PID_MULTICAST_LOCATOR));
+    TEST_ASSERT(!is_present(param_list, PID_OPENDDS_LOCATOR));
   }
-  { // Should decode writer unicast locators
+  { // Should decode writer unicast locators into allLocators
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
@@ -1998,44 +2001,19 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!to_param_list(writer_data, param_list));
     DiscoveredWriterData writer_data_out;
     TEST_ASSERT(!from_param_list(param_list, writer_data_out));
-    TEST_ASSERT(writer_data_out.writerProxy.unicastLocatorList.length() == 2);
-    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.unicastLocatorList[0],
-                        &locators[0],
-                        sizeof(Locator_t)));
-    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.unicastLocatorList[1],
-                        &locators[1],
-                        sizeof(Locator_t)));
-  }
-  { // Should clear writer unicast locators if not present in param list
-    Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
-                                   1234,
-                                   127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
-                                   7734,
-                                   107, 9, 8, 21);
-    DiscoveredWriterData writer_data_out = Factory::writer_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
-        AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
-        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-        locators, 2);
-    ParameterList empty_param_list;
-    TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
-    TEST_ASSERT(writer_data_out.writerProxy.unicastLocatorList.length() == 0);
+    TEST_ASSERT(!writer_data_out.writerProxy.unicastLocatorList.length());
+    TEST_ASSERT(writer_data_out.writerProxy.allLocators.length() == 1);
+    TEST_ASSERT(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
   }
 
   { // Should encode writer multicast locators
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
-                                   127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   227, 200, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    7734,
-                                   107, 9, 8, 21);
+                                   237, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
         KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -2048,6 +2026,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
+    TEST_ASSERT(!is_present(param_list, PID_UNICAST_LOCATOR));
+    TEST_ASSERT(!is_present(param_list, PID_OPENDDS_LOCATOR));
   }
   { // Should decode writer multicast locators
     Locator_t locators[2];
@@ -2070,34 +2050,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!to_param_list(writer_data, param_list));
     DiscoveredWriterData writer_data_out;
     TEST_ASSERT(!from_param_list(param_list, writer_data_out));
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList.length() == 2);
-    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.multicastLocatorList[0],
-                        &locators[0],
-                        sizeof(Locator_t)));
-    TEST_ASSERT(!memcmp(&writer_data_out.writerProxy.multicastLocatorList[1],
-                        &locators[1],
-                        sizeof(Locator_t)));
-  }
-  { // Should clear writer multicast locators if not present in param list
-    Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
-                                   1234,
-                                   127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
-                                   7734,
-                                   107, 9, 8, 21);
-    DiscoveredWriterData writer_data_out = Factory::writer_data(
-        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
-        AUTOMATIC_LIVELINESS_QOS, 0, 0,
-        BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
-        SHARED_OWNERSHIP_QOS, 0,
-        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-        NULL, 0, locators, 2);
-    ParameterList empty_param_list;
-    TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList.length() == 0);
+    TEST_ASSERT(writer_data_out.writerProxy.allLocators.length() == 1);
+    TEST_ASSERT(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
   }
 
   { // Should encode reader data
@@ -2530,7 +2484,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(reader_data, param_list));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_GUID));
+    TEST_ASSERT(is_present(param_list, PID_ENDPOINT_GUID));
   }
   { // Should decode reader guid
     DiscoveredReaderData reader_data;
@@ -2584,13 +2538,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     DiscoveredReaderData reader_data_out;
     TEST_ASSERT(!from_param_list(param_list, reader_data_out));
-    TEST_ASSERT(reader_data_out.readerProxy.unicastLocatorList.length() == 2);
-    TEST_ASSERT(!memcmp(&reader_data.readerProxy.unicastLocatorList[0],
-                        &locators[0],
-                        sizeof(Locator_t)));
-    TEST_ASSERT(!memcmp(&reader_data.readerProxy.unicastLocatorList[1],
-                        &locators[1],
-                        sizeof(Locator_t)));
+    TEST_ASSERT(reader_data_out.readerProxy.allLocators.length() == 1);
   }
 
   { // Should encode reader multicast locators
@@ -2617,10 +2565,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
-                                   127, 0, 0, 1);
+                                   227, 0, 0, 1);
     locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                    7734,
-                                   107, 9, 8, 21);
+                                   237, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
@@ -2633,13 +2581,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     DiscoveredReaderData reader_data_out;
     TEST_ASSERT(!from_param_list(param_list, reader_data_out));
-    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList.length() == 2);
-    TEST_ASSERT(!memcmp(&reader_data.readerProxy.multicastLocatorList[0],
-                        &locators[0],
-                        sizeof(Locator_t)));
-    TEST_ASSERT(!memcmp(&reader_data.readerProxy.multicastLocatorList[1],
-                        &locators[1],
-                        sizeof(Locator_t)));
+    TEST_ASSERT(reader_data_out.readerProxy.allLocators.length() == 1);
+    TEST_ASSERT(!strcmp(reader_data_out.readerProxy.allLocators[0].transport_type, "rtps_udp"));
   }
   { // Should encode reader content filter property
     const char* cf_topic_name = "CFTopic test";
@@ -2712,17 +2655,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     0x00, 0x00, 0x00, 0x00,
                                     0x00, 0x00, 0x00, 0x00,
                                     0x00, 0x17, 0x00, 0x01 };
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList.length() == 1);
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].kind ==
-                LOCATOR_KIND_UDPv4);
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].port == 0);
-    TEST_ASSERT(!memcmp(
-                writer_data_out.writerProxy.multicastLocatorList[0].address,
-                target_address, sizeof(OctetArray16)));
-    /*
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].address[0] == 0x01);
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].address[1] == 0x00);
-    TEST_ASSERT(writer_data_out.writerProxy.multicastLocatorList[0].address[2] == 0x17);*/
+    TEST_ASSERT(writer_data_out.writerProxy.allLocators.length() == 1);
+    LocatorSeq locators;
+    blob_to_locators(writer_data_out.writerProxy.allLocators[0].data,
+                     locators);
+    TEST_ASSERT(locators[0].kind == LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(locators[0].port == 0);
+    TEST_ASSERT(!memcmp(locators[0].address,
+                        target_address, sizeof(OctetArray16)));
   }
   { // Should decode reader multicast ip address
     Parameter param;
@@ -2737,13 +2677,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     0x00, 0x00, 0x00, 0x00,
                                     0x00, 0x00, 0x00, 0x00,
                                     0x00, 0x00, 0x03, 0x81 };
-    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList.length() == 1);
-    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList[0].kind ==
-                LOCATOR_KIND_UDPv4);
-    TEST_ASSERT(reader_data_out.readerProxy.multicastLocatorList[0].port == 0);
-    TEST_ASSERT(!memcmp(
-                reader_data_out.readerProxy.multicastLocatorList[0].address,
-                target_address, sizeof(OctetArray16)));
+    TEST_ASSERT(reader_data_out.readerProxy.allLocators.length() == 1);
+    LocatorSeq locators;
+    blob_to_locators(reader_data_out.readerProxy.allLocators[0].data,
+                     locators);
+    TEST_ASSERT(locators[0].kind == LOCATOR_KIND_UDPv4);
+    TEST_ASSERT(locators[0].port == 0);
+    TEST_ASSERT(!memcmp(locators[0].address,
+                        target_address, sizeof(OctetArray16)));
   }
   { // Should decode participant default unicast ip address
     Parameter param;

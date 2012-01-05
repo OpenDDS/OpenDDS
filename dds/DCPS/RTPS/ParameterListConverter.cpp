@@ -32,12 +32,65 @@ namespace {
     }
   }
 
+  void add_param_locator(ParameterList& param_list,
+                         const DCPS::TransportLocator& dcps_locator) {
+    // Convert the tls blob to an RTPS locator seq
+    LocatorSeq locators;
+    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
+    if (result == DDS::RETCODE_OK) {
+      CORBA::ULong locators_len = locators.length();
+      for (CORBA::ULong i = 0; i < locators_len; ++i) {
+        Locator_t& rtps_locator = locators[i];
+        ACE_INET_Addr address;
+        if (locator_to_address(address, rtps_locator) == 0) {
+          Parameter param;
+          param.locator(rtps_locator);
+          if (address.is_multicast()) {
+            param._d(PID_MULTICAST_LOCATOR);
+          } else {
+            param._d(PID_UNICAST_LOCATOR);
+          }
+          add_param(param_list, param);
+        }
+      }
+    } else {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Unable to convert dcps_rtps ")
+                          ACE_TEXT("TransportLocator blob to LocatorSeq\n")));
+    }
+  }
+
+  void add_param_blob(ParameterList& param_list,
+                      const DCPS::TransportLocator& dcps_locator) {
+    Parameter param;
+    param.opendds_locator(dcps_locator);
+    param._d(PID_OPENDDS_LOCATOR);
+    add_param(param_list, param);
+  }
+
   void append_locator(LocatorSeq& list, const Locator_t& locator) {
     CORBA::ULong length = list.length();
     list.length(length + 1); 
     list[length] = locator;
   }
 
+  void append_locator(
+      OpenDDS::DCPS::TransportLocatorSeq& list, 
+      const OpenDDS::DCPS::TransportLocator& locator) {
+    CORBA::ULong length = list.length();
+    list.length(length + 1); 
+    list[length] = locator;
+  }
+
+  void append_locators_if_present(
+      OpenDDS::DCPS::TransportLocatorSeq& list,
+      const LocatorSeq rtps_udp_locators) {
+    if (rtps_udp_locators.length()) {
+      CORBA::ULong length = list.length();
+      list.length(length + 1); 
+      list[length].transport_type = "rtps_udp";
+      locators_to_blob(rtps_udp_locators, list[length].data);
+    }
+  }
   enum LocatorState {
     locator_undefined,
     locator_complete,
@@ -394,15 +447,28 @@ int to_param_list(const DiscoveredWriterData& writer_data,
   {
     Parameter param;
     param.guid(writer_data.writerProxy.remoteWriterGuid);
-    param._d(PID_PARTICIPANT_GUID);
+    param._d(PID_ENDPOINT_GUID);
     add_param(param_list, param);
   }
-  add_param_locator_seq(param_list, 
-                        writer_data.writerProxy.unicastLocatorList,
-                        PID_UNICAST_LOCATOR);
-  add_param_locator_seq(param_list, 
-                        writer_data.writerProxy.multicastLocatorList,
-                        PID_MULTICAST_LOCATOR);
+  CORBA::ULong locator_len = writer_data.writerProxy.allLocators.length();
+
+  // Serialize from allLocators, rather than the unicastLocatorList
+  // and multicastLocatorList.  This allows OpenDDS transports to be 
+  // serialized in the proper order using custom PIDs.
+  for (CORBA::ULong i = 0; i < locator_len; ++i) {
+    // Each locator has a blob of interest
+    const DCPS::TransportLocator& tl = writer_data.writerProxy.allLocators[i];
+    // If this is an rtps udp transport
+    if (!strcmp(tl.transport_type.in(), "rtps_udp")) {
+      // Append the locator's deserialized locator and an RTPS PID
+      add_param_locator(param_list, tl);
+    // Otherwise, this is an OpenDDS, custom transport
+    } else {
+      // TODO Append the blob and a custom PID
+      add_param_blob(param_list, tl);
+    }
+  }
+
   return 0;
 }
 
@@ -510,7 +576,7 @@ int to_param_list(const DiscoveredReaderData& reader_data,
   {
     Parameter param;
     param.guid(reader_data.readerProxy.remoteReaderGuid);
-    param._d(PID_PARTICIPANT_GUID);
+    param._d(PID_ENDPOINT_GUID);
     add_param(param_list, param);
   }
   add_param_locator_seq(param_list, 
@@ -651,6 +717,9 @@ int from_param_list(const ParameterList& param_list,
                     DiscoveredWriterData& writer_data)
 {
   LocatorState last_state = locator_undefined;  // Track state of locator
+  // Collect the rtps_udp locators before appending them to allLocators
+  LocatorSeq rtps_udp_locators;
+
   // Start by setting defaults
   writer_data.ddsPublicationData.topic_name = "";
   writer_data.ddsPublicationData.type_name  = "";
@@ -743,23 +812,27 @@ int from_param_list(const ParameterList& param_list,
       case PID_GROUP_DATA:
         writer_data.ddsPublicationData.group_data = param.group_data();
         break;
-      case PID_PARTICIPANT_GUID:
+      case PID_ENDPOINT_GUID:
         writer_data.writerProxy.remoteWriterGuid = param.guid();
         break;
       case PID_UNICAST_LOCATOR:
-        append_locator(
-            writer_data.writerProxy.unicastLocatorList,
-            param.locator());
+        append_locator(rtps_udp_locators, param.locator());
         break;
       case PID_MULTICAST_LOCATOR:
-        append_locator(
-            writer_data.writerProxy.multicastLocatorList,
-            param.locator());
+        append_locator(rtps_udp_locators, param.locator());
         break;
       case PID_MULTICAST_IPADDRESS:
-        set_ipaddress(writer_data.writerProxy.multicastLocatorList,
+        set_ipaddress(rtps_udp_locators,
                       last_state,
                       param.ipv4_address());
+        break;
+      case PID_OPENDDS_LOCATOR:
+        // Append the rtps_udp_locators, if any, first, to preserve order
+        append_locators_if_present(writer_data.writerProxy.allLocators,
+                                   rtps_udp_locators);
+        rtps_udp_locators.length(0);
+        append_locator(writer_data.writerProxy.allLocators, 
+                       param.opendds_locator());
         break;
       case PID_SENTINEL:
       case PID_PAD:
@@ -778,6 +851,10 @@ int from_param_list(const ParameterList& param_list,
         }
     }
   }
+  // Append additional rtps_udp_locators, if any
+  append_locators_if_present(writer_data.writerProxy.allLocators,
+                             rtps_udp_locators);
+  rtps_udp_locators.length(0);
   return 0;
 }
 
@@ -785,6 +862,9 @@ int from_param_list(const ParameterList& param_list,
                     DiscoveredReaderData& reader_data)
 {
   LocatorState last_state = locator_undefined;  // Track state of locator
+  // Collect the rtps_udp locators before appending them to allLocators
+
+  LocatorSeq rtps_udp_locators;
   // Start by setting defaults
   reader_data.ddsSubscriptionData.topic_name = "";
   reader_data.ddsSubscriptionData.type_name  = "";
@@ -869,26 +949,30 @@ int from_param_list(const ParameterList& param_list,
       case PID_GROUP_DATA:
         reader_data.ddsSubscriptionData.group_data = param.group_data();
         break;
-      case PID_PARTICIPANT_GUID:
+      case PID_ENDPOINT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();
         break;
       case PID_UNICAST_LOCATOR:
-        append_locator(
-            reader_data.readerProxy.unicastLocatorList,
-            param.locator());
+        append_locator(rtps_udp_locators, param.locator());
         break;
       case PID_MULTICAST_LOCATOR:
-        append_locator(
-            reader_data.readerProxy.multicastLocatorList,
-            param.locator());
+        append_locator(rtps_udp_locators, param.locator());
         break;
       case PID_CONTENT_FILTER_PROPERTY:
         reader_data.contentFilterProperty = param.content_filter_property();
         break;
       case PID_MULTICAST_IPADDRESS:
-        set_ipaddress(reader_data.readerProxy.multicastLocatorList, 
+        set_ipaddress(rtps_udp_locators,
                       last_state,
                       param.ipv4_address());
+        break;
+      case PID_OPENDDS_LOCATOR:
+        // Append the rtps_udp_locators, if any, first, to preserve order
+        append_locators_if_present(reader_data.readerProxy.allLocators,
+                                   rtps_udp_locators);
+        rtps_udp_locators.length(0);
+        append_locator(reader_data.readerProxy.allLocators, 
+                       param.opendds_locator());
         break;
       case PID_SENTINEL:
       case PID_PAD:
@@ -907,6 +991,10 @@ int from_param_list(const ParameterList& param_list,
         }
     }
   }
+  // Append additional rtps_udp_locators, if any
+  append_locators_if_present(reader_data.readerProxy.allLocators,
+                             rtps_udp_locators);
+  rtps_udp_locators.length(0);
   return 0;
 }
 

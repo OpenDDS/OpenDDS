@@ -1,3 +1,16 @@
+Thu Jan  5 22:13:21 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Make use of new PID_ENDPOINT_GUID.
+          Encode from TransportLocators instead of RTPS locator lists to 
+          preserve ordering.
+          Decode to TransportLocators instead of RTPS locator lists.
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Tests for above changes.
+
 Thu Jan  5 20:49:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
