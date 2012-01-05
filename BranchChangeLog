@@ -1,3 +1,9 @@
+Thu Jan  5 20:49:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          Added PID_ENDPOINT_GUID.
+
 Thu Jan  5 19:10:10 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:

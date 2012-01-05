@@ -265,6 +265,7 @@ module OpenDDS {
     const ParameterId_t PID_GROUP_ENTITYID = 0x0053;
     const ParameterId_t PID_BUILTIN_ENDPOINT_SET = 0x0058;
     const ParameterId_t PID_PROPERTY_LIST = 0x0059;
+    const ParameterId_t PID_ENDPOINT_GUID = 0x005a;
     const ParameterId_t PID_TYPE_MAX_SIZE_SERIALIZED = 0x0060;
     const ParameterId_t PID_ENTITY_NAME = 0x0062;
     const ParameterId_t PID_KEY_HASH = 0x0070;
@@ -377,6 +378,7 @@ module OpenDDS {
         ContentFilterProperty_t content_filter_property;
 
       case PID_PARTICIPANT_GUID:
+      case PID_ENDPOINT_GUID:
       case PID_GROUP_GUID:
         GUID_t guid;
 
