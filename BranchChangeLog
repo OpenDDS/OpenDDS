@@ -1,3 +1,24 @@
+Thu Jan  5 15:54:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Keep track of ignored topic names.  When receiving data samples
+          for remote publications and subscriptions, ignore the sample if
+          the publication/subscription, participant, or topic are in the
+          ignore lists.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Fix logging of ACE_INET_Addr objects.  ACE uses a static
+          local character buffer so two addresses can't be logged at once.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Extended the test to read the publication BIT.  For now this fails.
+          Refactored the test so it's not all happening in main().
+          Fixed scope of _vars and usage issues with WaitSet.
+
 Wed Jan  4 22:27:09 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/run_test.pl:

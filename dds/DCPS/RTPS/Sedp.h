@@ -69,6 +69,9 @@ public:
   bool ignoring(const DCPS::RepoId& guid) const {
     return ignored_guids_.count(guid);
   }
+  bool ignoring(const char* topic_name) const {
+    return ignored_topics_.count(topic_name);
+  }
 
   DCPS::RepoId bit_key_to_repo_id(const char* bit_topic_name,
                                   const DDS::BuiltinTopicKey_t& key);
@@ -132,7 +135,6 @@ public:
 private:
   DCPS::RepoId participant_id_;
   Spdp& spdp_;
-  struct LocalPublication;
 
   class Endpoint : public DCPS::TransportClient {
   public:
@@ -328,6 +330,7 @@ private:
                   const DDS::SubscriptionBuiltinTopicData& src);
 
   std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> ignored_guids_;
+  std::set<std::string> ignored_topics_;
 
   // Topic:
   std::map<std::string, TopicDetails> topics_;

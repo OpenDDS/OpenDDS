@@ -9,6 +9,7 @@
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 using OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC;
+using OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC;
 
 void cleanup(const DDS::DomainParticipantFactory_var& dpf,
              const DDS::DomainParticipant_var& dp)
@@ -25,13 +26,146 @@ void cleanup(const DDS::DomainParticipantFactory_var& dpf,
   }
 }
 
+bool read_participant_bit(const DDS::Subscriber_var& bit_sub)
+{
+  DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                  ANY_VIEW_STATE,
+                                                  ALIVE_INSTANCE_STATE);
+  WaitSet_var waiter = new WaitSet;
+  waiter->attach_condition(rc);
+  ConditionSeq activeConditions;
+  Duration_t forever = { DDS::DURATION_INFINITE_SEC,
+                         DDS::DURATION_INFINITE_NSEC };
+  ReturnCode_t result = waiter->wait(activeConditions, forever);
+  waiter->detach_condition(rc);
+  if (result != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not wait for condition: %d\n", result));
+    return false;
+  }
+
+  ParticipantBuiltinTopicDataDataReader_var part_bit =
+    ParticipantBuiltinTopicDataDataReader::_narrow(dr);
+
+  ParticipantBuiltinTopicDataSeq data;
+  SampleInfoSeq infos;
+  ACE_OS::sleep(20);
+  ReturnCode_t ret = part_bit->read(data, infos, LENGTH_UNLIMITED,
+                                    ANY_SAMPLE_STATE, ANY_VIEW_STATE,
+                                    ALIVE_INSTANCE_STATE);
+  if (ret != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not read participant BIT: %d\n", ret));
+  }
+
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    if (infos[i].valid_data) {
+      ACE_DEBUG((LM_DEBUG,
+                 "Read Participant BIT with key: %x %x %x and handle %d\n",
+                 data[i].key.value[0],
+                 data[i].key.value[1],
+                 data[i].key.value[2],
+                 infos[i].instance_handle));
+    }
+  }
+
+  part_bit->return_loan(data, infos);
+  return true;
+}
+
+bool create_data_writer(const DDS::DomainParticipant_var& dp2)
+{
+  DDS::TypeSupport_var ts = new TestMsgTypeSupportImpl;
+
+  if (ts->register_type(dp2, "") != DDS::RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support"));
+    return false;
+  }
+
+  CORBA::String_var type_name = ts->get_type_name();
+  DDS::Topic_var topic = dp2->create_topic("Movie Discussion List",
+                                           type_name,
+                                           TOPIC_QOS_DEFAULT,
+                                           0,
+                                           DEFAULT_STATUS_MASK);
+
+  if (!topic) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic"));
+    return false;
+  }
+
+  DDS::Publisher_var pub = dp2->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                                 0,
+                                                 DEFAULT_STATUS_MASK);
+
+  if (!pub) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create publisher"));
+    return false;
+  }
+
+  DDS::DataWriter_var dw = pub->create_datawriter(topic,
+                                                  DATAWRITER_QOS_DEFAULT,
+                                                  0,
+                                                  DEFAULT_STATUS_MASK);
+
+  if (!dw) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data writer"));
+    return false;
+  }
+  return true;
+}
+
+bool read_publication_bit(const DDS::Subscriber_var& bit_sub)
+{
+  DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
+  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                  ANY_VIEW_STATE,
+                                                  ALIVE_INSTANCE_STATE);
+  WaitSet_var waiter = new WaitSet;
+  waiter->attach_condition(rc);
+  ConditionSeq activeConditions;
+  const Duration_t ten_seconds = { 10, 0 };
+  ReturnCode_t result = waiter->wait(activeConditions, ten_seconds);
+  waiter->detach_condition(rc);
+  if (result != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG,
+      "ERROR: (publication BIT) could not wait for condition: %d\n", result));
+    return false;
+  }
+
+  PublicationBuiltinTopicDataDataReader_var pub_bit =
+    PublicationBuiltinTopicDataDataReader::_narrow(dr);
+
+  PublicationBuiltinTopicDataSeq data;
+  SampleInfoSeq infos;
+  ReturnCode_t ret = pub_bit->read(data, infos, LENGTH_UNLIMITED,
+                                   ANY_SAMPLE_STATE, ANY_VIEW_STATE,
+                                   ALIVE_INSTANCE_STATE);
+  if (ret != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not read publication BIT: %d\n", ret));
+  }
+
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    if (infos[i].valid_data) {
+      ACE_DEBUG((LM_DEBUG,
+                 "Read Publication BIT with key: %x %x %x and handle %d\n"
+                 "\tParticipant's key: %x %x %x\n"
+                 "\tTopic: %C\tType: %C\n",
+                 data[i].key.value[0],
+                 data[i].key.value[1],
+                 data[i].key.value[2],
+                 infos[i].instance_handle,
+                 data[i].participant_key.value[0],
+                 data[i].participant_key.value[1],
+                 data[i].participant_key.value[2],
+                 data[i].topic_name.in(),
+                 data[i].type_name.in()));
+    }
+  }
+  return true;
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  TestMsgTypeSupport_var ts;
-  DDS::Topic_var topic;
-  DDS::Publisher_var pub;
-  DDS::DataWriter_var dw;
-
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp = dpf->create_participant(9, PARTICIPANT_QOS_DEFAULT,
                                                      0, DEFAULT_STATUS_MASK);
@@ -49,98 +183,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  {
-    Subscriber_var bit_sub = dp->get_builtin_subscriber();
-    DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
-                                                    ANY_VIEW_STATE,
-                                                    ALIVE_INSTANCE_STATE);
-    WaitSet waiter;
-    waiter.attach_condition(rc);
-    ConditionSeq activeConditions;
-    Duration_t forever = { DDS::DURATION_INFINITE_SEC,
-                           DDS::DURATION_INFINITE_NSEC };
-    ReturnCode_t result = waiter.wait(activeConditions, forever);
-    if (result != RETCODE_OK) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: could not wait for condition: %d\n", result));
-    }
+  Subscriber_var bit_sub = dp->get_builtin_subscriber();
 
-    ParticipantBuiltinTopicDataDataReader_var part_bit =
-      ParticipantBuiltinTopicDataDataReader::_narrow(dr);
+  read_participant_bit(bit_sub);
 
-    ParticipantBuiltinTopicDataSeq data;
-    SampleInfoSeq infos;
-    ACE_OS::sleep(20);
-    ReturnCode_t ret = part_bit->read(data, infos, LENGTH_UNLIMITED,
-                                      ANY_SAMPLE_STATE, ANY_VIEW_STATE,
-                                      ALIVE_INSTANCE_STATE);
-    if (ret != RETCODE_OK) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: could not read participant BIT: %d\n", ret));
-    }
+  create_data_writer(dp2);
 
-    if (data.length() > 0) {
-      for (CORBA::ULong i = 0; i < data.length(); ++i) {
-        if (infos[i].valid_data) {
-          if (&data[i] == 0)
-            ACE_DEBUG((LM_DEBUG, "ERROR: key value is empty!\n"));
-          else
-            ACE_DEBUG((LM_DEBUG, "Read Participant BIT with key: %x %x %x and handle %d\n",
-                       data[i].key.value[0],
-                       data[i].key.value[1],
-                       data[i].key.value[2],
-                       infos[i].instance_handle));
-        }
-      }
-    }
-
-    part_bit->return_loan(data, infos);
-  }
-
-  {
-    // Register TypeSupport (Messenger::Message)
-    ts = new TestMsgTypeSupportImpl;
-
-    if (ts->register_type(dp2, "") != DDS::RETCODE_OK) {
-      throw std::string("failed to register type support");
-    }
-
-    // Create Topic (Movie Discussion List)
-    CORBA::String_var type_name = ts->get_type_name();
-    topic = dp2->create_topic("Movie Discussion List",
-                              type_name,
-                              TOPIC_QOS_DEFAULT,
-                              0,
-                              DEFAULT_STATUS_MASK);
-
-    // Check for failure
-    if (!topic) {
-      throw std::string("failed to create topic");
-    }
-
-    // Create Publisher
-    pub = dp2->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                0,
-                                DEFAULT_STATUS_MASK);
-
-    // Check for failure
-    if (!pub) {
-      throw std::string("failed to create publisher");
-    }
-
-    // Create DataWriter
-    dw = pub->create_datawriter(topic,
-                                DATAWRITER_QOS_DEFAULT,
-                                0,
-                                DEFAULT_STATUS_MASK);
-
-    // Check for failure
-    if (!dw) {
-      throw std::string("failed to create data writer");
-    }
-  }
+  read_publication_bit(bit_sub);
 
   ACE_DEBUG((LM_INFO, "Cleaning up test\n"));
-
   ACE_OS::sleep(10);
   cleanup(dpf, dp);
   ACE_OS::sleep(5);

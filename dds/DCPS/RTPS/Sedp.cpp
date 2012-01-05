@@ -31,13 +31,8 @@
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "ace/OS_NS_stdio.h"
-//#include "ace/Message_Block.h"
 
-#include <cstdio>
-#include <ctime>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <cstring>
 
 
 namespace OpenDDS {
@@ -170,6 +165,7 @@ Sedp::ignore(const DCPS::RepoId& to_ignore)
     const std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator
       iter = topic_names_.find(to_ignore);
     if (iter != topic_names_.end()) {
+      ignored_topics_.insert(iter->second);
       //TODO: if we know of any publication(s) and/or subscription(s) on this
       //      topic remove them and break any associations.
     }
@@ -574,6 +570,15 @@ void
 Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 {
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
+  RepoId guid_participant = guid;
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)
+      || ignoring(wdata.ddsPublicationData.topic_name)) {
+    return;
+  }
+
   const DiscoveredPublicationIter iter = discovered_publications_.find(guid);
 
   if (message_id == DCPS::SAMPLE_DATA) {
@@ -607,6 +612,15 @@ void
 Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
 {
   const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
+  RepoId guid_participant = guid;
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)
+      || ignoring(rdata.ddsSubscriptionData.topic_name)) {
+    return;
+  }
+
   const DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
   if (message_id == DCPS::SAMPLE_DATA) {
@@ -841,7 +855,7 @@ Sedp::Writer::publish_sample(ACE_Message_Block& payload, size_t size)
   DCPS::DataSampleListElement list_el(repo_id_, this, 0, &alloc_, 0);
   list_el.header_.message_id_ = DCPS::SAMPLE_DATA;
   list_el.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
-  list_el.header_.message_length_ = size;
+  list_el.header_.message_length_ = static_cast<ACE_UINT32>(size);
 
   DCPS::DataSampleList list;  // Container of list elements
   list.head_ = list.tail_ = &list_el;
@@ -947,16 +961,11 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.presentation = pub.publisher_qos_.presentation;
   dwd.ddsPublicationData.partition = pub.publisher_qos_.partition;
   dwd.ddsPublicationData.topic_data = topic_details.qos_.topic_data;
-  CORBA::ULong gd_length = pub.publisher_qos_.group_data.value.length();
-  dwd.ddsPublicationData.group_data.value.length(gd_length);
-  CORBA::ULong i = 0;
-  for (i = 0; i < gd_length; ++i) {
-    dwd.ddsPublicationData.group_data.value[i] = pub.publisher_qos_.group_data.value[i];
-  }
+  dwd.ddsPublicationData.group_data = pub.publisher_qos_.group_data;
   dwd.writerProxy.remoteWriterGuid = publication_id;
   CORBA::ULong tx_length = pub.trans_info_.length();
-  for (i = 0; i < tx_length; ++i) {
-    ACE_DEBUG((LM_INFO, "got trans type of %s\n", 
+  for (CORBA::ULong i = 0; i < tx_length; ++i) {
+    ACE_DEBUG((LM_INFO, "got trans type of %C\n", 
                pub.trans_info_[i].transport_type.in()));
     std::string trans_type = pub.trans_info_[i].transport_type.in();
     if (trans_type == "rtps_udp") {
