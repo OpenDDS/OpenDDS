@@ -319,6 +319,16 @@ MulticastTransport::configure_i(TransportInst* config)
   }
   this->config_i_->_add_ref();
 
+  if (!this->config_i_->group_address_.is_multicast()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastTransport[%@]::configure_i: ")
+                      ACE_TEXT("invalid configuration: address %C is not ")
+                      ACE_TEXT("multicast.\n"),
+                      this, this->config_i_->group_address_.get_host_addr()),
+                     false);
+  }
+
   this->create_reactor_task();
 
   return true;

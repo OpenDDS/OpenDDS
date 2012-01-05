@@ -265,11 +265,12 @@ module OpenDDS {
     const ParameterId_t PID_GROUP_ENTITYID = 0x0053;
     const ParameterId_t PID_BUILTIN_ENDPOINT_SET = 0x0058;
     const ParameterId_t PID_PROPERTY_LIST = 0x0059;
-    const ParameterId_t PID_ENDPOINT_GUID = 0x005a;
     const ParameterId_t PID_TYPE_MAX_SIZE_SERIALIZED = 0x0060;
     const ParameterId_t PID_ENTITY_NAME = 0x0062;
     const ParameterId_t PID_KEY_HASH = 0x0070;
     const ParameterId_t PID_STATUS_INFO = 0x0071;
+    //   (the following constant is not in the spec but is needed for SEDP)
+    const ParameterId_t PID_ENDPOINT_GUID = 0x005a;
     //   (the following constants are in the same order as Table 9.14)
     const ParameterId_t PID_CONTENT_FILTER_INFO = 0x0055;
     const ParameterId_t PID_COHERENT_SET = 0x0056;
@@ -281,7 +282,12 @@ module OpenDDS {
     const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
 
     // Vendor-specific parameters
-    const ParameterId_t PID_OPENDDS_LOCATOR = PIDMASK_VENDOR_SPECIFIC + 1;
+    // PID_OPENDDS_BASE won't be used as an actual PID, it's just the starting
+    // point for ones we assign.  This is deliberately a larger number so as
+    // not to overlap ones that other vendors are using and are in the Wireshark
+    // dissector (they could overlap, but it would confuse Wireshark).
+    const ParameterId_t PID_OPENDDS_BASE = PIDMASK_VENDOR_SPECIFIC + 0x3000;
+    const ParameterId_t PID_OPENDDS_LOCATOR = PID_OPENDDS_BASE + 1;
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */

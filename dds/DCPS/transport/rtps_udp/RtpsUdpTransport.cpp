@@ -84,6 +84,9 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
   RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
     link = make_datalink(local_id.guidPrefix);
+    if (link.is_nil()) {
+      return 0;
+    }
   }
 
   link->add_locator(remote_id, get_connection_addr(remote_data));

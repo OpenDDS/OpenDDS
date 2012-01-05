@@ -27,6 +27,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/DCPS_Utils.h"
 
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
@@ -391,7 +392,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
     return DCPS::FOUND;
   }
 
-  TopicDetailsEx& td = iter->second;
+  TopicDetailsEx& td = topics_[topicName];
   td.data_type_ = dataTypeName;
   td.qos_ = qos;
   td.has_dcps_key_ = hasDcpsKey;
@@ -468,7 +469,8 @@ Sedp::add_publication(const RepoId& topicId,
   pb.qos_ = qos;
   pb.trans_info_ = transInfo;
   pb.publisher_qos_ = publisherQos;
-  topics_[topic_names_[topicId]].endpoints_.insert(rid);
+  TopicDetailsEx& td = topics_[topic_names_[topicId]];
+  td.endpoints_.insert(rid);
 
   DiscoveredWriterData dwd;
   if (DDS::RETCODE_OK == populate_discovered_writer_msg(dwd, rid, pb)) {
@@ -477,6 +479,7 @@ Sedp::add_publication(const RepoId& topicId,
       ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
       // TODO: should this be removed from the local_publications map?
     }
+    find_matching_endpoints(rid, td);
   } else {
     ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
     // TODO: should this be removed from the local_publications map?
@@ -763,6 +766,140 @@ Sedp::qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
   }
 
   return changed;
+}
+
+void
+Sedp::find_matching_endpoints(const DCPS::RepoId& repoId,
+                              const TopicDetailsEx& td)
+{
+  const bool reader = repoId.entityId.entityKind & 4;
+  for (RepoIdSet::const_iterator iter = td.endpoints_.begin();
+       iter != td.endpoints_.end(); ++iter) {
+    // check to make sure it's a Reader/Writer or Writer/Reader match
+    if (bool(iter->entityId.entityKind & 4) != reader) {
+      match(reader ? *iter : repoId, reader ? repoId : *iter, td);
+    }
+  }
+}
+
+void
+Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
+            const TopicDetailsEx& td) //TODO: do we need td here?
+{
+  // 0. For discovered endpoints, we'll have the QoS info in the form of the
+  // publication or subscription BIT data which doesn't use the same structures
+  // for QoS.  In those cases we can copy the individual QoS policies to temp
+  // QoS structs:
+  DDS::DataWriterQos tempDwQos;
+  DDS::PublisherQos tempPubQos;
+  DDS::DataReaderQos tempDrQos;
+  DDS::SubscriberQos tempSubQos;
+
+  // 1. collect details about the writer, which may be local or discovered
+  const DDS::DataWriterQos* dwQos = 0;
+  const DDS::PublisherQos* pubQos = 0;
+  const DCPS::TransportLocatorSeq* wTls = 0;
+
+  const LocalPublicationIter lpi = local_publications_.find(writer);
+  DiscoveredPublicationIter dpi;
+  bool writer_local = false;
+  if (lpi != local_publications_.end()) {
+    writer_local = true;
+    dwQos = &lpi->second.qos_;
+    pubQos = &lpi->second.publisher_qos_;
+    wTls = &lpi->second.trans_info_;
+  } else if ((dpi = discovered_publications_.find(writer))
+             != discovered_publications_.end()) {
+    wTls = &dpi->second.writer_data_.writerProxy.allLocators;
+  } else {
+    //TODO: error
+  }
+
+  // 2. collect details about the reader, which may be local or discovered
+  const DDS::DataReaderQos* drQos = 0;
+  const DDS::SubscriberQos* subQos = 0;
+  const DCPS::TransportLocatorSeq* rTls = 0;
+
+  const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
+  DiscoveredSubscriptionIter dsi;
+  bool reader_local = false;
+  if (lsi != local_subscriptions_.end()) {
+    reader_local = true;
+    drQos = &lsi->second.qos_;
+    subQos = &lsi->second.subscriber_qos_;
+    rTls = &lpi->second.trans_info_;
+  } else if ((dsi = discovered_subscriptions_.find(writer))
+             != discovered_subscriptions_.end()) {
+    if (!writer_local) {
+      // this is a discovered/discovered match, nothing for us to do
+      return;
+    }
+    rTls = &dsi->second.reader_data_.readerProxy.allLocators;
+    const DDS::SubscriptionBuiltinTopicData& bit =
+      dsi->second.reader_data_.ddsSubscriptionData;
+    tempDrQos.durability = bit.durability;
+    tempDrQos.deadline = bit.deadline;
+    tempDrQos.latency_budget = bit.latency_budget;
+    tempDrQos.liveliness = bit.liveliness;
+    tempDrQos.reliability = bit.reliability;
+    tempDrQos.ownership = bit.ownership;
+    tempDrQos.destination_order = bit.destination_order;
+    tempDrQos.user_data = bit.user_data;
+    tempDrQos.time_based_filter = bit.time_based_filter;
+    drQos = &tempDrQos;
+    tempSubQos.presentation = bit.presentation;
+    tempSubQos.partition = bit.partition;
+    tempSubQos.group_data = bit.group_data;
+    subQos = &tempSubQos;
+  } else {
+    //TODO: error
+  }
+
+  // This is really part of step 1, but we're doing it here just in case we
+  // are in the discovered/discovered match and we don't need the QoS data.
+  if (!writer_local) {
+    const DDS::PublicationBuiltinTopicData& bit =
+      dpi->second.writer_data_.ddsPublicationData;
+    tempDwQos.durability = bit.durability;
+    tempDwQos.durability_service = bit.durability_service;
+    tempDwQos.deadline = bit.deadline;
+    tempDwQos.latency_budget = bit.latency_budget;
+    tempDwQos.liveliness = bit.liveliness;
+    tempDwQos.reliability = bit.reliability;
+    tempDwQos.lifespan = bit.lifespan;
+    tempDwQos.user_data = bit.user_data;
+    tempDwQos.ownership = bit.ownership;
+    tempDwQos.ownership_strength = bit.ownership_strength;
+    tempDwQos.destination_order = bit.destination_order;
+    dwQos = &tempDwQos;
+    tempPubQos.presentation = bit.presentation;
+    tempPubQos.partition = bit.partition;
+    tempPubQos.group_data = bit.group_data;
+    pubQos = &tempPubQos;
+  }
+
+  // 3. check transport and QoS compatibility
+  DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()},
+    readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
+  if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
+                          dwQos, drQos, pubQos, subQos)) {
+    static const bool writer_active = true;
+    if (writer_local) {
+      DCPS::ReaderAssociation ra = {*rTls, reader, *subQos, *drQos}; //TODO: filtering info
+      lpi->second.publication_->add_association(writer, ra, writer_active);
+    }
+    if (reader_local) {
+      DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
+      lsi->second.subscription_->add_association(reader, wa, !writer_active);
+    }
+  } else {
+    if (writer_local && writerStatus.count_since_last_send) {
+      lpi->second.publication_->update_incompatible_qos(writerStatus);
+    }
+    if (reader_local && readerStatus.count_since_last_send) {
+      lsi->second.subscription_->update_incompatible_qos(readerStatus);
+    }
+  }
 }
 
 void

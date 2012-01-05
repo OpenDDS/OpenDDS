@@ -327,6 +327,12 @@ private:
   unsigned int topic_counter_;
   bool has_dcps_key(const DCPS::RepoId& topicId) const;
 
+  void find_matching_endpoints(const DCPS::RepoId& repoId,
+                               const TopicDetailsEx& td);
+  void match(const DCPS::RepoId& writer,
+             const DCPS::RepoId& reader,
+             const TopicDetailsEx& td);
+
   static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
                               const EntityId_t& entity);
 };

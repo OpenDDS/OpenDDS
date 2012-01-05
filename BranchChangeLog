@@ -1,9 +1,29 @@
+Thu Jan  5 23:36:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          Added a comment on PID_ENDPOINT_GUID not being in the spec.
+          Changed the range of the vendor-specific PIDs for OpenDDS.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Started implementing logic to match associated readers and writers.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Use ACE_INET_Addr::is_multicast() to check the config.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Avoid a crash if the DataLink fails to initialize.
+
 Thu Jan  5 22:13:21 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
 
           Make use of new PID_ENDPOINT_GUID.
-          Encode from TransportLocators instead of RTPS locator lists to 
+          Encode from TransportLocators instead of RTPS locator lists to
           preserve ordering.
           Decode to TransportLocators instead of RTPS locator lists.
 
