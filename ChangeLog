@@ -1,3 +1,9 @@
+Thu Jan  5 16:52:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/dds_generator.h:
+
+          Added default to switch statement to remove warnings.
+
 Wed Jan  4 18:57:25 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
@@ -8,7 +14,7 @@ Wed Jan  4 18:57:25 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
         * dds/idl/dds_generator.h:
         * dds/idl/marshal_generator.cpp:
         * dds/idl/metaclass_generator.cpp:
-        
+
           Fixed problem with handling DOC and TAO2.0 idl
           type structures that are indicated as a AST_*Fwd
           class to be converted to their actual AST_* class.

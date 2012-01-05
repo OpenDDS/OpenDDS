@@ -206,6 +206,8 @@ namespace AstTypeClassification {
       element = td->full_definition();
       break;
     }
+    default :
+      break;
     }
   }
 
