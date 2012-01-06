@@ -9,7 +9,7 @@
 #include "tools/dissector/giop_base.h"
 
 
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/CDR_Base.h"
@@ -162,7 +162,7 @@ namespace OpenDDS
       guint len = 16; // size of RepoId
       const RepoId *rid =
         reinterpret_cast<const RepoId *>(tvb_get_ptr(tvb_, *offset_, len));
-      RepoIdConverter converter (*rid);
+      GuidConverter converter (*rid);
       proto_tree_add_bytes_format_value
         ( tree, fieldId, tvb_, *offset_, len,
           reinterpret_cast<const guint8*>(rid),

@@ -13,7 +13,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -351,7 +351,7 @@ operator<<( std::ostream& str, const Test::Subscriber& value)
   value.reader_->get_latency_stats( statistics);
   str << " --- statistical summary ---" << std::endl;
   for( unsigned long index = 0; index < statistics.length(); ++index) {
-    OpenDDS::DCPS::RepoIdConverter converter(statistics[ index].publication);
+    OpenDDS::DCPS::GuidConverter converter(statistics[ index].publication);
     str << "  Writer[ " << converter << "]" << std::endl;
     str << "     samples: " << statistics[ index].n << std::endl;
     str << "        mean: " << statistics[ index].mean << std::endl;
@@ -386,7 +386,7 @@ Subscriber::rawData( std::ostream& str) const
          = readerImpl->raw_latency_statistics().begin();
        current != readerImpl->raw_latency_statistics().end();
        ++current, ++index) {
-    OpenDDS::DCPS::RepoIdConverter converter(current->first);
+    OpenDDS::DCPS::GuidConverter converter(current->first);
     str << std::endl << "  Writer[ " << converter << "]" << std::endl;
     current->second.raw_data( str);
   }

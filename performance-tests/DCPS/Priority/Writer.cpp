@@ -6,7 +6,6 @@
 #include "TestTypeSupportC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/RepoIdConverter.h"
 
 #include <sstream>
 

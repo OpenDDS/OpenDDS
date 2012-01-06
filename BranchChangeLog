@@ -1,9 +1,27 @@
+Fri Jan  6 18:11:41 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/sample_manager.h:
+
+          Replaced uses of RepoIdConverter with GuidConverter.
+          The only remaining uses of RepoIdConverter should be in
+          the DCPSInfoRepo code or tests.  The exception to this rule
+          is in the multicast transport, which should be fixed eventually.
+
 Fri Jan  6 17:42:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:
         * dds/DCPS/RTPS/Sedp.cpp:
 
-          Refator message publication.  
+          Refator message publication.
           Publish durable data on new association.
 
         * dds/DCPS/RTPS/Spdp.cpp:

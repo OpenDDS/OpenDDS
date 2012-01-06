@@ -10,6 +10,8 @@
 #include "tools/dissector/packet-repo.h"
 #include "tools/dissector/sample_manager.h"
 
+#include "dds/DCPS/GuidConverter.h"
+
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
 #include <ace/Message_Block.h>
@@ -228,7 +230,7 @@ namespace OpenDDS
           os << ", Sequence: 0x" << std::hex << std::setw(8) << std::setfill('0')
              << sample.sequence_.getValue();
         }
-        os << ", Publication: " << DCPS::RepoIdConverter(sample.publication_id_);
+        os << ", Publication: " << DCPS::GuidConverter(sample.publication_id_);
       }
 
       return os.str();
@@ -377,7 +379,7 @@ namespace OpenDDS
         reinterpret_cast<const guint8*>(&sample.publication_id_);
       if (sample.message_id_ != TRANSPORT_CONTROL)
         {
-          RepoIdConverter converter (sample.publication_id_);
+          GuidConverter converter (sample.publication_id_);
           proto_tree_add_bytes_format_value (ltree, hf_sample_publication,
                                              tvb_, offset, len, data_ptr, "%s",
                                              std::string(converter).c_str());
@@ -393,7 +395,7 @@ namespace OpenDDS
           data_ptr = reinterpret_cast<const guint8*>(&sample.publisher_id_);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
-              DCPS::RepoIdConverter converter(sample.publisher_id_);
+              DCPS::GuidConverter converter(sample.publisher_id_);
               proto_tree_add_bytes_format_value (ltree, hf_sample_publisher,
                                                  tvb_, offset, len,
                                                  data_ptr, "%s",
@@ -426,7 +428,7 @@ namespace OpenDDS
                    i++)
                 {
                   const GUID_t &filter = sample.content_filter_entries_[i];
-                  DCPS::RepoIdConverter converter(filter);
+                  DCPS::GuidConverter converter(filter);
                   std::stringstream strm;
                   strm << "filter [" << i << "] = " << converter << std::ends;
                   size = 0;
@@ -477,7 +479,7 @@ namespace OpenDDS
           return;
         }
 
-      RepoIdConverter converter(header.publication_id_);
+      GuidConverter converter(header.publication_id_);
 
       const char * data_name =
         InfoRepo_Dissector::instance().topic_for_pub(&header.publication_id_);

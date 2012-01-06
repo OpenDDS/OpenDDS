@@ -8,7 +8,6 @@
 
 #include "tools/dissector/packet-repo.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/RepoIdConverter.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/CDR_Base.h"
