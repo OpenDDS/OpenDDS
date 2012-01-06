@@ -491,8 +491,16 @@ Sedp::add_publication(const RepoId& topicId,
 void
 Sedp::remove_publication(const RepoId& publicationId)
 {
-  // TODO: use SEDP to dispose the publication
-  local_publications_.erase(publicationId);
+  LocalPublicationIter iter = local_publications_.find(publicationId);
+  if (iter != local_publications_.end()) {
+    if (DDS::RETCODE_OK == 
+          publications_writer_.publish_unregister_dispose(publicationId))
+    {
+      local_publications_.erase(publicationId);
+    } else {
+      ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
+    }
+  }
 }
 
 bool
@@ -505,7 +513,19 @@ Sedp::update_publication_qos(const RepoId& publicationId,
     LocalPublication& pb = iter->second;
     pb.qos_ = qos;
     pb.publisher_qos_ = publisherQos;
-    // TODO: tell the world about the change with SEDP
+
+    DiscoveredWriterData dwd;
+    if (DDS::RETCODE_OK == 
+              populate_discovered_writer_msg(dwd, publicationId, pb))
+    {
+      ACE_DEBUG((LM_ERROR, "Successfully populated DiscoveredWriterData msg\n"));
+      if (DDS::RETCODE_OK != publications_writer_.publish_sample(dwd)) {
+        ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
+      }
+    } else {
+      ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
+      return false;
+    }
 
     return true;
   }
@@ -1011,6 +1031,35 @@ Sedp::Writer::publish_sample(const DiscoveredWriterData& dwd)
 }
 
 DDS::ReturnCode_t
+Sedp::Writer::publish_unregister_dispose(const DCPS::RepoId& rid)
+{
+  // Build param list for message
+  Parameter param;
+  param.guid(rid);
+  param._d(PID_ENDPOINT_GUID);
+  ParameterList plist;
+  plist.length(1);
+  plist[0] = param;
+
+  // Determine message length
+  size_t size = 0, padding = 0;
+  DCPS::find_size_ulong(size, padding);
+  DCPS::gen_find_size(plist, size, padding);
+
+  ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
+                            ACE_Message_Block::MB_DATA,
+                            new ACE_Message_Block(size));
+
+  using DCPS::Serializer;
+  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  ser << plist;
+
+  // Send
+  publish_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+}
+
+
+DDS::ReturnCode_t
 Sedp::Writer::build_message(
     const DiscoveredWriterData& dwd,
     ACE_Message_Block& payload)
@@ -1041,6 +1090,20 @@ Sedp::Writer::publish_sample(ACE_Message_Block& payload, size_t size)
   list_el.sample_->cont(payload.duplicate());
 
   send(list);
+}
+
+void
+Sedp::Writer::publish_control_msg(
+    ACE_Message_Block& payload, 
+    size_t size,
+    DCPS::MessageId id)
+{
+  DCPS::DataSampleHeader header;
+  header.message_id_ = id;
+  header.byte_order_ = ACE_CDR_BYTE_ORDER;
+  header.message_length_ = static_cast<ACE_UINT32>(size);
+
+  send_control(header, &payload);
 }
 
 //-------------------------------------------------------------------------

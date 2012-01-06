@@ -32,7 +32,7 @@ namespace {
     }
   }
 
-  void add_param_locator(ParameterList& param_list,
+  void add_param_rtps_locator(ParameterList& param_list,
                          const DCPS::TransportLocator& dcps_locator) {
     // Convert the tls blob to an RTPS locator seq
     LocatorSeq locators;
@@ -59,7 +59,7 @@ namespace {
     }
   }
 
-  void add_param_blob(ParameterList& param_list,
+  void add_param_dcps_locator(ParameterList& param_list,
                       const DCPS::TransportLocator& dcps_locator) {
     Parameter param;
     param.opendds_locator(dcps_locator);
@@ -461,11 +461,16 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     // If this is an rtps udp transport
     if (!strcmp(tl.transport_type.in(), "rtps_udp")) {
       // Append the locator's deserialized locator and an RTPS PID
-      add_param_locator(param_list, tl);
+      add_param_rtps_locator(param_list, tl);
     // Otherwise, this is an OpenDDS, custom transport
     } else {
       // TODO Append the blob and a custom PID
-      add_param_blob(param_list, tl);
+      add_param_dcps_locator(param_list, tl);
+      if (!strcmp(tl.transport_type.in(), "multicast")) {
+        ACE_DEBUG((LM_WARNING, 
+                   ACE_TEXT("(%P|%t) Multicast transport with RTPS ")
+                   ACE_TEXT("discovery has known issues")));
+      }
     }
   }
 
@@ -579,16 +584,34 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     param._d(PID_ENDPOINT_GUID);
     add_param(param_list, param);
   }
-  add_param_locator_seq(param_list, 
-                        reader_data.readerProxy.unicastLocatorList,
-                        PID_UNICAST_LOCATOR);
-  add_param_locator_seq(param_list, 
-                        reader_data.readerProxy.multicastLocatorList,
-                        PID_MULTICAST_LOCATOR);
+
   {
     Parameter param;
     param.content_filter_property(reader_data.contentFilterProperty);
     add_param(param_list, param);
+  }
+
+  CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
+  // Serialize from allLocators, rather than the unicastLocatorList
+  // and multicastLocatorList.  This allows OpenDDS transports to be 
+  // serialized in the proper order using custom PIDs.
+  for (CORBA::ULong i = 0; i < locator_len; ++i) {
+    // Each locator has a blob of interest
+    const DCPS::TransportLocator& tl = reader_data.readerProxy.allLocators[i];
+    // If this is an rtps udp transport
+    if (!strcmp(tl.transport_type.in(), "rtps_udp")) {
+      // Append the locator's deserialized locator and an RTPS PID
+      add_param_rtps_locator(param_list, tl);
+    // Otherwise, this is an OpenDDS, custom transport
+    } else {
+      // TODO Append the blob and a custom PID
+      add_param_dcps_locator(param_list, tl);
+      if (!strcmp(tl.transport_type.in(), "multicast")) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Multicast transport with RTPS ")
+                   ACE_TEXT("discovery has known issues")));
+      }
+    }
   }
   return 0;
 }

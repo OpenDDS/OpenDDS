@@ -1,3 +1,17 @@
+Fri Jan  6 15:37:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Make locator changes for reader like writer.
+          Refactor add_ method names for locators
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Hanle update publication and remove publication.
+          Publish control message with one param (a guid).
+
 Thu Jan  5 23:36:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:

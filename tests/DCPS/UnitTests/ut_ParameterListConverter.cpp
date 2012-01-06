@@ -408,18 +408,6 @@ namespace {
         }
       }
       guid_generator.populate(result.readerProxy.remoteReaderGuid);
-      if (num_uc_locs && uc_locs) {
-        result.readerProxy.unicastLocatorList.length(num_uc_locs);
-        for (CORBA::ULong i = 0; i < num_uc_locs; ++i) {
-          result.readerProxy.unicastLocatorList[i] = uc_locs[i];
-        }
-      }
-      if (num_mc_locs && mc_locs) {
-        result.readerProxy.multicastLocatorList.length(num_mc_locs);
-        for (CORBA::ULong i = 0; i < num_mc_locs; ++i) {
-          result.readerProxy.multicastLocatorList[i] = mc_locs[i];
-        }
-      }
       if (cf_topic_name) {
         result.contentFilterProperty.contentFilteredTopicName = cf_topic_name;
       }
@@ -438,10 +426,32 @@ namespace {
           result.contentFilterProperty.expressionParameters[i] = params[i];
         }
       }
+      // One DCPS locator for all unicast and multicast locators
+      if ((num_uc_locs && uc_locs) || (num_mc_locs || mc_locs)) {
+        CORBA::ULong len = result.readerProxy.allLocators.length();
+        result.readerProxy.allLocators.length(len + 1);
+        OpenDDS::DCPS::TransportLocator& loc = result.readerProxy.allLocators[len];
+        // Combine unicast and multicast locators into one seq
+        LocatorSeq rtps_locators;
+        CORBA::ULong i;
+        for (i = 0; i < num_uc_locs; ++i) {
+          CORBA::ULong rtps_len = rtps_locators.length();
+          rtps_locators.length(rtps_len +1);
+          rtps_locators[rtps_len] = uc_locs[i];
+        }
+        for (i = 0; i < num_mc_locs; ++i) {
+          CORBA::ULong rtps_len = rtps_locators.length();
+          rtps_locators.length(rtps_len +1);
+          rtps_locators[rtps_len] = mc_locs[i];
+        }
+        loc.transport_type = "rtps_udp";
+        // Add that seq to the blob
+        locators_to_blob(rtps_locators, loc.data);
+      }
       return result;
-    }
-  }
-}
+    } // method
+  } // Factory namespace
+} // anon namespace
 
 bool is_present(const ParameterList& param_list, const ParameterId_t pid) {
   CORBA::ULong length = param_list.length();
@@ -2517,6 +2527,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
+    TEST_ASSERT(!is_present(param_list, PID_MULTICAST_LOCATOR));
+    TEST_ASSERT(!is_present(param_list, PID_OPENDDS_LOCATOR));
   }
   { // Should decode reader unicast locators
     Locator_t locators[2];
@@ -2545,10 +2557,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Locator_t locators[2];
     locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    1234,
-                                   127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+                                   227, 0, 0, 1);
+    locators[1] = Factory::locator(LOCATOR_KIND_UDPv4,
                                    7734,
-                                   107, 9, 8, 21);
+                                   237, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
         AUTOMATIC_LIVELINESS_QOS, 0, 0,
@@ -2560,6 +2572,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
+    Parameter param0 = get(param_list, PID_MULTICAST_LOCATOR, 0);
+    Locator_t loc0 = param0.locator();
+    TEST_ASSERT(!memcmp(&loc0, &locators[0], sizeof(Locator_t)));
+    Parameter param1 = get(param_list, PID_MULTICAST_LOCATOR, 1);
+    Locator_t loc1 = param1.locator();
+    TEST_ASSERT(!memcmp(&loc1, &locators[1], sizeof(Locator_t)));
   }
   { // Should decode reader multicast locators
     Locator_t locators[2];

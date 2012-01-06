@@ -185,6 +185,8 @@ private:
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
     DDS::ReturnCode_t publish_sample(const DiscoveredWriterData& dwd);
+    DDS::ReturnCode_t publish_unregister_dispose(const DCPS::RepoId& rid);
+
   private:
     DCPS::TransportSendElementAllocator alloc_;
     Header header_;
@@ -192,8 +194,13 @@ private:
 
     DDS::ReturnCode_t build_message(const DiscoveredWriterData& dwd,
                                     ACE_Message_Block& payload);
+    DDS::ReturnCode_t build_message(const DCPS::RepoId& rid,
+                                    ACE_Message_Block& payload);
 
     void publish_sample(ACE_Message_Block& payload, size_t size);
+    void publish_control_msg(ACE_Message_Block& payload, 
+                             size_t size,
+                             DCPS::MessageId id);
 
   } publications_writer_, subscriptions_writer_;
 
