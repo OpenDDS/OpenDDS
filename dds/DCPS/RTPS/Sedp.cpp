@@ -46,9 +46,10 @@ using DCPS::RepoId;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
-Sedp::Sedp(const RepoId& participant_id, Spdp& owner)
+Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   : participant_id_(participant_id)
   , spdp_(owner)
+  , lock_(lock)
   , publications_writer_(make_id(participant_id,
                                  ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
                          *this)
@@ -481,6 +482,12 @@ Sedp::add_publication(const RepoId& topicId,
   TopicDetailsEx& td = topics_[topic_names_[topicId]];
   td.endpoints_.insert(rid);
 
+  if (DDS::RETCODE_OK != write_publication_data(rid, pb))
+  {
+    // TODO: should this be removed from the local_publications map?
+  }
+
+/*
   DiscoveredWriterData dwd;
   if (DDS::RETCODE_OK == populate_discovered_writer_msg(dwd, rid, pb)) {
     ACE_DEBUG((LM_ERROR, "Successfully populated DiscoveredWriterData msg\n"));
@@ -493,7 +500,7 @@ Sedp::add_publication(const RepoId& topicId,
     ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
     // TODO: should this be removed from the local_publications map?
   }
-
+*/
   return rid;
 }
 
@@ -523,6 +530,11 @@ Sedp::update_publication_qos(const RepoId& publicationId,
     pb.qos_ = qos;
     pb.publisher_qos_ = publisherQos;
 
+    if (DDS::RETCODE_OK != write_publication_data(publicationId, pb))
+    {
+      return false;
+    }
+  /*
     DiscoveredWriterData dwd;
     if (DDS::RETCODE_OK == 
               populate_discovered_writer_msg(dwd, publicationId, pb))
@@ -535,7 +547,7 @@ Sedp::update_publication_qos(const RepoId& publicationId,
       ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
       return false;
     }
-
+*/
     return true;
   }
   return false;
@@ -1018,25 +1030,43 @@ Sedp::Writer::control_dropped(ACE_Message_Block*, bool)
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::publish_sample(const DiscoveredWriterData& dwd)
+Sedp::Writer::write_sample(const ParameterList& plist)
 {
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+
   // Determine message length
   size_t size = 0, padding = 0;
   DCPS::find_size_ulong(size, padding);
-  DCPS::gen_find_size(dwd, size, padding);
+  DCPS::gen_find_size(plist, size, padding);
 
   // Build RTPS message
   ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
-  DDS::ReturnCode_t result = build_message(dwd, payload);
-  if (result != DDS::RETCODE_OK) {
-    return result;
+  using DCPS::Serializer;
+  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  if (!(ser << plist)) {
+    result = DDS::RETCODE_ERROR;
   }
 
-  // Send sample
-  publish_sample(payload, size);
-  return DDS::RETCODE_OK;
+  if (result == DDS::RETCODE_OK) {
+    // Send sample
+    DCPS::DataSampleListElement list_el(repo_id_, this, 0, &alloc_, 0);
+    list_el.header_.message_id_ = DCPS::SAMPLE_DATA;
+    list_el.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
+    list_el.header_.message_length_ = static_cast<ACE_UINT32>(size);
+    list_el.header_.sequence_ = ++seq_;
+  
+    DCPS::DataSampleList list;  // Container of list elements
+    list.head_ = list.tail_ = &list_el;
+    list.size_ = 1;
+    list_el.sample_ = new ACE_Message_Block(size);
+    *list_el.sample_ << list_el.header_;
+    list_el.sample_->cont(payload.duplicate());
+
+    send(list);
+  }
+  return result;
 }
 
 DDS::ReturnCode_t
@@ -1084,6 +1114,7 @@ Sedp::Writer::build_message(
   return result;
 }
 
+/*
 void
 Sedp::Writer::publish_sample(ACE_Message_Block& payload, size_t size)
 {
@@ -1101,7 +1132,7 @@ Sedp::Writer::publish_sample(ACE_Message_Block& payload, size_t size)
 
   send(list);
 }
-
+*/
 void
 Sedp::Writer::publish_control_msg(
     ACE_Message_Block& payload, 
@@ -1222,6 +1253,10 @@ Sedp::populate_discovered_writer_msg(
       DDS::ReturnCode_t result = blob_to_locators(pub.trans_info_[i].data, 
                                                   locators);
       if (result != DDS::RETCODE_OK) {
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) Failed to translate  ")
+                             ACE_TEXT("blob to locators while ")
+                             ACE_TEXT("populatingDiscoveredWriterData\n")));
+
         return result;
       } else {
         CORBA::ULong locators_len = locators.length();
@@ -1249,20 +1284,46 @@ Sedp::populate_discovered_writer_msg(
 void
 Sedp::write_durable_publication_data()
 {
+  //ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
   LocalPublicationIter pub, end = local_publications_.end();
   for (pub = local_publications_.begin(); pub != end; ++pub) {
-    // Do nothing for now
+    write_publication_data(pub->first, pub->second);
   }
 }
 
 void
 Sedp::write_durable_subscription_data()
 {
+  //ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalSubscriptionIter sub, end = local_subscriptions_.end();
 
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
     // Do nothing for now
   }
+}
+
+DDS::ReturnCode_t
+Sedp::write_publication_data(const DCPS::RepoId& rid, const LocalPublication& lp)
+{
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  DiscoveredWriterData dwd;
+  ParameterList plist;
+  ACE_DEBUG((LM_INFO, "Writing publication data\n"));
+  result = populate_discovered_writer_msg(dwd, rid, lp);
+  if (DDS::RETCODE_OK == result) {
+    // Convert to parameter list
+    if (ParameterListConverter::to_param_list(dwd, plist)) {
+      ACE_DEBUG((LM_INFO, 
+          ACE_TEXT("(%P|%t) Failed to convert DiscoveredWriterData ")
+          ACE_TEXT(" to ParameterList\n")));
+      result = DDS::RETCODE_ERROR;
+    }
+  }
+  if (DDS::RETCODE_OK == result) {
+    result = publications_writer_.write_sample(plist);
+  }
+  return result;
 }
 
 }

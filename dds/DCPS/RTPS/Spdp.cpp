@@ -57,7 +57,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
   : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), sedp_(guid, *this)
+  , shutdown_cond_(lock_), sedp_(guid, *this, lock_)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   sedp_.ignore(guid);

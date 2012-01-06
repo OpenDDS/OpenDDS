@@ -53,7 +53,9 @@ class Spdp;
 
 class Sedp {
 public:
-  Sedp(const DCPS::RepoId& participant_id, Spdp& owner);
+  Sedp(const DCPS::RepoId& participant_id, 
+       Spdp& owner,
+       ACE_Thread_Mutex& lock);
 
   DDS::ReturnCode_t init(const DCPS::RepoId& guid, 
                          RtpsDiscovery& disco, 
@@ -134,6 +136,7 @@ public:
 private:
   DCPS::RepoId participant_id_;
   Spdp& spdp_;
+  ACE_Thread_Mutex& lock_;
 
   class Endpoint : public DCPS::TransportClient {
   public:
@@ -184,20 +187,19 @@ private:
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
-    DDS::ReturnCode_t publish_sample(const DiscoveredWriterData& dwd);
+    DDS::ReturnCode_t write_sample(const ParameterList& plist);
     DDS::ReturnCode_t publish_unregister_dispose(const DCPS::RepoId& rid);
 
   private:
     DCPS::TransportSendElementAllocator alloc_;
     Header header_;
-    SequenceNumber_t seq_;
+    DCPS::SequenceNumber seq_;
 
     DDS::ReturnCode_t build_message(const DiscoveredWriterData& dwd,
                                     ACE_Message_Block& payload);
     DDS::ReturnCode_t build_message(const DCPS::RepoId& rid,
                                     ACE_Message_Block& payload);
 
-    void publish_sample(ACE_Message_Block& payload, size_t size);
     void publish_control_msg(ACE_Message_Block& payload, 
                              size_t size,
                              DCPS::MessageId id);
@@ -345,6 +347,9 @@ private:
 
   void write_durable_publication_data();
   void write_durable_subscription_data();
+
+  DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid, 
+                                           const LocalPublication& pub);
 };
 
 }
