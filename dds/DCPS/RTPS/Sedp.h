@@ -248,7 +248,7 @@ private:
   typedef LocalPublicationMap::iterator LocalPublicationIter;
   LocalPublicationMap local_publications_;
 
-  DDS::ReturnCode_t populate_discovered_writer_msg(
+  void populate_discovered_writer_msg(
       DiscoveredWriterData& dwd,
       const DCPS::RepoId& publication_id,
       const LocalPublication& pub);
@@ -267,6 +267,10 @@ private:
   typedef LocalSubscriptionMap::iterator LocalSubscriptionIter;
   LocalSubscriptionMap local_subscriptions_;
 
+  void populate_discovered_reader_msg(
+      DiscoveredReaderData& drd,
+      const DCPS::RepoId& subscription_id,
+      const LocalSubscription& sub);
   unsigned int publication_counter_, subscription_counter_;
 
   void data_received(char message_id, const DiscoveredWriterData& wdata);
@@ -354,6 +358,9 @@ private:
   DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid, 
                                            const LocalPublication& pub,
                                            bool is_retransmission = false);
+  DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid, 
+                                            const LocalSubscription& pub,
+                                            bool is_retransmission = false);
 };
 
 }

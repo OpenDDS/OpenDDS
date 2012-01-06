@@ -477,23 +477,10 @@ Sedp::add_publication(const RepoId& topicId,
   if (DDS::RETCODE_OK != write_publication_data(rid, pb))
   {
     // TODO: should this be removed from the local_publications map?
+    return RepoId();
   }
-
   match_endpoints(rid, td);
 
-/*
-  DiscoveredWriterData dwd;
-  if (DDS::RETCODE_OK == populate_discovered_writer_msg(dwd, rid, pb)) {
-    ACE_DEBUG((LM_ERROR, "Successfully populated DiscoveredWriterData msg\n"));
-    if (DDS::RETCODE_OK != publications_writer_.publish_sample(dwd)) {
-      ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
-      // TODO: should this be removed from the local_publications map?
-    }
-  } else {
-    ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
-    // TODO: should this be removed from the local_publications map?
-  }
-*/
   return rid;
 }
 
@@ -507,7 +494,7 @@ Sedp::remove_publication(const RepoId& publicationId)
     {
       local_publications_.erase(publicationId);
     } else {
-      ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
+      ACE_DEBUG((LM_ERROR, "Failed to publish dispose msg\n"));
     }
   }
 }
@@ -558,9 +545,13 @@ Sedp::add_subscription(const RepoId& topicId,
 
   TopicDetailsEx& td = topics_[topic_names_[topicId]];
   td.endpoints_.insert(rid);
-  match_endpoints(rid, td);
 
-  // TODO: use SEDP to advertise the new subscription
+  if (DDS::RETCODE_OK != write_subscription_data(rid, sb))
+  {
+    // TODO: should this be removed from the local_subscriptions map?
+    return RepoId();
+  }
+  match_endpoints(rid, td);
 
   return rid;
 
@@ -569,8 +560,15 @@ Sedp::add_subscription(const RepoId& topicId,
 void
 Sedp::remove_subscription(const RepoId& subscriptionId)
 {
-  // TODO: use SEDP to dispose the subscription
-  local_subscriptions_.erase(subscriptionId);
+  LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
+  if (iter != local_subscriptions_.end()) {
+    if (DDS::RETCODE_OK == 
+          publications_writer_.write_unregister_dispose(subscriptionId)) {
+      local_subscriptions_.erase(subscriptionId);
+    } else {
+      ACE_DEBUG((LM_ERROR, "Failed to publish dispose msg\n"));
+    }
+  }
 }
 
 bool
@@ -583,7 +581,11 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
     LocalSubscription& sb = iter->second;
     sb.qos_ = qos;
     sb.subscriber_qos_ = subscriberQos;
-    // TODO: tell the world about the change with SEDP
+
+    if (DDS::RETCODE_OK != write_subscription_data(subscriptionId, sb))
+    {
+      return false;
+    }
 
     return true;
   }
@@ -598,7 +600,10 @@ Sedp::update_subscription_params(const RepoId& subId,
   if (iter != local_subscriptions_.end()) {
     LocalSubscription& sb = iter->second;
     sb.params_ = params;
-    // TODO: tell the world about the change with SEDP
+    if (DDS::RETCODE_OK != write_subscription_data(subId, sb))
+    {
+      return false;
+    }
 
     return true;
   }
@@ -1231,7 +1236,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
   }
 }
 
-DDS::ReturnCode_t
+void
 Sedp::populate_discovered_writer_msg(
     DiscoveredWriterData& dwd,
     const RepoId& publication_id,
@@ -1259,44 +1264,47 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.topic_data = topic_details.qos_.topic_data;
   dwd.ddsPublicationData.group_data = pub.publisher_qos_.group_data;
   dwd.writerProxy.remoteWriterGuid = publication_id;
-  CORBA::ULong tx_length = pub.trans_info_.length();
-  for (CORBA::ULong i = 0; i < tx_length; ++i) {
-    ACE_DEBUG((LM_INFO, "got trans type of %C\n", 
-               pub.trans_info_[i].transport_type.in()));
-    std::string trans_type = pub.trans_info_[i].transport_type.in();
-    if (trans_type == "rtps_udp") {
-      LocatorSeq locators;
-      bool ignore_requires_inline_qos;
-      DDS::ReturnCode_t result = blob_to_locators(pub.trans_info_[i].data, 
-                                                  locators,
-                                                  ignore_requires_inline_qos);
-      if (result != DDS::RETCODE_OK) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) Failed to translate  ")
-                             ACE_TEXT("blob to locators while ")
-                             ACE_TEXT("populatingDiscoveredWriterData\n")));
+  // Ignore dwd.writerProxy.unicastLocatorList;
+  // Ignore dwd.writerProxy.multicastLocatorList;
+  dwd.writerProxy.allLocators = pub.trans_info_;
+}
 
-        return result;
-      } else {
-        CORBA::ULong locators_len = locators.length();
-        for (CORBA::ULong j = 0; j < locators_len; ++j) {
-          CORBA::ULong unicast_len = 
-                dwd.writerProxy.unicastLocatorList.length();
-          // TODO Append to unicast locators or multicast locators?
-          dwd.writerProxy.unicastLocatorList.length(unicast_len + 1);
-          dwd.writerProxy.unicastLocatorList[unicast_len] = locators[j];
-        }
-      }
-    }
-    // Append to WriterProxy
-    CORBA::ULong len = dwd.writerProxy.allLocators.length();
-    dwd.writerProxy.allLocators.length(len + 1);
-    dwd.writerProxy.allLocators[len].transport_type = 
-          pub.trans_info_[i].transport_type;
-    dwd.writerProxy.allLocators[len].data = 
-          pub.trans_info_[i].data;
-  }
-
-  return DDS::RETCODE_OK;
+void
+Sedp::populate_discovered_reader_msg(
+    DiscoveredReaderData& drd,
+    const RepoId& subscription_id,
+    const LocalSubscription& sub)
+{
+  // Ignored on the wire drd.ddsSubscription.key
+  // Ignored on the wire drd.ddsSubscription.participant_key
+  std::string topic_name = topic_names_[sub.topic_id_];
+  drd.ddsSubscriptionData.topic_name = topic_name.c_str();
+  TopicDetails& topic_details = topics_[topic_name];
+  drd.ddsSubscriptionData.type_name = topic_details.data_type_.c_str();
+  drd.ddsSubscriptionData.durability = sub.qos_.durability;
+  drd.ddsSubscriptionData.deadline = sub.qos_.deadline;
+  drd.ddsSubscriptionData.latency_budget = sub.qos_.latency_budget;
+  drd.ddsSubscriptionData.liveliness = sub.qos_.liveliness;
+  drd.ddsSubscriptionData.reliability = sub.qos_.reliability;
+  drd.ddsSubscriptionData.ownership = sub.qos_.ownership;
+  drd.ddsSubscriptionData.destination_order = sub.qos_.destination_order;
+  drd.ddsSubscriptionData.user_data = sub.qos_.user_data;
+  drd.ddsSubscriptionData.time_based_filter = sub.qos_.time_based_filter;
+  drd.ddsSubscriptionData.presentation = sub.subscriber_qos_.presentation;
+  drd.ddsSubscriptionData.partition = sub.subscriber_qos_.partition;
+  drd.ddsSubscriptionData.topic_data = topic_details.qos_.topic_data;
+  drd.ddsSubscriptionData.group_data = sub.subscriber_qos_.group_data;
+  drd.readerProxy.remoteReaderGuid = subscription_id;
+  drd.readerProxy.expectsInlineQos = false;  // We never expect inline qos
+  // Ignore drd.readerProxy.unicastLocatorList;
+  // Ignore drd.readerProxy.multicastLocatorList;
+  drd.readerProxy.allLocators = sub.trans_info_;
+  //TODO: Where are these?
+  drd.contentFilterProperty.contentFilteredTopicName = "";
+  drd.contentFilterProperty.relatedTopicName = "";
+  drd.contentFilterProperty.filterClassName = "";
+  drd.contentFilterProperty.filterExpression = sub.filter_.c_str();
+  drd.contentFilterProperty.expressionParameters = sub.params_;
 }
 
 void
@@ -1317,7 +1325,7 @@ Sedp::write_durable_subscription_data()
   LocalSubscriptionIter sub, end = local_subscriptions_.end();
 
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-    // Do nothing for now
+    write_subscription_data(sub->first, sub->second, true);
   }
 }
 
@@ -1331,18 +1339,40 @@ Sedp::write_publication_data(
   DiscoveredWriterData dwd;
   ParameterList plist;
   ACE_DEBUG((LM_INFO, "Writing publication data\n"));
-  result = populate_discovered_writer_msg(dwd, rid, lp);
-  if (DDS::RETCODE_OK == result) {
-    // Convert to parameter list
-    if (ParameterListConverter::to_param_list(dwd, plist)) {
-      ACE_DEBUG((LM_INFO, 
+  populate_discovered_writer_msg(dwd, rid, lp);
+  // Convert to parameter list
+  if (ParameterListConverter::to_param_list(dwd, plist)) {
+    ACE_DEBUG((LM_INFO, 
           ACE_TEXT("(%P|%t) Failed to convert DiscoveredWriterData ")
           ACE_TEXT(" to ParameterList\n")));
-      result = DDS::RETCODE_ERROR;
-    }
+    result = DDS::RETCODE_ERROR;
   }
   if (DDS::RETCODE_OK == result) {
     result = publications_writer_.write_sample(plist, is_retransmission);
+  }
+  return result;
+}
+
+DDS::ReturnCode_t
+Sedp::write_subscription_data(
+    const DCPS::RepoId& rid, 
+    const LocalSubscription& ls,
+    bool is_retransmission)
+{
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  DiscoveredReaderData drd;
+  ParameterList plist;
+  ACE_DEBUG((LM_INFO, "Writing subscription data\n"));
+  populate_discovered_reader_msg(drd, rid, ls);
+  // Convert to parameter list
+  if (ParameterListConverter::to_param_list(drd, plist)) {
+    ACE_DEBUG((LM_INFO, 
+          ACE_TEXT("(%P|%t) Failed to convert DiscoveredReaderData ")
+          ACE_TEXT(" to ParameterList\n")));
+    result = DDS::RETCODE_ERROR;
+  }
+  if (DDS::RETCODE_OK == result) {
+    result = subscriptions_writer_.write_sample(plist, is_retransmission);
   }
   return result;
 }
