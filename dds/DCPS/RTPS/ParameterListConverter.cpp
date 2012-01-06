@@ -193,9 +193,10 @@ namespace {
         TheServiceParticipant->initial_LivelinessQosPolicy();
     return memcmp(&qos, &def_qos, sizeof(def_qos));
   }
-  bool not_default(const DDS::ReliabilityQosPolicy& qos) {
-    DDS::ReliabilityQosPolicy def_qos = 
-        TheServiceParticipant->initial_ReliabilityQosPolicy();
+  bool not_default(const DDS::ReliabilityQosPolicy& qos, bool is_datawriter) {
+    DDS::ReliabilityQosPolicy def_qos = is_datawriter ? 
+        TheServiceParticipant->initial_DataWriterQos().reliability :
+        TheServiceParticipant->initial_DataReaderQos().reliability;
     return memcmp(&qos, &def_qos, sizeof(def_qos));
   }
   bool not_default(const DDS::OwnershipQosPolicy& qos) {
@@ -374,10 +375,15 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.reliability))
+  if (not_default(writer_data.ddsPublicationData.reliability, true))
   {
     Parameter param;
-    param.reliability(writer_data.ddsPublicationData.reliability);
+    // Spec creators for RTPS have reliability indexed at 1
+    DDS::ReliabilityQosPolicy reliability_copy = 
+        writer_data.ddsPublicationData.reliability;
+    reliability_copy.kind = 
+        (DDS::ReliabilityQosPolicyKind)((int)reliability_copy.kind + 1);
+    param.reliability(reliability_copy);
     add_param(param_list, param);
   }
 
@@ -522,10 +528,15 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.reliability))
+  if (not_default(reader_data.ddsSubscriptionData.reliability, false))
   {
     Parameter param;
-    param.reliability(reader_data.ddsSubscriptionData.reliability);
+    // Spec creators for RTPS have reliability indexed at 1
+    DDS::ReliabilityQosPolicy reliability_copy = 
+        reader_data.ddsSubscriptionData.reliability;
+    reliability_copy.kind = 
+        (DDS::ReliabilityQosPolicyKind)((int)reliability_copy.kind + 1);
+    param.reliability(reliability_copy);
     add_param(param_list, param);
   }
 
@@ -757,7 +768,7 @@ int from_param_list(const ParameterList& param_list,
   writer_data.ddsPublicationData.liveliness =
       TheServiceParticipant->initial_LivelinessQosPolicy();
   writer_data.ddsPublicationData.reliability =
-      TheServiceParticipant->initial_ReliabilityQosPolicy();
+      TheServiceParticipant->initial_DataWriterQos().reliability;
   writer_data.ddsPublicationData.lifespan =
       TheServiceParticipant->initial_LifespanQosPolicy();
   writer_data.ddsPublicationData.user_data =
@@ -807,6 +818,10 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_RELIABILITY:
         writer_data.ddsPublicationData.reliability = param.reliability();
+        // Spec creators for RTPS have reliability indexed at 1
+        writer_data.ddsPublicationData.reliability.kind =
+          (DDS::ReliabilityQosPolicyKind)
+              ((int)writer_data.ddsPublicationData.reliability.kind - 1);
         break;
       case PID_LIFESPAN:
         writer_data.ddsPublicationData.lifespan = param.lifespan();
@@ -900,7 +915,7 @@ int from_param_list(const ParameterList& param_list,
   reader_data.ddsSubscriptionData.liveliness =
       TheServiceParticipant->initial_LivelinessQosPolicy();
   reader_data.ddsSubscriptionData.reliability =
-      TheServiceParticipant->initial_ReliabilityQosPolicy();
+      TheServiceParticipant->initial_DataReaderQos().reliability;
   reader_data.ddsSubscriptionData.ownership =
       TheServiceParticipant->initial_OwnershipQosPolicy();
   reader_data.ddsSubscriptionData.destination_order =
@@ -950,6 +965,10 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_RELIABILITY:
         reader_data.ddsSubscriptionData.reliability = param.reliability();
+        // Spec creators for RTPS have reliability indexed at 1
+        reader_data.ddsSubscriptionData.reliability.kind =
+          (DDS::ReliabilityQosPolicyKind)
+              ((int)reader_data.ddsSubscriptionData.reliability.kind - 1);
         break;
       case PID_USER_DATA:
         reader_data.ddsSubscriptionData.user_data = param.user_data();

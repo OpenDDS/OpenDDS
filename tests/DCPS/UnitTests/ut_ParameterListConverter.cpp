@@ -155,7 +155,7 @@ namespace {
       writer_data.ddsPublicationData.liveliness = 
           TheServiceParticipant->initial_LivelinessQosPolicy();
       writer_data.ddsPublicationData.reliability = 
-          TheServiceParticipant->initial_ReliabilityQosPolicy();
+          TheServiceParticipant->initial_DataWriterQos().reliability;
       writer_data.ddsPublicationData.lifespan = 
           TheServiceParticipant->initial_LifespanQosPolicy();
       writer_data.ddsPublicationData.user_data = 
@@ -190,7 +190,7 @@ namespace {
       reader_data.ddsSubscriptionData.liveliness = 
           TheServiceParticipant->initial_LivelinessQosPolicy();
       reader_data.ddsSubscriptionData.reliability = 
-          TheServiceParticipant->initial_ReliabilityQosPolicy();
+          TheServiceParticipant->initial_DataReaderQos().reliability;
       reader_data.ddsSubscriptionData.ownership = 
           TheServiceParticipant->initial_OwnershipQosPolicy();
       reader_data.ddsSubscriptionData.destination_order = 
@@ -1456,7 +1456,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!to_param_list(writer_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
     Parameter param = get(param_list, PID_RELIABILITY);
-    TEST_ASSERT(param.reliability().kind == RELIABLE_RELIABILITY_QOS);
+    TEST_ASSERT(param.reliability().kind == (int)RELIABLE_RELIABILITY_QOS + 1);
     TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
     TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
   }
@@ -1489,7 +1489,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ParameterList empty_param_list;
     TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
     ReliabilityQosPolicy defaultQos = 
-        TheServiceParticipant->initial_ReliabilityQosPolicy();
+        TheServiceParticipant->initial_DataWriterQos().reliability;
     TEST_ASSERT(defaultQos.kind ==
                 writer_data_out.ddsPublicationData.reliability.kind);
     TEST_ASSERT(defaultQos.max_blocking_time.sec ==
@@ -2224,7 +2224,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
     Parameter param = get(param_list, PID_RELIABILITY);
-    TEST_ASSERT(param.reliability().kind == RELIABLE_RELIABILITY_QOS);
+    TEST_ASSERT(param.reliability().kind == (int)RELIABLE_RELIABILITY_QOS + 1);
     TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
     TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
   }
@@ -3255,7 +3255,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(reader_data_out.ddsSubscriptionData.liveliness.lease_duration.nanosec ==
                 TheServiceParticipant->initial_LivelinessQosPolicy().lease_duration.nanosec);
     TEST_ASSERT(reader_data_out.ddsSubscriptionData.reliability.kind ==
-                TheServiceParticipant->initial_ReliabilityQosPolicy().kind);
+                TheServiceParticipant->initial_DataReaderQos().reliability.kind);
     TEST_ASSERT(reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.sec ==
                 TheServiceParticipant->initial_ReliabilityQosPolicy().max_blocking_time.sec);
     TEST_ASSERT(reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.nanosec ==
