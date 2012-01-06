@@ -160,13 +160,9 @@ DataLink::resume_send()
     this->send_strategy_->resume_send();
 }
 
-/// Only called by our TransportImpl object.
-///
-/// Return Codes: 0 means successful reservation made.
-///              -1 means failure.
 int
-DataLink::make_reservation(RepoId subscriber_id,  /* remote */
-                           RepoId publisher_id,   /* local */
+DataLink::make_reservation(const RepoId& remote_subscription_id,
+                           const RepoId& local_publication_id,
                            TransportSendListener* send_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
@@ -178,12 +174,11 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
   bool first_pub = false;
 
   if (DCPS_debug_level > 9) {
-    GuidConverter local(publisher_id);
-    GuidConverter remote(subscriber_id);
+    GuidConverter local(local_publication_id), remote(remote_subscription_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
-               ACE_TEXT("creating association local: publisher %C ")
-               ACE_TEXT("<--> with remote subscriber %C.\n"),
+               ACE_TEXT("creating association local publication  %C ")
+               ACE_TEXT("<--> with remote subscription %C.\n"),
                std::string(local).c_str(),
                std::string(remote).c_str()));
   }
@@ -203,16 +198,18 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
 
     // Update our pub_map_.  The last argument is a 0 because remote
     // subscribers don't have a TransportReceiveListener object.
-    pub_result = this->pub_map_.insert(publisher_id, subscriber_id, 0);
+    pub_result = this->pub_map_.insert(local_publication_id,
+                                       remote_subscription_id, 0);
 
     // Take advantage of the lock and store the send listener as well.
-    this->send_listeners_[publisher_id] = send_listener;
+    this->send_listeners_[local_publication_id] = send_listener;
   }
 
   if (pub_result == 0) {
     {
       GuardType guard(this->sub_map_lock_);
-      sub_result = this->sub_map_.insert(subscriber_id,publisher_id);
+      sub_result = this->sub_map_.insert(remote_subscription_id,
+                                         local_publication_id);
     }
 
     if (sub_result == 0) {
@@ -224,14 +221,14 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
 
       } else {
         GuardType guard(this->sub_map_lock_);
-        sub_undo_result = this->sub_map_.remove(subscriber_id,
-                                                publisher_id);
+        sub_undo_result = this->sub_map_.remove(remote_subscription_id,
+                                                local_publication_id);
       }
     }
 
     GuardType guard(this->pub_map_lock_);
-    pub_undo_result = this->pub_map_.remove(publisher_id,
-                                            subscriber_id);
+    pub_undo_result = this->pub_map_.remove(local_publication_id,
+                                            remote_subscription_id);
   }
 
   // We only get to here when an error occurred somewhere along the way.
@@ -239,56 +236,47 @@ DataLink::make_reservation(RepoId subscriber_id,  /* remote */
 
   if (pub_result == 0) {
     if (sub_result != 0) {
-      GuidConverter sub_converter(subscriber_id);
-      GuidConverter pub_converter(publisher_id);
+      GuidConverter local(local_publication_id), remote(remote_subscription_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to insert remote subscriber %C ")
-                 ACE_TEXT("to local publisher %C reservation into sub_map_.\n"),
-                 std::string(sub_converter).c_str(),
-                 std::string(pub_converter).c_str()));
+                 ACE_TEXT("failed to insert remote subscription %C ")
+                 ACE_TEXT("to local publication %C reservation into sub_map_.\n"),
+                 std::string(remote).c_str(), std::string(local).c_str()));
     }
 
     if (pub_undo_result != 0) {
-      GuidConverter pub_converter(publisher_id);
-      GuidConverter sub_converter(subscriber_id);
+      GuidConverter local(local_publication_id), remote(remote_subscription_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to remove (undo) local publisher %C ")
-                 ACE_TEXT("to remote subscriber %C reservation from pub_map_.\n"),
-                 std::string(pub_converter).c_str(),
-                 std::string(sub_converter).c_str()));
+                 ACE_TEXT("failed to remove (undo) local publication %C ")
+                 ACE_TEXT("to remote subscription %C reservation from pub_map_.\n"),
+                 std::string(local).c_str(), std::string(remote).c_str()));
     }
 
     if (sub_undo_result != 0) {
-      GuidConverter sub_converter(subscriber_id);
-      GuidConverter pub_converter(publisher_id);
+      GuidConverter local(local_publication_id), remote(remote_subscription_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to remove (undo) local subscriber %C ")
-                 ACE_TEXT("to remote publisher %C reservation from sub_map_.\n"),
-                 std::string(sub_converter).c_str(),
-                 std::string(pub_converter).c_str()));
+                 ACE_TEXT("failed to remove (undo) remote subscription %C ")
+                 ACE_TEXT("to local publication %C reservation from sub_map_.\n"),
+                 std::string(remote).c_str(), std::string(local).c_str()));
     }
 
   } else {
-    GuidConverter pub_converter(publisher_id);
-    GuidConverter sub_converter(subscriber_id);
+    GuidConverter local(local_publication_id), remote(remote_subscription_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-               ACE_TEXT("failed to insert local publisher %C to remote ")
-               ACE_TEXT("subscriber %C reservation into pub_map_.\n"),
-               std::string(pub_converter).c_str(),
-               std::string(sub_converter).c_str()));
+               ACE_TEXT("failed to insert local publication %C to remote ")
+               ACE_TEXT("subscription %C reservation into pub_map_.\n"),
+               std::string(local).c_str(), std::string(remote).c_str()));
   }
 
   return -1;
 }
 
-/// Only called by our TransportImpl object.
 int
-DataLink::make_reservation(RepoId publisher_id,     /* remote */
-                           RepoId subscriber_id,    /* local */
+DataLink::make_reservation(const RepoId& remote_publication_id,
+                           const RepoId& local_subcription_id,
                            TransportReceiveListener* receive_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
@@ -300,14 +288,12 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
   bool first_sub = false;
 
   if (DCPS_debug_level > 9) {
-    GuidConverter local(subscriber_id);
-    GuidConverter remote(publisher_id);
+    GuidConverter local(local_subcription_id), remote(remote_publication_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
-               ACE_TEXT("creating association local subscriber: %C ")
-               ACE_TEXT("<--> with remote publisher %C.\n"),
-               std::string(local).c_str(),
-               std::string(remote).c_str()));
+               ACE_TEXT("creating association local subscription %C ")
+               ACE_TEXT("<--> with remote publication  %C.\n"),
+               std::string(local).c_str(), std::string(remote).c_str()));
   }
 
   {
@@ -324,16 +310,16 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
     first_sub = this->sub_map_.size() == 0; // empty
 
     // Update our sub_map_.
-    sub_result = this->sub_map_.insert(subscriber_id ,publisher_id);
+    sub_result = this->sub_map_.insert(local_subcription_id, remote_publication_id);
 
-    this->recv_listeners_[subscriber_id] = receive_listener;
+    this->recv_listeners_[local_subcription_id] = receive_listener;
   }
 
   if (sub_result == 0) {
     {
       GuardType guard(this->pub_map_lock_);
-      pub_result = this->pub_map_.insert(publisher_id,
-                                         subscriber_id,
+      pub_result = this->pub_map_.insert(remote_publication_id,
+                                         local_subcription_id,
                                          receive_listener);
     }
 
@@ -346,8 +332,8 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
 
       } else {
         GuardType guard(this->pub_map_lock_);
-        pub_undo_result = this->pub_map_.remove(publisher_id,
-                                                subscriber_id);
+        pub_undo_result = this->pub_map_.remove(remote_publication_id,
+                                                local_subcription_id);
       }
     }
 
@@ -356,8 +342,8 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
     // already inserted it in the sub_map_, we better attempt to
     // undo the insert that we did to the sub_map_.  Otherwise,
     // the sub_map_ and pub_map_ will become inconsistent.
-    sub_undo_result = this->sub_map_.remove(subscriber_id,
-                                            publisher_id);
+    sub_undo_result = this->sub_map_.remove(local_subcription_id,
+                                            remote_publication_id);
   }
 
   //this->send_strategy_->link_released (false);
@@ -367,47 +353,39 @@ DataLink::make_reservation(RepoId publisher_id,     /* remote */
 
   if (sub_result == 0) {
     if (pub_result != 0) {
-      GuidConverter pub_converter(publisher_id);
-      GuidConverter sub_converter(subscriber_id);
+      GuidConverter local(local_subcription_id), remote(remote_publication_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("Failed to insert remote publisher %C to local ")
-                 ACE_TEXT("subscriber %C reservation into pub_map_.\n"),
-                 std::string(pub_converter).c_str(),
-                 std::string(sub_converter).c_str()));
+                 ACE_TEXT("Failed to insert remote publication %C to local ")
+                 ACE_TEXT("subcription %C reservation into pub_map_.\n"),
+                 std::string(remote).c_str(), std::string(local).c_str()));
     }
 
     if (sub_undo_result != 0) {
-      GuidConverter sub_converter(subscriber_id);
-      GuidConverter pub_converter(publisher_id);
+      GuidConverter local(local_subcription_id), remote(remote_publication_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
-                 ACE_TEXT("failed to remove (undo) local subscriber %C to remote ")
-                 ACE_TEXT("publisher %C reservation from sub_map_.\n"),
-                 std::string(sub_converter).c_str(),
-                 std::string(pub_converter).c_str()));
+                 ACE_TEXT("failed to remove (undo) local subcription %C to ")
+                 ACE_TEXT("remote publication %C reservation from sub_map_.\n"),
+                 std::string(local).c_str(), std::string(remote).c_str()));
     }
 
     if (pub_undo_result != 0) {
-      GuidConverter pub_converter(publisher_id);
-      GuidConverter sub_converter(subscriber_id);
+      GuidConverter local(local_subcription_id), remote(remote_publication_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
-                 ACE_TEXT("failed to remove (undo) local publisher %C to remote ")
-                 ACE_TEXT("subscriber %C reservation from pub_map_.\n"),
-                 std::string(pub_converter).c_str(),
-                 std::string(sub_converter).c_str()));
+                 ACE_TEXT("failed to remove (undo) remote publication %C to ")
+                 ACE_TEXT("local subcription %C reservation from pub_map_.\n"),
+                 std::string(remote).c_str(), std::string(local).c_str()));
     }
 
   } else {
-    GuidConverter sub_converter(subscriber_id);
-    GuidConverter pub_converter(publisher_id);
+    GuidConverter local(local_subcription_id), remote(remote_publication_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
-               ACE_TEXT("failed to insert local subscriber %C to remote ")
-               ACE_TEXT("publisher %C reservation into sub_map_.\n"),
-               std::string(sub_converter).c_str(),
-               std::string(pub_converter).c_str()));
+               ACE_TEXT("failed to insert local subcription %C to remote ")
+               ACE_TEXT("publication %C reservation into sub_map_.\n"),
+               std::string(local).c_str(), std::string(remote).c_str()));
   }
 
   return -1;

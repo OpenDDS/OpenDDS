@@ -153,11 +153,11 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
                 sizeof(pdata.ddsParticipantData.key.value));
 
     if (DCPS::DCPS_debug_level) {
+      DCPS::GuidConverter local(guid_), remote(guid);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("Data received called part key = %x %x %x\n"),
-                 pdata.ddsParticipantData.key.value[0],
-                 pdata.ddsParticipantData.key.value[1],
-                 pdata.ddsParticipantData.key.value[2]));
+        ACE_TEXT("(%P|%t) Spdp::data_received - %C discovered %C lease %ds\n"),
+        std::string(local).c_str(), std::string(remote).c_str(),
+        pdata.leaseDuration.seconds));
     }
 
     // add a new participant
@@ -206,7 +206,8 @@ Spdp::remove_expired_participants()
   for (DiscoveredParticipantIter it = participants_.begin();
        it != participants_.end();) {
     if (it->second.last_seen_ <
-        ACE_OS::gettimeofday() - it->second.pdata_.leaseDuration.seconds) {
+        ACE_OS::gettimeofday() -
+        ACE_Time_Value(it->second.pdata_.leaseDuration.seconds)) {
       if (DCPS::DCPS_debug_level > 1) {
         DCPS::GuidConverter conv(it->first);
         ACE_DEBUG((LM_WARNING,
@@ -555,7 +556,15 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
             ACE_TEXT("failed to deserialize data payload for SPDP\n")));
           return 0;
         }
+      } else {
+        plist.length(1);
+        RepoId guid;
+        std::memcpy(guid.guidPrefix, header.guidPrefix, sizeof(GuidPrefix_t));
+        guid.entityId = ENTITYID_PARTICIPANT;
+        plist[0].guid(guid);
+        plist[0]._d(PID_PARTICIPANT_GUID);
       }
+
       if (data.writerId == ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
         outer_->data_received(data, plist);
       }

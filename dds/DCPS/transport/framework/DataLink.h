@@ -85,19 +85,20 @@ public:
   /// on the subscriber's side.
   void resume_send();
 
-  // ciju: Called by TransportImpl
-  /// This is for a remote subscriber_id and local publisher_id
-  int make_reservation(
-    RepoId subscriber_id,
-    RepoId publisher_id,
-    TransportSendListener* send_listener);
+  /// Only called by our TransportImpl object.
+  ///
+  /// Return Codes: 0 means successful reservation made.
+  ///              -1 means failure.
+  int make_reservation(const RepoId& remote_subscription_id,
+                       const RepoId& local_publication_id,
+                       TransportSendListener* send_listener);
 
-  // ciju: Called by TransportImpl
-  /// This is for a remote publisher_id and a local subscriber_id.
-  /// The TransportReceiveListener is associated with the local
-  /// subscriber_id.
-  int make_reservation(RepoId                    publisher_id,
-                       RepoId                    subscriber_id,
+  /// Only called by our TransportImpl object.
+  ///
+  /// Return Codes: 0 means successful reservation made.
+  ///              -1 means failure.
+  int make_reservation(const RepoId& remote_publication_id,
+                       const RepoId& local_subcription_id,
                        TransportReceiveListener* receive_listener);
 
   // ciju: Called by LinkSet with locks held
