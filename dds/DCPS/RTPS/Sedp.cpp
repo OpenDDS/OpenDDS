@@ -278,6 +278,15 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     subscriptions_reader_.assoc(peer);
   }
   //FUTURE: if/when topic propagation is supported, add it here
+
+  // Write durable data
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    write_durable_publication_data();
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    write_durable_subscription_data();
+  }
+
 }
 
 void
@@ -1056,6 +1065,7 @@ Sedp::Writer::publish_unregister_dispose(const DCPS::RepoId& rid)
 
   // Send
   publish_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+  return DDS::RETCODE_OK;
 }
 
 
@@ -1236,6 +1246,24 @@ Sedp::populate_discovered_writer_msg(
   return DDS::RETCODE_OK;
 }
 
+void
+Sedp::write_durable_publication_data()
+{
+  LocalPublicationIter pub, end = local_publications_.end();
+  for (pub = local_publications_.begin(); pub != end; ++pub) {
+    // Do nothing for now
+  }
+}
+
+void
+Sedp::write_durable_subscription_data()
+{
+  LocalSubscriptionIter sub, end = local_subscriptions_.end();
+
+  for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
+    // Do nothing for now
+  }
+}
 
 }
 }

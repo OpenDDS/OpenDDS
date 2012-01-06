@@ -342,6 +342,9 @@ private:
 
   static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
                               const EntityId_t& entity);
+
+  void write_durable_publication_data();
+  void write_durable_subscription_data();
 };
 
 }
