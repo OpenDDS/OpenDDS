@@ -510,7 +510,7 @@ Sedp::remove_publication(const RepoId& publicationId)
   LocalPublicationIter iter = local_publications_.find(publicationId);
   if (iter != local_publications_.end()) {
     if (DDS::RETCODE_OK == 
-          publications_writer_.publish_unregister_dispose(publicationId))
+          publications_writer_.write_unregister_dispose(publicationId))
     {
       local_publications_.erase(publicationId);
     } else {
@@ -534,20 +534,6 @@ Sedp::update_publication_qos(const RepoId& publicationId,
     {
       return false;
     }
-  /*
-    DiscoveredWriterData dwd;
-    if (DDS::RETCODE_OK == 
-              populate_discovered_writer_msg(dwd, publicationId, pb))
-    {
-      ACE_DEBUG((LM_ERROR, "Successfully populated DiscoveredWriterData msg\n"));
-      if (DDS::RETCODE_OK != publications_writer_.publish_sample(dwd)) {
-        ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
-      }
-    } else {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
-      return false;
-    }
-*/
     return true;
   }
   return false;
@@ -1030,7 +1016,7 @@ Sedp::Writer::control_dropped(ACE_Message_Block*, bool)
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_sample(const ParameterList& plist)
+Sedp::Writer::write_sample(const ParameterList& plist, bool is_retransmission)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -1057,16 +1043,8 @@ Sedp::Writer::write_sample(const ParameterList& plist)
   if (result == DDS::RETCODE_OK) {
     // Send sample
     DCPS::DataSampleListElement list_el(repo_id_, this, 0, &alloc_, 0);
-    list_el.header_.message_id_ = DCPS::SAMPLE_DATA;
-    list_el.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
-    list_el.header_.message_length_ = static_cast<ACE_UINT32>(size);
-    list_el.header_.sequence_ = ++seq_;
-    list_el.header_.publication_id_ = repo_id_;
+    set_header_fields(list_el.header_, size, is_retransmission);
 
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
-    list_el.header_.source_timestamp_sec_ = now.sec();
-    list_el.header_.source_timestamp_nanosec_ = now.usec() * 1000;
-  
     DCPS::DataSampleList list;  // Container of list elements
     list.head_ = list.tail_ = &list_el;
     list.size_ = 1;
@@ -1080,7 +1058,7 @@ Sedp::Writer::write_sample(const ParameterList& plist)
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::publish_unregister_dispose(const DCPS::RepoId& rid)
+Sedp::Writer::write_unregister_dispose(const DCPS::RepoId& rid)
 {
   // Build param list for message
   Parameter param;
@@ -1104,57 +1082,38 @@ Sedp::Writer::publish_unregister_dispose(const DCPS::RepoId& rid)
   ser << plist;
 
   // Send
-  publish_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+  write_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
   return DDS::RETCODE_OK;
 }
 
-
-DDS::ReturnCode_t
-Sedp::Writer::build_message(
-    const DiscoveredWriterData& dwd,
-    ACE_Message_Block& payload)
-{
-  using DCPS::Serializer;
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
-  ParameterList plist;
-  DDS::ReturnCode_t result = ParameterListConverter::to_param_list(dwd, plist);
-  if (result == DDS::RETCODE_OK) {
-    ser << plist;
-  }
-  return result;
-}
-
-/*
 void
-Sedp::Writer::publish_sample(ACE_Message_Block& payload, size_t size)
-{
-  DCPS::DataSampleListElement list_el(repo_id_, this, 0, &alloc_, 0);
-  list_el.header_.message_id_ = DCPS::SAMPLE_DATA;
-  list_el.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
-  list_el.header_.message_length_ = static_cast<ACE_UINT32>(size);
-
-  DCPS::DataSampleList list;  // Container of list elements
-  list.head_ = list.tail_ = &list_el;
-  list.size_ = 1;
-  list_el.sample_ = new ACE_Message_Block(size);
-  *list_el.sample_ << list_el.header_;
-  list_el.sample_->cont(payload.duplicate());
-
-  send(list);
-}
-*/
-void
-Sedp::Writer::publish_control_msg(
+Sedp::Writer::write_control_msg(
     ACE_Message_Block& payload, 
     size_t size,
     DCPS::MessageId id)
 {
   DCPS::DataSampleHeader header;
-  header.message_id_ = id;
-  header.byte_order_ = ACE_CDR_BYTE_ORDER;
-  header.message_length_ = static_cast<ACE_UINT32>(size);
-
+  set_header_fields(header, size, false, id);
   send_control(header, &payload);
+}
+
+void
+Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh, 
+                                size_t size,
+                                bool is_retransmission,
+                                DCPS::MessageId id) 
+{
+  dsh.message_id_ = DCPS::SAMPLE_DATA;
+  dsh.byte_order_ = ACE_CDR_BYTE_ORDER;
+  dsh.message_length_ = static_cast<ACE_UINT32>(size);
+  dsh.publication_id_ = repo_id_;
+  dsh.historic_sample_ = is_retransmission;
+
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  dsh.source_timestamp_sec_ = now.sec();
+  dsh.source_timestamp_nanosec_ = now.usec() * 1000;
+
+  dsh.sequence_ = ++seq_;
 }
 
 //-------------------------------------------------------------------------
@@ -1298,7 +1257,7 @@ Sedp::write_durable_publication_data()
 
   LocalPublicationIter pub, end = local_publications_.end();
   for (pub = local_publications_.begin(); pub != end; ++pub) {
-    write_publication_data(pub->first, pub->second);
+    write_publication_data(pub->first, pub->second, true);
   }
 }
 
@@ -1314,7 +1273,10 @@ Sedp::write_durable_subscription_data()
 }
 
 DDS::ReturnCode_t
-Sedp::write_publication_data(const DCPS::RepoId& rid, const LocalPublication& lp)
+Sedp::write_publication_data(
+    const DCPS::RepoId& rid, 
+    const LocalPublication& lp,
+    bool is_retransmission)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   DiscoveredWriterData dwd;
@@ -1331,7 +1293,7 @@ Sedp::write_publication_data(const DCPS::RepoId& rid, const LocalPublication& lp
     }
   }
   if (DDS::RETCODE_OK == result) {
-    result = publications_writer_.write_sample(plist);
+    result = publications_writer_.write_sample(plist, is_retransmission);
   }
   return result;
 }

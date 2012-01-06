@@ -187,22 +187,22 @@ private:
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
-    DDS::ReturnCode_t write_sample(const ParameterList& plist);
-    DDS::ReturnCode_t publish_unregister_dispose(const DCPS::RepoId& rid);
+    DDS::ReturnCode_t write_sample(const ParameterList& plist,
+                                   bool is_retransmission);
+    DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
   private:
     DCPS::TransportSendElementAllocator alloc_;
     Header header_;
     DCPS::SequenceNumber seq_;
 
-    DDS::ReturnCode_t build_message(const DiscoveredWriterData& dwd,
-                                    ACE_Message_Block& payload);
-    DDS::ReturnCode_t build_message(const DCPS::RepoId& rid,
-                                    ACE_Message_Block& payload);
-
-    void publish_control_msg(ACE_Message_Block& payload, 
-                             size_t size,
-                             DCPS::MessageId id);
+    void write_control_msg(ACE_Message_Block& payload, 
+                           size_t size,
+                           DCPS::MessageId id);
+    void set_header_fields(DCPS::DataSampleHeader& dsh, 
+                           size_t size,
+                           bool is_retransmission = false,
+                           DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
   } publications_writer_, subscriptions_writer_;
 
@@ -349,7 +349,8 @@ private:
   void write_durable_subscription_data();
 
   DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid, 
-                                           const LocalPublication& pub);
+                                           const LocalPublication& pub,
+                                           bool is_retransmission = false);
 };
 
 }

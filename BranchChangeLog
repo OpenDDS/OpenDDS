@@ -1,10 +1,19 @@
+Fri Jan  6 21:46:47 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Cleanup.
+          Set headers consistently in common place.
+          Set headers in dispose msg.
+
 Fri Jan  6 21:36:49 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
         * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
 
           Account for reliability QOS with an index of 1.
-          Account for reliability QOS having different defaults for 
+          Account for reliability QOS having different defaults for
             reader and writer.
 
 Fri Jan  6 19:48:09 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
