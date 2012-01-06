@@ -237,7 +237,7 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     pdata.participantProxy.metatrafficUnicastLocatorList;
   const CORBA::ULong locator_count = mll.length() + ull.length();
 
-  ACE_Message_Block mb_locator(4 + locator_count * sizeof(Locator_t));
+  ACE_Message_Block mb_locator(4 + locator_count * sizeof(Locator_t) + 1);
   using DCPS::Serializer;
   Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   ser_loc << locator_count;
@@ -248,6 +248,7 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
   for (CORBA::ULong i = 0; i < ull.length(); ++i) {
     ser_loc << ull[i];
   }
+  ser_loc << ACE_OutputCDR::from_boolean(false); // requires_inline_qos
 
   proto.remote_data_.length(1);
   proto.remote_data_[0].transport_type = "rtps_udp";
@@ -398,6 +399,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
     topics_.find(topicName);
   if (iter != topics_.end()) { // types must match, RtpsInfo checked for us
     iter->second.qos_ = qos;
+    iter->second.has_dcps_key_ = hasDcpsKey;
     topicId = iter->second.repo_id_;
     return DCPS::FOUND;
   }
@@ -406,19 +408,9 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
   td.data_type_ = dataTypeName;
   td.qos_ = qos;
   td.has_dcps_key_ = hasDcpsKey;
-  td.repo_id_ = participant_id_;
-  td.repo_id_.entityId.entityKind = DCPS::ENTITYKIND_OPENDDS_TOPIC;
-  assign(td.repo_id_.entityId.entityKey, topic_counter_++);
-  topic_names_[td.repo_id_] = topicName;
+  td.repo_id_ = make_topic_guid();
   topicId = td.repo_id_;
-
-  if (topic_counter_ == 0x1000000) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Sedp::assert_topic: ")
-               ACE_TEXT("Exceeded Maximum number of topic entity keys!")
-               ACE_TEXT("Next key will be a duplicate!\n")));
-    topic_counter_ = 0;
-  }
+  topic_names_[td.repo_id_] = topicName;
 
   return DCPS::CREATED;
 }
@@ -487,6 +479,8 @@ Sedp::add_publication(const RepoId& topicId,
     // TODO: should this be removed from the local_publications map?
   }
 
+  match_endpoints(rid, td);
+
 /*
   DiscoveredWriterData dwd;
   if (DDS::RETCODE_OK == populate_discovered_writer_msg(dwd, rid, pb)) {
@@ -495,7 +489,6 @@ Sedp::add_publication(const RepoId& topicId,
       ACE_DEBUG((LM_ERROR, "Failed to publish DiscoveredWriterData msg\n"));
       // TODO: should this be removed from the local_publications map?
     }
-    find_matching_endpoints(rid, td);
   } else {
     ACE_DEBUG((LM_ERROR, "(%P|%t) Failed to populate DiscoveredWriterData msg\n"));
     // TODO: should this be removed from the local_publications map?
@@ -560,8 +553,12 @@ Sedp::add_subscription(const RepoId& topicId,
   sb.qos_ = qos;
   sb.trans_info_ = transInfo;
   sb.subscriber_qos_ = subscriberQos;
+  sb.filter_ = filterExpr;
   sb.params_ = params;
-  topics_[topic_names_[topicId]].endpoints_.insert(rid);
+
+  TopicDetailsEx& td = topics_[topic_names_[topicId]];
+  td.endpoints_.insert(rid);
+  match_endpoints(rid, td);
 
   // TODO: use SEDP to advertise the new subscription
 
@@ -608,6 +605,24 @@ Sedp::update_subscription_params(const RepoId& subId,
   return false;
 }
 
+RepoId
+Sedp::make_topic_guid()
+{
+  RepoId guid;
+  guid = participant_id_;
+  guid.entityId.entityKind = DCPS::ENTITYKIND_OPENDDS_TOPIC;
+  assign(guid.entityId.entityKey, topic_counter_++);
+
+  if (topic_counter_ == 0x1000000) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Sedp::make_topic_guid: ")
+               ACE_TEXT("Exceeded Maximum number of topic entity keys!")
+               ACE_TEXT("Next key will be a duplicate!\n")));
+    topic_counter_ = 0;
+  }
+  return guid;
+}
+
 void
 Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 {
@@ -627,14 +642,30 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
     if (iter == discovered_publications_.end()) { // add new
       DiscoveredPublication& pub =
         discovered_publications_[guid] = DiscoveredPublication(wdata);
+
+      const std::string topic_name = get_topic_name(pub);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+        topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        top_it =
+          topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
+        top_it->second.data_type_ = wdata.ddsPublicationData.type_name;
+        top_it->second.qos_.topic_data = wdata.ddsPublicationData.topic_data;
+        top_it->second.repo_id_ = make_topic_guid();
+        //TODO: similar case for the data_received(id, rdata) overload
+      }
+      TopicDetailsEx& td = top_it->second;
+      topic_names_[td.repo_id_] = topic_name;
+      td.endpoints_.insert(guid);
+
       std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                   guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
       assign_bit_key(pub);
       pub.bit_ih_ =
         pub_bit()->store_synthetic_data(pub.writer_data_.ddsPublicationData,
                                         DDS::NEW_VIEW_STATE);
-      topics_[get_topic_name(pub)].endpoints_.insert(guid);
-      //TODO: match local subscription(s)
+      match_endpoints(guid, td);
+
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
       pub_bit()->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
@@ -677,8 +708,12 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       sub.bit_ih_ =
         sub_bit()->store_synthetic_data(sub.reader_data_.ddsSubscriptionData,
                                         DDS::NEW_VIEW_STATE);
-      topics_[get_topic_name(sub)].endpoints_.insert(guid);
-      //TODO: match local publication(s)
+      const std::string topic_name = get_topic_name(sub);
+      TopicDetailsEx& td = topics_[topic_name];
+      topic_names_[td.repo_id_] = topic_name;
+
+      match_endpoints(guid, td);
+
     } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                           rdata.ddsSubscriptionData)) { // update existing
       sub_bit()->store_synthetic_data(iter->second.reader_data_.ddsSubscriptionData,
@@ -796,8 +831,7 @@ Sedp::qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
 }
 
 void
-Sedp::find_matching_endpoints(const DCPS::RepoId& repoId,
-                              const TopicDetailsEx& td)
+Sedp::match_endpoints(const DCPS::RepoId& repoId, const TopicDetailsEx& td)
 {
   const bool reader = repoId.entityId.entityKind & 4;
   for (RepoIdSet::const_iterator iter = td.endpoints_.begin();
@@ -821,6 +855,7 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
   DDS::PublisherQos tempPubQos;
   DDS::DataReaderQos tempDrQos;
   DDS::SubscriberQos tempSubQos;
+  ContentFilterProperty_t tempCfp;
 
   // 1. collect details about the writer, which may be local or discovered
   const DDS::DataWriterQos* dwQos = 0;
@@ -846,6 +881,7 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
   const DDS::DataReaderQos* drQos = 0;
   const DDS::SubscriberQos* subQos = 0;
   const DCPS::TransportLocatorSeq* rTls = 0;
+  const ContentFilterProperty_t* cfProp = 0;
 
   const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
   DiscoveredSubscriptionIter dsi;
@@ -854,7 +890,12 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     reader_local = true;
     drQos = &lsi->second.qos_;
     subQos = &lsi->second.subscriber_qos_;
-    rTls = &lpi->second.trans_info_;
+    rTls = &lsi->second.trans_info_;
+    if (!lsi->second.filter_.empty()) {
+      tempCfp.filterExpression = lsi->second.filter_.c_str();
+      tempCfp.expressionParameters = lsi->second.params_;
+    }
+    cfProp = &tempCfp;
   } else if ((dsi = discovered_subscriptions_.find(writer))
              != discovered_subscriptions_.end()) {
     if (!writer_local) {
@@ -878,6 +919,7 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     tempSubQos.partition = bit.partition;
     tempSubQos.group_data = bit.group_data;
     subQos = &tempSubQos;
+    cfProp = &dsi->second.reader_data_.contentFilterProperty;
   } else {
     //TODO: error
   }
@@ -912,11 +954,13 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
                           dwQos, drQos, pubQos, subQos)) {
     static const bool writer_active = true;
     if (writer_local) {
-      DCPS::ReaderAssociation ra = {*rTls, reader, *subQos, *drQos}; //TODO: filtering info
+      const DCPS::ReaderAssociation ra =
+        {*rTls, reader, *subQos, *drQos,
+         cfProp->filterExpression, cfProp->expressionParameters};
       lpi->second.publication_->add_association(writer, ra, writer_active);
     }
     if (reader_local) {
-      DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
+      const DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
       lsi->second.subscription_->add_association(reader, wa, !writer_active);
     }
   } else {
@@ -1110,7 +1154,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
   dsh.historic_sample_ = is_retransmission;
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
-  dsh.source_timestamp_sec_ = now.sec();
+  dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
   dsh.source_timestamp_nanosec_ = now.usec() * 1000;
 
   dsh.sequence_ = ++seq_;
@@ -1172,6 +1216,9 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
           "failed to convert from ParameterList to DiscoveredReaderData\n"));
         return;
       }
+      if (rdata.readerProxy.expectsInlineQos) {
+        set_inline_qos(rdata.readerProxy.allLocators);
+      }
       sedp_.data_received(sample.header_.message_id_, rdata);
       break;
     }
@@ -1219,8 +1266,10 @@ Sedp::populate_discovered_writer_msg(
     std::string trans_type = pub.trans_info_[i].transport_type.in();
     if (trans_type == "rtps_udp") {
       LocatorSeq locators;
+      bool ignore_requires_inline_qos;
       DDS::ReturnCode_t result = blob_to_locators(pub.trans_info_[i].data, 
-                                                  locators);
+                                                  locators,
+                                                  ignore_requires_inline_qos);
       if (result != DDS::RETCODE_OK) {
         ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) Failed to translate  ")
                              ACE_TEXT("blob to locators while ")
@@ -1296,6 +1345,19 @@ Sedp::write_publication_data(
     result = publications_writer_.write_sample(plist, is_retransmission);
   }
   return result;
+}
+
+void
+Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
+{
+  const std::string rtps_udp = "rtps_udp";
+  for (CORBA::ULong i = 0; i < locators.length(); ++i) {
+    if (locators[i].transport_type.in() == rtps_udp) {
+      const CORBA::ULong len = locators[i].data.length();
+      locators[i].data.length(len + 1);
+      locators[i].data[len] = CORBA::Octet(1);
+    }
+  }
 }
 
 }

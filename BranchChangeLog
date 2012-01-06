@@ -1,3 +1,31 @@
+Fri Jan  6 22:57:47 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Keep track of content filtering info for local subscriptions.
+          Account for topics that Sedp first learns about through discovery
+          of publications or subscriptions using said topics.
+          Support requires_inline_qos().
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Implemented requires_inline_qos().
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Extend the test to run with different transport configs and also
+          to create a data reader and wait for the writer to match it.
+          This does not work yet.
+
 Fri Jan  6 21:46:47 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

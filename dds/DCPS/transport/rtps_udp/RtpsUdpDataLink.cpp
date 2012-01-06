@@ -121,9 +121,10 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
 void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,
-                             const ACE_INET_Addr& address)
+                             const ACE_INET_Addr& address,
+                             bool requires_inline_qos)
 {
-  locators_[remote_id] = address;
+  locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
 }
 
 void
@@ -131,11 +132,11 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
                               std::set<ACE_INET_Addr>& addrs) const
 {
   using std::map;
-  typedef map<RepoId, ACE_INET_Addr, GUID_tKeyLessThan>::const_iterator iter_t;
+  typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
 
   if (local_id == GUID_UNKNOWN) {
     for (iter_t iter = locators_.begin(); iter != locators_.end(); ++iter) {
-      addrs.insert(iter->second);
+      addrs.insert(iter->second.addr_);
     }
     return;
   }
@@ -151,7 +152,7 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
       ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locators() - "
         "no locator found for peer %C\n", std::string(conv).c_str()));
     } else {
-      addrs.insert(iter->second);
+      addrs.insert(iter->second.addr_);
     }
   }
 }
@@ -358,13 +359,23 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 }
 
 bool
-RtpsUdpDataLink::requires_inline_qos(const PublicationId& /*pub_id*/)
+RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
 {
   if (this->force_inline_qos_) {
     // Force true for testing purposes
     return true;
   } else {
-    // TODO: replace this with logic from reader based on discovery
+    const GUIDSeq_var peers = peer_ids(pub_id);
+    if (!peers.ptr()) {
+      return false;
+    }
+    typedef std::map<RepoId, RemoteInfo, GUID_tKeyLessThan>::iterator iter_t;
+    for (CORBA::ULong i = 0; i < peers->length(); ++i) {
+      const iter_t iter = locators_.find(peers[i]);
+      if (iter != locators_.end() && iter->second.requires_inline_qos_) {
+        return true;
+      }
+    }
     return false;
   }
 }
@@ -625,7 +636,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
           }
         } else {
           std::set<ACE_INET_Addr> recipients;
-          recipients.insert(locators_[wi->first]);
+          recipients.insert(locators_[wi->first].addr_);
           send_strategy_->send_rtps_control(mb_acknack, recipients);
         }
       }
@@ -846,7 +857,7 @@ RtpsUdpDataLink::send_nack_replies()
 
       if (ri->second.requested_changes_.size()) {
         if (locators_.count(ri->first)) {
-          recipients.insert(locators_[ri->first]);
+          recipients.insert(locators_[ri->first].addr_);
         }
         ri->second.requested_changes_.clear();
       }
@@ -946,7 +957,7 @@ RtpsUdpDataLink::send_heartbeats()
     const ri_iter end = rw->second.remote_readers_.end();
     for (ri_iter ri = rw->second.remote_readers_.begin(); ri != end; ++ri) {
       if (locators_.count(ri->first)) {
-        recipients.insert(locators_[ri->first]);
+        recipients.insert(locators_[ri->first].addr_);
       }
     }
   }

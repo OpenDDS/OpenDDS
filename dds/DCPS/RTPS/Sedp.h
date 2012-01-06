@@ -259,6 +259,7 @@ private:
     DDS::DataReaderQos qos_;
     DCPS::TransportLocatorSeq trans_info_;
     DDS::SubscriberQos subscriber_qos_;
+    std::string filter_;
     DDS::StringSeq params_;
   };
   typedef std::map<DCPS::RepoId, LocalSubscription,
@@ -335,15 +336,17 @@ private:
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
   bool has_dcps_key(const DCPS::RepoId& topicId) const;
+  DCPS::RepoId make_topic_guid();
 
-  void find_matching_endpoints(const DCPS::RepoId& repoId,
-                               const TopicDetailsEx& td);
+  void match_endpoints(const DCPS::RepoId& repoId, const TopicDetailsEx& td);
   void match(const DCPS::RepoId& writer,
              const DCPS::RepoId& reader,
              const TopicDetailsEx& td);
 
   static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
                               const EntityId_t& entity);
+
+  static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
   void write_durable_publication_data();
   void write_durable_subscription_data();

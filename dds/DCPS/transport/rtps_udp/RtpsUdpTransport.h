@@ -50,7 +50,8 @@ protected:
   virtual void shutdown_i();
 
   virtual bool connection_info_i(TransportLocator& info) const;
-  ACE_INET_Addr get_connection_addr(const TransportBLOB& data) const;
+  ACE_INET_Addr get_connection_addr(const TransportBLOB& data,
+                                    bool& requires_inline_qos) const;
 
   virtual void release_datalink_i(DataLink* link, bool release_pending);
 

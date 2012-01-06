@@ -1,4 +1,5 @@
 #include "TestMsgTypeSupportImpl.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -6,10 +7,13 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
+#include "model/Sync.h"
+
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 using OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC;
 using OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC;
+using OpenDDS::Model::WriterSync;
 
 void cleanup(const DDS::DomainParticipantFactory_var& dpf,
              const DDS::DomainParticipant_var& dp)
@@ -72,13 +76,13 @@ bool read_participant_bit(const DDS::Subscriber_var& bit_sub)
   return true;
 }
 
-bool create_data_writer(const DDS::DomainParticipant_var& dp2)
+DDS::DataWriter_var create_data_writer(const DDS::DomainParticipant_var& dp2)
 {
   DDS::TypeSupport_var ts = new TestMsgTypeSupportImpl;
 
   if (ts->register_type(dp2, "") != DDS::RETCODE_OK) {
     ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support"));
-    return false;
+    return 0;
   }
 
   CORBA::String_var type_name = ts->get_type_name();
@@ -90,7 +94,7 @@ bool create_data_writer(const DDS::DomainParticipant_var& dp2)
 
   if (!topic) {
     ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic"));
-    return false;
+    return 0;
   }
 
   DDS::Publisher_var pub = dp2->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -99,7 +103,7 @@ bool create_data_writer(const DDS::DomainParticipant_var& dp2)
 
   if (!pub) {
     ACE_DEBUG((LM_DEBUG, "ERROR: failed to create publisher"));
-    return false;
+    return 0;
   }
 
   DDS::DataWriter_var dw = pub->create_datawriter(topic,
@@ -111,7 +115,49 @@ bool create_data_writer(const DDS::DomainParticipant_var& dp2)
     ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data writer"));
     return false;
   }
-  return true;
+  return dw;
+}
+
+DDS::DataReader_var create_data_reader(const DDS::DomainParticipant_var& dp)
+{
+  DDS::TypeSupport_var ts = new TestMsgTypeSupportImpl;
+
+  if (ts->register_type(dp, "") != DDS::RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support"));
+    return 0;
+  }
+
+  CORBA::String_var type_name = ts->get_type_name();
+  DDS::Topic_var topic = dp->create_topic("Movie Discussion List",
+                                          type_name,
+                                          TOPIC_QOS_DEFAULT,
+                                          0,
+                                          DEFAULT_STATUS_MASK);
+
+  if (!topic) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic"));
+    return 0;
+  }
+
+  DDS::Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                                  0,
+                                                  DEFAULT_STATUS_MASK);
+
+  if (!sub) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create subscriber"));
+    return 0;
+  }
+
+  DDS::DataReader_var dr = sub->create_datareader(topic,
+                                                  DATAREADER_QOS_DEFAULT,
+                                                  0,
+                                                  DEFAULT_STATUS_MASK);
+
+  if (!dr) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data reader"));
+    return 0;
+  }
+  return dr;
 }
 
 bool read_publication_bit(const DDS::Subscriber_var& bit_sub)
@@ -187,9 +233,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   read_participant_bit(bit_sub);
 
-  create_data_writer(dp2);
+  DDS::DataWriter_var dw = create_data_writer(dp2);
 
   read_publication_bit(bit_sub);
+
+  DDS::DataReader_var dr = create_data_reader(dp);
+
+  WriterSync::wait_match(dw);
 
   ACE_DEBUG((LM_INFO, "Cleaning up test\n"));
   ACE_OS::sleep(10);
@@ -197,5 +247,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_OS::sleep(5);
   cleanup(dpf, dp2);
   TheServiceParticipant->shutdown();
+  ACE_Thread_Manager::instance()->wait();
   return 0;
 }

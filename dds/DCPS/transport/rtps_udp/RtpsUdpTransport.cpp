@@ -89,7 +89,9 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
     }
   }
 
-  link->add_locator(remote_id, get_connection_addr(remote_data));
+  bool requires_inline_qos;
+  ACE_INET_Addr addr = get_connection_addr(remote_data, requires_inline_qos);
+  link->add_locator(remote_id, addr, requires_inline_qos);
   link->associated(local_id, remote_id, attribs.reliable_);
   return link._retn();
 }
@@ -118,11 +120,13 @@ RtpsUdpTransport::stop_accepting(ConnectionEvent& /*ce*/)
 }
 
 ACE_INET_Addr
-RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote) const
+RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
+                                      bool& requires_inline_qos) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
-  DDS::ReturnCode_t result = blob_to_locators(remote, locators);
+  DDS::ReturnCode_t result =
+    blob_to_locators(remote, locators, requires_inline_qos);
   if (result != DDS::RETCODE_OK) {
     return ACE_INET_Addr();
   }
@@ -171,17 +175,8 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
   RTPS::address_to_bytes(locators[idx].address, 
                          config_i_->local_address_);
 
-  size_t size = 0, padding = 0;
-  gen_find_size(locators, size, padding);
-  ACE_Message_Block mb(size + padding);
-
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-  if (!(ser << locators)) {
-    return false;
-  }
-
   info.transport_type = "rtps_udp";
-  info.data.replace(static_cast<CORBA::ULong>(mb.length()), &mb);
+  RTPS::locators_to_blob(locators, info.data);
   return true;
 }
 

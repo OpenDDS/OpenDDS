@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_rtps {
+project: dcpsexe, dcps_rtps, dds_model {
   exename = RtpsDiscoveryTest
 
   TypeSupport_Files {

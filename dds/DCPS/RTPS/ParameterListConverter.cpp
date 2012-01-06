@@ -36,7 +36,9 @@ namespace {
                          const DCPS::TransportLocator& dcps_locator) {
     // Convert the tls blob to an RTPS locator seq
     LocatorSeq locators;
-    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
+    bool ignore_requires_inline_qos;
+    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators,
+                                                ignore_requires_inline_qos);
     if (result == DDS::RETCODE_OK) {
       CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
@@ -83,7 +85,7 @@ namespace {
 
   void append_locators_if_present(
       OpenDDS::DCPS::TransportLocatorSeq& list,
-      const LocatorSeq rtps_udp_locators) {
+      const LocatorSeq& rtps_udp_locators) {
     if (rtps_udp_locators.length()) {
       CORBA::ULong length = list.length();
       list.length(length + 1); 

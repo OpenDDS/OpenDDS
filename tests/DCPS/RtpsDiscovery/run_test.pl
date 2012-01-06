@@ -9,12 +9,19 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $TEST = PerlDDS::create_process('RtpsDiscoveryTest',
-                                   '-DCPSConfigFile dcps.ini');
-my $result = $TEST->SpawnWaitKill(150);
-if ($result != 0) {
-  print STDERR "ERROR: test returned $result\n";
-  exit 1;
+my $result = 0;
+my @configs = qw/dcps.ini dcps_rtps_udp.ini/;
+
+for my $cfg (@configs) {
+
+  my $TEST = PerlDDS::create_process('RtpsDiscoveryTest',
+                                     "-DCPSConfigFile $cfg");
+  print "Running with config file: $cfg\n";
+  my $res += $TEST->SpawnWaitKill(150);
+  if ($res != 0) {
+    print STDERR "ERROR: test with $cfg returned $result\n";
+    $result += $res;
+  }
 }
 
-exit 0;
+exit $result;

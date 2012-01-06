@@ -83,7 +83,8 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address);
+  void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address,
+                   bool requires_inline_qos);
 
   /// Given a 'local_id' of a publication or subscription, populate the set of
   /// 'addrs' with the network addresses of any remote peers (or if 'local_id'
@@ -118,7 +119,15 @@ private:
   RtpsUdpReceiveStrategy_rch recv_strategy_;
 
   GuidPrefix_t local_prefix_;
-  std::map<RepoId, ACE_INET_Addr, GUID_tKeyLessThan> locators_;
+
+  struct RemoteInfo {
+    RemoteInfo() : addr_(), requires_inline_qos_(false) {}
+    RemoteInfo(const ACE_INET_Addr& addr, bool iqos)
+      : addr_(addr), requires_inline_qos_(iqos) {}
+    ACE_INET_Addr addr_;
+    bool requires_inline_qos_;
+  };
+  std::map<RepoId, RemoteInfo, GUID_tKeyLessThan> locators_;
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;

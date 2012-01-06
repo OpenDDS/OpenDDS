@@ -142,7 +142,8 @@ locator_to_address(ACE_INET_Addr& dest, const Locator_t& locator)
 inline DDS::ReturnCode_t
 blob_to_locators(
     const OpenDDS::DCPS::TransportBLOB& blob, 
-    LocatorSeq& locators)
+    LocatorSeq& locators,
+    bool& requires_inline_qos)
 {
   ACE_Data_Block db(blob.length(), ACE_Message_Block::MB_DATA,
       reinterpret_cast<const char*>(blob.get_buffer()),
@@ -155,7 +156,13 @@ blob_to_locators(
   if (!(ser >> locators)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) blob_to_locators: ")
-                      ACE_TEXT(" Failed to deserialize blob\n")), 
+                      ACE_TEXT("Failed to deserialize blob's locators\n")), 
+                      DDS::RETCODE_ERROR);
+  }
+  if (!(ser >> ACE_InputCDR::to_boolean(requires_inline_qos))) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) blob_to_locators: ")
+                      ACE_TEXT("Failed to deserialize blob's inline QoS flag\n")), 
                       DDS::RETCODE_ERROR);
   }
   return DDS::RETCODE_OK;
@@ -167,9 +174,13 @@ locators_to_blob(const LocatorSeq& locators, DCPS::TransportBLOB& blob)
   using OpenDDS::DCPS::Serializer;
   size_t size_locator = 0, padding_locator = 0;
   DCPS::gen_find_size(locators, size_locator, padding_locator);
-  ACE_Message_Block mb_locator(size_locator + padding_locator);
+  ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
   Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   ser_loc << locators;
+  // Add a bool for 'requires inline qos', see Sedp::set_inline_qos():
+  // if the bool is no longer the last octet of the sequence then that function
+  // must be changed as well.
+  ser_loc << ACE_OutputCDR::from_boolean(false);
   blob.replace(static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
 }
 
