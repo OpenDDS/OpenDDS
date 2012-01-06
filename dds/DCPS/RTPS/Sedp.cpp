@@ -1035,7 +1035,6 @@ Sedp::Writer::write_sample(const ParameterList& plist)
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   // Determine message length
-  ACE_CDR::ULong encapsulation_header = 0x00000300;  // PL_CDR_LE
   size_t size = 0, padding = 0;
   DCPS::find_size_ulong(size, padding);
   DCPS::gen_find_size(plist, size, padding);
@@ -1046,7 +1045,11 @@ Sedp::Writer::write_sample(const ParameterList& plist)
                             new ACE_Message_Block(size));
   using DCPS::Serializer;
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
-  bool ok = (ser << encapsulation_header) && (ser << plist);
+  bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // PL_CDR_LE = 0x0003
+            (ser << ACE_OutputCDR::from_octet(3)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << plist);
   if (!ok) {
     result = DDS::RETCODE_ERROR;
   }
