@@ -31,7 +31,7 @@
 
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
-#include "ace/OS_NS_stdio.h"
+
 
 #include <cstring>
 
@@ -1035,6 +1035,7 @@ Sedp::Writer::write_sample(const ParameterList& plist)
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   // Determine message length
+  ACE_CDR::ULong encapsulation_header = 0x00000300;  // PL_CDR_LE
   size_t size = 0, padding = 0;
   DCPS::find_size_ulong(size, padding);
   DCPS::gen_find_size(plist, size, padding);
@@ -1045,7 +1046,8 @@ Sedp::Writer::write_sample(const ParameterList& plist)
                             new ACE_Message_Block(size));
   using DCPS::Serializer;
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
-  if (!(ser << plist)) {
+  bool ok = (ser << encapsulation_header) && (ser << plist);
+  if (!ok) {
     result = DDS::RETCODE_ERROR;
   }
 
@@ -1056,6 +1058,11 @@ Sedp::Writer::write_sample(const ParameterList& plist)
     list_el.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
     list_el.header_.message_length_ = static_cast<ACE_UINT32>(size);
     list_el.header_.sequence_ = ++seq_;
+    list_el.header_.publication_id_ = repo_id_;
+
+    const ACE_Time_Value now = ACE_OS::gettimeofday();
+    list_el.header_.source_timestamp_sec_ = now.sec();
+    list_el.header_.source_timestamp_nanosec_ = now.usec() * 1000;
   
     DCPS::DataSampleList list;  // Container of list elements
     list.head_ = list.tail_ = &list_el;
