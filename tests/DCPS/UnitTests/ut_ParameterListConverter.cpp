@@ -2675,8 +2675,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     0x00, 0x17, 0x00, 0x01 };
     TEST_ASSERT(writer_data_out.writerProxy.allLocators.length() == 1);
     LocatorSeq locators;
+    bool ignoring_requires_inline_qos;
     blob_to_locators(writer_data_out.writerProxy.allLocators[0].data,
-                     locators);
+                     locators, ignoring_requires_inline_qos);
     TEST_ASSERT(locators[0].kind == LOCATOR_KIND_UDPv4);
     TEST_ASSERT(locators[0].port == 0);
     TEST_ASSERT(!memcmp(locators[0].address,
@@ -2697,8 +2698,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     0x00, 0x00, 0x03, 0x81 };
     TEST_ASSERT(reader_data_out.readerProxy.allLocators.length() == 1);
     LocatorSeq locators;
+    bool ignoring_requires_inline_qos;
     blob_to_locators(reader_data_out.readerProxy.allLocators[0].data,
-                     locators);
+                     locators, ignoring_requires_inline_qos);
     TEST_ASSERT(locators[0].kind == LOCATOR_KIND_UDPv4);
     TEST_ASSERT(locators[0].port == 0);
     TEST_ASSERT(!memcmp(locators[0].address,
