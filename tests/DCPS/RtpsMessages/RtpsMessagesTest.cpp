@@ -205,16 +205,18 @@ bool test_messages()
     ok &= test(ds, expected, "DataSubmessage");
     // enable InlineQosFlag
     ds.smHeader.flags |= 2;
-    ParameterList iqos(2);
-    iqos.length(2);
+    ParameterList iqos(3);
+    iqos.length(3);
     iqos[0].string_data("my_topic_name"); // 14 with null
     iqos[0]._d(PID_TOPIC_NAME);
     iqos[1].string_data("my_type_name"); // 13 with null
     iqos[1]._d(PID_TYPE_NAME);
+    ContentFilterProperty_t cfprop; // 4 empty strings + 1 empty StringSeq
+    iqos[2].content_filter_property(cfprop);
     ds.inlineQos = iqos;
-    ds.smHeader.submessageLength = 72;
+    ds.smHeader.submessageLength = 112;
     const CORBA::Octet expected_iqos[] = {
-      21, 3, 72, 0,               // smHeader
+      21, 3, 112, 0,              // smHeader
       0, 0, 16, 0,                // extraFlags, octetsToInlineQos
       0, 0, 0, 0, 0, 0, 2, 194,   // readerId, writerId
       0, 0, 0, 0, 2, 0, 0, 0,     // writerSN
@@ -222,11 +224,17 @@ bool test_messages()
       'm', 'y', '_', 't', 'o', 'p', 'i', 'c', '_', 'n', 'a', 'm', 'e', 0, 0, 0,
       7, 0, 20, 0, 13, 0, 0, 0,   // PID_TYPE_NAME, param len, string len
       'm', 'y', '_', 't', 'y', 'p', 'e', '_', 'n', 'a', 'm', 'e', 0, 0, 0, 0,
+      53, 0, 36, 0,               // PID_CONTENT_FILTER_PROPERTY, param len
+      1, 0, 0, 0, 0, 0, 0, 0,     // contentFilteredTopicName
+      1, 0, 0, 0, 0, 0, 0, 0,     // relatedTopicName
+      1, 0, 0, 0, 0, 0, 0, 0,     // filterClassName
+      1, 0, 0, 0, 0, 0, 0, 0,     // filterExpression
+      0, 0, 0, 0,                 // expressionParameters
       1, 0, 0, 0};                // PID_SENTINEL, ignored
     ok &= test(ds, expected_iqos, "DataSubmessage with inlineQos");
     ds.smHeader.flags &= ~1;
     const CORBA::Octet expected_iqos_BE[] = {
-      21, 2, 0, 72,               // smHeader
+      21, 2, 0, 112,              // smHeader
       0, 0, 0, 16,                // extraFlags, octetsToInlineQos
       0, 0, 0, 0, 0, 0, 2, 194,   // readerId, writerId
       0, 0, 0, 0, 0, 0, 0, 2,     // writerSN
@@ -234,6 +242,12 @@ bool test_messages()
       'm', 'y', '_', 't', 'o', 'p', 'i', 'c', '_', 'n', 'a', 'm', 'e', 0, 0, 0,
       0, 7, 0, 20, 0, 0, 0, 13,   // PID_TYPE_NAME, param len, string len
       'm', 'y', '_', 't', 'y', 'p', 'e', '_', 'n', 'a', 'm', 'e', 0, 0, 0, 0,
+      0, 53, 0, 36,               // PID_CONTENT_FILTER_PROPERTY, param len
+      0, 0, 0, 1, 0, 0, 0, 0,     // contentFilteredTopicName
+      0, 0, 0, 1, 0, 0, 0, 0,     // relatedTopicName
+      0, 0, 0, 1, 0, 0, 0, 0,     // filterClassName
+      0, 0, 0, 1, 0, 0, 0, 0,     // filterExpression
+      0, 0, 0, 0,                 // expressionParameters
       0, 1, 0, 0};                // PID_SENTINEL, ignored
     ok &= test(ds, expected_iqos_BE, "BE DataSubmessage with inlineQos", true);
     const CORBA::Octet input_large_otiq[] = {
