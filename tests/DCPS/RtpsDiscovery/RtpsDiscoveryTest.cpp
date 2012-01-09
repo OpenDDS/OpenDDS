@@ -234,12 +234,59 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   read_participant_bit(bit_sub);
 
   DDS::DataWriter_var dw = create_data_writer(dp2);
+  if (!dw) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not create Data Writer (participant 2)\n"));
+    return 1;
+  }
 
   read_publication_bit(bit_sub);
 
   DDS::DataReader_var dr = create_data_reader(dp);
+  if (!dr) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not create Data Reader (participant 1)\n"));
+    return 1;
+  }
 
   WriterSync::wait_match(dw);
+  TestMsgDataWriter_var tmdw = TestMsgDataWriter::_narrow(dw);
+  const TestMsg msg = {42};
+  tmdw->write(msg, HANDLE_NIL);
+
+  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                  ANY_VIEW_STATE,
+                                                  ALIVE_INSTANCE_STATE);
+  WaitSet_var waiter = new WaitSet;
+  waiter->attach_condition(rc);
+  ConditionSeq activeConditions;
+  const Duration_t ten_seconds = { 10, 0 };
+  ReturnCode_t result = waiter->wait(activeConditions, ten_seconds);
+  waiter->detach_condition(rc);
+  if (result != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG,
+      "ERROR: TestMsg reader could not wait for condition: %d\n", result));
+    return 1;
+  }
+
+  TestMsgDataReader_var tmdr = TestMsgDataReader::_narrow(dr);
+
+  TestMsgSeq data;
+  SampleInfoSeq infos;
+  ReturnCode_t ret = tmdr->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
+  if (ret != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not read TestMsg: %d\n", ret));
+  }
+
+  bool ok = false;
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    if (infos[i].valid_data) {
+      ok = true;
+      ACE_DEBUG((LM_DEBUG, "Read data sample: %d\n", data[i].value));
+    }
+  }
+
+  if (!ok) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: no valid data from TestMsg data reader\n"));
+  }
 
   ACE_DEBUG((LM_INFO, "Cleaning up test\n"));
   ACE_OS::sleep(10);

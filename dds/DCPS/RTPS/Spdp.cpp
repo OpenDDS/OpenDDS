@@ -88,13 +88,13 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
 
 Spdp::~Spdp()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (DiscoveredParticipantIter part = participants_.begin();
        part != participants_.end();) {
     remove_discovered_participant(part++);
   }
   tport_->close();
   eh_.reset();
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   while (!eh_shutdown_) {
     shutdown_cond_.wait();
   }

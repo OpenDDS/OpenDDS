@@ -990,7 +990,15 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
       const DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
       lsi->second.subscription_->add_association(reader, wa, !writer_active);
     }
-  } else {
+
+    //TODO: For cases where the reader is not local to this participant,
+    //      this callback is effectively lying to DCPS in telling it that
+    //      the association is complete.  It may not be done handshaking yet.
+    if (writer_local) { // change this if 'writer_active' (above) changes
+      lpi->second.publication_->association_complete(reader);
+    }
+
+  } else { // something was incompatible
     if (writer_local && writerStatus.count_since_last_send) {
       lpi->second.publication_->update_incompatible_qos(writerStatus);
     }
@@ -1174,7 +1182,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
                                 bool is_retransmission,
                                 DCPS::MessageId id) 
 {
-  dsh.message_id_ = DCPS::SAMPLE_DATA;
+  dsh.message_id_ = id;
   dsh.byte_order_ = ACE_CDR_BYTE_ORDER;
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
   dsh.publication_id_ = repo_id_;

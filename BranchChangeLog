@@ -1,3 +1,18 @@
+Mon Jan  9 22:12:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented association_complete() on the active side.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Fix locking for shutdown of Spdp.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Extend test to write and read a TestMsg data sample.
+
 Mon Jan  9 20:35:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:
