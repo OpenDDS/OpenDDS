@@ -32,7 +32,7 @@
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include <cstring>
-
+#include <ace/Reverse_Lock_T.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -859,8 +859,11 @@ void
 Sedp::match_endpoints(const DCPS::RepoId& repoId, const TopicDetailsEx& td)
 {
   const bool reader = repoId.entityId.entityKind & 4;
-  for (RepoIdSet::const_iterator iter = td.endpoints_.begin();
-       iter != td.endpoints_.end(); ++iter) {
+  // Copy the endpoint set - lock can be released in match()
+  RepoIdSet endpoints_copy = td.endpoints_;
+
+  for (RepoIdSet::const_iterator iter = endpoints_copy.begin();
+       iter != endpoints_copy.end(); ++iter) {
     // check to make sure it's a Reader/Writer or Writer/Reader match
     if (bool(iter->entityId.entityKind & 4) != reader) {
       match(reader ? *iter : repoId, reader ? repoId : *iter, td);
@@ -900,7 +903,7 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     wTls = &dpi->second.writer_data_.writerProxy.allLocators;
   } else {
     //TODO: error?
-    return;
+    return; // Possible and ok, since lock is released
   }
 
   // 2. collect details about the reader, which may be local or discovered
@@ -948,7 +951,7 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     cfProp = &dsi->second.reader_data_.contentFilterProperty;
   } else {
     //TODO: error?
-    return;
+    return; // Possible and ok, since lock is released
   }
 
   // This is really part of step 1, but we're doing it here just in case we
@@ -974,11 +977,13 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     pubQos = &tempPubQos;
   }
 
+  ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
   // 3. check transport and QoS compatibility
   DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()},
     readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
   if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                           dwQos, drQos, pubQos, subQos)) {
+    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
     static const bool writer_active = true;
     if (writer_local) {
       const DCPS::ReaderAssociation ra =
@@ -999,6 +1004,7 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     }
 
   } else { // something was incompatible
+    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
     if (writer_local && writerStatus.count_since_last_send) {
       lpi->second.publication_->update_incompatible_qos(writerStatus);
     }
@@ -1158,11 +1164,22 @@ Sedp::Writer::write_unregister_dispose(const DCPS::RepoId& rid)
 
   using DCPS::Serializer;
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
-  ser << plist;
+  bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // PL_CDR_LE = 0x0003
+            (ser << ACE_OutputCDR::from_octet(3)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << plist);
 
-  // Send
-  write_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
-  return DDS::RETCODE_OK;
+  if (ok) {
+    // Send
+    write_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+    return DDS::RETCODE_OK;
+  } else {
+    // Error
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Failed to serialize ")
+                         ACE_TEXT("RTPS control message\n")));
+    return DDS::RETCODE_ERROR;
+  }
 }
 
 void
