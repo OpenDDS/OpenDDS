@@ -1,3 +1,19 @@
+Mon Jan  9 20:35:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented support for first being notified of a topic via one of
+          its (remote) subscriptions.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed bug in ParameterList internal vs. trailing padding.
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Extend error message from test.
+
 Mon Jan  9 19:41:05 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

@@ -131,7 +131,7 @@ bool test(const T& foo, const CORBA::Octet (&expected)[N],
   Serializer ser(&mb, swap, Serializer::ALIGN_INITIALIZE);
   if (!(ser << foo) || mb.length() != N) {
     std::cerr << "ERROR: " << name << " should serialize to " << N << " bytes"
-              << std::endl;
+                 " (actual: " << mb.length() << ')' << std::endl;
     return false;
   }
   if (std::memcmp(expected, mb.rd_ptr(), N) != 0) {

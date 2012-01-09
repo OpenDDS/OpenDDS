@@ -1532,9 +1532,6 @@ namespace {
                                  "", "", cxx);
       be_global->impl_ <<
         "  }\n"
-        "  if (size % 4) {\n"
-        "    padding += 4 - (size % 4);\n"
-        "  }\n"
         "  size += 4; // parameterId & length\n";
     }
     {
@@ -1549,8 +1546,10 @@ namespace {
         "  size_t size = 0, pad = 0;\n"
         "  gen_find_size(uni, size, pad);\n"
         "  size -= 4; // parameterId & length\n"
+        "  const size_t post_pad = 4 - ((size + pad) % 4);\n"
+        "  const size_t total = size + pad + ((post_pad < 4) ? post_pad : 0);\n"
         "  if (size + pad > ACE_UINT16_MAX || "
-        "!(outer_strm << ACE_CDR::UShort(size + pad))) {\n"
+        "!(outer_strm << ACE_CDR::UShort(total))) {\n"
         "    return false;\n"
         "  }\n"
         "  ACE_Message_Block param(size + pad);\n"
@@ -1561,13 +1560,14 @@ namespace {
         "  }\n"
         "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
         "param.rd_ptr());\n"
-        "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(size))) {\n"
+        "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(param.length()))) {\n"
         "    return false;\n"
         "  }\n"
-        "  if (outer_strm.alignment() != Serializer::ALIGN_NONE) {\n"
-        "    static const ACE_CDR::Octet padding[4] = {0};\n"
+        "  if (post_pad < 4 && outer_strm.alignment() != "
+        "Serializer::ALIGN_NONE) {\n"
+        "    static const ACE_CDR::Octet padding[3] = {0};\n"
         "    return outer_strm.write_octet_array(padding, "
-        "ACE_CDR::ULong(pad));\n"
+        "ACE_CDR::ULong(post_pad));\n"
         "  }\n"
         "  return true;\n";
     }

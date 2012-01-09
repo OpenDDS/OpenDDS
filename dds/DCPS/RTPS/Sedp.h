@@ -236,11 +236,14 @@ private:
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 
-  struct LocalPublication {
+  struct LocalEndpoint {
     DCPS::RepoId topic_id_;
+    DCPS::TransportLocatorSeq trans_info_;
+  };
+
+  struct LocalPublication : LocalEndpoint {
     DCPS::DataWriterRemote_ptr publication_;
     DDS::DataWriterQos qos_;
-    DCPS::TransportLocatorSeq trans_info_;
     DDS::PublisherQos publisher_qos_;
   };
   typedef std::map<DCPS::RepoId, LocalPublication,
@@ -253,11 +256,9 @@ private:
       const DCPS::RepoId& publication_id,
       const LocalPublication& pub);
 
-  struct LocalSubscription {
-    DCPS::RepoId topic_id_;
+  struct LocalSubscription : LocalEndpoint {
     DCPS::DataReaderRemote_ptr subscription_;
     DDS::DataReaderQos qos_;
-    DCPS::TransportLocatorSeq trans_info_;
     DDS::SubscriberQos subscriber_qos_;
     std::string filter_;
     DDS::StringSeq params_;

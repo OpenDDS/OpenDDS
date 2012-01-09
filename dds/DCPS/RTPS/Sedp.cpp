@@ -31,8 +31,6 @@
 
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
-
-
 #include <cstring>
 
 
@@ -669,7 +667,6 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         top_it->second.data_type_ = wdata.ddsPublicationData.type_name;
         top_it->second.qos_.topic_data = wdata.ddsPublicationData.topic_data;
         top_it->second.repo_id_ = make_topic_guid();
-        //TODO: similar case for the data_received(id, rdata) overload
       }
       TopicDetailsEx& td = top_it->second;
       topic_names_[td.repo_id_] = topic_name;
@@ -719,16 +716,27 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
     if (iter == discovered_subscriptions_.end()) { // add new
       DiscoveredSubscription& sub =
         discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
+
+      const std::string topic_name = get_topic_name(sub);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+        topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        top_it =
+          topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
+        top_it->second.data_type_ = rdata.ddsSubscriptionData.type_name;
+        top_it->second.qos_.topic_data = rdata.ddsSubscriptionData.topic_data;
+        top_it->second.repo_id_ = make_topic_guid();
+      }
+      TopicDetailsEx& td = top_it->second;
+      topic_names_[td.repo_id_] = topic_name;
+      td.endpoints_.insert(guid);
+
       std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                   guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
       assign_bit_key(sub);
       sub.bit_ih_ =
         sub_bit()->store_synthetic_data(sub.reader_data_.ddsSubscriptionData,
                                         DDS::NEW_VIEW_STATE);
-      const std::string topic_name = get_topic_name(sub);
-      TopicDetailsEx& td = topics_[topic_name];
-      topic_names_[td.repo_id_] = topic_name;
-
       match_endpoints(guid, td);
 
     } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
@@ -891,7 +899,8 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
              != discovered_publications_.end()) {
     wTls = &dpi->second.writer_data_.writerProxy.allLocators;
   } else {
-    //TODO: error
+    //TODO: error?
+    return;
   }
 
   // 2. collect details about the reader, which may be local or discovered
@@ -938,7 +947,8 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     subQos = &tempSubQos;
     cfProp = &dsi->second.reader_data_.contentFilterProperty;
   } else {
-    //TODO: error
+    //TODO: error?
+    return;
   }
 
   // This is really part of step 1, but we're doing it here just in case we
