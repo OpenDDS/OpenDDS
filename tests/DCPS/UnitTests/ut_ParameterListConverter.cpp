@@ -2605,7 +2605,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   { // Should encode reader content filter property
     const char* cf_topic_name = "CFTopic test";
     const char* rel_topic_name = "CFTopic rel";
-    const char* filter_name = "Filter test";
     const char* filter_expr = "sequence > 10";
     const char* params[] = { "17", "32" };
 
@@ -2617,10 +2616,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
         INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
         NULL, 0, NULL, 0,
-        cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
+        cf_topic_name, rel_topic_name, NULL, filter_expr, params, 2);
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     TEST_ASSERT(is_present(param_list, PID_CONTENT_FILTER_PROPERTY));
+    // Default check
+    Parameter param = get(param_list, PID_CONTENT_FILTER_PROPERTY);
+    TEST_ASSERT(!strcmp("DDSSQL", 
+                        param.content_filter_property().filterClassName));
   }
   { // Should decode reader content filter property
     const char* cf_topic_name = "CFTopic test";
@@ -3338,6 +3341,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!is_present(param_list, PID_PARTITION));
     TEST_ASSERT(!is_present(param_list, PID_TOPIC_DATA));
     TEST_ASSERT(!is_present(param_list, PID_GROUP_DATA));
+    TEST_ASSERT(!is_present(param_list, PID_CONTENT_FILTER_PROPERTY));
   }
   return 0;
 }

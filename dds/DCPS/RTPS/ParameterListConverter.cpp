@@ -236,6 +236,11 @@ namespace {
       return false; // same as default
     }
   }
+  bool not_default(const ContentFilterProperty_t& cfprop)
+  {
+    return (strlen(cfprop.filterExpression.in()));
+  }
+
 };
 
 namespace ParameterListConverter {
@@ -598,9 +603,14 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
+  if (not_default(reader_data.contentFilterProperty))
   {
     Parameter param;
-    param.content_filter_property(reader_data.contentFilterProperty);
+    ContentFilterProperty_t cfprop_copy = reader_data.contentFilterProperty;
+    if (!strlen(cfprop_copy.filterClassName)) {
+      cfprop_copy.filterClassName = "DDSSQL";
+    }
+    param.content_filter_property(cfprop_copy);
     add_param(param_list, param);
   }
 
