@@ -901,7 +901,7 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
       tempCfp.expressionParameters = lsi->second.params_;
     }
     cfProp = &tempCfp;
-  } else if ((dsi = discovered_subscriptions_.find(writer))
+  } else if ((dsi = discovered_subscriptions_.find(reader))
              != discovered_subscriptions_.end()) {
     if (!writer_local) {
       // this is a discovered/discovered match, nothing for us to do
