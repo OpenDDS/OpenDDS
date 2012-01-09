@@ -1,3 +1,10 @@
+Mon Jan  9 19:41:05 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Mutex protection.
+
 Mon Jan  9 18:49:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

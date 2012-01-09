@@ -142,6 +142,7 @@ Sedp::multicast_group() const
 void
 Sedp::ignore(const DCPS::RepoId& to_ignore)
 {
+  // Locked prior to call from Spdp.
   ignored_guids_.insert(to_ignore);
   {
     const DiscoveredPublicationIter iter =
@@ -180,6 +181,7 @@ RepoId
 Sedp::bit_key_to_repo_id(const char* bit_topic_name,
                          const DDS::BuiltinTopicKey_t& key)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
   if (0 == std::strcmp(bit_topic_name, DCPS::BUILT_IN_PUBLICATION_TOPIC)) {
     return pub_key_to_id_[key];
   }
@@ -395,6 +397,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
                    const char* dataTypeName, const DDS::TopicQos& qos,
                    bool hasDcpsKey)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   std::map<std::string, TopicDetailsEx>::iterator iter =
     topics_.find(topicName);
   if (iter != topics_.end()) { // types must match, RtpsInfo checked for us
@@ -418,6 +421,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
 DCPS::TopicStatus
 Sedp::remove_topic(const RepoId& topicId, std::string& name)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   name = topic_names_[topicId];
   topics_.erase(name);
   topic_names_.erase(topicId);
@@ -428,6 +432,7 @@ bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
                        std::string& name)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator iter =
     topic_names_.find(topicId);
   if (iter != topic_names_.end()) {
@@ -459,6 +464,7 @@ Sedp::add_publication(const RepoId& topicId,
                       const DCPS::TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
   RepoId rid = participant_id_;
   rid.entityId.entityKind =
     has_dcps_key(topicId)
@@ -487,6 +493,7 @@ Sedp::add_publication(const RepoId& topicId,
 void
 Sedp::remove_publication(const RepoId& publicationId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalPublicationIter iter = local_publications_.find(publicationId);
   if (iter != local_publications_.end()) {
     if (DDS::RETCODE_OK == 
@@ -504,6 +511,7 @@ Sedp::update_publication_qos(const RepoId& publicationId,
                              const DDS::DataWriterQos& qos,
                              const DDS::PublisherQos& publisherQos)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   LocalPublicationIter iter = local_publications_.find(publicationId);
   if (iter != local_publications_.end()) {
     LocalPublication& pb = iter->second;
@@ -528,6 +536,7 @@ Sedp::add_subscription(const RepoId& topicId,
                        const char* filterExpr,
                        const DDS::StringSeq& params)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
   RepoId rid = participant_id_;
   rid.entityId.entityKind =
     has_dcps_key(topicId)
@@ -560,6 +569,7 @@ Sedp::add_subscription(const RepoId& topicId,
 void
 Sedp::remove_subscription(const RepoId& subscriptionId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
   if (iter != local_subscriptions_.end()) {
     if (DDS::RETCODE_OK == 
@@ -576,6 +586,7 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
                               const DDS::DataReaderQos& qos,
                               const DDS::SubscriberQos& subscriberQos)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
   if (iter != local_subscriptions_.end()) {
     LocalSubscription& sb = iter->second;
@@ -596,6 +607,7 @@ bool
 Sedp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   LocalSubscriptionIter iter = local_subscriptions_.find(subId);
   if (iter != local_subscriptions_.end()) {
     LocalSubscription& sb = iter->second;
@@ -1310,8 +1322,6 @@ Sedp::populate_discovered_reader_msg(
 void
 Sedp::write_durable_publication_data()
 {
-  //ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   LocalPublicationIter pub, end = local_publications_.end();
   for (pub = local_publications_.begin(); pub != end; ++pub) {
     write_publication_data(pub->first, pub->second, true);
@@ -1321,7 +1331,6 @@ Sedp::write_durable_publication_data()
 void
 Sedp::write_durable_subscription_data()
 {
-  //ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   LocalSubscriptionIter sub, end = local_subscriptions_.end();
 
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {

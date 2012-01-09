@@ -608,6 +608,7 @@ Spdp::remove_topic(const RepoId& topicId, std::string& name)
 void
 Spdp::ignore_topic(const RepoId& ignoreId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   sedp_.ignore(ignoreId);
 }
 
@@ -638,6 +639,7 @@ Spdp::remove_publication(const RepoId& publicationId)
 void
 Spdp::ignore_publication(const RepoId& ignoreId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   return sedp_.ignore(ignoreId);
 }
 
@@ -671,6 +673,7 @@ Spdp::remove_subscription(const RepoId& subscriptionId)
 void
 Spdp::ignore_subscription(const RepoId& ignoreId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   return sedp_.ignore(ignoreId);
 }
 
