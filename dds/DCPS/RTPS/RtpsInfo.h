@@ -214,6 +214,7 @@ private:
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;
+  ACE_Thread_Mutex lock_;
 };
 
 }
