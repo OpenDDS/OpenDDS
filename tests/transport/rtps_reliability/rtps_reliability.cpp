@@ -594,9 +594,10 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
   address_to_bytes(part1_locators[0].address, part1_addr);
   size_t size_locator = 0, padding_locator = 0;
   gen_find_size(part1_locators, size_locator, padding_locator);
-  mb_locator.init(size_locator + padding_locator);
+  mb_locator.init(size_locator + padding_locator + 1);
   Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   ser_loc << part1_locators;
+  ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
 }
 
 bool blob_to_addr(const TransportBLOB& blob, ACE_INET_Addr& addr)

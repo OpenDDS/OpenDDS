@@ -1,3 +1,11 @@
+Mon Jan  9 16:09:41 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated tests to use the new rtps_udp transport blob format.
+
 Sun Jan  8 00:24:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:

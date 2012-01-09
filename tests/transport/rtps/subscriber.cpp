@@ -234,6 +234,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   publication.remote_id_ = remote;
   publication.remote_data_.length(1);
   publication.remote_data_[0].transport_type = "rtps_udp";
+  publication.remote_data_[0].data.length(5);
+  for (CORBA::ULong i = 0; i < 5; ++i) {
+    publication.remote_data_[0].data[i] = 0;
+  }
 
   std::cout << "Associating with pub..." << std::endl;
   if (!sdr.init(publication)) {

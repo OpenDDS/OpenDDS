@@ -231,9 +231,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   size_t size_locator = 0, padding_locator = 0;
   gen_find_size(locators, size_locator, padding_locator);
-  ACE_Message_Block mb_locator(size_locator + padding_locator);
+  ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
   Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   ser_loc << locators;
+  ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
 
   SimpleDataWriter sdw(local_guid);
   sdw.enable_transport(true /*reliable*/);
