@@ -1050,10 +1050,14 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
   
   // Copy entries from local publication and local subscription maps 
   // prior to releasing lock
-  DCPS::DataWriterRemote_var dwr = 
-      DCPS::DataWriterRemote::_duplicate(lpi->second.publication_);
-  DCPS::DataReaderRemote_var drr = 
-      DCPS::DataReaderRemote::_duplicate(lsi->second.subscription_);
+  DCPS::DataWriterRemote_var dwr;
+  DCPS::DataReaderRemote_var drr;
+  if (writer_local) {
+    dwr = DCPS::DataWriterRemote::_duplicate(lpi->second.publication_);
+  }
+  if (reader_local) {
+    drr = DCPS::DataReaderRemote::_duplicate(lsi->second.subscription_);
+  }
 
   DCPS::IncompatibleQosStatus 
     writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()},
