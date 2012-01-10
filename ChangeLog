@@ -1,3 +1,10 @@
+Tue Jan 10 21:12:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Removing redundant indications for multicast which was
+          causing some crossplatform tests to fail.
+
 Thu Jan  5 16:52:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/idl/dds_generator.h:

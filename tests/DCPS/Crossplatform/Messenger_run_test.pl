@@ -30,7 +30,6 @@ if ($ARGV[0] eq 'udp') {
     $sub_config_file = "$file_prefix/sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
-    $opts .= "-t multicast";
     $pub_config_file = "$file_prefix/pub_multicast.ini";
     $sub_config_file = "$file_prefix/sub_multicast.ini";
 }
