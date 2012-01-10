@@ -783,8 +783,9 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       {
         // Release lock for call into sub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        sub_bit()->store_synthetic_data(rdata.ddsSubscriptionData,
-                                        DDS::NEW_VIEW_STATE);
+        instance_handle = 
+          sub_bit()->store_synthetic_data(rdata.ddsSubscriptionData,
+                                          DDS::NEW_VIEW_STATE);
       }
       // Subscription may have been removed while lock released
       iter = discovered_subscriptions_.find(guid);

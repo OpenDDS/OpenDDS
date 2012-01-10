@@ -1,8 +1,14 @@
+Tue Jan 10 22:36:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Bug - was not setting local instance_handle.
+
 Tue Jan 10 21:27:28 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
 
-          Deadlock - release lock when calling into part_bit within 
+          Deadlock - release lock when calling into part_bit within
             data_received().
 
         * dds/DCPS/RTPS/Spdp.cpp:
