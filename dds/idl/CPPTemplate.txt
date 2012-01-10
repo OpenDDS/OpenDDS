@@ -402,21 +402,17 @@ void
                                        dw_remote_objref);
 
   ::<%SCOPED%> data;
-  if (OpenDDS::DCPS::gen_is_bounded_size (data))
-  {
-    marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (data, true);
-  }
-  else
-  {
+  if (OpenDDS::DCPS::gen_is_bounded_size(data)) {
+    marshaled_size_ = 8 + OpenDDS::DCPS::gen_max_marshaled_size(data, true);
+    // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
+  } else {
     marshaled_size_ = 0; // should use gen_find_size when marshaling
   }
   OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko(data);
-  if (OpenDDS::DCPS::gen_is_bounded_size (ko))
-  {
-    key_marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (ko, true);
-  }
-  else
-  {
+  if (OpenDDS::DCPS::gen_is_bounded_size(ko)) {
+    key_marshaled_size_ = 8 + OpenDDS::DCPS::gen_max_marshaled_size(ko, true);
+    // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
+  } else {
     key_marshaled_size_ = 0; // should use gen_find_size when marshaling
   }
 }
@@ -490,11 +486,13 @@ ACE_Message_Block*
     // block.
 
     OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko_instance_data(instance_data);
-    size_t effective_size = cdr ? 4 : 0, padding = 0;
+    size_t effective_size = 0, padding = 0;
     if (key_marshaled_size_) {
-      effective_size += key_marshaled_size_;
-      padding = 4; // worst case
+      effective_size = key_marshaled_size_;
     } else {
+      if (cdr) {
+        effective_size = 4; // CDR encapsulation
+      }
       OpenDDS::DCPS::gen_find_size(ko_instance_data, effective_size, padding);
     }
     if (cdr) {
@@ -512,11 +510,13 @@ ACE_Message_Block*
     serializer << ko_instance_data;
 
   } else { // OpenDDS::DCPS::FULL_MARSHALING
-    size_t effective_size = cdr ? 4 : 0, padding = 0;
+    size_t effective_size = 0, padding = 0;
     if (marshaled_size_) {
-      effective_size += marshaled_size_;
-      padding = 4; // worst case
+      effective_size = marshaled_size_;
     } else {
+      if (cdr) {
+        effective_size = 4; // CDR encapsulation
+      }
       OpenDDS::DCPS::gen_find_size(instance_data, effective_size, padding);
     }
     if (cdr) {

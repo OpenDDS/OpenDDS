@@ -1,3 +1,26 @@
+Tue Jan 10 23:24:03 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Initialize all QoS data members when constructing from BIT data.
+
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+
+          Extend the default passive connect duration to 60 seconds in order
+          to account for the (default) SPDP rebroadcast period of 30 seconds.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Corrected a bug in how fixed-size data types use the allocators
+          with RTPS-compliant marshaling.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+
+          Extended the test to write and read a sample.
+          Cleaned up the test and removed some sleeps.
+          When run with RTPS transport, need two insts -- one per participant.
+
 Tue Jan 10 23:14:23 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

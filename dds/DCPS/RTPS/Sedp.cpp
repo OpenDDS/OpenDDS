@@ -1005,14 +1005,21 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     tempDrQos.latency_budget = bit.latency_budget;
     tempDrQos.liveliness = bit.liveliness;
     tempDrQos.reliability = bit.reliability;
-    tempDrQos.ownership = bit.ownership;
     tempDrQos.destination_order = bit.destination_order;
+    tempDrQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
+    tempDrQos.resource_limits =
+      TheServiceParticipant->initial_ResourceLimitsQosPolicy();
     tempDrQos.user_data = bit.user_data;
+    tempDrQos.ownership = bit.ownership;
     tempDrQos.time_based_filter = bit.time_based_filter;
+    tempDrQos.reader_data_lifecycle =
+      TheServiceParticipant->initial_ReaderDataLifecycleQosPolicy();
     drQos = &tempDrQos;
     tempSubQos.presentation = bit.presentation;
     tempSubQos.partition = bit.partition;
     tempSubQos.group_data = bit.group_data;
+    tempSubQos.entity_factory =
+      TheServiceParticipant->initial_EntityFactoryQosPolicy();
     subQos = &tempSubQos;
     cfProp = &dsi->second.reader_data_.contentFilterProperty;
   } else {
@@ -1031,15 +1038,24 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     tempDwQos.latency_budget = bit.latency_budget;
     tempDwQos.liveliness = bit.liveliness;
     tempDwQos.reliability = bit.reliability;
+    tempDwQos.destination_order = bit.destination_order;
+    tempDwQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
+    tempDwQos.resource_limits =
+      TheServiceParticipant->initial_ResourceLimitsQosPolicy();
+    tempDwQos.transport_priority =
+      TheServiceParticipant->initial_TransportPriorityQosPolicy();
     tempDwQos.lifespan = bit.lifespan;
     tempDwQos.user_data = bit.user_data;
     tempDwQos.ownership = bit.ownership;
     tempDwQos.ownership_strength = bit.ownership_strength;
-    tempDwQos.destination_order = bit.destination_order;
+    tempDwQos.writer_data_lifecycle =
+      TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
     dwQos = &tempDwQos;
     tempPubQos.presentation = bit.presentation;
     tempPubQos.partition = bit.partition;
     tempPubQos.group_data = bit.group_data;
+    tempPubQos.entity_factory =
+      TheServiceParticipant->initial_EntityFactoryQosPolicy();
     pubQos = &tempPubQos;
   }
 
