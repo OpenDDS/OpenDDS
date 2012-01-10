@@ -661,6 +661,8 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
 
   if (message_id == DCPS::SAMPLE_DATA) {
+    DiscoveredWriterData wdata_copy;
+
     if (iter == discovered_publications_.end()) 
     { // add new
       // Must unlock when calling into pub_bit() as it may call back into us
@@ -687,6 +689,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
         assign_bit_key(pub);
+        wdata_copy = pub.writer_data_;
       }
 
       // Iter no longer valid once lock released
@@ -697,7 +700,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         // Release lock for call into pub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
         instance_handle = 
-          pub_bit()->store_synthetic_data(wdata.ddsPublicationData,
+          pub_bit()->store_synthetic_data(wdata_copy.ddsPublicationData,
                                           DDS::NEW_VIEW_STATE);
       }
       // Publication may have been removed while lock released
@@ -751,6 +754,8 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
   ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
 
   if (message_id == DCPS::SAMPLE_DATA) {
+    DiscoveredReaderData rdata_copy;
+
     if (iter == discovered_subscriptions_.end()) 
     { // add new
       { // Reduce scope of sub and td
@@ -774,6 +779,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
         assign_bit_key(sub);
+        rdata_copy = sub.reader_data_;
       }
 
       // Iter no longer valid once lock released
@@ -784,7 +790,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         // Release lock for call into sub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
         instance_handle = 
-          sub_bit()->store_synthetic_data(rdata.ddsSubscriptionData,
+          sub_bit()->store_synthetic_data(rdata_copy.ddsSubscriptionData,
                                           DDS::NEW_VIEW_STATE);
       }
       // Subscription may have been removed while lock released
