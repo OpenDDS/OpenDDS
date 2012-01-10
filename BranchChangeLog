@@ -1,3 +1,17 @@
+Tue Jan 10 21:27:28 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Deadlock - release lock when calling into part_bit within 
+            data_received().
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added lock to data_received() overloads.
+          Same data_received() changes as above, releasing when calling into
+            pub_bit and sub_bit.
+          Copy more items in match() before releasing lock.
+
 Mon Jan  9 23:09:39 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsInfo.h:

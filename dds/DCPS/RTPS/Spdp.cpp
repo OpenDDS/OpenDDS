@@ -144,7 +144,11 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     return;
   }
 
-  const DiscoveredParticipantIter iter = participants_.find(guid);
+  // Find the participant - iterator valid only as long as we hold the lock
+  DiscoveredParticipantIter iter = participants_.find(guid);
+
+  // Must unlock when calling into part_bit() as it may call back into us
+  ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
 
   if (iter == participants_.end()) {
     // copy guid prefix (octet[12]) into BIT key (long[3])
@@ -160,12 +164,21 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         pdata.leaseDuration.seconds));
     }
 
+    // notify Sedp of association
+    sedp_.associate(pdata);
+
+    DDS::InstanceHandle_t bit_instance_handle;
     // add a new participant
     participants_[guid] = DiscoveredParticipant(pdata, time);
-    participants_[guid].bit_ih_ =
-      part_bit()->store_synthetic_data(pdata.ddsParticipantData,
-                                       DDS::NEW_VIEW_STATE);
-    sedp_.associate(pdata);
+    {
+      ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+      bit_instance_handle = 
+          part_bit()->store_synthetic_data(pdata.ddsParticipantData,
+                                           DDS::NEW_VIEW_STATE);
+    }
+    participants_[guid].bit_ih_ = bit_instance_handle;
+    // Iterator is no longer valid
+    iter = participants_.end();
 
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
     remove_discovered_participant(iter);
@@ -178,11 +191,19 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         pdata.ddsParticipantData.user_data) {
       iter->second.pdata_.ddsParticipantData.user_data =
         pdata.ddsParticipantData.user_data;
-      part_bit()->store_synthetic_data(pdata.ddsParticipantData,
-                                       DDS::NOT_NEW_VIEW_STATE);
+      {
+        ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+        part_bit()->store_synthetic_data(pdata.ddsParticipantData,
+                                         DDS::NOT_NEW_VIEW_STATE);
+      }
+      // Perform search again, so iterator becomes valid
+      iter = participants_.find(guid);
     }
-    iter->second.pdata_ = pdata;
-    iter->second.last_seen_ = time;
+    // Participant may have been removed while lock released
+    if (iter != participants_.end()) {
+      iter->second.pdata_ = pdata;
+      iter->second.last_seen_ = time;
+    }
   }
 }
 

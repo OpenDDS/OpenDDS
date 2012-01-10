@@ -25,6 +25,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/DataSampleHeader.h"
+#include "dds/DdsDcpsDataReaderRemoteC.h"
+#include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
@@ -641,44 +643,73 @@ Sedp::make_topic_guid()
 void
 Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 {
+
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
 
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (ignoring(guid)
       || ignoring(guid_participant)
       || ignoring(wdata.ddsPublicationData.topic_name)) {
     return;
   }
 
-  const DiscoveredPublicationIter iter = discovered_publications_.find(guid);
+
+  std::string topic_name;
+  // Find the publication  - iterator valid only as long as we hold the lock
+  DiscoveredPublicationIter iter = discovered_publications_.find(guid);
 
   if (message_id == DCPS::SAMPLE_DATA) {
-    if (iter == discovered_publications_.end()) { // add new
-      DiscoveredPublication& pub =
-        discovered_publications_[guid] = DiscoveredPublication(wdata);
+    if (iter == discovered_publications_.end()) 
+    { // add new
+      // Must unlock when calling into pub_bit() as it may call back into us
+      ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
 
-      const std::string topic_name = get_topic_name(pub);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
-        topics_.find(topic_name);
-      if (top_it == topics_.end()) {
-        top_it =
-          topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
-        top_it->second.data_type_ = wdata.ddsPublicationData.type_name;
-        top_it->second.qos_.topic_data = wdata.ddsPublicationData.topic_data;
-        top_it->second.repo_id_ = make_topic_guid();
+      { // Reduce scope of pub and td
+        DiscoveredPublication& pub =
+            discovered_publications_[guid] = DiscoveredPublication(wdata);
+
+        topic_name = get_topic_name(pub);
+        std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+        if (top_it == topics_.end()) {
+          top_it =
+            topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
+          top_it->second.data_type_ = wdata.ddsPublicationData.type_name;
+          top_it->second.qos_.topic_data = wdata.ddsPublicationData.topic_data;
+          top_it->second.repo_id_ = make_topic_guid();
+        }
+        TopicDetailsEx& td = top_it->second;
+        topic_names_[td.repo_id_] = topic_name;
+        td.endpoints_.insert(guid);
+
+        std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
+                    guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
+        assign_bit_key(pub);
       }
-      TopicDetailsEx& td = top_it->second;
-      topic_names_[td.repo_id_] = topic_name;
-      td.endpoints_.insert(guid);
 
-      std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
-                  guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
-      assign_bit_key(pub);
-      pub.bit_ih_ =
-        pub_bit()->store_synthetic_data(pub.writer_data_.ddsPublicationData,
-                                        DDS::NEW_VIEW_STATE);
-      match_endpoints(guid, td);
+      // Iter no longer valid once lock released
+      iter = discovered_publications_.end();
+
+      DDS::InstanceHandle_t instance_handle;
+      {
+        // Release lock for call into pub_bit
+        ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+        instance_handle = 
+          pub_bit()->store_synthetic_data(wdata.ddsPublicationData,
+                                          DDS::NEW_VIEW_STATE);
+      }
+      // Publication may have been removed while lock released
+      iter = discovered_publications_.find(guid);
+      if (iter != discovered_publications_.end()) {
+        iter->second.bit_ih_ = instance_handle;
+        std::map<std::string, TopicDetailsEx>::iterator top_it =
+            topics_.find(topic_name);
+        if (top_it != topics_.end()) {
+          match_endpoints(guid, top_it->second);
+        }
+      }
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
@@ -704,40 +735,68 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
 
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
   if (ignoring(guid)
       || ignoring(guid_participant)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
     return;
   }
 
-  const DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
+  std::string topic_name;
+  // Find the publication  - iterator valid only as long as we hold the lock
+  DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
+
+  // Must unlock when calling into sub_bit() as it may call back into us
+  ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
 
   if (message_id == DCPS::SAMPLE_DATA) {
-    if (iter == discovered_subscriptions_.end()) { // add new
-      DiscoveredSubscription& sub =
-        discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
+    if (iter == discovered_subscriptions_.end()) 
+    { // add new
+      { // Reduce scope of sub and td
+        DiscoveredSubscription& sub =
+          discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
 
-      const std::string topic_name = get_topic_name(sub);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
-        topics_.find(topic_name);
-      if (top_it == topics_.end()) {
-        top_it =
-          topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
-        top_it->second.data_type_ = rdata.ddsSubscriptionData.type_name;
-        top_it->second.qos_.topic_data = rdata.ddsSubscriptionData.topic_data;
-        top_it->second.repo_id_ = make_topic_guid();
+        topic_name = get_topic_name(sub);
+        std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+        if (top_it == topics_.end()) {
+          top_it =
+            topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
+          top_it->second.data_type_ = rdata.ddsSubscriptionData.type_name;
+          top_it->second.qos_.topic_data = rdata.ddsSubscriptionData.topic_data;
+          top_it->second.repo_id_ = make_topic_guid();
+        }
+        TopicDetailsEx& td = top_it->second;
+        topic_names_[td.repo_id_] = topic_name;
+        td.endpoints_.insert(guid);
+
+        std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
+                    guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
+        assign_bit_key(sub);
       }
-      TopicDetailsEx& td = top_it->second;
-      topic_names_[td.repo_id_] = topic_name;
-      td.endpoints_.insert(guid);
 
-      std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
-                  guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
-      assign_bit_key(sub);
-      sub.bit_ih_ =
-        sub_bit()->store_synthetic_data(sub.reader_data_.ddsSubscriptionData,
+      // Iter no longer valid once lock released
+      iter = discovered_subscriptions_.end();
+
+      DDS::InstanceHandle_t instance_handle;
+      {
+        // Release lock for call into sub_bit
+        ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+        sub_bit()->store_synthetic_data(rdata.ddsSubscriptionData,
                                         DDS::NEW_VIEW_STATE);
-      match_endpoints(guid, td);
+      }
+      // Subscription may have been removed while lock released
+      iter = discovered_subscriptions_.find(guid);
+      if (iter != discovered_subscriptions_.end()) {
+        iter->second.bit_ih_ = instance_handle;
+        std::map<std::string, TopicDetailsEx>::iterator top_it =
+            topics_.find(topic_name);
+        if (top_it != topics_.end()) {
+          match_endpoints(guid, top_it->second);
+        }
+      }
+
 
     } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                           rdata.ddsSubscriptionData)) { // update existing
@@ -977,39 +1036,54 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     pubQos = &tempPubQos;
   }
 
+  // Need to release lock, below, for callbacks into DCPS which could
+  // call into Spdp/Sedp.
   ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
   // 3. check transport and QoS compatibility
-  DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()},
+  
+  // Copy entries from local publication and local subscription maps 
+  // prior to releasing lock
+  DCPS::DataWriterRemote_var dwr = 
+      DCPS::DataWriterRemote::_duplicate(lpi->second.publication_);
+  DCPS::DataReaderRemote_var drr = 
+      DCPS::DataReaderRemote::_duplicate(lsi->second.subscription_);
+
+  DCPS::IncompatibleQosStatus 
+    writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()},
     readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
+
   if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                           dwQos, drQos, pubQos, subQos)) {
-    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-    static const bool writer_active = true;
-    if (writer_local) {
-      const DCPS::ReaderAssociation ra =
+    // Copy reader and writer association data prior to releasing lock
+    const DCPS::ReaderAssociation ra =
         {*rTls, reader, *subQos, *drQos,
          cfProp->filterExpression, cfProp->expressionParameters};
-      lpi->second.publication_->add_association(writer, ra, writer_active);
+    const DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
+
+    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+    static const bool writer_active = true;
+
+    if (writer_local) {
+      dwr->add_association(writer, ra, writer_active);
     }
     if (reader_local) {
-      const DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
-      lsi->second.subscription_->add_association(reader, wa, !writer_active);
+      drr->add_association(reader, wa, !writer_active);
     }
 
     //TODO: For cases where the reader is not local to this participant,
     //      this callback is effectively lying to DCPS in telling it that
     //      the association is complete.  It may not be done handshaking yet.
     if (writer_local) { // change this if 'writer_active' (above) changes
-      lpi->second.publication_->association_complete(reader);
+      dwr->association_complete(reader);
     }
 
   } else { // something was incompatible
     ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
     if (writer_local && writerStatus.count_since_last_send) {
-      lpi->second.publication_->update_incompatible_qos(writerStatus);
+      dwr->update_incompatible_qos(writerStatus);
     }
     if (reader_local && readerStatus.count_since_last_send) {
-      lsi->second.subscription_->update_incompatible_qos(readerStatus);
+      drr->update_incompatible_qos(readerStatus);
     }
   }
 }
