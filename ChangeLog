@@ -1,3 +1,9 @@
+Tue Jan 10 21:53:41 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Removing redundant indicastion for udp.
+
 Tue Jan 10 21:12:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Crossplatform/Messenger_run_test.pl:

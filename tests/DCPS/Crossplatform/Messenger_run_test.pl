@@ -25,7 +25,6 @@ my $pub_opts = "";
 my $sub_opts = "";
 
 if ($ARGV[0] eq 'udp') {
-    $opts .= "-t udp";
     $pub_config_file = "$file_prefix/pub_udp.ini";
     $sub_config_file = "$file_prefix/sub_udp.ini";
 }
