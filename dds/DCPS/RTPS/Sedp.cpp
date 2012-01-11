@@ -716,15 +716,28 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
-      pub_bit()->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
-                                      DDS::NOT_NEW_VIEW_STATE);
-      //TODO: match/unmatch local subscription(s)
-    }
+      pub_bit()->store_synthetic_data(
+          iter->second.writer_data_.ddsPublicationData,
+          DDS::NOT_NEW_VIEW_STATE);
 
+      // Match/unmatch local subscription(s)
+      topic_name = get_topic_name(iter->second);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        match_endpoints(guid, top_it->second);
+      }
+    }
   } else { // this is some combination of dispose and/or unregister
     if (iter != discovered_publications_.end()) {
-      topics_[get_topic_name(iter->second)].endpoints_.erase(guid);
-      //TODO: unmatch local subscription(s)
+      // Unmatch local subscription(s)
+      topic_name = get_topic_name(iter->second);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        top_it->second.endpoints_.erase(guid);
+        match_endpoints(guid, top_it->second);
+      }
       remove_from_bit(iter->second);
       discovered_publications_.erase(iter);
     }
@@ -807,15 +820,29 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
 
     } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                           rdata.ddsSubscriptionData)) { // update existing
-      sub_bit()->store_synthetic_data(iter->second.reader_data_.ddsSubscriptionData,
-                                      DDS::NOT_NEW_VIEW_STATE);
-      //TODO: match/unmatch local publication(s)
+      sub_bit()->store_synthetic_data(
+            iter->second.reader_data_.ddsSubscriptionData,
+            DDS::NOT_NEW_VIEW_STATE);
+
+      // Match/unmatch local publication(s)
+      topic_name = get_topic_name(iter->second);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        match_endpoints(guid, top_it->second);
+      }
     }
 
   } else { // this is some combination of dispose and/or unregister
     if (iter != discovered_subscriptions_.end()) {
-      topics_[get_topic_name(iter->second)].endpoints_.erase(guid);
-      //TODO: unmatch local publication(s)
+      // Unmatch local publication(s)
+      topic_name = get_topic_name(iter->second);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        top_it->second.endpoints_.erase(guid);
+        match_endpoints(guid, top_it->second);
+      }
       remove_from_bit(iter->second);
       discovered_subscriptions_.erase(iter);
     }
