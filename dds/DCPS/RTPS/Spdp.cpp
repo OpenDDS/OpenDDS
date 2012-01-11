@@ -384,7 +384,7 @@ Spdp::SpdpTransport::~SpdpTransport()
 {
   dispose_unregister();
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+    // Lock should be held prior to destructive action
     outer_->eh_shutdown_ = true;
   }
   outer_->shutdown_cond_.signal();

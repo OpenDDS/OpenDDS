@@ -1,3 +1,10 @@
+Wed Jan 11 18:01:51 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Don't obtain lock while in SpdpTransport destructor.  It is already
+            held, and we are only setting a bool, which should be atomic.
+
 Wed Jan 11 17:10:16 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsInfo.h:
