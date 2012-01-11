@@ -64,8 +64,7 @@ RtpsInfo::ignore_domain_participant(DDS::DomainId_t domain,
                                     const RepoId& myParticipantId,
                                     const RepoId& ignoreId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domain][myParticipantId]->ignore_domain_participant(ignoreId);
+  get_part(domain, myParticipantId)->ignore_domain_participant(ignoreId);
 }
 
 bool
@@ -73,8 +72,7 @@ RtpsInfo::update_domain_participant_qos(DDS::DomainId_t domain,
                                         const RepoId& participant,
                                         const DDS::DomainParticipantQos& qos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  return participants_[domain][participant]->update_domain_participant_qos(qos);
+  return get_part(domain, participant)->update_domain_participant_qos(qos);
 }
 
 void
@@ -86,8 +84,7 @@ RtpsInfo::init_bit(const DDS::Subscriber_var& bit_subscriber)
   DCPS::RepoId participantId = dpi->get_id();
   DDS::DomainId_t domainId = participant->get_domain_id();
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->bit_subscriber(bit_subscriber);
+  get_part(domainId, participantId)->bit_subscriber(bit_subscriber);
 }
 
 RepoId
@@ -96,8 +93,7 @@ RtpsInfo::bit_key_to_repo_id(DDS::DomainId_t domainId,
                              const char* bit_topic_name,
                              const DDS::BuiltinTopicKey_t& key)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
-  return participants_[domainId][partId]->bit_key_to_repo_id(bit_topic_name, key);
+  return get_part(domainId, partId)->bit_key_to_repo_id(bit_topic_name, key);
 }
 
 // Topic operations:
@@ -122,6 +118,7 @@ RtpsInfo::assert_topic(DCPS::RepoId_out topicId,
     }
   }
 
+  // Verified its safe to hold lock during call to assert_topic
   const DCPS::TopicStatus stat =
     participants_[domainId][participantId]->assert_topic(topicId, topicName,
                                                          dataTypeName, qos,
@@ -174,6 +171,7 @@ RtpsInfo::remove_topic(DDS::DomainId_t domainId, const RepoId& participantId,
   }
 
   std::string name;
+  // Safe to hold lock while calling remove topic
   const DCPS::TopicStatus stat =
     participants_[domainId][participantId]->remove_topic(topicId, name);
 
@@ -196,8 +194,7 @@ void
 RtpsInfo::ignore_topic(DDS::DomainId_t domainId, const RepoId& myParticipantId,
                        const RepoId& ignoreId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][myParticipantId]->ignore_topic(ignoreId);
+  get_part(domainId, myParticipantId)->ignore_topic(ignoreId);
 }
 
 bool
@@ -206,6 +203,7 @@ RtpsInfo::update_topic_qos(const RepoId& topicId, DDS::DomainId_t domainId,
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   std::string name;
+  // Safe to hold lock while calling update_topic_qos
   if (participants_[domainId][participantId]->update_topic_qos(topicId,
                                                                qos, name)) {
     topics_[domainId][name].qos_ = qos;
@@ -225,8 +223,7 @@ RtpsInfo::add_publication(DDS::DomainId_t domainId, const RepoId& participantId,
                           const DCPS::TransportLocatorSeq& transInfo,
                           const DDS::PublisherQos& publisherQos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
-  return participants_[domainId][participantId]->add_publication(
+  return get_part(domainId, participantId)->add_publication(
     topicId, publication, qos, transInfo, publisherQos);
 }
 
@@ -235,8 +232,7 @@ RtpsInfo::remove_publication(DDS::DomainId_t domainId,
                              const RepoId& participantId,
                              const RepoId& publicationId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->remove_publication(publicationId);
+  get_part(domainId, participantId)->remove_publication(publicationId);
 }
 
 void
@@ -244,8 +240,7 @@ RtpsInfo::ignore_publication(DDS::DomainId_t domainId,
                              const RepoId& participantId,
                              const RepoId& ignoreId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->ignore_publication(ignoreId);
+  get_part(domainId, participantId)->ignore_publication(ignoreId);
 }
 
 bool
@@ -254,9 +249,8 @@ RtpsInfo::update_publication_qos(DDS::DomainId_t domainId, const RepoId& partId,
                                  const DDS::DataWriterQos& qos,
                                  const DDS::PublisherQos& publisherQos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  return participants_[domainId][partId]->update_publication_qos(dwId, qos,
-                                                                 publisherQos);
+  return get_part(domainId, partId)->update_publication_qos(dwId, qos,
+                                                            publisherQos);
 }
 
 
@@ -272,8 +266,7 @@ RtpsInfo::add_subscription(DDS::DomainId_t domainId,
                            const char* filterExpr,
                            const DDS::StringSeq& params)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
-  return participants_[domainId][participantId]->add_subscription(
+  return get_part(domainId, participantId)->add_subscription(
     topicId, subscription, qos, transInfo, subscriberQos, filterExpr, params);
 }
 
@@ -282,8 +275,7 @@ RtpsInfo::remove_subscription(DDS::DomainId_t domainId,
                               const RepoId& participantId,
                               const RepoId& subscriptionId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->remove_subscription(subscriptionId);
+  get_part(domainId, participantId)->remove_subscription(subscriptionId);
 }
 
 void
@@ -291,8 +283,7 @@ RtpsInfo::ignore_subscription(DDS::DomainId_t domainId,
                               const RepoId& participantId,
                               const RepoId& ignoreId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->ignore_subscription(ignoreId);
+  get_part(domainId, participantId)->ignore_subscription(ignoreId);
 }
 
 bool
@@ -301,9 +292,7 @@ RtpsInfo::update_subscription_qos(DDS::DomainId_t domainId,
                                   const DDS::DataReaderQos& qos,
                                   const DDS::SubscriberQos& subQos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  return participants_[domainId][partId]->update_subscription_qos(drId, qos,
-                                                                  subQos);
+  return get_part(domainId, partId)->update_subscription_qos(drId, qos, subQos);
 }
 
 bool
@@ -313,9 +302,7 @@ RtpsInfo::update_subscription_params(DDS::DomainId_t domainId,
                                      const DDS::StringSeq& params)
 
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  return participants_[domainId][partId]->update_subscription_params(subId,
-                                                                     params);
+  return get_part(domainId, partId)->update_subscription_params(subId, params);
 }
 
 
@@ -326,9 +313,7 @@ RtpsInfo::association_complete(DDS::DomainId_t domainId,
                                const RepoId& participantId,
                                const RepoId& localId, const RepoId& remoteId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->association_complete(localId,
-                                                               remoteId);
+  get_part(domainId, participantId)->association_complete(localId, remoteId);
 }
 
 void
@@ -336,8 +321,7 @@ RtpsInfo::disassociate_participant(DDS::DomainId_t domainId,
                                    const RepoId& localId,
                                    const RepoId& remoteId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][localId]->disassociate_participant(remoteId);
+  get_part(domainId, localId)->disassociate_participant(remoteId);
 }
 
 void
@@ -346,9 +330,8 @@ RtpsInfo::disassociate_subscription(DDS::DomainId_t domainId,
                                     const RepoId& localId,
                                     const RepoId& remoteId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->disassociate_subscription(localId,
-                                                                    remoteId);
+  get_part(domainId, participantId)->disassociate_subscription(localId,
+                                                               remoteId);
 }
 
 void
@@ -357,11 +340,18 @@ RtpsInfo::disassociate_publication(DDS::DomainId_t domainId,
                                    const RepoId& localId,
                                    const RepoId& remoteId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  participants_[domainId][participantId]->disassociate_publication(localId,
-                                                                   remoteId);
+  get_part(domainId, participantId)->disassociate_publication(localId,
+                                                              remoteId);
 }
 
+
+DCPS::RcHandle<Spdp>
+RtpsInfo::get_part(const DDS::DomainId_t domain_id,
+                   const DCPS::RepoId& part_id)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::RcHandle<Spdp>());
+  return participants_[domain_id][part_id];
+}
 
 }
 }

@@ -212,6 +212,10 @@ private:
   std::map<DDS::DomainId_t, std::map<std::string, Sedp::TopicDetails> > topics_;
   std::map<DDS::DomainId_t, std::map<std::string, unsigned int> > topic_use_;
 
+  // Retrieve (while locked) the Spdp representing the participant
+  DCPS::RcHandle<Spdp> get_part(const DDS::DomainId_t domain_id, 
+                                const DCPS::RepoId& part_id);
+
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;
   ACE_Thread_Mutex lock_;
