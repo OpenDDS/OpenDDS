@@ -649,8 +649,8 @@ Sedp::remove_publication(const RepoId& publicationId)
     if (DDS::RETCODE_OK == 
           publications_writer_.write_unregister_dispose(publicationId))
     {
-      local_publications_.erase(publicationId);
       std::string topic_name = topic_names_[iter->second.topic_id_];
+      local_publications_.erase(publicationId);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
       if (top_it != topics_.end()) {
@@ -735,9 +735,9 @@ Sedp::remove_subscription(const RepoId& subscriptionId)
   LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
   if (iter != local_subscriptions_.end()) {
     if (DDS::RETCODE_OK == 
-          publications_writer_.write_unregister_dispose(subscriptionId)) {
-      local_subscriptions_.erase(subscriptionId);
+          subscriptions_writer_.write_unregister_dispose(subscriptionId)) {
       std::string topic_name = topic_names_[iter->second.topic_id_];
+      local_subscriptions_.erase(subscriptionId);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
       if (top_it != topics_.end()) {
