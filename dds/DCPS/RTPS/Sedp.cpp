@@ -148,10 +148,17 @@ Sedp::ignore(const RepoId& to_ignore)
     const DiscoveredPublicationIter iter =
       discovered_publications_.find(to_ignore);
     if (iter != discovered_publications_.end()) {
-      //TODO: break associations
+      // clean up tracking info
       topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
       discovered_publications_.erase(iter);
+      // break associations 
+      std::string topic_name = get_topic_name(iter->second);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        match_endpoints(to_ignore, top_it->second, true /*remove*/);
+      }
       return;
     }
   }
@@ -159,10 +166,17 @@ Sedp::ignore(const RepoId& to_ignore)
     const DiscoveredSubscriptionIter iter =
       discovered_subscriptions_.find(to_ignore);
     if (iter != discovered_subscriptions_.end()) {
-      //TODO: break associations
+      // clean up tracking info
       topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
       discovered_subscriptions_.erase(iter);
+      // break associations 
+      std::string topic_name = get_topic_name(iter->second);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        match_endpoints(to_ignore, top_it->second, true /*remove*/);
+      }
       return;
     }
   }
@@ -171,8 +185,16 @@ Sedp::ignore(const RepoId& to_ignore)
       iter = topic_names_.find(to_ignore);
     if (iter != topic_names_.end()) {
       ignored_topics_.insert(iter->second);
-      //TODO: if we know of any publication(s) and/or subscription(s) on this
-      //      topic remove them and break any associations.
+      // Remove all publications and subscriptions on this topic
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(iter->second);
+      if (top_it != topics_.end()) {
+        TopicDetailsEx& td = top_it->second;
+        RepoIdSet::iterator ep;
+        for (ep = td.endpoints_.begin(); ep!= td.endpoints_.end(); ++ep) {
+          match_endpoints(*ep, td, true /*remove*/);
+        }
+      }
     }
   }
 }

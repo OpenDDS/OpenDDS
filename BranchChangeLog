@@ -1,3 +1,9 @@
+Wed Jan 11 19:55:07 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Rerun match of endpoints for removal when ignoring discovered pub/sub.
+          
 Wed Jan 11 19:25:36 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
