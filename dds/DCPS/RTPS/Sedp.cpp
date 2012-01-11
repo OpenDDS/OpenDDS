@@ -562,6 +562,17 @@ Sedp::remove_topic(const RepoId& topicId, std::string& name)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   name = topic_names_[topicId];
+  // Remove all publications and subscriptions on this topic
+  std::map<std::string, TopicDetailsEx>::iterator top_it =
+      topics_.find(name);
+  if (top_it != topics_.end()) {
+    TopicDetailsEx& td = top_it->second;
+    RepoIdSet::iterator ep;
+    for (ep = td.endpoints_.begin(); ep!= td.endpoints_.end(); ++ep) {
+      match_endpoints(*ep, td, true /*remove*/);
+    }
+  }
+
   topics_.erase(name);
   topic_names_.erase(topicId);
   return DCPS::REMOVED;
