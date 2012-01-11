@@ -1,3 +1,16 @@
+Wed Jan 11 19:00:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Keep track of currently-matched endpoints in local publications and
+          subscriptions.  Provide a method for unmatching when some publication
+          or subscription is going away.  Ability to unmatch when QoS changes.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          Update default passive_connect_duration_.
+
 Wed Jan 11 18:52:58 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.cpp:

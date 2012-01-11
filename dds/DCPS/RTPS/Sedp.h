@@ -236,9 +236,12 @@ private:
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 
+  typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
+
   struct LocalEndpoint {
     DCPS::RepoId topic_id_;
     DCPS::TransportLocatorSeq trans_info_;
+    RepoIdSet matched_endpoints_;
   };
 
   struct LocalPublication : LocalEndpoint {
@@ -328,7 +331,6 @@ private:
   bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
                   const DDS::SubscriptionBuiltinTopicData& src);
 
-  typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
   RepoIdSet ignored_guids_;
   std::set<std::string> ignored_topics_;
 
@@ -343,10 +345,11 @@ private:
   bool has_dcps_key(const DCPS::RepoId& topicId) const;
   DCPS::RepoId make_topic_guid();
 
-  void match_endpoints(const DCPS::RepoId& repoId, const TopicDetailsEx& td);
-  void match(const DCPS::RepoId& writer,
-             const DCPS::RepoId& reader,
-             const TopicDetailsEx& td);
+  void match_endpoints(DCPS::RepoId repoId, const TopicDetailsEx& td,
+                       bool remove = false);
+  void match(const DCPS::RepoId& writer, const DCPS::RepoId& reader);
+  void remove_assoc(const DCPS::RepoId& remove_from,
+                    const DCPS::RepoId& removing);
 
   static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
                               const EntityId_t& entity);

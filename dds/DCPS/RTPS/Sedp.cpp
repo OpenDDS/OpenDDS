@@ -69,7 +69,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
 }
 
 RepoId
-Sedp::make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
+Sedp::make_id(const RepoId& participant_id, const EntityId_t& entity)
 {
   RepoId id = participant_id;
   id.entityId = entity;
@@ -140,7 +140,7 @@ Sedp::multicast_group() const
 }
 
 void
-Sedp::ignore(const DCPS::RepoId& to_ignore)
+Sedp::ignore(const RepoId& to_ignore)
 {
   // Locked prior to call from Spdp.
   ignored_guids_.insert(to_ignore);
@@ -433,7 +433,7 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
                        std::string& name)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator iter =
+  std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator iter =
     topic_names_.find(topicId);
   if (iter != topic_names_.end()) {
     name = iter->second;
@@ -446,7 +446,7 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
 bool
 Sedp::has_dcps_key(const RepoId& topicId) const
 {
-  typedef std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> TNMap;
+  typedef std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan> TNMap;
   TNMap::const_iterator tn = topic_names_.find(topicId);
   if (tn == topic_names_.end()) return false;
 
@@ -736,7 +736,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
-        match_endpoints(guid, top_it->second);
+        match_endpoints(guid, top_it->second, true /*remove*/);
       }
       remove_from_bit(iter->second);
       discovered_publications_.erase(iter);
@@ -841,7 +841,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
           topics_.find(topic_name);
       if (top_it == topics_.end()) {
         top_it->second.endpoints_.erase(guid);
-        match_endpoints(guid, top_it->second);
+        match_endpoints(guid, top_it->second, true /*remove*/);
       }
       remove_from_bit(iter->second);
       discovered_subscriptions_.erase(iter);
@@ -949,7 +949,8 @@ Sedp::qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
 }
 
 void
-Sedp::match_endpoints(const DCPS::RepoId& repoId, const TopicDetailsEx& td)
+Sedp::match_endpoints(RepoId repoId, const TopicDetailsEx& td,
+                      bool remove)
 {
   const bool reader = repoId.entityId.entityKind & 4;
   // Copy the endpoint set - lock can be released in match()
@@ -959,14 +960,17 @@ Sedp::match_endpoints(const DCPS::RepoId& repoId, const TopicDetailsEx& td)
        iter != endpoints_copy.end(); ++iter) {
     // check to make sure it's a Reader/Writer or Writer/Reader match
     if (bool(iter->entityId.entityKind & 4) != reader) {
-      match(reader ? *iter : repoId, reader ? repoId : *iter, td);
+      if (remove) {
+        remove_assoc(*iter, repoId);
+      } else {
+        match(reader ? *iter : repoId, reader ? repoId : *iter);
+      }
     }
   }
 }
 
 void
-Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
-            const TopicDetailsEx& td) //TODO: do we need td here?
+Sedp::match(const RepoId& writer, const RepoId& reader)
 {
   // 0. For discovered endpoints, we'll have the QoS info in the form of the
   // publication or subscription BIT data which doesn't use the same structures
@@ -985,17 +989,17 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
 
   const LocalPublicationIter lpi = local_publications_.find(writer);
   DiscoveredPublicationIter dpi;
-  bool writer_local = false;
+  bool writer_local = false, already_matched = false;
   if (lpi != local_publications_.end()) {
     writer_local = true;
     dwQos = &lpi->second.qos_;
     pubQos = &lpi->second.publisher_qos_;
     wTls = &lpi->second.trans_info_;
+    already_matched = lpi->second.matched_endpoints_.count(reader);
   } else if ((dpi = discovered_publications_.find(writer))
              != discovered_publications_.end()) {
     wTls = &dpi->second.writer_data_.writerProxy.allLocators;
   } else {
-    //TODO: error?
     return; // Possible and ok, since lock is released
   }
 
@@ -1018,6 +1022,9 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
       tempCfp.expressionParameters = lsi->second.params_;
     }
     cfProp = &tempCfp;
+    if (!already_matched) {
+      already_matched = lsi->second.matched_endpoints_.count(writer);
+    }
   } else if ((dsi = discovered_subscriptions_.find(reader))
              != discovered_subscriptions_.end()) {
     if (!writer_local) {
@@ -1050,7 +1057,6 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     subQos = &tempSubQos;
     cfProp = &dsi->second.reader_data_.contentFilterProperty;
   } else {
-    //TODO: error?
     return; // Possible and ok, since lock is released
   }
 
@@ -1087,8 +1093,10 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
   }
 
   // Need to release lock, below, for callbacks into DCPS which could
-  // call into Spdp/Sedp.
-  ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
+  // call into Spdp/Sedp.  Note that this doesn't unlock, it just constructs
+  // an ACE object which will be used below for unlocking.
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+
   // 3. check transport and QoS compatibility
   
   // Copy entries from local publication and local subscription maps 
@@ -1102,33 +1110,64 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     drr = DCPS::DataReaderRemote::_duplicate(lsi->second.subscription_);
   }
 
-  DCPS::IncompatibleQosStatus 
+  DCPS::IncompatibleQosStatus
     writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()},
     readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
 
   if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                           dwQos, drQos, pubQos, subQos)) {
+    bool call_writer = false, call_reader = false;
+    if (writer_local) {
+      call_writer = lpi->second.matched_endpoints_.insert(reader).second;
+    }
+    if (reader_local) {
+      call_reader = lsi->second.matched_endpoints_.insert(writer).second;
+    }
+    if (!call_writer && !call_reader) {
+      return; // nothing more to do
+    }
     // Copy reader and writer association data prior to releasing lock
     const DCPS::ReaderAssociation ra =
         {*rTls, reader, *subQos, *drQos,
          cfProp->filterExpression, cfProp->expressionParameters};
     const DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
 
-    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
     static const bool writer_active = true;
 
-    if (writer_local) {
+    if (call_writer) {
       dwr->add_association(writer, ra, writer_active);
     }
-    if (reader_local) {
+    if (call_reader) {
       drr->add_association(reader, wa, !writer_active);
     }
 
     //TODO: For cases where the reader is not local to this participant,
     //      this callback is effectively lying to DCPS in telling it that
     //      the association is complete.  It may not be done handshaking yet.
-    if (writer_local) { // change this if 'writer_active' (above) changes
+    if (call_writer) { // change this if 'writer_active' (above) changes
       dwr->association_complete(reader);
+    }
+
+  } else if (already_matched) { // break an existing associtaion
+    if (writer_local) {
+      lpi->second.matched_endpoints_.erase(reader);
+    }
+    if (reader_local) {
+      lsi->second.matched_endpoints_.erase(writer);
+    }
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+    if (writer_local) {
+      DCPS::ReaderIdSeq reader_seq(1);
+      reader_seq.length(1);
+      reader_seq[0] = reader;
+      dwr->remove_associations(reader_seq, false /*notify_lost*/);
+    }
+    if (reader_local) {
+      DCPS::WriterIdSeq writer_seq(1);
+      writer_seq.length(1);
+      writer_seq[0] = writer;
+      drr->remove_associations(writer_seq, false /*notify_lost*/);
     }
 
   } else { // something was incompatible
@@ -1138,6 +1177,35 @@ Sedp::match(const DCPS::RepoId& writer, const DCPS::RepoId& reader,
     }
     if (reader_local && readerStatus.count_since_last_send) {
       drr->update_incompatible_qos(readerStatus);
+    }
+  }
+}
+
+void
+Sedp::remove_assoc(const RepoId& remove_from,
+                   const RepoId& removing)
+{
+  const bool reader = remove_from.entityId.entityKind & 4;
+  if (reader) {
+    const LocalSubscriptionIter lsi = local_subscriptions_.find(remove_from);
+    if (lsi != local_subscriptions_.end()) {
+      lsi->second.matched_endpoints_.erase(removing);
+      DCPS::WriterIdSeq writer_seq(1);
+      writer_seq.length(1);
+      writer_seq[0] = removing;
+      lsi->second.subscription_->remove_associations(writer_seq,
+                                                     false /*notify_lost*/);
+    }
+
+  } else {
+    const LocalPublicationIter lpi = local_publications_.find(remove_from);
+    if (lpi != local_publications_.end()) {
+      lpi->second.matched_endpoints_.erase(removing);
+      DCPS::ReaderIdSeq reader_seq(1);
+      reader_seq.length(1);
+      reader_seq[0] = removing;
+      lpi->second.publication_->remove_associations(reader_seq,
+                                                    false /*notify_lost*/);
     }
   }
 }
@@ -1271,7 +1339,7 @@ Sedp::Writer::write_sample(const ParameterList& plist, bool is_retransmission)
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_unregister_dispose(const DCPS::RepoId& rid)
+Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 {
   // Build param list for message
   Parameter param;
@@ -1503,7 +1571,7 @@ Sedp::write_durable_subscription_data()
 
 DDS::ReturnCode_t
 Sedp::write_publication_data(
-    const DCPS::RepoId& rid, 
+    const RepoId& rid, 
     const LocalPublication& lp,
     bool is_retransmission)
 {
@@ -1527,7 +1595,7 @@ Sedp::write_publication_data(
 
 DDS::ReturnCode_t
 Sedp::write_subscription_data(
-    const DCPS::RepoId& rid, 
+    const RepoId& rid, 
     const LocalSubscription& ls,
     bool is_retransmission)
 {

@@ -107,7 +107,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(default_config->instances_[2] == inst);   // mytcp
   TEST_CHECK(default_config->instances_[9]->name() == std::string("tcp7"));
   TEST_CHECK(default_config->swap_bytes_ == false);
-  TEST_CHECK(default_config->passive_connect_duration_ == 10000);
+  TEST_CHECK(default_config->passive_connect_duration_ == 60000);
 
   TransportConfig_rch global_config =
     TransportRegistry::instance()->global_config();
