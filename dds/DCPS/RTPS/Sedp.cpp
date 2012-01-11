@@ -522,6 +522,13 @@ Sedp::update_publication_qos(const RepoId& publicationId,
     {
       return false;
     }
+    // Match/unmatch with subscriptions
+    std::string topic_name = topic_names_[pb.topic_id_];
+    std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+    if (top_it != topics_.end()) {
+      match_endpoints(publicationId, top_it->second);
+    }
     return true;
   }
   return false;
@@ -597,7 +604,13 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
     {
       return false;
     }
-
+    // Match/unmatch with subscriptions
+    std::string topic_name = topic_names_[sb.topic_id_];
+    std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+    if (top_it != topics_.end()) {
+      match_endpoints(subscriptionId, top_it->second);
+    }
     return true;
   }
   return false;
