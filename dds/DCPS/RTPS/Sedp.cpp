@@ -500,6 +500,12 @@ Sedp::remove_publication(const RepoId& publicationId)
           publications_writer_.write_unregister_dispose(publicationId))
     {
       local_publications_.erase(publicationId);
+      std::string topic_name = topic_names_[iter->second.topic_id_];
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+            topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        match_endpoints(publicationId, top_it->second, true /*remove*/);
+      }
     } else {
       ACE_DEBUG((LM_ERROR, "Failed to publish dispose msg\n"));
     }
@@ -582,6 +588,12 @@ Sedp::remove_subscription(const RepoId& subscriptionId)
     if (DDS::RETCODE_OK == 
           publications_writer_.write_unregister_dispose(subscriptionId)) {
       local_subscriptions_.erase(subscriptionId);
+      std::string topic_name = topic_names_[iter->second.topic_id_];
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+            topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        match_endpoints(subscriptionId, top_it->second, true /*remove*/);
+      }
     } else {
       ACE_DEBUG((LM_ERROR, "Failed to publish dispose msg\n"));
     }
