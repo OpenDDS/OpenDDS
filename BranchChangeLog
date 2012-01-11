@@ -1,9 +1,22 @@
+Wed Jan 11 20:00:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Move qosChanged() to anonymous-namespace instead of being members of
+          the class.  Added paramsChanged() which is similar but works with the
+          content filtering parameters.
+          In cases where content filtering parameters change, invoke the
+          needed callbacks on DataWriterRemote.
+          Explicity check for dispose/unregister message types instead of
+          assuming that the non-SAMPLE_DATA ones are dispose/unregister.
+
 Wed Jan 11 19:55:07 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
 
           Rerun match of endpoints for removal when ignoring discovered pub/sub.
-          
+
 Wed Jan 11 19:25:36 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

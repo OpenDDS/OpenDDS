@@ -326,11 +326,6 @@ private:
     return sub.reader_data_.ddsSubscriptionData.topic_name;
   }
 
-  bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
-                  const DDS::PublicationBuiltinTopicData& src);
-  bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
-                  const DDS::SubscriptionBuiltinTopicData& src);
-
   RepoIdSet ignored_guids_;
   std::set<std::string> ignored_topics_;
 

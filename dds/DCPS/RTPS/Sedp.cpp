@@ -36,6 +36,123 @@
 #include <cstring>
 #include <ace/Reverse_Lock_T.h>
 
+namespace {
+bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
+                const DDS::PublicationBuiltinTopicData& src)
+{
+  using OpenDDS::DCPS::operator!=;
+  bool changed = false;
+
+  // check each Changeable QoS policy value in Publication BIT Data
+
+  if (dest.deadline != src.deadline) {
+    changed = true;
+    dest.deadline = src.deadline;
+  }
+
+  if (dest.latency_budget != src.latency_budget) {
+    changed = true;
+    dest.latency_budget = src.latency_budget;
+  }
+
+  if (dest.lifespan != src.lifespan) {
+    changed = true;
+    dest.lifespan = src.lifespan;
+  }
+
+  if (dest.user_data != src.user_data) {
+    changed = true;
+    dest.user_data = src.user_data;
+  }
+
+  if (dest.ownership_strength != src.ownership_strength) {
+    changed = true;
+    dest.ownership_strength = src.ownership_strength;
+  }
+
+  if (dest.partition != src.partition) {
+    changed = true;
+    dest.partition = src.partition;
+  }
+
+  if (dest.topic_data != src.topic_data) {
+    changed = true;
+    dest.topic_data = src.topic_data;
+  }
+
+  if (dest.group_data != src.group_data) {
+    changed = true;
+    dest.group_data = src.group_data;
+  }
+
+  return changed;
+}
+
+bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
+                const DDS::SubscriptionBuiltinTopicData& src)
+{
+  using OpenDDS::DCPS::operator!=;
+  bool changed = false;
+
+  // check each Changeable QoS policy value in Subcription BIT Data
+
+  if (dest.deadline != src.deadline) {
+    changed = true;
+    dest.deadline = src.deadline;
+  }
+
+  if (dest.latency_budget != src.latency_budget) {
+    changed = true;
+    dest.latency_budget = src.latency_budget;
+  }
+
+  if (dest.user_data != src.user_data) {
+    changed = true;
+    dest.user_data = src.user_data;
+  }
+
+  if (dest.time_based_filter != src.time_based_filter) {
+    changed = true;
+    dest.time_based_filter = src.time_based_filter;
+  }
+
+  if (dest.partition != src.partition) {
+    changed = true;
+    dest.partition = src.partition;
+  }
+
+  if (dest.topic_data != src.topic_data) {
+    changed = true;
+    dest.topic_data = src.topic_data;
+  }
+
+  if (dest.group_data != src.group_data) {
+    changed = true;
+    dest.group_data = src.group_data;
+  }
+
+  return changed;
+}
+
+bool paramsChanged(OpenDDS::RTPS::ContentFilterProperty_t& dest,
+                   const OpenDDS::RTPS::ContentFilterProperty_t& src)
+{
+  if (dest.expressionParameters.length() != src.expressionParameters.length()) {
+    dest.expressionParameters = src.expressionParameters;
+    return true;
+  }
+  for (CORBA::ULong i = 0; i < src.expressionParameters.length(); ++i) {
+    if (0 != std::strcmp(dest.expressionParameters[i].in(),
+                         src.expressionParameters[i].in())) {
+      dest.expressionParameters = src.expressionParameters;
+      return true;
+    }
+  }
+  return false;
+}
+
+}
+
 namespace OpenDDS {
 namespace DCPS {
   typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
@@ -546,8 +663,7 @@ Sedp::update_publication_qos(const RepoId& publicationId,
     pb.qos_ = qos;
     pb.publisher_qos_ = publisherQos;
 
-    if (DDS::RETCODE_OK != write_publication_data(publicationId, pb))
-    {
+    if (DDS::RETCODE_OK != write_publication_data(publicationId, pb)) {
       return false;
     }
     // Match/unmatch with subscriptions
@@ -634,8 +750,7 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
     sb.qos_ = qos;
     sb.subscriber_qos_ = subscriberQos;
 
-    if (DDS::RETCODE_OK != write_subscription_data(subscriptionId, sb))
-    {
+    if (DDS::RETCODE_OK != write_subscription_data(subscriptionId, sb)) {
       return false;
     }
     // Match/unmatch with subscriptions
@@ -655,13 +770,22 @@ Sedp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  LocalSubscriptionIter iter = local_subscriptions_.find(subId);
+  const LocalSubscriptionIter iter = local_subscriptions_.find(subId);
   if (iter != local_subscriptions_.end()) {
     LocalSubscription& sb = iter->second;
     sb.params_ = params;
-    if (DDS::RETCODE_OK != write_subscription_data(subId, sb))
-    {
+
+    if (DDS::RETCODE_OK != write_subscription_data(subId, sb)) {
       return false;
+    }
+
+    // Let any associated local publications know about the change
+    for (RepoIdSet::iterator i = iter->second.matched_endpoints_.begin();
+         i != iter->second.matched_endpoints_.end(); ++i) {
+      const LocalPublicationIter lpi = local_publications_.find(*i);
+      if (lpi != local_publications_.end()) {
+        lpi->second.publication_->update_subscription_params(subId, params);
+      }
     }
 
     return true;
@@ -702,7 +826,6 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
     return;
   }
 
-
   std::string topic_name;
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
@@ -710,10 +833,9 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
   if (message_id == DCPS::SAMPLE_DATA) {
     DiscoveredWriterData wdata_copy;
 
-    if (iter == discovered_publications_.end()) 
-    { // add new
+    if (iter == discovered_publications_.end()) { // add new
       // Must unlock when calling into pub_bit() as it may call back into us
-      ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
       { // Reduce scope of pub and td
         DiscoveredPublication& pub =
@@ -775,7 +897,10 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         match_endpoints(guid, top_it->second);
       }
     }
-  } else { // this is some combination of dispose and/or unregister
+
+  } else if (message_id == DCPS::UNREGISTER_INSTANCE ||
+             message_id == DCPS::DISPOSE_INSTANCE ||
+             message_id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
     if (iter != discovered_publications_.end()) {
       // Unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
@@ -811,13 +936,12 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
   DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
   // Must unlock when calling into sub_bit() as it may call back into us
-  ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
   if (message_id == DCPS::SAMPLE_DATA) {
     DiscoveredReaderData rdata_copy;
 
-    if (iter == discovered_subscriptions_.end()) 
-    { // add new
+    if (iter == discovered_subscriptions_.end()) { // add new
       { // Reduce scope of sub and td
         DiscoveredSubscription& sub =
           discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
@@ -864,7 +988,6 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         }
       }
 
-
     } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                           rdata.ddsSubscriptionData)) { // update existing
       sub_bit()->store_synthetic_data(
@@ -875,12 +998,31 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       topic_name = get_topic_name(iter->second);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
-      if (top_it == topics_.end()) {
+      if (top_it != topics_.end()) {
         match_endpoints(guid, top_it->second);
+      }
+
+    } else if (paramsChanged(iter->second.reader_data_.contentFilterProperty,
+                             rdata.contentFilterProperty)) {
+      // Let any associated local publications know about the change
+      topic_name = get_topic_name(iter->second);
+      std::map<std::string, TopicDetailsEx>::iterator top_it =
+          topics_.find(topic_name);
+      const RepoIdSet& assoc =
+        (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints_;
+      for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
+        if (i->entityId.entityKind & 4) continue; // subscription
+        const LocalPublicationIter lpi = local_publications_.find(*i);
+        if (lpi != local_publications_.end()) {
+          lpi->second.publication_->update_subscription_params(guid,
+            rdata.contentFilterProperty.expressionParameters);
+        }
       }
     }
 
-  } else { // this is some combination of dispose and/or unregister
+  } else if (message_id == DCPS::UNREGISTER_INSTANCE ||
+             message_id == DCPS::DISPOSE_INSTANCE ||
+             message_id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
     if (iter != discovered_subscriptions_.end()) {
       // Unmatch local publication(s)
       topic_name = get_topic_name(iter->second);
@@ -894,105 +1036,6 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       discovered_subscriptions_.erase(iter);
     }
   }
-}
-
-bool
-Sedp::qosChanged(DDS::PublicationBuiltinTopicData& dest,
-                 const DDS::PublicationBuiltinTopicData& src)
-{
-  using OpenDDS::DCPS::operator!=;
-  bool changed = false;
-
-  // check each Changeable QoS policy value in Publication BIT Data
-
-  if (dest.deadline != src.deadline) {
-    changed = true;
-    dest.deadline = src.deadline;
-  }
-
-  if (dest.latency_budget != src.latency_budget) {
-    changed = true;
-    dest.latency_budget = src.latency_budget;
-  }
-
-  if (dest.lifespan != src.lifespan) {
-    changed = true;
-    dest.lifespan = src.lifespan;
-  }
-
-  if (dest.user_data != src.user_data) {
-    changed = true;
-    dest.user_data = src.user_data;
-  }
-
-  if (dest.ownership_strength != src.ownership_strength) {
-    changed = true;
-    dest.ownership_strength = src.ownership_strength;
-  }
-
-  if (dest.partition != src.partition) {
-    changed = true;
-    dest.partition = src.partition;
-  }
-
-  if (dest.topic_data != src.topic_data) {
-    changed = true;
-    dest.topic_data = src.topic_data;
-  }
-
-  if (dest.group_data != src.group_data) {
-    changed = true;
-    dest.group_data = src.group_data;
-  }
-
-  return changed;
-}
-
-bool
-Sedp::qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
-                 const DDS::SubscriptionBuiltinTopicData& src)
-{
-  using OpenDDS::DCPS::operator!=;
-  bool changed = false;
-
-  // check each Changeable QoS policy value in Subcription BIT Data
-
-  if (dest.deadline != src.deadline) {
-    changed = true;
-    dest.deadline = src.deadline;
-  }
-
-  if (dest.latency_budget != src.latency_budget) {
-    changed = true;
-    dest.latency_budget = src.latency_budget;
-  }
-
-  if (dest.user_data != src.user_data) {
-    changed = true;
-    dest.user_data = src.user_data;
-  }
-
-  if (dest.time_based_filter != src.time_based_filter) {
-    changed = true;
-    dest.time_based_filter = src.time_based_filter;
-  }
-
-  if (dest.partition != src.partition) {
-    changed = true;
-    dest.partition = src.partition;
-  }
-
-  if (dest.topic_data != src.topic_data) {
-    changed = true;
-    dest.topic_data = src.topic_data;
-  }
-
-  if (dest.group_data != src.group_data) {
-    changed = true;
-    dest.group_data = src.group_data;
-  }
-
-  return changed;
 }
 
 void
