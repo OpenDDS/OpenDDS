@@ -1,8 +1,8 @@
-Wed Jan 11 18:50:06 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+Wed Jan 11 18:52:58 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.cpp:
 
-          Revert last change, release lock prior to actions destructive to 
+          Revert last change, release lock prior to actions destructive to
             SpdpTransport.
 
 Wed Jan 11 18:01:51 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>

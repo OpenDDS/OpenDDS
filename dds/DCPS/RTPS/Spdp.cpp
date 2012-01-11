@@ -88,15 +88,21 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
 
 Spdp::~Spdp()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  for (DiscoveredParticipantIter part = participants_.begin();
-       part != participants_.end();) {
-    remove_discovered_participant(part++);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    for (DiscoveredParticipantIter part = participants_.begin();
+         part != participants_.end();) {
+      remove_discovered_participant(part++);
+    }
+    tport_->close();
   }
-  tport_->close();
+  // release lock for reset of event handler, which may delete transport
   eh_.reset();
-  while (!eh_shutdown_) {
-    shutdown_cond_.wait();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    while (!eh_shutdown_) {
+      shutdown_cond_.wait();
+    }
   }
 }
 
@@ -384,7 +390,8 @@ Spdp::SpdpTransport::~SpdpTransport()
 {
   dispose_unregister();
   {
-    // Lock should be held prior to destructive action
+    // Acquire lock for modification of condition variable
+    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
     outer_->eh_shutdown_ = true;
   }
   outer_->shutdown_cond_.signal();
