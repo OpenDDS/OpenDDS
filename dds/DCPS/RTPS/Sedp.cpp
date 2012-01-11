@@ -1042,7 +1042,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       topic_name = get_topic_name(iter->second);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
-      if (top_it == topics_.end()) {
+      if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
         match_endpoints(guid, top_it->second, true /*remove*/);
       }
@@ -1234,7 +1234,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     const DCPS::ReaderAssociation ra =
         {*rTls, reader, *subQos, *drQos,
          cfProp->filterExpression, cfProp->expressionParameters};
-    const DCPS::WriterAssociation wa = {*rTls, writer, *pubQos, *dwQos};
+    const DCPS::WriterAssociation wa = {*wTls, writer, *pubQos, *dwQos};
 
     ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
     static const bool writer_active = true;

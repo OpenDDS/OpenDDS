@@ -1,3 +1,26 @@
+Wed Jan 11 23:12:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed bugs.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Cleaned up new code for finding the unicast SPDP port.
+
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/rtps_disc.ini:
+        * tests/DCPS/Messenger/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Updated test for RTPS.  Added the rtps_disc_tcp test scenario which
+          uses RTPS Discovery with the default OpenDDS TCP transport for user
+          topics.
+          Check total_count in the subscription matched status.
+          Use consistent logging levels for both processes.
+
 Wed Jan 11 21:53:17 UTC 2012  Jeff Schmitz <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.h:

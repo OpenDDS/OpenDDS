@@ -306,42 +306,16 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   data_.writerSN.high = 0;
   data_.writerSN.low = 0;
 
-  // TODO why not starting at 0???
-  u_short participantId = (hdr_.guidPrefix[10] << 8)
-                         | hdr_.guidPrefix[11];
-
   // Ports are set by the formulas in RTPS v2.1 Table 9.8
   const u_short port_common = outer_->disco_->pb() +
                               (outer_->disco_->dg() * outer_->domain_),
-    //uni_port = port_common + outer_->disco_->d1() +
-               //(outer_->disco_->pg() * participantId),
     mc_port = port_common + outer_->disco_->d0();
 
-  while (!open_unicast_socket(port_common, participantId)) {
-    ++participantId;
-  }
-  // TODO update hdr_ with new participant id???
-
-/*
-  ACE_INET_Addr local_addr;
-  if (0 != local_addr.set(uni_port)) {
-    if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
-        "failed setting unicast local_addr to port %hd %p\n",
-        uni_port, ACE_TEXT("ACE_INET_Addr::set")));
-    }
-    throw std::runtime_error("failed to set unicast local address");
+  for (u_short participantId = (hdr_.guidPrefix[10] << 8) | hdr_.guidPrefix[11];
+       !open_unicast_socket(port_common, participantId); ++participantId) {
+    // empty for-loop body, run until open_unicast_socket() works
   }
 
-  if (0 != unicast_socket_.open(local_addr)) {
-    if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
-        "failed to open unicast socket on port %hd %p\n",
-        uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
-    }
-    throw std::runtime_error("failed to open unicast socket");
-  }
-*/
   const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
   ACE_INET_Addr default_multicast;
   if (0 != default_multicast.set(mc_port, mc_addr)) {
@@ -759,13 +733,13 @@ bool
 Spdp::SpdpTransport::open_unicast_socket(u_short port_common, 
                                          u_short participant_id)
 {
-  u_short  uni_port = port_common + outer_->disco_->d1() +
-               (outer_->disco_->pg() * participant_id);
+  const u_short uni_port = port_common + outer_->disco_->d1() +
+                           (outer_->disco_->pg() * participant_id);
 
   ACE_INET_Addr local_addr;
   if (0 != local_addr.set(uni_port)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - "
         "failed setting unicast local_addr to port %d %p\n",
         uni_port, ACE_TEXT("ACE_INET_Addr::set")));
     }
@@ -774,13 +748,14 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
   if (0 != unicast_socket_.open(local_addr)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
-        "failed to open unicast socket on port %d %p\n",
+      ACE_DEBUG((LM_WARNING, "(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - "
+        "failed to open unicast socket on port %d %p.  "
+        "Trying next participantId...\n",
         uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) Spdp::SpdpTransport::SpdpTransport() - "
+    ACE_DEBUG((LM_INFO, "(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - "
       "opened unicast socket on port %d\n",
       uni_port));
   }
