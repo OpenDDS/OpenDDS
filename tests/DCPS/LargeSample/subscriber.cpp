@@ -156,6 +156,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                 << num_messages_expected << " received)\n";
       ok = false;
     }
+    else {
+      const unsigned int percent = ((num_messages_expected - received) * 100) / num_messages_expected;
+      std::cout << "data loss == " << percent << "% (" << received << "/"
+                << num_messages_expected << " received)\n";
+    }
 
     // Clean-up!
     participant->delete_contained_entities();

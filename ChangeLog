@@ -1,3 +1,14 @@
+Wed Jan 11 14:03:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+
+          Changed to use zero copy.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Added line to always indicate how many messages were received, whether
+          it is passing or failing.
+
 Tue Jan 10 21:53:41 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Crossplatform/Messenger_run_test.pl:
