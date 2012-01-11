@@ -1,3 +1,15 @@
+Wed Jan 11 20:06:14 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Changed to use send_buffer_size and rcv_buffer_size in the configuration
+          to set the send and receive socket buffer size.
+
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+
+          Added send_buffer_size and rcv_buffer_size to configuration.
+
 Wed Jan 11 14:03:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/DataReaderListener.cpp:

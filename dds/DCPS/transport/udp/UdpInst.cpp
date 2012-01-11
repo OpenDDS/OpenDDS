@@ -19,7 +19,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 UdpInst::UdpInst(const std::string& name)
-  : TransportInst("udp", name)
+  : TransportInst("udp", name),
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+    send_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ),
+    rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#else
+    send_buffer_size_(0),
+    rcv_buffer_size_(0)
+#endif
 {
 }
 
@@ -39,6 +46,10 @@ UdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s)
   this->local_address_.set(local_address_s.c_str());
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"), this->rcv_buffer_size_, ACE_UINT32);
 
   return 0;
 }
