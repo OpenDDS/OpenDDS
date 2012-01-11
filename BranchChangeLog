@@ -1,3 +1,10 @@
+Wed Jan 11 21:53:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Both QoS and filter params can change in the same
+          DiscoveredReaderData data sample.
+
 Wed Jan 11 20:55:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

@@ -999,34 +999,37 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         }
       }
 
-    } else if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
-                          rdata.ddsSubscriptionData)) { // update existing
-      sub_bit()->store_synthetic_data(
-            iter->second.reader_data_.ddsSubscriptionData,
-            DDS::NOT_NEW_VIEW_STATE);
+    } else { // update existing
+      if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
+                     rdata.ddsSubscriptionData)) {
+        sub_bit()->store_synthetic_data(
+              iter->second.reader_data_.ddsSubscriptionData,
+              DDS::NOT_NEW_VIEW_STATE);
 
-      // Match/unmatch local publication(s)
-      topic_name = get_topic_name(iter->second);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
-          topics_.find(topic_name);
-      if (top_it != topics_.end()) {
-        match_endpoints(guid, top_it->second);
+        // Match/unmatch local publication(s)
+        topic_name = get_topic_name(iter->second);
+        std::map<std::string, TopicDetailsEx>::iterator top_it =
+            topics_.find(topic_name);
+        if (top_it != topics_.end()) {
+          match_endpoints(guid, top_it->second);
+        }
       }
 
-    } else if (paramsChanged(iter->second.reader_data_.contentFilterProperty,
-                             rdata.contentFilterProperty)) {
-      // Let any associated local publications know about the change
-      topic_name = get_topic_name(iter->second);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
-          topics_.find(topic_name);
-      const RepoIdSet& assoc =
-        (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints_;
-      for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
-        if (i->entityId.entityKind & 4) continue; // subscription
-        const LocalPublicationIter lpi = local_publications_.find(*i);
-        if (lpi != local_publications_.end()) {
-          lpi->second.publication_->update_subscription_params(guid,
-            rdata.contentFilterProperty.expressionParameters);
+      if (paramsChanged(iter->second.reader_data_.contentFilterProperty,
+                        rdata.contentFilterProperty)) {
+        // Let any associated local publications know about the change
+        topic_name = get_topic_name(iter->second);
+        std::map<std::string, TopicDetailsEx>::iterator top_it =
+            topics_.find(topic_name);
+        const RepoIdSet& assoc =
+          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints_;
+        for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
+          if (i->entityId.entityKind & 4) continue; // subscription
+          const LocalPublicationIter lpi = local_publications_.find(*i);
+          if (lpi != local_publications_.end()) {
+            lpi->second.publication_->update_subscription_params(guid,
+              rdata.contentFilterProperty.expressionParameters);
+          }
         }
       }
     }
