@@ -314,7 +314,7 @@ private:
   BitKeyMap pub_key_to_id_, sub_key_to_id_;
 
   template<typename Map>
-  void remove_entities_belonging_to(Map& m, const DCPS::RepoId& participant);
+  void remove_entities_belonging_to(Map& m, DCPS::RepoId participant);
 
   void remove_from_bit(const DiscoveredPublication& pub);
   void remove_from_bit(const DiscoveredSubscription& sub);

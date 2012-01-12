@@ -470,8 +470,12 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
 
 template<typename Map>
 void
-Sedp::remove_entities_belonging_to(Map& m, const RepoId& participant)
+Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
 {
+  participant.entityId.entityKey[0] = 0;
+  participant.entityId.entityKey[1] = 0;
+  participant.entityId.entityKey[2] = 0;
+  participant.entityId.entityKind = 0;
   for (typename Map::iterator i = m.lower_bound(participant);
        i != m.end() && 0 == std::memcmp(i->first.guidPrefix,
                                         participant.guidPrefix,

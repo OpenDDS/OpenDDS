@@ -1,3 +1,10 @@
+Thu Jan 12 17:28:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Initialize the entityId in the GUID that's used for lookup.
+
 Thu Jan 12 17:24:37 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
