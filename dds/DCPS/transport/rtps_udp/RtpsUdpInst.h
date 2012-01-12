@@ -15,6 +15,10 @@
 #include "dds/DCPS/transport/framework/TransportInst.h"
 
 namespace OpenDDS {
+namespace RTPS {
+  class Sedp;
+}
+  
 namespace DCPS {
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
@@ -43,6 +47,10 @@ private:
   explicit RtpsUdpInst(const std::string& name);
 
   RtpsUdpTransport* new_impl(const TransportInst_rch& inst);
+
+  friend class RTPS::Sedp;
+  friend class RtpsUdpTransport;
+  RepoId opendds_discovery_guid_;
 };
 
 } // namespace DCPS

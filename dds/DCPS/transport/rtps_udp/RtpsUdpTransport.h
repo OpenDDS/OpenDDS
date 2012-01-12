@@ -30,6 +30,9 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
 
+  /// For use by RTPS Discovery
+  void make_discovery_datalink(const GuidPrefix_t& local_prefix);
+
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,

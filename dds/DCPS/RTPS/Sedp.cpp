@@ -210,6 +210,7 @@ Sedp::init(const RepoId& guid,
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst = 
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  rtps_inst->opendds_discovery_guid_ = guid;
 
   // Bind to a specific multicast group
   const u_short mc_port = disco.pb() +
@@ -236,7 +237,6 @@ Sedp::init(const RepoId& guid,
   publications_reader_.enable_transport(force_reliability, transport_cfg_);
   subscriptions_writer_.enable_transport(force_reliability, transport_cfg_);
   subscriptions_reader_.enable_transport(force_reliability, transport_cfg_);
-
   return DDS::RETCODE_OK;
 }
 

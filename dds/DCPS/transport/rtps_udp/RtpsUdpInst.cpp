@@ -26,6 +26,7 @@ RtpsUdpInst::RtpsUdpInst(const std::string& name)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
+  , opendds_discovery_guid_(GUID_UNKNOWN)
 {
 }
 

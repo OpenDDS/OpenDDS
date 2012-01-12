@@ -1,3 +1,18 @@
+Thu Jan 12 20:42:55 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Provide a way for discovery to tell the transport about
+          its local GUID so that the DataLink can be created before
+          there are any associations made.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Use the above.
+
 Thu Jan 12 17:28:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

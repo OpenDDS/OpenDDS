@@ -244,6 +244,11 @@ RtpsUdpTransport::configure_i(TransportInst* config)
 
   create_reactor_task();
 
+  if (config_i_->opendds_discovery_guid_ != GUID_UNKNOWN) {
+    RtpsUdpDataLink_rch link =
+      make_datalink(config_i_->opendds_discovery_guid_.guidPrefix);
+  }
+
   return true;
 }
 
