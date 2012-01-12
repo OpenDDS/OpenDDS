@@ -946,6 +946,7 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_GroupDataQosPolicy();
   reader_data.readerProxy.unicastLocatorList.length(0);
   reader_data.readerProxy.multicastLocatorList.length(0);
+  reader_data.readerProxy.expectsInlineQos = false;
   reader_data.contentFilterProperty.contentFilteredTopicName = "";
   reader_data.contentFilterProperty.relatedTopicName = "";
   reader_data.contentFilterProperty.filterClassName = "";

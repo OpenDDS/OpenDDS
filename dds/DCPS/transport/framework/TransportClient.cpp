@@ -29,6 +29,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
+  : repo_id_(GUID_UNKNOWN)
 {
 }
 
