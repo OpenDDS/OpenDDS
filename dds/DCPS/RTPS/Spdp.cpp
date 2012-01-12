@@ -173,14 +173,15 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     // notify Sedp of association
     sedp_.associate(pdata);
 
-    DDS::InstanceHandle_t bit_instance_handle;
     // add a new participant
     participants_[guid] = DiscoveredParticipant(pdata, time);
-    {
-      ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-      bit_instance_handle = 
-          part_bit()->store_synthetic_data(pdata.ddsParticipantData,
-                                           DDS::NEW_VIEW_STATE);
+    DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
+    DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+    if (bit) {
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+      bit_instance_handle =
+        bit->store_synthetic_data(pdata.ddsParticipantData,
+                                  DDS::NEW_VIEW_STATE);
     }
     participants_[guid].bit_ih_ = bit_instance_handle;
     // Iterator is no longer valid
@@ -197,10 +198,11 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         pdata.ddsParticipantData.user_data) {
       iter->second.pdata_.ddsParticipantData.user_data =
         pdata.ddsParticipantData.user_data;
-      {
-        ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        part_bit()->store_synthetic_data(pdata.ddsParticipantData,
-                                         DDS::NOT_NEW_VIEW_STATE);
+      DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+      if (bit) {
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+        bit->store_synthetic_data(pdata.ddsParticipantData,
+                                  DDS::NOT_NEW_VIEW_STATE);
       }
       // Perform search again, so iterator becomes valid
       iter = participants_.find(guid);

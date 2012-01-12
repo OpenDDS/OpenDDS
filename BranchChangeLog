@@ -1,3 +1,10 @@
+Thu Jan 12 15:41:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Need check for a valid Participant BIT Data Reader since it can
+          be null during the participant's shutdown.
+
 Thu Jan 12 15:03:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
