@@ -1,3 +1,10 @@
+Thu Jan 12 12:57:54 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Adjusting the transport configuration to allow test to work on
+          all platforms.
+
 Wed Jan 11 20:06:14 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/udp/UdpDataLink.cpp:
