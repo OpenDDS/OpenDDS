@@ -120,6 +120,15 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 }
 
 void
+RtpsUdpDataLink::add_writer(const EntityId_t& entityid)
+{
+  RepoId id;
+  std::memcpy(id.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
+  id.entityId = entityid;
+  writers_[id];
+}
+
+void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,
                              const ACE_INET_Addr& address,
                              bool requires_inline_qos)

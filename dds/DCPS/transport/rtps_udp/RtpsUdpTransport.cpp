@@ -247,6 +247,8 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   if (config_i_->opendds_discovery_guid_ != GUID_UNKNOWN) {
     RtpsUdpDataLink_rch link =
       make_datalink(config_i_->opendds_discovery_guid_.guidPrefix);
+    link->add_writer(ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER);
+    link->add_writer(ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
   }
 
   return true;

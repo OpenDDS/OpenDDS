@@ -1,3 +1,15 @@
+Thu Jan 12 23:16:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidConverter.cpp:
+
+          Added built-in entity kinds for reader and writer.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued enabling reliability for the SEDP endpoints.
+
 Thu Jan 12 20:42:55 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:

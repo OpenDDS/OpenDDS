@@ -83,6 +83,8 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
+  void add_writer(const EntityId_t& entityid);
+
   void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address,
                    bool requires_inline_qos);
 
