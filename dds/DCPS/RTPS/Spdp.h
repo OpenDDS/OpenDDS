@@ -20,6 +20,7 @@
 #include "RtpsMessageTypesC.h"
 #include "Sedp.h"
 
+#include "ace/Atomic_Op.h"
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Mcast.h"
 #include "ace/Condition_Thread_Mutex.h"
@@ -107,6 +108,9 @@ public:
   DCPS::RepoId bit_key_to_repo_id(const char* bit_topic_name,
                                   const DDS::BuiltinTopicKey_t& key);
 
+  // Is Spdp shutting down?
+  bool shutting_down() { return shutdown_flag_.value(); } 
+
 private:
   ACE_Reactor* reactor() const;
 
@@ -152,6 +156,7 @@ private:
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, long> shutdown_flag_; // Spdp shutting down
 
   struct DiscoveredParticipant {
     DiscoveredParticipant() {}

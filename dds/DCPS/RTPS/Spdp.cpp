@@ -57,7 +57,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
   : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), sedp_(guid, *this, lock_)
+  , shutdown_cond_(lock_), shutdown_flag_(0), sedp_(guid, *this, lock_)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   sedp_.ignore(guid);
@@ -88,6 +88,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
 
 Spdp::~Spdp()
 {
+  shutdown_flag_ = 1;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     for (DiscoveredParticipantIter part = participants_.begin();
@@ -129,6 +130,8 @@ Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
 void
 Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 {
+  if (shutdown_flag_.value()) { return; }
+
   const ACE_Time_Value time = ACE_OS::gettimeofday();
   SPDPdiscoveredParticipantData pdata;
   if (ParameterListConverter::from_param_list(plist, pdata) < 0) {

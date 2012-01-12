@@ -829,6 +829,7 @@ Sedp::make_topic_guid()
 void
 Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 {
+  if (spdp_.shutting_down()) { return; }
 
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
   RepoId guid_participant = guid;
@@ -936,6 +937,8 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 void
 Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
 {
+  if (spdp_.shutting_down()) { return; }
+
   const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
