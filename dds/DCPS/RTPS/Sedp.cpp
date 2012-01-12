@@ -630,11 +630,13 @@ Sedp::add_publication(const RepoId& topicId,
   TopicDetailsEx& td = topics_[topic_names_[topicId]];
   td.endpoints_.insert(rid);
 
-  if (DDS::RETCODE_OK != write_publication_data(rid, pb))
-  {
+  if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
     // TODO: should this be removed from the local_publications map?
     return RepoId();
   }
+
+  ACE_DEBUG((LM_DEBUG,
+             "(%P|%t) add_publication() calling match_endpoints\n"));
   match_endpoints(rid, td);
 
   return rid;
@@ -717,11 +719,13 @@ Sedp::add_subscription(const RepoId& topicId,
   TopicDetailsEx& td = topics_[topic_names_[topicId]];
   td.endpoints_.insert(rid);
 
-  if (DDS::RETCODE_OK != write_subscription_data(rid, sb))
-  {
+  if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
     // TODO: should this be removed from the local_subscriptions map?
     return RepoId();
   }
+
+  ACE_DEBUG((LM_DEBUG,
+             "(%P|%t) add_subscription() calling match_endpoints\n"));
   match_endpoints(rid, td);
 
   return rid;
@@ -890,6 +894,8 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
+          ACE_DEBUG((LM_DEBUG,
+                     "(%P|%t) data_received(dwd) calling match_endpoints\n"));
           match_endpoints(guid, top_it->second);
         }
       }
@@ -995,6 +1001,8 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
+          ACE_DEBUG((LM_DEBUG,
+                     "(%P|%t) data_received(drd) calling match_endpoints\n"));
           match_endpoints(guid, top_it->second);
         }
       }

@@ -69,8 +69,8 @@ elsif ($ARGV[0] eq 'rtps_disc') {
     $is_rtps_disc = 1;
 }
 elsif ($ARGV[0] eq 'rtps_disc_tcp') {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini -ORBVerboseLogging 1";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini -ORBVerboseLogging 1";
     $is_rtps_disc = 1;
 }
 elsif ($ARGV[0] eq 'rtps_unicast') {

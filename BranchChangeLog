@@ -1,3 +1,21 @@
+Thu Jan 12 15:03:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added logging, these still need to be made conditional on debug level.
+
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+
+          Updated domain ID to match change to main messenger test.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Added timestamps to logging for rtps_disc_tcp, for use
+          during development.
+
 Wed Jan 11 23:12:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

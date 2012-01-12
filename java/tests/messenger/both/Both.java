@@ -23,7 +23,7 @@ public class Both {
             System.err.println("ERROR: Domain Participant Factory not found");
             return;
         }
-        DomainParticipant dp = dpf.create_participant(411,
+        DomainParticipant dp = dpf.create_participant(4,
             PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         if (dp == null) {
             System.err.println("ERROR: Domain Participant creation failed");
