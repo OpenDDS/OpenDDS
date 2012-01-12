@@ -1,3 +1,13 @@
+Thu Jan 12 17:24:37 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Make use of != operators for Qos policies in Qos_Helper.h
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Remove temporary log messages.  Proper format of one other.
+
 Thu Jan 12 17:17:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

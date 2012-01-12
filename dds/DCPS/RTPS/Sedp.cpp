@@ -659,7 +659,8 @@ Sedp::remove_publication(const RepoId& publicationId)
         match_endpoints(publicationId, top_it->second, true /*remove*/);
       }
     } else {
-      ACE_DEBUG((LM_ERROR, "Failed to publish dispose msg\n"));
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("Sedp::remove_publication() - ")
+                           ACE_TEXT("Failed to publish dispose msg\n")));
     }
   }
 }
@@ -729,7 +730,6 @@ Sedp::add_subscription(const RepoId& topicId,
   match_endpoints(rid, td);
 
   return rid;
-
 }
 
 void
@@ -1693,7 +1693,6 @@ Sedp::write_publication_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   DiscoveredWriterData dwd;
   ParameterList plist;
-  ACE_DEBUG((LM_INFO, "Writing publication data\n"));
   populate_discovered_writer_msg(dwd, rid, lp);
   // Convert to parameter list
   if (ParameterListConverter::to_param_list(dwd, plist)) {
@@ -1717,7 +1716,6 @@ Sedp::write_subscription_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   DiscoveredReaderData drd;
   ParameterList plist;
-  ACE_DEBUG((LM_INFO, "Writing subscription data\n"));
   populate_discovered_reader_msg(drd, rid, ls);
   // Convert to parameter list
   if (ParameterListConverter::to_param_list(drd, plist)) {

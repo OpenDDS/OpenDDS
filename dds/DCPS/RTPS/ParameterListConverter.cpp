@@ -8,10 +8,13 @@
 
 #include "ParameterListConverter.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
 namespace OpenDDS { namespace RTPS {
+
+using DCPS::operator!=;
 
 namespace {
   void add_param(ParameterList& param_list, const Parameter& param) {
@@ -153,88 +156,78 @@ namespace {
   bool not_default(const DDS::UserDataQosPolicy& qos) {
     DDS::UserDataQosPolicy def_qos = 
         TheServiceParticipant->initial_UserDataQosPolicy();
-    return qos.value != def_qos.value;
+    return qos != def_qos;
   }
   bool not_default(const DDS::GroupDataQosPolicy& qos) {
     DDS::GroupDataQosPolicy def_qos = 
         TheServiceParticipant->initial_GroupDataQosPolicy();
-    return qos.value != def_qos.value;
+    return qos != def_qos;
   }
   bool not_default(const DDS::TopicDataQosPolicy& qos) {
     DDS::TopicDataQosPolicy def_qos = 
         TheServiceParticipant->initial_TopicDataQosPolicy();
-    return qos.value != def_qos.value;
+    return qos != def_qos;
   }
   bool not_default(const DDS::DurabilityQosPolicy& qos) {
     DDS::DurabilityQosPolicy def_qos = 
         TheServiceParticipant->initial_DurabilityQosPolicy();
-    return qos.kind != def_qos.kind;
+    return qos != def_qos;
   }
   bool not_default(const DDS::DurabilityServiceQosPolicy& qos) {
     DDS::DurabilityServiceQosPolicy def_qos = 
         TheServiceParticipant->initial_DurabilityServiceQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos != def_qos;
   }
   bool not_default(const DDS::LifespanQosPolicy& qos) {
     DDS::LifespanQosPolicy def_qos = 
         TheServiceParticipant->initial_LifespanQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos != def_qos;
   }
   bool not_default(const DDS::DeadlineQosPolicy& qos) {
     DDS::DeadlineQosPolicy def_qos = 
         TheServiceParticipant->initial_DeadlineQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos != def_qos;
   }
   bool not_default(const DDS::LatencyBudgetQosPolicy& qos) {
     DDS::LatencyBudgetQosPolicy def_qos = 
         TheServiceParticipant->initial_LatencyBudgetQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos != def_qos;
   }
   bool not_default(const DDS::LivelinessQosPolicy& qos) {
     DDS::LivelinessQosPolicy def_qos = 
         TheServiceParticipant->initial_LivelinessQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos != def_qos;
   }
   bool not_default(const DDS::ReliabilityQosPolicy& qos, bool is_datawriter) {
     DDS::ReliabilityQosPolicy def_qos = is_datawriter ? 
         TheServiceParticipant->initial_DataWriterQos().reliability :
         TheServiceParticipant->initial_DataReaderQos().reliability;
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos != def_qos;
   }
   bool not_default(const DDS::OwnershipQosPolicy& qos) {
     DDS::OwnershipQosPolicy def_qos = 
         TheServiceParticipant->initial_OwnershipQosPolicy();
-    return qos.kind != def_qos.kind;
+    return qos != def_qos;
   }
   bool not_default(const DDS::OwnershipStrengthQosPolicy& qos) {
     DDS::OwnershipStrengthQosPolicy def_qos = 
         TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
-    return qos.value != def_qos.value;
+    return qos != def_qos;
   }
   bool not_default(const DDS::DestinationOrderQosPolicy& qos) {
     DDS::DestinationOrderQosPolicy def_qos = 
         TheServiceParticipant->initial_DestinationOrderQosPolicy();
-    return qos.kind != def_qos.kind;
+    return qos != def_qos;
   }
   bool not_default(const DDS::PresentationQosPolicy& qos) {
     DDS::PresentationQosPolicy def_qos = 
         TheServiceParticipant->initial_PresentationQosPolicy();
-    return memcmp(&qos, &def_qos, sizeof(def_qos));
+    return qos != def_qos;
   }
   bool not_default(const DDS::PartitionQosPolicy& qos) {
     DDS::PartitionQosPolicy def_qos = 
         TheServiceParticipant->initial_PartitionQosPolicy();
-    CORBA::ULong length = qos.name.length();
-    if (length != def_qos.name.length()) {
-      return true; // not same as default
-    } else {
-      for (CORBA::ULong i = 0; i < length; ++i) {
-        if (strcmp(qos.name[i], def_qos.name[i])) {
-          return true; // not same as default
-        }
-      }
-      return false; // same as default
-    }
+    return qos != def_qos;
   }
   bool not_default(const ContentFilterProperty_t& cfprop)
   {
