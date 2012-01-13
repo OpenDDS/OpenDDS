@@ -1398,21 +1398,27 @@ Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
 void
 Sedp::Writer::data_delivered(const DCPS::DataSampleListElement*)
 {
+  // list el allocated on stack, will delete sample
 }
 
 void
 Sedp::Writer::data_dropped(const DCPS::DataSampleListElement*, bool)
 {
+  // list el allocated on stack, will delete sample
 }
 
 void
-Sedp::Writer::control_delivered(ACE_Message_Block*)
+Sedp::Writer::control_delivered(ACE_Message_Block* mb)
 {
+  // We allocated mb on stack, its continuation block on heap
+  delete mb->cont();
 }
 
 void
-Sedp::Writer::control_dropped(ACE_Message_Block*, bool)
+Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
 {
+  // We allocated mb on stack, its continuation block on heap
+  delete mb->cont();
 }
 
 DDS::ReturnCode_t
@@ -1454,6 +1460,7 @@ Sedp::Writer::write_sample(const ParameterList& plist, bool is_retransmission)
 
     send(list);
   }
+  delete payload.cont();
   return result;
 }
 

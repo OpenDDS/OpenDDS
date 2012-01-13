@@ -1,3 +1,9 @@
+Fri Jan 13 18:43:53 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Memory leaks in Sedp messaging.
+
 Thu Jan 12 23:16:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GuidConverter.cpp:
