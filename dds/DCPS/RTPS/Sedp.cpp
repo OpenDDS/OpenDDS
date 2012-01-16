@@ -1422,7 +1422,10 @@ Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_sample(const ParameterList& plist, bool is_retransmission)
+Sedp::Writer::write_sample(
+    const ParameterList& plist, 
+    bool is_retransmission, 
+    DCPS::SequenceNumber* sequence_storage)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -1450,6 +1453,11 @@ Sedp::Writer::write_sample(const ParameterList& plist, bool is_retransmission)
     // Send sample
     DCPS::DataSampleListElement list_el(repo_id_, this, 0, &alloc_, 0);
     set_header_fields(list_el.header_, size, is_retransmission);
+    // Sequence now set in header
+    if (sequence_storage) {
+      *sequence_storage = list_el.header_.sequence_;
+    }
+    
 
     DCPS::DataSampleList list;  // Container of list elements
     list.head_ = list.tail_ = &list_el;
@@ -1698,7 +1706,7 @@ Sedp::write_durable_subscription_data()
 DDS::ReturnCode_t
 Sedp::write_publication_data(
     const RepoId& rid, 
-    const LocalPublication& lp,
+    LocalPublication& lp,
     bool is_retransmission)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
@@ -1713,7 +1721,10 @@ Sedp::write_publication_data(
     result = DDS::RETCODE_ERROR;
   }
   if (DDS::RETCODE_OK == result) {
-    result = publications_writer_.write_sample(plist, is_retransmission);
+    result = publications_writer_.write_sample(
+        plist, 
+        is_retransmission,
+        is_retransmission ? NULL : &lp.original_sequence_);
   }
   return result;
 }
@@ -1721,7 +1732,7 @@ Sedp::write_publication_data(
 DDS::ReturnCode_t
 Sedp::write_subscription_data(
     const RepoId& rid, 
-    const LocalSubscription& ls,
+    LocalSubscription& ls,
     bool is_retransmission)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
@@ -1736,7 +1747,10 @@ Sedp::write_subscription_data(
     result = DDS::RETCODE_ERROR;
   }
   if (DDS::RETCODE_OK == result) {
-    result = subscriptions_writer_.write_sample(plist, is_retransmission);
+    result = subscriptions_writer_.write_sample(
+        plist, 
+        is_retransmission,
+        is_retransmission ? NULL : &ls.original_sequence_);
   }
   return result;
 }

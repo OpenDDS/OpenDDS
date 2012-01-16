@@ -187,8 +187,10 @@ private:
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
-    DDS::ReturnCode_t write_sample(const ParameterList& plist,
-                                   bool is_retransmission);
+    DDS::ReturnCode_t write_sample(
+        const ParameterList& plist,
+        bool is_retransmission,
+        DCPS::SequenceNumber* sequence_storage = NULL);
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
   private:
@@ -242,6 +244,7 @@ private:
     DCPS::RepoId topic_id_;
     DCPS::TransportLocatorSeq trans_info_;
     RepoIdSet matched_endpoints_;
+    DCPS::SequenceNumber original_sequence_;
   };
 
   struct LocalPublication : LocalEndpoint {
@@ -355,10 +358,10 @@ private:
   void write_durable_subscription_data();
 
   DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid, 
-                                           const LocalPublication& pub,
+                                           LocalPublication& pub,
                                            bool is_retransmission = false);
   DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid, 
-                                            const LocalSubscription& pub,
+                                            LocalSubscription& pub,
                                             bool is_retransmission = false);
 };
 

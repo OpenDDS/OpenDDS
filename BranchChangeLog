@@ -1,3 +1,16 @@
+Mon Jan 16 19:42:44 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+
+          Add originalSequence_ to DataSampleListElement.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Add original_sequence_ to LocalEndpoint, and set when sending first
+          sample.
+
 Fri Jan 13 18:43:53 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

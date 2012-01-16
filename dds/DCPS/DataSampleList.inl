@@ -18,7 +18,8 @@ DataSampleListElement::DataSampleListElement(
   PublicationInstance*    handle,
   TransportSendElementAllocator* tse_allocator,
   TransportCustomizedElementAllocator* tce_allocator)
-  : sample_(0),
+  : originalSequence_(0),
+    sample_(0),
     publication_id_(publication_id),
     num_subs_(0),
     previous_sample_(0),
