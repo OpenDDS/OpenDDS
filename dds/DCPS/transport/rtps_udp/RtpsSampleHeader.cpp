@@ -317,6 +317,23 @@ RtpsSampleHeader::populate_data_sample_submessages(
     data.smHeader.flags |= FLAG_Q;
   }
 
+  // Add Original writer info
+  if (dsle.header_.historic_sample_) {
+    RTPS::OriginalWriterInfo_t original_writer_info;
+    original_writer_info.originalWriterGUID = dsle.publication_id_;
+    original_writer_info.originalWriterSN.high = 
+          dsle.originalSequence_.getHigh();
+    original_writer_info.originalWriterSN.low  = 
+          dsle.originalSequence_.getLow();
+    // ignore original_writer_info.originalWriterQos;
+
+    Parameter owi_param;
+    owi_param.original_writer_info(original_writer_info);
+    CORBA::ULong len = data.inlineQos.length();
+    data.inlineQos.length(len + 1);
+    data.inlineQos[len] = owi_param;
+  }
+
   subm.length(i + 1);
   subm[i].data_sm(data);
 }
