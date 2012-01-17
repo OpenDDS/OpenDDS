@@ -1,8 +1,19 @@
+Tue Jan 17 18:15:52 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Republish local publications and local subscriptions when topic_data
+            changes.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Change topic_data on writer topic.
+
 Tue Jan 17 15:58:35 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
 
-          Set opendds header historic sample flag when the DataSubmessage 
+          Set opendds header historic sample flag when the DataSubmessage
             contains PID_ORIGINAL_WRITER_INFO.
 
 Mon Jan 16 23:17:19 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>

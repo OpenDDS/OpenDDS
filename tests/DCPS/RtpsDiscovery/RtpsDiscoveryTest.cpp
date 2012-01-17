@@ -286,6 +286,13 @@ bool run_test(const DomainParticipant_var& dp,
     ACE_DEBUG((LM_DEBUG, "ERROR: no valid data from TestMsg data reader\n"));
   }
 
+  Topic_var topic = dw->get_topic();
+  TopicQos topic_qos;
+  topic->get_qos(topic_qos);
+  topic_qos.topic_data.value.length(1);
+  topic_qos.topic_data.value[0] = 7;
+  topic->set_qos(topic_qos);
+  
   return ok;
 }
 

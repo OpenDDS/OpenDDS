@@ -591,7 +591,38 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
     topic_names_.find(topicId);
   if (iter != topic_names_.end()) {
     name = iter->second;
-    topics_[name].qos_ = qos;
+    TopicDetailsEx& topic = topics_[name];
+    using namespace DCPS;
+    // Remember if topic data changed
+    bool topic_data_changed = (qos.topic_data != topic.qos_.topic_data);
+    topic.qos_ = qos;
+
+    // If the topic data QOS changed our local endpoints must be resent
+    // with new QOS
+    if (topic_data_changed) {
+      // For each endpoint associated on this topic
+      for (RepoIdSet::iterator topic_endpoints = topic.endpoints_.begin();
+           topic_endpoints != topic.endpoints_.end();
+           ++topic_endpoints)
+      {
+        RepoId rid = *topic_endpoints;
+        EntityKind kind = GuidConverter(rid).entityKind();
+        if (KIND_WRITER == kind) {
+          // This may be our local publication, verify
+          LocalPublicationIter lp = local_publications_.find(rid);
+          if (lp != local_publications_.end()) {
+            write_publication_data(rid, lp->second);
+          }
+        } else if (KIND_READER == kind) {
+          // This may be our local subscription, verify
+          LocalSubscriptionIter ls = local_subscriptions_.find(rid);
+          if (ls != local_subscriptions_.end()) {
+            write_subscription_data(rid, ls->second);
+          }
+        }
+      }
+    }
+
     return true;
   }
   return false;
