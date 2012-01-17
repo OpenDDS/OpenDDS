@@ -55,6 +55,9 @@ public:
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
   void bit_subscriber(const DDS::Subscriber_var& bit_subscriber);
   DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
+  void get_default_locators(DCPS::RepoId part_id, 
+                            LocatorSeq& target, 
+                            bool& inlineQos);
 
   // Topic
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,

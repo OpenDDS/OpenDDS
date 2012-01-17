@@ -1,3 +1,16 @@
+Tue Jan 17 20:19:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          If no Locators provided for endpoint, use default locators provided
+            by SPDP.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Provide acess to default locators and expectsInlineQos for a
+            participant.
+
 Tue Jan 17 18:15:52 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

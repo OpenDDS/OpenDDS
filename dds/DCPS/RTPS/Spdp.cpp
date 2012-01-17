@@ -767,5 +767,34 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   return true;
 }
 
+void
+Spdp::get_default_locators(
+    DCPS::RepoId part_id, 
+    LocatorSeq& target, 
+    bool& inlineQos)
+{
+  DiscoveredParticipantIter part_iter = participants_.find(part_id);
+  if (part_iter != participants_.end()) {
+    inlineQos = part_iter->second.pdata_.participantProxy.expectsInlineQos;
+    LocatorSeq& mc_source = 
+          part_iter->second.pdata_.participantProxy.defaultMulticastLocatorList;
+    LocatorSeq& uc_source = 
+          part_iter->second.pdata_.participantProxy.defaultUnicastLocatorList;
+    CORBA::ULong mc_source_len = mc_source.length();
+    CORBA::ULong uc_source_len = uc_source.length();
+    CORBA::ULong target_len = target.length();
+    target.length(mc_source_len + uc_source_len + target_len);
+    // Copy multicast
+    for (CORBA::ULong mci = 0; mci < mc_source.length(); ++mci) {
+      target[target_len + mci] = mc_source[mci];
+    }
+    // Copy unicast
+    for (CORBA::ULong uci = 0; uci < uc_source.length(); ++uci) {
+      target[target_len + mc_source_len + uci] = uc_source[uci];
+    }
+
+  }
+}
+
 }
 }

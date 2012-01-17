@@ -1156,7 +1156,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
   // 2. collect details about the reader, which may be local or discovered
   const DDS::DataReaderQos* drQos = 0;
   const DDS::SubscriberQos* subQos = 0;
-  const DCPS::TransportLocatorSeq* rTls = 0;
+  DCPS::TransportLocatorSeq* rTls = 0;
   const ContentFilterProperty_t* cfProp = 0;
 
   const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
@@ -1182,6 +1182,42 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       return;
     }
     rTls = &dsi->second.reader_data_.readerProxy.allLocators;
+    // if no locators provided, add the default
+    if (!rTls->length()) {
+      {
+        LocatorSeq locs;
+        bool expectsInlineQos = false;
+        spdp_.get_default_locators(participant_id_, locs, expectsInlineQos); 
+
+        if (locs.length()) {
+          size_t size = 0, padding = 0;
+          DCPS::gen_find_size(locs, size, padding);
+
+          // Ad space for boolean
+          ACE_Message_Block mb_locator(size + 1);
+          using DCPS::Serializer;
+          Serializer ser_loc(&mb_locator, 
+                             ACE_CDR_BYTE_ORDER, 
+                             Serializer::ALIGN_CDR);
+          ser_loc << locs;
+          ser_loc << ACE_OutputCDR::from_boolean(expectsInlineQos);
+
+          // append default locators
+          DCPS::TransportLocator tl;
+          tl.transport_type = "rtps_udp";
+          tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()), 
+                          &mb_locator);
+          rTls->length(1);
+          (*rTls)[0] = tl;
+        } else {
+          ACE_DEBUG((
+                LM_WARNING, ACE_TEXT("(%P|%t) Sedp::match() - ") 
+                            ACE_TEXT("remote endpoint found with no locators ")
+                            ACE_TEXT("and no deafault locators\n")));
+        }
+      }
+    }
+
     const DDS::SubscriptionBuiltinTopicData& bit =
       dsi->second.reader_data_.ddsSubscriptionData;
     tempDrQos.durability = bit.durability;
