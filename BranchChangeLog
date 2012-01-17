@@ -1,8 +1,15 @@
+Tue Jan 17 15:58:35 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Set opendds header historic sample flag when the DataSubmessage 
+            contains PID_ORIGINAL_WRITER_INFO.
+
 Mon Jan 16 23:17:19 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
 
-          If historic_sample_, populate and add OriginalWriterInfo to 
+          If historic_sample_, populate and add OriginalWriterInfo to
             DataSubmessage.
 
 Mon Jan 16 19:42:44 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>

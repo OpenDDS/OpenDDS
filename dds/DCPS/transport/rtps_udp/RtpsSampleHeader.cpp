@@ -180,6 +180,8 @@ RtpsSampleHeader::process_iqos(DataSampleHeader& opendds,
       } else if (iqos[i].status_info() == STATUS_INFO_REGISTER) {
         opendds.message_id_ = INSTANCE_REGISTRATION;
       }
+    } else if (iqos[i]._d() == PID_ORIGINAL_WRITER_INFO) {
+      opendds.historic_sample_ = true;
 #if defined(OPENDDS_TEST_INLINE_QOS)
     } else if (iqos[i]._d() == PID_TOPIC_NAME) {
       ACE_DEBUG((LM_DEBUG, "topic_name = %C\n", iqos[i].string_data()));
