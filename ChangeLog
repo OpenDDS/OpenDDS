@@ -1,3 +1,9 @@
+Tue Jan 17 18:41:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+
+          Removed unused variables.
+
 Thu Jan 12 12:57:54 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/subscriber.cpp:

@@ -87,7 +87,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   fwddeclstructs.length(2);
   fwddeclstructs[0].v1 = -5;
   fwddeclstructs[1].v1 = 43;
-  size_t size_fwddeclstructs = OpenDDS::DCPS::gen_find_size(fwddeclstructs);
   ACE_Message_Block* b = new ACE_Message_Block( 100000) ;
   OpenDDS::DCPS::Serializer serializer( b, false) ;
 
@@ -121,7 +120,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   fwddeclstructs.length(2);
   fwddeclstructs[0].v1 = -5;
   fwddeclstructs[1].v1 = 43;
-  size_t size_fwddeclstructs = OpenDDS::DCPS::gen_find_size(fwddeclstructs);
   ACE_Message_Block* b = new ACE_Message_Block( 100000) ;
   OpenDDS::DCPS::Serializer serializer( b, false) ;
 
