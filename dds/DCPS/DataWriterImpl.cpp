@@ -266,14 +266,9 @@ DataWriterImpl::add_association(const RepoId& yourId,
                    ACE_TEXT("marked %C as pending.\n"),
                    std::string(converter).c_str()));
       }
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-      if (TheServiceParticipant->publisher_content_filter()
-          && reader.filterExpression.in()[0]) {
-        reader_info_.insert(std::make_pair(reader.readerId,
-          ReaderInfo(reader.filterExpression, reader.exprParams,
-            participant_servant_)));
-      }
-#endif
+      reader_info_.insert(std::make_pair(reader.readerId,
+        ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+          reader.exprParams, participant_servant_)));
     }
   }
 
@@ -314,7 +309,6 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
                                        const DDS::StringSeq& params,
@@ -322,16 +316,19 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
   : participant_(participant)
   , expression_params_(params)
   , filter_(filter)
-  , eval_(participant->get_filter_eval(filter))
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  , eval_(*filter ? participant->get_filter_eval(filter) : 0)
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 {}
 
 DataWriterImpl::ReaderInfo::~ReaderInfo()
 {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   eval_ = RcHandle<FilterEvaluator>();
   participant_->deref_filter_eval(filter_.c_str());
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 void
 DataWriterImpl::association_complete(const RepoId& remote_id)
@@ -459,6 +456,31 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
 
     DataSampleList list = data_container_->get_resend_data();
 
+    // Assign new sequence numbers to the durable samples
+    for (DataSampleListElement* list_el = list.head_; 
+         list_el != NULL;
+         list_el = list_el->next_sample_) {
+      // Durable data gets a new sequence number
+      if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+        this->sequence_number_ = SequenceNumber();
+      } else {
+        ++this->sequence_number_;
+      }
+      // Reassign list element header sequence
+      list_el->header_.sequence_ = sequence_number_;
+      list_el->header_.historic_sample_ = true;
+      // Reform sequence number in blob
+      list_el->sample_->wr_ptr(list_el->sample_->base());
+      if (!(*list_el->sample_ << list_el->header_)) {
+        ACE_DEBUG((LM_ERROR, 
+              ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
+              ACE_TEXT(" failed to serialize header for historic sample\n")));
+      }
+    }
+
+    // Update the reader's expected sequence
+    reader_info_.find(remote_id)->second.expected_sequence_ = sequence_number_;
+
     if (this->publisher_servant_->is_suspended()) {
       this->available_data_list_.enqueue_tail_next_send_sample(list);
     } else {
@@ -540,9 +562,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                   ACE_TEXT("removing reader %C before association_complete() call.\n"),
                   std::string(converter).c_str()));
       }
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
       reader_info_.erase(readers[i]);
-#endif
       //else reader is already removed which indicates remove_association()
       //is called multiple times.
     }
@@ -873,7 +893,6 @@ DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap) const
 DDS::ReturnCode_t
 DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
 {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   AckCustomization ac(token);
   for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
        end = reader_info_.end(); iter != end; ++iter) {
@@ -882,7 +901,6 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
       token.custom_[iter->first] = iter->second.expected_sequence_;
     }
   }
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   ACE_Message_Block* data;
   if (!token.marshal(data, this->swap_bytes())) {
@@ -905,11 +923,7 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
     this->create_control_message(REQUEST_ACK, header, data, token.timestamp());
 
   const SendControlStatus status =
-    this->send_control(header, ack_request
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-                       , ac.customized_.length() ? &ac : 0
-#endif
-                       );
+    this->send_control(header, ack_request, ac.customized_.length() ? &ac : 0);
 
   if (status == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
@@ -927,15 +941,6 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch&  links,
                                         ACE_Message_Block*      msg,
                                         void*                   extra)
 {
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
-  ACE_UNUSED_ARG(links);
-  ACE_UNUSED_ARG(msg);
-  ACE_UNUSED_ARG(extra);
-  return SEND_CONTROL_ERROR; // this method shouldn't be called
-
-#else
-
   AckCustomization& ac = *static_cast<AckCustomization*>(extra);
   const bool swap = this->swap_bytes();
 
@@ -1056,7 +1061,6 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch&  links,
   }
 
   return ok ? SEND_CONTROL_OK : SEND_CONTROL_ERROR;
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
 
 DDS::ReturnCode_t
@@ -1735,6 +1739,7 @@ DataWriterImpl::write(DataSample* data,
   }
   for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
        end = reader_info_.end(); iter != end; ++iter) {
+    // If not excluding this reader, update expected sequence
     if (excluded.count(iter->first) == 0) {
       iter->second.expected_sequence_ = sequence_number_;
     }
@@ -1912,6 +1917,17 @@ DataWriterImpl::create_control_message(MessageId message_id,
                         0);
 
   *message << header_data;
+  // If we incremented sequence number for this control message
+  if (header_data.sequence_ != SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  {
+    // Update the expected sequence number for all readers
+    RepoIdToReaderInfoMap::iterator reader;
+    for (reader = reader_info_.begin(); reader != reader_info_.end(); ++reader)
+    {
+      reader->second.expected_sequence_ = sequence_number_;
+    }
+  }
+
   return message;
 }
 
@@ -1935,7 +1951,6 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   }
 
   bool needSequenceRepair = false;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   for (RepoIdToReaderInfoMap::iterator it = reader_info_.begin(),
        end = reader_info_.end(); it != end; ++it) {
     if (it->second.expected_sequence_ != sequence_number_) {
@@ -1943,7 +1958,6 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
       break;
     }
   }
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   header_data.message_id_ = SAMPLE_DATA;
   header_data.byte_order_ =
