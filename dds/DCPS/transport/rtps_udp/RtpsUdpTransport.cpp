@@ -26,7 +26,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
-  : handshake_condition_(connections_lock_)
 {
   if (!inst.is_nil()) {
     configure(inst.in());
@@ -92,21 +91,12 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
     }
   }
 
-  if (use_datalink(local_id, remote_id, remote_data,
-                   attribs.local_reliable_, remote_reliable)) {
-    return link._retn();
-  } else {
-    ACE_Time_Value abs_timeout = ACE_OS::gettimeofday()
-      + config_i_->handshake_timeout_;
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, connections_lock_, 0);
-    while (!link->handshake_done(local_id, remote_id)) {
-      if (handshake_condition_.wait(&abs_timeout) == -1) {
-        return 0;
-      }
-    }
-    return link._retn();
+  use_datalink(local_id, remote_id, remote_data,
+               attribs.local_reliable_, remote_reliable);
+  if (!link->wait_for_handshake(local_id, remote_id)) {
+    return 0;
   }
-  return 0;
+  return link._retn();
 }
 
 DataLink*
@@ -137,16 +127,6 @@ RtpsUdpTransport::accept_datalink(ConnectionEvent& ce)
   return 0;
 }
 
-void
-RtpsUdpTransport::handshake(const RepoId& /*local_id*/,
-                            const RepoId& /*remote_id*/)
-{
-  // [active/writer side] By the time this is called, the shared
-  // state in the data link (remote_readers_, remote_writers_) has been updated.
-  // The associate() thread may be waiting in connect_datalink_i(), wake it.
-  ACE_GUARD(ACE_Thread_Mutex, g, connections_lock_);
-  handshake_condition_.broadcast();
-}
 
 void
 RtpsUdpTransport::stop_accepting(ConnectionEvent& /*ce*/)
@@ -154,7 +134,7 @@ RtpsUdpTransport::stop_accepting(ConnectionEvent& /*ce*/)
   // nothing to do here, we don't defer any accept actions in accept_datalink()
 }
 
-bool
+void
 RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
@@ -165,7 +145,6 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
   ACE_INET_Addr addr = get_connection_addr(remote_data, requires_inline_qos);
   link_->add_locator(remote_id, addr, requires_inline_qos);
   link_->associated(local_id, remote_id, local_reliable, remote_reliable);
-  return link_->handshake_done(local_id, remote_id);
 }
 
 ACE_INET_Addr

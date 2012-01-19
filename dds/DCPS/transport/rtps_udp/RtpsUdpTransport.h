@@ -30,10 +30,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
 
-  // called by our datalink
-  void handshake(const RepoId& local_id, const RepoId& remote_id);
-
-protected:
+private:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
@@ -62,10 +59,9 @@ protected:
 
   virtual std::string transport_type() const { return "rtps_udp"; }
 
-private:
   RtpsUdpDataLink* make_datalink(const GuidPrefix_t& local_prefix);
 
-  bool use_datalink(const RepoId& local_id,
+  void use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
                     bool local_reliable,
@@ -81,9 +77,6 @@ private:
   RtpsUdpDataLink_rch link_;
 
   ACE_SOCK_Dgram unicast_socket_;
-
-  ACE_Thread_Mutex connections_lock_;
-  ACE_Thread_Condition<ACE_Thread_Mutex> handshake_condition_;
 };
 
 } // namespace DCPS

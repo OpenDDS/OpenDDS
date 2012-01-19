@@ -46,6 +46,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
     transport_customized_element_allocator_(40,
                                             sizeof(TransportCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
+    handshake_condition_(lock_),
     nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
@@ -123,6 +124,7 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
                              const ACE_INET_Addr& address,
                              bool requires_inline_qos)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
 }
 
@@ -134,6 +136,7 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
   typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
 
   if (local_id == GUID_UNKNOWN) {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     for (iter_t iter = locators_.begin(); iter != locators_.end(); ++iter) {
       addrs.insert(iter->second.addr_);
     }
@@ -144,6 +147,7 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
   if (!peers.ptr()) {
     return;
   }
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (CORBA::ULong i = 0; i < peers->length(); ++i) {
     const iter_t iter = locators_.find(peers[i]);
     if (iter == locators_.end()) {
@@ -164,6 +168,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     return;
   }
 
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const GuidConverter conv(local_id);
   const EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER && remote_reliable) {
@@ -179,6 +184,21 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     rr->second.remote_writers_[remote_id];
     reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
   }
+}
+
+bool
+RtpsUdpDataLink::wait_for_handshake(const RepoId& local_id,
+                                    const RepoId& remote_id)
+{
+  ACE_Time_Value abs_timeout = ACE_OS::gettimeofday()
+    + config_->handshake_timeout_;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  while (!handshake_done(local_id, remote_id)) {
+    if (handshake_condition_.wait(&abs_timeout) == -1) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool
@@ -204,16 +224,10 @@ RtpsUdpDataLink::handshake_done(const RepoId& local_id, const RepoId& remote_id)
 }
 
 void
-RtpsUdpDataLink::handshake(const RepoId& local_id, const RepoId& remote_id)
-{
-  TransportImpl_rch ti = impl();
-  static_cast<RtpsUdpTransport*>(ti.in())->handshake(local_id, remote_id);
-}
-
-void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   using std::pair;
   const GuidConverter conv(local_id);
   const EntityKind kind = conv.entityKind();
@@ -271,6 +285,7 @@ RtpsUdpDataLink::stop_i()
 void
 RtpsUdpDataLink::MultiSendBuffer::retain_all(RepoId pub_id)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
   if (wi != outer_->writers_.end() && !wi->second.send_buff_.is_nil()) {
     wi->second.send_buff_->retain_all(pub_id);
@@ -289,6 +304,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
 
   const RepoId pub_id = q->peek()->publication_id();
 
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
   if (wi == outer_->writers_.end()) {
     return; // this datawriter is not reliable
@@ -314,6 +330,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   if (!msg) {
     return element;
   }
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
 
   OpenDDS::RTPS::SubmessageSeq subm;
   add_gap_submsg(subm, *element);
@@ -575,6 +593,7 @@ void
 RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 {
   using namespace OpenDDS::RTPS;
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end();
        ++rr) {
     WriterInfoMap& writers = rr->second.remote_writers_;
@@ -819,6 +838,7 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
   std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
   local.entityId = acknack.writerId; // can't be ENTITYID_UNKNOWN
 
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const RtpsWriterMap::iterator rw = writers_.find(local);
   if (rw == writers_.end()) {
     return;
@@ -841,7 +861,7 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    handshake(rw->first, ri->first);
+    handshake_condition_.broadcast();
   }
 
   const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
@@ -857,6 +877,7 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
 void
 RtpsUdpDataLink::send_nack_replies()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // Reply from local DW to remote DR: GAP or DATA
   using namespace OpenDDS::RTPS;
   typedef RtpsWriterMap::iterator rw_iter;
@@ -956,6 +977,7 @@ RtpsUdpDataLink::send_nack_replies()
 void
 RtpsUdpDataLink::send_heartbeats()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   using namespace OpenDDS::RTPS;
   std::vector<HeartBeatSubmessage> subm;
   std::set<ACE_INET_Addr> recipients;

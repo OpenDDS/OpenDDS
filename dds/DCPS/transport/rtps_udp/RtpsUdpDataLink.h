@@ -90,7 +90,7 @@ public:
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable);
 
-  bool handshake_done(const RepoId& local, const RepoId& remote);
+  bool wait_for_handshake(const RepoId& local_id, const RepoId& remote_id);
 
 private:
   virtual void stop_i();
@@ -202,7 +202,13 @@ private:
     RtpsReaderIndex;
   RtpsReaderIndex reader_index_; // keys are remote data writer GUIDs
 
-  void handshake(const RepoId& local_id, const RepoId& remote_id);
+  bool handshake_done(const RepoId& local, const RepoId& remote);
+
+  /// lock_ protects data structures accessed by both the transport's thread
+  /// (TransportReactorTask) and an external thread which is responsible
+  /// for adding/removing associations from the DataLink.
+  mutable ACE_Thread_Mutex lock_;
+  ACE_Thread_Condition<ACE_Thread_Mutex> handshake_condition_;
 
   size_t generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nack_frags,
                              WriterInfo& wi, const RepoId& pub_id);
@@ -236,6 +242,7 @@ private:
     std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
     src.entityId = submessage.writerId;
 
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     if (local.entityId == ENTITYID_UNKNOWN) {
       for (pair<RtpsReaderIndex::iterator, RtpsReaderIndex::iterator> iters =
              reader_index_.equal_range(src);

@@ -19,7 +19,7 @@ for my $cfg (@configs) {
   print "Running with config file: $cfg\n";
   my $res = $TEST->SpawnWaitKill(150);
   if ($res != 0) {
-    print STDERR "ERROR: test with $cfg returned $result\n";
+    print STDERR "ERROR: test with $cfg returned $res\n";
     $result += $res;
   }
 }
