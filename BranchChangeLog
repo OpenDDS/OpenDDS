@@ -1,3 +1,21 @@
+Thu Jan 19 21:11:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Revert change from my prior commit.  This was just for checking
+          the datalink_release_delay_ in cancel_release(), and it doesn't
+          seem to be working.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Manage disabling of the heartbeat timer in the handle_timeout()
+          itself to avoid needing to call into the ACE Reactor while locked.
+
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Enable RELIABILITY QoS in the Data Reader when running
+          with the rtps_udp transport.
+
 Thu Jan 19 20:39:31 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

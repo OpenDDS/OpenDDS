@@ -239,10 +239,6 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 
       if (rw->second.remote_readers_.empty()) {
         writers_.erase(rw);
-
-        if (writers_.empty()) {
-          heartbeat_.disable();
-        }
       }
     }
 
@@ -978,6 +974,11 @@ void
 RtpsUdpDataLink::send_heartbeats()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (writers_.empty()) {
+    heartbeat_.disable();
+  }
+
   using namespace OpenDDS::RTPS;
   std::vector<HeartBeatSubmessage> subm;
   std::set<ACE_INET_Addr> recipients;
