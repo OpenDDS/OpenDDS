@@ -768,10 +768,8 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 }
 
 void
-Spdp::get_default_locators(
-    DCPS::RepoId part_id, 
-    LocatorSeq& target, 
-    bool& inlineQos)
+Spdp::get_default_locators(const RepoId& part_id, LocatorSeq& target, 
+                           bool& inlineQos)
 {
   DiscoveredParticipantIter part_iter = participants_.find(part_id);
   if (part_iter != participants_.end()) {

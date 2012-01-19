@@ -325,7 +325,9 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 {
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   eval_ = RcHandle<FilterEvaluator>();
-  participant_->deref_filter_eval(filter_.c_str());
+  if (!filter_.empty()) {
+    participant_->deref_filter_eval(filter_.c_str());
+  }
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
 
@@ -459,7 +461,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
     // Assign new sequence numbers to the durable samples
     for (DataSampleListElement* list_el = list.head_; 
          list_el != NULL;
-         list_el = list_el->next_sample_) {
+         list_el = list_el->next_send_sample_) {
       // Durable data gets a new sequence number
       if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
         this->sequence_number_ = SequenceNumber();

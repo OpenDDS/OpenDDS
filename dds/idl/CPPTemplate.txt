@@ -256,18 +256,18 @@ DDS::ReturnCode_t
 
   // list of reader RepoIds that should not get data
   OpenDDS::DCPS::GUIDSeq_var filter_out;
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  const bool use_filter = false;
-#else
-  const bool use_filter = reader_info_.size() &&
-    TheServiceParticipant->publisher_content_filter();
-  if (use_filter) {
-    filter_out = new OpenDDS::DCPS::GUIDSeq;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  if (TheServiceParticipant->publisher_content_filter()) {
     for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
          end = reader_info_.end(); iter != end; ++iter) {
       const ReaderInfo& ri = iter->second;
-      if (!ri.eval_->eval(instance_data, ri.expression_params_)) {
-        push_back(filter_out.inout(), iter->first);
+      if (!ri.eval_.is_nil()) {
+        if (!filter_out.ptr()) {
+          filter_out = new OpenDDS::DCPS::GUIDSeq;
+        }
+        if (!ri.eval_->eval(instance_data, ri.expression_params_)) {
+          push_back(filter_out.inout(), iter->first);
+        }
       }
     }
   }
@@ -278,9 +278,7 @@ DDS::ReturnCode_t
 
   return OpenDDS::DCPS::DataWriterImpl::write(marshalled, handle,
                                               source_timestamp,
-                                              use_filter
-                                                ? filter_out._retn()
-                                                : 0);
+                                              filter_out._retn());
 }
 
 DDS::ReturnCode_t

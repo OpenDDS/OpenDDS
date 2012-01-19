@@ -176,7 +176,7 @@ namespace OpenDDS
     {
       T t;
 
-      guint len = std::min(tvb->length - offset,
+      guint len = std::min(tvb_length(tvb) - offset,
                            static_cast<guint>(t.max_marshaled_size()));
       const guint8* data = tvb_get_ptr(tvb, offset, len);
 
@@ -545,7 +545,7 @@ namespace OpenDDS
 
         this->dissect_transport_header (trans_tree, trans, offset);
 
-        while (offset < gint(tvb_->length))
+        while (offset < gint(tvb_length(tvb_)))
           {
             DataSampleHeader sample =
               demarshal_data<DataSampleHeader>(tvb_, offset);

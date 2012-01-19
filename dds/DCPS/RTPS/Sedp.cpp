@@ -589,43 +589,39 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator iter =
     topic_names_.find(topicId);
-  if (iter != topic_names_.end()) {
-    name = iter->second;
-    TopicDetailsEx& topic = topics_[name];
-    using namespace DCPS;
-    // Remember if topic data changed
-    bool topic_data_changed = (qos.topic_data != topic.qos_.topic_data);
+  if (iter == topic_names_.end()) {
+    return false;
+  }
+  name = iter->second;
+  TopicDetailsEx& topic = topics_[name];
+  using namespace DCPS;
+  // If the TOPIC_DATA QoS changed our local endpoints must be resent
+  // with new QoS
+  if (qos.topic_data != topic.qos_.topic_data) {
     topic.qos_ = qos;
+    // For each endpoint associated on this topic
+    for (RepoIdSet::iterator topic_endpoints = topic.endpoints_.begin();
+         topic_endpoints != topic.endpoints_.end(); ++topic_endpoints) {
 
-    // If the topic data QOS changed our local endpoints must be resent
-    // with new QOS
-    if (topic_data_changed) {
-      // For each endpoint associated on this topic
-      for (RepoIdSet::iterator topic_endpoints = topic.endpoints_.begin();
-           topic_endpoints != topic.endpoints_.end();
-           ++topic_endpoints)
-      {
-        RepoId rid = *topic_endpoints;
-        EntityKind kind = GuidConverter(rid).entityKind();
-        if (KIND_WRITER == kind) {
-          // This may be our local publication, verify
-          LocalPublicationIter lp = local_publications_.find(rid);
-          if (lp != local_publications_.end()) {
-            write_publication_data(rid, lp->second);
-          }
-        } else if (KIND_READER == kind) {
-          // This may be our local subscription, verify
-          LocalSubscriptionIter ls = local_subscriptions_.find(rid);
-          if (ls != local_subscriptions_.end()) {
-            write_subscription_data(rid, ls->second);
-          }
+      const RepoId& rid = *topic_endpoints;
+      EntityKind kind = GuidConverter(rid).entityKind();
+      if (KIND_WRITER == kind) {
+        // This may be our local publication, verify
+        LocalPublicationIter lp = local_publications_.find(rid);
+        if (lp != local_publications_.end()) {
+          write_publication_data(rid, lp->second);
+        }
+      } else if (KIND_READER == kind) {
+        // This may be our local subscription, verify
+        LocalSubscriptionIter ls = local_subscriptions_.find(rid);
+        if (ls != local_subscriptions_.end()) {
+          write_subscription_data(rid, ls->second);
         }
       }
     }
-
-    return true;
   }
-  return false;
+
+  return true;
 }
 
 bool
@@ -1182,39 +1178,38 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       return;
     }
     rTls = &dsi->second.reader_data_.readerProxy.allLocators;
-    // if no locators provided, add the default
-    if (!rTls->length()) {
-      {
-        LocatorSeq locs;
-        bool expectsInlineQos = false;
-        spdp_.get_default_locators(participant_id_, locs, expectsInlineQos); 
 
-        if (locs.length()) {
-          size_t size = 0, padding = 0;
-          DCPS::gen_find_size(locs, size, padding);
+    LocatorSeq locs;
+    bool participantExpectsInlineQos = false;
+    spdp_.get_default_locators(participant_id_, locs,
+                               participantExpectsInlineQos); 
+    if (!rTls->length()) {     // if no locators provided, add the default
+      if (locs.length()) {
+        size_t size = 0, padding = 0;
+        DCPS::gen_find_size(locs, size, padding);
 
-          // Ad space for boolean
-          ACE_Message_Block mb_locator(size + 1);
-          using DCPS::Serializer;
-          Serializer ser_loc(&mb_locator, 
-                             ACE_CDR_BYTE_ORDER, 
-                             Serializer::ALIGN_CDR);
-          ser_loc << locs;
-          ser_loc << ACE_OutputCDR::from_boolean(expectsInlineQos);
+        ACE_Message_Block mb_locator(size + 1);   // Add space for boolean
+        using DCPS::Serializer;
+        Serializer ser_loc(&mb_locator, 
+                           ACE_CDR_BYTE_ORDER, 
+                           Serializer::ALIGN_CDR);
+        ser_loc << locs;
+        const bool readerExpectsInlineQos =
+          dsi->second.reader_data_.readerProxy.expectsInlineQos;
+        ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos
+                                               || readerExpectsInlineQos);
 
-          // append default locators
-          DCPS::TransportLocator tl;
-          tl.transport_type = "rtps_udp";
-          tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()), 
-                          &mb_locator);
-          rTls->length(1);
-          (*rTls)[0] = tl;
-        } else {
-          ACE_DEBUG((
-                LM_WARNING, ACE_TEXT("(%P|%t) Sedp::match() - ") 
-                            ACE_TEXT("remote endpoint found with no locators ")
-                            ACE_TEXT("and no deafault locators\n")));
-        }
+        // append default locators
+        DCPS::TransportLocator tl;
+        tl.transport_type = "rtps_udp";
+        tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()), 
+                        &mb_locator);
+        rTls->length(1);
+        (*rTls)[0] = tl;
+      } else {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Sedp::match() - ") 
+                   ACE_TEXT("remote endpoint found with no locators ")
+                   ACE_TEXT("and no deafault locators\n")));
       }
     }
 
