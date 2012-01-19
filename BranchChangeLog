@@ -1,3 +1,10 @@
+Thu Jan 19 20:39:31 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fix shutdown crash accessing pub_bit() or sub_bit()
+            while shutting down.
+
 Thu Jan 19 19:49:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

@@ -899,6 +899,11 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
     return;
   }
 
+  DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+  if (!bit) { // bit may be null if the DomainParticipant is shutting down
+    return;
+  }
+
   std::string topic_name;
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
@@ -942,8 +947,8 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         // Release lock for call into pub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
         instance_handle = 
-          pub_bit()->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                          DDS::NEW_VIEW_STATE);
+          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
+                                    DDS::NEW_VIEW_STATE);
       }
       // Publication may have been removed while lock released
       iter = discovered_publications_.find(guid);
@@ -962,9 +967,8 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
-      pub_bit()->store_synthetic_data(
-          iter->second.writer_data_.ddsPublicationData,
-          DDS::NOT_NEW_VIEW_STATE);
+      bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
+                                DDS::NOT_NEW_VIEW_STATE);
 
       // Match/unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
@@ -1007,6 +1011,10 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
   if (ignoring(guid)
       || ignoring(guid_participant)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
+    return;
+  }
+  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+  if (!bit) { // bit may be null if the DomainParticipant is shutting down
     return;
   }
 
@@ -1053,8 +1061,8 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         // Release lock for call into sub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
         instance_handle = 
-          sub_bit()->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                          DDS::NEW_VIEW_STATE);
+          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
+                                    DDS::NEW_VIEW_STATE);
       }
       // Subscription may have been removed while lock released
       iter = discovered_subscriptions_.find(guid);
@@ -1074,7 +1082,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
     } else { // update existing
       if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                      rdata.ddsSubscriptionData)) {
-        sub_bit()->store_synthetic_data(
+        bit->store_synthetic_data(
               iter->second.reader_data_.ddsSubscriptionData,
               DDS::NOT_NEW_VIEW_STATE);
 
