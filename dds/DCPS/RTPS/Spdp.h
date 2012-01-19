@@ -114,6 +114,7 @@ public:
   // Is Spdp shutting down?
   bool shutting_down() { return shutdown_flag_.value(); } 
 
+  bool associated() const;
 private:
   ACE_Reactor* reactor() const;
 

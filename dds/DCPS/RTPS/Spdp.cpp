@@ -794,5 +794,11 @@ Spdp::get_default_locators(const RepoId& part_id, LocatorSeq& target,
   }
 }
 
+bool
+Spdp::associated() const
+{
+  return !participants_.empty();
+}
+
 }
 }

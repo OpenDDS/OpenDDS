@@ -361,7 +361,8 @@ Sedp::increment_key(DDS::BuiltinTopicKey_t& key)
       return;
     }
   }
-  //TODO: error, we ran out of keys (2^96 available)
+  ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Sedp::increment_key - ")
+                         ACE_TEXT("ran out of builtin topic keys\n")));
 }
 
 void
@@ -681,7 +682,6 @@ Sedp::add_publication(const RepoId& topicId,
   td.endpoints_.insert(rid);
 
   if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
-    // TODO: should this be removed from the local_publications map?
     return RepoId();
   }
 
@@ -771,7 +771,6 @@ Sedp::add_subscription(const RepoId& topicId,
   td.endpoints_.insert(rid);
 
   if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
-    // TODO: should this be removed from the local_subscriptions map?
     return RepoId();
   }
 
@@ -1841,7 +1840,6 @@ void
 Sedp::write_durable_subscription_data()
 {
   LocalSubscriptionIter sub, end = local_subscriptions_.end();
-
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
     write_subscription_data(sub->first, sub->second, true);
   }
@@ -1854,21 +1852,26 @@ Sedp::write_publication_data(
     bool is_retransmission)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  DiscoveredWriterData dwd;
-  ParameterList plist;
-  populate_discovered_writer_msg(dwd, rid, lp);
-  // Convert to parameter list
-  if (ParameterListConverter::to_param_list(dwd, plist)) {
-    ACE_DEBUG((LM_INFO, 
-          ACE_TEXT("(%P|%t) Failed to convert DiscoveredWriterData ")
-          ACE_TEXT(" to ParameterList\n")));
-    result = DDS::RETCODE_ERROR;
-  }
-  if (DDS::RETCODE_OK == result) {
-    result = publications_writer_.write_sample(
-        plist, 
-        is_retransmission,
-        is_retransmission ? NULL : &lp.original_sequence_);
+  if (spdp_.associated()) {
+    DiscoveredWriterData dwd;
+    ParameterList plist;
+    populate_discovered_writer_msg(dwd, rid, lp);
+    // Convert to parameter list
+    if (ParameterListConverter::to_param_list(dwd, plist)) {
+      ACE_DEBUG((LM_INFO, 
+            ACE_TEXT("(%P|%t) Failed to convert DiscoveredWriterData ")
+            ACE_TEXT(" to ParameterList\n")));
+      result = DDS::RETCODE_ERROR;
+    }
+    if (DDS::RETCODE_OK == result) {
+      result = publications_writer_.write_sample(
+          plist, 
+          is_retransmission,
+          is_retransmission ? NULL : &lp.original_sequence_);
+    }
+  } else if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
+                        ACE_TEXT("not currently associcted, dropping msg.\n")));
   }
   return result;
 }
@@ -1880,21 +1883,26 @@ Sedp::write_subscription_data(
     bool is_retransmission)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  DiscoveredReaderData drd;
-  ParameterList plist;
-  populate_discovered_reader_msg(drd, rid, ls);
-  // Convert to parameter list
-  if (ParameterListConverter::to_param_list(drd, plist)) {
-    ACE_DEBUG((LM_INFO, 
-          ACE_TEXT("(%P|%t) Failed to convert DiscoveredReaderData ")
-          ACE_TEXT(" to ParameterList\n")));
-    result = DDS::RETCODE_ERROR;
-  }
-  if (DDS::RETCODE_OK == result) {
-    result = subscriptions_writer_.write_sample(
-        plist, 
-        is_retransmission,
-        is_retransmission ? NULL : &ls.original_sequence_);
+  if (spdp_.associated()) {
+    DiscoveredReaderData drd;
+    ParameterList plist;
+    populate_discovered_reader_msg(drd, rid, ls);
+    // Convert to parameter list
+    if (ParameterListConverter::to_param_list(drd, plist)) {
+      ACE_DEBUG((LM_INFO, 
+            ACE_TEXT("(%P|%t) Failed to convert DiscoveredReaderData ")
+            ACE_TEXT(" to ParameterList\n")));
+      result = DDS::RETCODE_ERROR;
+    }
+    if (DDS::RETCODE_OK == result) {
+      result = subscriptions_writer_.write_sample(
+          plist, 
+          is_retransmission,
+          is_retransmission ? NULL : &ls.original_sequence_);
+    }
+  } else if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
+                        ACE_TEXT("not currently associcted, dropping msg.\n")));
   }
   return result;
 }

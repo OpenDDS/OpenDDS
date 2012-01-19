@@ -1,3 +1,19 @@
+Thu Jan 19 18:16:44 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added associated() method to tell caller if we know of any other
+            participants.
+          Don't publish samples when there are no other participants.
+          Log warning when running out of bit keys.
+          Remove Todo comments where there is no additional error handling.
+
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.cpp:
+
+          Fix log msg.
+
 Thu Jan 19 16:45:53 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
