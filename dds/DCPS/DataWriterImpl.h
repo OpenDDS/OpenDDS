@@ -662,6 +662,10 @@ private:
 
   /// Periodic Monitor object for this entity
   Monitor* periodic_monitor_;
+
+  // Do we need to set the sequence repair header bit?
+  //   must set the header sequence number prior to calling
+  bool need_sequence_repair(const DataSampleHeader& hdr) const;
 };
 
 } // namespace DCPS

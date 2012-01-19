@@ -1,3 +1,11 @@
+Thu Jan 19 16:45:53 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Refactor determination if need sequence repair bit should be set.
+          Call when creating control message too.
+
 Thu Jan 19 16:11:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/AssociationData.h:

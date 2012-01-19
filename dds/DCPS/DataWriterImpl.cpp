@@ -1883,6 +1883,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   }
 
   header_data.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  header_data.sequence_repair_ = false; // set below
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   header_data.publication_id_ = publication_id_;
@@ -1900,6 +1901,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
       ++this->sequence_number_;
     }
     header_data.sequence_ = this->sequence_number_;
+    header_data.sequence_repair_ = need_sequence_repair(header_data);
     header_data.key_fields_only_ = true;
   }
 
@@ -1955,15 +1957,6 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                      DDS::RETCODE_ERROR);
   }
 
-  bool needSequenceRepair = false;
-  for (RepoIdToReaderInfoMap::iterator it = reader_info_.begin(),
-       end = reader_info_.end(); it != end; ++it) {
-    if (it->second.expected_sequence_ != sequence_number_) {
-      needSequenceRepair = true;
-      break;
-    }
-  }
-
   header_data.message_id_ = SAMPLE_DATA;
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
@@ -1972,7 +1965,6 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     this->publisher_servant_->qos_.presentation.access_scope
     == DDS::GROUP_PRESENTATION_QOS;
   header_data.content_filter_ = content_filter;
-  header_data.sequence_repair_ = needSequenceRepair;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
@@ -1981,6 +1973,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     ++this->sequence_number_;
   }
   header_data.sequence_ = this->sequence_number_;
+  header_data.sequence_repair_ = need_sequence_repair(header_data);
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -2506,6 +2499,18 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
   this->publisher_servant_->get_qos(qos_data.pub_qos);
   qos_data.dw_qos = this->qos_;
   qos_data.topic_name = this->topic_name_.in();
+}
+
+bool
+DataWriterImpl::need_sequence_repair(const DataSampleHeader& hdr) const
+{
+  for (RepoIdToReaderInfoMap::const_iterator it = reader_info_.begin(),
+       end = reader_info_.end(); it != end; ++it) {
+    if (it->second.expected_sequence_ != hdr.sequence_) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace DCPS
