@@ -316,11 +316,12 @@ struct TestParticipant: ACE_Event_Handler {
   }
 
   bool send_an(const OpenDDS::DCPS::EntityId_t& writer,
-               const SequenceNumber_t& nack, const ACE_INET_Addr& send_to)
+               const SequenceNumber_t& nack, const ACE_INET_Addr& send_to,
+               bool set_bit_in_bitmap = true)
   {
     LongSeq8 bitmap;
     bitmap.length(1);
-    bitmap[0] = 0xF0000000;
+    bitmap[0] = set_bit_in_bitmap ? 0xF0000000 : 0;
     const AckNackSubmessage an = {
       {ACKNACK, FLAG_E, 0},
       reader_ent_, writer,
@@ -515,6 +516,13 @@ struct TestParticipant: ACE_Event_Handler {
     }
     ACE_DEBUG((LM_INFO, "recv_hb() first = %d last = %d\n",
                hb.firstSN.low, hb.lastSN.low));
+    const bool flag_f = hb.smHeader.flags & 2;
+    if (!flag_f && hb.firstSN.low == 1 && hb.lastSN.low == 1) {
+      const SequenceNumber_t one = {0, 1};
+      if (!send_an(hb.writerId, one, peer, false)) {
+        return false;
+      }
+    }
     // pretend #2 was lost
     if (do_nack_ && hb.firstSN.low <= 2 && hb.lastSN.low >= 2) {
       SequenceNumber_t nack = {0, 2};
@@ -545,14 +553,29 @@ void reactor_wait()
   ACE_Reactor::instance()->run_reactor_event_loop(one);
 }
 
+struct ReactorTask : ACE_Task_Base {
+
+  ReactorTask()
+  {
+    activate();
+  }
+
+  int svc()
+  {
+    ACE_Reactor* reactor = ACE_Reactor::instance();
+    ACE_thread_t old_owner;
+    reactor->owner(ACE_Thread_Manager::instance()->thr_self(), &old_owner);
+    reactor_wait();
+    reactor->owner(old_owner);
+    return 0;
+  }
+};
+
 void transport_setup()
 {
   TransportInst_rch inst =
     TheTransportRegistry->create_inst("my_rtps", "rtps_udp");
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
-  //TODO: remove the hard-coded port (below) once the transport knows how to
-  //      listen on "any" OS-assigned port.
-  rtps_inst->local_address_.set(11694, "localhost");
   rtps_inst->use_multicast_ = false;
   rtps_inst->datalink_release_delay_ = 0;
   rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 500*1000 /*microseconds*/);
@@ -660,6 +683,7 @@ bool run_test()
 
   AssociationData part1_writer;
   part1_writer.remote_id_ = writer1;
+  part1_writer.remote_reliable_ = true;
   part1_writer.remote_data_.length(1);
   part1_writer.remote_data_[0].transport_type = "rtps_udp";
   part1_writer.remote_data_[0].data.replace(
@@ -667,13 +691,6 @@ bool run_test()
   if (!sdr2.associate(part1_writer, false /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataReader(reader2) could not associate with writer1\n"));
-    return false;
-  }
-  AssociationData part1_reader = part1_writer;
-  part1_reader.remote_id_ = reader1;
-  if (!sdw2.associate(part1_reader, true /*active*/)) {
-    ACE_DEBUG((LM_DEBUG,
-               "SimpleDataWriter(writer1) could not associate with reader1\n"));
     return false;
   }
 
@@ -790,6 +807,16 @@ bool run_test()
 
   // Use the real DDS DataWriter (sdw2) against the test reader
   ACE_DEBUG((LM_INFO, ">>> Starting test of DataWriter\n"));
+  AssociationData part1_reader = part1_writer;
+  part1_reader.remote_id_ = reader1;
+  ReactorTask rt;
+  if (!sdw2.associate(part1_reader, true /*active*/)) {
+    ACE_DEBUG((LM_DEBUG,
+               "SimpleDataWriter(writer2) could not associate with reader1\n"));
+    sdr2.disassociate(writer1);
+    return false;
+  }
+  rt.wait();
 
   SequenceNumber seq_dw2;
   sdw2.send_data(seq_dw2++);  // send #1 - #3, test reader will nack #2

@@ -35,12 +35,14 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
+                                    bool remote_reliable,
                                     const ConnectionAttribs& attribs,
                                     bool active);
 
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
+                                       bool remote_reliable,
                                        const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);

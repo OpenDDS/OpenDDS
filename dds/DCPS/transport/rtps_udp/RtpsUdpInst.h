@@ -31,7 +31,7 @@ public:
 
   size_t nak_depth_;
   ACE_Time_Value nak_response_delay_, heartbeat_period_,
-    heartbeat_response_delay_;
+    heartbeat_response_delay_, handshake_timeout_;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
@@ -47,10 +47,6 @@ private:
   explicit RtpsUdpInst(const std::string& name);
 
   RtpsUdpTransport* new_impl(const TransportInst_rch& inst);
-
-  friend class RTPS::Sedp;
-  friend class RtpsUdpTransport;
-  RepoId opendds_discovery_guid_;
 };
 
 } // namespace DCPS

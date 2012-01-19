@@ -563,9 +563,12 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
 bool
 DataLink::cancel_release()
 {
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-  ACE_Reactor* reactor = orb->orb_core()->reactor();
-  return reactor->cancel_timer(this) > 0;
+  if (this->datalink_release_delay_ > ACE_Time_Value::zero) {
+    CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
+    ACE_Reactor* reactor = orb->orb_core()->reactor();
+    return reactor->cancel_timer(this) > 0;
+  }
+  return true;
 }
 
 int

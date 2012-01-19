@@ -201,6 +201,7 @@ SubDriver::run()
   // Set up the publication.
   OpenDDS::DCPS::AssociationData publication;
   publication.remote_id_ = this->pub_id_;
+  publication.remote_reliable_ = true;
   publication.remote_data_.length(1);
   publication.remote_data_[0].transport_type = "tcp";
 

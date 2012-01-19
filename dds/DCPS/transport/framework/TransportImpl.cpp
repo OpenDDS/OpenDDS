@@ -201,10 +201,11 @@ TransportImpl::find_connect_i(const RepoId& local_id,
       if (connect) {
         link = connect_datalink_i(local_id, remote_association.remote_id_,
                                   remote_association.remote_data_[idx].data,
-                                  attribs);
+                                  remote_association.remote_reliable_, attribs);
       } else {
         link = find_datalink_i(local_id, remote_association.remote_id_,
                                remote_association.remote_data_[idx].data,
+                               remote_association.remote_reliable_,
                                attribs, active);
       }
       if (!link.is_nil()) {

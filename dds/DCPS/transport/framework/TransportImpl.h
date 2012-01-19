@@ -87,7 +87,7 @@ protected:
 
   struct ConnectionAttribs {
     CORBA::Long priority_;
-    bool reliable_; // local side supports reliability
+    bool local_reliable_;
   };
 
   DataLink* find_datalink(const RepoId& local_id,
@@ -138,6 +138,7 @@ protected:
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
+                                       bool remote_reliable,
                                        const ConnectionAttribs& attribs) = 0;
 
   /// stop_accepting() is called from TransportClient::associate()
@@ -154,6 +155,7 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
+                                    bool remote_reliable,
                                     const ConnectionAttribs& attribs,
                                     bool active) = 0;
 

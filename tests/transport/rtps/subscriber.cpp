@@ -232,6 +232,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   AssociationData publication;
   publication.remote_id_ = remote;
+  publication.remote_reliable_ = true;
   publication.remote_data_.length(1);
   publication.remote_data_[0].transport_type = "rtps_udp";
   publication.remote_data_[0].data.length(5);

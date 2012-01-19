@@ -240,6 +240,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sdw.enable_transport(true /*reliable*/);
   AssociationData subscription;
   subscription.remote_id_ = remote;
+  subscription.remote_reliable_ = false;
   subscription.remote_data_.length(1);
   subscription.remote_data_[0].transport_type = "rtps_udp";
   subscription.remote_data_[0].data.replace(

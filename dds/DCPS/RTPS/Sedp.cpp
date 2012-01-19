@@ -194,8 +194,7 @@ Sedp::make_id(const RepoId& participant_id, const EntityId_t& entity)
 }
 
 DDS::ReturnCode_t
-Sedp::init(const RepoId& guid,
-           RtpsDiscovery& disco,
+Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
            DDS::DomainId_t domainId)
 {
   char domainStr[16];
@@ -210,12 +209,15 @@ Sedp::init(const RepoId& guid,
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst = 
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  rtps_inst->opendds_discovery_guid_ = guid;
+  // The SEDP endpoints may need to wait at least one resend period before
+  // the handshake completes (allows time for our SPDP multicast to be
+  // received by the other side).  Arbitrary constant of 5 to account for
+  // possible network lossiness.
+  static const double HANDSHAKE_MULTIPLIER = 5;
+  rtps_inst->handshake_timeout_ = disco.resend_period() * HANDSHAKE_MULTIPLIER;
 
   // Bind to a specific multicast group
-  const u_short mc_port = disco.pb() +
-                          disco.dg() * domainId +
-                          disco.dx();
+  const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
   const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
   if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr)) {
@@ -365,10 +367,25 @@ Sedp::increment_key(DDS::BuiltinTopicKey_t& key)
 void
 Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
 {
+  new AssociateTask(pdata, this);
+}
+
+int
+Sedp::AssociateTask::close(u_long)
+{
+  delete this;
+  return 0;
+}
+
+int
+Sedp::AssociateTask::svc()
+{
+  const SPDPdiscoveredParticipantData& pdata = pdata_;
   // First create a 'prototypical' instance of AssociationData.  It will
   // be copied and modified for each of the (up to) four SEDP Endpoints.
   DCPS::AssociationData proto;
   proto.publication_transport_priority_ = 0;
+  proto.remote_reliable_ = true;
   std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
               sizeof(GuidPrefix_t));
 
@@ -400,36 +417,38 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     pdata.participantProxy.availableBuiltinEndpoints;
 
   // See RTPS v2.1 section 8.5.5.1
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    publications_writer_.assoc(peer);
-  }
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    publications_reader_.assoc(peer);
+    sedp_->publications_reader_.assoc(peer);
   }
-  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    subscriptions_writer_.assoc(peer);
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    sedp_->publications_writer_.assoc(peer);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    subscriptions_reader_.assoc(peer);
+    sedp_->subscriptions_reader_.assoc(peer);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    sedp_->subscriptions_writer_.assoc(peer);
   }
   //FUTURE: if/when topic propagation is supported, add it here
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_->lock_, 1);
   // Write durable data
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    write_durable_publication_data();
+    sedp_->write_durable_publication_data();
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
-    write_durable_subscription_data();
+    sedp_->write_durable_subscription_data();
   }
 
+  return 0;
 }
 
 void
@@ -1094,6 +1113,25 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
   }
 }
 
+// helper for match(), below
+struct DcpsUpcalls : ACE_Task_Base {
+  DcpsUpcalls(const DCPS::DataReaderRemote_var& drr,
+              const RepoId& reader,
+              const DCPS::WriterAssociation& wa,
+              bool active,
+              const DCPS::DataWriterRemote_var& dwr);
+  int svc();
+  void writer_done();
+  const DCPS::DataReaderRemote_var& drr_;
+  const RepoId& reader_;
+  const DCPS::WriterAssociation& wa_;
+  bool active_;
+  const DCPS::DataWriterRemote_var& dwr_;
+  bool reader_done_, writer_done_;
+  ACE_Thread_Mutex mtx_;
+  ACE_Condition_Thread_Mutex cnd_;
+};
+
 void
 Sedp::match_endpoints(RepoId repoId, const TopicDetailsEx& td,
                       bool remove)
@@ -1317,16 +1355,24 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     static const bool writer_active = true;
 
     if (call_writer) {
+      DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
+      if (call_reader) {
+        thr.activate();
+      }
       dwr->add_association(writer, ra, writer_active);
-    }
-    if (call_reader) {
+      if (call_reader) {
+        thr.writer_done();
+      }
+
+    } else if (call_reader) {
       drr->add_association(reader, wa, !writer_active);
     }
 
     //TODO: For cases where the reader is not local to this participant,
     //      this callback is effectively lying to DCPS in telling it that
     //      the association is complete.  It may not be done handshaking yet.
-    if (call_writer) { // change this if 'writer_active' (above) changes
+    // change this if 'writer_active' (above) changes
+    if (call_writer && !call_reader) {
       dwr->association_complete(reader);
     }
 
@@ -1360,6 +1406,42 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       drr->update_incompatible_qos(readerStatus);
     }
   }
+}
+
+DcpsUpcalls::DcpsUpcalls(const DCPS::DataReaderRemote_var& drr,
+                         const RepoId& reader,
+                         const DCPS::WriterAssociation& wa,
+                         bool active,
+                         const DCPS::DataWriterRemote_var& dwr)
+  : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
+  , reader_done_(false), writer_done_(false), cnd_(mtx_)
+{}
+
+int
+DcpsUpcalls::svc()
+{
+  drr_->add_association(reader_, wa_, active_);
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);
+    reader_done_ = true;
+    cnd_.signal();
+    while (!writer_done_) {
+      cnd_.wait();
+    }
+  }
+  dwr_->association_complete(reader_);
+  return 0;
+}
+
+void
+DcpsUpcalls::writer_done()
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
+    writer_done_ = true;
+    cnd_.signal();
+  }
+  wait();
 }
 
 void

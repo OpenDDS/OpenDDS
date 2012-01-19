@@ -75,29 +75,27 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 
   case DATA:
     receiver_.fill_header(sample.header_);
-    link_->received(rsh.submessage_.data_sm(), receiver_.source_guid_prefix_,
-                    receiver_.dest_guid_prefix_);
+    link_->received(rsh.submessage_.data_sm(), receiver_.source_guid_prefix_);
     link_->data_received(sample);
     break;
 
   case GAP:
-    link_->received(rsh.submessage_.gap_sm(), receiver_.source_guid_prefix_,
-                    receiver_.dest_guid_prefix_);
+    link_->received(rsh.submessage_.gap_sm(), receiver_.source_guid_prefix_);
     break;
 
   case HEARTBEAT:
     link_->received(rsh.submessage_.heartbeat_sm(),
-                    receiver_.source_guid_prefix_, receiver_.dest_guid_prefix_);
+                    receiver_.source_guid_prefix_);
     break;
 
   case ACKNACK:
-    link_->received(rsh.submessage_.acknack_sm(), receiver_.source_guid_prefix_,
-                    receiver_.dest_guid_prefix_);
+    link_->received(rsh.submessage_.acknack_sm(),
+                    receiver_.source_guid_prefix_);
     break;
 
   case HEARTBEAT_FRAG:
-    link_->received(rsh.submessage_.hb_frag_sm(), receiver_.source_guid_prefix_,
-                    receiver_.dest_guid_prefix_);
+    link_->received(rsh.submessage_.hb_frag_sm(),
+                    receiver_.source_guid_prefix_);
     break;
 
   /* no case DATA_FRAG: by the time deliver_sample() is called, reassemble()

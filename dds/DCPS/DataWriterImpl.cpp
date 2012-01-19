@@ -284,6 +284,9 @@ DataWriterImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.remote_reliable_ =
+    (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
+
   if (!this->associate(data, active)) {
     //FUTURE: inform inforepo and try again as passive peer
     if (DCPS_debug_level) {

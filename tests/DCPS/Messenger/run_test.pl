@@ -16,8 +16,9 @@ use strict;
 
 my $status = 0;
 
-my $pub_opts = "-ORBDebugLevel 1 -ORBLogFile pub.log -DCPSDebugLevel 10 -DCPSTransportDebugLevel 6";
-my $sub_opts = "-ORBDebugLevel 1 -ORBLogFile sub.log -DCPSDebugLevel 10 -DCPSTransportDebugLevel 6";
+my $dbg_lvl = '-ORBDebugLevel 1 -DCPSDebugLevel 4 -DCPSTransportDebugLevel 2'; 
+my $pub_opts = "$dbg_lvl -ORBLogFile pub.log";
+my $sub_opts = "$dbg_lvl -ORBLogFile sub.log";
 my $repo_bit_opt = "";
 my $stack_based = 0;
 my $is_rtps_disc = 0;
@@ -69,8 +70,8 @@ elsif ($ARGV[0] eq 'rtps_disc') {
     $is_rtps_disc = 1;
 }
 elsif ($ARGV[0] eq 'rtps_disc_tcp') {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini -ORBVerboseLogging 1";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini -ORBVerboseLogging 1";
+    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $is_rtps_disc = 1;
 }
 elsif ($ARGV[0] eq 'rtps_unicast') {
@@ -104,7 +105,7 @@ unlink $dcpsrepo_ior;
 
 unless ($is_rtps_disc) {
   $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                     "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log " .
+                     "-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
                      "$repo_bit_opt -o $dcpsrepo_ior");
 }
 

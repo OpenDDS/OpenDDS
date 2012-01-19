@@ -355,6 +355,8 @@ DataReaderImpl::add_association(const RepoId& yourId,
     data.remote_data_ = writer.writerTransInfo;
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
+    data.remote_reliable_ =
+      (writer.writerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
 
     if (!this->associate(data, active)) {
       if (DCPS_debug_level) {

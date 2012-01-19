@@ -58,7 +58,7 @@ public:
        ACE_Thread_Mutex& lock);
 
   DDS::ReturnCode_t init(const DCPS::RepoId& guid, 
-                         RtpsDiscovery& disco, 
+                         const RtpsDiscovery& disco, 
                          DDS::DomainId_t domainId);
 
   // @brief return the ip address we have bound to.  
@@ -80,6 +80,17 @@ public:
 
   void associate(const SPDPdiscoveredParticipantData& pdata);
   void disassociate(const SPDPdiscoveredParticipantData& pdata);
+
+  struct AssociateTask : ACE_Task_Base {
+    AssociateTask(const SPDPdiscoveredParticipantData& pdata, Sedp* sedp)
+      : pdata_(pdata), spdp_(&sedp->spdp_, false), sedp_(sedp)
+    { activate(); }
+    int svc();
+    int close(u_long flags);
+    SPDPdiscoveredParticipantData pdata_;
+    DCPS::RcHandle<Spdp> spdp_;
+    Sedp* sedp_;
+  };
 
   // Topic
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,

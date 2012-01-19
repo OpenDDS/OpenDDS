@@ -1,3 +1,72 @@
+Thu Jan 19 16:11:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          AssociationData now contains a "remote_reliable_" bool,
+          which indicates to each side if the other has enabled reliability.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Run the SEDP association steps on their own thread.  This allows
+          the SPDP reactor thread to be available for the periodic send.
+          Reader-side associations need to start first.
+          Configure SEDP's transport with a "handshake_timeout_" value based
+          on the way the user has configured the Discovery object's resend
+          period, and removed opendds_discovery_guid_ since it's no longer used.
+          match_endpoints() can use a background thread if both sides are local.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Use the new "remote_reliable_" flag in AssociationData so that the
+          individual transport types can have access to this bit of info.
+          Other minor cleanup.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Adapted the non-RTPS transports to the framework changes above.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Implemented handshaking for new RTPS associations.  The writer side
+          will send a heartbeat and wait (for a configurable timeout) until
+          the reader acknowledges.  This applies to reliable readers only.
+          Corrected handling of INFO_DST submessages and the "destination
+          prefix."  Removed hacks previously needed by Discovery.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Cleaned up logging options and added RTPS configs to the nightlies.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Added the initial heartbeat/acknack handshake.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+
+          Adapted transport-level tests for "remote_reliable_".
+
 Thu Jan 19 15:48:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
@@ -45,7 +114,7 @@ Tue Jan 17 20:19:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
         * dds/DCPS/RTPS/Spdp.h:
         * dds/DCPS/RTPS/Spdp.cpp:
 
-          Provide acess to default locators and expectsInlineQos for a
+          Provide access to default locators and expectsInlineQos for a
             participant.
 
 Tue Jan 17 18:15:52 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>

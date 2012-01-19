@@ -22,6 +22,13 @@ struct AssociationData {
   RepoId               remote_id_;
   TransportLocatorSeq  remote_data_;
   CORBA::Long          publication_transport_priority_;
+  bool                 remote_reliable_;
+
+  AssociationData()
+    : remote_id_(GUID_UNKNOWN)
+    , publication_transport_priority_(0)
+    , remote_reliable_(false)
+  {}
 
   static ACE_INET_Addr get_remote_address(const TransportBLOB& remote)
   {

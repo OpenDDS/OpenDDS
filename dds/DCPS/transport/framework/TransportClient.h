@@ -47,7 +47,7 @@ protected:
   // Local setup:
 
   void enable_transport(bool reliable);
-  void enable_transport(bool reliable, TransportConfig_rch tc);
+  void enable_transport(bool reliable, const TransportConfig_rch& tc);
 
 protected:
   bool swap_bytes() const { return swap_bytes_; }

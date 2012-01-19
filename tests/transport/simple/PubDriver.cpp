@@ -221,6 +221,7 @@ PubDriver::run()
   // Set up the subscription.
   OpenDDS::DCPS::AssociationData subscription;
   subscription.remote_id_ = this->sub_id_;
+  subscription.remote_reliable_ = true;
   subscription.remote_data_.length(1);
   subscription.remote_data_[0].transport_type = "tcp";
 

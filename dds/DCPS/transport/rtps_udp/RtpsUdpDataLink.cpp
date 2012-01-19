@@ -72,8 +72,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   send_strategy_->send_buffer(&multi_buff_);
 
-  // Set up info_dst_ and info_reply_ messages for use with ACKNACKS,
-  // these won't change during the life of the datalink.
+  // Set up info_dst_ and info_reply_ messages for use with ACKNACKS
   using namespace OpenDDS::RTPS;
   info_dst_.smHeader.submessageId = INFO_DST;
   info_dst_.smHeader.flags = 1 /*FLAG_E*/;
@@ -120,15 +119,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 }
 
 void
-RtpsUdpDataLink::add_writer(const EntityId_t& entityid)
-{
-  RepoId id;
-  std::memcpy(id.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
-  id.entityId = entityid;
-  writers_[id];
-}
-
-void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,
                              const ACE_INET_Addr& address,
                              bool requires_inline_qos)
@@ -168,15 +158,15 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
 
 void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
-                            bool reliable)
+                            bool local_reliable, bool remote_reliable)
 {
-  if (!reliable) {
+  if (!local_reliable) {
     return;
   }
 
   const GuidConverter conv(local_id);
   const EntityKind kind = conv.entityKind();
-  if (kind == KIND_WRITER) {
+  if (kind == KIND_WRITER && remote_reliable) {
     writers_[local_id].remote_readers_[remote_id];
     heartbeat_.enable();
 
@@ -189,6 +179,35 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     rr->second.remote_writers_[remote_id];
     reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
   }
+}
+
+bool
+RtpsUdpDataLink::handshake_done(const RepoId& local_id, const RepoId& remote_id)
+{
+  const GuidConverter conv(local_id);
+  const EntityKind kind = conv.entityKind();
+  if (kind == KIND_WRITER) {
+    RtpsWriterMap::iterator rw = writers_.find(local_id);
+    if (rw == writers_.end()) {
+      return true; // not reliable, no handshaking
+    }
+    ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(remote_id);
+    if (ri == rw->second.remote_readers_.end()) {
+      return true; // not reliable, no handshaking
+    }
+    return ri->second.handshake_done_;
+
+  } else if (kind == KIND_READER) {
+    return true; // no handshaking for local reader
+  }
+  return false;
+}
+
+void
+RtpsUdpDataLink::handshake(const RepoId& local_id, const RepoId& remote_id)
+{
+  TransportImpl_rch ti = impl();
+  static_cast<RtpsUdpTransport*>(ti.in())->handshake(local_id, remote_id);
 }
 
 void
@@ -457,11 +476,9 @@ RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::DataSubmessage& data,
-                          const GuidPrefix_t& src_prefix,
-                          const GuidPrefix_t& dst_prefix)
+                          const GuidPrefix_t& src_prefix)
 {
-  datareader_dispatch(data, src_prefix, dst_prefix,
-                      &RtpsUdpDataLink::process_data_i);
+  datareader_dispatch(data, src_prefix, &RtpsUdpDataLink::process_data_i);
 }
 
 void
@@ -480,11 +497,9 @@ RtpsUdpDataLink::process_data_i(const OpenDDS::RTPS::DataSubmessage& data,
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::GapSubmessage& gap,
-                          const GuidPrefix_t& src_prefix,
-                          const GuidPrefix_t& dst_prefix)
+                          const GuidPrefix_t& src_prefix)
 {
-  datareader_dispatch(gap, src_prefix, dst_prefix,
-                      &RtpsUdpDataLink::process_gap_i);
+  datareader_dispatch(gap, src_prefix, &RtpsUdpDataLink::process_gap_i);
 }
 
 void
@@ -507,10 +522,9 @@ RtpsUdpDataLink::process_gap_i(const OpenDDS::RTPS::GapSubmessage& gap,
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
-                          const GuidPrefix_t& src_prefix,
-                          const GuidPrefix_t& dst_prefix)
+                          const GuidPrefix_t& src_prefix)
 {
-  datareader_dispatch(heartbeat, src_prefix, dst_prefix,
+  datareader_dispatch(heartbeat, src_prefix,
                       &RtpsUdpDataLink::process_heartbeat_i);
 }
 
@@ -627,6 +641,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
         // byte swapping is handled in the operator<<() implementation
         Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
+        std::memcpy(info_dst_.guidPrefix, wi->first.guidPrefix,
+                    sizeof(GuidPrefix_t));
         ser << info_dst_;
         ser << info_reply_;
         ser << acknack;
@@ -754,11 +770,9 @@ RtpsUdpDataLink::extend_bitmap_range(OpenDDS::RTPS::FragmentNumberSet& fnSet,
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
-                          const GuidPrefix_t& src_prefix,
-                          const GuidPrefix_t& dst_prefix)
+                          const GuidPrefix_t& src_prefix)
 {
-  datareader_dispatch(hb_frag, src_prefix, dst_prefix,
-                      &RtpsUdpDataLink::process_hb_frag_i);
+  datareader_dispatch(hb_frag, src_prefix, &RtpsUdpDataLink::process_hb_frag_i);
 }
 
 void
@@ -798,12 +812,11 @@ RtpsUdpDataLink::process_hb_frag_i(
 
 void
 RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
-                          const GuidPrefix_t& src_prefix,
-                          const GuidPrefix_t& dst_prefix)
+                          const GuidPrefix_t& src_prefix)
 {
   // local side is DW
   RepoId local;
-  std::memcpy(local.guidPrefix, dst_prefix, sizeof(GuidPrefix_t));
+  std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
   local.entityId = acknack.writerId; // can't be ENTITYID_UNKNOWN
 
   const RtpsWriterMap::iterator rw = writers_.find(local);
@@ -825,6 +838,11 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
   }
 
   ri->second.acknack_recvd_count_ = acknack.count.value;
+
+  if (!ri->second.handshake_done_) {
+    ri->second.handshake_done_ = true;
+    handshake(rw->first, ri->first);
+  }
 
   const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
@@ -945,15 +963,31 @@ RtpsUdpDataLink::send_heartbeats()
   typedef RtpsWriterMap::iterator rw_iter;
   for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
-    if (rw->second.send_buff_.is_nil() || rw->second.send_buff_->empty()) {
-      continue; // no data available -> no need to heartbeat (8.4.2.2.3)
+    const bool has_data = !rw->second.send_buff_.is_nil()
+                          && !rw->second.send_buff_->empty();
+    bool final = true;
+
+    typedef ReaderInfoMap::iterator ri_iter;
+    const ri_iter end = rw->second.remote_readers_.end();
+    for (ri_iter ri = rw->second.remote_readers_.begin(); ri != end; ++ri) {
+      if ((has_data || !ri->second.handshake_done_)
+          && locators_.count(ri->first)) {
+        recipients.insert(locators_[ri->first].addr_);
+        if (final && !ri->second.handshake_done_) {
+          final = false;
+        }
+      }
     }
 
-    const SequenceNumber firstSN = rw->second.send_buff_->low(),
-      lastSN = rw->second.send_buff_->high();
+    if (final && !has_data) {
+      continue;
+    }
+
+    const SequenceNumber firstSN = has_data ? rw->second.send_buff_->low() : 1,
+      lastSN = has_data ? rw->second.send_buff_->high() : 1;
 
     const HeartBeatSubmessage hb = {
-      {HEARTBEAT, 1 /*FLAG_E*/ | 2 /*FLAG_F*/, HEARTBEAT_SZ},
+      {HEARTBEAT, 1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0), HEARTBEAT_SZ},
       ENTITYID_UNKNOWN, // any matched reader may be interested in this
       rw->first.entityId,
       {firstSN.getHigh(), firstSN.getLow()},
@@ -961,14 +995,6 @@ RtpsUdpDataLink::send_heartbeats()
       {++rw->second.heartbeat_count_}
     };
     subm.push_back(hb);
-
-    typedef ReaderInfoMap::iterator ri_iter;
-    const ri_iter end = rw->second.remote_readers_.end();
-    for (ri_iter ri = rw->second.remote_readers_.begin(); ri != end; ++ri) {
-      if (locators_.count(ri->first)) {
-        recipients.insert(locators_[ri->first].addr_);
-      }
-    }
   }
 
   if (!subm.empty()) {

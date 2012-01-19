@@ -26,7 +26,7 @@ RtpsUdpInst::RtpsUdpInst(const std::string& name)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
-  , opendds_discovery_guid_(GUID_UNKNOWN)
+  , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
 {
 }
 
@@ -64,6 +64,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                         heartbeat_period_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_response_delay"),
                         heartbeat_response_delay_);
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("handshake_timeout"),
+                        handshake_timeout_);
   return 0;
 }
 
@@ -89,7 +91,9 @@ RtpsUdpInst::dump(std::ostream& os)
      << formatNameForDump("heartbeat_period") << heartbeat_period_.msec()
      << '\n'
      << formatNameForDump("heartbeat_response_delay")
-     << heartbeat_response_delay_.msec() << std::endl;
+     << heartbeat_response_delay_.msec() << '\n'
+     << formatNameForDump("handshake_timeout") << handshake_timeout_.msec() 
+     << std::endl;
   os.flags(flags);
 }
 

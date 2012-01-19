@@ -71,6 +71,7 @@ DataLink*
 UdpTransport::find_datalink_i(const RepoId& /*local_id*/,
                               const RepoId& /*remote_id*/,
                               const TransportBLOB& remote_data,
+                              bool /*remote_reliable*/,
                               const ConnectionAttribs& attribs,
                               bool active)
 {
@@ -104,6 +105,7 @@ DataLink*
 UdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
                                  const RepoId& /*remote_id*/,
                                  const TransportBLOB& remote_data,
+                                 bool /*remote_reliable*/,
                                  const ConnectionAttribs& attribs)
 {
   ACE_INET_Addr remote_address = get_connection_addr(remote_data);

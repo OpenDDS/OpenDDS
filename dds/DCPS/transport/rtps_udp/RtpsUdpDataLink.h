@@ -62,28 +62,21 @@ public:
   bool open(const ACE_SOCK_Dgram& unicast_socket);
 
   void received(const OpenDDS::RTPS::DataSubmessage& data,
-                const GuidPrefix_t& src_prefix,
-                const GuidPrefix_t& dst_prefix);
+                const GuidPrefix_t& src_prefix);
 
   void received(const OpenDDS::RTPS::GapSubmessage& gap,
-                const GuidPrefix_t& src_prefix,
-                const GuidPrefix_t& dst_prefix);
+                const GuidPrefix_t& src_prefix);
 
   void received(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
-                const GuidPrefix_t& src_prefix,
-                const GuidPrefix_t& dst_prefix);
+                const GuidPrefix_t& src_prefix);
 
   void received(const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
-                const GuidPrefix_t& src_prefix,
-                const GuidPrefix_t& dst_prefix);
+                const GuidPrefix_t& src_prefix);
 
   void received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
-                const GuidPrefix_t& src_prefix,
-                const GuidPrefix_t& dst_prefix);
+                const GuidPrefix_t& src_prefix);
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
-
-  void add_writer(const EntityId_t& entityid);
 
   void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address,
                    bool requires_inline_qos);
@@ -94,7 +87,10 @@ public:
   void get_locators(const RepoId& local_id,
                     std::set<ACE_INET_Addr>& addrs) const;
 
-  void associated(const RepoId& local, const RepoId& remote, bool reliable);
+  void associated(const RepoId& local, const RepoId& remote,
+                  bool local_reliable, bool remote_reliable);
+
+  bool handshake_done(const RepoId& local, const RepoId& remote);
 
 private:
   virtual void stop_i();
@@ -158,8 +154,9 @@ private:
   struct ReaderInfo {
     CORBA::Long acknack_recvd_count_;
     std::vector<OpenDDS::RTPS::SequenceNumberSet> requested_changes_;
+    bool handshake_done_;
 
-    ReaderInfo() : acknack_recvd_count_(0) {}
+    ReaderInfo() : acknack_recvd_count_(0), handshake_done_(false) {}
   };
 
   typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> ReaderInfoMap;
@@ -188,8 +185,8 @@ private:
       acknack_count_, nackfrag_count_;
 
     WriterInfo()
-      : ack_pending_(false), heartbeat_recvd_count_(0), hb_frag_recvd_count_(0),
-        acknack_count_(0), nackfrag_count_(0) {}
+      : ack_pending_(false), heartbeat_recvd_count_(0),
+        hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) {}
   };
 
   typedef std::map<RepoId, WriterInfo, GUID_tKeyLessThan> WriterInfoMap;
@@ -204,6 +201,8 @@ private:
   typedef std::multimap<RepoId, RtpsReaderMap::iterator, GUID_tKeyLessThan>
     RtpsReaderIndex;
   RtpsReaderIndex reader_index_; // keys are remote data writer GUIDs
+
+  void handshake(const RepoId& local_id, const RepoId& remote_id);
 
   size_t generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nack_frags,
                              WriterInfo& wi, const RepoId& pub_id);
@@ -226,11 +225,11 @@ private:
 
   template<typename T, typename FN>
   void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
-                           const GuidPrefix_t& dst_prefix, const FN& func)
+                           const FN& func)
   {
     using std::pair;
     RepoId local;
-    std::memcpy(local.guidPrefix, dst_prefix, sizeof(GuidPrefix_t));
+    std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
     local.entityId = submessage.readerId; 
 
     RepoId src;

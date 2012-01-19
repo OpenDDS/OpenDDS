@@ -40,6 +40,7 @@ DataLink*
 MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
                                     const RepoId& remote_id,
                                     const TransportBLOB& /*remote_data*/,
+                                    bool /*remote_reliable*/,
                                     const ConnectionAttribs& /*attribs*/,
                                     bool active)
 {
@@ -184,6 +185,7 @@ DataLink*
 MulticastTransport::connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& /*remote_data*/,
+                                       bool /*remote_reliable*/,
                                        const ConnectionAttribs& attribs)
 {
   MulticastDataLink_rch link = this->client_link_;

@@ -30,19 +30,21 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
 
-  /// For use by RTPS Discovery
-  void make_discovery_datalink(const GuidPrefix_t& local_prefix);
+  // called by our datalink
+  void handshake(const RepoId& local_id, const RepoId& remote_id);
 
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
+                                    bool remote_reliable,
                                     const ConnectionAttribs& attribs,
                                     bool active);
 
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
+                                       bool remote_reliable,
                                        const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);
@@ -63,6 +65,12 @@ protected:
 private:
   RtpsUdpDataLink* make_datalink(const GuidPrefix_t& local_prefix);
 
+  bool use_datalink(const RepoId& local_id,
+                    const RepoId& remote_id,
+                    const TransportBLOB& remote_data,
+                    bool local_reliable,
+                    bool remote_reliable);
+
   RcHandle<RtpsUdpInst> config_i_;
 
   /// RTPS uses only one link per transport.
@@ -73,6 +81,9 @@ private:
   RtpsUdpDataLink_rch link_;
 
   ACE_SOCK_Dgram unicast_socket_;
+
+  ACE_Thread_Mutex connections_lock_;
+  ACE_Thread_Condition<ACE_Thread_Mutex> handshake_condition_;
 };
 
 } // namespace DCPS
