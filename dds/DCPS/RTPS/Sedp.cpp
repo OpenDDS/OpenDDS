@@ -1819,10 +1819,9 @@ Sedp::populate_discovered_reader_msg(
   // Ignore drd.readerProxy.unicastLocatorList;
   // Ignore drd.readerProxy.multicastLocatorList;
   drd.readerProxy.allLocators = sub.trans_info_;
-  //TODO: Where are these?
   drd.contentFilterProperty.contentFilteredTopicName = "";
   drd.contentFilterProperty.relatedTopicName = "";
-  drd.contentFilterProperty.filterClassName = "";
+  drd.contentFilterProperty.filterClassName = ""; // See PL converter
   drd.contentFilterProperty.filterExpression = sub.filter_.c_str();
   drd.contentFilterProperty.expressionParameters = sub.params_;
 }
