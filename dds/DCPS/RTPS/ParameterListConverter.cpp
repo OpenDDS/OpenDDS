@@ -59,8 +59,9 @@ namespace {
         }
       }
     } else {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Unable to convert dcps_rtps ")
-                          ACE_TEXT("TransportLocator blob to LocatorSeq\n")));
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: add_param_rtps_locator - ")
+                           ACE_TEXT("Unable to convert dcps_rtps ")
+                           ACE_TEXT("TransportLocator blob to LocatorSeq\n")));
     }
   }
 
@@ -474,7 +475,8 @@ int to_param_list(const DiscoveredWriterData& writer_data,
       add_param_dcps_locator(param_list, tl);
       if (!strcmp(tl.transport_type.in(), "multicast")) {
         ACE_DEBUG((LM_WARNING, 
-                   ACE_TEXT("(%P|%t) Multicast transport with RTPS ")
+                   ACE_TEXT("(%P|%t) to_param_list(dwd) - ")
+                   ACE_TEXT("Multicast transport with RTPS ")
                    ACE_TEXT("discovery has known issues")));
       }
     }
@@ -624,7 +626,8 @@ int to_param_list(const DiscoveredReaderData& reader_data,
       add_param_dcps_locator(param_list, tl);
       if (!strcmp(tl.transport_type.in(), "multicast")) {
         ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) Multicast transport with RTPS ")
+                   ACE_TEXT("(%P|%t) to_param_list(drd) - ")
+                   ACE_TEXT("Multicast transport with RTPS ")
                    ACE_TEXT("discovery has known issues")));
       }
     }

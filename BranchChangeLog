@@ -1,3 +1,13 @@
+Thu Jan 19 19:49:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Consistent logging.
+          Log errors unconditionally.
+          Remove unnecessary TODO comments.
+
 Thu Jan 19 18:29:36 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:

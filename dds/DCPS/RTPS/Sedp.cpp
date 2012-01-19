@@ -221,9 +221,10 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 
   const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
   if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr)) {
-    ACE_DEBUG((LM_ERROR, "(%P|%t) Sedp::init() - "
-                         "failed setting multicast local_addr to port %hd\n",
-                         mc_port));
+    ACE_DEBUG((LM_ERROR, 
+               ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
+               ACE_TEXT("failed setting multicast local_addr to port %hd\n"),
+                        mc_port));
     return DDS::RETCODE_ERROR;
   }
 
@@ -685,8 +686,10 @@ Sedp::add_publication(const RepoId& topicId,
     return RepoId();
   }
 
-  ACE_DEBUG((LM_DEBUG,
-             "(%P|%t) add_publication() calling match_endpoints\n"));
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::add_publication - ")
+                         ACE_TEXT("calling match_endpoints\n")));
+  }
   match_endpoints(rid, td);
 
   return rid;
@@ -709,8 +712,9 @@ Sedp::remove_publication(const RepoId& publicationId)
         match_endpoints(publicationId, top_it->second, true /*remove*/);
       }
     } else {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("Sedp::remove_publication() - ")
-                           ACE_TEXT("Failed to publish dispose msg\n")));
+      ACE_DEBUG((LM_ERROR, 
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::remove_publication - ")
+                 ACE_TEXT("Failed to publish dispose msg\n")));
     }
   }
 }
@@ -774,8 +778,10 @@ Sedp::add_subscription(const RepoId& topicId,
     return RepoId();
   }
 
-  ACE_DEBUG((LM_DEBUG,
-             "(%P|%t) add_subscription() calling match_endpoints\n"));
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::add_subscription -")
+                         ACE_TEXT("calling match_endpoints\n")));
+  }
   match_endpoints(rid, td);
 
   return rid;
@@ -797,7 +803,9 @@ Sedp::remove_subscription(const RepoId& subscriptionId)
         match_endpoints(subscriptionId, top_it->second, true /*remove*/);
       }
     } else {
-      ACE_DEBUG((LM_ERROR, "Failed to publish dispose msg\n"));
+      ACE_DEBUG((LM_ERROR, 
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::remove_subscription - ")
+                 ACE_TEXT("Failed to publish dispose msg\n")));
     }
   }
 }
@@ -866,7 +874,7 @@ Sedp::make_topic_guid()
   assign(guid.entityId.entityKey, topic_counter_++);
 
   if (topic_counter_ == 0x1000000) {
-    ACE_ERROR((LM_ERROR,
+    ACE_DEBUG((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::make_topic_guid: ")
                ACE_TEXT("Exceeded Maximum number of topic entity keys!")
                ACE_TEXT("Next key will be a duplicate!\n")));
@@ -944,8 +952,10 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
-          ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) data_received(dwd) calling match_endpoints\n"));
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
+                                 ACE_TEXT("calling match_endpoints\n")));
+          }
           match_endpoints(guid, top_it->second);
         }
       }
@@ -1053,8 +1063,10 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
-          ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) data_received(drd) calling match_endpoints\n"));
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
+                                 ACE_TEXT("calling match_endpoints\n")));
+          }
           match_endpoints(guid, top_it->second);
         }
       }
@@ -1244,7 +1256,8 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
         rTls->length(1);
         (*rTls)[0] = tl;
       } else {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Sedp::match() - ") 
+        ACE_DEBUG((LM_WARNING, 
+                   ACE_TEXT("(%P|%t) Sedp::match - ") 
                    ACE_TEXT("remote endpoint found with no locators ")
                    ACE_TEXT("and no deafault locators\n")));
       }
@@ -1367,9 +1380,6 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       drr->add_association(reader, wa, !writer_active);
     }
 
-    //TODO: For cases where the reader is not local to this participant,
-    //      this callback is effectively lying to DCPS in telling it that
-    //      the association is complete.  It may not be done handshaking yet.
     // change this if 'writer_active' (above) changes
     if (call_writer && !call_reader) {
       dwr->association_complete(reader);
@@ -1476,9 +1486,8 @@ void
 Sedp::association_complete(const RepoId& /*localId*/,
                            const RepoId& /*remoteId*/)
 {
-  //TODO
-}
-
+  // no-op 
+} 
 void
 Sedp::disassociate_participant(const RepoId& /*remoteId*/)
 {
@@ -1649,8 +1658,9 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
     return DDS::RETCODE_OK;
   } else {
     // Error
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Failed to serialize ")
-                         ACE_TEXT("RTPS control message\n")));
+    ACE_DEBUG((LM_ERROR, 
+               ACE_TEXT("(%P|%t) ERROR: Sedp::Writer::write_unregister_dispose")
+               ACE_TEXT(" - Failed to serialize RTPS control message\n")));
     return DDS::RETCODE_ERROR;
   }
 }
@@ -1718,8 +1728,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     ParameterList data;
     ok &= (ser >> data);
     if (!ok) {
-      ACE_DEBUG((LM_ERROR,
-        "ERROR: Sedp::Reader::data_received() failed to deserialize data\n"));
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                           ACE_TEXT("failed to deserialize data\n")));
       return;
     }
 
@@ -1727,8 +1737,10 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER.entityKey[2]
       DiscoveredWriterData wdata;
       if (ParameterListConverter::from_param_list(data, wdata) < 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR Sedp::Reader::data_received - "
-          "failed to convert from ParameterList to DiscoveredWriterData\n"));
+        ACE_DEBUG((LM_ERROR, 
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to convert from ParameterList ")
+                   ACE_TEXT("to DiscoveredWriterData\n")));
         return;
       }
       sedp_.data_received(sample.header_.message_id_, wdata);
@@ -1737,8 +1749,10 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER.entityKey[2]
       DiscoveredReaderData rdata;
       if (ParameterListConverter::from_param_list(data, rdata) < 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR Sedp::Reader::data_received - "
-          "failed to convert from ParameterList to DiscoveredReaderData\n"));
+        ACE_DEBUG((LM_ERROR, 
+                   ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to convert from ParameterList ")
+                   ACE_TEXT("to DiscoveredReaderData\n")));
         return;
       }
       if (rdata.readerProxy.expectsInlineQos) {
@@ -1857,9 +1871,10 @@ Sedp::write_publication_data(
     populate_discovered_writer_msg(dwd, rid, lp);
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(dwd, plist)) {
-      ACE_DEBUG((LM_INFO, 
-            ACE_TEXT("(%P|%t) Failed to convert DiscoveredWriterData ")
-            ACE_TEXT(" to ParameterList\n")));
+      ACE_DEBUG((LM_ERROR, 
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                 ACE_TEXT("Failed to convert DiscoveredWriterData ")
+                 ACE_TEXT(" to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
@@ -1888,9 +1903,10 @@ Sedp::write_subscription_data(
     populate_discovered_reader_msg(drd, rid, ls);
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(drd, plist)) {
-      ACE_DEBUG((LM_INFO, 
-            ACE_TEXT("(%P|%t) Failed to convert DiscoveredReaderData ")
-            ACE_TEXT(" to ParameterList\n")));
+      ACE_DEBUG((LM_ERROR, 
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                 ACE_TEXT("Failed to convert DiscoveredReaderData ")
+                 ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
