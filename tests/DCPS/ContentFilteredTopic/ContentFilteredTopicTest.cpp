@@ -70,7 +70,8 @@ size_t takeSamples(const DataReader_var& dr, F filter)
 
 bool run_filtering_test(const DomainParticipant_var& dp,
   const MessageTypeSupport_var& ts, const Publisher_var& pub,
-  const Subscriber_var& sub, const Subscriber_var& sub2)
+  const Subscriber_var& sub, const Subscriber_var& sub2,
+  bool should_wait_for_ack)
 {
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp->create_topic("MyTopic", type_name,
@@ -80,6 +81,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
+  dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   DataWriter_var dw =
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   DataWriter_var dw2 =
@@ -88,6 +90,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
+  dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
     "MyTopic-Filtered", topic, "key > 1", StringSeq());
   DataReader_var dr =
@@ -164,9 +167,11 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
 
   Duration_t wfa = {60 /*seconds*/, 0 /*nanoseconds*/};
-  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
-    cout << "ERROR: wait_for_acknowledgments 1" << endl;
-    return false;
+  if (should_wait_for_ack) {
+    if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
+      cout << "ERROR: wait_for_acknowledgments 1" << endl;
+      return false;
+    }
   }
 
   // To set up a more difficult wait_for_acknowledgements() scenario,
@@ -175,9 +180,11 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   sample.key = 2;
   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
 
-  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
-    cout << "ERROR: wait_for_acknowledgments 2" << endl;
-    return false;
+  if (should_wait_for_ack) {
+    if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
+      cout << "ERROR: wait_for_acknowledgments 2" << endl;
+      return false;
+    }
   }
 
   if (dp->delete_contentfilteredtopic(cft) != RETCODE_PRECONDITION_NOT_MET) {
@@ -209,6 +216,12 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 int run_test(int argc, ACE_TCHAR *argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+  // RTPS has not yet implemented wait_for_acknowledgements
+  TransportConfig_rch using_rtps = 
+      TheTransportRegistry->get_config("using_rtps");
+  bool should_wait_for_ack = using_rtps.is_nil();
+
   DomainParticipant_var dp =
     dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
                             DEFAULT_STATUS_MASK);
@@ -230,7 +243,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   TransportRegistry::instance()->bind_config("c3", sub2);
 
-  bool passed = run_filtering_test(dp, ts, pub, sub, sub2);
+  bool passed = run_filtering_test(dp, ts, pub, sub, sub2, should_wait_for_ack);
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);

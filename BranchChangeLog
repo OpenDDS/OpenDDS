@@ -1,3 +1,15 @@
+Fri Jan 20 15:02:34 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Make reader and writer reliable.
+          Don't wait for acks when using RTPS discovery.
+
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/rtps_disc.ini
+
+          Run with RTPS discovery using argument rtps_disc
+
 Thu Jan 19 21:11:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
