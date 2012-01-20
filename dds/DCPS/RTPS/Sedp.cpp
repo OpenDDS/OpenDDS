@@ -216,16 +216,20 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   static const double HANDSHAKE_MULTIPLIER = 5;
   rtps_inst->handshake_timeout_ = disco.resend_period() * HANDSHAKE_MULTIPLIER;
 
-  // Bind to a specific multicast group
-  const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
+  if (disco.sedp_multicast()) {
+    // Bind to a specific multicast group
+    const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-  const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
-  if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr)) {
-    ACE_DEBUG((LM_ERROR, 
-               ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
-               ACE_TEXT("failed setting multicast local_addr to port %hd\n"),
-                        mc_port));
-    return DDS::RETCODE_ERROR;
+    const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
+    if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr)) {
+      ACE_DEBUG((LM_ERROR, 
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
+                 ACE_TEXT("failed setting multicast local_addr to port %hd\n"),
+                          mc_port));
+      return DDS::RETCODE_ERROR;
+    }
+  } else {
+    rtps_inst->use_multicast_ = false;
   }
 
   // Crete a config

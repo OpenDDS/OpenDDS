@@ -646,7 +646,8 @@ DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* messag
 /// within this DataLink that are interested in the (remote) publisher id
 /// that sent the sample.
 int
-DataLink::data_received(ReceivedDataSample& sample)
+DataLink::data_received(ReceivedDataSample& sample,
+                        const RepoId& readerId /* = GUID_UNKNOWN */)
 {
   DBG_ENTRY_LVL("DataLink", "data_received", 6);
 
@@ -684,6 +685,11 @@ DataLink::data_received(ReceivedDataSample& sample)
                  std::string(converter).c_str()));
     }
 
+    return 0;
+  }
+
+  if (readerId != GUID_UNKNOWN) {
+    listener_set->data_received(sample, readerId);
     return 0;
   }
 

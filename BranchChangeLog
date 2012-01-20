@@ -1,3 +1,33 @@
+Fri Jan 20 20:04:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Provide a configurable parameter "SedpMulticast" which can disable
+          the use of multicast by the SEDP portion of discovery.
+          Allow the d0 configurable parameter to be defaulted by an enviornment
+          variable "OPENDDS_RTPS_DEFAULT_D0", which will be used for the nightly
+          build machines (to avoid interference).
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          data_received() can now be called with a "destination" reader,
+          identified by subscription id (GUID).
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Use the above feature in the transport framework to allow delivering
+          Data submessages to a specific reader instead of all matched readers.
+
+        * tests/DCPS/RtpsDiscovery/dcps.ini:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+
+          Turn off SedpMulticast for testing.
+
 Fri Jan 20 19:02:44 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/DcpsIntegration/topic.cpp:

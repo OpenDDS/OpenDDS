@@ -104,6 +104,18 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
   }
 }
 
+ACE_INLINE void
+ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
+                                  const RepoId& readerId)
+{
+  DBG_ENTRY_LVL("ReceiveListenerSet", "data_received(sample, readerId)", 6);
+  GuardType guard(this->lock_);
+  MapType::iterator itr = map_.find(readerId);
+  if (itr != map_.end() && itr->second) {
+    itr->second->data_received(sample);
+  }
+}
+
 ACE_INLINE ReceiveListenerSet::MapType&
 ReceiveListenerSet::map()
 {

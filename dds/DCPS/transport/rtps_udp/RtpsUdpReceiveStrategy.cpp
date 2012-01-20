@@ -73,12 +73,19 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     // MessageReceiver (see check_header()), they are not passed up to DCPS.
     break;
 
-  case DATA:
+  case DATA: {
     receiver_.fill_header(sample.header_);
-    link_->received(rsh.submessage_.data_sm(), receiver_.source_guid_prefix_);
-    link_->data_received(sample);
+    const DataSubmessage& data = rsh.submessage_.data_sm();
+    link_->received(data, receiver_.source_guid_prefix_);
+    RepoId reader = GUID_UNKNOWN;
+    if (data.readerId != ENTITYID_UNKNOWN) {
+      std::memcpy(reader.guidPrefix, link_->local_prefix(),
+                  sizeof(GuidPrefix_t));
+      reader.entityId = data.readerId;
+    }
+    link_->data_received(sample, reader);
     break;
-
+  }
   case GAP:
     link_->received(rsh.submessage_.gap_sm(), receiver_.source_guid_prefix_);
     break;

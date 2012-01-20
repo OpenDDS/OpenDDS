@@ -138,7 +138,10 @@ public:
   /// has received a complete data sample.  This method will cause
   /// the appropriate TransportReceiveListener objects to be told
   /// that data_received().
-  int data_received(ReceivedDataSample& sample);
+  /// If readerId is not GUID_UNKNOWN, only the TransportReceiveListener
+  /// with that ID (if one exists) will receive the data.
+  int data_received(ReceivedDataSample& sample,
+                    const RepoId& readerId = GUID_UNKNOWN);
 
   /// SAMPLE_ACK message received on this link.
   void ack_received(ReceivedDataSample& sample);

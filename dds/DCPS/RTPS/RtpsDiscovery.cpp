@@ -18,6 +18,19 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 
+#include <cstdlib>
+
+namespace {
+  u_short get_default_d0(u_short fallback)
+  {
+    const char* from_env = std::getenv("OPENDDS_RTPS_DEFAULT_D0");
+    if (from_env) {
+      return static_cast<u_short>(std::atoi(from_env));
+    }
+    return fallback;
+  }
+}
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -28,9 +41,10 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)
   , pg_(2)
-  , d0_(0)
+  , d0_(get_default_d0(0))
   , d1_(10)
   , dx_(2)
+  , sedp_multicast_(true)
 {
   PortableServer::POA_var poa = TheServiceParticipant->the_poa();
   PortableServer::ObjectId_var oid = poa->activate_object(servant_);
@@ -171,7 +185,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
       u_short pb, dg, pg, d0, d1, dx;
       AddrVec spdp_send_addrs;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
-        has_d0 = false, has_d1 = false, has_dx = false;
+        has_d0 = false, has_d1 = false, has_dx = false, has_sm = false, sm;
 
       DCPS::ValueMap values;
       DCPS::pullValues(cf, it->second, values);
@@ -248,6 +262,18 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
                ACE_TEXT("[rtps_discovery/%C] section.\n"),
                value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "SedpMulticast") {
+          const std::string& value = it->second;
+          int smInt;
+          has_sm = DCPS::convertToInteger(value, smInt);
+          if (!has_sm) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+               ACE_TEXT("Invalid entry (%C) for SedpMulticast in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
+          sm = bool(smInt);
         } else if (name == "SpdpSendAddrs") {
           const std::string& value = it->second;
           size_t i = 0;
@@ -274,6 +300,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
       if (has_d0) discovery->d0(d0);
       if (has_d1) discovery->d1(d1);
       if (has_dx) discovery->dx(dx);
+      if (has_sm) discovery->sedp_multicast(sm);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
       TheServiceParticipant->add_discovery(
         DCPS::static_rchandle_cast<Discovery>(discovery));
@@ -286,7 +313,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
   if (discoveryMap.find(Discovery::DEFAULT_RTPS) == discoveryMap.end()) {
     RtpsDiscovery_rch discovery = new RtpsDiscovery(Discovery::DEFAULT_RTPS);
     TheServiceParticipant->add_discovery(
-      DCPS::dynamic_rchandle_cast<Discovery>(discovery));
+      DCPS::static_rchandle_cast<Discovery>(discovery));
   }
 
   return 0;

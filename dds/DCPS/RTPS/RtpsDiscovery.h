@@ -87,6 +87,11 @@ public:
     dx_ = offset_two;
   }
 
+  bool sedp_multicast() const { return sedp_multicast_; }
+  void sedp_multicast(bool sm) {
+    sedp_multicast_ = sm;
+  }
+
   typedef std::vector<std::string> AddrVec;
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
@@ -97,6 +102,7 @@ private:
 
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
+  bool sedp_multicast_;
   AddrVec spdp_send_addrs_;
 
   static int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
