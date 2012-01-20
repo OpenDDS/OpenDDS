@@ -1,3 +1,18 @@
+Fri Jan 20 22:53:50 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/dcps.ini:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Added support for RTPS testing (currently failing).
+
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+
+          Removed these files.
+
 Fri Jan 20 22:10:58 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * bin/dcps_tests.lst:

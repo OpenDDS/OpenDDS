@@ -84,7 +84,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                        reinterpret_cast<CORBA::Octet*>(PART_USER_DATA));
 
       DDS::DomainParticipant_var participant =
-        dpf->create_participant(411,
+        dpf->create_participant(41,
                                 partQos,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
