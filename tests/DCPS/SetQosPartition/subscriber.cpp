@@ -39,7 +39,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
       participant =
-        dpf->create_participant(411,
+        dpf->create_participant(311,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -148,11 +148,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         dynamic_cast<DataReaderListenerImpl*>(listener2.in());
 
       int expected = 10;
+      cout << "subscriber waiting for partition A completion" << endl;
       // Writer of PARTITION A -> Reader of PARTITION A
       while ( listener_servant1->num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 
+      cout << "subscriber waiting for partition B completion" << endl;
       // Writer switch from PARTITION A to B -> Reader of PARTITION B
       while ( listener_servant2->num_reads() < expected) {
         ACE_OS::sleep (1);
@@ -161,6 +163,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // ----------------------------------------------
       // Now switch first reader/subscriber from A to B
       // and it should be connected with DataWriter.
+      cout << "subscriber switching from A to B partition" << endl;
       sub_qos1.partition.name[0] = PARTITION_B;
 
       if (sub1->set_qos (sub_qos1) != ::DDS::RETCODE_OK)
@@ -172,6 +175,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Continue receive 10 more messages each.
       expected = 20;
 
+      cout << "subscriber waiting for 2nd partition B completion" << endl;
       while ( listener_servant1->num_reads() < expected) {
         ACE_OS::sleep (1);
       }

@@ -1,3 +1,21 @@
+Fri Jan 20 21:44:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/rtps_disc.ini:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+
+          Allow rtps_disc mode.
+
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/rtps_disc.ini:
+        * tests/DCPS/SetQosPartition/rtps_disc_tcp.ini:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+
+          Allow rtps_disc and rtps_disc_tcp mode.
+
 Fri Jan 20 20:04:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.h:

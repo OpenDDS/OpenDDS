@@ -16,6 +16,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
+#include <tools/modeling/codegen/model/Sync.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
@@ -40,7 +41,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         TheParticipantFactoryWithArgs(argc, argv);
 
       DDS::DomainParticipant_var participant =
-        dpf->create_participant(411,
+        dpf->create_participant(311,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -105,10 +106,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       {
         std::auto_ptr<Writer> writer (new Writer (dw.in ()));
 
+        cout << "Pub waiting for match on A partition." << std::endl;
+        if (OpenDDS::Model::WriterSync::wait_match(dw)) {
+          cerr << "Error waiting for match on A partition" << std::endl;
+          return 1;
+        }
         while (attempts != max_attempts)
         {
+
           ::DDS::InstanceHandleSeq handles;
           dw->get_matched_subscriptions(handles);
+          cout << "Pub matched " << handles.length() << " A subs." << std::endl;
           if (handles.length() == 1)
           {
             handle = handles[0];
@@ -150,11 +158,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       {
         std::auto_ptr<Writer> writer (new Writer (dw.in ()));
 
+        cout << "Pub waiting for match on B partition." << std::endl;
+        if (OpenDDS::Model::WriterSync::wait_match(dw)) {
+          cerr << "Error waiting for match on B partition" << std::endl;
+          return 1;
+        }
         attempts = 1;
         while (attempts != max_attempts)
         {
           ::DDS::InstanceHandleSeq handles;
           dw->get_matched_subscriptions(handles);
+          cout << "Pub matched " << handles.length() << " B subs." << std::endl;
           if (handles.length() == 1 && handles[0] != handle)
             break;
           else
@@ -194,7 +208,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
         if (attempts == max_attempts)
         {
-          cerr << "ERROR: failed to wait for DataReader exit." << endl;
+          cerr << "ERROR: failed to wait for DataReader partition switch." << endl;
           exit (1);
         }
 
