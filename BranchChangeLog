@@ -1,3 +1,12 @@
+Fri Jan 20 16:44:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc_tcp.ini:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+
+          Allow test to run in rtps_disc or rtps_disc_tcp modes.
+
 Fri Jan 20 15:46:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r5111 through r5254.
