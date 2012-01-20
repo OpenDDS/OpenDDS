@@ -1,5 +1,5 @@
 // $Id$
 
 feature(dds4ccm_opendds) : ciaoidldefaults {
-  idlflags += -Glem
+  idlflags += -Glem -Gsv
 }

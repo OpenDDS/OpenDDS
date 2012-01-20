@@ -25,6 +25,9 @@ public:
   /// The default value is: none.
   ACE_INET_Addr local_address_;
 
+  ACE_INT32 send_buffer_size_;
+  ACE_INT32 rcv_buffer_size_;
+
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 

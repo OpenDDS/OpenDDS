@@ -41,52 +41,60 @@ throw(CORBA::SystemException)
       ACE_OS::exit(-1);
     }
 
-    Messenger::Message message;
-    DDS::SampleInfo si;
+    Messenger::MessageSeq messages;
+    DDS::SampleInfoSeq info;
 
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+    DDS::ReturnCode_t error = message_dr->take(messages,
+                                               info,
+                                               DDS::LENGTH_UNLIMITED,
+                                               DDS::ANY_SAMPLE_STATE,
+                                               DDS::ANY_VIEW_STATE,
+                                               DDS::ANY_INSTANCE_STATE);
 
-    if (status == DDS::RETCODE_OK) {
+    if (error == DDS::RETCODE_OK) {
 
-      if (si.valid_data) {
-        ++num_samples_;
+      for (unsigned int i = 0; i < messages.length(); ++i) {
+        const DDS::SampleInfo& si = info[i];
+        if (si.valid_data) {
+          const Messenger::Message& message = messages[i];
+          ++num_samples_;
 
-        std::cout << "Message: subject = " << message.subject.in()
-                  << " subject_id = " << message.subject_id
-                  << " count = " << message.count
-                  << " from = " << message.from.in()
-                  << "\n\t text = " << message.text.in()
-                  << " data.length = " << message.data.length() << "\n";
+          std::cout << "Message: subject = " << message.subject.in()
+                    << " subject_id = " << message.subject_id
+                    << " count = " << message.count
+                    << " from = " << message.from.in()
+                    << "\n\t text = " << message.text.in()
+                    << " data.length = " << message.data.length() << "\n";
 
-        for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
-          if ((message.subject_id == 1 &&
-               (message.data[i] != i % 256)) ||
-              (message.subject_id == 2 &&
-               (message.data[i] != 255 - (i % 256)))) {
-            std::cout << "ERROR: Bad data at index " << i << " subjid "
-                      << message.subject_id << " count " << message.count
-                      << "\n";
-            break;
+          for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
+            if ((message.subject_id == 1 &&
+                 (message.data[i] != i % 256)) ||
+                (message.subject_id == 2 &&
+                 (message.data[i] != 255 - (i % 256)))) {
+              std::cout << "ERROR: Bad data at index " << i << " subjid "
+                        << message.subject_id << " count " << message.count
+                        << "\n";
+              break;
+            }
           }
+        } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+
+        } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l: on_data_available()")
+                     ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+                     si.instance_state));
         }
-      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
-
-      } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: on_data_available()")
-                   ACE_TEXT(" ERROR: unknown instance state: %d\n"),
-                   si.instance_state));
       }
-
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: unexpected status: %d\n"),
-                 status));
+                 error));
     }
 
   } catch (const CORBA::Exception& e) {

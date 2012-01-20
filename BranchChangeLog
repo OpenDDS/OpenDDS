@@ -1,3 +1,7 @@
+Fri Jan 20 15:46:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r5111 through r5254.
+
 Fri Jan 20 15:02:34 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:

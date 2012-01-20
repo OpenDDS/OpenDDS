@@ -262,7 +262,7 @@ namespace {
       return;
     }
     AST_Type* elem = seq->base_type();
-    unTypeDef(elem);
+    resolveActualType(elem);
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
@@ -444,7 +444,7 @@ namespace {
     NamespaceGuard ng;
     string cxx = scoped(name);
     AST_Type* elem = arr->base_type();
-    unTypeDef(elem);
+    resolveActualType(elem);
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
@@ -673,7 +673,7 @@ namespace {
   {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
-    unTypeDef(type);
+    resolveActualType(type);
     for (unsigned int i = 0; i < type_stack.size(); i++) {
       // If we encounter the same type recursively, then we are unbounded
       if (type == type_stack[i]) return false;
@@ -746,7 +746,7 @@ namespace {
   // Should only be called on bounded types (see above function)
   void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding)
   {
-    unTypeDef(type);
+    resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
         AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
@@ -886,7 +886,7 @@ namespace {
                         const string& = "") // same sig as streamCommon
   {
     AST_Type* typedeff = type;
-    unTypeDef(type);
+    resolveActualType(type);
     Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name;
     const string indent = (prefix == "uni") ? "      " : "  ";
@@ -934,7 +934,7 @@ namespace {
                       const string& stru = "")
   {
     AST_Type* typedeff = type;
-    unTypeDef(type);
+    resolveActualType(type);
     Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name, shift = prefix.substr(0, 2);
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
@@ -1105,7 +1105,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
       AST_Type* field_type = fields[i]->field_type();
-      unTypeDef(field_type);
+      resolveActualType(field_type);
       if (!field_type->in_main_file()
           && field_type->node_type() != AST_Decl::NT_pre_defined) {
         be_global->add_referenced(field_type->file_name().c_str());
@@ -1458,7 +1458,7 @@ namespace {
       if (namePrefix == string(">> ")) {
         string brType = scoped(branch->field_type()->name()), forany;
         AST_Type* br = branch->field_type();
-        unTypeDef(br);
+        resolveActualType(br);
         Classification br_cls = classify(br);
         if (!br->in_main_file()
             && br->node_type() != AST_Decl::NT_pre_defined) {

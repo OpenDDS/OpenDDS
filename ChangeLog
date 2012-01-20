@@ -1,3 +1,133 @@
+Tue Jan 17 18:41:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+
+          Removed unused variables.
+
+Thu Jan 12 12:57:54 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Adjusting the transport configuration to allow test to work on
+          all platforms.
+
+Wed Jan 11 20:06:14 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Changed to use send_buffer_size and rcv_buffer_size in the configuration
+          to set the send and receive socket buffer size.
+
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+
+          Added send_buffer_size and rcv_buffer_size to configuration.
+
+Wed Jan 11 14:03:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+
+          Changed to use zero copy.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Added line to always indicate how many messages were received, whether
+          it is passing or failing.
+
+Tue Jan 10 21:53:41 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Removing redundant indicastion for udp.
+
+Tue Jan 10 21:12:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Removing redundant indications for multicast which was
+          causing some crossplatform tests to fail.
+
+Thu Jan  5 16:52:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/dds_generator.h:
+
+          Added default to switch statement to remove warnings.
+
+Wed Jan  4 18:57:25 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+
+          Cleaned-up tests.
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+
+          Fixed problem with handling DOC and TAO2.0 idl
+          type structures that are indicated as a AST_*Fwd
+          class to be converted to their actual AST_* class.
+          [RT# 14991].
+
+Tue Dec 27 23:16:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Fuzz
+
+Tue Dec 13 17:03:58 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+
+          Added to idl tests to expose error in opendds_idl due to changes
+          in TAO_IDL in DOC/2.0a for processing multiple openings of the
+          same module with forward declared structures.
+
+Mon Dec 12 15:56:19 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Also use -Gsv
+
+Mon Dec  5 15:45:27 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Fuzz.
+
+        * docs/getting_started.odt:
+
+          Complete description of messenger minimal.
+
+Fri Dec  2 16:34:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+
+          Removed org.junit4 dependency from Require-Bundle list.
+
+Thu Dec  1 19:49:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Messenger.idl:
+
+          Reformatting.
+
+        * docs/getting_started.odt:
+
+          Describe IDL.
+
+Thu Dec  1 19:28:32 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Boilerplate.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger.minimal/Subscriber.cpp:
+
+          Reformatting.
+
+        * docs/getting_started.odt:
+
+          Document describing minimal messenger.
+
 Mon Nov 21 16:19:46 UTC 2011  Brian Johnson  <johnsonb@ociweb.com>
 
         * ChangeLog:

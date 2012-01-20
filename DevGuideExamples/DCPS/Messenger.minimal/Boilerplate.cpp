@@ -61,9 +61,10 @@ createPublisher(DDS::DomainParticipant_var participant)
 {
   // Create Publisher
   DDS::Publisher_var publisher =
-    participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                  0,
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    participant->create_publisher(
+        PUBLISHER_QOS_DEFAULT,
+        0,
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   // Check for failure
   if (!publisher) {
@@ -77,9 +78,10 @@ createSubscriber(DDS::DomainParticipant_var participant)
 {
   // Create Subscriber
   DDS::Subscriber_var subscriber =
-      participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                     0,
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      participant->create_subscriber(
+          SUBSCRIBER_QOS_DEFAULT,
+          0,
+          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   // Check for failure
   if (!subscriber) {

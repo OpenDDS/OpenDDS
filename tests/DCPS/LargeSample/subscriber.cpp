@@ -17,6 +17,11 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportInst_rch.h"
+#include "dds/DCPS/transport/udp/UdpInst.h"
+#include "dds/DCPS/transport/udp/UdpInst_rch.h"
+
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/DCPS/transport/udp/Udp.h>
@@ -41,6 +46,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    // handle test performance issue on one platform
+#if defined (sun)
+    const char* udpTransName = "udp";
+    OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::TransportRegistry::instance()->get_inst(udpTransName);
+    if (inst != 0) {
+      OpenDDS::DCPS::UdpInst_rch udp_inst = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::UdpInst>(inst);
+      if (udp_inst == 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l main()")
+                          ACE_TEXT(" ERROR: retrieving transport config for: %C failed!\n"),
+                          udpTransName), -1);
+      }
+      udp_inst->rcv_buffer_size_ = 0x40000;
+    }
+#endif
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
@@ -155,6 +176,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cout << "ERROR: data loss >= 25% (" << received << "/"
                 << num_messages_expected << " received)\n";
       ok = false;
+    }
+    else {
+      const unsigned int percent = ((num_messages_expected - received) * 100) / num_messages_expected;
+      std::cout << "data loss == " << percent << "% (" << received << "/"
+                << num_messages_expected << " received)\n";
     }
 
     // Clean-up!

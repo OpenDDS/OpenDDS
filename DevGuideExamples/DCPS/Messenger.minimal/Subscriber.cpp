@@ -36,7 +36,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::Subscriber_var subscriber = createSubscriber(participant);
 
     // Create Listener
-    DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
+    DataReaderListenerImpl* listener_impl = new DataReaderListenerImpl;
+    DDS::DataReaderListener_var listener(listener_impl);
 
     // Create DataReader with the listener attached
     DDS::DataReader_var reader = createDataReader(subscriber,
@@ -49,9 +50,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::Model::ReaderSync rs(reader);
     }
 
+    // Output the sample count
+    std::cout << "Subscriber received " << listener_impl->sample_count
+              << " samples" << std::endl;
+
     // Clean-up!
     cleanup(participant, dpf);
 
+    // Listener will be cleaned up when reader goes out of scope
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
