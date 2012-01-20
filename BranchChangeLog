@@ -1,3 +1,15 @@
+Fri Jan 20 17:15:19 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger/rtps_disc.ini:
+        * tests/DCPS/Messenger/rtps_disc_tcp.ini:
+        * tests/DCPS/RtpsDiscovery/dcps.ini:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+
+          Configure RTPS discovery with a shorter resend period (2s).
+
 Fri Jan 20 16:44:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/DcpsIntegration/rtps_disc.ini:
