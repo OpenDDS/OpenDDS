@@ -505,9 +505,9 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
 }
 
 void
-TcpTransport::release_datalink_i(DataLink* link, bool release_pending)
+TcpTransport::release_datalink(DataLink* link)
 {
-  DBG_ENTRY_LVL("TcpTransport", "release_datalink_i", 6);
+  DBG_ENTRY_LVL("TcpTransport", "release_datalink", 6);
 
   TcpDataLink* tcp_link = static_cast<TcpDataLink*>(link);
 
@@ -535,20 +535,27 @@ TcpTransport::release_datalink_i(DataLink* link, bool release_pending)
                "(%P|%t) ERROR: Unable to locate DataLink in order to "
                "release and it.\n"));
 
-  } else if (release_pending) {
-    released_link->set_release_pending (true);
+  } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
+
+    released_link->set_release_pending(true);
     if (this->pending_release_links_.bind(key, released_link) != 0) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
                  "pending_release_links_ map.\n"));
+    } else {
+      link->schedule_delayed_release();
     }
+
+  } else { // datalink_release_delay_ is 0
+
+    link->stop();
   }
 
   if (DCPS_debug_level > 9) {
     std::stringstream buffer;
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::release_datalink_i() - ")
+               ACE_TEXT("(%P|%t) TcpTransport::release_datalink() - ")
                ACE_TEXT("link with priority %d released.\n%C"),
                link->transport_priority(),
                buffer.str().c_str()));

@@ -28,7 +28,6 @@ namespace DCPS {
 
 TransportSendBuffer::~TransportSendBuffer()
 {
-  //release_all();
 }
 
 void
@@ -52,6 +51,11 @@ SingleSendBuffer::SingleSendBuffer(size_t capacity,
     replaced_mb_allocator_(this->n_chunks_ * 2),
     replaced_db_allocator_(this->n_chunks_ * 2)
 {
+}
+
+SingleSendBuffer::~SingleSendBuffer()
+{
+  release_all();
 }
 
 void

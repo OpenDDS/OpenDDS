@@ -285,9 +285,9 @@ RtpsUdpTransport::shutdown_i()
 }
 
 void
-RtpsUdpTransport::release_datalink_i(DataLink*, bool /*release_pending*/)
+RtpsUdpTransport::release_datalink(DataLink* /*link*/)
 {
-  link_ = 0;
+  // No-op for rtps_udp: keep the link_ around until the transport is shut down.
 }
 
 

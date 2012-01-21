@@ -46,6 +46,7 @@ DataLink::DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback,
   : stopped_(false),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
+    scheduled_(false),
     strategy_condition_(strategy_lock_),
     send_control_allocator_(0),
     mb_allocator_(0),
@@ -532,40 +533,42 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
            5);
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
-    // Add reference before schedule timer with reactor and remove reference after
-    // handle_timeout is called. This would avoid DataLink deletion while handling
-    // timeout.
-    this->_add_ref();
-    VDBG((LM_DEBUG, "(%P|%t) DataLink[%@]::release_reservations last "
-                    "reservation released\n", this));
 
-    if (this->datalink_release_delay_ > ACE_Time_Value::zero) {
-      // The samples has to be removed at this point, otherwise the sample
-      // can not be delivered when new association is added and still use
-      // this connection/datalink.
-      if (!this->send_strategy_.is_nil()) {
-        this->send_strategy_->clear();
-      }
-
-      CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-      ACE_Reactor* reactor = orb->orb_core()->reactor();
-
-      this->impl_->release_datalink(this, true);
-      reactor->schedule_timer(this, 0, this->datalink_release_delay_);
-
-    } else {
-      this->impl_->release_datalink(this, false);
-      this->handle_timeout(ACE_OS::gettimeofday(), (const void *)0);
-    }
+    this->impl_->release_datalink(this);
   }
+}
+
+void
+DataLink::schedule_delayed_release()
+{
+  // Add reference before schedule timer with reactor and remove reference after
+  // handle_timeout is called. This would avoid DataLink deletion while handling
+  // timeout.
+  this->_add_ref();
+  VDBG((LM_DEBUG, "(%P|%t) DataLink[%@]::schedule_delayed_release\n", this));
+
+  // The samples has to be removed at this point, otherwise the sample
+  // can not be delivered when new association is added and still use
+  // this connection/datalink.
+  if (!this->send_strategy_.is_nil()) {
+    this->send_strategy_->clear();
+  }
+
+  CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
+  ACE_Reactor* reactor = orb->orb_core()->reactor();
+  reactor->schedule_timer(this, 0, this->datalink_release_delay_);
+  scheduled_ = true;
 }
 
 bool
 DataLink::cancel_release()
 {
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-  ACE_Reactor* reactor = orb->orb_core()->reactor();
-  return reactor->cancel_timer(this) > 0;
+  if (scheduled_) {
+    CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
+    ACE_Reactor* reactor = orb->orb_core()->reactor();
+    return reactor->cancel_timer(this) > 0;
+  }
+  return false;
 }
 
 int

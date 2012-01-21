@@ -206,6 +206,8 @@ UdpTransport::shutdown_i()
     it->second->transport_shutdown();
   }
   this->client_links_.clear();
+
+  this->server_link_->transport_shutdown();
   this->server_link_ = 0;
 
   this->config_i_ = 0;
@@ -246,7 +248,7 @@ UdpTransport::get_connection_addr(const TransportBLOB& data) const
 }
 
 void
-UdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
+UdpTransport::release_datalink(DataLink* link)
 {
   GuardType guard(this->client_links_lock_);
   for (UdpDataLinkMap::iterator it(this->client_links_.begin());
@@ -254,6 +256,7 @@ UdpTransport::release_datalink_i(DataLink* link, bool /*release_pending*/)
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
     if (link == static_cast<DataLink*>(it->second.in())) {
+      link->stop();
       this->client_links_.erase(it);
       return;
     }

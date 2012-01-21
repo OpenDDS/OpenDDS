@@ -110,6 +110,10 @@ public:
                             RepoId          local_id,
                             DataLinkSetMap& released_locals);
 
+  void schedule_delayed_release();
+
+  const ACE_Time_Value& datalink_release_delay() const;
+
   /// Either send or receive listener for this local_id should be
   /// removed from internal DataLink structures so it no longer
   /// receives events.
@@ -392,6 +396,8 @@ private:
 
   /// TRANSPORT_PRIORITY value associated with the link.
   CORBA::Long transport_priority_;
+
+  bool scheduled_;
 
 protected:
 

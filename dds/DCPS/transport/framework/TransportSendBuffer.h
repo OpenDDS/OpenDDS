@@ -73,6 +73,7 @@ public:
   size_t n_chunks() const;
 
   SingleSendBuffer(size_t capacity, size_t max_samples_per_packet);
+  ~SingleSendBuffer();
 
   bool resend(const SequenceRange& range, DisjointSequence* gaps = 0);
 

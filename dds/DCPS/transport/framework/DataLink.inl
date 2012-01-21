@@ -56,6 +56,11 @@ bool  DataLink::is_active() const
   return this->is_active_;
 }
 
+ACE_INLINE const ACE_Time_Value&
+DataLink::datalink_release_delay() const
+{
+  return this->datalink_release_delay_;
+}
 
 ACE_INLINE void
 DataLink::send_start()

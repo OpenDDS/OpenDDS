@@ -366,11 +366,10 @@ MulticastTransport::connection_info_i(TransportLocator& info) const
 }
 
 void
-MulticastTransport::release_datalink_i(DataLink* /*link*/,
-                                       bool /*release_pending*/)
+MulticastTransport::release_datalink(DataLink* /*link*/)
 {
-  this->client_link_ = 0;  // release ownership
-  this->server_link_ = 0;  // release ownership
+  // No-op for multicast: keep both the client_link_ and server_link_ around
+  // until the transport is shut down.
 }
 
 
