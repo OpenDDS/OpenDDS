@@ -1,3 +1,9 @@
+Fri Jan 20 23:59:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          At least for now, require "-Config RTPS" to run RTPS tests.
+
 Fri Jan 20 22:53:50 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/dcps.ini:
