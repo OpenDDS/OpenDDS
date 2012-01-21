@@ -27,15 +27,16 @@ MulticastReceiveStrategy::get_handle() const
 }
 
 int
-MulticastReceiveStrategy::handle_input(ACE_HANDLE /*fd*/)
+MulticastReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  return TransportReceiveStrategy::handle_input();  // delegate to parent
+  return this->handle_dds_input(fd);
 }
 
 ssize_t
 MulticastReceiveStrategy::receive_bytes(iovec iov[],
                                         int n,
-                                        ACE_INET_Addr& remote_address)
+                                        ACE_INET_Addr& remote_address,
+                                        ACE_HANDLE /*fd*/)
 {
   ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
   return socket.recv(iov, n, remote_address);

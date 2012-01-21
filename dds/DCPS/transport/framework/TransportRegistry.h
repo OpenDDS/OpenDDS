@@ -89,6 +89,10 @@ public:
   /// TransportRegistry to attempt to load a fallback option.
   TransportConfig_rch fix_empty_default();
 
+  /// For internal use by OpenDDS DCPS layer:
+  /// Dynamically load the library for the supplied transport type.
+  void load_transport_lib(const std::string& transport_type);
+
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 

@@ -6,19 +6,19 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_TRANSPORTSENDBUFFER_RCH_H
-#define DCPS_TRANSPORTSENDBUFFER_RCH_H
+#ifndef DCPS_RTPSUDPSENDSTRATEGY_RCH_H
+#define DCPS_RTPSUDPSENDSTRATEGY_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-class TransportSendBuffer;
+class RtpsUdpSendStrategy;
 
-typedef RcHandle<TransportSendBuffer> TransportSendBuffer_rch;
+typedef RcHandle<RtpsUdpSendStrategy> RtpsUdpSendStrategy_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif  /* DCPS_TRANSPORTSENDBUFFER_RCH_H */
+#endif  /* DCPS_RTPSUDPSENDSTRATEGY_RCH_H */

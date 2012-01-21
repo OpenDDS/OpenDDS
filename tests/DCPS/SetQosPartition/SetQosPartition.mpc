@@ -11,7 +11,7 @@ project(*idl): dcps_test_lib {
 }
 
 
-project(*Publisher) : dcpsexe_with_tcp {
+project(*Publisher) : dcpsexe_with_tcp, dds_model {
   exename = publisher
   after  += *idl
   libs   += *idl

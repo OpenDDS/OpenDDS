@@ -99,9 +99,9 @@ Writer::svc()
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+    message.from       = "Comic Book Guy";
+    message.subject    = "Review";
+    message.text       = "Worst. Movie. Ever.";
     message.count      = 0;
 
     for (int i = 0; i < num_messages; i++) {

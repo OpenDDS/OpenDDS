@@ -121,3 +121,9 @@ OpenDDS::DCPS::TransportSendStrategy::max_message_size() const
 {
   return 0;
 }
+
+ACE_INLINE OpenDDS::DCPS::TransportQueueElement*
+OpenDDS::DCPS::TransportSendStrategy::current_packet_first_element() const
+{
+  return this->elems_->peek();
+}

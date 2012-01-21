@@ -54,7 +54,7 @@ public:
   void send_naks();
 
   void nak_received(ACE_Message_Block* control);
-  void send_naks (DisjointSequence& found);
+  void send_naks(DisjointSequence& found);
 
   void nakack_received(ACE_Message_Block* control);
   virtual void send_nakack(SequenceNumber low);

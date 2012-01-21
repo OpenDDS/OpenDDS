@@ -14,7 +14,6 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/Serializer.h"
 #include "ace/Synch.h"
 
 #include <map>

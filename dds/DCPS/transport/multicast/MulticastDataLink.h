@@ -28,7 +28,6 @@
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
-#include "dds/DCPS/transport/framework/TransportSendBuffer_rch.h"
 
 #include <map>
 
@@ -59,7 +58,7 @@ public:
   void receive_strategy(MulticastReceiveStrategy* recv_strategy);
   MulticastReceiveStrategy* receive_strategy();
 
-  TransportSendBuffer* send_buffer();
+  SingleSendBuffer* send_buffer();
 
   MulticastInst* config();
 
@@ -93,7 +92,7 @@ private:
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;
 
-  TransportSendBuffer_rch send_buffer_;
+  SingleSendBuffer* send_buffer_;
 
   ACE_SOCK_Dgram_Mcast socket_;
 

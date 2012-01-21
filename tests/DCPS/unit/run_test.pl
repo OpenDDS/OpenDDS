@@ -35,7 +35,7 @@ $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
                               , "$debugOpts -o $iorfile");
 
 $CL = PerlDDS::create_process ("DdsDcps_UnitTest",
-                              "$debugOpts -DCPSInfoRepo file://$iorfile" .
+                              "$debugOpts -DCPSInfoRepo file://$iorfile " .
                               "-c $client_orb ");
 
 print $REPO->CommandLine() . "\n";

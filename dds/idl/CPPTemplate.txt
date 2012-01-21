@@ -77,6 +77,13 @@ const OpenDDS::DCPS::MetaStruct&
 
 #endif
 
+bool
+<%TYPE%>TypeSupportImpl::has_dcps_key()
+{
+  return OpenDDS::DCPS::gen_has_key(<%TYPE%>());
+}
+
+
 <%TYPE%>DataWriterImpl::<%TYPE%>DataWriterImpl ()
   : marshaled_size_ (0)
   , key_marshaled_size_ (0)
@@ -249,18 +256,18 @@ DDS::ReturnCode_t
 
   // list of reader RepoIds that should not get data
   OpenDDS::DCPS::GUIDSeq_var filter_out;
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  const bool use_filter = false;
-#else
-  const bool use_filter = reader_info_.size() &&
-    TheServiceParticipant->publisher_content_filter();
-  if (use_filter) {
-    filter_out = new OpenDDS::DCPS::GUIDSeq;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  if (TheServiceParticipant->publisher_content_filter()) {
     for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
          end = reader_info_.end(); iter != end; ++iter) {
       const ReaderInfo& ri = iter->second;
-      if (!ri.eval_->eval(instance_data, ri.expression_params_)) {
-        push_back(filter_out.inout(), iter->first);
+      if (!ri.eval_.is_nil()) {
+        if (!filter_out.ptr()) {
+          filter_out = new OpenDDS::DCPS::GUIDSeq;
+        }
+        if (!ri.eval_->eval(instance_data, ri.expression_params_)) {
+          push_back(filter_out.inout(), iter->first);
+        }
       }
     }
   }
@@ -271,9 +278,7 @@ DDS::ReturnCode_t
 
   return OpenDDS::DCPS::DataWriterImpl::write(marshalled, handle,
                                               source_timestamp,
-                                              use_filter
-                                                ? filter_out._retn()
-                                                : 0);
+                                              filter_out._retn());
 }
 
 DDS::ReturnCode_t
@@ -395,22 +400,18 @@ void
                                        dw_remote_objref);
 
   ::<%SCOPED%> data;
-  if (OpenDDS::DCPS::gen_is_bounded_size (data))
-  {
-    marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (data);
-  }
-  else
-  {
-    marshaled_size_ =  0;// should use gen_find_size when marshaling
+  if (OpenDDS::DCPS::gen_is_bounded_size(data)) {
+    marshaled_size_ = 8 + OpenDDS::DCPS::gen_max_marshaled_size(data, true);
+    // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
+  } else {
+    marshaled_size_ = 0; // should use gen_find_size when marshaling
   }
   OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko(data);
-  if (OpenDDS::DCPS::gen_is_bounded_size (ko))
-  {
-    key_marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (ko);
-  }
-  else
-  {
-    key_marshaled_size_ =  0;// should use gen_find_size when marshaling
+  if (OpenDDS::DCPS::gen_is_bounded_size(ko)) {
+    key_marshaled_size_ = 8 + OpenDDS::DCPS::gen_max_marshaled_size(ko, true);
+    // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
+  } else {
+    key_marshaled_size_ = 0; // should use gen_find_size when marshaling
   }
 }
 
@@ -475,28 +476,56 @@ ACE_Message_Block*
   const ::<%SCOPED%>& instance_data,
   OpenDDS::DCPS::MarshalingType marshaling_type)
 {
-  ACE_Message_Block* mb;
+  const bool cdr = this->cdr_encapsulation(), swap = this->swap_bytes();
 
+  ACE_Message_Block* mb;
   if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
     // Don't use the cached allocator for the registered sample message
     // block.
 
     OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> > ko_instance_data(instance_data);
-    ACE_NEW_RETURN(mb,
-                   ACE_Message_Block(key_marshaled_size_
-                                     ? key_marshaled_size_
-                                     : OpenDDS::DCPS::gen_find_size(ko_instance_data)),
-                   0);
-    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
+    size_t effective_size = 0, padding = 0;
+    if (key_marshaled_size_) {
+      effective_size = key_marshaled_size_;
+    } else {
+      if (cdr) {
+        effective_size = 4; // CDR encapsulation
+      }
+      OpenDDS::DCPS::gen_find_size(ko_instance_data, effective_size, padding);
+    }
+    if (cdr) {
+      effective_size += padding;
+    }
+    ACE_NEW_RETURN(mb, ACE_Message_Block(effective_size), 0);
+    OpenDDS::DCPS::Serializer serializer(mb, swap, cdr
+      ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+      : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    if (cdr) {
+      serializer << ACE_OutputCDR::from_octet(0);
+      serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
+      serializer << ACE_CDR::UShort(0);
+    }
     serializer << ko_instance_data;
+
   } else { // OpenDDS::DCPS::FULL_MARSHALING
+    size_t effective_size = 0, padding = 0;
+    if (marshaled_size_) {
+      effective_size = marshaled_size_;
+    } else {
+      if (cdr) {
+        effective_size = 4; // CDR encapsulation
+      }
+      OpenDDS::DCPS::gen_find_size(instance_data, effective_size, padding);
+    }
+    if (cdr) {
+      effective_size += padding;
+    }
     ACE_NEW_MALLOC_RETURN(mb,
                           static_cast<ACE_Message_Block*>(
                               mb_allocator_->malloc(
                               sizeof(ACE_Message_Block))),
                           ACE_Message_Block(
-                              marshaled_size_ ? marshaled_size_ :
-                                  OpenDDS::DCPS::gen_find_size(instance_data),
+                              effective_size,
                               ACE_Message_Block::MB_DATA,
                               0, //cont
                               0, //data
@@ -508,7 +537,14 @@ ACE_Message_Block*
                               db_allocator_,
                               mb_allocator_),
                            0);
-    ::OpenDDS::DCPS::Serializer serializer(mb, this->swap_bytes());
+    OpenDDS::DCPS::Serializer serializer(mb, swap, cdr
+      ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+      : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    if (cdr) {
+      serializer << ACE_OutputCDR::from_octet(0);
+      serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
+      serializer << ACE_CDR::UShort(0);
+    }
     serializer << instance_data;
   }
 
@@ -1733,9 +1769,17 @@ void
                             data_allocator_->malloc(sizeof(::<%SCOPED%>))),
                            ::<%SCOPED%>);
 
+  const bool cdr = sample.header_.cdr_encapsulation_;
+
   OpenDDS::DCPS::Serializer ser(
     sample.sample_,
-    sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+    cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+
+  if (cdr) {
+    ACE_CDR::ULong header;
+    ser >> header;
+  }
 
   if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
     ser >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(*data);
@@ -1769,9 +1813,17 @@ void
 
   ::<%SCOPED%> data;
 
+  const bool cdr = sample.header_.cdr_encapsulation_;
+
   ::OpenDDS::DCPS::Serializer ser(
     sample.sample_,
-    sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+    cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+
+  if (cdr) {
+    ACE_CDR::ULong header;
+    ser >> header;
+  }
 
   ser >> data;
 
@@ -2140,8 +2192,11 @@ void
   // can be notified the dispose event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal(sample, instance, just_registered, filtered,
-                      OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+  OpenDDS::DCPS::MarshalingType marshaling = OpenDDS::DCPS::FULL_MARSHALING;
+  if (sample.header_.key_fields_only_) {
+    marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
+  }
+  this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
 }
 
 void
@@ -2156,8 +2211,11 @@ void
   // can be notified the unregister event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal (sample, instance, just_registered, filtered,
-                       OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+  OpenDDS::DCPS::MarshalingType marshaling = OpenDDS::DCPS::FULL_MARSHALING;
+  if (sample.header_.key_fields_only_) {
+    marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
+  }
+  this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
 }
 
 DDS::ReturnCode_t

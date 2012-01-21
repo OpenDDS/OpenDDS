@@ -13,11 +13,22 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-my $debug ;# = 10;
-my $transportDebug ;# = 10;
+my $debug = 10;
+my $transportDebug = 10;
 my $debugFile = "debug.out";
+my $is_rtps_disc = 0;
+my $DCPScfg = "";
+
+if ($ARGV[0] eq "rtps_disc") {
+  $DCPScfg = $ARGV[0] . ".ini";
+  $is_rtps_disc = 1;
+} elsif ($ARGV[0] eq "rtps_disc_tcp") {
+  $DCPScfg = $ARGV[0] . ".ini";
+  $is_rtps_disc = 1;
+}
 
 my $debugOpts = "";
+
 $debugOpts .= "-DCPSDebugLevel $debug " if $debug;
 $debugOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportDebug);
@@ -26,13 +37,14 @@ my $opts;
 
 $opts .= " " . $debugOpts if $debug or $transportDebug;
 
-$pub_opts = "$opts -DCPSConfigFile pub.ini";
-$sub_opts = "$opts -DCPSConfigFile sub.ini";
+$pub_opts = "$opts -DCPSConfigFile " .  ($is_rtps_disc ? $DCPScfg : "pub.ini");
+$sub_opts = "$opts -DCPSConfigFile " .  ($is_rtps_disc ? $DCPScfg : "sub.ini");
 
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
+unlink $debugFile;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "$repo_bit_opt -o $dcpsrepo_ior ");

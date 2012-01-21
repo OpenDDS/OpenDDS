@@ -221,6 +221,7 @@ PubDriver::run()
   // Set up the subscription.
   OpenDDS::DCPS::AssociationData subscription;
   subscription.remote_id_ = this->sub_id_;
+  subscription.remote_reliable_ = true;
   subscription.remote_data_.length(1);
   subscription.remote_data_[0].transport_type = "tcp";
 
@@ -237,7 +238,7 @@ PubDriver::run()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimplePublisher object.\n"));
 
-  this->writer_.enable_transport();
+  this->writer_.enable_transport(false /*reliable*/);
   this->writer_.init(subscription);
 
   // Wait for a fully association establishment and then start sending samples.

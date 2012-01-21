@@ -41,8 +41,8 @@ class MonitorDataStorage;
 class MonitorTask : public ACE_Task_Base {
   public:
     /// Alias the RepoKey type locally.
-    typedef OpenDDS::DCPS::Service_Participant::RepoKey RepoKey;
-    enum { DEFAULT_REPO = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO };
+    typedef OpenDDS::DCPS::Discovery::RepoKey RepoKey;
+    static const RepoKey DEFAULT_REPO;
 
     /// Map IOR values to repository key values.
     typedef std::map< std::string, RepoKey> IorKeyMap;
@@ -189,7 +189,7 @@ class MonitorTask : public ACE_Task_Base {
     bool activeKeyInited_;
 
     /// Repository key value used for last IOR to be set.
-    RepoKey lastKey_;
+    int lastKey_;
 };
 
 } // End of namespace Monitor

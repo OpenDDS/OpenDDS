@@ -13,6 +13,7 @@
 #include "Definitions.h"
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
+#include "DataSampleHeader.h"
 
 #include <map>
 #include <iterator>
@@ -107,6 +108,12 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
 
   ~DataSampleListElement();
 
+  /// The OpenDDS DCPS header for this sample
+  DataSampleHeader       header_;
+
+  // Original sequence number - set if this is a "historic sample"
+  SequenceNumber originalSequence_;
+
   /// Message being sent which includes the DataSampleHeader message block
   /// and DataSample message block.
   DataSample*            sample_;
@@ -115,9 +122,6 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
   PublicationId          publication_id_;
   CORBA::ULong           num_subs_;
   OpenDDS::DCPS::RepoId  subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
-
-  /// Timestamp for the sample when it was first written.
-  DDS::Time_t source_timestamp_;
 
   /// Used to make removal from the
   /// container _much_ more efficient.
@@ -298,7 +302,6 @@ public:
   ssize_t                size_;
   //TBD size is never negative so should be size_t but this ripples through
   // the transport code so leave it for now. SHH
-
 };
 
 } // namespace DCPS

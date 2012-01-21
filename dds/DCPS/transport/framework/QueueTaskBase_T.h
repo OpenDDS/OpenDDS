@@ -52,7 +52,7 @@ public:
   /// Put the request to the request queue.
   /// Returns 0 if successful, -1 otherwise (it has been "rejected" or this
   /// task is shutdown).
-  int add(T& req) {
+  int add(const T& req) {
     DBG_ENTRY("QueueTaskBase","add");
     GuardType guard(this->lock_);
 

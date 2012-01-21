@@ -23,8 +23,6 @@
 #include "TcpConnection.inl"
 #endif /* __ACE_INLINE__ */
 
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
-
 // The connection lost can be detected by both send and receive strategy. When
 // that happens, both of them add a request to the reconnect task. The reconnect
 // will be attempted when the first request is dequeued and the second request
@@ -186,10 +184,9 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   ACE_UINT32 len = ntohl(nlen);
 
-  char * buf = new char [len];
+  std::vector<char> buf(len);
 
-  if (this->peer().recv_n(buf,
-                          len) == -1) {
+  if (this->peer().recv_n(&buf[0], len) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: TcpConnection::open() - ")
                       ACE_TEXT("unable to receive the address string ")
@@ -199,12 +196,10 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
                      -1);
   }
 
-  const std::string bufstr(buf);
+  const std::string bufstr(&buf[0]);
   NetworkAddress network_order_address(bufstr);
 
   network_order_address.to_addr(this->remote_address_);
-
-  delete[] buf;
 
   ACE_UINT32 priority = 0;
 
@@ -229,7 +224,8 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   // Now it is time to announce (and give) ourselves to the
   // TcpTransport object.
-  transport->passive_connection(this->remote_address_,this);
+  transport->passive_connection(this->remote_address_,
+                                TcpConnection_rch(this, false));
 
   this->connected_ = true;
 
@@ -237,7 +233,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 }
 
 int
-OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE)
+OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE fd)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_input",6);
 
@@ -245,7 +241,7 @@ OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE)
     return 0;
   }
 
-  return this->receive_strategy_->handle_input();
+  return this->receive_strategy_->handle_dds_input(fd);
 }
 
 int
@@ -563,7 +559,6 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   DBG_ENTRY_LVL("TcpConnection","active_reconnect_i",6);
 
   GuardType guard(this->reconnect_lock_);
-  int ret = -1;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %d\n",
@@ -596,7 +591,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     // notify_lost() without delay.
 
     double retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
-
+    int ret = -1;
     for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i) {
       ret = this->active_establishment(this->remote_address_,
                                        this->local_address_,

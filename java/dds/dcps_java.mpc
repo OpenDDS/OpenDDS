@@ -25,7 +25,6 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
   Idl2Jni_Files {
     $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl
     $(DDS_ROOT)/dds/DdsDcpsDomain.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionJC.h DdsDcpsPublicationJC.h
-    $(DDS_ROOT)/dds/DdsDcpsDomainExt.idl << DdsDcpsDomainJC.h
     $(DDS_ROOT)/dds/DdsDcpsTypeSupportExt.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionExtJC.h DdsDcpsPublicationJC.h DdsDcpsDomainJC.h
     $(DDS_ROOT)/dds/DdsDcpsGuid.idl
   }
@@ -74,6 +73,8 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
   // This list should match the Java_Files list above, but these are the .class
   // files instead of the .java files.  (Only for classes with native methods.)
   JavaH_Files {
+    commandflags += -classpath ../../lib/i2jrt.jar
+
     classes/OpenDDS/DCPS/TheParticipantFactory.class
     classes/OpenDDS/DCPS/TheServiceParticipant.class
     classes/DDS/PARTICIPANT_QOS_DEFAULT.class

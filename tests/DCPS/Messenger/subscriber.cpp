@@ -17,11 +17,23 @@
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
+
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportConfig.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 #include "Args.h"
+
+bool
+make_dr_reliable()
+{
+  OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
+  return gc->instances_[0]->name() == "the_rtps_transport";
+}
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -38,7 +50,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(411,
+      dpf->create_participant(4,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -89,9 +101,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DataReader
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
+    DDS::DataReaderQos dr_qos;
+    sub->get_default_datareader_qos(dr_qos);
+    if (make_dr_reliable()) {
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    }
+
     DDS::DataReader_var reader =
       sub->create_datareader(topic.in(),
-                             DATAREADER_QOS_DEFAULT,
+                             dr_qos,
                              listener.in(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -126,7 +144,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-    } while (matches.current_count > 0);
+    } while (matches.current_count > 0 && matches.total_count != 0);
 
     ws->detach_condition(condition);
 

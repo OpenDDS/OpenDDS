@@ -43,6 +43,7 @@ public:
   ssize_t size() const;
 
   void data_received(const ReceivedDataSample& sample);
+  void data_received(const ReceivedDataSample& sample, const RepoId& readerId);
 
   /// Give access to the underlying map for iteration purposes.
   MapType& map();

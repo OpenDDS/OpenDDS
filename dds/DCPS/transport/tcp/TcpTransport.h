@@ -53,13 +53,15 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
-                                    CORBA::Long priority,
+                                    bool remote_reliable,
+                                    const ConnectionAttribs& attribs,
                                     bool active);
 
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
-                                       CORBA::Long priority);
+                                       bool remote_reliable,
+                                       const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);
   virtual void stop_accepting(ConnectionEvent& ce);
@@ -72,8 +74,7 @@ protected:
   virtual bool connection_info_i(TransportLocator& local_info) const;
 
   /// Called by the DataLink to release itself.
-  virtual void release_datalink_i(DataLink* link,
-                                  bool release_pending);
+  virtual void release_datalink(DataLink* link);
 
   virtual std::string transport_type() const { return "tcp"; }
 
@@ -90,23 +91,21 @@ private:
   /// created by the acceptor and needs to be attached to a DataLink.
   /// The DataLink may or may not already be created and waiting
   /// for this passive connection to appear.
-  /// Note that the TcpConnection* "ownership" is given away
-  /// to the passive_connection() call.
   void passive_connection(const ACE_INET_Addr& remote_address,
-                          TcpConnection* connection);
+                          const TcpConnection_rch& connection);
 
   /// Called by find_or_create_datalink().
   int make_active_connection(const ACE_INET_Addr& remote_address,
-                             TcpDataLink*   link);
+                             const TcpDataLink_rch& link);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
-  int connect_tcp_datalink(TcpDataLink*   link,
-                           TcpConnection* connection);
+  int connect_tcp_datalink(const TcpDataLink_rch& link,
+                           const TcpConnection_rch& connection);
 
-  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
-                                  CORBA::Long priority,
-                                  bool active);
+  PriorityKey blob_to_key(const TransportBLOB& remote,
+                          CORBA::Long priority,
+                          bool active);
 
   /// Map Type: (key) PriorityKey to (value) TcpDataLink_rch
   typedef ACE_Hash_Map_Manager_Ex

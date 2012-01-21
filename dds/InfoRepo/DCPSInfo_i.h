@@ -79,7 +79,8 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const char * topicName,
     const char * dataTypeName,
-    const DDS::TopicQos & qos)
+    const DDS::TopicQos & qos,
+    bool hasDcpsKey)
   ACE_THROW_SPEC((CORBA::SystemException
                    , OpenDDS::DCPS::Invalid_Domain
                    , OpenDDS::DCPS::Invalid_Participant));
@@ -118,15 +119,6 @@ public:
                    , OpenDDS::DCPS::Invalid_Domain));
 
   virtual OpenDDS::DCPS::TopicStatus remove_topic(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& topicId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Topic));
-
-  virtual OpenDDS::DCPS::TopicStatus enable_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId)

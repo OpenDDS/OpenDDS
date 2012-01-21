@@ -14,7 +14,7 @@
 
 #include "EntryExit.h"
 
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 
 OpenDDS::DCPS::DataLinkSetMap::DataLinkSetMap()
@@ -35,7 +35,7 @@ OpenDDS::DCPS::DataLinkSetMap::dump()
   for (MapType::const_iterator current = this->map_.begin();
        current != this->map_.end();
        ++current) {
-    RepoIdConverter converter(current->first);
+    GuidConverter converter(current->first);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLinkSetMap::dump() - ")
                ACE_TEXT("contains link for %C.\n"),
@@ -132,8 +132,8 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
     DataLinkSet_rch link_set;
 
     if (find(this->map_, remote_ids[i], link_set) != 0) {
-      RepoIdConverter remote_converter(remote_ids[i]);
-      RepoIdConverter local_converter(local_id);
+      GuidConverter remote_converter(remote_ids[i]);
+      GuidConverter local_converter(local_id);
       VDBG((LM_WARNING,
             ACE_TEXT("(%P|%t) DataLinkSetMap::release_reservations: ")
             ACE_TEXT("failed to find remote_id %C ")
@@ -148,7 +148,7 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
 
     if (link_set->empty()) {
       if (unbind(map_, remote_ids[i]) != 0) {
-        RepoIdConverter converter(remote_ids[i]);
+        GuidConverter converter(remote_ids[i]);
         VDBG((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: DataLinkSetMap::release_reservations: ")
               ACE_TEXT("failed to unbind remote_id %C ")
@@ -211,7 +211,7 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
 
     // Find the DataLinkSet in our map_ that has the local_id as the key.
     if (find(map_, local_id, link_set) != 0) {
-      RepoIdConverter converter(local_id);
+      GuidConverter converter(local_id);
       VDBG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataLinkSetMap::remove_released: ")
             ACE_TEXT("released local_id %C is not associated with ")
@@ -237,7 +237,7 @@ OpenDDS::DCPS::DataLinkSetMap::remove_released
           // link_set in the map_ using the key just a few steps earlier.
 
           // Just issue a warning.
-          RepoIdConverter converter(local_id);
+          GuidConverter converter(local_id);
           VDBG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DataLinkSetMap:remove_released: ")
                 ACE_TEXT("failed to unbind released local_id %C ")

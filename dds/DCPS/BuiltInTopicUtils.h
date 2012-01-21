@@ -14,8 +14,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Service_Participant.h"
-#include "RepoIdBuilder.h"
-#include "RepoIdConverter.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
 #include <sstream>
@@ -35,13 +33,6 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
-enum BuiltInTopicTransportTypeId {
-  BIT_SIMPLE_TCP = 0xb17b17
-};
-
-enum BuiltInTopicTransportInstanceId {
-  BIT_ALL_TRAFFIC = 0xb17b17
-};
 
 class DomainParticipantImpl;
 
@@ -72,41 +63,16 @@ DDS::BuiltinTopicKey_t keyFromSample(TopicType* sample);
 template <class BIT_Reader, class BIT_Reader_var, class BIT_DataSeq>
 class BIT_Helper_1 {
 public:
-  DDS::ReturnCode_t instance_handle_to_repo_key(
-    DomainParticipantImpl*         dp,
-    const char*                    bit_name,
-    const DDS::InstanceHandle_t&   handle,
-    OpenDDS::DCPS::RepoId&         repoId)
-  {
-    BIT_DataSeq data;
-    DDS::ReturnCode_t ret
-      = instance_handle_to_bit_data(dp, bit_name, handle, data);
-
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_key: ")
-                        ACE_TEXT("failed to find builtin topic data for instance 0x%x, ")
-                        ACE_TEXT("error %d.\n"),
-                        handle,
-                        ret), ret);
-    }
-
-    OpenDDS::DCPS::RepoIdBuilder builder(repoId);
-    builder.from_BuiltinTopicKey(data[0].key);
-
-    return DDS::RETCODE_OK;
-  }
-
   DDS::ReturnCode_t instance_handle_to_bit_data(
     DomainParticipantImpl*       dp,
     const char*                  bit_name,
     const DDS::InstanceHandle_t& handle,
     BIT_DataSeq&                 data)
   {
-    DDS::Subscriber_var bit_subscriber = dp->get_builtin_subscriber() ;
+    DDS::Subscriber_var bit_subscriber = dp->get_builtin_subscriber();
 
     DDS::DataReader_var reader =
-      bit_subscriber->lookup_datareader(bit_name) ;
+      bit_subscriber->lookup_datareader(bit_name);
 
     BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
@@ -124,12 +90,13 @@ public:
     while (1) {
       DDS::SampleInfoSeq the_info;
       BIT_DataSeq the_data;
-      ret = bit_reader->read(the_data,
-                             the_info,
-                             DDS::LENGTH_UNLIMITED, // zero-copy
-                             DDS::ANY_SAMPLE_STATE,
-                             DDS::ANY_VIEW_STATE,
-                             DDS::ANY_INSTANCE_STATE);
+      ret = bit_reader->read_instance(the_data,
+                                      the_info,
+                                      DDS::LENGTH_UNLIMITED, // zero-copy
+                                      handle,
+                                      DDS::ANY_SAMPLE_STATE,
+                                      DDS::ANY_VIEW_STATE,
+                                      DDS::ANY_INSTANCE_STATE);
 
       if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -139,17 +106,10 @@ public:
                          ret);
       }
 
-      // This is a temporary hack to work around the entity/data
-      // instance handle mismatch when data handles are passed
-      // to ignore_*. see: docs/design/instance-handles.txt
-      for (CORBA::ULong i = 0; i < the_data.length(); ++i) {
-        if (the_info[i].instance_handle == handle ||
-            the_data[i].key.value[2] == handle) {
-          data.length(1);
-          data[0] = the_data[i];
-
-          return DDS::RETCODE_OK;
-        }
+      if (ret == DDS::RETCODE_OK) {
+        data.length(1);
+        data[0] = the_data[0];
+        return ret;
       }
 
       ACE_Time_Value now = ACE_OS::gettimeofday();
@@ -176,25 +136,6 @@ public:
         return DDS::RETCODE_TIMEOUT;
       }
     }
-  }
-};
-
-template <class BIT_Reader, class BIT_Reader_var, class BIT_DataSeq, class IdSeq>
-class BIT_Helper_2 {
-public:
-  DDS::ReturnCode_t repo_ids_to_instance_handles(
-    const IdSeq&                    repoids,
-    DDS::InstanceHandleSeq&         handles)
-  {
-    CORBA::ULong repoids_len = repoids.length();
-    handles.length(repoids_len);
-
-    for (CORBA::ULong i = 0; i < repoids_len; ++i) {
-      OpenDDS::DCPS::RepoIdConverter converter(repoids[i]);
-      handles[i] = DDS::InstanceHandle_t(converter);
-    }
-
-    return DDS::RETCODE_OK;
   }
 };
 

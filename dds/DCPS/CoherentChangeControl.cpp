@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "CoherentChangeControl.h"
 #include "Serializer.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include <iomanip>
@@ -99,7 +99,7 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
       << ", last_sample: " << value.coherent_samples_.last_sample_.getValue()
       << ", ";
   if (value.group_coherent_) {
-    RepoIdConverter converter(value.publisher_id_);
+    GuidConverter converter(value.publisher_id_);
     str << "publisher: " << std::dec << std::string(converter).c_str() << ", ";
     str << "group size: " << std::dec << value.group_coherent_samples_.size()
         << ", ";
@@ -107,7 +107,7 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
       value.group_coherent_samples_.end();
     for (GroupCoherentSamples::const_iterator it =
            value.group_coherent_samples_.begin(); it != itEnd; ++it) {
-      RepoIdConverter converter(it->first);
+      GuidConverter converter(it->first);
       str << "writer: " << std::string(converter).c_str() << ", "
           << "num_samples: " << it->second.num_samples_ << ", "
           << "last_sample: " << it->second.last_sample_.getValue()  << std::endl;

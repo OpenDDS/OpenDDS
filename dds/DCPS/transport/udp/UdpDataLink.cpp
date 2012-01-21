@@ -19,29 +19,6 @@
 # include "UdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
-namespace {
-  int makeIovec(const ACE_Message_Block* block, iovec iov[], int size) {
-    int num_blocks = 0;
-
-#ifdef _MSC_VER
-#pragma warning(push)
-// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
-// since on other platforms iov_len is 64-bit
-#pragma warning(disable : 4267)
-#endif
-    while (block != 0 && num_blocks < size) {
-      iov[num_blocks].iov_len  = block->length();
-      iov[num_blocks].iov_base = block->rd_ptr();
-      ++num_blocks;
-      block = block->cont();
-    }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-    return num_blocks;
-  }
-}
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -207,7 +184,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     transport_header_block->cont(sample_header_block);
 
     iovec iov[MAX_SEND_BLOCKS];
-    int num_blocks = makeIovec(transport_header_block, iov, MAX_SEND_BLOCKS);
+    const int num_blocks =
+      TransportSendStrategy::mb_to_iov(*transport_header_block, iov);
     this->socket().send(iov, num_blocks, remote_address);
     transport_header_block->release();
 
@@ -232,7 +210,9 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     }
   }
 
-  if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
+  if (start(static_rchandle_cast<TransportSendStrategy>(this->send_strategy_),
+            static_rchandle_cast<TransportStrategy>(this->recv_strategy_))
+      != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

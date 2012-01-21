@@ -6,7 +6,6 @@
 #include "TestTypeSupportC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/RepoIdConverter.h"
 
 #include <sstream>
 
@@ -21,21 +20,12 @@ Writer::Writer(
   bool verbose
 
 ) : writer_( ::DDS::DataWriter::_duplicate( writer)),
+    publicationId_(writer->get_instance_handle()),
     profile_( profile),
     verbose_( verbose),
     done_( false),
     messages_( 0)
 {
-  OpenDDS::DCPS::DataWriterImpl* writerImpl
-    = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
-  if( writerImpl) {
-    OpenDDS::DCPS::RepoIdConverter converter(writerImpl->get_publication_id());
-    this->publicationId_ = DDS::InstanceHandle_t(converter);
-
-  } else {
-    this->publicationId_ = -1;
-  }
-
 }
 
 Writer::~Writer()

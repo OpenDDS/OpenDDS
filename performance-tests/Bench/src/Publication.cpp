@@ -11,7 +11,7 @@
 #include "EntityProfiles.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
@@ -402,7 +402,7 @@ Publication::svc ()
   OpenDDS::DCPS::DataWriterImpl* servant
     = dynamic_cast< OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
 
-  OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
+  OpenDDS::DCPS::GuidConverter converter(servant->get_publication_id());
   int pid = converter.checksum();
 
   ACE_Time_Value startTime = ACE_High_Res_Timer::gettimeofday_hr();

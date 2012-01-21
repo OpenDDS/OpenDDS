@@ -18,7 +18,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ThreadPerConRemoveVisitor : public BasicQueueVisitor<SendRequest> {
+class OpenDDS_Dcps_Export ThreadPerConRemoveVisitor
+  : public BasicQueueVisitor<SendRequest> {
 public:
 
   /// In order to construct a QueueRemoveVisitor, it must be
@@ -26,7 +27,7 @@ public:
   /// identifier) that should be removed from the BasicQueue<T>
   /// (the one this visitor will visit when it is passed-in
   /// to a BasicQueue<T>::accept_remove_visitor() invocation).
-  ThreadPerConRemoveVisitor(const ACE_Message_Block* sample);
+  explicit ThreadPerConRemoveVisitor(const ACE_Message_Block* sample);
 
   virtual ~ThreadPerConRemoveVisitor();
 
@@ -35,9 +36,8 @@ public:
   virtual int visit_element_remove(SendRequest*           element,
                                    int&                   remove);
 
-  /// Accessor for the status.  Called after this visitor object has
-  /// been passed to BasicQueue<T>::accept_remove_visitor().
-  int status() const;
+  /// True if the visitor found and removed the sample.
+  RemoveResult status() const;
 
 private:
 
@@ -45,7 +45,7 @@ private:
   const ACE_Message_Block* sample_;
 
   /// Holds the status of our visit.
-  int status_;
+  RemoveResult status_;
 };
 
 } // namespace DCPS

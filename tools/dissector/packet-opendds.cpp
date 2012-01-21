@@ -10,6 +10,8 @@
 #include "tools/dissector/packet-repo.h"
 #include "tools/dissector/sample_manager.h"
 
+#include "dds/DCPS/GuidConverter.h"
+
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
 #include <ace/Message_Block.h>
@@ -86,6 +88,9 @@ int hf_sample_flags_group_coh   = -1;
 int hf_sample_flags_content_filt= -1;
 int hf_sample_flags_seq_repair  = -1;
 int hf_sample_flags_more_frags  = -1;
+int hf_sample_flags2            = -1;
+int hf_sample_flags2_cdr_encap  = -1;
+int hf_sample_flags2_key_only   = -1;
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -100,10 +105,18 @@ const int* sample_flags_fields[] = {
   NULL
 };
 
+const int sample_flags2_bits = 8;
+const int* sample_flags2_fields[] = {
+  &hf_sample_flags2_cdr_encap,
+  &hf_sample_flags2_key_only,
+  NULL
+};
+
 gint ett_trans_header  = -1;
 gint ett_trans_flags   = -1;
 gint ett_sample_header = -1;
 gint ett_sample_flags  = -1;
+gint ett_sample_flags2 = -1;
 gint ett_filters = -1;
 
 const value_string byte_order_vals[] = {
@@ -163,7 +176,7 @@ namespace OpenDDS
     {
       T t;
 
-      guint len = std::min(tvb->length - offset,
+      guint len = std::min(tvb_length(tvb) - offset,
                            static_cast<guint>(t.max_marshaled_size()));
       const guint8* data = tvb_get_ptr(tvb, offset, len);
 
@@ -217,7 +230,7 @@ namespace OpenDDS
           os << ", Sequence: 0x" << std::hex << std::setw(8) << std::setfill('0')
              << sample.sequence_.getValue();
         }
-        os << ", Publication: " << DCPS::RepoIdConverter(sample.publication_id_);
+        os << ", Publication: " << DCPS::GuidConverter(sample.publication_id_);
       }
 
       return os.str();
@@ -260,7 +273,9 @@ namespace OpenDDS
       offset += len;
 
       // hf_sequence
-      len = static_cast<gint>(gen_find_size(header.sequence_));
+      size_t size = 0, padding = 0;
+      gen_find_size(header.sequence_, size, padding);
+      len = static_cast<gint>(size);
       proto_tree_add_uint64(ltree, hf_sequence, tvb_, offset, len,
                             gint64(header.sequence_.getValue()));
       offset += len;
@@ -291,11 +306,19 @@ namespace OpenDDS
           proto_tree_add_item(ltree, hf_sample_sub_id, tvb_, offset, len, FALSE);
         }
       offset += len;
+
       // hf_sample_flags
       len = sizeof(ACE_CDR::Octet);
       proto_tree_add_bitmask(ltree, tvb_, offset,
                              hf_sample_flags,
                              ett_sample_flags, sample_flags_fields, FALSE);
+      offset += len;
+
+      // hf_sample_flags2
+      len = sizeof(ACE_CDR::Octet);
+      proto_tree_add_bitmask(ltree, tvb_, offset,
+                             hf_sample_flags2,
+                             ett_sample_flags2, sample_flags2_fields, FALSE);
       offset += len;
 
       // hf_sample_length
@@ -307,7 +330,9 @@ namespace OpenDDS
       offset += len;
 
       // hf_sample_sequence
-      len = static_cast<gint>(gen_find_size(sample.sequence_));
+      size_t size = 0, padding = 0;
+      gen_find_size(sample.sequence_, size, padding);
+      len = static_cast<gint>(size);
       if (sample.message_id_ == SAMPLE_DATA) {
         proto_tree_add_uint64(ltree, hf_sample_sequence, tvb_, offset, len,
                               gint64(sample.sequence_.getValue()));
@@ -347,12 +372,14 @@ namespace OpenDDS
         }
 
       // hf_sample_publication
-      len = static_cast<gint>(gen_find_size(sample.publication_id_));
+      size = 0;
+      gen_find_size(sample.publication_id_, size, padding);
+      len = static_cast<gint>(size);
       const guint8 *data_ptr =
         reinterpret_cast<const guint8*>(&sample.publication_id_);
       if (sample.message_id_ != TRANSPORT_CONTROL)
         {
-          RepoIdConverter converter (sample.publication_id_);
+          GuidConverter converter (sample.publication_id_);
           proto_tree_add_bytes_format_value (ltree, hf_sample_publication,
                                              tvb_, offset, len, data_ptr, "%s",
                                              std::string(converter).c_str());
@@ -362,11 +389,13 @@ namespace OpenDDS
       // hf_sample_publisher
       if (sample.group_coherent_)
         {
-          len = static_cast<gint>(gen_find_size(sample.publisher_id_));
+          size = 0;
+          gen_find_size(sample.publisher_id_, size, padding);
+          len = static_cast<gint>(size);
           data_ptr = reinterpret_cast<const guint8*>(&sample.publisher_id_);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
-              DCPS::RepoIdConverter converter(sample.publisher_id_);
+              DCPS::GuidConverter converter(sample.publisher_id_);
               proto_tree_add_bytes_format_value (ltree, hf_sample_publisher,
                                                  tvb_, offset, len,
                                                  data_ptr, "%s",
@@ -379,8 +408,9 @@ namespace OpenDDS
       // hf_sample_content_filt
       if (sample.content_filter_)
         {
-          gint total_len =
-            static_cast<gint>(gen_find_size(sample.content_filter_entries_));
+          size = 0;
+          gen_find_size(sample.content_filter_entries_, size, padding);
+          gint total_len = static_cast<gint>(size);
           len = sizeof(CORBA::ULong);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
@@ -398,10 +428,12 @@ namespace OpenDDS
                    i++)
                 {
                   const GUID_t &filter = sample.content_filter_entries_[i];
-                  DCPS::RepoIdConverter converter(filter);
+                  DCPS::GuidConverter converter(filter);
                   std::stringstream strm;
                   strm << "filter [" << i << "] = " << converter << std::ends;
-                  len = static_cast<gint>(gen_find_size(filter));
+                  size = 0;
+                  gen_find_size(filter, size, padding);
+                  len = static_cast<gint>(size);
                   proto_tree_add_text (subtree, tvb_, offset, len, "%s",
                                        strm.str().c_str());
                   offset += len;
@@ -412,7 +444,6 @@ namespace OpenDDS
             {
               offset += total_len;
             }
-      //TODO: represent the content_filter entries in wireshark, for now skip
         }
     }
 
@@ -428,7 +459,27 @@ namespace OpenDDS
           return;
         }
 
-      RepoIdConverter converter(header.publication_id_);
+      if (header.cdr_encapsulation_)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      "DDS_Dissector::dissect_sample_payload: "
+                      "dissection of CDR-encapsulated data is not currently "
+                      "supported\n"));
+          offset += header.message_length_;
+          return;
+        }
+
+      if (header.byte_order_ != ACE_CDR_BYTE_ORDER)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      "DDS_Dissector::dissect_sample_payload: "
+                      "dissection of byte-swapped data is not currently "
+                      "supported\n"));
+          offset += header.message_length_;
+          return;
+        }
+
+      GuidConverter converter(header.publication_id_);
 
       const char * data_name =
         InfoRepo_Dissector::instance().topic_for_pub(&header.publication_id_);
@@ -494,7 +545,7 @@ namespace OpenDDS
 
         this->dissect_transport_header (trans_tree, trans, offset);
 
-        while (offset < gint(tvb_->length))
+        while (offset < gint(tvb_length(tvb_)))
           {
             DataSampleHeader sample =
               demarshal_data<DataSampleHeader>(tvb_, offset);
@@ -696,7 +747,7 @@ namespace OpenDDS
         },
         { &hf_sample_flags_coherent,
             { "Coherent", "opendds.sample.flags.coherent",
-                FT_BOOLEAN, sample_flags_bits, BF_HFILL (1)
+                FT_BOOLEAN, sample_flags_bits, BF_HFILL(1)
                 }
         },
         { &hf_sample_flags_historic,
@@ -728,6 +779,21 @@ namespace OpenDDS
             { "More Fragments", "opendds.sample.flags.more_frags",
                 FT_BOOLEAN, sample_flags_bits, BF_HFILL(7)
                 }
+        },
+        { &hf_sample_flags2,
+            { "Flags2", "opendds.sample.flags2",
+                FT_UINT8, BASE_HEX, NULL_HFILL
+            }
+        },
+        { &hf_sample_flags2_cdr_encap,
+            { "CDR Encapsulation", "opendds.sample.flags2.cdr_encap",
+              FT_BOOLEAN, sample_flags2_bits, BF_HFILL(0)
+            }
+        },
+        { &hf_sample_flags2_key_only,
+            { "Key Fields Only", "opendds.sample.flags2.key_only",
+              FT_BOOLEAN, sample_flags2_bits, BF_HFILL(1)
+            }
         },
         { &hf_sample_length,
             { "Length", "opendds.sample.length",
@@ -772,6 +838,7 @@ namespace OpenDDS
         &ett_trans_flags,
         &ett_sample_header,
         &ett_sample_flags,
+        &ett_sample_flags2,
         &ett_filters
       };
 

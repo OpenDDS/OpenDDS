@@ -16,7 +16,7 @@
 #include "ace/Arg_Shifter.h"
 
 // const data declarations
-const long  TEST_DOMAIN_NUMBER   = 411;
+const long  TEST_DOMAIN_NUMBER   = 41;
 const char* TEST_TOPIC_NAME    = "foo-name";
 const char* TEST_TYPE_NAME     = "foo-type";
 
@@ -145,7 +145,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) Was able to set invalid default Topic QOS!\n")),
                             4);
         }
-
       ::DDS::TopicQos topicQOSNewDefault;
       participant->get_default_topic_qos (topicQOSNewDefault);
       if (topicQOSNewDefault.reliability.kind

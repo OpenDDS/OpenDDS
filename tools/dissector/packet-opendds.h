@@ -28,7 +28,6 @@ extern "C" {
 #include "tools/dissector/dissector_export.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "ace/Hash_Map_Manager.h"

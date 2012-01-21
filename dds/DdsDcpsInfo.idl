@@ -74,7 +74,8 @@ module OpenDDS {
                                 in RepoId  participantId,
                                 in string          topicName,
                                 in string          DataTypeName,
-                                in ::DDS::TopicQos   qos)
+                                in ::DDS::TopicQos   qos,
+                                in boolean hasDcpsKey)
         raises (Invalid_Domain,
                 Invalid_Participant);
 
@@ -93,15 +94,6 @@ module OpenDDS {
       TopicStatus remove_topic (in ::DDS::DomainId_t domainId,
                                         in RepoId  participantId,
                                         in RepoId  topicId)
-        raises (Invalid_Domain,
-                Invalid_Participant,
-                Invalid_Topic);
-
-
-      // Topic entity calls to enable a topic
-      TopicStatus enable_topic (in ::DDS::DomainId_t domainId,
-                                in RepoId  participantId,
-                                in RepoId  topicId)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);

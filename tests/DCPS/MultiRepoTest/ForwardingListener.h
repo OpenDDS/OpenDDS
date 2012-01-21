@@ -20,7 +20,7 @@ class ForwardingListenerImpl
 {
 public:
   //Constructor
-  ForwardingListenerImpl( OpenDDS::DCPS::Service_Participant::RepoKey repo);
+  ForwardingListenerImpl( OpenDDS::DCPS::Discovery::RepoKey repo);
 
   //Destructor
   virtual ~ForwardingListenerImpl();
@@ -89,8 +89,6 @@ public:
 private:
   unsigned int samples_;
 
-  ::DDS::DataReader_var reader_;
-
   /// Writer to forward data on.
   ::DDS::DataWriter_var dataWriter_;
 
@@ -103,7 +101,7 @@ private:
   bool complete_;
 
   /// Repository key that we are attached to.
-  OpenDDS::DCPS::Service_Participant::RepoKey repo_;
+  OpenDDS::DCPS::Discovery::RepoKey repo_;
 };
 
 #endif /* FORWARDINGLISTENER_H  */

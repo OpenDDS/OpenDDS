@@ -10,76 +10,81 @@
 #define RTPS_RTPSBASEMESSAGETYPES_IDL
 
 #include "../../DdsDcpsGuid.idl"
+#include "../../DdsDcpsInfoUtils.idl"
 #include "../../DdsDcpsInfrastructure.idl"
 
 module OpenDDS {
   module RTPS {
 
+    // OMG Specification formal/2010-11-01 DDS-RTPS v2.1
+    // Section 9.3: "Mapping of the RTPS Types"
+
     typedef DCPS::GuidPrefix_t GuidPrefix_t;
-    typedef DCPS::EntityId_t EntityId;
+    // see GUIDPREFIX_UNKNOWN constant in BaseMessageTypes.h
+
+    typedef DCPS::EntityId_t EntityId_t;
+    // see ENTITYID_* constants in BaseMessageTypes.h
+
     typedef DCPS::GUID_t GUID_t;
+    // see GUID_UNKNOWN constant in BaseMessageTypes.h
 
     typedef DCPS::GUIDSeq GUIDSeq;
 
     typedef DDS::OctetSeq OctetSeq;
+    typedef DDS::StringSeq StringSeq;
 
     /* Type used to hold a timestamp. */
-    struct Time_t {
+    struct Time_t { // IETF RFC 1305: time = seconds + fraction / 2^32
       long seconds;
       unsigned long fraction;
     };
+    // see TIME_* constants in BaseMessageTypes.h
     typedef Time_t Timestamp_t;
 
-    typedef octet VIDOctetArray[2];
+    /* Duration_t isn't defined in the PSM. It is used to hold time-differences.
+       Should have at least nano-second resolution.  Table 9.13's row for
+       PID_PARTICIPANT_LEASE_DURATION indicates this a 2-item struct or array,
+       just like Time_t (which does have the needed resolution).  So we'll use
+       Time_t for the Duration_t datatype. */
+    typedef Time_t Duration_t;
 
-    /* Type used to represent the vendor of the service implementing the RTPS protocol. */
+    typedef octet OctetArray2[2];
+
+    /* Type used to represent the vendor of the service
+       implementing the RTPS protocol. */
     struct VendorId_t {
-      VIDOctetArray vendorId;
+      OctetArray2 vendorId;
     };
+    // see VENDORID_* constants in BaseMessageTypes.h
 
     /* Type used to hold sequence numbers. */
     struct SequenceNumber_t {
       long high;
       unsigned long low;
     };
-
-    typedef sequence<long, 8> SNSLongSeq;
-
-    /* SequenceNumberSet SubmessageElements are used as parts of several messages to
-       provide binary information about individual sequence numbers within a range. */
-    /* ***ATTENTION***: requires custom de/serializer */
-    struct SequenceNumberSet {
-      SequenceNumber_t bitmapBase;
-      SNSLongSeq bitmap;
-    };
+    // see SEQUENCENUMBER_UNKNOWN constant in BaseMessageTypes.h
 
     /* Type used to hold fragment numbers. */
     struct FragmentNumber_t {
       unsigned long value;
     };
 
-    typedef sequence<long, 8> FNSLongSeq;
+    typedef octet OctetArray16[16];
 
-    /* FragmentNumberSet SubmessageElements are used to provide binary information
-       about individual fragment numbers within a range. */
-    /* ***ATTENTION***: requires custom de/serializer */
-    struct FragmentNumberSet {
-      FragmentNumber_t bitmapBase;
-      FNSLongSeq bitmap;
-    };
-
-    typedef octet LOctetArray[16];
-
-    /* Type used to represent the addressing information needed to send a message
-       to an RTPS Endpoint */
+    /* Type used to represent the addressing information needed to send a
+       message to an RTPS Endpoint */
     struct Locator_t {
       long kind;
       unsigned long _port;
-      LOctetArray address;
+      OctetArray16 address;
     };
 
-    /* LocatorList is used to specify a list of locators. */
-    typedef sequence<Locator_t, 8> LocatorList;
+    const long LOCATOR_KIND_INVALID = -1;
+    const long LOCATOR_KIND_RESERVED = 0;
+    const long LOCATOR_KIND_UDPv4 = 1;
+    const long LOCATOR_KIND_UDPv6 = 2;
+    const unsigned long LOCATOR_PORT_INVALID = 0;
+    // see LOCATOR_* constants in BaseMessageTypes.h
 
     /* Specialization of Locator_t used to hold UDP IPv4 locators using a more
        compact representation. */
@@ -87,19 +92,28 @@ module OpenDDS {
       unsigned long address;
       unsigned long _port;
     };
+    // see LOCATORUDPv4_INVALID constant in BaseMessageTypes.h
 
     /* Enumeration used to distinguish whether a Topic has defined some fields
-       within to be used as the ‘key’ that identifies data-instances within the
+       within to be used as the 'key' that identifies data-instances within the
        Topic. */
     struct TopicKind_t {
       long value;
     };
+
+    // Constants for the TopicKind_t::value field
+    const short NO_KEY = 1;
+    const short WITH_KEY = 2;
 
     /* Enumeration used to indicate the level of the reliability used for
        communications. */
     struct ReliabilityKind_t {
       long value;
     };
+
+    // Constants for the ReliabilityKind_t::value field
+    const short BEST_EFFORT = 1;
+    const short RELIABLE = 3;
 
     /* Type used to encapsulate a count that is incremented monotonically, used
        to identify message duplicates. */
@@ -112,46 +126,42 @@ module OpenDDS {
       octet major;
       octet minor;
     };
+    // see PROTOCOLVERSION* constants in BaseMessageTypes.h
 
-    typedef octet KHOctetArray[16];
     struct KeyHash_t {
-      KHOctetArray value;
+      OctetArray16 value;
     };
 
-    typedef octet SIOctetArray[4];
+    typedef octet OctetArray4[4];
+
     struct StatusInfo_t {
-      SIOctetArray value;
+      OctetArray4 value;
     };
 
-    /* Type used to uniquely identify a parameter in a parameter list. */
-    struct ParameterId_t {
-      short value;
-    };
-
-    typedef string<256> CFPBoundedString;
-    typedef sequence<string> CFPStringSeq;
+    typedef string<256> String256;
 
     /* information to enable content filtering */
     struct ContentFilterProperty_t {
-      CFPBoundedString contentFilteredTopicName;
-      CFPBoundedString relatedTopicName;
-      CFPBoundedString filterClassName;
+      String256 contentFilteredTopicName;
+      String256 relatedTopicName;
+      String256 filterClassName;
       string filterExpression;
-      CFPStringSeq expressionParameters;
+      StringSeq expressionParameters;
     };
 
     /* For each filter signature, the results indicate whether the
        sample passed the filter. */
     typedef sequence<long> FilterResult_t;
 
-    /* A list of filters that were applied to the sample. */
+    /* A list of filters that were applied to the sample.
+       See section 9.6.3.1 for the signature-generation algorithm. */
     typedef long FilterSignature_t[4];
 
-    typedef sequence<FilterSignature_t> CFIFilterSignatureSeq;
+    typedef sequence<FilterSignature_t> FilterSignatureSeq;
 
     struct ContentFilterInfo_t {
       FilterResult_t filterResult;
-      CFIFilterSignatureSeq filterSignatures;
+      FilterSignatureSeq filterSignatures;
     };
 
     struct Property_t {
@@ -159,17 +169,41 @@ module OpenDDS {
       string value;
     };
 
+    typedef sequence<Property_t> PropertySeq;
+
     struct EntityName_t {
       string name;
     };
 
-    /* requires custom de/marshalling */
-    struct Parameter {
-      ParameterId_t parameterId;
-      OctetSeq value;
-    };
+    typedef unsigned long BuiltinEndpointSet_t;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER =
+      1 << 0;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR =
+      1 << 1;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER =
+      1 << 2;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR =
+      1 << 3;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER =
+      1 << 4;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR =
+      1 << 5;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER =
+      1 << 6;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR =
+      1 << 7;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER =
+      1 << 8;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR =
+      1 << 9;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER =
+      1 << 10;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER =
+      1 << 11;
 
+    union Parameter;
     /* contains a list of Parameters, terminated with a sentinel */
+    /* custom de/serializer implemented in opendds_idl: see 9.4.2.11 */
     typedef sequence<Parameter> ParameterList;
 
     struct OriginalWriterInfo_t {
@@ -178,36 +212,222 @@ module OpenDDS {
       ParameterList originalWriterQos;
     };
 
-    typedef unsigned long BuiltinEndpointSet_t;
+    typedef unsigned short ParameterId_t;
 
-    /* ***ATTENTION***: Not sure how best to represent SerializedPayload */
-    typedef OctetSeq SerializedPayload_t;
+    // see Table 9.12 "ParameterId Values" and 9.14 "Inline QoS Parameters"
+    //   (the following constants are in the same order as Table 9.12)
+    const ParameterId_t PID_PAD = 0x0000;
+    const ParameterId_t PID_SENTINEL = 0x0001;
+    const ParameterId_t PID_USER_DATA = 0x002c;
+    const ParameterId_t PID_TOPIC_NAME = 0x0005;
+    const ParameterId_t PID_TYPE_NAME = 0x0007;
+    const ParameterId_t PID_GROUP_DATA = 0x002d;
+    const ParameterId_t PID_TOPIC_DATA = 0x002e;
+    const ParameterId_t PID_DURABILITY = 0x001d;
+    const ParameterId_t PID_DURABILITY_SERVICE = 0x001e;
+    const ParameterId_t PID_DEADLINE = 0x0023;
+    const ParameterId_t PID_LATENCY_BUDGET = 0x0027;
+    const ParameterId_t PID_LIVELINESS = 0x001b;
+    const ParameterId_t PID_RELIABILITY = 0x001a;
+    const ParameterId_t PID_LIFESPAN = 0x002b;
+    const ParameterId_t PID_DESTINATION_ORDER = 0x0025;
+    const ParameterId_t PID_HISTORY = 0x0040;
+    const ParameterId_t PID_RESOURCE_LIMITS = 0x0041;
+    const ParameterId_t PID_OWNERSHIP = 0x001f;
+    const ParameterId_t PID_OWNERSHIP_STRENGTH = 0x0006;
+    const ParameterId_t PID_PRESENTATION = 0x0021;
+    const ParameterId_t PID_PARTITION = 0x0029;
+    const ParameterId_t PID_TIME_BASED_FILTER = 0x0004;
+    const ParameterId_t PID_TRANSPORT_PRIORITY = 0x0049;
+    const ParameterId_t PID_PROTOCOL_VERSION = 0x0015;
+    const ParameterId_t PID_VENDORID = 0x0016;
+    const ParameterId_t PID_UNICAST_LOCATOR = 0x002f;
+    const ParameterId_t PID_MULTICAST_LOCATOR = 0x0030;
+    const ParameterId_t PID_MULTICAST_IPADDRESS = 0x0011;
+    const ParameterId_t PID_DEFAULT_UNICAST_LOCATOR = 0x0031;
+    const ParameterId_t PID_DEFAULT_MULTICAST_LOCATOR = 0x0048;
+    const ParameterId_t PID_METATRAFFIC_UNICAST_LOCATOR = 0x0032;
+    const ParameterId_t PID_METATRAFFIC_MULTICAST_LOCATOR = 0x0033;
+    const ParameterId_t PID_DEFAULT_UNICAST_IPADDRESS = 0x000c;
+    const ParameterId_t PID_DEFAULT_UNICAST_PORT = 0x000e;
+    const ParameterId_t PID_METATRAFFIC_UNICAST_IPADDRESS = 0x0045;
+    const ParameterId_t PID_METATRAFFIC_UNICAST_PORT = 0x000d;
+    const ParameterId_t PID_METATRAFFIC_MULTICAST_IPADDRESS = 0x000b;
+    const ParameterId_t PID_METATRAFFIC_MULTICAST_PORT = 0x0046;
+    const ParameterId_t PID_EXPECTS_INLINE_QOS = 0x0043;
+    const ParameterId_t PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT = 0x0034;
+    const ParameterId_t PID_PARTICIPANT_BUILTIN_ENDPOINTS = 0x0044;
+    const ParameterId_t PID_PARTICIPANT_LEASE_DURATION = 0x0002;
+    const ParameterId_t PID_CONTENT_FILTER_PROPERTY = 0x0035;
+    const ParameterId_t PID_PARTICIPANT_GUID = 0x0050;
+    const ParameterId_t PID_PARTICIPANT_ENTITYID = 0x0051;
+    const ParameterId_t PID_GROUP_GUID = 0x0052;
+    const ParameterId_t PID_GROUP_ENTITYID = 0x0053;
+    const ParameterId_t PID_BUILTIN_ENDPOINT_SET = 0x0058;
+    const ParameterId_t PID_PROPERTY_LIST = 0x0059;
+    const ParameterId_t PID_TYPE_MAX_SIZE_SERIALIZED = 0x0060;
+    const ParameterId_t PID_ENTITY_NAME = 0x0062;
+    const ParameterId_t PID_KEY_HASH = 0x0070;
+    const ParameterId_t PID_STATUS_INFO = 0x0071;
+    //   (the following constant is not in the spec but is needed for SEDP)
+    const ParameterId_t PID_ENDPOINT_GUID = 0x005a;
+    //   (the following constants are in the same order as Table 9.14)
+    const ParameterId_t PID_CONTENT_FILTER_INFO = 0x0055;
+    const ParameterId_t PID_COHERENT_SET = 0x0056;
+    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
+    const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
 
-    const long LOCATOR_KIND_INVALID = -1;
-    const unsigned long LOCATOR_PORT_INVALID = 0;
-    const long LOCATOR_KIND_RESERVED = 0;
-    const long LOCATOR_KIND_UDPv4 = 1;
-    const long LOCATOR_KIND_UDPv6  = 2;
+    // ParameterId Bitmask values (Table 9.11)
+    const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
+    const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
 
-    const short NO_KEY = 1;
-    const short WITH_KEY = 2;
+    // Vendor-specific parameters
+    // PID_OPENDDS_BASE won't be used as an actual PID, it's just the starting
+    // point for ones we assign.  This is deliberately a larger number so as
+    // not to overlap ones that other vendors are using and are in the Wireshark
+    // dissector (they could overlap, but it would confuse Wireshark).
+    const ParameterId_t PID_OPENDDS_BASE = PIDMASK_VENDOR_SPECIFIC + 0x3000;
+    const ParameterId_t PID_OPENDDS_LOCATOR = PID_OPENDDS_BASE + 1;
 
-    const short BEST_EFFORT = 1;
-    const short RELIABLE = 3;
+    /* Always used inside a ParameterList */
+    /* custom de/serializer implemented in opendds_idl */
+    union Parameter switch (ParameterId_t) {
+      case PID_TOPIC_NAME:
+      case PID_TYPE_NAME:
+        String256 string_data;
 
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER = 0x00000001 << 0;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR = 0x00000001 << 1;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER = 0x00000001 << 2;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR = 0x00000001 << 3;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER = 0x00000001 << 4;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR = 0x00000001 << 5;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER = 0x00000001 << 6;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR = 0x00000001 << 7;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER = 0x00000001 << 8;
-    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR = 0x00000001 << 9;
-    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER = 0x00000001 << 10;
-    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER = 0x00000001 << 11;
+      // DDS Quality-of-Service (QoS) structs
+      case PID_USER_DATA:
+        DDS::UserDataQosPolicy user_data;
+      case PID_GROUP_DATA:
+        DDS::GroupDataQosPolicy group_data;
+      case PID_TOPIC_DATA:
+        DDS::TopicDataQosPolicy topic_data;
+      case PID_DURABILITY:
+        DDS::DurabilityQosPolicy durability;
+      case PID_DURABILITY_SERVICE:
+        DDS::DurabilityServiceQosPolicy durability_service;
+      case PID_DEADLINE:
+        DDS::DeadlineQosPolicy deadline;
+      case PID_LATENCY_BUDGET:
+        DDS::LatencyBudgetQosPolicy latency_budget;
+      case PID_LIVELINESS:
+        DDS::LivelinessQosPolicy liveliness;
+      case PID_RELIABILITY:
+        DDS::ReliabilityQosPolicy reliability;
+      case PID_LIFESPAN:
+        DDS::LifespanQosPolicy lifespan;
+      case PID_DESTINATION_ORDER:
+        DDS::DestinationOrderQosPolicy destination_order;
+      case PID_HISTORY:
+        DDS::HistoryQosPolicy history;
+      case PID_RESOURCE_LIMITS:
+        DDS::ResourceLimitsQosPolicy resource_limits;
+      case PID_OWNERSHIP:
+        DDS::OwnershipQosPolicy ownership;
+      case PID_OWNERSHIP_STRENGTH:
+        DDS::OwnershipStrengthQosPolicy ownership_strength;
+      case PID_PRESENTATION:
+        DDS::PresentationQosPolicy presentation;
+      case PID_PARTITION:
+        DDS::PartitionQosPolicy partition;
+      case PID_TIME_BASED_FILTER:
+        DDS::TimeBasedFilterQosPolicy time_based_filter;
+      case PID_TRANSPORT_PRIORITY:
+        DDS::TransportPriorityQosPolicy transport_priority;
 
+      // RTPS-defined data types
+      case PID_PROTOCOL_VERSION:
+        ProtocolVersion_t version;
+
+      case PID_VENDORID:
+        VendorId_t vendor;
+
+      case PID_UNICAST_LOCATOR:
+      case PID_MULTICAST_LOCATOR:
+      case PID_DEFAULT_UNICAST_LOCATOR:
+      case PID_DEFAULT_MULTICAST_LOCATOR:
+      case PID_METATRAFFIC_UNICAST_LOCATOR:
+      case PID_METATRAFFIC_MULTICAST_LOCATOR:
+        Locator_t locator;
+
+      case PID_MULTICAST_IPADDRESS:
+      case PID_DEFAULT_UNICAST_IPADDRESS:
+      case PID_METATRAFFIC_UNICAST_IPADDRESS:
+      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
+        unsigned long ipv4_address;
+        //NOTE: the spec uses "IPv4Address_t" which is not defined anywhere.
+        //      We have chosen unsigned long to match the type of
+        //      the address field in the LocatorUDPv4_t struct.
+
+      case PID_DEFAULT_UNICAST_PORT:
+      case PID_METATRAFFIC_UNICAST_PORT:
+      case PID_METATRAFFIC_MULTICAST_PORT:
+        unsigned long udpv4_port;
+        //NOTE: the spec uses "Port_t" which is not defined anywhere.
+        //      We have chosen unsigned long to match the type of
+        //      the port field in the LocatorUDPv4_t struct.
+
+      case PID_EXPECTS_INLINE_QOS:
+        boolean expects_inline_qos;
+
+      case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
+        Count_t count;
+
+      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
+        unsigned long participant_builtin_endpoints;
+
+      case PID_PARTICIPANT_LEASE_DURATION:
+        Duration_t duration;
+
+      case PID_CONTENT_FILTER_PROPERTY:
+        ContentFilterProperty_t content_filter_property;
+
+      case PID_PARTICIPANT_GUID:
+      case PID_ENDPOINT_GUID:
+      case PID_GROUP_GUID:
+        GUID_t guid;
+
+      case PID_PARTICIPANT_ENTITYID:
+      case PID_GROUP_ENTITYID:
+        EntityId_t entity_id;
+
+      case PID_BUILTIN_ENDPOINT_SET:
+        BuiltinEndpointSet_t builtin_endpoints;
+
+      case PID_PROPERTY_LIST:
+        PropertySeq properties;
+
+      case PID_TYPE_MAX_SIZE_SERIALIZED:
+        long type_max_size_serialized;
+
+      case PID_ENTITY_NAME:
+        EntityName_t entity_name;
+
+      case PID_KEY_HASH:
+        KeyHash_t key_hash;
+
+      case PID_STATUS_INFO:
+        StatusInfo_t status_info;
+
+      case PID_CONTENT_FILTER_INFO:
+        ContentFilterInfo_t content_filter_info;
+
+      case PID_COHERENT_SET:
+        SequenceNumber_t coherent_set;
+
+      case PID_DIRECTED_WRITE:
+        GUIDSeq directed_write;
+
+      case PID_ORIGINAL_WRITER_INFO:
+        OriginalWriterInfo_t original_writer_info;
+
+      case PID_OPENDDS_LOCATOR:
+        DCPS::TransportLocator opendds_locator;
+
+      default:
+        OctetSeq unknown_data;
+    };
   };
 };
 

@@ -20,6 +20,7 @@
 #include "PacketRemoveVisitor.h"
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
@@ -53,11 +54,11 @@ namespace {
 // occurs every packet and is released after packet is sent.
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
-TransportSendStrategy::TransportSendStrategy
-(TransportInst*          transport_inst,
- ThreadSynchResource*    synch_resource,
- CORBA::Long             priority,
- ThreadSynchStrategy_rch thread_sync_strategy)
+TransportSendStrategy::TransportSendStrategy(
+  const TransportInst_rch& transport_inst,
+  ThreadSynchResource* synch_resource,
+  CORBA::Long priority,
+  const ThreadSynchStrategy_rch& thread_sync_strategy)
   : max_samples_(transport_inst->max_samples_per_packet_),
     optimum_size_(transport_inst->optimum_packet_size_),
     max_size_(transport_inst->max_packet_size_),
@@ -82,15 +83,13 @@ TransportSendStrategy::TransportSendStrategy
     replaced_element_mb_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
     replaced_element_db_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
     retained_element_allocator_(0),
+    transport_inst_(transport_inst),
     graceful_disconnecting_(false),
     link_released_(true),
     send_buffer_(0),
     transport_shutdown_(false)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
-
-  transport_inst->_add_ref();
-  this->transport_inst_ = transport_inst;
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper(priority);
@@ -112,7 +111,8 @@ TransportSendStrategy::TransportSendStrategy
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
 
-  this->delayed_delivered_notification_queue_ = new TransportQueueElement* [max_samples_];
+  this->delayed_delivered_notification_queue_ =
+    new TransportQueueElement*[max_samples_];
   this->delayed_notification_mode_ = new SendMode[max_samples_];
 }
 
@@ -714,7 +714,7 @@ TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
 
     num_delayed_notifications = this->num_delayed_notifications_;
 
-    if (num_delayed_notifications <= 0) {
+    if (num_delayed_notifications == 0) {
       return;
 
     } else if (num_delayed_notifications == 1) {
@@ -1299,7 +1299,7 @@ TransportSendStrategy::send_stop()
       return;
     }
 
-    size_t header_length = this->header_.length_;// + this->not_yet_pac_q_len_;
+    size_t header_length = this->header_.length_;
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "We are in MODE_DIRECT in an important send_stop() - "
           "header_.length_ == [%d].\n", header_length));
@@ -1324,7 +1324,7 @@ TransportSendStrategy::send_stop()
     }
   }
 
-  TransportSendElement element (0, 0);
+  TransportSendElement element(0, 0);
   // Notify the Elements that were sent.
   this->send_delayed_notifications(element);
 }
@@ -1342,27 +1342,16 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
     this->send_buffer_->retain_all(pub_id);
   }
 
-  // Process any specific sample storage first.
-  remove_all_msgs_i(pub_id);
-
-  TransportRetainedElement current_sample(0, pub_id);
-  do_remove_sample(current_sample);
+  TransportQueueElement::MatchOnPubId match(pub_id);
+  do_remove_sample(match);
 }
 
-void
-TransportSendStrategy::remove_all_msgs_i(RepoId /* pub_id */)
+RemoveResult
+TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs_i",6);
+  DBG_ENTRY_LVL("TransportSendStrategy", "remove_sample", 6);
 
-  // Default implementation does nothing.
-}
-
-int
-TransportSendStrategy::remove_sample(TransportSendElement& element)
-{
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",6);
-
-  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@\n", element.msg ()),5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@\n", sample->sample_), 5);
 
   // The sample to remove is either in temporary delayed notification list or
   // internal list (elems_ or queue_). If it's going to be removed from temporary delayed
@@ -1374,44 +1363,25 @@ TransportSendStrategy::remove_sample(TransportSendElement& element)
   // in which case the element carry the info if the sample is released so the datalinkset
   // can stop calling rest datalinks to remove this sample if it's already released..
 
-  this->send_delayed_notifications (element);
+  TransportSendElement tse(0, sample);
+  this->send_delayed_notifications(tse);
 
-  if (element.released ()) {
-    return 0;
+  if (tse.released()) {
+    return REMOVE_RELEASED;
   }
 
   GuardType guard(this->lock_);
 
-  // Process any specific sample storage first.
-  remove_sample_i(element);
-
-  return do_remove_sample(element);
+  const char* payload = sample->sample_->cont()->rd_ptr();
+  TransportQueueElement::MatchOnDataPayload modp(payload);
+  return do_remove_sample(modp);
 }
 
-void
-TransportSendStrategy::remove_sample_i(
-  const TransportSendElement& /* element */
-)
+RemoveResult
+TransportSendStrategy::do_remove_sample(
+  const TransportQueueElement::MatchCriteria& criteria)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","remove_sample_i",6);
-
-  // Default implementation does nothing.
-}
-
-int
-TransportSendStrategy::do_remove_sample(TransportQueueElement& current_sample)
-{
-  DBG_ENTRY_LVL("TransportSendStrategy","do_remove_sample",6);
-
-  QueueRemoveVisitor simple_rem_vis(current_sample);
-  PacketRemoveVisitor pac_rem_vis(current_sample,
-                                  this->pkt_chain_,
-                                  this->header_block_,
-                                  this->replaced_element_allocator_,
-                                  this->replaced_element_mb_allocator_,
-                                  this->replaced_element_db_allocator_);
-
-  int status = 0;
+  DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
 
   //ciju: Tim had the idea that we could do the following check
   // if ((this->mode_ == MODE_DIRECT) ||
@@ -1424,53 +1394,49 @@ TransportSendStrategy::do_remove_sample(TransportQueueElement& current_sample)
     // assumption can be made that the samples
     // in the elems_ queue aren't part of a packet.
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "The mode is MODE_DIRECT.\n"));
+          "The mode is MODE_DIRECT, or the queue is empty and no "
+          "transport packet is in progress.\n"));
 
+    QueueRemoveVisitor simple_rem_vis(criteria);
     this->elems_->accept_remove_visitor(simple_rem_vis);
 
-    status = simple_rem_vis.status();
+    const RemoveResult status = simple_rem_vis.status();
 
-    if (status == 1) {
+    if (status == REMOVE_RELEASED || status == REMOVE_FOUND) {
       this->header_.length_ -= simple_rem_vis.removed_bytes();
-    }
 
-    if (status == -1) {
+    } else if (status == REMOVE_NOT_FOUND) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Failed to find the sample to remove.\n"));
     }
 
-    // The status 1 means successfully removed the sample.
-    return (status != 1) ? -1 : 0;
+    return status;
   }
 
-  // We now know that this->mode_ == MODE_QUEUE.
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "The mode is MODE_QUEUE.\n"));
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Visit the queue_ with the RemoveElementVisitor.\n"));
 
-  // First we will attempt to remove the element from the queue_,
-  // in case it is "stuck" in there.
+  QueueRemoveVisitor simple_rem_vis(criteria);
   this->queue_->accept_remove_visitor(simple_rem_vis);
 
-  status = simple_rem_vis.status();
+  RemoveResult status = simple_rem_vis.status();
 
-  if (status == 1) {
+  if (status == REMOVE_RELEASED || status == REMOVE_FOUND) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The sample was removed from the queue_.\n"));
     // This means that the visitor did not encounter any fatal error
     // along the way, *AND* the sample was found in the queue_,
     // and has now been removed.  We are done.
-    return 0;
+    return status;
   }
 
-  if (status == -1) {
+  if (status == REMOVE_ERROR) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The RemoveElementVisitor encountered a fatal error in queue_.\n"));
     // This means that the visitor encountered some fatal error along
     // the way (and it already reported something to the log).
     // Return our failure code.
-    return -1;
+    return status;
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1487,26 +1453,31 @@ TransportSendStrategy::do_remove_sample(TransportQueueElement& current_sample)
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Visit our elems_ with the PacketRemoveVisitor.\n"));
 
-  // Let it visit our elems_ collection as a "replace" visitor.
+  PacketRemoveVisitor pac_rem_vis(criteria,
+                                  this->pkt_chain_,
+                                  this->header_block_,
+                                  this->replaced_element_allocator_,
+                                  this->replaced_element_mb_allocator_,
+                                  this->replaced_element_db_allocator_);
+
   this->elems_->accept_replace_visitor(pac_rem_vis);
 
   status = pac_rem_vis.status();
 
-  if (status == -1) {
+  if (status == REMOVE_ERROR) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The PacketRemoveVisitor encountered a fatal error.\n"));
 
-  } else if (status == 1) {
+  } else if (status == REMOVE_NOT_FOUND) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "The PacketRemoveVisitor found the sample and removed it.\n"));
+          "The PacketRemoveVisitor didn't find the sample.\n"));
 
   } else {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "The PacketRemoveVisitor didn't find the sample.\n"));
+          "The PacketRemoveVisitor found the sample and removed it.\n"));
   }
 
-  // Return -1 only if the visitor's status() returns -1. Otherwise, return 0.
-  return (status == -1) ? -1 : 0;
+  return status;
 }
 
 void
@@ -1748,8 +1719,7 @@ TransportSendStrategy::prepare_packet()
                       this->header_db_allocator_,
                       this->header_mb_allocator_));
 
-  // Marshal the packet header_ into the header_block_.
-  *this->header_block_ << this->header_;
+  marshal_transport_header(this->header_block_);
 
   this->pkt_chain_ = this->header_block_->duplicate();
 
@@ -1786,6 +1756,12 @@ TransportSendStrategy::prepare_packet()
 }
 
 void
+TransportSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
+{
+  *mb << this->header_;
+}
+
+void
 TransportSendStrategy::prepare_packet_i()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet_i",6);
@@ -1803,25 +1779,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 
   iovec iov[MAX_SEND_BLOCKS];
 
-  const ACE_Message_Block* block = packet;
-
-  int num_blocks = 0;
-
-#ifdef _MSC_VER
-#pragma warning(push)
-// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
-// since on other platforms iov_len is 64-bit
-#pragma warning(disable : 4267)
-#endif
-  while (block != 0 && num_blocks < MAX_SEND_BLOCKS) {
-    iov[num_blocks].iov_len  = block->length();
-    iov[num_blocks].iov_base = block->rd_ptr();
-    ++num_blocks;
-    block = block->cont();
-  }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+  int num_blocks = mb_to_iov(*packet, iov);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "There are [%d] number of entries in the iovec array.\n",
@@ -1885,7 +1843,7 @@ TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
     // If a secondary send buffer is bound, sent samples must
     // be inserted in order to properly maintain the buffer:
     this->send_buffer_->insert(this->header_.sequence_,
-      TransportSendBuffer::buffer_type(this->elems_, this->pkt_chain_));
+      this->elems_, this->pkt_chain_);
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1976,6 +1934,28 @@ TransportSendStrategy::space_available() const
     return std::min(this->max_size_ - used, max_msg - used);
   }
   return this->max_size_ - used;
+}
+
+int
+TransportSendStrategy::mb_to_iov(const ACE_Message_Block& msg, iovec* iov)
+{
+  int num_blocks = 0;
+#ifdef _MSC_VER
+#pragma warning(push)
+// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+// since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
+  for (const ACE_Message_Block* block = &msg;
+       block && num_blocks < MAX_SEND_BLOCKS;
+       block = block->cont()) {
+    iov[num_blocks].iov_len = block->length();
+    iov[num_blocks++].iov_base = block->rd_ptr();
+  }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+  return num_blocks;
 }
 
 // close namespaces

@@ -73,6 +73,8 @@ public:
 
   virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
+
+  bool has_dcps_key() { return false; }
 };
 
 class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl

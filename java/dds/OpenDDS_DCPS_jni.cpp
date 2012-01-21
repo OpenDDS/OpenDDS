@@ -36,6 +36,7 @@
 #include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/GuardCondition.h"
@@ -46,6 +47,9 @@
 
 #include "ace/Service_Config.h"
 #include "ace/Service_Repository.h"
+
+template <typename CppClass>
+CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
 
 // TheParticipantFactory
 
@@ -87,31 +91,44 @@ void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown(JNIEnv *, jclass)
   TheServiceParticipant->shutdown();
 }
 
-jint JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_domain_1to_1repo
-(JNIEnv *, jclass, jint domain)
+jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_domain_1to_1repo
+(JNIEnv * jni, jclass, jint domain)
 {
-  OpenDDS::DCPS::Service_Participant::RepoKey key =
+  OpenDDS::DCPS::Discovery::RepoKey key =
     TheServiceParticipant->domain_to_repo(domain);
-  return static_cast<jint>(key);
+  jstring retStr = jni->NewStringUTF(key.c_str());
+  return retStr;
 }
 
 void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_set_1repo_1domain
-(JNIEnv *, jclass, jint domain, jint repo)
+(JNIEnv * envp, jclass, jint domain, jstring repo)
 {
-  TheServiceParticipant->set_repo_domain(domain, repo);
+  JStringMgr repo_jsm(envp, repo);
+  TheServiceParticipant->set_repo_domain(domain, repo_jsm.c_str());
 }
 
 void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_set_1repo_1ior
-(JNIEnv *envp, jclass, jstring ior, jint repo)
+(JNIEnv *envp, jclass, jstring ior, jstring repo)
 {
-  JStringMgr jsm(envp, ior);
+  JStringMgr ior_jsm(envp, ior);
+  JStringMgr repo_jsm(envp, repo);
 
   try {
-    TheServiceParticipant->set_repo_ior(jsm.c_str(), repo);
+    TheServiceParticipant->set_repo_ior(ior_jsm.c_str(), repo_jsm.c_str());
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(envp, se);
   }
+}
+
+jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
+(JNIEnv * jni, jclass, jobject participant)
+{
+  DDS::DomainParticipant_var part;
+  copyToCxx(jni, part, participant);
+  OpenDDS::DCPS::DomainParticipantImpl* impl = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part.in());
+  jstring retStr = jni->NewStringUTF(impl->get_unique_id().c_str());
+  return retStr;
 }
 
 // Exception translation

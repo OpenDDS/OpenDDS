@@ -9,6 +9,8 @@
 #include "tools/dissector/sample_dissector.h"
 #include "tools/dissector/sample_manager.h"
 
+#include "dds/DCPS/Serializer.h"
+
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
 #include <ace/Message_Block.h>
@@ -30,7 +32,7 @@ namespace OpenDDS
     guint8 *
     Wireshark_Bundle::get_remainder ()
     {
-      gint remainder = tvb->length - offset;
+      gint remainder = tvb_length(tvb) - offset;
       return reinterpret_cast<guint8 *>(ep_tvb_memdup(tvb, offset, remainder));
     }
 
@@ -110,7 +112,7 @@ namespace OpenDDS
           }
         case WChar:
           {
-            len = sizeof(ACE_CDR::WChar);
+            len = 1 + Serializer::WCHAR_SIZE;
             break;
           }
         case Short:
@@ -166,7 +168,7 @@ namespace OpenDDS
         case WString:
           {
             len = 4 +
-              *(reinterpret_cast< guint32 * >(data)) * sizeof (ACE_CDR::WChar);
+              *(reinterpret_cast< guint32 * >(data)) * Serializer::WCHAR_SIZE;
             break;
           }
         case Enumeration:
@@ -269,7 +271,7 @@ namespace OpenDDS
           {
             guint32 len = *(reinterpret_cast< guint32 * >(data));
             data += 4;
-            guint8 *last = data + len;
+            guint8 *last = data + len - 1 /*len included the trailing null*/;
             while (data != last)
               s << *(data++);
             break;
@@ -317,7 +319,7 @@ namespace OpenDDS
             {
               guint32 len =
                 *(reinterpret_cast< guint32 * >(params.data));
-              guint32 width = len * sizeof (ACE_CDR::WChar);
+              guint32 width = len * Serializer::WCHAR_SIZE;
               outstream << std::ends;
               std::string buffer = outstream.str();
 

@@ -40,7 +40,8 @@ DataLink*
 MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
                                     const RepoId& remote_id,
                                     const TransportBLOB& /*remote_data*/,
-                                    CORBA::Long /*priority*/,
+                                    bool /*remote_reliable*/,
+                                    const ConnectionAttribs& /*attribs*/,
                                     bool active)
 {
   // To accommodate the one-to-many nature of multicast reservations,
@@ -184,11 +185,13 @@ DataLink*
 MulticastTransport::connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& /*remote_data*/,
-                                       CORBA::Long priority)
+                                       bool /*remote_reliable*/,
+                                       const ConnectionAttribs& attribs)
 {
   MulticastDataLink_rch link = this->client_link_;
   if (link.is_nil()) {
-    link = this->make_datalink(local_id, remote_id, priority, true /*active*/);
+    link = this->make_datalink(local_id, remote_id,
+                               attribs.priority_, true /*active*/);
     this->client_link_ = link;
   }
 
@@ -238,7 +241,7 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
       MulticastDataLink_rch link = this->server_link_;
       if (link.is_nil()) {
         link = this->make_datalink(ce.local_id_, remote_id,
-                                   ce.priority_, false /*!active*/);
+                                   ce.attribs_.priority_, false /*!active*/);
         this->server_link_ = link;
       }
 
@@ -318,6 +321,16 @@ MulticastTransport::configure_i(TransportInst* config)
   }
   this->config_i_->_add_ref();
 
+  if (!this->config_i_->group_address_.is_multicast()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastTransport[%@]::configure_i: ")
+                      ACE_TEXT("invalid configuration: address %C is not ")
+                      ACE_TEXT("multicast.\n"),
+                      this, this->config_i_->group_address_.get_host_addr()),
+                     false);
+  }
+
   this->create_reactor_task();
 
   return true;
@@ -353,11 +366,10 @@ MulticastTransport::connection_info_i(TransportLocator& info) const
 }
 
 void
-MulticastTransport::release_datalink_i(DataLink* /*link*/,
-                                       bool /*release_pending*/)
+MulticastTransport::release_datalink(DataLink* /*link*/)
 {
-  this->client_link_ = 0;  // release ownership
-  this->server_link_ = 0;  // release ownership
+  // No-op for multicast: keep both the client_link_ and server_link_ around
+  // until the transport is shut down.
 }
 
 

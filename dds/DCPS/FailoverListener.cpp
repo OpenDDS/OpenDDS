@@ -14,13 +14,13 @@
 namespace OpenDDS {
 namespace DCPS {
 
-FailoverListener::FailoverListener(int key)
+FailoverListener::FailoverListener(Discovery::RepoKey key)
   : key_(key)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) FailoverListener::FailoverListener( key==%d)\n"),
-               key));
+               ACE_TEXT("(%P|%t) FailoverListener::FailoverListener( key==%C)\n"),
+               key.c_str()));
   }
 }
 

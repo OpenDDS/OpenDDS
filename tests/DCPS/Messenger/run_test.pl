@@ -16,10 +16,13 @@ use strict;
 
 my $status = 0;
 
-my $pub_opts = "-ORBDebugLevel 10 -ORBLogFile pub.log -DCPSDebugLevel 10";
-my $sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSDebugLevel 10";
+my $dbg_lvl = '-ORBDebugLevel 1 -DCPSDebugLevel 4 -DCPSTransportDebugLevel 2';
+my $pub_opts = "$dbg_lvl -ORBLogFile pub.log";
+my $sub_opts = "$dbg_lvl -ORBLogFile sub.log";
 my $repo_bit_opt = "";
 my $stack_based = 0;
+my $is_rtps_disc = 0;
+my $DCPSREPO;
 
 unlink qw/DCPSInfoRepo.log pub.log sub.log/;
 
@@ -57,10 +60,30 @@ elsif ($ARGV[0] eq 'stack') {
     $sub_opts .= " -t tcp";
     $stack_based = 1;
 }
+elsif ($ARGV[0] eq 'rtps') {
+    $pub_opts .= " -DCPSConfigFile rtps.ini";
+    $sub_opts .= " -DCPSConfigFile rtps.ini";
+}
+elsif ($ARGV[0] eq 'rtps_disc') {
+    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $is_rtps_disc = 1;
+}
+elsif ($ARGV[0] eq 'rtps_disc_tcp') {
+    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
+    $is_rtps_disc = 1;
+}
+elsif ($ARGV[0] eq 'rtps_unicast') {
+    $repo_bit_opt = '-NOBITS';
+    $pub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
+    $sub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
+}
 elsif ($ARGV[0] eq 'all') {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
-                        nobits stack/);
+                        nobits stack
+                        rtps rtps_disc rtps_unicast rtps_disc_tcp/);
     push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
     for my $test (@tests) {
         $status += system($^X, $0, @original_ARGV, $test);
@@ -80,21 +103,26 @@ my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                   "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log " .
-                   "$repo_bit_opt -o $dcpsrepo_ior");
+unless ($is_rtps_disc) {
+  $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                     "-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+                     "$repo_bit_opt -o $dcpsrepo_ior");
+}
 
 my $Subscriber = PerlDDS::create_process(($stack_based ? 'stack_' : '') .
                                          "subscriber", $sub_opts);
 
 my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn();
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
+unless ($is_rtps_disc) {
+  print $DCPSREPO->CommandLine() . "\n";
+  $DCPSREPO->Spawn();
+
+  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
+      print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+      $DCPSREPO->Kill();
+      exit 1;
+  }
 }
 
 print $Publisher->CommandLine() . "\n";
@@ -116,13 +144,14 @@ if ($SubscriberResult != 0) {
     $status = 1;
 }
 
-my $ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
+unless ($is_rtps_disc) {
+  my $ir = $DCPSREPO->TerminateWaitKill(5);
+  if ($ir != 0) {
+      print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
+      $status = 1;
+  }
+  unlink $dcpsrepo_ior;
 }
-
-unlink $dcpsrepo_ior;
 
 if ($status == 0) {
   print "test PASSED.\n";

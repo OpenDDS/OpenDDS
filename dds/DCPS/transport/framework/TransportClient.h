@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_TRANSPORT_CLIENT_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "TransportConfig_rch.h"
 #include "TransportImpl.h"
 #include "DataLinkSet.h"
 
@@ -43,11 +44,14 @@ protected:
   TransportClient();
   virtual ~TransportClient();
 
-
   // Local setup:
 
-  void enable_transport();
+  void enable_transport(bool reliable);
+  void enable_transport(bool reliable, const TransportConfig_rch& tc);
+
+protected:
   bool swap_bytes() const { return swap_bytes_; }
+  bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
 
 
@@ -59,9 +63,13 @@ protected:
 
   // Data transfer:
 
-  bool send_response(const RepoId& peer, ACE_Message_Block* payload); // [DR]
+  bool send_response(const RepoId& peer,
+                     const DataSampleHeader& header,
+                     ACE_Message_Block* payload); // [DR]
   void send(const DataSampleList& samples);
-  SendControlStatus send_control(ACE_Message_Block* msg, void* extra = 0);
+  SendControlStatus send_control(const DataSampleHeader& header,
+                                 ACE_Message_Block* msg,
+                                 void* extra = 0);
   bool remove_sample(const DataSampleListElement* sample);
   bool remove_all_msgs();
 
@@ -97,7 +105,7 @@ private:
 
   // Configuration details:
 
-  bool swap_bytes_;
+  bool swap_bytes_, cdr_encapsulation_, reliable_;
   ACE_Time_Value passive_connect_duration_;
 
 

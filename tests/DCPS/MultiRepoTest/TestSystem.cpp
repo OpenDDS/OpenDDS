@@ -30,27 +30,27 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if( this->config_.infoRepoIorSize() > 0) {
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T INFO: loading repository %d.\n"),
-      OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+      ACE_TEXT("(%P|%t) %T INFO: loading repository %C.\n"),
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO.c_str()
     ));
     TheServiceParticipant->set_repo_ior( this->config_.infoRepoIor().c_str());
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T INFO: binding subscriber domain to repository %d.\n"),
-      OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+      ACE_TEXT("(%P|%t) %T INFO: binding subscriber domain to repository %C.\n"),
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO.c_str()
     ));
     TheServiceParticipant->set_repo_domain(
       this->config_.subscriberDomain(),
-      OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO
     );
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T INFO: binding publisher domain to repository %d.\n"),
-      OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+      ACE_TEXT("(%P|%t) %T INFO: binding publisher domain to repository %C.\n"),
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO.c_str()
     ));
     TheServiceParticipant->set_repo_domain(
       this->config_.publisherDomain(),
-      OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO
     );
 
 #if 1
@@ -129,7 +129,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating data reader listener.\n")));
-  this->listener_ = new ForwardingListenerImpl( 0);
+  this->listener_ = new ForwardingListenerImpl(OpenDDS::DCPS::Discovery::DEFAULT_REPO);
   ForwardingListenerImpl* forwarder_servant =
     dynamic_cast<ForwardingListenerImpl*>(listener_.in());
 
@@ -253,7 +253,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // Establish and install the DataWriter.
   //
 
-  ::DDS::DataWriterListener_var listener (new DataWriterListenerImpl( 0));
+  ::DDS::DataWriterListener_var listener (new DataWriterListenerImpl(OpenDDS::DCPS::Discovery::DEFAULT_REPO));
 
   //
   // Keep all data samples to allow us to establish connections in an

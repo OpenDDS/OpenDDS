@@ -160,7 +160,8 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
   const OpenDDS::DCPS::RepoId& participantId,
   const char * topicName,
   const char * dataTypeName,
-  const DDS::TopicQos & qos)
+  const DDS::TopicQos & qos,
+  bool /*hasDcpsKey -- only used for RTPS Discovery*/)
 ACE_THROW_SPEC((CORBA::SystemException
                  , OpenDDS::DCPS::Invalid_Domain
                  , OpenDDS::DCPS::Invalid_Participant))
@@ -356,42 +357,6 @@ ACE_THROW_SPEC((CORBA::SystemException
   }
 
   return removedStatus;
-}
-
-OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::enable_topic(
-  DDS::DomainId_t domainId,
-  const OpenDDS::DCPS::RepoId& participantId,
-  const OpenDDS::DCPS::RepoId& topicId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Topic))
-{
-
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
-
-  // Grab the domain.
-  DCPS_IR_Domain_Map::iterator where = this->domains_.find(domainId);
-
-  if (where == this->domains_.end()) {
-    throw OpenDDS::DCPS::Invalid_Domain();
-  }
-
-  // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = where->second->participant(participantId);
-
-  if (0 == partPtr) {
-    throw OpenDDS::DCPS::Invalid_Participant();
-  }
-
-  DCPS_IR_Topic* topic;
-
-  if (partPtr->find_topic_reference(topicId, topic) != 0) {
-    throw OpenDDS::DCPS::Invalid_Topic();
-  }
-
-  return OpenDDS::DCPS::ENABLED;
 }
 
 OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(

@@ -214,14 +214,13 @@ void test_bit_participant ()
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
+
+      //NOTE: this is only valid for InfoRepo-based Discovery
+
       OpenDDS::DCPS::RepoIdConverter converter(participant_servant->get_id());
-
-      DDS::BuiltinTopicKey_t key;
-      converter.get_BuiltinTopicKey(key);
-
-      TEST_CHECK (part_data[0].key.value[0] == key.value[0]);
-      TEST_CHECK (part_data[0].key.value[1] == key.value[1]);
-      TEST_CHECK (part_data[0].key.value[2] == key.value[2]);
+      TEST_CHECK(part_data[0].key.value[0] == converter.federationId());
+      TEST_CHECK(part_data[0].key.value[1] == converter.participantId());
+      TEST_CHECK(part_data[0].key.value[2] == converter.entityId());
     }
   catch (...)
     {
@@ -264,14 +263,13 @@ void test_bit_topic ()
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
+
+      //NOTE: this is only valid for InfoRepo-based Discovery
       OpenDDS::DCPS::RepoIdConverter converter(topic_servant->get_id());
 
-      DDS::BuiltinTopicKey_t key;
-      converter.get_BuiltinTopicKey(key);
-
-      TEST_CHECK (topic_data[0].key.value[0] == key.value[0]);
-      TEST_CHECK (topic_data[0].key.value[1] == key.value[1]);
-      TEST_CHECK (topic_data[0].key.value[2] == key.value[2]);
+      TEST_CHECK(topic_data[0].key.value[0] == converter.federationId());
+      TEST_CHECK(topic_data[0].key.value[1] == converter.participantId());
+      TEST_CHECK(topic_data[0].key.value[2] == converter.entityId());
 
       topic_servant->get_qos (topic_qos);
 
@@ -336,24 +334,20 @@ void test_bit_publication ()
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter pub_converter(datawriter_servant->get_publication_id());
+      //NOTE: this is only valid for InfoRepo-based Discovery
 
-      DDS::BuiltinTopicKey_t pub_key;
-      pub_converter.get_BuiltinTopicKey(pub_key);
-
-      TEST_CHECK (the_pub_data.key.value[0] == pub_key.value[0]);
-      TEST_CHECK (the_pub_data.key.value[1] == pub_key.value[1]);
-      TEST_CHECK (the_pub_data.key.value[2] == pub_key.value[2]);
+      TEST_CHECK(the_pub_data.key.value[0] == pub_converter.federationId());
+      TEST_CHECK(the_pub_data.key.value[1] == pub_converter.participantId());
+      TEST_CHECK(the_pub_data.key.value[2] == pub_converter.entityId());
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter part_converter(participant_servant->get_id());
+      //NOTE: this is only valid for InfoRepo-based Discovery
 
-      DDS::BuiltinTopicKey_t part_key;
-      part_converter.get_BuiltinTopicKey(part_key);
-
-      TEST_CHECK (the_pub_data.participant_key.value[0] == part_key.value[0]);
-      TEST_CHECK (the_pub_data.participant_key.value[1] == part_key.value[1]);
-      TEST_CHECK (the_pub_data.participant_key.value[2] == part_key.value[2]);
+      TEST_CHECK(the_pub_data.participant_key.value[0] == part_converter.federationId());
+      TEST_CHECK(the_pub_data.participant_key.value[1] == part_converter.participantId());
+      TEST_CHECK(the_pub_data.participant_key.value[2] == part_converter.entityId());
 
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
@@ -417,24 +411,20 @@ void test_bit_subscription ()
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter sub_converter(datareader_servant->get_subscription_id());
+      //NOTE: this is only valid for InfoRepo-based Discovery
 
-      DDS::BuiltinTopicKey_t sub_key;
-      sub_converter.get_BuiltinTopicKey(sub_key);
-
-      TEST_CHECK (the_sub_data.key.value[0] == sub_key.value[0]);
-      TEST_CHECK (the_sub_data.key.value[1] == sub_key.value[1]);
-      TEST_CHECK (the_sub_data.key.value[2] == sub_key.value[2]);
+      TEST_CHECK(the_sub_data.key.value[0] == sub_converter.federationId());
+      TEST_CHECK(the_sub_data.key.value[1] == sub_converter.participantId());
+      TEST_CHECK(the_sub_data.key.value[2] == sub_converter.entityId());
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter part_converter(participant_servant->get_id());
+      //NOTE: this is only valid for InfoRepo-based Discovery
 
-      DDS::BuiltinTopicKey_t part_key;
-      part_converter.get_BuiltinTopicKey(part_key);
-
-      TEST_CHECK (the_sub_data.participant_key.value[0] == part_key.value[0]);
-      TEST_CHECK (the_sub_data.participant_key.value[1] == part_key.value[1]);
-      TEST_CHECK (the_sub_data.participant_key.value[2] == part_key.value[2]);
+      TEST_CHECK(the_sub_data.participant_key.value[0] == part_converter.federationId());
+      TEST_CHECK(the_sub_data.participant_key.value[1] == part_converter.participantId());
+      TEST_CHECK(the_sub_data.participant_key.value[2] == part_converter.entityId());
 
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);

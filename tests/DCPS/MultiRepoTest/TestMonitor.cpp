@@ -12,6 +12,7 @@
 #include "ace/SString.h"
 
 #include <set>
+#include <sstream>
 
 namespace { // Anonymous namespace for file scope.
 
@@ -107,9 +108,12 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       ACE_TEXT("(%P|%t) %T INFO: loading repository %d.\n"),
       index
     ));
+    std::ostringstream oss;
+    oss << index;
+    std::string key_string = oss.str();
     TheServiceParticipant->set_repo_ior(
       this->config_.infoRepoIor( index).c_str(),
-      index
+      key_string
     );
   }
 
@@ -123,9 +127,12 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
         this->config_.subscriberDomain( index),
         this->config_.domainToRepo( this->config_.subscriberDomain( index))
       ));
+      std::ostringstream oss;
+      oss << this->config_.domainToRepo( this->config_.subscriberDomain( index));
+      std::string key_string = oss.str();
       TheServiceParticipant->set_repo_domain(
         this->config_.subscriberDomain( index),
-        this->config_.domainToRepo( this->config_.subscriberDomain( index))
+        key_string
       );
     }
 
@@ -135,9 +142,12 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
         this->config_.publisherDomain( index),
         this->config_.domainToRepo( this->config_.publisherDomain( index))
       ));
+      std::ostringstream oss;
+      oss << this->config_.domainToRepo( this->config_.publisherDomain( index));
+      std::string key_string = oss.str();
       TheServiceParticipant->set_repo_domain(
         this->config_.publisherDomain( index),
-        this->config_.domainToRepo( this->config_.publisherDomain( index))
+        key_string
       );
     }
   }
@@ -226,7 +236,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // the repositories and domains from a file, we do not have that
   // information available to us.  Drat.
   //
-  std::set< OpenDDS::DCPS::Service_Participant::RepoKey> keylist;
+  std::set< OpenDDS::DCPS::Discovery::RepoKey> keylist;
   for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.subscriberDomain( index)));
   }

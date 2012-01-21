@@ -25,6 +25,8 @@
 #include "FederatorTypeSupportC.h"
 #include "FederatorTypeSupportImpl.h"
 
+#include <sstream>
+
 #if !defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"
 #endif /* !__ACE_INLINE__ */
@@ -985,9 +987,9 @@ ManagerImpl::join_federation(
       // Obtain a reference to the remote repository.
       OpenDDS::DCPS::DCPSInfo_var remoteRepo = peer->repository();
 
+      CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
+      CORBA::String_var remoteRepoIor = orb->object_to_string(remoteRepo.in());
       if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-        CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-        CORBA::String_var remoteRepoIor = orb->object_to_string(remoteRepo.in());
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) FederatorManagerImpl::join_federation() - ")
                    ACE_TEXT("id %d obtained reference to id %d:\n")
@@ -998,8 +1000,11 @@ ManagerImpl::join_federation(
       }
 
       // Add remote repository to Service_Participant in the Federation domain
-      TheServiceParticipant->set_repo(remoteRepo.in(), remote);
-      TheServiceParticipant->set_repo_domain(this->config_.federationDomain(), remote);
+      std::ostringstream oss;
+      oss << remote;
+      std::string key_string = oss.str();
+      TheServiceParticipant->set_repo_ior(remoteRepoIor.in(), key_string);
+      TheServiceParticipant->set_repo_domain(this->config_.federationDomain(), key_string);
 
     } catch (const CORBA::Exception& ex) {
       ex._tao_print_exception(

@@ -16,6 +16,9 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/Discovery.h"
+#include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DCPS/transport/tcp/Tcp.h"
 
 #include <ace/streams.h>
@@ -134,7 +137,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ACE_OS::fclose (fp);
       }
 
-      participant = dpf->create_participant(411,
+      participant = dpf->create_participant(41,
                                             PARTICIPANT_QOS_DEFAULT,
                                             DDS::DomainParticipantListener::_nil(),
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -223,9 +226,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ::DDS::ParticipantBuiltinTopicData data;
           participant->get_discovered_participant_data(data, handles[i]);
 
-          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
-          OpenDDS::DCPS::RepoIdBuilder builder( id);
-          builder.from_BuiltinTopicKey( data.key);
+          OpenDDS::DCPS::Discovery_rch disc =
+            TheServiceParticipant->get_discovery(participant->get_domain_id());
+          OpenDDS::DCPS::RepoId id =
+            disc->bit_key_to_repo_id(part_svt,
+                                     OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                                     data.key);
 
           if (part_svt->get_handle (id) != handles[i])
           {
@@ -330,9 +336,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ::DDS::TopicBuiltinTopicData data;
           participant->get_discovered_topic_data(data, handles[i]);
 
-          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::RepoIdBuilder::create();
-          OpenDDS::DCPS::RepoIdBuilder builder( id);
-          builder.from_BuiltinTopicKey( data.key);
+          OpenDDS::DCPS::Discovery_rch disc =
+            TheServiceParticipant->get_discovery(participant->get_domain_id());
+          OpenDDS::DCPS::RepoId id =
+            disc->bit_key_to_repo_id(part_svt,
+                                     OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
+                                     data.key);
 
           if (part_svt->get_handle (id) != handles[i])
           {

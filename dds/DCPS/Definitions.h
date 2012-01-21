@@ -58,7 +58,7 @@ typedef RepoId SubscriptionId;
 class OpenDDS_Dcps_Export SequenceNumber {
 public:
   typedef ACE_INT64 Value;
-  /// Construct with a value, default to negative starting point.
+  /// Construct with a value, default to one (starting point).
   SequenceNumber(Value value = MIN_VALUE) {
     setValue(value);
   }
@@ -119,6 +119,14 @@ public:
     }
     this->high_ = ACE_INT32(value / LOW_BASE);
     this->low_  = ACE_UINT32(value % LOW_BASE);
+  }
+
+  void setValue(ACE_INT32 high, ACE_UINT32 low) {
+    this->high_ = high;
+    this->low_ = low;
+    if (this->getValue() < MIN_VALUE) {
+      this->setValue(MIN_VALUE);
+    }
   }
 
   Value getValue() const {
@@ -210,9 +218,10 @@ operator>>(Serializer& s, SequenceNumber& x) {
   return true;
 }
 
-inline size_t gen_find_size(const SequenceNumber& sn) {
-  ACE_UNUSED_ARG(sn);
-  return max_marshaled_size_ulong() + gen_max_marshaled_size(CORBA::Long());
+inline void
+gen_find_size(const SequenceNumber& /*sn*/, size_t& size, size_t& padding) {
+  find_size_ulong(size, padding);
+  size += gen_max_marshaled_size(CORBA::Long());
 }
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;

@@ -14,25 +14,22 @@
 namespace OpenDDS {
   namespace RTPS {
 
-    enum SubmessageKind {
-      PAD            = 0x01,    /* Pad */
-      ACKNACK        = 0x06,    /* AckNak */
-      HEARTBEAT      = 0x07,    /* Heartbeat */
-      GAP            = 0x08,    /* Gap  */
-      INFO_TS        = 0x09,    /* InfoTimestamp */
-      INFO_SRC       = 0x0c,    /* InfoSource */
-      INFO_REPLY_IP4 = 0x0d,    /* InfoReplyIp4 */
-      INFO_DST       = 0x0e,    /* InfooDestination */
-      INFO_REPLY     = 0x0f,    /* InfoReply */
-      NACK_FRAG      = 0x12,    /* NackFrag */
-      HEARTBEAT_FRAG = 0x13,    /* HeartbeatFrag */
-      DATA           = 0x15,    /* Data */
-      DATA_FRAG      = 0x16     /* DataGrag */
-    };
+    // For messages we create, the "octetsToInlineQoS" value will be constant.
+    const ACE_CDR::UShort DATA_OCTETS_TO_IQOS = 16;
+    const ACE_CDR::UShort DATA_FRAG_OCTETS_TO_IQOS = 28;
 
-    const PMDOctetArray PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN = { 0x00, 0x00, 0x00, 0x00 };
-    const PMDOctetArray PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x01 };
-    const PMDOctetArray PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x02 };
+    const ACE_CDR::UShort RTPSHDR_SZ = 20, // size of RTPS Message Header
+      SMHDR_SZ = 4, // size of SubmessageHeader
+      HEARTBEAT_SZ = 28, // size (octetsToNextHeader) of HeartBeatSubmessage
+      INFO_DST_SZ = 12; // size (octetsToNextHeader) of InfoDestSubmessage
+
+    const OctetArray4
+      PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =
+        { 0x00, 0x00, 0x00, 0x00 },
+      PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE =
+        { 0x00, 0x00, 0x00, 0x01 },
+      PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE =
+        { 0x00, 0x00, 0x00, 0x02 };
 
   }
 }

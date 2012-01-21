@@ -39,8 +39,8 @@ assert_subscription_matched(const Options& opts, const DDS::DataReaderListener_v
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) Expected publication_matched to be %C, but it was %C [")
-                        ACE_TEXT(" durability_kind=%s, liveliness_kind=%s, liveliness_duration=%s, ")
-                        ACE_TEXT("reliability_kind=%s]\n"),
+                        ACE_TEXT(" durability_kind=%C, liveliness_kind=%C, liveliness_duration=%C, ")
+                        ACE_TEXT("reliability_kind=%C]\n"),
                         (opts.compatible) ? "true" : "false",
                         (drl_servant->subscription_matched()) ? "true" : "false",
                         opts.durability_kind_str.c_str(),
@@ -68,8 +68,8 @@ assert_publication_matched(const Options& opts, const DDS::DataWriterListener_va
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) Expected publication_matched to be %C, but it was %C [")
-                        ACE_TEXT(" durability_kind=%s, liveliness_kind=%s, liveliness_duration=%s, ")
-                        ACE_TEXT("reliability_kind=%s]\n"),
+                        ACE_TEXT(" durability_kind=%C, liveliness_kind=%C, liveliness_duration=%C, ")
+                        ACE_TEXT("reliability_kind=%C]\n"),
                         (opts.compatible) ? "true" : "false",
                         (dwl_servant->publication_matched()) ? "true" : "false",
                         opts.durability_kind_str.c_str(),

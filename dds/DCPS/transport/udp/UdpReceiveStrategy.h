@@ -11,12 +11,11 @@
 
 #include "Udp_Export.h"
 
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
-#include "dds/DCPS/transport/framework/TransportReassembly.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
 
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 #include <map>
 
 namespace OpenDDS {
@@ -25,7 +24,7 @@ namespace DCPS {
 class UdpDataLink;
 
 class OpenDDS_Udp_Export UdpReceiveStrategy
-  : public TransportReceiveStrategy,
+  : public TransportReceiveStrategy<>,
     public ACE_Event_Handler {
 public:
   explicit UdpReceiveStrategy(UdpDataLink* link);
@@ -36,7 +35,8 @@ public:
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
-                                ACE_INET_Addr& remote_address);
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE fd);
 
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);
@@ -48,7 +48,7 @@ protected:
 
   virtual bool check_header(const DataSampleHeader& header)
   {
-    return TransportReceiveStrategy::check_header(header);
+    return TransportReceiveStrategy<>::check_header(header);
   }
 
 private:

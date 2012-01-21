@@ -60,6 +60,13 @@ OpenDDS::DCPS::TransportSendControlElement::msg() const
   return this->msg_;
 }
 
+const ACE_Message_Block*
+OpenDDS::DCPS::TransportSendControlElement::msg_payload() const
+{
+  DBG_ENTRY_LVL("TransportSendControlElement", "msg_payload", 6);
+  return this->msg_->cont();
+}
+
 bool
 OpenDDS::DCPS::TransportSendControlElement::is_control(RepoId pub_id) const
 {

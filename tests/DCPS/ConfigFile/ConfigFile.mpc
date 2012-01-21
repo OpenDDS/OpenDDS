@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project(ConfigFile): dcpsexe_with_tcp, dcps_multicast, dcps_udp {
+project(ConfigFile): dcpsexe_with_tcp, dcps_multicast, dcps_udp, dcps_rtps {
   exename   = *
 
   Source_Files {

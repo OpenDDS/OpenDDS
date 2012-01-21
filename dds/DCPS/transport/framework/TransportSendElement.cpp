@@ -51,6 +51,12 @@ OpenDDS::DCPS::TransportSendElement::msg() const
   return this->element_->sample_;
 }
 
+const ACE_Message_Block*
+OpenDDS::DCPS::TransportSendElement::msg_payload() const
+{
+  DBG_ENTRY_LVL("TransportSendElement", "msg_payload", 6);
+  return this->element_->sample_ ? this->element_->sample_->cont() : 0;
+}
 
 const OpenDDS::DCPS::DataSampleListElement*
 OpenDDS::DCPS::TransportSendElement::sample() const

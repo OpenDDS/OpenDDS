@@ -30,8 +30,7 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export ReceivedDataSample {
 public:
-
-  ReceivedDataSample();
+  explicit ReceivedDataSample(ACE_Message_Block* payload);
 
   ReceivedDataSample(const ReceivedDataSample&);
 

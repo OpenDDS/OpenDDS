@@ -120,37 +120,18 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
     return false;
   }
 
-  // Get the repo id for the data writer
+  // Get the repo id for the subscription
   ::OpenDDS::DCPS::RepoId ignore_id = dr_servant->get_subscription_id ();
-
-  ::DDS::InstanceHandleSeq handles;
-  ::OpenDDS::DCPS::ReaderIdSeq ignore_ids;
-  ignore_ids.length (1);
-  ignore_ids[0] = ignore_id;
-
-  // helper object for retrieving information from the DCPSInfoRepo
-  ::OpenDDS::DCPS::BIT_Helper_2 <
-                ::DDS::SubscriptionBuiltinTopicDataDataReader,
-                ::DDS::SubscriptionBuiltinTopicDataDataReader_var,
-                ::DDS::SubscriptionBuiltinTopicDataSeq,
-                ::OpenDDS::DCPS::ReaderIdSeq > bit_helper;
-
-  // Get the instance id of data writer from the Built-In Topic data
-  DDS::ReturnCode_t ret = bit_helper.repo_ids_to_instance_handles(ignore_ids, handles);
-  if (ret != ::DDS::RETCODE_OK) {
-    ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("ERROR - Failed to get data writer id: repo_ids_to_instance_handles returned error %d\n"),
-      ret));
-    return false;
-  }
+  // Get the instance handle for the subscription
+  ::DDS::InstanceHandle_t handle = dp_servant->get_handle(ignore_id);
 
   // tell the domain participant to ignore the subscription
-  ret = dp_->ignore_subscription (handles[0]);
+  DDS::ReturnCode_t ret = dp_->ignore_subscription (handle);
   if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT("ERROR - Failed to ignore_publication %d return error %d\n"),
-                handles[0], ret));
+                handle, ret));
     return false;
   }
 
@@ -173,7 +154,6 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
       ACE_TEXT("ERROR - Narrow of data writer failed.\n") ));
     return false;
   }
-
 
   return true;
 }

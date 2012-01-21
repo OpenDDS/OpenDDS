@@ -201,6 +201,7 @@ SubDriver::run()
   // Set up the publication.
   OpenDDS::DCPS::AssociationData publication;
   publication.remote_id_ = this->pub_id_;
+  publication.remote_reliable_ = true;
   publication.remote_data_.length(1);
   publication.remote_data_[0].transport_type = "tcp";
 
@@ -217,7 +218,7 @@ SubDriver::run()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimpleSubscriber object.\n"));
 
-  this->reader_.enable_transport();
+  this->reader_.enable_transport(false /*reliable*/);
 
   // Write a file so that test script knows we're ready
   FILE * file = ACE_OS::fopen ("subready.txt", ACE_TEXT("w"));

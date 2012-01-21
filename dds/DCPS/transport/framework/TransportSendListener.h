@@ -51,6 +51,7 @@ public:
   /// customized messages to different DataLinks.
   virtual SendControlStatus send_control_customized(
     const DataLinkSet_rch& /* links */,
+    const DataSampleHeader& /* header */,
     ACE_Message_Block* /* msg */,
     void* /* extra */)
   {
@@ -62,6 +63,14 @@ public:
     const DataSampleHeader& /* header */,
     DataSample* /* data */)
   {}
+
+  struct InlineQosData {
+    DDS::PublisherQos  pub_qos;
+    DDS::DataWriterQos dw_qos;
+    std::string        topic_name;
+  };
+
+  virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;
 
 protected:
 

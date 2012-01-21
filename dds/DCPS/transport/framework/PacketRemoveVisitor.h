@@ -20,10 +20,11 @@ class ACE_Message_Block;
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export PacketRemoveVisitor : public BasicQueueVisitor<TransportQueueElement> {
+class OpenDDS_Dcps_Export PacketRemoveVisitor
+  : public BasicQueueVisitor<TransportQueueElement> {
 public:
 
-  PacketRemoveVisitor(TransportQueueElement& sample,
+  PacketRemoveVisitor(const TransportQueueElement::MatchCriteria& match,
                       ACE_Message_Block*&          unsent_head_block,
                       ACE_Message_Block*           header_block,
                       TransportReplacedElementAllocator& allocator,
@@ -36,17 +37,12 @@ public:
   /// this visit_element() method for each element in the queue.
   virtual int visit_element_ref(TransportQueueElement*& element);
 
-  /// Accessor for the status.  Called after this visitor object has
-  /// been passed to BasicQueue<T>::accept_remove_visitor().
-  /// status == 1  means the sample was found and removed.
-  /// status == 0  means the sample was not found (thus not removed)
-  /// status == -1 means a fatal error was encountered.
-  int status() const;
+  RemoveResult status() const;
 
 private:
 
   /// The sample that needs to be removed.
-  TransportQueueElement& sample_;
+  const TransportQueueElement::MatchCriteria& match_;
 
   /// The head block of the chain of unsent blocks in the packet.
   ACE_Message_Block*& head_;
@@ -56,7 +52,7 @@ private:
   ACE_Message_Block* header_block_;
 
   /// Holds the status of our visit.
-  int status_;
+  RemoveResult status_;
 
   /// This is the message block in the chain that corresponds to the
   /// current (non-head) element being visited.

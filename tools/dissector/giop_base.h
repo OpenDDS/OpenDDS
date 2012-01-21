@@ -25,15 +25,15 @@ extern "C" {
 #include "tools/dissector/dissector_export.h"
 #include "dds/DdsDcpsInfoC.h"
 
-#include "ace/Synch.h"
-#include "ace/Hash_Map_Manager.h"
+#include <map>
+#include <string>
 
 namespace OpenDDS
 {
   namespace DCPS
   {
-    typedef bool (DecodeFN) (::MessageHeader *);
-    typedef ACE_Hash_Map_Manager <const char *, DecodeFN*, ACE_Null_Mutex> DecodeFN_Map;
+    typedef bool (*DecodeFN)(::MessageHeader*);
+    typedef std::map<std::string, DecodeFN> DecodeFN_Map;
 
     class dissector_Export GIOP_Base
     {
@@ -81,7 +81,7 @@ namespace OpenDDS
       int *offset_;
 
       DecodeFN_Map op_functions_;
-      DecodeFN *find_giop_decoder (gchar *opname);
+      DecodeFN find_giop_decoder (gchar *opname);
       void add_giop_decoder (const char *opname, DecodeFN decoder);
       void init_proto_label (const char *proto);
       void init_repo_id (const char *repoid);

@@ -10,6 +10,7 @@
 
 #include "MulticastDataLink.h"
 #include "MulticastInst.h"
+#include "MulticastReceiveStrategy.h"
 
 #include "ace/Global_Macros.h"
 #include "ace/Time_Value.h"
@@ -68,7 +69,7 @@ ReliableSession::check_header(const TransportHeader& header)
 
   // Update last seen sequence for remote peer; return false if we
   // have already seen this datagram to prevent duplicate delivery:
-  return this->nak_sequence_.update(header.sequence_);
+  return this->nak_sequence_.insert(header.sequence_);
 }
 
 bool
@@ -102,7 +103,8 @@ void
 ReliableSession::syn_hook(const SequenceNumber& seq)
 {
   // Establish a baseline for detecting reception gaps:
-  this->nak_sequence_.reset(seq);
+  this->nak_sequence_.reset();
+  this->nak_sequence_.insert(SequenceRange(SequenceNumber(), seq));
 }
 
 void
@@ -120,16 +122,13 @@ ReliableSession::expire_naks()
 
   // Skip unrecoverable datagrams to
   // re-establish a baseline to detect future reception gaps.
-  SequenceNumber lastSeq;
-  if (last == this->nak_requests_.end()) {
-    lastSeq = this->nak_requests_.rbegin()->second;
-  }
-  else {
-    lastSeq = last->second;
-  }
+  SequenceNumber lastSeq = (last == this->nak_requests_.end())
+                         ? this->nak_requests_.rbegin()->second
+                         : last->second;
 
   std::vector<SequenceRange> dropped;
-  if (this->nak_sequence_.lowest_valid(lastSeq, &dropped)) {
+  if (this->nak_sequence_.insert(SequenceRange(this->nak_sequence_.low(),
+                                               lastSeq), dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
       this->reassembly_.data_unavailable(dropped[i]);
@@ -166,10 +165,9 @@ ReliableSession::send_naks()
   // Record high-water mark for this interval; this value will
   // be used to reset the low-water mark in the event the remote
   // peer becomes unresponsive:
-  this->nak_requests_.insert(
-    NakRequestMap::value_type(now, this->nak_sequence_.high()));
+  this->nak_requests_[now] = this->nak_sequence_.high();
 
-  typedef std::vector<std::pair<SequenceNumber, SequenceNumber> > RangeVector;
+  typedef std::vector<SequenceRange> RangeVector;
   RangeVector ignored;
 
   /// The range first - second will be skiped (no naks sent for it).
@@ -239,11 +237,11 @@ ReliableSession::send_naks()
   size_t sz = ignored.size();
   for (size_t i = 0; i < sz; ++i) {
 
-    if (ignored[i].second > received.low()) {
+    if (ignored[i].second > received.cumulative_ack()) {
       SequenceNumber high = ignored[i].second;
       SequenceNumber low = ignored[i].first;
-      if (low < received.low()) {
-        low = received.low();
+      if (low < received.cumulative_ack()) {
+        low = received.cumulative_ack();
       }
 
       if (DCPS_debug_level > 0) {
@@ -253,7 +251,7 @@ ReliableSession::send_naks()
       }
 
       // Make contiguous between ignored sequences.
-      received.update(SequenceRange(low, high));
+      received.insert(SequenceRange(low, high));
     }
   }
 
@@ -261,7 +259,7 @@ ReliableSession::send_naks()
        it != this->nak_peers_.end(); ++it) {
     // Update sequence to temporarily suppress repair requests for
     // ranges already requested by other peers for this interval:
-    received.update(*it);
+    received.insert(*it);
   }
 
   if (received.disjoint()) {
@@ -275,13 +273,12 @@ ReliableSession::send_naks()
 void
 ReliableSession::nak_received(ACE_Message_Block* control)
 {
-  if (! this->active_) return; // sub send naks, then doesn't receive them.
+  if (!this->active_) return; // sub send naks, then doesn't receive them.
 
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  Serializer serializer(
-    control, header.swap_bytes());
+  Serializer serializer(control, header.swap_bytes());
 
   MulticastPeer local_peer;
   CORBA::ULong size = 0;
@@ -294,7 +291,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
     SequenceRange range;
     serializer >> range.first;
     serializer >> range.second;
-    ranges.push_back (range);
+    ranges.push_back(range);
   }
 
   // Track peer repair requests for later suppression:
@@ -309,7 +306,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   if ((local_peer != this->link_->local_peer())        // Not to us.
     || (this->remote_peer_ != header.source_)) return; // Not from the remote peer for this session.
 
-  TransportSendBuffer* send_buffer = this->link_->send_buffer();
+  SingleSendBuffer* send_buffer = this->link_->send_buffer();
   // Broadcast a MULTICAST_NAKACK control sample before resending to suppress
   // repair requests for unrecoverable samples by providing a
   // new low-water mark for affected peers:
@@ -373,8 +370,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(
-    control, header.swap_bytes());
+  Serializer serializer(control, header.swap_bytes());
 
   SequenceNumber low;
   serializer >> low;
@@ -383,7 +379,8 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   // repaired by a remote peer; if any values were needed below
   // this value, then the sequence needs to be shifted:
   std::vector<SequenceRange> dropped;
-  if (this->nak_sequence_.lowest_valid(low, &dropped)) {
+  if (this->nak_sequence_.insert(SequenceRange(this->nak_sequence_.low(),
+                                               low.previous()), dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
       this->reassembly_.data_unavailable(dropped[i]);
@@ -419,10 +416,7 @@ ReliableSession::send_nakack(SequenceNumber low)
 bool
 ReliableSession::start(bool active)
 {
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
-                   guard,
-                   this->start_lock_,
-                   false);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
 
   if (this->started_) return true;  // already started
 

@@ -312,6 +312,7 @@ public:
   void control_delivered(ACE_Message_Block* sample);
 
   SendControlStatus send_control_customized(const DataLinkSet_rch& links,
+                                            const DataSampleHeader& header,
                                             ACE_Message_Block* msg,
                                             void* extra);
 
@@ -329,6 +330,8 @@ public:
 
   /// Deliver a requested SAMPLE_ACK message to this writer.
   virtual void deliver_ack(const DataSampleHeader& header, DataSample* data);
+
+  virtual void retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos_data) const;
 
   virtual bool check_transport_qos(const TransportInst& inst);
 
@@ -431,6 +434,7 @@ public:
   DDS::ReturnCode_t
   create_sample_data_message(DataSample* data,
                              DDS::InstanceHandle_t instance_handle,
+                             DataSampleHeader& header_data,
                              ACE_Message_Block*& message,
                              const DDS::Time_t& source_timestamp,
                              bool content_filter);
@@ -521,6 +525,7 @@ private:
    */
   ACE_Message_Block*
   create_control_message(MessageId message_id,
+                         DataSampleHeader& header,
                          ACE_Message_Block* data,
                          const DDS::Time_t& source_timestamp);
 
@@ -567,7 +572,6 @@ private:
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.
-  /// Not used in first implementation.
   SequenceNumber                  sequence_number_;
   /// Flag indicating DataWriter current belongs to
   /// a coherent change set.
@@ -658,6 +662,10 @@ private:
 
   /// Periodic Monitor object for this entity
   Monitor* periodic_monitor_;
+
+  // Do we need to set the sequence repair header bit?
+  //   must set the header sequence number prior to calling
+  bool need_sequence_repair(const DataSampleHeader& hdr) const;
 };
 
 } // namespace DCPS

@@ -48,3 +48,10 @@ OpenDDS::DCPS::DataReaderImpl::raw_latency_buffer_type()
 {
   return this->raw_latency_buffer_type_;
 }
+
+ACE_INLINE
+void
+OpenDDS::DCPS::DataReaderImpl::disable_transport()
+{
+  this->transport_disabled_ = true;
+}

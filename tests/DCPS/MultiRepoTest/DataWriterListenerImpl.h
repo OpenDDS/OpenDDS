@@ -19,7 +19,7 @@ class DataWriterListenerImpl
 {
 public:
   //Constructor
-  DataWriterListenerImpl ( OpenDDS::DCPS::Service_Participant::RepoKey repo);
+  DataWriterListenerImpl ( OpenDDS::DCPS::Discovery::RepoKey repo);
 
   //Destructor
   virtual ~DataWriterListenerImpl (void);
@@ -58,7 +58,7 @@ public:
 
   private:
     /// Repository key that we are attached to.
-    OpenDDS::DCPS::Service_Participant::RepoKey repo_;
+    OpenDDS::DCPS::Discovery::RepoKey repo_;
 
 };
 

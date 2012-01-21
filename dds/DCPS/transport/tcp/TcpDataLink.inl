@@ -8,8 +8,6 @@
 
 #include "TcpTransport.h"
 #include "TcpConnection.h"
-#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE const ACE_INET_Addr&

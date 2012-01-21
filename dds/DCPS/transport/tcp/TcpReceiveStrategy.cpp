@@ -19,24 +19,15 @@
 #include "TcpReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
-OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy
-(TcpDataLink*    link,
- TcpConnection*  connection,
- TransportReactorTask* task)
+OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
+  const TcpDataLink_rch& link,
+  const TcpConnection_rch& connection,
+  const TransportReactorTask_rch& task)
+  : link_(link)
+  , connection_(connection)
+  , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","TcpReceiveStrategy",6);
-
-  // Keep a "copy" of the reference to the DataLink for ourselves.
-  link->_add_ref();
-  this->link_ = link;
-
-  // Keep a "copy" of the reference to the TransportReactorTask for ourselves.
-  task->_add_ref();
-  this->reactor_task_ = task;
-
-  // Keep a "copy" of the reference to the TcpConnection for ourselves.
-  connection->_add_ref();
-  this->connection_ = connection;
 }
 
 OpenDDS::DCPS::TcpReceiveStrategy::~TcpReceiveStrategy()
@@ -45,15 +36,15 @@ OpenDDS::DCPS::TcpReceiveStrategy::~TcpReceiveStrategy()
 }
 
 ssize_t
-OpenDDS::DCPS::TcpReceiveStrategy::receive_bytes
-(iovec iov[],
- int   n,
- ACE_INET_Addr& remote_address)
+OpenDDS::DCPS::TcpReceiveStrategy::receive_bytes(
+  iovec iov[],
+  int   n,
+  ACE_INET_Addr& /*remote_address*/,
+  ACE_HANDLE /*fd*/)
 {
-  DBG_ENTRY_LVL("TcpReceiveStrategy","receive_bytes",6);
+  DBG_ENTRY_LVL("TcpReceiveStrategy", "receive_bytes", 6);
 
   // We don't do anything to the remote_address for the Tcp case.
-  ACE_UNUSED_ARG(remote_address);
 
   TcpConnection_rch connection = this->connection_;
 
@@ -66,13 +57,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::receive_bytes
 
 void
 OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
-(ReceivedDataSample&  sample,
- const ACE_INET_Addr& remote_address)
+  (ReceivedDataSample& sample, const ACE_INET_Addr&)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","deliver_sample",6);
-
-  // We don't do anything to the remote_address for the Tcp case.
-  ACE_UNUSED_ARG(remote_address);
 
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));

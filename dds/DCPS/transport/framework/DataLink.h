@@ -18,8 +18,8 @@
 #include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
-#include "TransportReceiveStrategy.h"
-#include "TransportReceiveStrategy_rch.h"
+#include "TransportStrategy.h"
+#include "TransportStrategy_rch.h"
 #include "TransportSendControlElement.h"
 #include "TransportSendListener.h"
 #include "TransportReceiveListener.h"
@@ -34,18 +34,6 @@
 #include <iosfwd> // For operator<<() diagnostic formatter.
 
 class ACE_SOCK;
-
-namespace OpenDDS {
-namespace DCPS {
-
-class DataLink;
-
-} // namespace DCPS
-} // namespace OpenDDS
-
-OpenDDS_Dcps_Export
-std::ostream& operator<<(std::ostream& str,
-                         const OpenDDS::DCPS::DataLink& value);
 
 namespace OpenDDS {
 namespace DCPS {
@@ -97,19 +85,20 @@ public:
   /// on the subscriber's side.
   void resume_send();
 
-  // ciju: Called by TransportImpl
-  /// This is for a remote subscriber_id and local publisher_id
-  int make_reservation(
-    RepoId subscriber_id,
-    RepoId publisher_id,
-    TransportSendListener* send_listener);
+  /// Only called by our TransportImpl object.
+  ///
+  /// Return Codes: 0 means successful reservation made.
+  ///              -1 means failure.
+  int make_reservation(const RepoId& remote_subscription_id,
+                       const RepoId& local_publication_id,
+                       TransportSendListener* send_listener);
 
-  // ciju: Called by TransportImpl
-  /// This is for a remote publisher_id and a local subscriber_id.
-  /// The TransportReceiveListener is associated with the local
-  /// subscriber_id.
-  int make_reservation(RepoId                    publisher_id,
-                       RepoId                    subscriber_id,
+  /// Only called by our TransportImpl object.
+  ///
+  /// Return Codes: 0 means successful reservation made.
+  ///              -1 means failure.
+  int make_reservation(const RepoId& remote_publication_id,
+                       const RepoId& local_subcription_id,
                        TransportReceiveListener* receive_listener);
 
   // ciju: Called by LinkSet with locks held
@@ -120,6 +109,10 @@ public:
   void release_reservations(RepoId          remote_id,
                             RepoId          local_id,
                             DataLinkSetMap& released_locals);
+
+  void schedule_delayed_release();
+
+  const ACE_Time_Value& datalink_release_delay() const;
 
   /// Either send or receive listener for this local_id should be
   /// removed from internal DataLink structures so it no longer
@@ -140,12 +133,7 @@ public:
   /// This method is essentially an "undo_send()" method.  It's goal
   /// is to remove all traces of the sample from this DataLink (if
   /// the sample is even known to the DataLink).
-  /// A return value of -1 indicates that a fatal error was encountered
-  /// while trying to carry out the remove_sample operation.
-  /// A return value of 0 indicates that there was no fatal error, and
-  /// that this DataLink no longer references the sample (if it ever
-  /// did).
-  int remove_sample(TransportSendElement& element, bool dropped_by_transport);
+  RemoveResult remove_sample(const DataSampleListElement* sample);
 
   // ciju: Called by LinkSet with locks held
   void remove_all_msgs(RepoId pub_id);
@@ -154,7 +142,10 @@ public:
   /// has received a complete data sample.  This method will cause
   /// the appropriate TransportReceiveListener objects to be told
   /// that data_received().
-  int data_received(ReceivedDataSample& sample);
+  /// If readerId is not GUID_UNKNOWN, only the TransportReceiveListener
+  /// with that ID (if one exists) will receive the data.
+  int data_received(ReceivedDataSample& sample,
+                    const RepoId& readerId = GUID_UNKNOWN);
 
   /// SAMPLE_ACK message received on this link.
   void ack_received(ReceivedDataSample& sample);
@@ -233,13 +224,14 @@ public:
   /// This allows a subclass to easily create a transport control
   /// sample to send via send_control.
   ACE_Message_Block* create_control(char submessage_id,
+                                    DataSampleHeader& header,
                                     ACE_Message_Block* data);
 
   /// This allows a subclass to send transport control samples over
   /// this DataLink. This is useful for sending transport-specific
   /// control messages between one or more endpoints under this
   /// DataLink's control.
-  SendControlStatus send_control(ACE_Message_Block* data);
+  SendControlStatus send_control(const DataSampleHeader& header, ACE_Message_Block* data);
 
   /// Return the subset of the input set which are also targets of
   /// this DataLink (see is_target()).
@@ -270,8 +262,8 @@ protected:
   /// is returned.  Otherwise, a 0 is returned.  In the failure case,
   /// if one of the strategy objects was started successfully, then
   /// it will be stopped before the start() method returns -1.
-  int start(TransportSendStrategy*    send_strategy,
-            TransportReceiveStrategy* receive_strategy);
+  int start(const TransportSendStrategy_rch& send_strategy,
+            const TransportStrategy_rch& receive_strategy);
 
   /// This announces the "start" event to our subclass.  The "start"
   /// event will occur when this DataLink is handling its first
@@ -291,7 +283,7 @@ protected:
   static ACE_UINT64 get_next_datalink_id();
 
   /// The transport receive strategy object for this DataLink.
-  TransportReceiveStrategy_rch receive_strategy_;
+  TransportStrategy_rch receive_strategy_;
 
   friend class ThreadPerConnectionSendTask;
 
@@ -301,6 +293,11 @@ protected:
   void send_start_i();
   void send_i(TransportQueueElement* element, bool relink = true);
   void send_stop_i();
+
+  /// For a given local RepoId (publication or subscription), return the list
+  /// of remote peer RepoIds (subscriptions or publications) that this link
+  /// knows about due to make_reservation().
+  GUIDSeq* peer_ids(const RepoId& local_id) const;
 
 private:
 
@@ -331,10 +328,23 @@ private:
   /// empty maps for new associations.
   void prepare_release();
 
+  /// Allow derived classes to provide an alternate "customized" queue element
+  /// for this DataLink (not shared with other links in the DataLinkSet).
+  virtual TransportQueueElement* customize_queue_element(
+    TransportQueueElement* element)
+  {
+    return element;
+  }
+
+  virtual void release_remote_i(const RepoId& /*remote_id*/) {}
+  virtual void release_reservations_i(const RepoId& /*remote_id*/,
+                                      const RepoId& /*local_id*/) {}
+
   typedef ACE_SYNCH_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.
-  friend std::ostream& ::operator<<(std::ostream& str, const DataLink& value);
+  friend OpenDDS_Dcps_Export
+  std::ostream& operator<<(std::ostream& str, const DataLink& value);
 
   /// A boolean indicating if the DataLink has been stopped. This
   /// value is protected by the strategy_lock_.
@@ -354,7 +364,7 @@ private:
   /// (aka, received) data samples.
   ReceiveListenerSetMap pub_map_;
 
-  LockType pub_map_lock_;
+  mutable LockType pub_map_lock_;
 
   /// Map associating each subscriber_id with the set of publisher_ids.
   /// In essence, the pub_map_ and sub_map_ are the "mirror image" of
@@ -386,6 +396,8 @@ private:
 
   /// TRANSPORT_PRIORITY value associated with the link.
   CORBA::Long transport_priority_;
+
+  bool scheduled_;
 
 protected:
 

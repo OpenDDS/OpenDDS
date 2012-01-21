@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DcpsInfo_pch.h"
-#include "DCPS_Utils.h"
+#include "DCPS/DdsDcps_pch.h"
+#include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Definitions.h"
 
@@ -16,7 +16,8 @@
 
 #include <cstring>
 
-namespace {
+namespace OpenDDS {
+namespace DCPS {
 
 bool
 is_wildcard(const char *str)
@@ -112,8 +113,6 @@ matching_partitions(const DDS::PartitionQosPolicy& pub,
   return false;
 }
 
-} // namespace
-
 void
 increment_incompatibility_count(OpenDDS::DCPS::IncompatibleQosStatus* status,
                                 DDS::QosPolicyId_t incompatible_policy)
@@ -156,18 +155,19 @@ compatibleTransports(const OpenDDS::DCPS::TransportLocatorSeq& s1,
 }
 
 bool
-compatibleQOS(DCPS_IR_Publication  * publication,
-              DCPS_IR_Subscription * subscription)
+compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
+              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus,
+              const OpenDDS::DCPS::TransportLocatorSeq& pubTLS,
+              const OpenDDS::DCPS::TransportLocatorSeq& subTLS,
+              DDS::DataWriterQos const * const writerQos,
+              DDS::DataReaderQos const * const readerQos,
+              DDS::PublisherQos const * const pubQos,
+              DDS::SubscriberQos const * const subQos)
 {
   bool compatible = true;
-  OpenDDS::DCPS::IncompatibleQosStatus* writerStatus
-  = publication->get_incompatibleQosStatus();
-  OpenDDS::DCPS::IncompatibleQosStatus* readerStatus
-  = subscription->get_incompatibleQosStatus();
 
   // Check transport-type compatibility
-  if (!compatibleTransports(publication->get_transportLocatorSeq(),
-                            subscription->get_transportLocatorSeq())) {
+  if (!compatibleTransports(pubTLS, subTLS)) {
     compatible = false;
     increment_incompatibility_count(writerStatus,
                                     OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
@@ -175,19 +175,9 @@ compatibleQOS(DCPS_IR_Publication  * publication,
                                     OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
   }
 
-  DDS::DataWriterQos const * const writerQos =
-    publication->get_datawriter_qos();
-  DDS::DataReaderQos const * const readerQos =
-    subscription->get_datareader_qos();
-
   // Verify compatibility of DataWriterQos and DataReaderQos
   compatible = compatible && compatibleQOS(writerQos, readerQos,
                                            writerStatus, readerStatus);
-
-  DDS::PublisherQos const * const pubQos =
-    publication->get_publisher_qos();
-  DDS::SubscriberQos const * const subQos =
-    subscription->get_subscriber_qos();
 
   // Verify compatibility of PublisherQos and SubscriberQos
   compatible = compatible && compatibleQOS(pubQos, subQos,
@@ -470,3 +460,5 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
 {
   return false;
 }
+
+}}

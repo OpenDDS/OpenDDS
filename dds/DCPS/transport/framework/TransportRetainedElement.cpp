@@ -49,3 +49,9 @@ OpenDDS::DCPS::TransportRetainedElement::msg() const
   return this->msg_;
 }
 
+const ACE_Message_Block*
+OpenDDS::DCPS::TransportRetainedElement::msg_payload() const
+{
+  DBG_ENTRY_LVL("TransportRetainedElement", "msg_payload", 6);
+  return this->msg_->cont();
+}

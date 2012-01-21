@@ -35,13 +35,15 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
-                                    CORBA::Long priority,
+                                    bool remote_reliable,
+                                    const ConnectionAttribs& attribs,
                                     bool active);
 
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
-                                       CORBA::Long priority);
+                                       bool remote_reliable,
+                                       const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);
   virtual void stop_accepting(ConnectionEvent& ce);
@@ -52,15 +54,9 @@ protected:
 
   virtual bool connection_info_i(TransportLocator& info) const;
 
-  virtual void release_datalink_i(DataLink* link,
-                                  bool release_pending);
+  virtual void release_datalink(DataLink* link);
 
   virtual std::string transport_type() const { return "multicast"; }
-
-  virtual PriorityKey blob_to_key(const TransportBLOB& /*remote*/,
-                                  CORBA::Long /*priority*/,
-                                  bool /*active*/) { return PriorityKey(); }
-          // blob_to_key() is not called for Multicast transports
 
 private:
   MulticastDataLink* make_datalink(const RepoId& local_id,

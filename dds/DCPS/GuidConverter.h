@@ -42,7 +42,7 @@ namespace DCPS {
  *
  * byte  structure reference     content
  * ---- ---------------------    --------------------------
- *   0  GUID_t.guidPrefix[ 0] == VendorId_t == 0x00 for OCI (used for OpenDDS)
+ *   0  GUID_t.guidPrefix[ 0] == VendorId_t == 0x01 for OCI (used for OpenDDS)
  *   1  GUID_t.guidPrefix[ 1] == VendorId_t == 0x03 for OCI (used for OpenDDS)
  *   2  GUID_t.guidPrefix[ 2] == 0x00
  *   3  GUID_t.guidPrefix[ 3] == 0x00
@@ -90,6 +90,8 @@ public:
 #ifdef DDS_HAS_WCHAR
   operator std::wstring() const;
 #endif
+
+  std::string uniqueId() const;
 
 protected:
   const GUID_t guid_;

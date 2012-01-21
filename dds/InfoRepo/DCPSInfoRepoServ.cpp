@@ -289,7 +289,7 @@ InfoRepo::init()
   // to ourselves in the service here.
   TheServiceParticipant->set_repo_ior(
     ACE_TEXT_CHAR_TO_TCHAR(objref_str),
-    OpenDDS::DCPS::Service_Participant::DEFAULT_REPO);
+    OpenDDS::DCPS::Discovery::DEFAULT_REPO);
 
   // Initialize persistence _after_ initializing the participant factory
   // and intializing the transport.

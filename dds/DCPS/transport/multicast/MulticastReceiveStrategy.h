@@ -13,7 +13,7 @@
 
 #include "ace/Event_Handler.h"
 
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -21,7 +21,7 @@ namespace DCPS {
 class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastReceiveStrategy
-  : public TransportReceiveStrategy,
+  : public TransportReceiveStrategy<>,
     public ACE_Event_Handler {
 public:
   explicit MulticastReceiveStrategy(MulticastDataLink* link);
@@ -32,7 +32,8 @@ public:
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
-                                ACE_INET_Addr& remote_address);
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE fd);
 
   virtual bool check_header(const TransportHeader& header);
   virtual bool check_header(const DataSampleHeader& header);

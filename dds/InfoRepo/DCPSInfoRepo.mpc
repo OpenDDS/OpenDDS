@@ -16,7 +16,6 @@ project(*Lib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install
     DCPS_IR_Subscription.cpp
     DCPS_IR_Topic.cpp
     DCPS_IR_Topic_Description.cpp
-    DCPS_Utils.cpp
     DomainParticipantListener_i.cpp
     PersistenceUpdater.cpp
     UpdateManager.cpp

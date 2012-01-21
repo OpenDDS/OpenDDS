@@ -14,7 +14,7 @@
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
-#include /**/ "DCPS_Utils.h"
+#include /**/ "dds/DCPS/DCPS_Utils.h"
 #include /**/ "dds/DdsDcpsInfoUtilsC.h"
 #include /**/ "dds/DCPS/RepoIdConverter.h"
 #include /**/ "dds/DCPS/Qos_Helper.h"
@@ -481,13 +481,13 @@ void
 DCPS_IR_Publication::set_qos(const DDS::DataWriterQos& qos)
 {
   if (false == (qos == this->qos_)) {
-    if (::should_check_compatibility_upon_change(qos, this->qos_)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos, this->qos_)
         && (false == this->compatibleQosChange(qos))) {
       return;
     }
 
     // Check if we should check while we have both values.
-    bool check = ::should_check_association_upon_change(qos, this->qos_);
+    bool check = OpenDDS::DCPS::should_check_association_upon_change(qos, this->qos_);
 
     // Store the new, compatible, value.
     this->qos_ = qos;
@@ -515,13 +515,13 @@ void
 DCPS_IR_Publication::set_qos(const DDS::PublisherQos& qos)
 {
   if (false == (qos == this->publisherQos_)) {
-    if (::should_check_compatibility_upon_change(qos, this->publisherQos_)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos, this->publisherQos_)
         && (false == this->compatibleQosChange(qos))) {
       return;
     }
 
     // Check if we should check while we have both values.
-    bool check = ::should_check_association_upon_change(qos, this->publisherQos_);
+    bool check = OpenDDS::DCPS::should_check_association_upon_change(qos, this->publisherQos_);
 
     // Store the new, compatible, value.
     this->publisherQos_ = qos;
@@ -553,12 +553,12 @@ bool DCPS_IR_Publication::set_qos(const DDS::DataWriterQos & qos,
   bool u_dw_qos = !(qos_ == qos);
 
   if (u_dw_qos) {
-    if (::should_check_compatibility_upon_change(qos_, qos)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos_, qos)
         && !compatibleQosChange(qos)) {
       return false;
     }
 
-    if (::should_check_association_upon_change(qos_, qos)) {
+    if (OpenDDS::DCPS::should_check_association_upon_change(qos_, qos)) {
       need_evaluate = true;
     }
 
@@ -568,12 +568,12 @@ bool DCPS_IR_Publication::set_qos(const DDS::DataWriterQos & qos,
   bool u_pub_qos = !(publisherQos_ == publisherQos);
 
   if (u_pub_qos) {
-    if (::should_check_compatibility_upon_change(publisherQos_, publisherQos)
+    if (OpenDDS::DCPS::should_check_compatibility_upon_change(publisherQos_, publisherQos)
         && !compatibleQosChange(publisherQos)) {
       return false;
     }
 
-    if (::should_check_association_upon_change(publisherQos_, publisherQos)) {
+    if (OpenDDS::DCPS::should_check_association_upon_change(publisherQos_, publisherQos)) {
       need_evaluate = true;
     }
 
@@ -680,8 +680,8 @@ bool DCPS_IR_Publication::compatibleQosChange(const DDS::DataWriterQos & qos)
     readerStatus.total_count = 0;
     readerStatus.count_since_last_send = 0;
 
-    if (!::compatibleQOS(&qos, sub->get_datareader_qos(),
-                          &writerStatus, &readerStatus))
+    if (!OpenDDS::DCPS::compatibleQOS(&qos, sub->get_datareader_qos(),
+                                      &writerStatus, &readerStatus))
       return false;
   }
 
@@ -706,8 +706,8 @@ bool DCPS_IR_Publication::compatibleQosChange(const DDS::PublisherQos & qos)
     sub = *iter;
     ++iter;
 
-    if (!::compatibleQOS(&qos, sub->get_subscriber_qos(),
-                          &writerStatus, &readerStatus))
+    if (!OpenDDS::DCPS::compatibleQOS(&qos, sub->get_subscriber_qos(),
+                                      &writerStatus, &readerStatus))
       return false;
   }
 
@@ -759,7 +759,16 @@ DCPS_IR_Publication::reevaluate_association(DCPS_IR_Subscription* subscription)
 
   if (status == 0) {
     // verify if they are still compatiable after change
-    if (!::compatibleQOS(this, subscription)) {
+
+
+    if (!OpenDDS::DCPS::compatibleQOS(this->get_incompatibleQosStatus(),
+                                      subscription->get_incompatibleQosStatus(),
+                                      this->get_transportLocatorSeq(),
+                                      subscription->get_transportLocatorSeq(),
+                                      this->get_datawriter_qos(),
+                                      subscription->get_datareader_qos(),
+                                      this->get_publisher_qos(),
+                                      subscription->get_subscriber_qos())) {
       bool sendNotify = true; // inform datawriter
       bool notify_lost = true; // invoke listerner callback
 

@@ -8,7 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "OwnershipManager.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "Util.h"
 #include "DataReaderImpl.h"
 #include <algorithm>
@@ -404,7 +404,7 @@ OwnershipManager::broadcast_new_owner ( const ::DDS::InstanceHandle_t& instance_
     // This may not be an error since it could happen that the sample
     // is delivered to the datareader after the write is dis-associated
     // with this datareader.
-    RepoIdConverter writer_converter(owner);
+    GuidConverter writer_converter(owner);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) OwnershipManager::broadcast_new_owner: ")
       ACE_TEXT("owner writer %C, instance handle %d strength %d num of candidates %d\n"),

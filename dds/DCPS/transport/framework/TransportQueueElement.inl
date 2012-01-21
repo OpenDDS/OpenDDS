@@ -9,47 +9,32 @@
 #include "ace/Message_Block.h"
 #include "EntryExit.h"
 
-#include <assert.h>
+namespace OpenDDS {
+namespace DCPS {
 
 ACE_INLINE
-OpenDDS::DCPS::TransportQueueElement::TransportQueueElement(int initial_count)
+TransportQueueElement::TransportQueueElement(unsigned long initial_count)
   : sub_loan_count_(initial_count),
     dropped_(false),
     released_(false)
 {
-  DBG_ENTRY_LVL("TransportQueueElement","TransportQueueElement",6);
+  DBG_ENTRY_LVL("TransportQueueElement", "TransportQueueElement", 6);
 }
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportQueueElement::operator==(
-  const TransportQueueElement& rhs
-) const
+TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("TransportQueueElement","operator==",6);
-  if( this->msg()) {
-    return this->msg()->rd_ptr() == rhs.msg()->rd_ptr();
-
-  } else {
-    return  (this->publication_id() == rhs.publication_id())
-        && !(this->publication_id() == GUID_UNKNOWN);
-  }
-}
-
-ACE_INLINE
-bool
-OpenDDS::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
-{
-  DBG_ENTRY_LVL("TransportQueueElement","data_dropped",6);
+  DBG_ENTRY_LVL("TransportQueueElement", "data_dropped", 6);
   this->dropped_ = true;
   return this->decision_made(dropped_by_transport);
 }
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportQueueElement::data_delivered()
+TransportQueueElement::data_delivered()
 {
-  DBG_ENTRY_LVL("TransportQueueElement","data_delivered",6);
+  DBG_ENTRY_LVL("TransportQueueElement", "data_delivered", 6);
   // Decision made depend on dropped_ flag. If any link drops
   // the sample even other links deliver successfully, the
   // data dropped by transport will called back to writer.
@@ -58,16 +43,11 @@ OpenDDS::DCPS::TransportQueueElement::data_delivered()
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
+TransportQueueElement::decision_made(bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("TransportQueueElement","decision_made",6);
+  DBG_ENTRY_LVL("TransportQueueElement", "decision_made", 6);
 
-  int new_count;
-
-  {
-    GuardType guard(this->lock_);
-    new_count = --this->sub_loan_count_;
-  }
+  const unsigned long new_count = --this->sub_loan_count_;
 
   if (new_count == 0) {
     // All interested subscriptions have been satisfied.
@@ -94,25 +74,41 @@ OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportQueueElement::was_dropped() const
+TransportQueueElement::was_dropped() const
 {
   return this->dropped_;
 }
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportQueueElement::released() const
+TransportQueueElement::released() const
 {
   return this->released_;
 }
 
-
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportQueueElement::released(bool flag)
+TransportQueueElement::released(bool flag)
 {
   this->released_ = flag;
 }
 
+ACE_INLINE
+bool
+TransportQueueElement::MatchOnPubId::matches(
+  const TransportQueueElement& candidate) const
+{
+  return this->pub_id_ == candidate.publication_id()
+    && this->pub_id_ != GUID_UNKNOWN;
+}
 
+ACE_INLINE
+bool
+TransportQueueElement::MatchOnDataPayload::matches(
+  const TransportQueueElement& candidate) const
+{
+  return this->data_ == candidate.msg_payload()->rd_ptr();
+}
 
+}
+}

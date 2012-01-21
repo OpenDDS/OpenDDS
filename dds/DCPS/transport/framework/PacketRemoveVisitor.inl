@@ -8,9 +8,9 @@
 
 #include "EntryExit.h"
 
-ACE_INLINE int
+ACE_INLINE OpenDDS::DCPS::RemoveResult
 OpenDDS::DCPS::PacketRemoveVisitor::status() const
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","status",6);
+  DBG_ENTRY_LVL("PacketRemoveVisitor", "status", 6);
   return this->status_;
 }

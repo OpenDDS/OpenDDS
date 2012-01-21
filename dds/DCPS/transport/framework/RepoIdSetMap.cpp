@@ -8,7 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "RepoIdSetMap.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include <sstream>
@@ -30,7 +30,7 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
 
   if (id_set.is_nil()) {
     // find_or_create failure
-    RepoIdConverter converter(key);
+    GuidConverter converter(key);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
                       ACE_TEXT("failed to find_or_create RepoIdSet ")
@@ -41,8 +41,8 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
   int result = id_set->insert_id(value, key);
 
   if (result == -1) {
-    RepoIdConverter value_converter(value);
-    RepoIdConverter key_converter(key);
+    GuidConverter value_converter(value);
+    GuidConverter key_converter(key);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
                ACE_TEXT("failed to insert RepoId %C ")
@@ -62,7 +62,7 @@ OpenDDS::DCPS::RepoIdSetMap::insert(RepoId key, RepoId value)
   // If so, we need to "undo" the creation.
   if (id_set->size() == 0) {
     if (unbind(map_, key) != 0) {
-      RepoIdConverter converter(key);
+      GuidConverter converter(key);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::insert: ")
                  ACE_TEXT("failed to unbind (undo create) an empty ")
@@ -86,7 +86,7 @@ OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
 
   if (result != 0) {
     // We couldn't find the id_set for the supplied key.
-    RepoIdConverter converter(key);
+    GuidConverter converter(key);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::remove: ")
                       ACE_TEXT("unable to locate RepoIdSet for key %C.\n"),
@@ -98,8 +98,8 @@ OpenDDS::DCPS::RepoIdSetMap::remove(RepoId key,RepoId value)
 
   if (result != 0) {
     // We couldn't find the supplied RepoId value as a member of the id_set.
-    RepoIdConverter key_converter(key);
-    RepoIdConverter value_converter(value);
+    GuidConverter key_converter(key);
+    GuidConverter value_converter(value);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::remove: ")
                       ACE_TEXT("RepoIdSet for key %C does not contain ")
@@ -120,7 +120,7 @@ OpenDDS::DCPS::RepoIdSetMap::remove_set(RepoId key)
 
   if (unbind(map_, key, value) != 0) {
     if (DCPS_debug_level > 4) {
-      RepoIdConverter converter(key);
+      GuidConverter converter(key);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) RepeIdSetMap::remove_set: ")
                  ACE_TEXT("RepoId %C not found in map.\n"),
@@ -141,7 +141,7 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
   RepoIdSet_rch id_set;
 
   if (OpenDDS::DCPS::find(map_, subscriber_id, id_set) != 0) {
-    RepoIdConverter converter(subscriber_id);
+    GuidConverter converter(subscriber_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::release_publisher: ")
                ACE_TEXT("subscriber_id %C not found in map.\n"),
@@ -162,7 +162,7 @@ OpenDDS::DCPS::RepoIdSetMap::release_publisher(RepoId subscriber_id,
 
   if (id_set->size() == 0) {
     if (unbind(map_, subscriber_id) != 0) {
-      RepoIdConverter converter(publisher_id);
+      GuidConverter converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: RepoIdSetMap::release_publisher: ")
                  ACE_TEXT("failed to remove an empty ")

@@ -92,10 +92,10 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 /// connection object for us.  This call puts this TcpDataLink into
 /// the "connected" state.
 int
-OpenDDS::DCPS::TcpDataLink::connect
-(TcpConnection*      connection,
- TransportSendStrategy*    send_strategy,
- TransportReceiveStrategy* receive_strategy)
+OpenDDS::DCPS::TcpDataLink::connect(
+  const TcpConnection_rch& connection,
+  const TransportSendStrategy_rch& send_strategy,
+  const TransportStrategy_rch& receive_strategy)
 {
   DBG_ENTRY_LVL("TcpDataLink","connect",6);
 
@@ -106,8 +106,6 @@ OpenDDS::DCPS::TcpDataLink::connect
                      -1);
   }
 
-  // Keep a "copy" of the reference to the connection object for ourselves.
-  connection->_add_ref();
   this->connection_ = connection;
 
   // Let connection know the datalink for callbacks upon reconnect failure.
@@ -115,7 +113,7 @@ OpenDDS::DCPS::TcpDataLink::connect
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
-  if (this->start(send_strategy,receive_strategy) != 0) {
+  if (this->start(send_strategy, receive_strategy) != 0) {
     // Our base (DataLink) class failed to start the strategy objects.
     // We need to "undo" some things here before we return -1 to indicate
     // that an error has taken place.
@@ -149,7 +147,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
   this->connection_->transfer(connection);
 
   bool released = false;
-  TransportReceiveStrategy_rch brs;
+  TransportStrategy_rch brs;
   TransportSendStrategy_rch bss;
 
   {
@@ -165,19 +163,17 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
     }
   }
 
+  TcpConnection_rch conn_rch(connection, false);
   if (released) {
-    return this->transport_->connect_tcp_datalink(this, connection);
+    TcpDataLink_rch this_rch(this, false);
+    return this->transport_->connect_tcp_datalink(this_rch, conn_rch);
   }
 
-  // Keep a "copy" of the reference to the connection object for ourselves.
-  connection->_add_ref();
-  this->connection_ = connection;
+  this->connection_ = conn_rch._retn();
 
-  TcpReceiveStrategy* rs
-  = dynamic_cast <TcpReceiveStrategy*>(brs.in());
+  TcpReceiveStrategy* rs = dynamic_cast<TcpReceiveStrategy*>(brs.in());
 
-  TcpSendStrategy* ss
-  = dynamic_cast <TcpSendStrategy*>(bss.in());
+  TcpSendStrategy* ss = dynamic_cast<TcpSendStrategy*>(bss.in());
 
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.

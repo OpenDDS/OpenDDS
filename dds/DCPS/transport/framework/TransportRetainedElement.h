@@ -18,10 +18,12 @@ namespace DCPS {
 
 class TransportRetainedElement;
 
-typedef Cached_Allocator_With_Overflow<TransportRetainedElement, ACE_SYNCH_NULL_MUTEX>
-TransportRetainedElementAllocator;
+typedef Cached_Allocator_With_Overflow<TransportRetainedElement,
+                                       ACE_SYNCH_NULL_MUTEX>
+  TransportRetainedElementAllocator;
 
-class OpenDDS_Dcps_Export TransportRetainedElement : public TransportQueueElement {
+class OpenDDS_Dcps_Export TransportRetainedElement
+  : public TransportQueueElement {
 public:
   /// Construct with message block chain and Id values.
   TransportRetainedElement(
@@ -33,15 +35,18 @@ public:
   );
 
   /// Copy constructor.
-  TransportRetainedElement( const TransportRetainedElement& source);
+  TransportRetainedElement(const TransportRetainedElement& source);
 
   virtual ~TransportRetainedElement();
 
   ///{ @name TransportQueueElement methods
 
   virtual RepoId publication_id() const;
+
   virtual const ACE_Message_Block* msg() const;
-  virtual bool owned_by_transport ();
+  virtual const ACE_Message_Block* msg_payload() const;
+
+  virtual bool owned_by_transport();
 
 protected:
   virtual void release_element(bool dropped_by_transport);

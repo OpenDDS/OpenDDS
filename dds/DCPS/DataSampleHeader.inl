@@ -6,18 +6,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-//TODO: we should really use the ACE_CDR_BYTE_ORDER instead of
-//      TAO_ENCAP_BYTE_ORDER, but since the ACE_CDR_BYTE_ORDER
-//      is currently defined under the ACE_HAS_WCHAR guard which
-//      is different from DOC's version (I'm not sure why) and
-//      the TAO_ENCAP_BYTE_ORDER is currently consistent with
-//      the ACE_CDR_BYTE_ORDER, it's ok to use
-//      TAO_ENCAP_BYTE_ORDER for now.
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   : message_id_(0)
   , submessage_id_(0)
-  , byte_order_(TAO_ENCAP_BYTE_ORDER)
+  , byte_order_(ACE_CDR_BYTE_ORDER)
   , coherent_change_(0)
   , historic_sample_(0)
   , lifespan_duration_(0)
@@ -25,6 +18,14 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , content_filter_(0)
   , sequence_repair_(0)
   , more_fragments_(0)
+  , cdr_encapsulation_(0)
+  , key_fields_only_(0)
+  , reserved_1(0)
+  , reserved_2(0)
+  , reserved_3(0)
+  , reserved_4(0)
+  , reserved_5(0)
+  , reserved_6(0)
   , message_length_(0)
   , sequence_()
   , source_timestamp_sec_(0)
@@ -39,7 +40,7 @@ ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   : message_id_(0)
   , submessage_id_(0)
-  , byte_order_(TAO_ENCAP_BYTE_ORDER)
+  , byte_order_(ACE_CDR_BYTE_ORDER)
   , coherent_change_(0)
   , historic_sample_(0)
   , lifespan_duration_(0)
@@ -47,6 +48,14 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , content_filter_(0)
   , sequence_repair_(0)
   , more_fragments_(0)
+  , cdr_encapsulation_(0)
+  , key_fields_only_(0)
+  , reserved_1(0)
+  , reserved_2(0)
+  , reserved_3(0)
+  , reserved_4(0)
+  , reserved_5(0)
+  , reserved_6(0)
   , message_length_(0)
   , sequence_()
   , source_timestamp_sec_(0)
@@ -77,7 +86,7 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
 {
   return 1 + // message_id_;
          1 + // submessage_id_;
-         1 + // flags
+         2 + // flags
          4 + // message_length_;
          8 + // sequence_;
          4 + // source_timestamp_sec_;
@@ -88,13 +97,6 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
         16 ; // publisher_id_;
   // content_filter_entries_ is not marsahled into the same Data Block
   // so it is not part of the max_marshaled_size() which is used to allocate
-}
-
-ACE_INLINE
-long
-OpenDDS::DCPS::DataSampleHeader::mask_flag(DataSampleHeaderFlag flag)
-{
-  return 1 << flag;
 }
 
 /// The clear_flag and set_flag methods are a hack to update the

@@ -36,6 +36,7 @@ public:
   virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
 
+  virtual bool has_dcps_key();
 
 private:
   CORBA::String_var type_name_;

@@ -6,27 +6,31 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "TransportReceiveStrategy.h"
+#include "TransportReceiveStrategy_T.h"
 #include "ace/INET_Addr.h"
 
 #if !defined (__ACE_INLINE__)
-#include "TransportReceiveStrategy.inl"
+#include "TransportReceiveStrategy_T.inl"
 #endif /* __ACE_INLINE__ */
 
-OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
+namespace OpenDDS {
+namespace DCPS {
+
+template<typename TH, typename DSH>
+TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
     mb_allocator_(MESSAGE_BLOCKS),
     db_allocator_(DATA_BLOCKS),
     data_allocator_(DATA_BLOCKS),
     buffer_index_(0),
+    payload_(0),
     good_pdu_(true),
     pdu_remaining_(0)
 {
-  DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",6);
+  DBG_ENTRY_LVL("TransportReceiveStrategy", "TransportReceiveStrategy" ,6);
 
-  if (OpenDDS::DCPS::Transport_debug_level >= 2) {
+  if (Transport_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-mb"
                " Cached_Allocator_With_Overflow %x with %d chunks\n",
                &mb_allocator_, MESSAGE_BLOCKS));
@@ -38,17 +42,16 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
                &data_allocator_, DATA_BLOCKS));
   }
 
-  // No aggregate assignment possible in initializer list.  That I know
-  // of anyway.
-  ACE_OS::memset(this->receive_buffers_, 0x0, sizeof(this->receive_buffers_));
+  ACE_OS::memset(this->receive_buffers_, 0, sizeof(this->receive_buffers_));
 }
 
-OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
+template<typename TH, typename DSH>
+TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",6);
 
-  if (this->receive_buffers_[ this->buffer_index_] != 0) {
-    size_t size = this->receive_buffers_[ this->buffer_index_]->total_length();
+  if (this->receive_buffers_[this->buffer_index_] != 0) {
+    size_t size = this->receive_buffers_[this->buffer_index_]->total_length();
 
     if (size > 0) {
       ACE_DEBUG((LM_WARNING,
@@ -59,14 +62,16 @@ OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
   }
 }
 
+template<typename TH, typename DSH>
 bool
-OpenDDS::DCPS::TransportReceiveStrategy::check_header(const TransportHeader& /*header*/)
+TransportReceiveStrategy<TH, DSH>::check_header(const TH& /*header*/)
 {
   return true;
 }
 
+template<typename TH, typename DSH>
 bool
-OpenDDS::DCPS::TransportReceiveStrategy::check_header(const DataSampleHeader& /*header*/)
+TransportReceiveStrategy<TH, DSH>::check_header(const DSH& /*header*/)
 {
   return true;
 }
@@ -75,13 +80,13 @@ OpenDDS::DCPS::TransportReceiveStrategy::check_header(const DataSampleHeader& /*
 /// some shortcuts (we will) that will need to be dealt with later once
 /// a more robust implementation can be put in place.
 ///
-/// Our handle_input() method is called by the reactor when there is
+/// Our handle_dds_input() method is called by the reactor when there is
 /// data to be pulled from our peer() ACE_SOCK_Stream.
-//OpenDDS::DCPS::TransportReceiveStrategy::handle_input(ACE_HANDLE)
+template<typename TH, typename DSH>
 int
-OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
+TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 {
-  DBG_ENTRY_LVL("TransportReceiveStrategy","handle_input",6);
+  DBG_ENTRY_LVL("TransportReceiveStrategy", "handle_dds_input", 6);
 
   //
   // What we will be doing here:
@@ -151,10 +156,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   //
   size_t index;
 
-  for (index = 0 ; index < RECEIVE_BUFFERS ; ++index) {
-    if ((this->receive_buffers_[ index] != 0)
-        && (this->receive_buffers_[ index]->length() == 0)
-        && (this->receive_buffers_[ index]->space() < BUFFER_LOW_WATER)) {
+  for (index = 0; index < RECEIVE_BUFFERS; ++index) {
+    if ((this->receive_buffers_[index] != 0)
+        && (this->receive_buffers_[index]->length() == 0)
+        && (this->receive_buffers_[index]->space() < BUFFER_LOW_WATER)) {
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "Remove a receive_buffer_[%d] from use.\n",
             index));
@@ -165,7 +170,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
       for (size_t ii =0; ii < RECEIVE_BUFFERS; ii++) {
         if ((0 != this->receive_buffers_[ii]) &&
             (this->receive_buffers_[ii]->cont() ==
-             this->receive_buffers_[ index])) {
+             this->receive_buffers_[index])) {
           this->receive_buffers_[ii]->cont(0);
         }
       }
@@ -174,10 +179,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
       // Remove the receive buffer from use.
       //
       ACE_DES_FREE(
-        this->receive_buffers_[ index],
+        this->receive_buffers_[index],
         this->mb_allocator_.free,
-        ACE_Message_Block) ;
-      this->receive_buffers_[ index] = 0 ;
+        ACE_Message_Block);
+      this->receive_buffers_[index] = 0;
     }
   }
 
@@ -189,15 +194,15 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   size_t previous = this->buffer_index_;
 
   for (index = this->buffer_index_;
-       this->successor_index(previous) != this->buffer_index_ ;
+       this->successor_index(previous) != this->buffer_index_;
        index = this->successor_index(index)) {
-    if (this->receive_buffers_[ index] == 0) {
+    if (this->receive_buffers_[index] == 0) {
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "Allocate a Message_Block for new receive_buffer_[%d].\n",
             index));
 
       ACE_NEW_MALLOC_RETURN(
-        this->receive_buffers_[ index],
+        this->receive_buffers_[index],
         (ACE_Message_Block*) this->mb_allocator_.malloc(
           sizeof(ACE_Message_Block)),
         ACE_Message_Block(
@@ -213,7 +218,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           &this->db_allocator_,         // Our data block cache
           &this->mb_allocator_          // Our message block cache
         ),
-        -1) ;
+        -1);
     }
 
     //
@@ -221,11 +226,11 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     // data cross buffer boundaries without a problem.
     //
     if (previous != index) {
-      this->receive_buffers_[ previous]->cont(
-        this->receive_buffers_[index]) ;
+      this->receive_buffers_[previous]->cont(
+        this->receive_buffers_[index]);
     }
 
-    previous = index ;
+    previous = index;
   }
 
   //
@@ -249,19 +254,19 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   //
   // Form the iovec from the message block chain of receive buffers.
   //
-  iovec iov[ RECEIVE_BUFFERS] ;
-  size_t vec_index = 0 ;
+  iovec iov[RECEIVE_BUFFERS];
+  size_t vec_index = 0;
   size_t current = this->buffer_index_;
 
-  for (index = 0 ;
-       index < RECEIVE_BUFFERS ;
+  for (index = 0;
+       index < RECEIVE_BUFFERS;
        ++index, current = this->successor_index(current)) {
     // Invariant.  ASSERT?
-    if (this->receive_buffers_[ current] == 0) {
+    if (this->receive_buffers_[current] == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Unrecoverably corrupted ")
                         ACE_TEXT("receive buffer management detected.\n")),
-                       -1) ;
+                       -1);
     }
 
 #ifdef _MSC_VER
@@ -280,7 +285,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
             "index==%d, len==%d, base==%x\n",
             vec_index, iov[vec_index].iov_len, iov[vec_index].iov_base));
 
-      vec_index++ ;
+      vec_index++;
     }
   }
 
@@ -297,7 +302,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   ACE_INET_Addr remote_address;
   ssize_t bytes_remaining = this->receive_bytes(iov,
                                                 static_cast<int>(vec_index),
-                                                remote_address);
+                                                remote_address,
+                                                fd);
 
   if (bytes_remaining < 0) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Problem ")
@@ -347,10 +353,14 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   // Adjust the message block chain pointers to account for the new
   // data.
   //
-  size_t  bytes = bytes_remaining;
+  size_t bytes = bytes_remaining;
 
-  for (index = this->buffer_index_ ;
-       bytes > 0 ;
+  if (!this->pdu_remaining_) {
+    this->receive_transport_header_.length_ = static_cast<ACE_UINT32>(bytes);
+  }
+
+  for (index = this->buffer_index_;
+       bytes > 0;
        index = this->successor_index(index)) {
     VDBG((LM_DEBUG,"(%P|%t) DBG:    -> "
           "At top of for..loop block.\n"));
@@ -360,25 +370,25 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           "bytes == %d.\n", bytes));
 
     size_t amount
-    = ace_min<size_t>(bytes, this->receive_buffers_[ index]->space()) ;
+    = ace_min<size_t>(bytes, this->receive_buffers_[index]->space());
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:       "
           "amount == %d.\n", amount));
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:       "
-          "this->receive_buffers_[ index]->rd_ptr() ==  %u.\n",
-          this->receive_buffers_[ index]->rd_ptr()));
+          "this->receive_buffers_[index]->rd_ptr() ==  %u.\n",
+          this->receive_buffers_[index]->rd_ptr()));
     VDBG((LM_DEBUG,"(%P|%t) DBG:       "
-          "this->receive_buffers_[ index]->wr_ptr() ==  %u.\n",
-          this->receive_buffers_[ index]->wr_ptr()));
+          "this->receive_buffers_[index]->wr_ptr() ==  %u.\n",
+          this->receive_buffers_[index]->wr_ptr()));
 
-    this->receive_buffers_[ index]->wr_ptr(amount) ;
+    this->receive_buffers_[index]->wr_ptr(amount);
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:       "
-          "Now, this->receive_buffers_[ index]->wr_ptr() ==  %u.\n",
-          this->receive_buffers_[ index]->wr_ptr()));
+          "Now, this->receive_buffers_[index]->wr_ptr() ==  %u.\n",
+          this->receive_buffers_[index]->wr_ptr()));
 
-    bytes -= amount ;
+    bytes -= amount;
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:       "
           "Now, bytes == %d .\n", bytes));
@@ -391,7 +401,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                         ACE_TEXT("(%P|%t) ERROR: Unrecoverably corrupted ")
                         ACE_TEXT("receive buffer management detected: ")
                         ACE_TEXT("read more bytes than available.\n")),
-                       -1) ;
+                       -1);
     }
   }
 
@@ -450,16 +460,16 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
             "this->buffer_index_ == %d.\n",this->buffer_index_));
 
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[ this->buffer_index_]->rd_ptr() "
+            "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
             "== %u.\n",
-            this->receive_buffers_[ this->buffer_index_]->rd_ptr()));
+            this->receive_buffers_[this->buffer_index_]->rd_ptr()));
 
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[ this->buffer_index_]->wr_ptr() "
+            "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
             "== %u.\n",
-            this->receive_buffers_[ this->buffer_index_]->wr_ptr()));
+            this->receive_buffers_[this->buffer_index_]->wr_ptr()));
 
-      if (this->receive_buffers_[ this->buffer_index_]->total_length()
+      if (this->receive_buffers_[this->buffer_index_]->total_length()
           < this->receive_transport_header_.max_marshaled_size()) {
         //
         // Not enough room in the buffer for the entire Transport
@@ -478,15 +488,15 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
               "packet header.\n"));
 
         // only do the hexdump if it will be printed - to not impact perfomance.
-        if (OpenDDS::DCPS::Transport_debug_level) {
+        if (Transport_debug_level) {
           ACE_TCHAR xbuffer[4096];
           const ACE_Message_Block& mb =
             *this->receive_buffers_[this->buffer_index_];
           size_t xbytes = mb.length();
 
-          xbytes = std::min(xbytes, TransportHeader::max_marshaled_size());
+          xbytes = (std::min)(xbytes, TH::max_marshaled_size());
 
-          ACE::format_hexdump(mb.rd_ptr(), xbytes, xbuffer, sizeof(xbuffer)) ;
+          ACE::format_hexdump(mb.rd_ptr(), xbytes, xbuffer, sizeof(xbuffer));
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "Hex Dump of transport header block "
@@ -506,7 +516,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT
                             ("(%P|%t) ERROR: TransportHeader invalid.\n")),
-                           -1) ;
+                           -1);
         }
 
         this->good_pdu_ = check_header(this->receive_transport_header_);
@@ -561,16 +571,16 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
               "this->buffer_index_ == %d.\n",this->buffer_index_));
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-              "this->receive_buffers_[ this->buffer_index_]->rd_ptr() "
+              "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
               "== %u.\n",
-              this->receive_buffers_[ this->buffer_index_]->rd_ptr()));
+              this->receive_buffers_[this->buffer_index_]->rd_ptr()));
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-              "this->receive_buffers_[ this->buffer_index_]->wr_ptr() "
+              "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
               "== %u.\n",
-              this->receive_buffers_[ this->buffer_index_]->wr_ptr()));
+              this->receive_buffers_[this->buffer_index_]->wr_ptr()));
 
-        if (DataSampleHeader::partial(*this->receive_buffers_[this->buffer_index_])) {
+        if (DSH::partial(*this->receive_buffers_[this->buffer_index_])) {
           //
           // Not enough room in the buffer for the entire Sample
           // header that we need to read, so relinquish control until
@@ -589,28 +599,30 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                 "header.  Demarshall the sample header now.\n"));
 
           // only do the hexdump if it will be printed - to not impact perfomance.
-          if (OpenDDS::DCPS::Transport_debug_level) {
-            ACE_TCHAR ebuffer[4096] ;
+          if (Transport_debug_level) {
+            ACE_TCHAR ebuffer[4096];
             ACE::format_hexdump
             (this->receive_buffers_[this->buffer_index_]->rd_ptr(),
-             this->receive_sample_.header_.max_marshaled_size(),
-             ebuffer, sizeof(ebuffer)) ;
+             this->data_sample_header_.max_marshaled_size(),
+             ebuffer, sizeof(ebuffer));
 
             VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                   "Hex Dump:\n%s\n", ebuffer));
           }
 
+          this->data_sample_header_.pdu_remaining(this->pdu_remaining_);
+
           //
           // Demarshal the sample header.
           //
-          this->receive_sample_.header_ =
+          this->data_sample_header_ =
             *this->receive_buffers_[this->buffer_index_];
 
           //
           // Check the DataSampleHeader.
           //
 
-          this->good_pdu_ = check_header(receive_sample_.header_);
+          this->good_pdu_ = check_header(data_sample_header_);
 
           //
           // Set the amount to parse into the message buffer.  We
@@ -618,8 +630,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           // where we are since downstream processing will expect
           // the value to be correct (unadjusted by us).
           //
-          this->receive_sample_remaining_
-          = this->receive_sample_.header_.message_length_ ;
+          this->receive_sample_remaining_ =
+            this->data_sample_header_.message_length();
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "The demarshalled sample header says that we "
@@ -631,12 +643,12 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           // Decrement packet size.
           //
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                "this->receive_sample_.header_.marshaled_size() "
+                "this->data_sample_header_.marshaled_size() "
                 "== %d.\n",
-                this->receive_sample_.header_.marshaled_size()));
+                this->data_sample_header_.marshaled_size()));
 
           this->pdu_remaining_
-          -= this->receive_sample_.header_.marshaled_size() ;
+          -= this->data_sample_header_.marshaled_size();
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "Amount of transport packet remaining: %d.\n",
@@ -654,147 +666,147 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
       // Adjust the buffer chain in case we crossed into the next
       // buffer after the last read(s).
       //
-      size_t initial = this->buffer_index_ ;
+      size_t initial = this->buffer_index_;
+      bool last_buffer = false;
 
-      while (this->receive_buffers_[ this->buffer_index_]->length() == 0) {
-        this->buffer_index_ = this->successor_index(this->buffer_index_) ;
+      while (this->receive_buffers_[this->buffer_index_]->length() == 0) {
+        this->buffer_index_ = this->successor_index(this->buffer_index_);
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Set this->buffer_index_ = %d.\n",
               this->buffer_index_));
 
         if (initial == this->buffer_index_) {
-          // At this point we have a data sample with no data.
-          // This is actually Ok, since some control messages -
-          // specifically the DATAWRITER_LIVELINESS messages
-          // contain no data.
+          last_buffer = true; // no other buffers in receive_buffers_ have data
           break;
         }
       }
 
-      //
-      // Manage the current sample data.
-      //
-      //   This involves reading data to complete the current sample.  As
-      //   samples are completed, they are dispatched via the
-      //   data_received() mechanism.  This data is read into message
-      //   blocks that are obtained from the pool of message blocks since
-      //   the lifetime of this data will last until the DataReader
-      //   components demarshal the sample data.  A reference to the
-      //   current sample being built is retained as a member to allow us
-      //   to hold partialy read samples until they are completed.
-      //
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "Determine amount of data for the next block in the chain\n"));
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->buffer_index_ == %d.\n",this->buffer_index_));
+      if (this->receive_sample_remaining_ > 0) {
+        //
+        // Manage the current sample data.
+        //
+        //   This involves reading data to complete the current sample.  As
+        //   samples are completed, they are dispatched via the
+        //   data_received() mechanism.  This data is read into message
+        //   blocks that are obtained from the pool of message blocks since
+        //   the lifetime of this data will last until the DataReader
+        //   components demarshal the sample data.  A reference to the
+        //   current sample being built is retained as a member to allow us
+        //   to hold partialy read samples until they are completed.
+        //
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "Determine amount of data for the next block in the chain\n"));
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[ this->buffer_index_]->rd_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[ this->buffer_index_]->rd_ptr()));
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->buffer_index_ == %d.\n",this->buffer_index_));
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[ this->buffer_index_]->wr_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[ this->buffer_index_]->wr_ptr()));
-      //
-      // Determine the amount of data for the next block in the chain.
-      //
-      size_t amount
-      = ace_min<size_t>(
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->wr_ptr()));
+        //
+        // Determine the amount of data for the next block in the chain.
+        //
+        const size_t amount = ace_min<size_t>(
           this->receive_sample_remaining_,
-          this->receive_buffers_[ this->buffer_index_]->length()) ;
+          this->receive_buffers_[this->buffer_index_]->length());
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "amount of data for the next block in the chain is %d\n",
-            amount));
-      //
-      // Now create a message block for the data in the current buffer
-      // and chain it if we are starting a new sample.
-      //
-      ACE_Message_Block* current_sample_block = 0 ;
-      ACE_NEW_MALLOC_RETURN(
-        current_sample_block,
-        (ACE_Message_Block*) this->mb_allocator_.malloc(
-          sizeof(ACE_Message_Block)),
-        ACE_Message_Block(
-          this->receive_buffers_[ this->buffer_index_]
-          ->data_block()->duplicate(),
-          0,
-          &this->mb_allocator_),
-        -1) ;
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "amount of data for the next block in the chain is %d\n",
+              amount));
+        //
+        // Now create a message block for the data in the current buffer
+        // and chain it if we are starting a new sample.
+        //
+        ACE_Message_Block* current_sample_block = 0;
+        ACE_NEW_MALLOC_RETURN(
+          current_sample_block,
+          (ACE_Message_Block*) this->mb_allocator_.malloc(
+            sizeof(ACE_Message_Block)),
+          ACE_Message_Block(
+            this->receive_buffers_[this->buffer_index_]
+            ->data_block()->duplicate(),
+            0,
+            &this->mb_allocator_),
+          -1);
 
-      //
-      // Chain it to the end of the current sample.
-      //
-      if (this->receive_sample_.sample_ == 0) {
-        this->receive_sample_.sample_ = current_sample_block ;
+        //
+        // Chain it to the end of the current sample.
+        //
+        if (this->payload_ == 0) {
+          this->payload_ = current_sample_block;
 
-      } else {
-        ACE_Message_Block* block = this->receive_sample_.sample_ ;
+        } else {
+          ACE_Message_Block* block = this->payload_;
 
-        while (block->cont() != 0) {
-          block = block->cont() ;
+          while (block->cont() != 0) {
+            block = block->cont();
+          }
+
+          block->cont(current_sample_block);
         }
 
-        block->cont(current_sample_block) ;
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "Before adjustment of the pointers and byte counters\n"));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->rd_ptr() "
+              "== %u.\n",
+              this->payload_->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->wr_ptr() "
+              "== %u.\n",
+              this->payload_->wr_ptr()));
+
+        //
+        // Adjust the pointers and byte counters.
+        //
+        current_sample_block->rd_ptr(
+          this->receive_buffers_[this->buffer_index_]->rd_ptr());
+        current_sample_block->wr_ptr(
+          this->receive_buffers_[this->buffer_index_]->wr_ptr());
+        this->receive_buffers_[this->buffer_index_]->rd_ptr(amount);
+        this->receive_sample_remaining_ -= amount;
+        this->pdu_remaining_            -= amount;
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "After adjustment of the pointers and byte counters\n"));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->rd_ptr() "
+              "== %u.\n",
+              this->payload_->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->payload_->wr_ptr() "
+              "== %u.\n",
+              this->payload_->wr_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->rd_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->rd_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "this->receive_buffers_[this->buffer_index_]->wr_ptr() "
+              "== %u.\n",
+              this->receive_buffers_[this->buffer_index_]->wr_ptr()));
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "After adjustment, remaining sample bytes == %d\n",
+              this->receive_sample_remaining_));
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "After adjustment, remaining transport packet bytes == %d\n",
+              this->pdu_remaining_));
       }
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "Before adjustment of the pointers and byte counters\n"));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_sample_.sample_->rd_ptr() "
-            "== %u.\n",
-            this->receive_sample_.sample_->rd_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_sample_.sample_->wr_ptr() "
-            "== %u.\n",
-            this->receive_sample_.sample_->wr_ptr()));
-
-      //
-      // Adjust the pointers and byte counters.
-      //
-      current_sample_block->rd_ptr(
-        this->receive_buffers_[ this->buffer_index_]->rd_ptr()) ;
-      current_sample_block->wr_ptr(
-        this->receive_buffers_[ this->buffer_index_]->wr_ptr()) ;
-      this->receive_buffers_[ this->buffer_index_]->rd_ptr(amount) ;
-      this->receive_sample_remaining_ -= amount ;
-      this->pdu_remaining_            -= amount ;
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "After adjustment of the pointers and byte counters\n"));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_sample_.sample_->rd_ptr() "
-            "== %u.\n",
-            this->receive_sample_.sample_->rd_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_sample_.sample_->wr_ptr() "
-            "== %u.\n",
-            this->receive_sample_.sample_->wr_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[ this->buffer_index_]->rd_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[ this->buffer_index_]->rd_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "this->receive_buffers_[ this->buffer_index_]->wr_ptr() "
-            "== %u.\n",
-            this->receive_buffers_[ this->buffer_index_]->wr_ptr()));
-
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "After adjustment, remaining sample bytes == %d\n",
-            this->receive_sample_remaining_));
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "After adjustment, remaining transport packet bytes == %d\n",
-            this->pdu_remaining_));
 
       //
       // Dispatch the received message if we have received it all.
@@ -808,39 +820,37 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Now dispatch the sample to the DataLink\n"));
 
-        if (this->receive_sample_.header_.more_fragments_
-            || this->receive_transport_header_.last_fragment_) {
-          VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
+        ReceivedDataSample rds(this->payload_);
+        this->payload_ = 0;  // rds takes ownership of payload_
+        if (this->data_sample_header_.into_received_data_sample(rds)) {
 
-          if (this->reassemble(this->receive_sample_)) {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
-            this->deliver_sample(this->receive_sample_, remote_address);
+          if (this->data_sample_header_.more_fragments()
+              || this->receive_transport_header_.last_fragment()) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
+
+            if (this->reassemble(rds)) {
+              VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
+              this->deliver_sample(rds, remote_address);
+            }
+            // If reassemble() returned false, it takes ownership of the data
+            // just like deliver_sample() does.
+
+          } else {
+            this->deliver_sample(rds, remote_address);
           }
-          // If reassemble() returned false, it takes ownership of the data
-          // just like deliver_sample() does.
-
-        } else {
-          this->deliver_sample(this->receive_sample_, remote_address);
         }
-
-        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-              "Release the sample that we just sent.\n"));
-        //
-        // Release the entire chain.  This manages the data block
-        // refcount and buffer space as well.
-        //
-        // TODO: Manage this differently if we pass ownership.
-        //
-        ACE_Message_Block::release(this->receive_sample_.sample_);
-        this->receive_sample_.sample_ = 0;
 
         // For the reassembly algorithm, the 'last_fragment_' header bit only
         // applies to the first DataSampleHeader in the TransportHeader
-        this->receive_transport_header_.last_fragment_ = false;
+        this->receive_transport_header_.last_fragment(false);
+
+        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+              "Release the sample that we just sent.\n"));
+        // ~ReceivedDataSample() releases the payload_ message block
       }
 
-      if (amount == 0
-          && this->receive_buffers_[this->buffer_index_]->length() == 0) {
+      if (last_buffer &&
+          this->receive_buffers_[this->buffer_index_]->length() == 0) {
         // Relinquish control if there is no more data to process.
         VDBG((LM_DEBUG,"(%P|%t) DBG:   We are done - no more data.\n"));
         return 0;
@@ -863,8 +873,9 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   return 0;
 }
 
+template<typename TH, typename DSH>
 bool
-OpenDDS::DCPS::TransportReceiveStrategy::reassemble(ReceivedDataSample&)
+TransportReceiveStrategy<TH, DSH>::reassemble(ReceivedDataSample&)
 {
   ACE_DEBUG((LM_WARNING, "(%P|%t) TransportReceiveStrategy::reassemble() "
     "WARNING: derived class must override if specific transport type uses "
@@ -872,8 +883,9 @@ OpenDDS::DCPS::TransportReceiveStrategy::reassemble(ReceivedDataSample&)
   return false;
 }
 
+template<typename TH, typename DSH>
 int
-OpenDDS::DCPS::TransportReceiveStrategy::skip_bad_pdus()
+TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
 {
   if (this->good_pdu_) return 1;
 
@@ -881,23 +893,23 @@ OpenDDS::DCPS::TransportReceiveStrategy::skip_bad_pdus()
   // Adjust the message block chain pointers to account for the
   // skipped data.
   //
-  for (size_t index = this->buffer_index_ ;
-       this->pdu_remaining_ > 0 ;
+  for (size_t index = this->buffer_index_;
+       this->pdu_remaining_ > 0;
        index = this->successor_index(index)) {
     size_t amount =
-      ace_min<size_t>(this->pdu_remaining_, this->receive_buffers_[ index]->length());
+      ace_min<size_t>(this->pdu_remaining_, this->receive_buffers_[index]->length());
 
-    this->receive_buffers_[ index]->rd_ptr(amount) ;
-    this->pdu_remaining_ -= amount ;
+    this->receive_buffers_[index]->rd_ptr(amount);
+    this->pdu_remaining_ -= amount;
 
     if (this->pdu_remaining_ > 0 && this->successor_index(index) == this->buffer_index_) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("TransportReceiveStrategy::handle_input()")
+                        ACE_TEXT("TransportReceiveStrategy::skip_bad_pdus()")
                         ACE_TEXT(" - Unrecoverably corrupted ")
                         ACE_TEXT("receive buffer management detected: ")
                         ACE_TEXT("read more bytes than available.\n")),
-                       -1) ;
+                       -1);
     }
   }
 
@@ -905,10 +917,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::skip_bad_pdus()
   // Adjust the buffer chain in case we crossed into the next
   // buffer after skipping the PDU.
   //
-  size_t initial = this->buffer_index_ ;
+  size_t initial = this->buffer_index_;
 
-  while (this->receive_buffers_[ this->buffer_index_]->length() == 0) {
-    this->buffer_index_ = this->successor_index(this->buffer_index_) ;
+  while (this->receive_buffers_[this->buffer_index_]->length() == 0) {
+    this->buffer_index_ = this->successor_index(this->buffer_index_);
 
     if (initial == this->buffer_index_) {
       // No more data to process, our work here is done.
@@ -917,4 +929,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::skip_bad_pdus()
   }
 
   return 1;
+}
+
+}
 }

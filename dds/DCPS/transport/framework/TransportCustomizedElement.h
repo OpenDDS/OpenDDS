@@ -15,6 +15,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class TransportSendElement;
+
 class OpenDDS_Dcps_Export TransportCustomizedElement
   : public TransportQueueElement {
 
@@ -29,12 +31,22 @@ public:
   virtual const ACE_Message_Block* msg() const;
   void set_msg(ACE_Message_Block* m);
 
-  virtual bool owned_by_transport();
+  virtual const ACE_Message_Block* msg_payload() const;
 
-  bool is_fragment() const { return fragment_; }
+  virtual SequenceNumber sequence() const;
+
+  virtual bool owned_by_transport() { return false; }
+
+  virtual bool is_fragment() const { return fragment_; }
+
+  const TransportSendElement* original_send_element() const;
+
+  void set_requires_exclusive() { exclusive_ = true; }
 
 protected:
   virtual void release_element(bool dropped_by_transport);
+
+  virtual bool requires_exclusive_packet() const { return exclusive_; }
 
 private:
   TransportCustomizedElement(TransportQueueElement* orig,
@@ -46,7 +58,7 @@ private:
   ACE_Message_Block* msg_;
   ACE_Allocator* allocator_;
   RepoId publication_id_;
-  bool fragment_;
+  bool fragment_, exclusive_;
 };
 
 } // namespace DCPS

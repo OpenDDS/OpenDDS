@@ -41,3 +41,36 @@ project(*Fragmentation): dcpsexe {
     Fragmentation.cpp
   }
 }
+
+project(*GuidGenerator): dcps_rtpsexe {
+  exename   = *
+
+  Source_Files {
+    GuidGenerator.cpp
+  }
+}
+
+project(*ParameterListConverter): dcps_rtpsexe {
+  exename   = *
+
+  Source_Files {
+    ut_ParameterListConverter.cpp
+  }
+}
+
+project(*RepoIdSequence) : dcps_rtpsexe {
+  exename   = *
+
+    Source_Files {
+        ut_RepoIdSequence.cpp
+    }
+}
+
+project(*BIT_DataReader) : dcps_rtpsexe {
+  exename   = *
+
+    Source_Files {
+        ut_BIT_DataReader.cpp
+    }
+}
+

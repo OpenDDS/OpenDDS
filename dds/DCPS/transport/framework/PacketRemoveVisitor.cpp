@@ -16,36 +16,38 @@
 #include "PacketRemoveVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
-OpenDDS::DCPS::PacketRemoveVisitor::PacketRemoveVisitor
-(TransportQueueElement& sample,
- ACE_Message_Block*&          unsent_head_block,
- ACE_Message_Block*           header_block,
- TransportReplacedElementAllocator& allocator,
- MessageBlockAllocator& mb_allocator,
- DataBlockAllocator& db_allocator)
-  : sample_(sample),
-    head_(unsent_head_block),
-    header_block_(header_block),
-    status_(0),
-    current_block_(0),
-    previous_block_(0),
-    replaced_element_allocator_(allocator),
-    replaced_element_mb_allocator_(mb_allocator),
-    replaced_element_db_allocator_(db_allocator)
+namespace OpenDDS {
+namespace DCPS {
+
+PacketRemoveVisitor::PacketRemoveVisitor(
+  const TransportQueueElement::MatchCriteria& match,
+  ACE_Message_Block*& unsent_head_block,
+  ACE_Message_Block* header_block,
+  TransportReplacedElementAllocator& allocator,
+  MessageBlockAllocator& mb_allocator,
+  DataBlockAllocator& db_allocator)
+  : match_(match)
+  , head_(unsent_head_block)
+  , header_block_(header_block)
+  , status_(REMOVE_NOT_FOUND)
+  , current_block_(0)
+  , previous_block_(0)
+  , replaced_element_allocator_(allocator)
+  , replaced_element_mb_allocator_(mb_allocator)
+  , replaced_element_db_allocator_(db_allocator)
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","PacketRemoveVisitor",6);
+  DBG_ENTRY_LVL("PacketRemoveVisitor", "PacketRemoveVisitor", 6);
 }
 
-OpenDDS::DCPS::PacketRemoveVisitor::~PacketRemoveVisitor()
+PacketRemoveVisitor::~PacketRemoveVisitor()
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","~PacketRemoveVisitor",6);
+  DBG_ENTRY_LVL("PacketRemoveVisitor", "~PacketRemoveVisitor", 6);
 }
 
 int
-OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
-(TransportQueueElement*& element)
+PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
 {
-  DBG_ENTRY_LVL("PacketRemoveVisitor","visit_element_ref",6);
+  DBG_ENTRY_LVL("PacketRemoveVisitor", "visit_element_ref", 6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Obtain the element_blocks using element->msg()\n"));
@@ -75,7 +77,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
 
     // This must be our first visit_element() call.  Set up the
     // current_block_ and previous_block_ data members appropriately.
-    this->current_block_  = this->head_;
+    this->current_block_ = this->head_;
     this->previous_block_ = 0;
 
     // There is a chance that the head_ block (and thus the current_block_)
@@ -132,7 +134,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
 
   // Does the current element (being visited) match the sample that we
   // need to remove?
-  if( this->sample_ == *element) {
+  if (this->match_.matches(*element)) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "YES - The element matches the sample\n"));
 
@@ -182,7 +184,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     // contributed by the element currently being visited.
     original_blocks->cont(0);
 
-    unsigned num_elem_blocks_sent = 0;
+    unsigned int num_elem_blocks_sent = 0;
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Set num_elem_blocks_sent to 0\n"));
@@ -233,10 +235,10 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     if (contrib_block == 0) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Element queue and unsent message block "
-                 "chain is out-of-synch. source_block == 0.\n"));
+                 "chain is out-of-sync. source_block == 0.\n"));
 
       // Set the status to indicate a fatal error occurred.
-      this->status_ = -1;
+      this->status_ = REMOVE_ERROR;
 
       // Stop vistation now.
       return 0;
@@ -350,11 +352,10 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
       (TransportQueueElement*)this->replaced_element_allocator_.malloc(),
       TransportReplacedElement(orig_elem, &this->replaced_element_allocator_,
                                &this->replaced_element_mb_allocator_,
-                               &this->replaced_element_db_allocator_)
-    );
-    if( element == 0) {
+                               &this->replaced_element_db_allocator_));
+    if (element == 0) {
       // Set fatal error and stop visitation.
-      this->status_ = -1;
+      this->status_ = REMOVE_ERROR;
       return 0;
     }
 
@@ -373,7 +374,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
           replacement_element_blocks));
 
     // Move through the chain to account for the num_elem_blocks_sent
-    for (unsigned i = 0; i < num_elem_blocks_sent; i++) {
+    for (unsigned int i = 0; i < num_elem_blocks_sent; i++) {
       replacement_element_blocks = replacement_element_blocks->cont();
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -448,13 +449,6 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     original_blocks->release();
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "Set our status_ to 1.\n"));
-
-    // Set the status to 1 to indicate that an element was replaced,
-    // and no problems were encountered.
-    this->status_ = 1;
-
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Tell original element that data_dropped().\n"));
 
     // Tell the original element (that we replaced), data_dropped()
@@ -464,12 +458,11 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     // is dropped as a result of writer's remove_sample call. In the
     // later case, the dropped_by_transport is not used as the sample
     // is retained sample and no callback is made to writer.
-    this->sample_.released (orig_elem->data_dropped());
+    this->status_ = orig_elem->data_dropped() ? REMOVE_RELEASED : REMOVE_FOUND;
 
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "Return 0 to halt visitation.\n"));
-
-    if (this->sample_.released() ||  this->sample_.msg() != 0) {
+    if (this->status_ == REMOVE_RELEASED || this->match_.unique()) {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+            "Return 0 to halt visitation.\n"));
       // Replace a single sample if one is specified, otherwise visit the
       // entire queue replacing each sample with the specified
       // publication Id value.
@@ -484,3 +477,5 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
   return 1;
 }
 
+}
+}

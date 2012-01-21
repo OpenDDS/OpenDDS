@@ -98,15 +98,15 @@ int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
 
 // Implementation skeleton constructor
 ForwardingListenerImpl::ForwardingListenerImpl(
-  OpenDDS::DCPS::Service_Participant::RepoKey repo
+  OpenDDS::DCPS::Discovery::RepoKey repo
 ) : samples_( 0),
     condition_( this->lock_),
     complete_ (false),
     repo_( repo)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::ForwardingListenerImpl Repo[ %d]\n"),
-    this->repo_
+    ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::ForwardingListenerImpl Repo[ %C]\n"),
+             this->repo_.c_str()
   ));
 }
 
@@ -114,9 +114,9 @@ ForwardingListenerImpl::ForwardingListenerImpl(
 ForwardingListenerImpl::~ForwardingListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::~ForwardingListenerImpl Repo[ %d] ")
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::~ForwardingListenerImpl Repo[ %C] ")
       ACE_TEXT("after %d samples\n"),
-      this->repo_,
+      this->repo_.c_str(),
       this->samples_
     ));
   }
@@ -151,8 +151,8 @@ void ForwardingListenerImpl::on_requested_deadline_missed (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_requested_deadline_missed Repo[ %d]\n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_requested_deadline_missed Repo[ %C]\n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -168,8 +168,8 @@ void ForwardingListenerImpl::on_requested_incompatible_qos (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_requested_incompatible_qos Repo[ %d]\n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_requested_incompatible_qos Repo[ %C]\n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -185,8 +185,8 @@ void ForwardingListenerImpl::on_liveliness_changed (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_liveliness_changed Repo[ %d]\n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_liveliness_changed Repo[ %C]\n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -202,8 +202,8 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_subscription_matched Repo[ %d] \n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_subscription_matched Repo[ %C] \n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -219,8 +219,8 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_rejected Repo[ %d] \n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_rejected Repo[ %C] \n"),
+      this->repo_.c_str()
     ));
   }
 
@@ -231,11 +231,6 @@ void ForwardingListenerImpl::on_subscription_matched (
     CORBA::SystemException
   ))
   {
-    //ACE_DEBUG((LM_DEBUG,
-    //  ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available %d\n"), num_reads.value ()));
-
-    //num_reads ++;
-
     ::Xyz::FooNoKey foo;
     bool valid_data = false;
     int ret = read <Xyz::FooNoKey,
@@ -248,14 +243,14 @@ void ForwardingListenerImpl::on_subscription_matched (
     if (ret != 0)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %d] read failed.\n"),
-        this->repo_
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] read failed.\n"),
+        this->repo_.c_str()
       ));
 
     } else if( CORBA::is_nil( this->dataWriter_.in())) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl Repo[ %d] - bit bucket reached. \n"),
-        this->repo_
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] - bit bucket reached. \n"),
+        this->repo_.c_str()
       ));
       // The bit bucket is done processing when the answer is received.
       if(valid_data && foo.data_source == 42) {
@@ -268,8 +263,8 @@ void ForwardingListenerImpl::on_subscription_matched (
       // Signal that we are done once we receive a disconnect message.
       // We use the data_source member as a command value.
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl Repo[ %d] - termination command received. \n"),
-        this->repo_
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] - termination command received. \n"),
+        this->repo_.c_str()
       ));
       ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
       this->complete_ = true;
@@ -283,9 +278,9 @@ void ForwardingListenerImpl::on_subscription_matched (
         = ::Xyz::FooNoKeyDataWriter::_narrow( this->dataWriter_.in());
       if( CORBA::is_nil( fooWriter.in())) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %d] ")
+          ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] ")
           ACE_TEXT("failed to narrow writer to forward a sample with.\n"),
-          this->repo_
+          this->repo_.c_str()
         ));
 
       } else if (valid_data)
@@ -297,9 +292,9 @@ void ForwardingListenerImpl::on_subscription_matched (
         // Go ahead and forward the data.
         if( ::DDS::RETCODE_OK != fooWriter->write( foo, ::DDS::HANDLE_NIL)) {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %d] ")
+            ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %C] ")
             ACE_TEXT("failed to forward a sample.\n"),
-            this->repo_
+            this->repo_.c_str()
           ));
         }
       }
@@ -318,7 +313,7 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_lost Repo[ %d] \n"),
-      this->repo_
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_lost Repo[ %C] \n"),
+      this->repo_.c_str()
     ));
   }

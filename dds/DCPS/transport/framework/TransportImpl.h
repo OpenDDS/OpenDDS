@@ -85,26 +85,31 @@ protected:
 
   bool configure(TransportInst* config);
 
+  struct ConnectionAttribs {
+    CORBA::Long priority_;
+    bool local_reliable_;
+  };
+
   DataLink* find_datalink(const RepoId& local_id,
                           const AssociationData& remote_association,
-                          CORBA::Long priority,
+                          const ConnectionAttribs& attribs,
                           bool active);
 
   DataLink* connect_datalink(const RepoId& local_id,
                              const AssociationData& remote_association,
-                             CORBA::Long priority);
+                             const ConnectionAttribs& attribs);
 
   struct OpenDDS_Dcps_Export ConnectionEvent {
     ConnectionEvent(const RepoId& local_id,
                     const AssociationData& remote_association,
-                    CORBA::Long priority);
+                    const ConnectionAttribs& attribs);
 
     void wait(const ACE_Time_Value& timeout);
     bool complete(const DataLink_rch& link);
 
     const RepoId& local_id_;
     const AssociationData& remote_association_;
-    const CORBA::Long priority_;
+    const ConnectionAttribs& attribs_;
     ACE_Thread_Mutex mtx_;
     ACE_Condition_Thread_Mutex cond_;
     DataLink_rch link_;
@@ -133,7 +138,8 @@ protected:
   virtual DataLink* connect_datalink_i(const RepoId& local_id,
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
-                                       CORBA::Long priority) = 0;
+                                       bool remote_reliable,
+                                       const ConnectionAttribs& attribs) = 0;
 
   /// stop_accepting() is called from TransportClient::associate()
   /// to terminate the accepting process begun by accept_datalink().
@@ -149,7 +155,8 @@ protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
-                                    CORBA::Long priority,
+                                    bool remote_reliable,
+                                    const ConnectionAttribs& attribs,
                                     bool active) = 0;
 
 
@@ -166,15 +173,6 @@ protected:
   /// Called before transport is shutdown to let the
   /// concrete transport to do anything necessary.
   virtual void pre_shutdown_i();
-
-  /// Called by our release_datalink() method in order to give the
-  /// concrete TransportImpl subclass a chance to do something when
-  /// the release_datalink "event" occurs.
-  virtual void release_datalink_i(DataLink* link, bool release_pending) = 0;
-
-  virtual PriorityKey blob_to_key(const TransportBLOB& remote,
-                                  CORBA::Long priority,
-                                  bool active) = 0;
 
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
@@ -200,16 +198,15 @@ private:
   /// TransportClient is known to have acquired our reservation_lock_,
   /// so there won't be any reserve_datalink() calls being made from
   /// any other threads while we perform this release.
-  /// Since there are some delay of the datalink release, the release_pending
-  /// flag means whether the release happen right away or after some delay.
-  void release_datalink(DataLink* link, bool release_pending);
+  virtual void release_datalink(DataLink* link) = 0;
 
   void attach_client(TransportClient* client);
   void detach_client(TransportClient* client);
 
   DataLink* find_connect_i(const RepoId& local_id,
                            const AssociationData& remote_association,
-                           CORBA::Long priority, bool active, bool connect);
+                           const ConnectionAttribs& attribs,
+                           bool active, bool connect);
 
 public:
   typedef ACE_SYNCH_MUTEX                ReservationLockType;

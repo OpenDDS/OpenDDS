@@ -29,12 +29,28 @@ public:
   bool reassemble(const SequenceNumber& transportSeq, bool firstFrag,
                   ReceivedDataSample& data);
 
+  bool reassemble(const SequenceRange& seqRange, ReceivedDataSample& data);
+
   /// Called by TransportReceiveStrategy to indicate that we can
   /// stop tracking partially-reassembled messages when we know the
   /// remaining fragments are not expected to arrive.
   void data_unavailable(const SequenceRange& transportSeqDropped);
 
+  void data_unavailable(const SequenceNumber& dataSampleSeq,
+                        const RepoId& pub_id);
+
+  /// Returns true if this object is storing fragments for the given
+  /// DataSampleHeader sequence number from the given publication.
+  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const;
+
+  CORBA::ULong get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
+                        CORBA::Long bitmap[], CORBA::ULong length,
+                        CORBA::ULong& numBits) const;
+
 private:
+
+  bool reassemble_i(const SequenceRange& seqRange, bool firstFrag,
+                    ReceivedDataSample& data);
 
   // A FragKey represents the identifier for an original (pre-fragmentation)
   // message.  Since DataSampleHeader sequence numbers are distinct for each
@@ -60,7 +76,7 @@ private:
   // The transport_seq_ range is the range of transport sequence numbers
   // that were used to send the given chunk of data.
   struct FragRange {
-    FragRange(const SequenceNumber& transportSeq,
+    FragRange(const SequenceRange& seqRange,
               const ReceivedDataSample& data);
 
     SequenceRange transport_seq_;
@@ -77,10 +93,8 @@ private:
   std::set<FragKey> have_first_;
 
   static bool insert(std::list<FragRange>& flist,
-                     const SequenceNumber& transportSeq,
+                     const SequenceRange& seqRange,
                      ReceivedDataSample& data);
-
-  void dropped_one(const SequenceNumber& dropped, const SequenceNumber& first);
 };
 
 }

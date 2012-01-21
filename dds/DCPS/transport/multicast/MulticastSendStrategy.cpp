@@ -14,7 +14,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
-  : TransportSendStrategy(link->config(),
+  : TransportSendStrategy(TransportInst_rch(link->config(), false),
                           0,  // synch_resource
                           link->transport_priority(),
                           new NullSynchStrategy),

@@ -46,11 +46,39 @@ typedef std::pair<TransportQueueElement*, TransportQueueElement*> ElementPair;
 class OpenDDS_Dcps_Export TransportQueueElement {
 public:
 
-  /// Dtor
   virtual ~TransportQueueElement();
 
-  /// Returns true if the other element matches this one.
-  bool operator==(const TransportQueueElement& rhs) const;
+  class OpenDDS_Dcps_Export MatchCriteria {
+  protected:
+    virtual ~MatchCriteria();
+    MatchCriteria() {}
+  public:
+    virtual bool matches(const TransportQueueElement& candidate) const = 0;
+    virtual bool unique() const = 0; // (only expect to match 1 element)
+  private: // and unimplemented...
+    MatchCriteria(const MatchCriteria&);
+    MatchCriteria& operator=(const MatchCriteria&);
+  };
+
+  class OpenDDS_Dcps_Export MatchOnPubId : public MatchCriteria {
+  public:
+    explicit MatchOnPubId(const RepoId& id) : pub_id_(id) {}
+    virtual ~MatchOnPubId();
+    virtual bool matches(const TransportQueueElement& candidate) const;
+    virtual bool unique() const { return false; }
+  private:
+    RepoId pub_id_;
+  };
+
+  class OpenDDS_Dcps_Export MatchOnDataPayload : public MatchCriteria {
+  public:
+    explicit MatchOnDataPayload(const char* data) : data_(data) {}
+    virtual ~MatchOnDataPayload();
+    virtual bool matches(const TransportQueueElement& candidate) const;
+    virtual bool unique() const { return true; }
+  private:
+    const char* data_;
+  };
 
   /// Invoked when the sample is dropped from a DataLink due to a
   /// remove_sample() call.
@@ -71,8 +99,16 @@ public:
   /// Accessor for the publisher id that sent the sample.
   virtual RepoId publication_id() const = 0;
 
+  virtual SequenceNumber sequence() const
+  {
+    return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  }
+
   /// The marshalled sample (sample header + sample data)
   virtual const ACE_Message_Block* msg() const = 0;
+
+  /// The marshalled payload only (sample data)
+  virtual const ACE_Message_Block* msg_payload() const = 0;
 
   /// Is the element a "control" sample from the specified pub_id?
   virtual bool is_control(RepoId pub_id) const;
@@ -83,9 +119,9 @@ public:
 
   /// Clone method with provided message block allocator and data block
   /// allocators.
-  static ACE_Message_Block* clone(const ACE_Message_Block* msg,
-                                  MessageBlockAllocator* mb_allocator,
-                                  DataBlockAllocator* db_allocator);
+  static ACE_Message_Block* clone_mb(const ACE_Message_Block* msg,
+                                     MessageBlockAllocator* mb_allocator,
+                                     DataBlockAllocator* db_allocator);
 
   /// Is the sample created by the transport?
   virtual bool owned_by_transport() = 0;
@@ -106,7 +142,7 @@ protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which
   /// this TransportQueueElement will be sent.
-  explicit TransportQueueElement(int initial_count);
+  explicit TransportQueueElement(unsigned long initial_count);
 
   /// Invoked when the counter reaches 0.
   virtual void release_element(bool dropped_by_transport) = 0;
@@ -122,17 +158,8 @@ private:
   bool decision_made(bool dropped_by_transport);
   friend class TransportCustomizedElement;
 
-  /// Thread lock type
-  typedef ACE_SYNCH_MUTEX LockType;
-
-  /// Thread guard type
-  typedef ACE_Guard<LockType> GuardType;
-
-  /// Lock for the count_ data member
-  LockType lock_;
-
   /// Counts the number of outstanding sub-loans.
-  int sub_loan_count_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> sub_loan_count_;
 
   /// Flag flipped to true if any DataLink dropped the sample.
   bool dropped_;

@@ -15,7 +15,7 @@
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Domain.h"
 
-#include /**/ "DCPS_Utils.h"
+#include /**/ "dds/DCPS/DCPS_Utils.h"
 
 #include /**/ "tao/debug.h"
 
@@ -363,7 +363,14 @@ DCPS_IR_Topic_Description::try_associate(DCPS_IR_Publication* publication,
                  std::string(sub_converter).c_str()));
     }
 
-    if (compatibleQOS(publication, subscription)) {
+    if (OpenDDS::DCPS::compatibleQOS(publication->get_incompatibleQosStatus(),
+                                     subscription->get_incompatibleQosStatus(),
+                                     publication->get_transportLocatorSeq(),
+                                     subscription->get_transportLocatorSeq(),
+                                     publication->get_datawriter_qos(),
+                                     subscription->get_datareader_qos(),
+                                     publication->get_publisher_qos(),
+                                     subscription->get_subscriber_qos())) {
       associate(publication, subscription);
       return true;
     }

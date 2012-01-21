@@ -10,6 +10,7 @@
 #include "DataLink.h"
 #include "TransportSendElement.h"
 #include "SendResponseListener.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Util.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -72,9 +73,10 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 }
 
 ACE_INLINE OpenDDS::DCPS::SendControlStatus
-OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
-                                         TransportSendListener* listener,
-                                         ACE_Message_Block*     msg)
+OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
+                                         TransportSendListener*  listener,
+                                         const DataSampleHeader& header,
+                                         ACE_Message_Block*      msg)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_control",6);
   //Optimized - use cached allocator.
@@ -88,6 +90,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
     TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
                                 listener,
+                                header,
                                 msg,
                                 &send_control_element_allocator_),
     SEND_CONTROL_ERROR);
@@ -106,6 +109,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_response(
   RepoId pub_id,
+  const DataSampleHeader& header,
   ACE_Message_Block* response)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
@@ -120,6 +124,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
     TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
                                 &listener,
+                                header,
                                 response,
                                 &send_control_element_allocator_));
 
@@ -132,44 +137,37 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   }
 }
 
-ACE_INLINE int
-OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample,
-                                          bool  dropped_by_transport)
+ACE_INLINE bool
+OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("DataLinkSet","remove_sample",6);
+  DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
 
   GuardType guard(this->lock_);
-  TransportSendElement element (0, sample);
 
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
+  const MapType::iterator end = this->map_.end();
+  for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
 
-    // Tell the current DataLink to remove_sample.
-    if (itr->second->remove_sample(element, dropped_by_transport) == 0
-    && element.released ()) {
-      return 0;
+    if (itr->second->remove_sample(sample) == REMOVE_RELEASED) {
+      return true;
     }
-    // else still go on to rest DataLinks.
   }
 
-  return -1;
+  return false;
 }
 
-ACE_INLINE int
+ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
 {
-  DBG_ENTRY_LVL("DataLinkSet","remove_all_msgs",6);
+  DBG_ENTRY_LVL("DataLinkSet", "remove_all_msgs", 6);
 
   GuardType guard(this->lock_);
 
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
+  const MapType::iterator end = this->map_.end();
+  for (MapType::iterator itr = this->map_.begin(); itr != map_.end(); ++itr) {
     itr->second->remove_all_msgs(pub_id);
   }
 
-  return 0;
+  return true;
 }
 
 /// This will do several things, including adding to the membership

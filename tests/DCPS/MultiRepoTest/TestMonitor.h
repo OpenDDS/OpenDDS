@@ -40,7 +40,7 @@ class TestMonitor {
     typedef std::map< ::DDS::DomainId_t, ::DDS::DomainParticipant_var> ParticipantMap;
 
     /// Map repository keys to transport implementations.
-    typedef std::map< OpenDDS::DCPS::Service_Participant::RepoKey,
+    typedef std::map< OpenDDS::DCPS::Discovery::RepoKey,
                       OpenDDS::DCPS::TransportImpl_rch>            RepoToTransportMap;
 
     /// Configuration information.

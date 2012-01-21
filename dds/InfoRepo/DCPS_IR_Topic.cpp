@@ -16,7 +16,7 @@
 #include /**/ "DCPS_IR_Participant.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
 
-#include /**/ "DCPS_Utils.h"
+#include /**/ "dds/DCPS/DCPS_Utils.h"
 #include /**/ "dds/DCPS/RepoIdConverter.h"
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"

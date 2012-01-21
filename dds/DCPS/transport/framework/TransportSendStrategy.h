@@ -78,13 +78,7 @@ public:
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
-  /// A -1 is returned if some fatal error was encountered while
-  /// attempting to remove the sample.  Otherwise, a 0 is returned.
-  /// Note that a 0 return value does not imply that the sample was
-  /// actually found and removed - it could mean that, or it could
-  /// mean that the sample has already been fully sent, and there
-  /// is no trace of it in this strategy object.
-  int remove_sample(TransportSendElement& element);
+  RemoveResult remove_sample(const DataSampleListElement* sample);
 
   void remove_all_msgs(RepoId pub_id);
 
@@ -133,12 +127,19 @@ public:
   /// listener.
   void transport_shutdown();
 
+  typedef BasicQueue<TransportQueueElement> QueueType;
+
+  /// Convert ACE_Message_Block chain into iovec[] entries for send(),
+  /// returns number of iovec[] entries used (up to MAX_SEND_BLOCKS).
+  /// Precondition: iov must be an iovec[] of size MAX_SEND_BLOCKS or greater.
+  static int mb_to_iov(const ACE_Message_Block& msg, iovec* iov);
+
 protected:
 
-  TransportSendStrategy(TransportInst*          transport_inst,
-                        ThreadSynchResource*    synch_resource,
-                        CORBA::Long             priority,
-                        ThreadSynchStrategy_rch thread_sync_strategy);
+  TransportSendStrategy(const TransportInst_rch& transport_inst,
+                        ThreadSynchResource* synch_resource,
+                        CORBA::Long priority,
+                        const ThreadSynchStrategy_rch& thread_sync_strategy);
 
   // Only our subclass knows how to do this.
   // Third arg is the "back-pressure" flag.  If send_bytes() returns
@@ -160,16 +161,10 @@ protected:
   /// Specific implementation processing of prepared packet.
   virtual void prepare_packet_i();
 
-  /// Provide the opportunity to remove a sample from implementation
-  /// specific lists as well.
-  virtual void remove_sample_i(const TransportSendElement& element);
-
-  /// Provide the opportunity to remove control messages from
-  /// implementation specific lists as well.
-  virtual void remove_all_msgs_i(RepoId pub_id);
+  TransportQueueElement* current_packet_first_element() const;
 
   /// The maximum size of a message allowed by the this TransportImpl, or 0
-  /// if there is such limit.  This is expected to be a constant, for example
+  /// if there is no such limit.  This is expected to be a constant, for example
   /// UDP/IPv4 can send messages of up to 65466 bytes.
   /// The transport framework will use the returned value (if > 0) to
   /// fragment larger messages.  This fragmentation and
@@ -183,7 +178,6 @@ protected:
   static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
 private:
-  typedef BasicQueue<TransportQueueElement> QueueType;
 
   enum SendPacketOutcome {
     OUTCOME_COMPLETE_SEND,
@@ -286,7 +280,10 @@ public:
 
 private:
   /// Implement framework chain visitations to remove a sample.
-  int do_remove_sample(TransportQueueElement& current_sample);
+  RemoveResult do_remove_sample(
+    const TransportQueueElement::MatchCriteria& criteria);
+
+  virtual void marshal_transport_header(ACE_Message_Block* mb);
 
   /// Helper function to debugging.
   static const char* mode_as_str(SendMode mode);

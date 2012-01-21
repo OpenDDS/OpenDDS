@@ -32,19 +32,6 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
   return task._retn();
 }
 
-/// The DataLink itself calls this when it has determined that, due
-/// to some remove_associations() call being handled by a TransportClient
-/// object, the DataLink has lost all of its associations, and is not needed
-/// any longer.
-ACE_INLINE void
-OpenDDS::DCPS::TransportImpl::release_datalink(DataLink* link, bool release_pending)
-{
-  DBG_ENTRY_LVL("TransportImpl","release_datalink",6);
-
-  // Delegate to our subclass.
-  this->release_datalink_i(link, release_pending);
-}
-
 ACE_INLINE OpenDDS::DCPS::TransportImpl::ReservationLockType&
 OpenDDS::DCPS::TransportImpl::reservation_lock()
 {

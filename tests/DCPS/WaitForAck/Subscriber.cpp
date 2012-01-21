@@ -12,7 +12,6 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"

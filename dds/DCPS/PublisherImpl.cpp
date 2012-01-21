@@ -14,7 +14,7 @@
 #include "DataWriterImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
 #include "MonitorFactory.h"
@@ -213,7 +213,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
     if (dw_publisher.in() != this) {
       RepoId id = dw_servant->get_publication_id();
-      RepoIdConverter converter(id);
+      GuidConverter converter(id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
                  ACE_TEXT("the data writer %C doesn't ")
@@ -249,7 +249,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     PublicationMap::iterator it = publication_map_.find(publication_id);
 
     if (it == publication_map_.end()) {
-      RepoIdConverter converter(publication_id);
+      GuidConverter converter(publication_id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("PublisherImpl::delete_datawriter, ")
@@ -385,7 +385,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
 
     if (ret != DDS::RETCODE_OK) {
-      RepoIdConverter converter(pub_id);
+      GuidConverter converter(pub_id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("PublisherImpl::")
@@ -434,7 +434,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
             idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
           if (pair.second == false) {
-            RepoIdConverter converter(id);
+            GuidConverter converter(id);
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ")
                               ACE_TEXT("PublisherImpl::set_qos: ")
@@ -884,7 +884,7 @@ PublisherImpl::writer_enabled(const char* topic_name,
     publication_map_.insert(PublicationMap::value_type(publication_id, writer));
 
   if (pair.second == false) {
-    RepoIdConverter converter(publication_id);
+    GuidConverter converter(publication_id);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("PublisherImpl::writer_enabled: ")

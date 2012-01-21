@@ -163,7 +163,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
       {
         if (ACE_OS::strcmp (message.char_seq.get_buffer (), charseq))
           ACE_ERROR_RETURN ((LM_ERROR,
-                      "(%P|%t) ERROR: char_seq(%d) - unexpected char_seq %s\n", message.count,
+                      "(%P|%t) ERROR: char_seq(%d) - unexpected char_seq %C\n", message.count,
                       message.char_seq.get_buffer ()),
                       false);
       }
@@ -183,7 +183,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
       {
         if (ACE_OS::strcmp (message.str.in (), str))
           ACE_ERROR_RETURN ((LM_ERROR,
-                      "(%P|%t) ERROR: string(%d) - unexpected string %s\n", message.count, message.str.in ()),
+                      "(%P|%t) ERROR: string(%d) - unexpected string %C\n", message.count, message.str.in ()),
                       false);
       }
     case 1:

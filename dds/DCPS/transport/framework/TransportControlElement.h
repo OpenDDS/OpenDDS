@@ -14,12 +14,13 @@
 #include "TransportDefs.h"
 #include "TransportQueueElement.h"
 
-class ACE_Message_Block ;
+class ACE_Message_Block;
 
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportControlElement : public TransportQueueElement {
+class OpenDDS_Dcps_Export TransportControlElement
+  : public TransportQueueElement {
 public:
 
   /**
@@ -32,13 +33,13 @@ public:
    *             type is created on the stack, this *must* be set to
    *             false.
    */
-  TransportControlElement( const ACE_Message_Block* msg_block,
-                           const RepoId& pub_id = GUID_UNKNOWN,
-                           bool  owner = true);
+  TransportControlElement(const ACE_Message_Block* msg_block,
+                          const RepoId& pub_id = GUID_UNKNOWN,
+                          bool owner = true);
 
   virtual ~TransportControlElement();
 
-  virtual bool owned_by_transport ();
+  virtual bool owned_by_transport();
 
 protected:
 
@@ -47,6 +48,8 @@ protected:
   virtual RepoId publication_id() const;
 
   virtual const ACE_Message_Block* msg() const;
+
+  virtual const ACE_Message_Block* msg_payload() const;
 
   virtual void release_element(bool dropped_by_transport);
 

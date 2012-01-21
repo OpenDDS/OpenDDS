@@ -1,3 +1,14 @@
+Sat Jan 21 04:05:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "RTPS", which includes the initial OpenDDS
+          implementation of the DDS Interoperability Protocol, known as
+          Real-Time Publish-Subscribe, version 2.1, OMG formal/2010-11-01.
+          Not all DDS QoS policies and features are implemented, see the
+          notes in docs/design/RTPS.  All of the changes developed on that
+          branch are described in docs/history/ChangeLog-RTPS-2.
+          RTPS Discovery and Transport mechanisms are separately
+          configurable and neither is enabled by default.
+
 Tue Jan 17 18:41:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Compiler/idl_test1_main/main.cpp:

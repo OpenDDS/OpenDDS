@@ -12,6 +12,7 @@
 #include "utl_identifier.h"
 
 #include <string>
+#include <map>
 #include <sstream>
 #include <iostream>
 #include <cctype>
@@ -172,11 +173,94 @@ namespace {
       idt + "}\n";
   }
 
+  string checkAlignment(AST_Type* elem)
+  {
+    // At this point the stream must be 4-byte aligned (from the sequence
+    // length), but it might need to be 8-byte aligned for primitives > 4.
+    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
+    case AST_PredefinedType::PT_longlong:
+    case AST_PredefinedType::PT_ulonglong:
+    case AST_PredefinedType::PT_double:
+    case AST_PredefinedType::PT_longdouble:
+      return
+        "  if ((size + padding) % 8) {\n"
+        "    padding += 4;\n"
+        "  }\n";
+    default:
+      return "";
+    }
+  }
+
+  bool isRtpsSpecialSequence(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::ParameterList";
+  }
+
+  bool genRtpsSpecialSequence(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("seq", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (seq[i]._d() == OpenDDS::RTPS::PID_SENTINEL) continue;\n"
+        "    size_t param_size = 0, param_padding = 0;\n"
+        "    gen_find_size(seq[i], param_size, param_padding);\n"
+        "    size += param_size + param_padding;\n"
+        "    if (size % 4) {\n"
+        "      size += 4 - (size % 4);\n"
+        "    }\n"
+        "  }\n"
+        "  size += 4; /* PID_SENTINEL */\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("seq", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (seq[i]._d() == OpenDDS::RTPS::PID_SENTINEL) continue;\n"
+        "    if (!(strm << seq[i])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n"
+        "  return (strm << OpenDDS::RTPS::PID_SENTINEL)\n"
+        "    && (strm << OpenDDS::RTPS::PID_PAD);\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("seq", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  while (true) {\n"
+        "    const CORBA::ULong len = seq.length();\n"
+        "    seq.length(len + 1);\n"
+        "    if (!(strm >> seq[len])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    if (seq[len]._d() == OpenDDS::RTPS::PID_SENTINEL) {\n"
+        "      seq.length(len);\n"
+        "      return true;\n"
+        "    }\n"
+        "  }\n";
+    }
+    return true;
+  }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     string cxx = scoped(tdname);
+    if (isRtpsSpecialSequence(cxx)) {
+      genRtpsSpecialSequence(cxx);
+      return;
+    }
     AST_Type* elem = seq->base_type();
     resolveActualType(elem);
     Classification elem_cls = classify(elem);
@@ -190,43 +274,49 @@ namespace {
     }
     string cxx_elem = scoped(elem->name());
     {
-      Function find_size("gen_find_size", "size_t");
+      Function find_size("gen_find_size", "void");
       find_size.addArg("seq", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
       find_size.endArgs();
+      be_global->impl_ <<
+        "  find_size_ulong(size, padding);\n";
       if (elem_cls & CL_ENUM) {
-        be_global->impl_ << "  return max_marshaled_size_ulong() + "
-          "seq.length() * max_marshaled_size_ulong();\n";
+        be_global->impl_ <<
+          "  size += seq.length() * max_marshaled_size_ulong();\n";
       } else if (elem_cls & CL_PRIMITIVE) {
-        be_global->impl_ << "  return max_marshaled_size_ulong() + "
-          "seq.length() * " << getMaxSizeExprPrimitive(elem) << ";\n";
+        be_global->impl_ << checkAlignment(elem) <<
+          "  size += seq.length() * " << getMaxSizeExprPrimitive(elem) << ";\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
-          "  return 0; // sequence of objrefs is not marshaled\n";
+          "  // sequence of objrefs is not marshaled\n";
       } else if (elem_cls == CL_UNKNOWN) {
         be_global->impl_ <<
-          "  return 0; // sequence of unknown/unsupported type\n";
+          "  // sequence of unknown/unsupported type\n";
       } else { // String, Struct, Array, Sequence, Union
         be_global->impl_ <<
-          "  size_t length = max_marshaled_size_ulong();\n"
           "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n";
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            "    length += max_marshaled_size_ulong() + "
-            "(seq[i] ? ACE_OS::strlen(seq[i]) : 0)"
-            << ((elem_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar);\n" : ";\n");
+            "    find_size_ulong(size, padding);\n"
+            "    if (seq[i]) {\n"
+            "      size += ACE_OS::strlen(seq[i])"
+            << ((elem_cls & CL_WIDE)
+                ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+                : " + 1;\n") <<
+            "    }\n";
         } else if (elem_cls & CL_ARRAY) {
           be_global->impl_ <<
             "    " << cxx_elem << "_var tmp_var = " << cxx_elem
             << "_dup(seq[i]);\n"
             "    " << cxx_elem << "_forany tmp = tmp_var.inout();\n"
-            "    length += gen_find_size(tmp);\n";
-        } else {
+            "    gen_find_size(tmp, size, padding);\n";
+        } else { // Struct, Sequence, Union
           be_global->impl_ <<
-            "    length += gen_find_size(seq[i]);\n";
+            "    gen_find_size(seq[i], size, padding);\n";
         }
         be_global->impl_ <<
-          "  }\n"
-          "  return length;\n";
+          "  }\n";
       }
     }
     {
@@ -275,7 +365,7 @@ namespace {
         << streamAndCheck(">> length");
       if (!seq->unbounded()) {
         be_global->impl_ <<
-          "  if (length > seq.maximum ()) {\n"
+          "  if (length > seq.maximum()) {\n"
           "    return false;\n"
           "  }\n";
       }
@@ -325,6 +415,29 @@ namespace {
     }
   }
 
+  string getAlignment(AST_Type* elem)
+  {
+    if (elem->node_type() == AST_Decl::NT_enum) {
+      return "4";
+    }
+    switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
+    case AST_PredefinedType::PT_short:
+    case AST_PredefinedType::PT_ushort:
+      return "2";
+    case AST_PredefinedType::PT_long:
+    case AST_PredefinedType::PT_ulong:
+    case AST_PredefinedType::PT_float:
+      return "4";
+    case AST_PredefinedType::PT_longlong:
+    case AST_PredefinedType::PT_ulonglong:
+    case AST_PredefinedType::PT_double:
+    case AST_PredefinedType::PT_longdouble:
+      return "8";
+    default:
+      return "";
+    }
+  }
+
   void gen_array(UTL_ScopedName* name, AST_Array* arr)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
@@ -343,40 +456,51 @@ namespace {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
     }
     {
-      Function find_size("gen_find_size", "size_t");
+      Function find_size("gen_find_size", "void");
       find_size.addArg("arr", "const " + cxx + "_forany&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  return " << n_elems << " * max_marshaled_size_ulong();\n";
+          "  find_size_ulong(size, padding);\n";
+          if (n_elems > 1) {
+            be_global->impl_ <<
+              "  size += " << n_elems - 1 << " * max_marshaled_size_ulong();\n";
+          }
       } else if (elem_cls & CL_PRIMITIVE) {
+        const string align = getAlignment(elem);
+        if (!align.empty()) {
+          be_global->impl_ <<
+            "  if ((size + padding) % " << align << ") {\n"
+            "    padding += " << align << " - ((size + padding) % " << align
+            << ");\n"
+            "  }\n";
+        }
         be_global->impl_ <<
-          "  return " << n_elems << " * " << getMaxSizeExprPrimitive(elem)
+          "  size += " << n_elems << " * " << getMaxSizeExprPrimitive(elem)
           << ";\n";
       } else { // String, Struct, Array, Sequence, Union
-        be_global->impl_ <<
-          "  size_t length = 0;\n";
-        {
-          string indent = "  ";
-          NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-          if (elem_cls & CL_STRING) {
-            be_global->impl_ <<
-              indent << "length += max_marshaled_size_ulong() + "
-              "ACE_OS::strlen(arr" << nfl.index_ << ")"
-              << ((elem_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar);\n"
-              : ";\n");
-          } else if (elem_cls & CL_ARRAY) {
-            be_global->impl_ <<
-              indent << cxx_elem << "_var tmp_var = " << cxx_elem
-              << "_dup(arr" << nfl.index_ << ");\n" <<
-              indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
-              indent << "length += gen_find_size(tmp);\n";
-          } else {
-            be_global->impl_ <<
-              "    length += gen_find_size(arr" << nfl.index_ << ");\n";
-          }
+        string indent = "  ";
+        NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+        if (elem_cls & CL_STRING) {
+          be_global->impl_ <<
+            indent << "find_size_ulong(size, padding);\n" <<
+            indent << "size += ACE_OS::strlen(arr" << nfl.index_ << ")"
+            << ((elem_cls & CL_WIDE)
+                ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+                : " + 1;\n");
+        } else if (elem_cls & CL_ARRAY) {
+          be_global->impl_ <<
+            indent << cxx_elem << "_var tmp_var = " << cxx_elem
+            << "_dup(arr" << nfl.index_ << ");\n" <<
+            indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
+            indent << "gen_find_size(tmp, size, padding);\n";
+        } else { // Struct, Sequence, Union
+          be_global->impl_ <<
+            indent << "gen_find_size(arr" << nfl.index_
+            << ", size, padding);\n";
         }
-        be_global->impl_ << "  return length;\n";
       }
     }
     {
@@ -454,8 +578,7 @@ namespace {
   // specified and returns the AST_Type associated with that key.
   // Because the key name can contain indexed arrays and nested
   // structures, things can get interesting.
-  AST_Type* find_type(const std::vector<AST_Field*>& fields,
-                      string key)
+  AST_Type* find_type(const std::vector<AST_Field*>& fields, const string& key)
   {
     string key_base = key;   // the field we are looking for here
     string key_rem;          // the sub-field we will look for recursively
@@ -479,7 +602,7 @@ namespace {
       string field_name = fields[i]->local_name()->get_string();
       if (field_name == key_base) {
         AST_Type* field_type = fields[i]->field_type();
-        if (!is_array && key_rem == "") {
+        if (!is_array && key_rem.empty()) {
           // The requested key field matches this one.  We do not allow
           // arrays (must be indexed specifically) or structs (must
           // identify specific sub-fields).
@@ -546,7 +669,8 @@ namespace {
     throw std::string("Field not found.");
   }
 
-  bool is_bounded_type(AST_Type* type) {
+  bool is_bounded_type(AST_Type* type)
+  {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
     resolveActualType(type);
@@ -593,10 +717,36 @@ namespace {
     return bounded;
   }
 
+  void align(size_t alignment, size_t& size, size_t& padding)
+  {
+    if ((size + padding) % alignment) {
+      padding += alignment - ((size + padding) % alignment);
+    }
+  }
+
+  void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding);
+
+  // Max marshaled size of repeating 'type' 'n' times in the stream
+  // (for an array or sequence)
+  void mms_repeating(AST_Type* type, size_t n, size_t& size, size_t& padding)
+  {
+    if (n > 0) {
+      // 1st element may need padding relative to whatever came before
+      max_marshaled_size(type, size, padding);
+    }
+    if (n > 1) {
+      // subsequent elements may need padding relative to prior element
+      size_t prev_size = size, prev_pad = padding;
+      max_marshaled_size(type, size, padding);
+      size += (n - 2) * (size - prev_size);
+      padding += (n - 2) * (padding - prev_pad);
+    }
+  }
+
   // Should only be called on bounded types (see above function)
-  size_t max_marshaled_size(AST_Type* type) {
+  void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding)
+  {
     resolveActualType(type);
-    size_t size = 0;
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
         AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
@@ -608,20 +758,26 @@ namespace {
           break;
         case AST_PredefinedType::PT_short:
         case AST_PredefinedType::PT_ushort:
-        case AST_PredefinedType::PT_wchar:
+          align(2, size, padding);
           size += 2;
+          break;
+        case AST_PredefinedType::PT_wchar:
+          size += 3; // see Serializer::max_marshaled_size_wchar()
           break;
         case AST_PredefinedType::PT_long:
         case AST_PredefinedType::PT_ulong:
         case AST_PredefinedType::PT_float:
+          align(4, size, padding);
           size += 4;
           break;
         case AST_PredefinedType::PT_longlong:
         case AST_PredefinedType::PT_ulonglong:
         case AST_PredefinedType::PT_double:
+          align(8, size, padding);
           size += 8;
           break;
         case AST_PredefinedType::PT_longdouble:
+          align(8, size, padding);
           size += 16;
           break;
         default:
@@ -631,12 +787,19 @@ namespace {
         break;
       }
     case AST_Decl::NT_enum:
+      align(4, size, padding);
       size += 4;
       break;
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
         AST_String* string_node = dynamic_cast<AST_String*>(type);
-        size += string_node->width() * string_node->max_size()->ev ()->u.ulval;
+        align(4, size, padding);
+        size += 4;
+        const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
+        size += width * string_node->max_size()->ev()->u.ulval;
+        if (type->node_type() == AST_Decl::NT_string) {
+          size += 1; // narrow string includes the null terminator
+        }
         break;
       }
     case AST_Decl::NT_struct: {
@@ -645,7 +808,7 @@ namespace {
           AST_Field** f;
           struct_node->field(f, i);
           AST_Type* field_type = (*f)->field_type();
-          size += max_marshaled_size(field_type);
+          max_marshaled_size(field_type, size, padding);
         }
         break;
       }
@@ -653,7 +816,9 @@ namespace {
         AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
         AST_Type* base_node = seq_node->base_type();
         size_t bound = seq_node->max_size()->ev()->u.ulval;
-        size += 4 + bound * max_marshaled_size(base_node);
+        align(4, size, padding);
+        size += 4;
+        mms_repeating(base_node, bound, size, padding);
         break;
       }
     case AST_Decl::NT_array: {
@@ -664,28 +829,37 @@ namespace {
         for (unsigned long i = 0; i < array_node->n_dims(); i++) {
           array_size *= dims[i]->ev()->u.ulval;
         }
-        size += array_size * max_marshaled_size(base_node);
+        mms_repeating(base_node, array_size, size, padding);
         break;
       }
     case AST_Decl::NT_union: {
         AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-        size += max_marshaled_size(union_node->disc_type());
-        size_t largest_field_size = 0;
+        max_marshaled_size(union_node->disc_type(), size, padding);
+        size_t largest_field_size = 0, largest_field_pad = 0;
+        const size_t starting_size = size, starting_pad = padding;
         for (unsigned long i = 0; i < union_node->nfields(); ++i) {
           AST_Field** f;
           union_node->field(f, i);
           AST_Type* field_type = (*f)->field_type();
-          size_t field_size = max_marshaled_size(field_type);
-          if (field_size > largest_field_size) largest_field_size = field_size;
+          max_marshaled_size(field_type, size, padding);
+          size_t field_size = size - starting_size,
+            field_pad = padding - starting_pad;
+          if (field_size > largest_field_size) {
+            largest_field_size = field_size;
+            largest_field_pad = field_pad;
+          }
+          // rewind:
+          size = starting_size;
+          padding = starting_pad;
         }
         size += largest_field_size;
+        padding += largest_field_pad;
         break;
       }
     default:
       // Anything else should be not here or is unbounded
       break;
     }
-    return size;
   }
 }
 
@@ -715,21 +889,33 @@ namespace {
     resolveActualType(type);
     Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name;
+    const string indent = (prefix == "uni") ? "      " : "  ";
     if (fld_cls & CL_ENUM) {
-      return "max_marshaled_size_ulong()";
+      return indent + "find_size_ulong(size, padding);\n";
     } else if (fld_cls & CL_STRING) {
-      return "max_marshaled_size_ulong() + ACE_OS::strlen(" + qual + ")"
-        + ((fld_cls & CL_WIDE) ? " * sizeof(ACE_CDR::WChar)": "");
+      return indent + "find_size_ulong(size, padding);\n" +
+        indent + "size += ACE_OS::strlen(" + qual + ")"
+        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+                               : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
-      return "gen_max_marshaled_size(" + getWrapper(qual, type, WD_OUTPUT)
-        + ')';
+      string align = getAlignment(type);
+      if (!align.empty()) {
+        align =
+          indent + "if ((size + padding) % " + align + ") {\n" +
+          indent + "  padding += " + align + " - ((size + padding) % "
+          + align + ");\n" +
+          indent + "}\n";
+      }
+      return align +
+        indent + "size += gen_max_marshaled_size(" +
+        getWrapper(qual, type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
-      return "0"; // warning will be issued for the serialize functions
+      return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = name;
       if (fld_cls & CL_ARRAY) {
-        intro += "  " + getArrayForany(prefix.c_str(), name.c_str(),
-                          scoped(typedeff->name())) + '\n';
+        intro += indent + getArrayForany(prefix.c_str(), name.c_str(),
+                                         scoped(typedeff->name())) + '\n';
         fieldref += '_';
         if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
           local.erase(local.size() - 2);
@@ -737,7 +923,8 @@ namespace {
       } else {
         fieldref += '.';
       }
-      return "gen_find_size(" + fieldref + local + ')';
+      return indent +
+        "gen_find_size(" + fieldref + local + ", size, padding);\n";
     }
   }
 
@@ -782,6 +969,121 @@ namespace {
       return "(strm " + fieldref + local + ')';
     }
   }
+
+  bool isRtpsSpecialStruct(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::SequenceNumberSet"
+      || cxx == "OpenDDS::RTPS::FragmentNumberSet";
+  }
+
+  bool genRtpsSpecialStruct(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  size += "
+        << ((cxx == "OpenDDS::RTPS::SequenceNumberSet") ? "12" : "8")
+        << " + 4 * ((stru.numBits + 31) / 32); // RTPS Custom\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if ((strm << stru.bitmapBase) && (strm << stru.numBits)) {\n"
+        "    const CORBA::ULong M = (stru.numBits + 31) / 32;\n"
+        "    if (stru.bitmap.length() < M) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    for (CORBA::ULong i = 0; i < M; ++i) {\n"
+        "      if (!(strm << stru.bitmap[i])) {\n"
+        "        return false;\n"
+        "      }\n"
+        "    }\n"
+        "    return true;\n"
+        "  }\n"
+        "  return false;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  if ((strm >> stru.bitmapBase) && (strm >> stru.numBits)) {\n"
+        "    const CORBA::ULong M = (stru.numBits + 31) / 32;\n"
+        "    if (M > 8) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    stru.bitmap.length(M);\n"
+        "    for (CORBA::ULong i = 0; i < M; ++i) {\n"
+        "      if (!(strm >> stru.bitmap[i])) {\n"
+        "        return false;\n"
+        "      }\n"
+        "    }\n"
+        "    return true;\n"
+        "  }\n"
+        "  return false;\n";
+    }
+    return true;
+  }
+
+  struct RtpsFieldCustomizer {
+
+    explicit RtpsFieldCustomizer(const string& cxx)
+    {
+      if (cxx == "OpenDDS::RTPS::DataSubmessage") {
+        cst_["inlineQos"] = "stru.smHeader.flags & 2";
+        iQosOffset_ = "16";
+
+      } else if (cxx == "OpenDDS::RTPS::DataFragSubmessage") {
+        cst_["inlineQos"] = "stru.smHeader.flags & 2";
+        iQosOffset_ = "28";
+
+      } else if (cxx == "OpenDDS::RTPS::InfoReplySubmessage") {
+        cst_["multicastLocatorList"] = "stru.smHeader.flags & 2";
+
+      } else if (cxx == "OpenDDS::RTPS::InfoTimestampSubmessage") {
+        cst_["timestamp"] = "!(stru.smHeader.flags & 2)";
+
+      } else if (cxx == "OpenDDS::RTPS::InfoReplyIp4Submessage") {
+        cst_["multicastLocator"] = "stru.smHeader.flags & 2";
+
+      } else if (cxx == "OpenDDS::RTPS::SubmessageHeader") {
+        preamble_ =
+          "  strm.swap_bytes(ACE_CDR_BYTE_ORDER != (stru.flags & 1));\n";
+      }
+    }
+
+    string getConditional(const string& field_name) const
+    {
+      if (cst_.empty()) {
+        return "";
+      }
+      std::map<string, string>::const_iterator it = cst_.find(field_name);
+      if (it != cst_.end()) {
+        return it->second;
+      }
+      return "";
+    }
+
+    string preFieldRead(const string& field_name) const
+    {
+      if (cst_.empty() || field_name != "inlineQos" || iQosOffset_.empty()) {
+        return "";
+      }
+      return "strm.skip(stru.octetsToInlineQos - " + iQosOffset_ + ")\n"
+        "    && ";
+    }
+
+    std::map<string, string> cst_;
+    string iQosOffset_, preamble_;
+  };
 }
 
 bool marshal_generator::gen_struct(UTL_ScopedName* name,
@@ -790,9 +1092,15 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
+  if (isRtpsSpecialStruct(cxx)) {
+    return genRtpsSpecialStruct(cxx);
+  }
+  RtpsFieldCustomizer rtpsCustom(cxx);
   {
-    Function find_size("gen_find_size", "size_t");
+    Function find_size("gen_find_size", "void");
     find_size.addArg("stru", "const " + cxx + "&");
+    find_size.addArg("size", "size_t&");
+    find_size.addArg("padding", "size_t&");
     find_size.endArgs();
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
@@ -802,22 +1110,36 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
           && field_type->node_type() != AST_Decl::NT_pre_defined) {
         be_global->add_referenced(field_type->file_name().c_str());
       }
-      if (i) expr += "\n    + ";
-      expr += findSizeCommon(fields[i]->local_name()->get_string(),
-                             field_type, "stru", intro);
+      const string field_name = fields[i]->local_name()->get_string(),
+        cond = rtpsCustom.getConditional(field_name);
+      if (!cond.empty()) {
+        expr += "  if (" + cond + ") {\n  ";
+      }
+      expr += findSizeCommon(field_name, field_type, "stru", intro);
+      if (!cond.empty()) {
+        expr += "  }\n";
+      }
     }
-    be_global->impl_ << intro << "  return " << expr << ";\n";
+    be_global->impl_ << intro << expr;
   }
   {
     Function insertion("operator<<", "bool");
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
-    string expr, intro;
+    string expr, intro = rtpsCustom.preamble_;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (i) expr += "\n    && ";
-      expr += streamCommon(fields[i]->local_name()->get_string(),
-                           fields[i]->field_type(), "<< stru", intro, cxx);
+      const string field_name = fields[i]->local_name()->get_string(),
+        cond = rtpsCustom.getConditional(field_name);
+      if (!cond.empty()) {
+        expr += "(!(" + cond + ") || ";
+      }
+      expr += streamCommon(field_name, fields[i]->field_type(),
+                           "<< stru", intro, cxx);
+      if (!cond.empty()) {
+        expr += ")";
+      }
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -829,8 +1151,17 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (i) expr += "\n    && ";
-      expr += streamCommon(fields[i]->local_name()->get_string(),
-                           fields[i]->field_type(), ">> stru", intro, cxx);
+      const string field_name = fields[i]->local_name()->get_string(),
+        cond = rtpsCustom.getConditional(field_name);
+      if (!cond.empty()) {
+        expr += rtpsCustom.preFieldRead(field_name);
+        expr += "(!(" + cond + ") || ";
+      }
+      expr += streamCommon(field_name, fields[i]->field_type(),
+                           ">> stru", intro, cxx);
+      if (!cond.empty()) {
+        expr += ")";
+      }
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -855,14 +1186,24 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
       max_marsh.addArg("stru", "const " + cxx + "&");
+      max_marsh.addArg("align", "bool");
       max_marsh.endArgs();
-      size_t size = 0;
-      if (is_bounded_struct) {  // If not bounded, return 0.
+      if (is_bounded_struct) {
+        size_t size = 0, padding = 0;
         for (size_t i = 0; i < fields.size(); ++i) {
-          size += max_marshaled_size(fields[i]->field_type());
+          max_marshaled_size(fields[i]->field_type(), size, padding);
         }
+        if (padding) {
+          be_global->impl_
+            << "  return align ? " << size + padding << " : " << size << ";\n";
+        } else {
+          be_global->impl_
+            << "  return " << size << ";\n";
+        }
+      } else { // unbounded
+        be_global->impl_
+          << "  return 0;\n";
       }
-      be_global->impl_ << "  return " << size << ";\n";
     }
 
     // Generate key-related marshaling code
@@ -896,11 +1237,12 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
       max_marsh.addArg("stru", "KeyOnly<const " + cxx + ">");
+      max_marsh.addArg("align", "bool");
       max_marsh.endArgs();
 
-      size_t size = 0;
       if (bounded_key) {  // Only generate a size if the key is bounded
         IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        size_t size = 0, padding = 0;
         for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
           string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
           AST_Type* field_type = 0;
@@ -911,18 +1253,28 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                       << " (" << key_name << "). " << error << std::endl;
             return false;
           }
-          size += max_marshaled_size(field_type);
+          max_marshaled_size(field_type, size, padding);
         }
+        if (padding) {
+          be_global->impl_
+            << "  return align ? " << size + padding << " : " << size << ";\n";
+        } else {
+          be_global->impl_
+            << "  return " << size << ";\n";
+        }
+      } else { // unbounded
+        be_global->impl_
+          << "  return 0;\n";
       }
-      be_global->impl_  << "  return " << size << ";\n";
     }
 
     {
-      Function find_size("gen_find_size", "size_t");
+      Function find_size("gen_find_size", "void");
       find_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       string expr, intro;
-      bool first = true;
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
@@ -934,12 +1286,9 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        if (first) first = false;
-        else       expr += "\n    + ";
         expr += findSizeCommon(key_name, field_type, "stru.t", intro);
       }
-      if (first) expr += "0";  // No key, size = 0
-      be_global->impl_ << intro << "  return " << expr << ";\n";
+      be_global->impl_ << intro << expr;
     }
 
     {
@@ -1086,12 +1435,24 @@ namespace {
   void generateSwitchBodyForUnion(CommonFn commonFn,
     const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
     const char* statementPrefix, const char* namePrefix = "",
-    const string& uni = "")
+    const string& uni = "", bool forceDisableDefault = false)
   {
     size_t n_labels = 0;
     bool has_default = false;
     for (size_t i = 0; i < branches.size(); ++i) {
       AST_UnionBranch* branch = branches[i];
+      if (forceDisableDefault) {
+        bool foundDefault = false;
+        for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+          if (branch->label(j)->label_kind() == AST_UnionLabel::UL_default) {
+            foundDefault = true;
+          }
+        }
+        if (foundDefault) {
+          has_default = true;
+          continue;
+        }
+      }
       generateBranchLabels(branch, discriminator, n_labels, has_default);
       string intro, name = branch->local_name()->get_string();
       if (namePrefix == string(">> ")) {
@@ -1129,9 +1490,15 @@ namespace {
                                string(namePrefix) + "uni", intro, uni);
         be_global->impl_ <<
           "    {\n" <<
-          (intro.length() ? "    " : "") << intro <<
-          "      " << statementPrefix << " " << expr << ";\n" <<
-          (statementPrefix == string("return") ? "" : "      break;\n") <<
+          (intro.length() ? "    " : "") << intro;
+        if (*statementPrefix) {
+          be_global->impl_ <<
+            "      " << statementPrefix << " " << expr << ";\n" <<
+            (statementPrefix == string("return") ? "" : "      break;\n");
+        } else {
+          be_global->impl_ << expr << "      break;\n";
+        }
+        be_global->impl_<<
           "    }\n";
       }
     }
@@ -1140,6 +1507,166 @@ namespace {
         "  default:\n" <<
         ((namePrefix == string(">> ")) ? "    uni._d(disc);\n" : "") <<
         "    break;\n";
+    }
+  }
+
+  bool isRtpsSpecialUnion(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::Parameter"
+      || cxx == "OpenDDS::RTPS::Submessage";
+  }
+
+  bool genRtpsParameter(AST_Type* discriminator,
+                        const std::vector<AST_UnionBranch*>& branches)
+  {
+    const string cxx = "OpenDDS::RTPS::Parameter";
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("uni", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
+                                 "", "", cxx);
+      be_global->impl_ <<
+        "  }\n"
+        "  size += 4; // parameterId & length\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("outer_strm", "Serializer&");
+      insertion.addArg("uni", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if (!(outer_strm << uni._d())) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  size_t size = 0, pad = 0;\n"
+        "  gen_find_size(uni, size, pad);\n"
+        "  size -= 4; // parameterId & length\n"
+        "  const size_t post_pad = 4 - ((size + pad) % 4);\n"
+        "  const size_t total = size + pad + ((post_pad < 4) ? post_pad : 0);\n"
+        "  if (size + pad > ACE_UINT16_MAX || "
+        "!(outer_strm << ACE_CDR::UShort(total))) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  ACE_Message_Block param(size + pad);\n"
+        "  Serializer strm(&param, outer_strm.swap_bytes(), "
+        "outer_strm.alignment());\n"
+        "  if (!insertParamData(strm, uni)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
+        "param.rd_ptr());\n"
+        "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(param.length()))) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  if (post_pad < 4 && outer_strm.alignment() != "
+        "Serializer::ALIGN_NONE) {\n"
+        "    static const ACE_CDR::Octet padding[3] = {0};\n"
+        "    return outer_strm.write_octet_array(padding, "
+        "ACE_CDR::ULong(post_pad));\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function insertData("insertParamData", "bool");
+      insertData.addArg("strm", "Serializer&");
+      insertData.addArg("uni", "const " + cxx + "&");
+      insertData.endArgs();
+      be_global->impl_ <<
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+                                 "return", "<< ", cxx);
+      be_global->impl_ <<
+        "  }\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("outer_strm", "Serializer&");
+      extraction.addArg("uni", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  ACE_CDR::UShort disc, size;\n"
+        "  if (!(outer_strm >> disc) || !(outer_strm >> size)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  ACE_Message_Block param(size);\n"
+        "  ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
+        "param.wr_ptr());\n"
+        "  if (!outer_strm.read_octet_array(data, size)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  param.wr_ptr(size);\n"
+        "  Serializer strm(&param, outer_strm.swap_bytes(), "
+        "Serializer::ALIGN_CDR);\n"
+        "  switch (disc) {\n";
+      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+                                 "return", ">> ", cxx, true);
+      be_global->impl_ <<
+        "  default:\n"
+        "    {\n"
+        "      uni.unknown_data(OpenDDS::RTPS::OctetSeq(size));\n"
+        "      uni.unknown_data().length(size);\n"
+        "      std::memcpy(uni.unknown_data().get_buffer(), data, size);\n"
+        "      uni._d(disc);\n"
+        "    }\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    return true;
+  }
+
+  bool genRtpsSubmessage(AST_Type* discriminator,
+                         const std::vector<AST_UnionBranch*>& branches)
+  {
+    const string cxx = "OpenDDS::RTPS::Submessage";
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("uni", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
+                                 "", "", cxx);
+      be_global->impl_ <<
+        "  }\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("uni", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  switch (uni._d()) {\n";
+      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+                                 "return", "<< ", cxx);
+      be_global->impl_ <<
+        "  }\n";
+    }
+    {
+      Function insertion("operator>>", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("uni", cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ << "  // unused\n  return false;\n";
+    }
+    return true;
+  }
+
+  bool genRtpsSpecialUnion(const string& cxx, AST_Type* discriminator,
+                           const std::vector<AST_UnionBranch*>& branches)
+  {
+    if (cxx == "OpenDDS::RTPS::Parameter") {
+      return genRtpsParameter(discriminator, branches);
+    } else if (cxx == "OpenDDS::RTPS::Submessage") {
+      return genRtpsSubmessage(discriminator, branches);
+    } else {
+      return false;
     }
   }
 }
@@ -1151,19 +1678,31 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
+  if (isRtpsSpecialUnion(cxx)) {
+    return genRtpsSpecialUnion(cxx, discriminator, branches);
+  }
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
-    Function find_size("gen_find_size", "size_t");
+    Function find_size("gen_find_size", "void");
     find_size.addArg("uni", "const " + cxx + "&");
+    find_size.addArg("size", "size_t&");
+    find_size.addArg("padding", "size_t&");
     find_size.endArgs();
+    const string align = getAlignment(discriminator);
+    if (!align.empty()) {
+      be_global->impl_ <<
+        "  if ((size + padding) % " << align << ") {\n"
+        "    padding += " << align << " - ((size + padding) % " << align
+        << ");\n"
+        "  }\n";
+    }
     be_global->impl_ <<
-      "  size_t result = gen_max_marshaled_size(" << wrap_out << ");\n"
+      "  size += gen_max_marshaled_size(" << wrap_out << ");\n"
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
-                               "result +=", "", cxx);
+                               "", "", cxx);
     be_global->impl_ <<
-      "  }\n"
-      "  return result;\n";
+      "  }\n";
   }
   {
     Function insertion("operator<<", "bool");

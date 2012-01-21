@@ -15,6 +15,7 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/EntityImpl.h"
+#include "dds/DCPS/ConfigUtils.h"
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -29,96 +30,11 @@
 namespace {
   const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
 
-  /// Helper types and functions for config file parsing
-  typedef std::map<std::string, std::string> ValueMap;
-  typedef std::pair<std::string, ACE_Configuration_Section_Key> SubsectionPair;
-  typedef std::list<SubsectionPair> KeyList;
-
   /// Used for sorting
   bool predicate( const OpenDDS::DCPS::TransportInst_rch& lhs,
                   const OpenDDS::DCPS::TransportInst_rch& rhs )
   {
     return lhs->name() < rhs->name();
-  }
-
-  template <typename T> bool convertToInteger( const std::string& s,
-                                               T& value )
-  {
-    std::stringstream istr(s);
-    if (!(istr >> value) || (istr.peek() != EOF)) return false;
-    return true;
-  }
-
-  ///     Function that pulls all the values from the
-  ///     specified ACE Configuration Section and places them in a
-  ///     value map based on the field name.  Returns the number of
-  ///     values found in the section (and added to the value map).
-  ///
-  ///     cf     ACE_Configuration_Heap object being processed
-  ///     key    ACE_Configuration_Section_Key object that specifies
-  ///            the section of the .ini file to process
-  ///     values Map of field names to values (both std::strings)
-  ///            that this function will add to.
-  ///
-  int pullValues( ACE_Configuration_Heap& cf,
-                  const ACE_Configuration_Section_Key& key,
-                  ValueMap& values ) {
-    int index = 0;
-    ACE_TString name;
-    ACE_Configuration::VALUETYPE type;
-
-    while (cf.enumerate_values( key, index, name, type ) == 0) {
-      ACE_TString value;
-      if (type == ACE_Configuration::STRING) {
-        cf.get_string_value( key, name.c_str(), value );
-        values[ACE_TEXT_ALWAYS_CHAR(name.c_str())] =
-          ACE_TEXT_ALWAYS_CHAR(value.c_str());
-      } else {
-        ACE_DEBUG((LM_WARNING, "Unexpected value type in config file (ignored): "
-                   "name=%s, type=%d\n", name.c_str(), type));
-      }
-      index++;
-    }
-    return index;
-  }
-
-
-  ///     Function that processes the specified ACE Configuration Section
-  ///     for subsections.  If multiple levels of subsections are found,
-  ///     a non-zero value is returned to indicate the error.
-  ///     All valid subsection will be placed into the supplied
-  ///     KeyList (std::pair<> of the subsection number and
-  ///     ACE_Configuration_Section_Key).  A return value of zero indicates
-  ///     error-free success.
-  ///
-  ///
-  ///     cf              ACE_Configuration_Heap object being processed
-  ///     key             ACE_Configuration_Section_Key object that
-  ///                     specifies the section of the .ini file to process
-  ///     subsections     List of subsections found (list contains a
-  ///                     std::pair<> of the subsection number and
-  ///                     ACE_Configuration_Section_Key).
-  ///
-  int processSections( ACE_Configuration_Heap& cf,
-                       const ACE_Configuration_Section_Key& key,
-                       KeyList& subsections ) {
-    int index = 0;
-    ACE_TString name;
-    while (cf.enumerate_sections( key, index, name ) == 0) {
-      ACE_Configuration_Section_Key subkey;
-      cf.open_section( key, name.c_str(), 0, subkey );
-      subsections.push_back( SubsectionPair( ACE_TEXT_ALWAYS_CHAR(name.c_str()),
-                                             subkey ) );
-      int subindex = 0;
-      ACE_TString subname;
-      if (cf.enumerate_sections( subkey, subindex, subname ) == 0) {
-        // Found additional nesting of subsections that we don't care
-        // to allow (e.g. [transport/my/yours]), so return an error.
-        return 1;
-      }
-      index++;
-    }
-    return 0;
   }
 
   // transport type to try loading if none are loaded when DCPS attempts to use
@@ -145,13 +61,13 @@ OpenDDS::DCPS::TransportRegistry::TransportRegistry()
   lib_directive_map_["tcp"]       = "dynamic OpenDDS_Tcp Service_Object * OpenDDS_Tcp:_make_TcpLoader()";
   lib_directive_map_["udp"]       = "dynamic OpenDDS_Udp Service_Object * OpenDDS_Udp:_make_UdpLoader()";
   lib_directive_map_["multicast"] = "dynamic OpenDDS_Multicast Service_Object * OpenDDS_Multicast:_make_MulticastLoader()";
+  lib_directive_map_["rtps_udp"]  = "dynamic OpenDDS_Rtps_Udp Service_Object * OpenDDS_Rtps_Udp:_make_RtpsUdpLoader()";
 }
 
 int
 TransportRegistry::load_transport_configuration(const std::string& file_name,
                                                 ACE_Configuration_Heap& cf)
 {
-  int status = 0;
   const ACE_Configuration_Section_Key &root = cf.root_section();
 
   // Create a vector to hold configuration information so we can populate
@@ -166,7 +82,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
   ACE_TString sect_name;
 
   for (int index = 0;
-       (status = cf.enumerate_sections(root, index, sect_name)) == 0;
+       cf.enumerate_sections(root, index, sect_name) == 0;
        ++index) {
     if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0) {
       // found the [transport/*] section, now iterate through subsections...
@@ -366,7 +282,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
 
   // Create and populate the default configuration for this
   // file with all the instances from this file.
-  if (instances.size() > 0) {
+  if (!instances.empty()) {
     TransportConfig_rch config = this->create_config(file_name);
     if (config == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -375,8 +291,8 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                         file_name.c_str()),
                        -1);
     }
-    instances.sort( predicate );
-    for (std::list<TransportInst_rch>::const_iterator it=instances.begin();
+    instances.sort(predicate);
+    for (std::list<TransportInst_rch>::const_iterator it = instances.begin();
          it != instances.end(); ++it) {
       config->instances_.push_back(*it);
     }
@@ -385,6 +301,23 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
   return 0;
 }
 
+void
+TransportRegistry::load_transport_lib(const std::string& transport_type)
+{
+  ACE_UNUSED_ARG(transport_type);
+#if !defined(ACE_AS_STATIC_LIBS)
+  GuardType guard(lock_);
+  LibDirectiveMap::iterator lib_iter =
+    this->lib_directive_map_.find(transport_type);
+  if (lib_iter != this->lib_directive_map_.end()) {
+    ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
+    // Release the lock, because loading a transport library will
+    // recursively call this function to add its default inst.
+    guard.release();
+    ACE_Service_Config::process_directive(directive.c_str());
+  }
+#endif
+}
 
 TransportInst_rch
 TransportRegistry::create_inst(const std::string& name,
@@ -395,17 +328,10 @@ TransportRegistry::create_inst(const std::string& name,
 
   if (find(this->type_map_, transport_type, type) != 0) {
 #if !defined(ACE_AS_STATIC_LIBS)
+    guard.release();
     // Not present, try to load library
-    LibDirectiveMap::iterator lib_iter =
-      this->lib_directive_map_.find(transport_type);
-    if (lib_iter != this->lib_directive_map_.end()) {
-      ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
-      // Release the lock, because loading a transport library will
-      // recursively call this function to add its default inst.
-      guard.release();
-      ACE_Service_Config::process_directive(directive.c_str());
-      guard.acquire();
-    }
+    this->load_transport_lib(transport_type);
+    guard.acquire();
 
     // Try to find it again
     if (find(this->type_map_, transport_type, type) != 0) {
@@ -504,12 +430,8 @@ TransportRegistry::fix_empty_default()
   }
   TransportConfig_rch global_config = global_config_;
 #if !defined(ACE_AS_STATIC_LIBS)
-  const ACE_TString directive =
-    ACE_TEXT_CHAR_TO_TCHAR(lib_directive_map_[FALLBACK_TYPE].c_str());
-  // Release the lock, because loading a transport library will
-  // attempt to acquire the lock in create_inst()
   guard.release();
-  ACE_Service_Config::process_directive(directive.c_str());
+  this->load_transport_lib(FALLBACK_TYPE);
 #endif
   return global_config;
 }
@@ -562,6 +484,7 @@ TransportRegistry::release()
   type_map_.clear();
   inst_map_.clear();
   config_map_.clear();
+  global_config_ = 0;
 }
 
 

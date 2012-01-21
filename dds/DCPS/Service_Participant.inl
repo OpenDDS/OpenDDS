@@ -10,13 +10,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-Service_Participant::RepoKey
+Discovery::RepoKey
 Service_Participant::domain_to_repo(const DDS::DomainId_t domain) const
 {
   DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
 
   if (where == this->domainRepoMap_.end()) {
-    return DEFAULT_REPO;
+    return Discovery::DEFAULT_REPO;
 
   } else {
     return where->second;

@@ -14,11 +14,11 @@
 #include "TopicImpl.h"
 #include "InstanceHandle.h"
 #include "OwnershipManager.h"
-#include "RepoIdGenerator.h"
+#include "GuidBuilder.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsDomainExtS.h"
+#include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -66,7 +66,7 @@ class FilterEvaluator;
 * the interface this class is implementing.
 */
 class OpenDDS_Dcps_Export DomainParticipantImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DomainParticipantExt>,
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
     public virtual OpenDDS::DCPS::EntityImpl {
 public:
   typedef Objref_Servant_Pair <SubscriberImpl, DDS::Subscriber,
@@ -81,12 +81,22 @@ public:
   typedef std::set<Subscriber_Pair> SubscriberSet;
   typedef std::set<Publisher_Pair> PublisherSet;
 
+  class OpenDDS_Dcps_Export RepoIdSequence {
+  public:
+    explicit RepoIdSequence(RepoId& base);
+    RepoId next();
+  private:
+    RepoId      base_;     // will be combined with serial to produce next
+    long        serial_;   // will be incremeneted each time
+    GuidBuilder builder_;  // used to modify base
+  };
+
   struct RefCounted_Topic {
     RefCounted_Topic()
       : client_refs_(0)
     {}
 
-    RefCounted_Topic(const Topic_Pair & pair)
+    explicit RefCounted_Topic(const Topic_Pair& pair)
       : pair_(pair),
         client_refs_(1)
     {}
@@ -102,6 +112,7 @@ public:
   typedef std::map<std::string, DDS::TopicDescription_var> TopicDescriptionMap;
 
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
+  typedef std::map<DDS::InstanceHandle_t, RepoId> RepoIdMap;
 
   ///Constructor
   DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
@@ -296,16 +307,20 @@ public:
   */
   RepoId get_id();
 
-  CORBA::Long get_federation_id()
-  ACE_THROW_SPEC((CORBA::SystemException));
-
-  CORBA::Long get_participant_id()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  /**
+   * Return a unique string based on repo ID.
+   */
+  std::string get_unique_id();
 
   /**
    * Obtain a local handle representing a GUID.
    */
   DDS::InstanceHandle_t get_handle(const RepoId& id = GUID_UNKNOWN);
+  /**
+   * Obtain a GUID representing a local hande.
+   * @return GUID_UNKNOWN if not found.
+   */
+  RepoId get_repoid(const DDS::InstanceHandle_t& id);
 
   /**
   *  Associate the servant with the object reference.
@@ -335,14 +350,16 @@ public:
 
   /** Accessor for ownership manager.
   */
-  OwnershipManager* ownership_manager ();
+  OwnershipManager* ownership_manager();
 
   /**
   * Called upon receiving new BIT publication data to
   * update the ownership strength of a publication.
   */
-  void update_ownership_strength (const PublicationId& pub_id,
-                                  const CORBA::Long& ownership_strength);
+  void update_ownership_strength(const PublicationId& pub_id,
+                                 const CORBA::Long& ownership_strength);
+
+  bool federated() const { return this->federated_; }
 
 private:
 
@@ -363,17 +380,6 @@ private:
   DDS::ReturnCode_t delete_topic_i(
     DDS::Topic_ptr a_topic,
     bool             remove_objref);
-
-  /// Initialize the built in topic.
-  DDS::ReturnCode_t init_bit();
-  /// Initialize the built in topic topics
-  DDS::ReturnCode_t init_bit_topics();
-  /// Create the built in topic subscriber.
-  DDS::ReturnCode_t init_bit_subscriber();
-  /// Initialize the built in topic datareaders.
-  DDS::ReturnCode_t init_bit_datareaders();
-  /// Attach the subscriber with the transport.
-  DDS::ReturnCode_t attach_bit_transport();
 
   DomainParticipantFactoryImpl* factory_;
   /// The default topic qos.
@@ -411,8 +417,9 @@ private:
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
-  /// Collection of handles.
+  /// Bidirectional collection of handles <--> RepoIds.
   HandleMap      handles_;
+  RepoIdMap      repoIds_;
   /// Collection of ignored participants.
   HandleMap      ignored_participants_;
   /// Collection of ignored topics.
@@ -432,15 +439,6 @@ private:
   /// The built in topic subscriber.
   DDS::Subscriber_var        bit_subscriber_;
 
-  /// The topic for built in topic participant.
-  DDS::Topic_var       bit_part_topic_;
-  /// The topic for built in topic topic.
-  DDS::Topic_var       bit_topic_topic_;
-  /// The topic for built in topic publication.
-  DDS::Topic_var       bit_pub_topic_;
-  /// The topic for built in topic subscription.
-  DDS::Topic_var       bit_sub_topic_;
-
   /// Listener to initiate failover with.
   FailoverListener*    failoverListener_;
 
@@ -448,22 +446,13 @@ private:
   /// (i.e. subscribers and publishers).
   InstanceHandleGenerator participant_handles_;
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  /// The datareader for built in topic participant.
-  DDS::ParticipantBuiltinTopicDataDataReader_var  bit_part_dr_;
-  /// The datareader for built in topic topic.
-  DDS::TopicBuiltinTopicDataDataReader_var        bit_topic_dr_;
-  /// The datareader for built in topic publication.
-  DDS::PublicationBuiltinTopicDataDataReader_var  bit_pub_dr_;
-  /// The datareader for built in topic subscription.
-  DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
   Monitor* monitor_;
 
   OwnershipManager owner_man_;
 
   /// Publisher ID generator.
-  RepoIdGenerator  pub_id_generator_;
+  RepoIdSequence   pub_id_gen_;
+  RepoId nextPubId();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;

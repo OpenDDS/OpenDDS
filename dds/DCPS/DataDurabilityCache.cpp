@@ -34,7 +34,7 @@ namespace {
 void cleanup_directory(const std::vector<std::string> & path,
                        const ACE_CString & data_dir)
 {
-  if (path.size() == 0) return;
+  if (path.empty()) return;
 
   using OpenDDS::FileSystemStorage::Directory;
   Directory::Ptr dir = Directory::create(data_dir.c_str());
@@ -178,8 +178,8 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type(
   , sample_(0)
   , allocator_(a)
 {
-  this->source_timestamp_.sec     = element.source_timestamp_.sec;
-  this->source_timestamp_.nanosec = element.source_timestamp_.nanosec;
+  this->source_timestamp_.sec     = element.header_.source_timestamp_sec_;
+  this->source_timestamp_.nanosec = element.header_.source_timestamp_nanosec_;
 
   // Only copy the data provided by the user.  The DataSampleHeader
   // will be reconstructed when the durable data is retrieved by a

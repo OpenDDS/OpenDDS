@@ -11,7 +11,7 @@
 
 #include "TcpConnection_rch.h"
 #include "TcpDataLink_rch.h"
-#include "dds/DCPS/transport/framework/TransportReceiveStrategy.h"
+#include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 
 namespace OpenDDS {
@@ -19,12 +19,13 @@ namespace DCPS {
 
 class TcpConnection;
 
-class TcpReceiveStrategy : public TransportReceiveStrategy {
+class TcpReceiveStrategy : public TransportReceiveStrategy<> {
 public:
 
-  TcpReceiveStrategy(TcpDataLink*    link,
-                           TcpConnection*  connection,
-                           TransportReactorTask* task);
+  TcpReceiveStrategy(const TcpDataLink_rch& link,
+                     const TcpConnection_rch& connection,
+                     const TransportReactorTask_rch& task);
+
   virtual ~TcpReceiveStrategy();
 
   int reset(TcpConnection* connection);
@@ -37,7 +38,8 @@ protected:
 
   virtual ssize_t receive_bytes(iovec iov[],
                                 int   n,
-                                ACE_INET_Addr& remote_address);
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE fd);
 
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);

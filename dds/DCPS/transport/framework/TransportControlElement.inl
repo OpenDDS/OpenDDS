@@ -38,8 +38,15 @@ OpenDDS::DCPS::TransportControlElement::msg() const
 }
 
 ACE_INLINE
+const ACE_Message_Block*
+OpenDDS::DCPS::TransportControlElement::msg_payload() const
+{
+  return this->msg_->cont();
+}
+
+ACE_INLINE
 bool
-OpenDDS::DCPS::TransportControlElement::owned_by_transport ()
+OpenDDS::DCPS::TransportControlElement::owned_by_transport()
 {
   return true;
 }

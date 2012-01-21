@@ -21,8 +21,8 @@ namespace DCPS {
 class TcpSynchResource : public ThreadSynchResource {
 public:
 
-  TcpSynchResource(TcpConnection* connection,
-                         const int& max_output_pause_period_ms);
+  TcpSynchResource(const TcpConnection_rch& connection,
+                   const int& max_output_pause_period_ms);
   virtual ~TcpSynchResource();
 
   virtual void notify_lost_on_backpressure_timeout();

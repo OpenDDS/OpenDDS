@@ -8,7 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReceiveListenerSetMap.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 
 #include <sstream>
@@ -33,7 +33,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
 
   if (listener_set.is_nil()) {
     // find_or_create failure
-    RepoIdConverter converter(publisher_id);
+    GuidConverter converter(publisher_id);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                       ACE_TEXT("failed to find_or_create entry for ")
@@ -51,9 +51,9 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
   // This is error handling code from here on out...
 
   // Handle the two possible failure cases (duplicate key or unknown)
+  GuidConverter sub_converter(subscriber_id);
+  GuidConverter pub_converter(publisher_id);
   if (result == 1) {
-    RepoIdConverter sub_converter(subscriber_id);
-    RepoIdConverter pub_converter(publisher_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                ACE_TEXT("subscriber %C already exists for ")
@@ -62,8 +62,6 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
                std::string(pub_converter).c_str()));
 
   } else {
-    RepoIdConverter sub_converter(subscriber_id);
-    RepoIdConverter pub_converter(publisher_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                ACE_TEXT("failed to insert subscriber %C for ")
@@ -79,7 +77,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
     listener_set = this->remove_set(publisher_id);
 
     if (listener_set.is_nil()) {
-      RepoIdConverter converter(publisher_id);
+      GuidConverter converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                  ACE_TEXT("failed to remove (undo create) ReceiveListenerSet ")
@@ -109,7 +107,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
 
   if (listener_set->size() == 0) {
     if (unbind(map_, publisher_id) != 0) {
-      RepoIdConverter converter(publisher_id);
+      GuidConverter converter(publisher_id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::remove: ")
                         ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
@@ -143,7 +141,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
   ReceiveListenerSet_rch listener_set;
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0) {
-    RepoIdConverter converter(publisher_id);
+    GuidConverter converter(publisher_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReciveListenerSetMap::release_subscriber: ")
                ACE_TEXT("publisher %C not found in map_.\n"),
@@ -160,7 +158,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
 
   if (listener_set->size() == 0) {
     if (unbind(map_, publisher_id) != 0) {
-      RepoIdConverter converter(publisher_id);
+      GuidConverter converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::release_subscriber: ")
                  ACE_TEXT("failed to remove empty ReceiveListenerSet for ")

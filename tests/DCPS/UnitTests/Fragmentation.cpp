@@ -10,6 +10,9 @@
 
 #include "dds/DCPS/DataSampleHeader.h"
 
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/transport/framework/TransportReassembly.h"
+
 #include "../common/TestSupport.h"
 
 using namespace OpenDDS::DCPS;
@@ -63,6 +66,26 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(reassembled.sequence_ == header2.sequence_);
     TEST_CHECK(!reassembled.more_fragments_);
     TEST_CHECK(reassembled.message_length_ == N);
+
+    ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+      rds2(f.tail_->cont()->duplicate());
+    rds1.header_ = header1;
+    rds2.header_ = header2;
+    TransportReassembly tr;
+    TEST_CHECK(!tr.reassemble(4, true, rds1));
+    TEST_CHECK(!rds1.sample_);
+    TEST_CHECK(tr.reassemble(5, false, rds2));
+    TEST_CHECK(rds2.sample_ && rds2.sample_->total_length() == N);
+
+    ReceivedDataSample rds1b(f.head_->cont()->duplicate()),
+      rds2b(f.tail_->cont()->duplicate());
+    rds1b.header_ = header1;
+    rds2b.header_ = header2;
+    TransportReassembly tr2;
+    TEST_CHECK(!tr2.reassemble(5, false, rds2b));
+    TEST_CHECK(!rds2b.sample_);
+    TEST_CHECK(tr2.reassemble(4, true, rds1b));
+    TEST_CHECK(rds1b.sample_ && rds1b.sample_->total_length() == N);
   }
   { // data split into 3 messageblocks, fragment in the middle of block #2
     ACE_Message_Block data1(N / 3), data2(N / 3), data3(N / 3);
@@ -162,6 +185,135 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(f2.tail_->cont());
     TEST_CHECK(f2.tail_->cont()->length() == N / 3);
     TEST_CHECK(!f2.tail_->cont()->cont());
+
+    // Test all permutations of order of reception of the 3 fragments
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds2(f2.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds2.header_ = header2a;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(1, true, rds1));
+      TEST_CHECK(!rds1.sample_);
+      TEST_CHECK(!tr.reassemble(2, false, rds2));
+      TEST_CHECK(!rds2.sample_);
+      TEST_CHECK(tr.reassemble(3, false, rds3));
+      TEST_CHECK(rds3.sample_ && rds3.sample_->total_length() == N);
+    }
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds2(f2.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds2.header_ = header2a;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(1, true, rds1));
+      TEST_CHECK(!rds1.sample_);
+      TEST_CHECK(!tr.reassemble(3, false, rds3));
+      TEST_CHECK(!rds3.sample_);
+      TEST_CHECK(tr.reassemble(2, false, rds2));
+      TEST_CHECK(rds2.sample_ && rds2.sample_->total_length() == N);
+    }
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds2(f2.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds2.header_ = header2a;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(2, false, rds2));
+      TEST_CHECK(!rds2.sample_);
+      TEST_CHECK(!tr.reassemble(1, true, rds1));
+      TEST_CHECK(!rds1.sample_);
+      TEST_CHECK(tr.reassemble(3, false, rds3));
+      TEST_CHECK(rds3.sample_ && rds3.sample_->total_length() == N);
+    }
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds2(f2.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds2.header_ = header2a;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(2, false, rds2));
+      TEST_CHECK(!rds2.sample_);
+      TEST_CHECK(!tr.reassemble(3, false, rds3));
+      TEST_CHECK(!rds3.sample_);
+      TEST_CHECK(tr.reassemble(1, true, rds1));
+      TEST_CHECK(rds1.sample_ && rds1.sample_->total_length() == N);
+    }
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds2(f2.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds2.header_ = header2a;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(3, false, rds3));
+      TEST_CHECK(!rds3.sample_);
+      TEST_CHECK(!tr.reassemble(1, true, rds1));
+      TEST_CHECK(!rds1.sample_);
+      TEST_CHECK(tr.reassemble(2, false, rds2));
+      TEST_CHECK(rds2.sample_ && rds2.sample_->total_length() == N);
+    }
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds2(f2.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds2.header_ = header2a;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(3, false, rds3));
+      TEST_CHECK(!rds3.sample_);
+      TEST_CHECK(!tr.reassemble(2, false, rds2));
+      TEST_CHECK(!rds2.sample_);
+      TEST_CHECK(tr.reassemble(1, true, rds1));
+      TEST_CHECK(rds1.sample_ && rds1.sample_->total_length() == N);
+    }
+    // Test data_unavailable() scenarios
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(1, true, rds1));
+      TEST_CHECK(!rds1.sample_);
+      tr.data_unavailable(SequenceRange(2, 2));
+      TEST_CHECK(!tr.reassemble(3, false, rds3));
+      TEST_CHECK(!rds3.sample_);
+    }
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds3(f2.tail_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds3.header_ = header2b;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(3, false, rds3));
+      TEST_CHECK(!rds3.sample_);
+      tr.data_unavailable(SequenceRange(2, 2));
+      TEST_CHECK(!tr.reassemble(1, true, rds1));
+      TEST_CHECK(!rds1.sample_);
+    }
+    {
+      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+        rds2(f2.head_->cont()->duplicate());
+      rds1.header_ = header1;
+      rds2.header_ = header2a;
+      TransportReassembly tr;
+      TEST_CHECK(!tr.reassemble(2, false, rds2));
+      TEST_CHECK(!rds2.sample_);
+      tr.data_unavailable(SequenceRange(3, 3));
+      TEST_CHECK(!tr.reassemble(1, true, rds1));
+      TEST_CHECK(!rds1.sample_);
+    }
   }
   { // content filtering flag with no "entries" (adds another MB to the chain)
     ACE_Message_Block data(N);

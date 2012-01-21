@@ -19,7 +19,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   /// return status of main
   int status = 0;
 
-
   // Initialize DDS before parsing the command line parameters.
   // This is done so the DDS command line parameters do not go through the
   // application's parameter processing.

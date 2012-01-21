@@ -9,7 +9,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataSampleHeader.h"
 #include "Serializer.h"
-#include "RepoIdConverter.h"
+#include "GuidConverter.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include <iomanip>
@@ -135,11 +136,13 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 
   if (flags & CONTENT_FILT_MASK) {
     CORBA::ULong seqLen;
-    const bool swap = (flags & BYTE_ORDER_MASK) != TAO_ENCAP_BYTE_ORDER;
+    const bool swap = (flags & BYTE_ORDER_MASK) != ACE_CDR_BYTE_ORDER;
     if (!mb_peek(seqLen, mb, expected, swap)) {
       return true;
     }
-    expected += sizeof(seqLen) + gen_find_size(GUID_t()) * seqLen;
+    size_t guidsize = 0, padding = 0;
+    gen_find_size(GUID_t(), guidsize, padding);
+    expected += sizeof(seqLen) + guidsize * seqLen;
   }
 
   return len < expected;
@@ -182,7 +185,15 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   // Set swap_bytes flag to the Serializer if data sample from
   // the publisher is in different byte order.
-  reader.swap_bytes(this->byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  reader.swap_bytes(this->byte_order_ != ACE_CDR_BYTE_ORDER);
+
+  reader >> ACE_InputCDR::to_octet(byte);
+
+  if (!reader.good_bit()) return;
+  this->marshaled_size_ += sizeof(byte);
+
+  this->cdr_encapsulation_ = byte & mask_flag(CDR_ENCAP_FLAG);
+  this->key_fields_only_   = byte & mask_flag(KEY_ONLY_FLAG);
 
   reader >> this->message_length_;
 
@@ -192,7 +203,8 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   reader >> this->sequence_;
 
   if (!reader.good_bit()) return;
-  this->marshaled_size_ += gen_find_size(this->sequence_);
+  size_t padding = 0;
+  gen_find_size(this->sequence_, this->marshaled_size_, padding);
 
   reader >> this->source_timestamp_sec_;
 
@@ -219,25 +231,25 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   reader >> this->publication_id_;
 
   if (!reader.good_bit()) return;
-  this->marshaled_size_ += gen_find_size(this->publication_id_);
+  gen_find_size(this->publication_id_, this->marshaled_size_, padding);
 
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
     if (!reader.good_bit()) return;
-    this->marshaled_size_ += gen_find_size(this->publisher_id_);
+    gen_find_size(this->publisher_id_, this->marshaled_size_, padding);
   }
 
   if (this->content_filter_) {
     reader >> this->content_filter_entries_;
     if (!reader.good_bit()) return;
-    this->marshaled_size_ += gen_find_size(this->content_filter_entries_);
+    gen_find_size(this->content_filter_entries_, this->marshaled_size_, padding);
   }
 }
 
 bool
 operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 {
-  Serializer writer(&buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  Serializer writer(&buffer, value.byte_order_ != ACE_CDR_BYTE_ORDER);
 
   writer << value.message_id_;
   writer << value.submessage_id_;
@@ -253,6 +265,12 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
                          | (value.more_fragments_     << MORE_FRAGMENTS_FLAG)
                          ;
   writer << ACE_OutputCDR::from_octet(flags);
+
+  flags = (value.cdr_encapsulation_ << CDR_ENCAP_FLAG)
+        | (value.key_fields_only_   << KEY_ONLY_FLAG)
+        ;
+  writer << ACE_OutputCDR::from_octet(flags);
+
   writer << value.message_length_;
   writer << value.sequence_;
   writer << value.source_timestamp_sec_;
@@ -280,10 +298,16 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 void
 DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 {
-  ACE_Message_Block* optHdr = alloc_msgblock(*mb,
-    guids ? gen_find_size(*guids) : sizeof(CORBA::ULong), false);
+  size_t size = 0;
+  if (guids) {
+    size_t padding = 0; // GUIDs are always aligned
+    gen_find_size(*guids, size, padding);
+  } else {
+    size = sizeof(CORBA::ULong);
+  }
+  ACE_Message_Block* optHdr = alloc_msgblock(*mb, size, false);
 
-  const bool swap = (TAO_ENCAP_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
+  const bool swap = (ACE_CDR_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
   Serializer ser(optHdr, swap);
   if (guids) {
     ser << *guids;
@@ -425,6 +449,8 @@ std::ostream& operator<<(std::ostream& str, const MessageId value)
     return str << "END_COHERENT_CHANGES";
   case TRANSPORT_CONTROL:
     return str << "TRANSPORT_CONTROL";
+  case DISPOSE_UNREGISTER_INSTANCE:
+    return str << "DISPOSE_UNREGISTER_INSTANCE";
   default:
     return str << "Unknown";
   }
@@ -479,6 +505,8 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
     if (value.sequence_repair_ == 1) str << "Sequence Repair, ";
     if (value.more_fragments_ == 1) str << "More Fragments, ";
+    if (value.cdr_encapsulation_ == 1) str << "CDR Encapsulation, ";
+    if (value.key_fields_only_ == 1) str << "Key Fields Only, ";
 
     str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
         << value.sequence_.getValue() << ", ";
@@ -491,22 +519,29 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
           << std::dec << value.lifespan_duration_nanosec_ << ", ";
     }
 
-    str << "Publication: " << RepoIdConverter(value.publication_id_);
+    str << "Publication: " << GuidConverter(value.publication_id_);
     if (value.group_coherent_) {
-      str << ", Publisher: " << RepoIdConverter(value.publisher_id_);
+      str << ", Publisher: " << GuidConverter(value.publisher_id_);
     }
 
     if (value.content_filter_) {
       const CORBA::ULong len = value.content_filter_entries_.length();
       str << ", Content-Filter Entries (" << len << "): [";
       for (CORBA::ULong i(0); i < len; ++i) {
-        str << RepoIdConverter(value.content_filter_entries_[i]) << ' ';
+        str << GuidConverter(value.content_filter_entries_[i]) << ' ';
       }
       str << ']';
     }
   }
 
   return str;
+}
+
+bool
+DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
+{
+  rds.header_ = *this;
+  return true;
 }
 
 } // namespace DCPS

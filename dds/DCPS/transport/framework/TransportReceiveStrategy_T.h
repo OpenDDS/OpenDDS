@@ -10,10 +10,11 @@
 #define OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
-#include "TransportHeader.h"
 #include "ReceivedDataSample.h"
+#include "TransportStrategy.h"
 #include "TransportDefs.h"
+#include "TransportHeader.h"
+
 #include "ace/Synch.h"
 #include "ace/Lock_Adapter_T.h"
 
@@ -24,8 +25,9 @@ namespace DCPS {
  * This class provides buffer for data received by transports, de-assemble
  * the data to individual samples and deliver them.
  */
-class OpenDDS_Dcps_Export TransportReceiveStrategy
-  : public RcObject<ACE_SYNCH_MUTEX> {
+template<typename TH = TransportHeader, typename DSH = DataSampleHeader>
+class TransportReceiveStrategy
+  : public TransportStrategy {
 public:
 
   virtual ~TransportReceiveStrategy();
@@ -33,7 +35,7 @@ public:
   int start();
   void stop();
 
-  int handle_input();
+  int handle_dds_input(ACE_HANDLE fd);
 
   /// The subclass needs to provide the implementation
   /// for re-establishing the datalink. This is called
@@ -42,7 +44,13 @@ public:
 
   /// Provides access to the received transport header
   /// for subclasses.
-  const TransportHeader& received_header() const;
+  const TH& received_header() const;
+  TH& received_header();
+
+  /// Provides access to the received sample header
+  /// for subclasses.
+  const DSH& received_sample_header() const;
+  DSH& received_sample_header();
 
 protected:
   TransportReceiveStrategy();
@@ -50,13 +58,14 @@ protected:
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],
                                 int            n,
-                                ACE_INET_Addr& remote_address) = 0;
+                                ACE_INET_Addr& remote_address,
+                                ACE_HANDLE     fd) = 0;
 
   /// Check the transport header for suitability.
-  virtual bool check_header(const TransportHeader& header);
+  virtual bool check_header(const TH& header);
 
   /// Check the data sample header for suitability.
-  virtual bool check_header(const DataSampleHeader& header);
+  virtual bool check_header(const DSH& header);
 
   /// Called when there is a ReceivedDataSample to be delivered.
   virtual void deliver_sample(ReceivedDataSample&  sample,
@@ -85,7 +94,7 @@ private:
   size_t receive_sample_remaining_;
 
   /// Current receive TransportHeader.
-  TransportHeader receive_transport_header_;
+  TH receive_transport_header_;
 
   //
   // The total available space in the receive buffers must have enough to hold
@@ -118,7 +127,9 @@ private:
   size_t buffer_index_;
 
   /// Current data sample header.
-  ReceivedDataSample receive_sample_;
+  DSH data_sample_header_;
+
+  ACE_Message_Block* payload_;
 
   /** Flag indicating that the currently resident PDU is a good one
     * (i.e. has not been received and processed previously).  This is
@@ -136,7 +147,11 @@ private:
 } // namespace OpenDDS */
 
 #if defined (__ACE_INLINE__)
-#include "TransportReceiveStrategy.inl"
+#include "TransportReceiveStrategy_T.inl"
 #endif /* __ACE_INLINE__ */
+
+#ifdef ACE_TEMPLATES_REQUIRE_SOURCE
+#include "TransportReceiveStrategy_T.cpp"
+#endif
 
 #endif /* OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY */

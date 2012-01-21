@@ -1,0 +1,12 @@
+//
+// $Id$
+//
+
+project: dcps_rtps, install {
+  sharedname    = OpenDDS_Rtps_Udp
+  dynamicflags  = OPENDDS_RTPS_UDP_BUILD_DLL
+
+  specific {
+    install_dir = dds/DCPS/transport/rtps_udp
+  }
+}

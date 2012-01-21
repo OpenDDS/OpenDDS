@@ -9,7 +9,7 @@
 #include "tools/dissector/giop_base.h"
 
 
-#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/CDR_Base.h"
@@ -68,8 +68,7 @@ namespace OpenDDS
 
       this->is_big_endian_ = ::is_big_endian(header);
 
-      //GIOP_Decoder *decoder = find_giop_decoder (operation);
-      DecodeFN *decoder = find_giop_decoder (operation);
+      DecodeFN decoder = find_giop_decoder (operation);
 
       if (decoder != 0 && (*decoder)(header))
           return 0;
@@ -77,13 +76,11 @@ namespace OpenDDS
     }
 
     gboolean
-    GIOP_Base::dissect_heur (::MessageHeader *header,
-                             gchar *operation)
+    GIOP_Base::dissect_heur(::MessageHeader* header, gchar* operation)
     {
       this->is_big_endian_ = ::is_big_endian(header);
 
-      //GIOP_Decoder *decoder = find_giop_decoder (operation);
-      DecodeFN *decoder = find_giop_decoder (operation);
+      DecodeFN decoder = find_giop_decoder(operation);
 
       if (decoder == 0)
         return false;
@@ -106,21 +103,19 @@ namespace OpenDDS
       }
     }
 
-    DecodeFN*
-    GIOP_Base::find_giop_decoder (gchar *opname)
+    DecodeFN
+    GIOP_Base::find_giop_decoder(gchar* opname)
     {
-      DecodeFN *func = 0;
-      if (op_functions_.find(opname, func) == 0)
-        {
-          return func;
-        }
-      return 0;
+      if (op_functions_.count(opname) == 0) {
+        return 0;
+      }
+      return op_functions_[opname];
     }
 
     void
-    GIOP_Base::add_giop_decoder (const char *opname, DecodeFN decoder)
+    GIOP_Base::add_giop_decoder(const char *opname, DecodeFN decoder)
     {
-      op_functions_.bind (opname, decoder);
+      op_functions_[opname] = decoder;
     }
 
     void
@@ -167,7 +162,7 @@ namespace OpenDDS
       guint len = 16; // size of RepoId
       const RepoId *rid =
         reinterpret_cast<const RepoId *>(tvb_get_ptr(tvb_, *offset_, len));
-      RepoIdConverter converter (*rid);
+      GuidConverter converter (*rid);
       proto_tree_add_bytes_format_value
         ( tree, fieldId, tvb_, *offset_, len,
           reinterpret_cast<const guint8*>(rid),

@@ -21,12 +21,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 /// Vendor Id value specified for OCI is used for OpenDDS.
-const GuidVendorId_t VENDORID_OCI = { 0x00, 0x03 };
+const GuidVendorId_t VENDORID_OCI = { 0x01, 0x03 };
 
 /// Nil value for the GUID prefix (participant identifier).
 const GuidPrefix_t GUIDPREFIX_UNKNOWN = { 0 };
 
-/// Entity Id values specified in Version 2.0 of RTPS specification.
+/// Entity Id values specified in Version 2.1 of RTPS specification.
 const EntityId_t ENTITYID_UNKNOWN                                = { {0x00,0x00,0x00}, 0x00};
 const EntityId_t ENTITYID_PARTICIPANT                            = { {0x00,0x00,0x01}, 0xc1};
 const EntityId_t ENTITYID_SEDP_BUILTIN_TOPIC_WRITER              = { {0x00,0x00,0x02}, 0xc2};
@@ -37,8 +37,8 @@ const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER      = { {0x00,0x00,
 const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER      = { {0x00,0x00,0x04}, 0xc7};
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER        = { {0x00,0x01,0x00}, 0xc2};
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER        = { {0x00,0x01,0x00}, 0xc7};
-const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = { {0x00,0x02,0x00}, 0xC2};
-const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = { {0x00,0x02,0x00}, 0xC7};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = { {0x00,0x02,0x00}, 0xc2};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = { {0x00,0x02,0x00}, 0xc7};
 
 /// Nil value for GUID.
 const GUID_t GUID_UNKNOWN = { {0,0,0,0,0,0,0,0,0,0,0,0}, { {0,0,0}, 0} };
@@ -57,6 +57,19 @@ enum EntityKind {     // EntityId_t.entityKind value(s)
 };
 
 struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
+  static bool entity_less(const EntityId_t& v1, const EntityId_t& v2)
+  {
+    if (v1.entityKey[2] < v2.entityKey[2]) return true;
+    if (v2.entityKey[2] < v1.entityKey[2]) return false;
+    if (v1.entityKey[1] < v2.entityKey[1]) return true;
+    if (v2.entityKey[1] < v1.entityKey[1]) return false;
+    if (v1.entityKey[0] < v2.entityKey[0]) return true;
+    if (v2.entityKey[0] < v1.entityKey[0]) return false;
+    if (v1.entityKind < v2.entityKind) return true;
+    if (v2.entityKind < v1.entityKind) return false;
+    return false;
+  }
+
   bool operator()(const GUID_t& v1, const GUID_t& v2) const
   {
     if (v1.guidPrefix[11] < v2.guidPrefix[11]) return true;
@@ -83,15 +96,7 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
     if (v2.guidPrefix[ 1] < v1.guidPrefix[ 1]) return false;
     if (v1.guidPrefix[ 0] < v2.guidPrefix[ 0]) return true;
     if (v2.guidPrefix[ 0] < v1.guidPrefix[ 0]) return false;
-    if (v1.entityId.entityKey[2] < v2.entityId.entityKey[2]) return true;
-    if (v2.entityId.entityKey[2] < v1.entityId.entityKey[2]) return false;
-    if (v1.entityId.entityKey[1] < v2.entityId.entityKey[1]) return true;
-    if (v2.entityId.entityKey[1] < v1.entityId.entityKey[1]) return false;
-    if (v1.entityId.entityKey[0] < v2.entityId.entityKey[0]) return true;
-    if (v2.entityId.entityKey[0] < v1.entityId.entityKey[0]) return false;
-    if (v1.entityId.entityKind < v2.entityId.entityKind) return true;
-    if (v2.entityId.entityKind < v1.entityId.entityKind) return false;
-    return false;
+    return entity_less(v1.entityId, v2.entityId);
   }
 };
 
@@ -101,12 +106,30 @@ gen_max_marshaled_size(const GUID_t&)
   return 16;
 }
 
-// Check for equality using the generated logical functor.
 inline OpenDDS_Dcps_Export bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
   GUID_tKeyLessThan lessThan;
   return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
+}
+
+inline OpenDDS_Dcps_Export bool
+operator!=(const GUID_t& lhs, const GUID_t& rhs)
+{
+  return !(lhs == rhs);
+}
+
+inline OpenDDS_Dcps_Export bool
+operator==(const EntityId_t& lhs, const EntityId_t& rhs)
+{
+  return !GUID_tKeyLessThan::entity_less(lhs, rhs)
+    && !GUID_tKeyLessThan::entity_less(rhs, lhs);
+}
+
+inline OpenDDS_Dcps_Export bool
+operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
+{
+  return !(lhs == rhs);
 }
 
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"

@@ -21,6 +21,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class ReceivedDataSample;
+
 /// One byte message id (<256)
 enum MessageId {
   SAMPLE_DATA,
@@ -32,7 +34,8 @@ enum MessageId {
   REQUEST_ACK,
   SAMPLE_ACK,
   END_COHERENT_CHANGES,
-  TRANSPORT_CONTROL
+  TRANSPORT_CONTROL,
+  DISPOSE_UNREGISTER_INSTANCE
 };
 
 enum SubMessageId {
@@ -54,6 +57,11 @@ enum DataSampleHeaderFlag {
   MORE_FRAGMENTS_FLAG
 };
 
+enum DataSampleHeaderFlag2 {
+  CDR_ENCAP_FLAG,
+  KEY_ONLY_FLAG
+};
+
 /// The header message of a data sample.
 /// This header and the data sample are in different
 /// message block and will be chained together.
@@ -66,8 +74,8 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Implementation-specific sub-message Ids.
   char submessage_id_;
 
-  /// 0 -  Message encoded using little-endian byte order.
-  /// 1 -  Message encoded using network byte order.
+  /// 0 -  Message encoded using big-endian byte order. (see ace/CDR_Base.h)
+  /// 1 -  Message encoded using little-endian byte order.
   bool byte_order_ : 1;
 
   /// The flag indicates the sample belongs to a coherent
@@ -95,6 +103,25 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   /// The current "Data Sample" needs reassembly before further processing.
   bool more_fragments_ : 1;
+
+  // bools above this line are in the first flags byte, below this line are
+  // in the second flags byte.  To avoid complicating the implementation of
+  // partial(), flags that impact the size of serialized DataSampleHeader
+  // should go in the first flags byte.
+
+  /// The data payload uses CDR encapsulation and alignment rules, as defined
+  /// by the RTPS specification formal/2010-11-01.
+  bool cdr_encapsulation_ : 1;
+
+  /// Only the key fields of the data sample are present in the payload.
+  bool key_fields_only_ : 1;
+
+  bool reserved_1 : 1;
+  bool reserved_2 : 1;
+  bool reserved_3 : 1;
+  bool reserved_4 : 1;
+  bool reserved_5 : 1;
+  bool reserved_6 : 1;
 
   /// The size of the data sample (without header).  After this header is
   /// demarshaled, the transport expects to see this many bytes in the stream
@@ -142,7 +169,8 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Indicates which readers should not receive the data.
   GUIDSeq content_filter_entries_;
 
-  static long mask_flag(DataSampleHeaderFlag flag);
+  static ACE_UINT8 mask_flag(DataSampleHeaderFlag  flag) { return 1 << flag; }
+  static ACE_UINT8 mask_flag(DataSampleHeaderFlag2 flag) { return 1 << flag; }
 
   static void clear_flag(DataSampleHeaderFlag flag,
                          ACE_Message_Block* buffer);
@@ -192,6 +220,14 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Implement load from buffer.
   void init(ACE_Message_Block* buffer);
 
+  bool into_received_data_sample(ReceivedDataSample& rds);
+
+  ACE_UINT32 message_length() { return this->message_length_; }
+
+  bool more_fragments() const { return this->more_fragments_; }
+
+  void pdu_remaining(size_t) { /* ignored, only RTPS uses this */ }
+
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t marshaled_size_;
@@ -201,11 +237,11 @@ private:
 OpenDDS_Dcps_Export
 bool operator<<(ACE_Message_Block&, const DataSampleHeader& value);
 
-/// Message Id enumarion insertion onto an ostream.
+/// Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const MessageId value);
 
-/// Sub-Message Id enumarion insertion onto an ostream.
+/// Sub-Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& os, const SubMessageId rhs);
 

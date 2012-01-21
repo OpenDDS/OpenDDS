@@ -19,7 +19,6 @@
 
 #include "tao/ORB_Core.h"
 
-#include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #ifndef __ACE_INLINE__
@@ -38,14 +37,16 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
     session_factory_(session_factory, false),
     local_peer_(local_peer),
     config_(0),
-    reactor_task_(0)
+    reactor_task_(0),
+    send_buffer_(0)
 {
 }
 
 MulticastDataLink::~MulticastDataLink()
 {
-  if (!this->send_buffer_.is_nil()) {
+  if (this->send_buffer_) {
     this->send_strategy_->send_buffer(0);
+    delete this->send_buffer_;
   }
 }
 
@@ -64,16 +65,16 @@ MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
   // configured number of most-recent datagrams are retained:
   if (this->session_factory_->requires_send_buffer()) {
     ACE_NEW_NORETURN(this->send_buffer_,
-                     TransportSendBuffer(this->config_->nak_depth_,
-                                         this->config_->max_samples_per_packet_));
-    if (this->send_buffer_.is_nil()) {
+                     SingleSendBuffer(this->config_->nak_depth_,
+                                      this->config_->max_samples_per_packet_));
+    if (!this->send_buffer_) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("MulticastDataLink::send_strategy: ")
-                 ACE_TEXT("failed to create TransportSendBuffer!\n")));
+                 ACE_TEXT("failed to create SingleSendBuffer!\n")));
       return;
     }
-    send_strategy->send_buffer(this->send_buffer_.in());
+    send_strategy->send_buffer(this->send_buffer_);
   }
   this->send_strategy_ = send_strategy;
 }
@@ -140,7 +141,9 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   }
 #endif /* ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 
-  if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
+  if (start(static_rchandle_cast<TransportSendStrategy>(this->send_strategy_),
+            static_rchandle_cast<TransportStrategy>(this->recv_strategy_))
+      != 0) {
     this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -267,13 +270,16 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
                 guard,
                 this->session_lock_);
 
-      char* ptr = sample.sample_->rd_ptr();
+      char* ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
+
       for (MulticastSessionMap::iterator it(this->sessions_.begin());
           it != this->sessions_.end(); ++it) {
         it->second->control_received(sample.header_.submessage_id_,
                                      sample.sample_);
         // reset read pointer
-        sample.sample_->rd_ptr(ptr);
+        if (ptr) {
+          sample.sample_->rd_ptr(ptr);
+        }
       }
     }
   } break;
