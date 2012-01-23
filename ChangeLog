@@ -1,3 +1,9 @@
+Mon Jan 23 15:31:11 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+
+          Marked Default QoS values can't be used as regular QoS values.
+
 Sat Jan 21 04:05:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * Merged the branch "RTPS", which includes the initial OpenDDS

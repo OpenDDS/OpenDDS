@@ -7,7 +7,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "TransportSendListener.h"
 #include "EntryExit.h"
 
@@ -64,7 +64,7 @@ OpenDDS::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
 void
 OpenDDS::DCPS::TransportSendListener::retrieve_inline_qos_data(InlineQosData& qos_data) const
 {
-  qos_data.dw_qos     = DATAWRITER_QOS_DEFAULT;
-  qos_data.pub_qos    = PUBLISHER_QOS_DEFAULT;
+  qos_data.dw_qos     = TheServiceParticipant->initial_DataWriterQos();
+  qos_data.pub_qos    = TheServiceParticipant->initial_PublisherQos();
   qos_data.topic_name = "";
 }
