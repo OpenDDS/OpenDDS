@@ -13,6 +13,8 @@
 #include "RcObject_T.h"
 #include "RcHandle_T.h"
 
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
