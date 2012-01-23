@@ -25,7 +25,7 @@
 namespace {
   u_short get_default_d0(u_short fallback)
   {
-#ifndef ACE_LACKS_GETENV
+#if !defined ACE_LACKS_GETENV && !defined ACE_LACKS_ENV
     const char* from_env = std::getenv("OPENDDS_RTPS_DEFAULT_D0");
     if (from_env) {
       return static_cast<u_short>(std::atoi(from_env));
