@@ -1437,10 +1437,25 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       return; // nothing more to do
     }
     // Copy reader and writer association data prior to releasing lock
+#ifdef __SUNPRO_CC
+    DCPS::ReaderAssociation ra;
+    ra.readerTransInfo = *rTls;
+    ra.readerId = reader;
+    ra.subQos = *subQos;
+    ra.readerQos = *drQos;
+    ra.filterExpression = cfProp->filterExpression;
+    ra.exprParams = cfProp->expressionParameters;
+    DCPS::WriterAssociation wa;
+    wa.writerTransInfo = *wTls;
+    wa.writerId = writer;
+    wa.pubQos = *pubQos;
+    wa.writerQos = *dwQos;
+#else
     const DCPS::ReaderAssociation ra =
         {*rTls, reader, *subQos, *drQos,
          cfProp->filterExpression, cfProp->expressionParameters};
     const DCPS::WriterAssociation wa = {*wTls, writer, *pubQos, *dwQos};
+#endif
 
     ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
     static const bool writer_active = true;

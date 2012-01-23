@@ -191,10 +191,18 @@ struct TestParticipant: ACE_Event_Handler {
   bool send_data(const OpenDDS::DCPS::EntityId_t& writer,
                  const SequenceNumber_t& seq, const ACE_INET_Addr& send_to)
   {
+#ifdef __SUNPRO_CC
+    DataSubmessage ds = {
+      {DATA, FLAG_E | FLAG_D, 0}, 0, DATA_OCTETS_TO_IQOS};
+    ds.readerId = ENTITYID_UNKNOWN;
+    ds.writerId = writer;
+    ds.writerSN = seq;
+#else
     const DataSubmessage ds = {
       {DATA, FLAG_E | FLAG_D, 0},
       0, DATA_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq, ParameterList()
     };
+#endif
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(ds, size, padding);
@@ -221,7 +229,23 @@ struct TestParticipant: ACE_Event_Handler {
       inlineQoS[0].string_data("my_topic_name");
       inlineQoS[0]._d(PID_TOPIC_NAME);
     }
-    DataFragSubmessage df = {
+#ifdef __SUNPRO_CC
+    DataFragSubmessage df;
+    df.smHeader.submessageId = DATA_FRAG;
+    df.smHeader.flags = FLAG_E | (i ? 0 : FLAG_Q);
+    df.smHeader.submessageLength = 0;
+    df.extraFlags = 0;
+    df.octetsToInlineQos = DATA_FRAG_OCTETS_TO_IQOS;
+    df.readerId = ENTITYID_UNKNOWN;
+    df.writerId = writer;
+    df.writerSN = seq;
+    df.fragmentStartingNum.value = i + 1;
+    df.fragmentsInSubmessage = 1;
+    df.fragmentSize = FRAG_SIZE;
+    df.sampleSize = N * FRAG_SIZE;
+    df.inlineQos = inlineQoS;
+#else
+    const DataFragSubmessage df = {
       {DATA_FRAG, FLAG_E | (i ? 0 : FLAG_Q), 0},
       0, DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq,
       {i + 1},       // fragmentStartingNum
@@ -230,6 +254,7 @@ struct TestParticipant: ACE_Event_Handler {
       N * FRAG_SIZE, // sampleSize
       inlineQoS
     };
+#endif
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(df, size, padding);
@@ -255,11 +280,21 @@ struct TestParticipant: ACE_Event_Handler {
     bitmap.length(1);
     bitmap[0] = 0;
     SequenceNumber_t seq_pp = {seq.high, seq.low + 1};
-    const GapSubmessage gap = {
-      {GAP, FLAG_E, 0},
-      ENTITYID_UNKNOWN, writer, seq,
+    GapSubmessage gap = {
+      {GAP, FLAG_E, 0}
+#ifdef __SUNPRO_CC
+    };
+    gap.readerId = ENTITYID_UNKNOWN;
+    gap.writerId = writer;
+    gap.gapStart = seq;
+    gap.gapList.bitmapBase = seq_pp;
+    gap.gapList.numBits = 1;
+    gap.gapList.bitmap = bitmap;
+#else
+    , ENTITYID_UNKNOWN, writer, seq,
       {seq_pp, 1, bitmap}
     };
+#endif
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(gap, size, padding);
@@ -277,10 +312,22 @@ struct TestParticipant: ACE_Event_Handler {
                const SequenceNumber_t& firstSN, const SequenceNumber_t& lastSN,
                const ACE_INET_Addr& send_to)
   {
+#ifdef __SUNPRO_CC
+    HeartBeatSubmessage hb;
+    hb.smHeader.submessageId = HEARTBEAT;
+    hb.smHeader.flags = FLAG_E;
+    hb.smHeader.submessageLength = 0;
+    hb.readerId = ENTITYID_UNKNOWN;
+    hb.writerId = writer;
+    hb.firstSN = firstSN;
+    hb.lastSN = lastSN;
+    hb.count.value = ++heartbeat_count_;
+#else
     const HeartBeatSubmessage hb = {
       {HEARTBEAT, FLAG_E, 0},
       ENTITYID_UNKNOWN, writer, firstSN, lastSN, {++heartbeat_count_}
     };
+#endif
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(hb, size, padding);
@@ -298,10 +345,22 @@ struct TestParticipant: ACE_Event_Handler {
                    const SequenceNumber_t& seq, CORBA::ULong lastAvailFrag,
                    const ACE_INET_Addr& send_to)
   {
+#ifdef __SUNPRO_CC
+    HeartBeatFragSubmessage hbf;
+    hbf.smHeader.submessageId = HEARTBEAT_FRAG;
+    hbf.smHeader.flags = FLAG_E;
+    hbf.smHeader.submessageLength = 0;
+    hbf.readerId = ENTITYID_UNKNOWN;
+    hbf.writerId = writer;
+    hbf.writerSN = seq;
+    hbf.lastFragmentNum.value = lastAvailFrag;
+    hbf.count.value = ++hbfrag_count_;
+#else
     const HeartBeatFragSubmessage hbf = {
       {HEARTBEAT_FRAG, FLAG_E, 0},
       ENTITYID_UNKNOWN, writer, seq, {lastAvailFrag}, {++hbfrag_count_}
     };
+#endif
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(hbf, size, padding);
@@ -322,12 +381,25 @@ struct TestParticipant: ACE_Event_Handler {
     LongSeq8 bitmap;
     bitmap.length(1);
     bitmap[0] = set_bit_in_bitmap ? 0xF0000000 : 0;
+#ifdef __SUNPRO_CC
+    AckNackSubmessage an;
+    an.smHeader.submessageId = ACKNACK;
+    an.smHeader.flags = FLAG_E;
+    an.smHeader.submessageLength = 0;
+    an.readerId = reader_ent_;
+    an.writerId = writer;
+    an.readerSNState.bitmapBase = nack;
+    an.readerSNState.numBits = 1;
+    an.readerSNState.bitmap = bitmap;
+    an.count.value = ++acknack_count_;
+#else
     const AckNackSubmessage an = {
       {ACKNACK, FLAG_E, 0},
       reader_ent_, writer,
       {nack, 1, bitmap},
       {++acknack_count_}
     };
+#endif
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(an, size, padding);

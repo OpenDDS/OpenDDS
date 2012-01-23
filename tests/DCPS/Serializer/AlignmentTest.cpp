@@ -7,6 +7,7 @@
 using OpenDDS::DCPS::Serializer;
 
 struct DataTypeBase {
+  virtual ~DataTypeBase() {}
 
   virtual void write(Serializer& s) = 0;
 

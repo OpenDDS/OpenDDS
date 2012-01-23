@@ -1,3 +1,19 @@
+Mon Jan 23 21:55:12 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Fixed SunCC-specific compiler errors.  Turns out there's
+          a lot of standard-compliant C++ that this compiler can't
+          handle at all.  Sometimes without even listing a line number
+          with the error.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * tests/DCPS/Serializer/AlignmentTest.cpp:
+
+          Fixed warnings.
+
 Mon Jan 23 19:02:17 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Discovery.h:

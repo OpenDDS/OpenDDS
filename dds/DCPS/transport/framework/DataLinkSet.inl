@@ -163,7 +163,7 @@ OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
   GuardType guard(this->lock_);
 
   const MapType::iterator end = this->map_.end();
-  for (MapType::iterator itr = this->map_.begin(); itr != map_.end(); ++itr) {
+  for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
     itr->second->remove_all_msgs(pub_id);
   }
 

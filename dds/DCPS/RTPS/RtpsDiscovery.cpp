@@ -189,7 +189,8 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
       u_short pb, dg, pg, d0, d1, dx;
       AddrVec spdp_send_addrs;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
-        has_d0 = false, has_d1 = false, has_dx = false, has_sm = false, sm;
+        has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
+        sm = false;
 
       DCPS::ValueMap values;
       DCPS::pullValues(cf, it->second, values);
