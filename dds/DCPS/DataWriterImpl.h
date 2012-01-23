@@ -489,13 +489,13 @@ protected:
   /// creates this datawriter.
   DomainParticipantImpl*          participant_servant_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
   struct ReaderInfo {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     DomainParticipantImpl* participant_;
     DDS::StringSeq expression_params_;
     std::string filter_;
     RcHandle<FilterEvaluator> eval_;
+#endif
     SequenceNumber expected_sequence_;
     ReaderInfo(const char* filter, const DDS::StringSeq& params,
                DomainParticipantImpl* participant);
@@ -510,8 +510,6 @@ protected:
     AckToken& token_;
     explicit AckCustomization(AckToken& at) : token_(at) {}
   };
-
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 private:
 

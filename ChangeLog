@@ -1,3 +1,12 @@
+Mon Jan 23 18:57:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Fixes for building with content_subscription=0.
+
 Mon Jan 23 18:31:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Discovery.h:

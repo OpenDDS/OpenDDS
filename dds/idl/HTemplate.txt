@@ -371,12 +371,13 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
   DDS::InstanceHandle_t store_synthetic_data(const <%SCOPED%>& sample,
                                              DDS::ViewStateKind view);
 
   void set_instance_state(DDS::InstanceHandle_t instance,
                           DDS::InstanceStateKind state);
-#endif
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance);

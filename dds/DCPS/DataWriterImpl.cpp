@@ -316,13 +316,19 @@ DataWriterImpl::add_association(const RepoId& yourId,
 DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
                                        const DDS::StringSeq& params,
                                        DomainParticipantImpl* participant)
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   : participant_(participant)
   , expression_params_(params)
   , filter_(filter)
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   , eval_(*filter ? participant->get_filter_eval(filter) : 0)
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 {}
+#else
+{
+  ACE_UNUSED_ARG(filter);
+  ACE_UNUSED_ARG(params);
+  ACE_UNUSED_ARG(participant);
+}
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 DataWriterImpl::ReaderInfo::~ReaderInfo()
 {

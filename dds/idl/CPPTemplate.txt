@@ -1682,6 +1682,8 @@ DDS::ReturnCode_t
   return rc;
 }
 
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
 DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,
   DDS::ViewStateKind view)
@@ -1690,12 +1692,14 @@ DDS::InstanceHandle_t
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                    DDS::HANDLE_NIL);
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::TopicDescription_var descr = get_topicdescription();
   if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
     if (!mt->filter(sample)) {
       return DDS::HANDLE_NIL;
     }
   }
+#endif
 
   get_subscriber_servant()->data_received(this);
 
@@ -1751,8 +1755,6 @@ void
     notify_read_conditions();
   }
 }
-
-#endif
 
 void
 <%TYPE%>DataReaderImpl::dds_demarshal(
