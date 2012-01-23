@@ -196,9 +196,14 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   } else {
     // update an existing participant
     pdata.ddsParticipantData.key = iter->second.pdata_.ddsParticipantData.key;
+#ifdef OPENDDS_GCC33
+    if (DCPS::operator!=(iter->second.pdata_.ddsParticipantData.user_data,
+                         pdata.ddsParticipantData.user_data)) {
+#else
     using OpenDDS::DCPS::operator!=;
     if (iter->second.pdata_.ddsParticipantData.user_data !=
         pdata.ddsParticipantData.user_data) {
+#endif
       iter->second.pdata_.ddsParticipantData.user_data =
         pdata.ddsParticipantData.user_data;
       DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();

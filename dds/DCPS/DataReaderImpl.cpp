@@ -1292,7 +1292,8 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         (header.message_id_ == DISPOSE_INSTANCE) ||
         (header.message_id_ == DISPOSE_UNREGISTER_INSTANCE)) {
 
-      SequenceRange resetRange(SequenceNumber(), header.sequence_);
+      const SequenceNumber defaultSN;
+      SequenceRange resetRange(defaultSN, header.sequence_);
 
       if (writer->seen_data_ && !header.sequence_repair_) {
         // Data samples should be acknowledged prior to any

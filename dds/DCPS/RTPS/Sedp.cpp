@@ -40,47 +40,82 @@ namespace {
 bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
                 const DDS::PublicationBuiltinTopicData& src)
 {
+#ifndef OPENDDS_GCC33
   using OpenDDS::DCPS::operator!=;
+#endif
   bool changed = false;
 
   // check each Changeable QoS policy value in Publication BIT Data
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.deadline, src.deadline)) {
+#else
   if (dest.deadline != src.deadline) {
+#endif
     changed = true;
     dest.deadline = src.deadline;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.latency_budget, src.latency_budget)) {
+#else
   if (dest.latency_budget != src.latency_budget) {
+#endif
     changed = true;
     dest.latency_budget = src.latency_budget;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.lifespan, src.lifespan)) {
+#else
   if (dest.lifespan != src.lifespan) {
+#endif
     changed = true;
     dest.lifespan = src.lifespan;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.user_data, src.user_data)) {
+#else
   if (dest.user_data != src.user_data) {
+#endif
     changed = true;
     dest.user_data = src.user_data;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.ownership_strength,
+                                src.ownership_strength)) {
+#else
   if (dest.ownership_strength != src.ownership_strength) {
+#endif
     changed = true;
     dest.ownership_strength = src.ownership_strength;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.partition, src.partition)) {
+#else
   if (dest.partition != src.partition) {
+#endif
     changed = true;
     dest.partition = src.partition;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.topic_data, src.topic_data)) {
+#else
   if (dest.topic_data != src.topic_data) {
+#endif
     changed = true;
     dest.topic_data = src.topic_data;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.group_data, src.group_data)) {
+#else
   if (dest.group_data != src.group_data) {
+#endif
     changed = true;
     dest.group_data = src.group_data;
   }
@@ -91,42 +126,73 @@ bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
 bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
                 const DDS::SubscriptionBuiltinTopicData& src)
 {
+#ifndef OPENDDS_GCC33
   using OpenDDS::DCPS::operator!=;
+#endif
   bool changed = false;
 
   // check each Changeable QoS policy value in Subcription BIT Data
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.deadline, src.deadline)) {
+#else
   if (dest.deadline != src.deadline) {
+#endif
     changed = true;
     dest.deadline = src.deadline;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.latency_budget, src.latency_budget)) {
+#else
   if (dest.latency_budget != src.latency_budget) {
+#endif
     changed = true;
     dest.latency_budget = src.latency_budget;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.user_data, src.user_data)) {
+#else
   if (dest.user_data != src.user_data) {
+#endif
     changed = true;
     dest.user_data = src.user_data;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.time_based_filter,
+                                src.time_based_filter)) {
+#else
   if (dest.time_based_filter != src.time_based_filter) {
+#endif
     changed = true;
     dest.time_based_filter = src.time_based_filter;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.partition, src.partition)) {
+#else
   if (dest.partition != src.partition) {
+#endif
     changed = true;
     dest.partition = src.partition;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.topic_data, src.topic_data)) {
+#else
   if (dest.topic_data != src.topic_data) {
+#endif
     changed = true;
     dest.topic_data = src.topic_data;
   }
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator!=(dest.group_data, src.group_data)) {
+#else
   if (dest.group_data != src.group_data) {
+#endif
     changed = true;
     dest.group_data = src.group_data;
   }

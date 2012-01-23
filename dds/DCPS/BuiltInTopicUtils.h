@@ -46,7 +46,7 @@ class BuiltinTopicKeyLess {
 public:
   bool operator()(
     const DDS::BuiltinTopicKey_t& lhs,
-    const DDS::BuiltinTopicKey_t& rhs);
+    const DDS::BuiltinTopicKey_t& rhs) const;
 };
 
 template<typename TopicType>
@@ -143,9 +143,8 @@ public:
 
 inline
 bool
-BuiltinTopicKeyLess::operator()(
-  const DDS::BuiltinTopicKey_t& lhs,
-  const DDS::BuiltinTopicKey_t& rhs)
+BuiltinTopicKeyLess::operator()(const DDS::BuiltinTopicKey_t& lhs,
+                                const DDS::BuiltinTopicKey_t& rhs) const
 {
   // N.B.  This assumes that the MS index is 2 and the LS index is 0.
   return (lhs.value[2] < rhs.value[2])? true:

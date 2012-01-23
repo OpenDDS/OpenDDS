@@ -1,3 +1,15 @@
+Mon Jan 23 18:25:25 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          BuiltinTopicKeyLess::operator() should be const.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Fixes for GCC 3.3.x.
+
 Mon Jan 23 15:35:55 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
