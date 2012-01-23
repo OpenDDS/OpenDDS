@@ -8,6 +8,7 @@
 
 #ifndef OPENDDS_RTPS_SEDP_H
 #define OPENDDS_RTPS_SEDP_H
+#ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -379,5 +380,6 @@ private:
 }
 }
 
+#endif // DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_RTPS_SEDP_H
 

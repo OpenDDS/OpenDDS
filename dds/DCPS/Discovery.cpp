@@ -34,6 +34,7 @@ std::string Discovery::get_stringified_dcps_info_ior()
   return std::string(retval.in());
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)
 {
@@ -186,6 +187,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
 
   return DDS::RETCODE_OK;
 }
+#endif
 
 
 } // namespace DCPS

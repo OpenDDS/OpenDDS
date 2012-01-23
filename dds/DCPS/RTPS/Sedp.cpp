@@ -6,6 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef DDS_HAS_MINIMUM_BIT
 #include "Sedp.h"
 #include "Spdp.h"
 #include "MessageTypes.h"
@@ -2015,3 +2016,4 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
 
 }
 }
+#endif // DDS_HAS_MINIMUM_BIT

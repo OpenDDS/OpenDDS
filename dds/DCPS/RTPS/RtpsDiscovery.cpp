@@ -6,6 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef DDS_HAS_MINIMUM_BIT
+
 #include "RtpsDiscovery.h"
 #include "RtpsInfo.h"
 
@@ -324,3 +326,4 @@ RtpsDiscovery::StaticInitializer RtpsDiscovery::dummy_;
 
 } // namespace DCPS
 } // namespace OpenDDS
+#endif // DDS_HAS_MINIMUM_BIT

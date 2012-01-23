@@ -6,6 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef DDS_HAS_MINIMUM_BIT
 #include "Spdp.h"
 #include "BaseMessageTypes.h"
 #include "MessageTypes.h"
@@ -814,3 +815,4 @@ Spdp::associated() const
 
 }
 }
+#endif // DDS_HAS_MINIMUM_BIT

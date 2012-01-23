@@ -177,6 +177,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
 
+#ifndef DDS_HAS_MINIMUM_BIT
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
     TEST_CHECK(discovery->get_stringified_dcps_info_ior() != ior);
@@ -191,6 +192,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(rd->d1() == 9);
     TEST_CHECK(rd->spdp_send_addrs().size() == 1);
     TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
+#endif
   }
 
   {
@@ -201,6 +203,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
 
+#ifndef DDS_HAS_MINIMUM_BIT
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
     OpenDDS::RTPS::RtpsDiscovery_rch rd =
@@ -212,6 +215,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(rd->spdp_send_addrs()[2] == "host3:10003");
     TEST_CHECK(rd->spdp_send_addrs()[3] == "host4:10004");
     TEST_CHECK(rd->spdp_send_addrs()[4] == "host5:10005");
+#endif
   }
 
   TheServiceParticipant->shutdown();

@@ -1,3 +1,22 @@
+Mon Jan 23 18:31:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Fixes for built_in_topics=0.
+          RTPS Discovery will not work with built_in_topics=0.
+
 Mon Jan 23 18:25:25 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/BuiltInTopicUtils.h:

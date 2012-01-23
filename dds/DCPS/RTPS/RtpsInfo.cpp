@@ -6,6 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef DDS_HAS_MINIMUM_BIT
+
 #include "RtpsInfo.h"
 #include "BaseMessageTypes.h"
 
@@ -355,3 +357,4 @@ RtpsInfo::get_part(const DDS::DomainId_t domain_id,
 
 }
 }
+#endif // DDS_HAS_MINIMUM_BIT

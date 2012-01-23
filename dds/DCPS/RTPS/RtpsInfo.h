@@ -8,6 +8,7 @@
 
 #ifndef OPENDDS_RTPS_RTPSINFO_H
 #define OPENDDS_RTPS_RTPSINFO_H
+#ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DdsDcpsInfoS.h"
 
@@ -224,4 +225,5 @@ private:
 }
 }
 
+#endif // DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_RTPS_RTPSINFO_H
