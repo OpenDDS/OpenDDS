@@ -18,7 +18,7 @@ namespace OpenDDS {
 namespace RTPS {
   class Sedp;
 }
-  
+
 namespace DCPS {
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {

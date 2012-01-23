@@ -131,7 +131,7 @@ RtpsUdpReceiveStrategy::start_i()
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
                       ACE_TEXT("failed to register handler for unicast ")
-                      ACE_TEXT("socket %d\n"), 
+                      ACE_TEXT("socket %d\n"),
                       link_->unicast_socket().get_handle()),
                      -1);
   }
@@ -201,7 +201,7 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
   if (reassembly_.reassemble(frags_, data)) {
 
     // Reassembly was successful, replace DataFrag with Data.  This doesn't have
-    // to be a fully-formed DataSubmessage, just enough for this class to use 
+    // to be a fully-formed DataSubmessage, just enough for this class to use
     // in deliver_sample() which ends up calling RtpsUdpDataLink::received().
     // In particular we will need the SequenceNumber, but ignore the iQoS.
 
@@ -396,7 +396,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
   unicast_reply_locator_list_.length(1);
   unicast_reply_locator_list_[0].kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
   unicast_reply_locator_list_[0].port = iri4.unicastLocator.port;
-  OpenDDS::RTPS::assign(unicast_reply_locator_list_[0].address, 
+  OpenDDS::RTPS::assign(unicast_reply_locator_list_[0].address,
                         iri4.unicastLocator.address);
 
   if (iri4.smHeader.flags & 2 /* MulticastFlag */) {

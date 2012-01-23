@@ -236,7 +236,7 @@ private:
     using std::pair;
     RepoId local;
     std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
-    local.entityId = submessage.readerId; 
+    local.entityId = submessage.readerId;
 
     RepoId src;
     std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));

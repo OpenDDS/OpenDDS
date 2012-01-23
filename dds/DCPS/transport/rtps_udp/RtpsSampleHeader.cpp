@@ -323,9 +323,9 @@ RtpsSampleHeader::populate_data_sample_submessages(
   if (dsle.header_.historic_sample_) {
     RTPS::OriginalWriterInfo_t original_writer_info;
     original_writer_info.originalWriterGUID = dsle.publication_id_;
-    original_writer_info.originalWriterSN.high = 
+    original_writer_info.originalWriterSN.high =
           dsle.originalSequence_.getHigh();
-    original_writer_info.originalWriterSN.low  = 
+    original_writer_info.originalWriterSN.low  =
           dsle.originalSequence_.getLow();
     // ignore original_writer_info.originalWriterQos;
 

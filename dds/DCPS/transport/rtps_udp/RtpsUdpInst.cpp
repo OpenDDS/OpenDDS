@@ -92,7 +92,7 @@ RtpsUdpInst::dump(std::ostream& os)
      << '\n'
      << formatNameForDump("heartbeat_response_delay")
      << heartbeat_response_delay_.msec() << '\n'
-     << formatNameForDump("handshake_timeout") << handshake_timeout_.msec() 
+     << formatNameForDump("handshake_timeout") << handshake_timeout_.msec()
      << std::endl;
   os.flags(flags);
 }

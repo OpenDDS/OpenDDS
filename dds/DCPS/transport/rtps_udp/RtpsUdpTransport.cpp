@@ -189,7 +189,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
       (config_i_->multicast_group_address_.get_type() == AF_INET6)
       ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
     locators[0].port = config_i_->multicast_group_address_.get_port_number();
-    RTPS::address_to_bytes(locators[0].address, 
+    RTPS::address_to_bytes(locators[0].address,
                            config_i_->multicast_group_address_);
     idx = 1;
 
@@ -200,7 +200,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
   locators[idx].kind = (config_i_->local_address_.get_type() == AF_INET6)
                        ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
   locators[idx].port = config_i_->local_address_.get_port_number();
-  RTPS::address_to_bytes(locators[idx].address, 
+  RTPS::address_to_bytes(locators[idx].address,
                          config_i_->local_address_);
 
   info.transport_type = "rtps_udp";
@@ -257,7 +257,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
     if (config_i_->local_address_.is_any() && count > 0) {
       config_i_->local_address_ = addrs[0];
     }
-  } 
+  }
 
   if (config_i_->local_address_.get_port_number() == 0) {
 

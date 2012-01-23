@@ -292,7 +292,7 @@ bool run_test(const DomainParticipant_var& dp,
   topic_qos.topic_data.value.length(1);
   topic_qos.topic_data.value[0] = 7;
   topic->set_qos(topic_qos);
-  
+
   return ok;
 }
 
