@@ -32,6 +32,8 @@ extern "C" {
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "ace/Hash_Map_Manager.h"
 
+#include <string>
+
 namespace OpenDDS
 {
   namespace DCPS
