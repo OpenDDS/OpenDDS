@@ -1,5 +1,5 @@
-
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/ACE.h"
 #include "ace/Arg_Shifter.h"
@@ -66,7 +66,9 @@ insertions(ACE_Message_Block* chain, const Values& values,
   serializer << values.charValue;
   serializer << ACE_OutputCDR::from_wchar(values.wcharValue);
   serializer << ACE_OutputCDR::from_string(values.stringValue, 0);
+#ifdef DDS_HAS_WCHAR
   serializer << ACE_OutputCDR::from_wstring(values.wstringValue, 0);
+#endif
 }
 
 void
@@ -108,7 +110,9 @@ extractions(ACE_Message_Block* chain, Values& values,
   serializer >> values.charValue;
   serializer >> ACE_InputCDR::to_wchar(values.wcharValue);
   serializer >> ACE_InputCDR::to_string(values.stringValue, 0);
+#ifdef DDS_HAS_WCHAR
   serializer >> ACE_InputCDR::to_wstring(values.wstringValue, 0);
+#endif
 }
 
 void
@@ -244,6 +248,7 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << ")." << std::endl;
     failed = true;
   }
+#ifdef DDS_HAS_WCHAR
   if((expected.wstringValue != 0) && (0 != ACE_OS::strcmp(expected.wstringValue, observed.wstringValue))) {
     ACE::format_hexdump(reinterpret_cast<char*>(expected.wstringValue), ACE_OS::strlen(expected.wstringValue), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(reinterpret_cast<char*>(observed.wstringValue), ACE_OS::strlen(observed.wstringValue), obuffer, sizeof(obuffer));
@@ -253,7 +258,7 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << ")." << std::endl;
     failed = true;
   }
-
+#endif
 }
 
 void
@@ -421,7 +426,9 @@ int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
   const char string[] = "This is a test of the string serialization.";
+#ifdef DDS_HAS_WCHAR
   const ACE_CDR::WChar wstring[] = L"This is a test of the wstring serialization.";
+#endif
 
   Values expected = { 0x01,
                       0x2345,
@@ -440,7 +447,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                       0x1a,
                       0xb2,
                       const_cast<ACE_CDR::Char*>(string),
+#ifdef DDS_HAS_WCHAR
                       const_cast<ACE_CDR::WChar*>(wstring)
+#else
+                      0
+#endif
   };
 
   ArrayValues expectedArray;

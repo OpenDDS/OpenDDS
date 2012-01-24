@@ -29,6 +29,7 @@
 #include <ace/SOCK_Dgram.h>
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_sys_time.h>
+#include <ace/OS_NS_time.h>
 
 #include <iostream>
 #include <sstream>
@@ -50,7 +51,7 @@ using namespace OpenDDS::RTPS;
 void log_time(const ACE_Time_Value& t)
 {
   const std::time_t seconds = t.sec();
-  std::string timestr(std::ctime(&seconds));
+  std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime(&seconds)));
   timestr.erase(timestr.size() - 1); // remove \n from ctime()
   ACE_DEBUG((LM_INFO, "Sending with timestamp %C %q usec\n",
              timestr.c_str(), ACE_INT64(t.usec())));

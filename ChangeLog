@@ -1,3 +1,12 @@
+Tue Jan 24 16:55:02 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Serializer/AlignmentTest.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Support for incomplete std C++ libraries on QNX and WinCE/mobile.
+
 Mon Jan 23 21:55:12 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

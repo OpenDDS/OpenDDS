@@ -1,4 +1,6 @@
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/Definitions.h"
+
 #include "tao/CORBA_String.h"
 
 #include <iostream>
@@ -104,6 +106,7 @@ struct DataType<const ACE_CDR::Char*> : DataTypeBase {
   const char* name() { return "string"; }
 };
 
+#ifdef DDS_HAS_WCHAR
 template <>
 struct DataType<const ACE_CDR::WChar*> : DataTypeBase {
 
@@ -117,6 +120,7 @@ struct DataType<const ACE_CDR::WChar*> : DataTypeBase {
 
   const char* name() { return "wstring"; }
 };
+#endif
 
 DataType<ACE_CDR::Boolean> dt_bool;
 DataType<ACE_CDR::Char> dt_char;
@@ -132,7 +136,9 @@ DataType<ACE_CDR::Float> dt_float;
 DataType<ACE_CDR::Double> dt_double;
 DataType<ACE_CDR::LongDouble> dt_longdouble;
 DataType<const ACE_CDR::Char*> dt_string;
+#ifdef DDS_HAS_WCHAR
 DataType<const ACE_CDR::WChar*> dt_wstring;
+#endif
 
 DataTypeBase* types[] = {
   &dt_bool,
@@ -149,7 +155,9 @@ DataTypeBase* types[] = {
   &dt_double,
   &dt_longdouble,
   &dt_string,
+#ifdef DDS_HAS_WCHAR
   &dt_wstring,
+#endif
 };
 
 bool testType(DataTypeBase* type)

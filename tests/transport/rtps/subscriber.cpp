@@ -16,6 +16,7 @@
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 #include <ace/Get_Opt.h>
+#include <ace/OS_NS_time.h>
 
 #include <cstdio>
 #include <ctime>
@@ -75,10 +76,11 @@ public:
                         sample.header_.source_timestamp_nanosec_};
       ACE_Time_Value atv = time_to_time_value(ts);
       std::time_t seconds = atv.sec();
+      std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime(&seconds)));
       std::ostringstream oss;
       oss << "data_received():\n\t"
         "id = " << int(sample.header_.message_id_) << "\n\t"
-        "timestamp = " << atv.usec() << " usec " << std::ctime(&seconds) << "\t"
+        "timestamp = " << atv.usec() << " usec " << timestr << "\t"
         "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
         "byte order = " << sample.header_.byte_order_ << "\n\t"
         "length = " << sample.header_.message_length_ << "\n\t"
