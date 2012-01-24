@@ -1,3 +1,14 @@
+Tue Jan 24 22:39:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          For the case where the datalink release delay is 0, need to call
+          pre_stop_i() before stop().
+
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          If participants are run with -DCPSBit 0, pass -NOBITS to InfoRepo.
+
 Tue Jan 24 21:49:00 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:

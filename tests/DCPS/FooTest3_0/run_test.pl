@@ -70,7 +70,7 @@ unlink $dcpsrepo_ior;
 unlink $sub_ready_file;
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                        "-o $dcpsrepo_ior ");
+                                        "-o $dcpsrepo_ior $repo_bit_conf");
 print $DCPSREPO->CommandLine(), "\n";
 
 my $publisher = PerlDDS::create_process ("FooTest3_publisher",

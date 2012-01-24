@@ -547,7 +547,7 @@ TcpTransport::release_datalink(DataLink* link)
     }
 
   } else { // datalink_release_delay_ is 0
-
+    link->pre_stop_i();
     link->stop();
   }
 
