@@ -8,6 +8,10 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/WaitSet.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#endif
+
 #include "ace/OS_NS_unistd.h"
 #include "ace/Log_Msg.h"
 

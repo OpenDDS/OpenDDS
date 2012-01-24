@@ -1,3 +1,13 @@
+Tue Jan 24 23:24:48 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/UnitTests/rtps.ini:
+
+          Disable SEDP Multicasting for RTPS Discovery.
+
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          Allow static linking with OpenDDS_Rtps library.
+
 Tue Jan 24 22:39:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpTransport.cpp:
