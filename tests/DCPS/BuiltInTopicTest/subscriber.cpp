@@ -163,6 +163,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // set up user data in DR qos
       CORBA::ULong dr_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DR_USER_DATA));

@@ -1,3 +1,9 @@
+Tue Jan 24 17:59:40 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Set reliability on subscriber.
+
 Tue Jan 24 17:42:08 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/rtps_disc.ini:
