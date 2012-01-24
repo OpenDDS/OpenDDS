@@ -216,6 +216,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         ACE_OS::sleep (small_time);
       }
 
+      ACE_DEBUG((LM_INFO, "(%|%t) publisher exiting\n"));
       // Cleanup
       writer->end ();
       delete writer;

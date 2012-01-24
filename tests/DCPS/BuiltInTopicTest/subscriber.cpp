@@ -233,6 +233,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         result = 1;
       }
 
+      ACE_DEBUG((LM_INFO, "(%P|%t) subscriber exiting\n"));
+
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
       }

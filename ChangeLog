@@ -1,3 +1,10 @@
+Tue Jan 24 19:09:55 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Log when exiting.
+
 Tue Jan 24 18:32:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tools/dissector/packet-opendds.h:
