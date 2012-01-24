@@ -90,7 +90,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                        part_user_data_len,
                                        reinterpret_cast<CORBA::Octet*>(PART_USER_DATA));
 
-      participant = dpf->create_participant(41,
+      participant = dpf->create_participant(411,
                                             partQos,
                                             DDS::DomainParticipantListener::_nil(),
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -163,7 +163,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
-      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // set up user data in DR qos
       CORBA::ULong dr_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DR_USER_DATA));
@@ -232,8 +231,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         cerr << "subscriber: Built in topic read failure." << endl;
         result = 1;
       }
-
-      ACE_DEBUG((LM_INFO, "(%P|%t) subscriber exiting\n"));
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();

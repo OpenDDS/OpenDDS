@@ -137,7 +137,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ACE_OS::fclose (fp);
       }
 
-      participant = dpf->create_participant(41,
+      participant = dpf->create_participant(411,
                                             PARTICIPANT_QOS_DEFAULT,
                                             DDS::DomainParticipantListener::_nil(),
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);

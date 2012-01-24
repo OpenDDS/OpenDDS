@@ -1,3 +1,17 @@
+Tue Jan 24 21:49:00 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/dcps.ini:
+        * tests/DCPS/BuiltInTopicTest/rtps_disc.ini:
+        * tests/DCPS/BuiltInTopicTest/rtps_disc_tcp.ini:
+
+          Revert back to the pre-merge version.
+
 Tue Jan 24 19:09:55 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/publisher.cpp:
