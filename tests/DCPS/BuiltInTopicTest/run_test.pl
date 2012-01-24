@@ -16,16 +16,20 @@ my $status = 0;
 my $is_rtps_disc = 0;
 my $DCPScfg = "dcps.ini";
 my $DCPSREPO;
+my $num_topics = 2;
 
 if ($ARGV[0] eq 'rtps_disc') {
   $DCPScfg = $ARGV[0] . ".ini";
   $is_rtps_disc = 1;
+  $num_topics = 0;
 }
-elsif ($ARGV[0] eq 'rtps_disc') {
+elsif ($ARGV[0] eq 'rtps_disc_tcp') {
   $DCPScfg = $ARGV[0] . ".ini";
   $is_rtps_disc = 1;
+  $num_topics = 0;
 }
 my $opts = "-DCPSConfigFile $DCPScfg";
+my $mon_opts = "-t $num_topics";
 
 my $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
@@ -36,8 +40,8 @@ if (!$is_rtps_disc) {
 }
 my $Subscriber = PerlDDS::create_process ("subscriber", "$opts");
 my $Publisher = PerlDDS::create_process ("publisher", "$opts");
-my $Monitor1 = PerlDDS::create_process ("monitor", "$opts -l 7");
-my $Monitor2 = PerlDDS::create_process ("monitor", "$opts -u");
+my $Monitor1 = PerlDDS::create_process ("monitor", "$opts $mon_opts -l 7");
+my $Monitor2 = PerlDDS::create_process ("monitor", "$opts $mon_opts -u");
 my $synch_file = "monitor1_done";
 
 my $data_file = "test_run.data";
