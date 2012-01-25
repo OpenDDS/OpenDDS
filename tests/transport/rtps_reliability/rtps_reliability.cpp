@@ -124,9 +124,13 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     send(list_);
   }
 
-  void data_delivered(const DataSampleListElement*)
+  void data_delivered(const DataSampleListElement* d)
   {
     ACE_DEBUG((LM_INFO, "SimpleDataWriter::data_delivered()\n"));
+    if (d == &dsle_) {
+      dsle_.sample_->release();
+      dsle_.sample_ = 0;
+    }
   }
 
   void notify_publication_disconnected(const ReaderIdSeq&) {}
