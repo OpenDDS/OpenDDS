@@ -2,17 +2,17 @@
 // $Id$
 
 workspace {
-  $(TAO_ROOT)/tao/PI_Server.mpc
-  $(TAO_ROOT)/tao/IORManipulation.mpc
-  $(TAO_ROOT)/tao/Valuetype.mpc
-  $(TAO_ROOT)/tao/Messaging.mpc
+  $(TAO_ROOT)/tao/PI_Server/PI_Server.mpc
+  $(TAO_ROOT)/tao/IORManipulation/IORManipulation.mpc
+  $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc
+  $(TAO_ROOT)/tao/Messaging/Messaging.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/PortableGroup.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/FTORB.mpc
   $(TAO_ROOT)/tests/Hello                  // used by Java tests
   $(TAO_ROOT)/orbsvcs/Naming_Service/Naming_Service.mpc
   $(TAO_ROOT)/orbsvcs/ImplRepo_Service/ImplRepo_Service.mpc
-  DDS_TAO.mwc
+  DDS_TAOv2.mwc
   examples
   performance-tests
   tests

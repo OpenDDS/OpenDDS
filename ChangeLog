@@ -1,3 +1,11 @@
+Wed Jan 25 15:20:06 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO_all.mwc:
+        * DDS_TAOv2_all.mwc:
+
+          Updated to include all parts of TAO needed for running OpenDDS tests.
+          Added the TAOv2 version (for DOC Group 2.0.x and OCI TAO 2.0a).
+
 Tue Jan 24 23:24:48 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/UnitTests/rtps.ini:
