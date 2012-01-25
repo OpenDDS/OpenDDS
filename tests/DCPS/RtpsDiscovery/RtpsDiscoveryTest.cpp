@@ -42,7 +42,14 @@ void cleanup(const DomainParticipantFactory_var& dpf,
   }
 }
 
-bool read_participant_bit(const Subscriber_var& bit_sub)
+void set_qos(OctetSeq& qos, CORBA::Octet value)
+{
+  qos.length(1);
+  qos[0] = value;
+}
+
+bool read_participant_bit(const Subscriber_var& bit_sub, 
+                          int user_data)
 {
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -80,6 +87,28 @@ bool read_participant_bit(const Subscriber_var& bit_sub)
                  data[i].key.value[1],
                  data[i].key.value[2],
                  infos[i].instance_handle));
+
+      if (data[i].user_data.value.length() != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR particpant[%d] user data length %d "
+                          "not expected length of 1\n",  
+                          i,
+                          data[i].user_data.value.length()),
+                         false);
+      }
+
+      if (i != data.length() - 1) {
+        continue;
+      }
+      if (data[i].user_data.value[0] != user_data) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR particpant[%d] user data value %d "
+                          "not expected value %d\n",
+                          i,
+                          data[i].user_data.value[0],
+                          user_data), 
+                         false);
+      }
     }
   }
 
@@ -96,10 +125,13 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
     return 0;
   }
 
+  TopicQos topic_qos;
+  dp2->get_default_topic_qos(topic_qos);
+  set_qos(topic_qos.topic_data.value, 8);
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp2->create_topic("Movie Discussion List",
                                       type_name,
-                                      TOPIC_QOS_DEFAULT,
+                                      topic_qos,
                                       0,
                                       DEFAULT_STATUS_MASK);
 
@@ -117,8 +149,12 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
     return 0;
   }
 
+  DataWriterQos dw_qos;
+  pub->get_default_datawriter_qos(dw_qos);
+  set_qos(dw_qos.user_data.value, 2);
+
   DataWriter_var dw = pub->create_datawriter(topic,
-                                             DATAWRITER_QOS_DEFAULT,
+                                             dw_qos,
                                              0,
                                              DEFAULT_STATUS_MASK);
 
@@ -159,8 +195,12 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
     return 0;
   }
 
+  DataReaderQos dr_qos;
+  sub->get_default_datareader_qos(dr_qos);
+  dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+
   DataReader_var dr = sub->create_datareader(topic,
-                                             DATAREADER_QOS_DEFAULT,
+                                             dr_qos,
                                              0,
                                              DEFAULT_STATUS_MASK);
 
@@ -171,7 +211,9 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
   return dr;
 }
 
-bool read_publication_bit(const Subscriber_var& bit_sub)
+bool read_publication_bit(const Subscriber_var& bit_sub, 
+                          int user_data,
+                          int topic_data)
 {
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -213,13 +255,93 @@ bool read_publication_bit(const Subscriber_var& bit_sub)
                  data[i].participant_key.value[1],
                  data[i].participant_key.value[2], data[i].topic_name.in(),
                  data[i].type_name.in()));
+      if (data[i].user_data.value.length() != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR publication [%d] user data length %d "
+                          "not expected length of 1\n",  
+                          i,
+                          data[i].user_data.value.length()),
+                         false);
+      }
+      if (data[i].topic_data.value.length() != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR publication [%d] topic data length %d "
+                          "not expected length of 1\n",  
+                          i,
+                          data[i].topic_data.value.length()),
+                         false);
+      }
+      if (i != data.length() - 1) {
+        continue;
+      }
+      if (data[i].user_data.value[0] != user_data) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR publication [%d] user data value %d "
+                          "not expected value %d\n",
+                          i,
+                          data[i].user_data.value[0],
+                          user_data), 
+                         false);
+      }
+      if (data[i].topic_data.value[0] != topic_data) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR publication [%d] topic data value %d "
+                          "not expected value %d\n",
+                          i,
+                          data[i].topic_data.value[0],
+                          topic_data), 
+                         false);
+      }
     }
   }
   return true;
 }
 
-bool run_test(const DomainParticipant_var& dp,
-              const DomainParticipant_var& dp2)
+bool check_discovered_participants(DomainParticipant_var& dp)
+{
+  InstanceHandle_t my_handle    = dp->get_instance_handle();
+
+  DDS::InstanceHandleSeq part_handles;
+  DDS::ReturnCode_t stat = dp->get_discovered_participants(part_handles);
+  while (stat == RETCODE_NO_DATA || part_handles.length() == 0) {
+    ACE_OS::sleep(1);
+    stat = dp->get_discovered_participants(part_handles);
+  }
+
+  if (stat == RETCODE_OK) {
+    CORBA::ULong len = part_handles.length();
+    if (len != 1) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR expected to discover")
+                                  ACE_TEXT("one other participant handle but ")
+                                  ACE_TEXT("found %d\n"), len), false);
+    } else if (part_handles[0] == my_handle) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR discovered own ")
+                                  ACE_TEXT("participant handle\n")), false);
+    } else {
+      DDS::ParticipantBuiltinTopicData data;
+      dp->get_discovered_participant_data(data, part_handles[0]);
+      OpenDDS::DCPS::Discovery_rch disc = 
+          TheServiceParticipant->get_discovery(dp->get_domain_id());
+      OpenDDS::DCPS::DomainParticipantImpl* dp_impl = 
+          dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
+        
+      OpenDDS::DCPS::RepoId repo_id = disc->bit_key_to_repo_id(
+          dp_impl,
+          OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+          data.key);
+      if (dp_impl->get_handle(repo_id) != part_handles[0]) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR discovered participant ")
+                                    ACE_TEXT("BIT key could not be converted ")
+                                    ACE_TEXT("to repo id, then handle\n")), 
+                         false);
+      }
+    }
+  }
+  return (stat == RETCODE_OK);
+}
+
+bool run_test(DomainParticipant_var& dp,
+              DomainParticipant_var& dp2) 
 {
 
   // If we are running with an rtps_udp transport, it can't be shared between
@@ -235,7 +357,13 @@ bool run_test(const DomainParticipant_var& dp,
 
   Subscriber_var bit_sub = dp->get_builtin_subscriber();
 
-  read_participant_bit(bit_sub);
+  read_participant_bit(bit_sub, 1);
+
+  if (!(check_discovered_participants(dp) && 
+        check_discovered_participants(dp2)))
+  {
+    return false;
+  }
 
   DataWriter_var dw = create_data_writer(dp2);
   if (!dw) {
@@ -243,7 +371,7 @@ bool run_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  read_publication_bit(bit_sub);
+  read_publication_bit(bit_sub, 2, 8);
 
   DataReader_var dr = create_data_reader(dp);
   if (!dr) {
@@ -252,6 +380,7 @@ bool run_test(const DomainParticipant_var& dp,
   }
 
   WriterSync::wait_match(dw);
+
   TestMsgDataWriter_var tmdw = TestMsgDataWriter::_narrow(dw);
   const TestMsg msg = {42};
   tmdw->write(msg, HANDLE_NIL);
@@ -292,13 +421,44 @@ bool run_test(const DomainParticipant_var& dp,
     ACE_DEBUG((LM_DEBUG, "ERROR: no valid data from TestMsg data reader\n"));
   }
 
+  // Change dp qos
+  {
+    DomainParticipantQos dp_qos;
+    dp2->get_qos(dp_qos);
+    set_qos(dp_qos.user_data.value, 17);
+    dp2->set_qos(dp_qos);
+  }
+  // Change dr qos
+  {
+    DataReaderQos dr_qos;
+    dr->get_qos(dr_qos);
+    set_qos(dr_qos.user_data.value, 101);
+    dr->set_qos(dr_qos);
+  }
+  // Change dw qos
+  {
+    DataWriterQos dw_qos;
+    dw->get_qos(dw_qos);
+    set_qos(dw_qos.user_data.value, 21);
+    dw->set_qos(dw_qos);
+  }
+  // Wait for propagation
+  ACE_OS::sleep(3);
+  read_participant_bit(bit_sub, 17);
+  read_publication_bit(bit_sub, 21, 8);
+
+
+  // Set datawriter topic qos
   Topic_var topic = dw->get_topic();
   TopicQos topic_qos;
   topic->get_qos(topic_qos);
-  topic_qos.topic_data.value.length(1);
-  topic_qos.topic_data.value[0] = 7;
+  set_qos(topic_qos.topic_data.value, 7);
   topic->set_qos(topic_qos);
 
+  // Wait for propagation
+  ACE_OS::sleep(3);
+  read_publication_bit(bit_sub, 21, 7);
+  
   return ok;
 }
 
@@ -315,8 +475,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_DEBUG((LM_DEBUG, "ERROR: could not create Domain Participant 1\n"));
 
     } else {
-      dp2 = dpf->create_participant(9, PARTICIPANT_QOS_DEFAULT,
-                                    0, DEFAULT_STATUS_MASK);
+      DomainParticipantQos dp_qos = PARTICIPANT_QOS_DEFAULT;
+      dp_qos.user_data.value.length(1);
+      dp_qos.user_data.value[0] = 1;
+
+      dp2 = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
 
       if (!dp2) {
         ACE_DEBUG((LM_DEBUG, "ERROR: could not create Domain Participant 2\n"));
@@ -326,17 +489,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
         if (!ok) {
           ACE_DEBUG((LM_ERROR, "ERROR from run_test\n"));
+          return -1;
         }
       }
     }
   } catch (const std::exception& e) {
     ACE_DEBUG((LM_ERROR, "ERROR: Exception thrown: %C\n", e.what()));
+    return -2;
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("ERROR: Exception thrown:");
+    return -2;
   } catch (const OpenDDS::DCPS::Transport::Exception&) {
     ACE_DEBUG((LM_ERROR, "ERROR: Transport exception thrown\n"));
+    return -2;
   } catch (...) {
     ACE_DEBUG((LM_ERROR, "ERROR: unknown exception thrown\n"));
+    return -2;
   }
 
   ACE_DEBUG((LM_INFO, "Cleaning up test\n"));
