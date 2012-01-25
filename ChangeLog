@@ -1,3 +1,13 @@
+Wed Jan 25 16:11:35 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/dcps.ini:
+        * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
+        * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Renamed ini files for consistency with other tests.
+
 Wed Jan 25 15:20:06 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO_all.mwc:
