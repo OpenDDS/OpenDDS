@@ -1,3 +1,12 @@
+Wed Jan 25 20:05:51 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fix sequence repair bit unnecessarily being set.
+          Fix expected sequence not being updated when content subscription
+            profile not built.
+
 Wed Jan 25 19:22:48 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/CorbaSeq/Writer.cpp:

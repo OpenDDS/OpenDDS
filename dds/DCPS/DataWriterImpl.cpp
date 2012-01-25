@@ -321,8 +321,10 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
   , expression_params_(params)
   , filter_(filter)
   , eval_(*filter ? participant->get_filter_eval(filter) : 0)
+  , expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {}
 #else
+  : expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
   ACE_UNUSED_ARG(filter);
   ACE_UNUSED_ARG(params);
@@ -1755,6 +1757,11 @@ DataWriterImpl::write(DataSample* data,
       iter->second.expected_sequence_ = sequence_number_;
     }
   }
+#else
+  for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
+       end = reader_info_.end(); iter != end; ++iter) {
+    iter->second.expected_sequence_ = sequence_number_;
+  }
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   if (this->coherent_) {
@@ -1899,6 +1906,8 @@ DataWriterImpl::create_control_message(MessageId message_id,
    || message_id == DISPOSE_INSTANCE
    || message_id == UNREGISTER_INSTANCE
    || message_id == DISPOSE_UNREGISTER_INSTANCE) {
+
+    header_data.sequence_repair_ = need_sequence_repair();
     // Use the sequence number here for the sake of RTPS (where these
     // control messages map onto the Data Submessage).
     if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
@@ -1907,7 +1916,6 @@ DataWriterImpl::create_control_message(MessageId message_id,
       ++this->sequence_number_;
     }
     header_data.sequence_ = this->sequence_number_;
-    header_data.sequence_repair_ = need_sequence_repair(header_data);
     header_data.key_fields_only_ = true;
   }
 
@@ -1973,13 +1981,13 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.content_filter_ = content_filter;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
+  header_data.sequence_repair_ = need_sequence_repair();
   if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     this->sequence_number_ = SequenceNumber();
   } else {
     ++this->sequence_number_;
   }
   header_data.sequence_ = this->sequence_number_;
-  header_data.sequence_repair_ = need_sequence_repair(header_data);
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -2508,11 +2516,11 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
 }
 
 bool
-DataWriterImpl::need_sequence_repair(const DataSampleHeader& hdr) const
+DataWriterImpl::need_sequence_repair() const
 {
   for (RepoIdToReaderInfoMap::const_iterator it = reader_info_.begin(),
        end = reader_info_.end(); it != end; ++it) {
-    if (it->second.expected_sequence_ != hdr.sequence_) {
+    if (it->second.expected_sequence_ != sequence_number_) {
       return true;
     }
   }
