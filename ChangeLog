@@ -1,3 +1,33 @@
+Wed Jan 25 17:01:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          RtpsDiscovery should only have one entry, one invocation
+          of run_test.pl is enough to run all scenarios.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Allow static linking to OpenDDS_Rtps library with an #include of
+          RtpsDiscovery.h ensuring that the linker sees some needed symbol.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/DcpsIntegration/dcps_integration.mpc:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          Allow static builds to use OpenDDS_Rtps and OpenDDS_Rtps_Udp libs.
+
 Wed Jan 25 16:11:35 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/dcps.ini:

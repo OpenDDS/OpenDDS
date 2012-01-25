@@ -324,9 +324,6 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
   return 0;
 }
 
-RtpsDiscovery::StaticInitializer RtpsDiscovery::dummy_;
-
-
 } // namespace DCPS
 } // namespace OpenDDS
 #endif // DDS_HAS_MINIMUM_BIT

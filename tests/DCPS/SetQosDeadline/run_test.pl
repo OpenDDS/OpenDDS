@@ -10,63 +10,62 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
+my $status = 0;
 my $is_rtps_disc = 0;
 
 if ($ARGV[0] eq 'rtps_disc') {
   $is_rtps_disc = 1;
 }
 
-$pub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
-$sub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
+my $pub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
+my $sub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
 
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-if (!$is_rtps_disc) {
-  $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "-o $dcpsrepo_ior ");
-}
-$Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", "$pub_opts");
+my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                       "-o $dcpsrepo_ior");
+my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
+my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
 
 
 if (!$is_rtps_disc) {
   print $DCPSREPO->CommandLine() . "\n";
-  $DCPSREPO->Spawn ();
-  if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
+  $DCPSREPO->Spawn();
+  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-    $DCPSREPO->Kill ();
+    $DCPSREPO->Kill();
     exit 1;
   }
 }
 
 print $Publisher->CommandLine() . "\n";
 print $Subscriber->CommandLine() . "\n";
-$Publisher->Spawn ();
+$Publisher->Spawn();
 
-$Subscriber->Spawn ();
+$Subscriber->Spawn();
+
+my $PublisherResult = $Publisher->WaitKill(300);
+if ($PublisherResult != 0) {
+  print STDERR "ERROR: publisher returned $PublisherResult \n";
+  $status = 1;
+}
+
+my $SubscriberResult = $Subscriber->WaitKill(15);
+if ($SubscriberResult != 0) {
+  print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+  $status = 1;
+}
 
 if (!$is_rtps_disc) {
-  $PublisherResult = $Publisher->WaitKill (300);
-  if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-  }
-}
-
-$SubscriberResult = $Subscriber->WaitKill (15);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
+  my $ir = $DCPSREPO->TerminateWaitKill(5);
+  if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
+  }
 }
 
 unlink $dcpsrepo_ior;

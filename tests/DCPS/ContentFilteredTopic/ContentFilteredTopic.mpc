@@ -1,4 +1,4 @@
-project: dcpsexe_with_tcp {
+project: dcpsexe_with_tcp, dcps_rtps_udp {
   exename = ContentFilteredTopicTest
   requires += content_subscription
   TypeSupport_Files {

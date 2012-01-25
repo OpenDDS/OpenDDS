@@ -226,7 +226,5 @@ tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS
-tests/DCPS/RtpsDiscovery/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
-tests/DCPS/RtpsDiscovery/run_test.pl rtps_disc_udp: !DCPS_MIN !NO_MCAST RTPS
 tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN RTPS

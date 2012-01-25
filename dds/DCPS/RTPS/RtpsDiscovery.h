@@ -109,15 +109,16 @@ private:
 
   static int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
 
+public:
   class StaticInitializer {
   public:
     StaticInitializer() {
       OpenDDS::DCPS::rtps_discovery_config = RtpsDiscovery::load_rtps_discovery_configuration;
     }
   };
-  static StaticInitializer dummy_;
 };
 
+static RtpsDiscovery::StaticInitializer initialize_rtps;
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscovery> RtpsDiscovery_rch;
 
 } // namespace RTPS
