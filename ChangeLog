@@ -1,3 +1,11 @@
+Wed Jan 25 19:22:48 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+
+          Initialize all data in sequences.  This is needed in
+          the wchar case because some hosts have > 16 bits in wchar_t
+          and the serializer can't handle values outside of the UTF-16 range.
+
 Wed Jan 25 17:25:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
