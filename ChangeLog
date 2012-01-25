@@ -1,3 +1,10 @@
+Wed Jan 25 17:25:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Add get_discovered_participants, get_discovered_participant_data,
+          bit_key_to_repo_id and get_handle testing.
+
 Wed Jan 25 17:01:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
