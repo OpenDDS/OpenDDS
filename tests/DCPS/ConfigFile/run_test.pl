@@ -15,6 +15,7 @@ use PerlDDS::Run_Test;
 use FileHandle;
 use Cwd;
 use File::Copy;
+use strict;
 
 my $status = 0;
 
@@ -24,8 +25,8 @@ my $dcpsrepo3_ior = "repo3.ior";
 
 
 unlink $dcpsrepo_ior;
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     " -o $dcpsrepo_ior ");
+my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                       " -o $dcpsrepo_ior");
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
@@ -37,14 +38,16 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 copy($dcpsrepo_ior, $dcpsrepo2_ior);
 copy($dcpsrepo_ior, $dcpsrepo3_ior);
 
-$TST = PerlDDS::create_process("ConfigFile", "-DCPSConfigFile test1.ini");
+my $cfg = new PerlACE::ConfigList->check_config('NO_BUILT_IN_TOPICS')
+          ? 'test1_nobits.ini' : 'test1.ini';
+my $TST = PerlDDS::create_process("ConfigFile", "-DCPSConfigFile $cfg");
 print $TST->CommandLine() . "\n";
 my $retcode = $TST->SpawnWaitKill(60);
 if ($retcode != 0) {
     $status = 1;
 }
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
+my $ir = $DCPSREPO->TerminateWaitKill(5);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;

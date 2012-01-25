@@ -1,3 +1,17 @@
+Wed Jan 25 21:12:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude tests that require Built-In Topics from running
+          when the test configuration includes NO_BUILT_IN_TOPICS.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigFile/test1_nobits.ini:
+
+          Allow test to run when Built-in Topics are disabled
+          at compile time.  This will skip testing RTPS Discovery.
+
 Wed Jan 25 21:06:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:

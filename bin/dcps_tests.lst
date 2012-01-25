@@ -147,8 +147,8 @@ tests/DCPS/Messenger/run_test.pl stack: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl rtps: !DCPS_MIN !NO_MCAST RTPS
 tests/DCPS/Messenger/run_test.pl rtps_unicast: !DCPS_MIN RTPS
-tests/DCPS/Messenger/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
-tests/DCPS/Messenger/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS
+tests/DCPS/Messenger/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+tests/DCPS/Messenger/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 
 tests/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
 tests/DCPS/Messenger/run_corbaloc_test.pl host_port_only: !DCPS_MIN
@@ -172,10 +172,10 @@ tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN
 tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN
 tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN
 tests/DCPS/SetQosDeadline/run_test.pl: !DCPS_MIN
-tests/DCPS/SetQosDeadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
+tests/DCPS/SetQosDeadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/SetQosPartition/run_test.pl: !DCPS_MIN
-tests/DCPS/SetQosPartition/run_test.pl rps_disc: !DCPS_MIN !NO_MCAST
-tests/DCPS/SetQosPartition/run_test.pl rps_disc_tcp: !DCPS_MIN !NO_MCAST
+tests/DCPS/SetQosPartition/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+tests/DCPS/SetQosPartition/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/StringKey/run_test.pl: !DCPS_MIN
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN
@@ -185,7 +185,7 @@ tests/DCPS/FilterExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/ContentFilteredTopic/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/ContentFilteredTopic/run_test.pl nopub: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
-tests/DCPS/ContentFilteredTopic/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST !DDS_NO_CONTENT_SUBSCRIPTION RTPS
+tests/DCPS/ContentFilteredTopic/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST !DDS_NO_CONTENT_SUBSCRIPTION RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/TopicExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/MultiTopic/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/MetaStruct/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
@@ -225,6 +225,6 @@ tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN !NO_MCAST
 tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN RTPS
-tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS
+tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN RTPS

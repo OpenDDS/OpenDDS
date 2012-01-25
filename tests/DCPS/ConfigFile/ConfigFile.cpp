@@ -95,7 +95,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(config->passive_connect_duration_ == 20000);
 
   TransportConfig_rch default_config =
+#ifdef DDS_HAS_MINIMUM_BIT
+    TransportRegistry::instance()->get_config("test1_nobits.ini");
+#else
     TransportRegistry::instance()->get_config("test1.ini");
+#endif
   TEST_CHECK(default_config != 0);
   //std::cout << "size=" << default_config->instances_.size() << std::endl;
   //for (unsigned int i = 0; i < default_config->instances_.size(); ++i) {
@@ -152,6 +156,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(ird->bit_transport_port() == 4321);
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
   {
     DDS::DomainId_t domain = 21;
     OpenDDS::DCPS::Discovery::RepoKey key = "DEFAULT_RTPS";
@@ -177,7 +182,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
 
-#ifndef DDS_HAS_MINIMUM_BIT
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
     TEST_CHECK(discovery->get_stringified_dcps_info_ior() != ior);
@@ -192,7 +196,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(rd->d1() == 9);
     TEST_CHECK(rd->spdp_send_addrs().size() == 1);
     TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
-#endif
   }
 
   {
@@ -203,7 +206,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
 
-#ifndef DDS_HAS_MINIMUM_BIT
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
     OpenDDS::RTPS::RtpsDiscovery_rch rd =
@@ -215,8 +217,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(rd->spdp_send_addrs()[2] == "host3:10003");
     TEST_CHECK(rd->spdp_send_addrs()[3] == "host4:10004");
     TEST_CHECK(rd->spdp_send_addrs()[4] == "host5:10005");
-#endif
   }
+#endif
 
   TheServiceParticipant->shutdown();
   orb->destroy();
