@@ -23,6 +23,7 @@ using OpenDDS::DCPS::TransportConfig_rch;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 using OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC;
 using OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC;
+using OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC;
 using OpenDDS::Model::WriterSync;
 
 void cleanup(const DomainParticipantFactory_var& dpf,
@@ -127,7 +128,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
 
   TopicQos topic_qos;
   dp2->get_default_topic_qos(topic_qos);
-  set_qos(topic_qos.topic_data.value, 8);
+  set_qos(topic_qos.topic_data.value, 1);
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp2->create_topic("Movie Discussion List",
                                       type_name,
@@ -174,10 +175,13 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
     return 0;
   }
 
+  TopicQos topic_qos;
+  dp->get_default_topic_qos(topic_qos);
+  set_qos(topic_qos.topic_data.value, 1);
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp->create_topic("Movie Discussion List",
                                      type_name,
-                                     TOPIC_QOS_DEFAULT,
+                                     topic_qos,
                                      0,
                                      DEFAULT_STATUS_MASK);
 
@@ -198,6 +202,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  set_qos(dr_qos.user_data.value, 4);
 
   DataReader_var dr = sub->create_datareader(topic,
                                              dr_qos,
@@ -297,6 +302,92 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
   return true;
 }
 
+bool read_subscription_bit(const Subscriber_var& bit_sub, 
+                           int user_data,
+                           int topic_data)
+{
+  DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
+  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                  ANY_VIEW_STATE,
+                                                  ALIVE_INSTANCE_STATE);
+  WaitSet_var waiter = new WaitSet;
+  waiter->attach_condition(rc);
+  ConditionSeq activeConditions;
+  Duration_t forever = { DURATION_INFINITE_SEC,
+                         DURATION_INFINITE_NSEC };
+  ReturnCode_t result = waiter->wait(activeConditions, forever);
+  waiter->detach_condition(rc);
+  if (result != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG,
+      "ERROR: (subscription BIT) could not wait for condition: %d\n", result));
+    return false;
+  }
+
+  SubscriptionBuiltinTopicDataDataReader_var pub_bit =
+    SubscriptionBuiltinTopicDataDataReader::_narrow(dr);
+
+  SubscriptionBuiltinTopicDataSeq data;
+  SampleInfoSeq infos;
+  ReturnCode_t ret =
+    pub_bit->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
+  if (ret != RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not read subscription BIT: %d\n", ret));
+    return false;
+  }
+
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    if (infos[i].valid_data) {
+      ACE_DEBUG((LM_DEBUG,
+                 "Read Subscription BIT with key: %x %x %x and handle %d\n"
+                 "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
+                 data[i].key.value[0], data[i].key.value[1],
+                 data[i].key.value[2], infos[i].instance_handle,
+                 data[i].participant_key.value[0],
+                 data[i].participant_key.value[1],
+                 data[i].participant_key.value[2], data[i].topic_name.in(),
+                 data[i].type_name.in()));
+      if (data[i].user_data.value.length() != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR subscription [%d] user data length %d "
+                          "not expected length of 1\n",  
+                          i,
+                          data[i].user_data.value.length()),
+                         false);
+      }
+      if (data[i].topic_data.value.length() != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR subscription [%d] topic data length %d "
+                          "not expected length of 1\n",  
+                          i,
+                          data[i].topic_data.value.length()),
+                         false);
+      }
+      if (i != data.length() - 1) {
+        continue;
+      }
+      if (data[i].user_data.value[0] != user_data) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR subscription [%d] user data value %d "
+                          "not expected value %d\n",
+                          i,
+                          data[i].user_data.value[0],
+                          user_data), 
+                         false);
+      }
+      if (data[i].topic_data.value[0] != topic_data) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "ERROR subscription [%d] topic data value %d "
+                          "not expected value %d\n",
+                          i,
+                          data[i].topic_data.value[0],
+                          topic_data), 
+                         false);
+      }
+    }
+  }
+  return true;
+}
+
 bool check_discovered_participants(DomainParticipant_var& dp)
 {
   InstanceHandle_t my_handle    = dp->get_instance_handle();
@@ -357,7 +448,7 @@ bool run_test(DomainParticipant_var& dp,
 
   Subscriber_var bit_sub = dp->get_builtin_subscriber();
 
-  read_participant_bit(bit_sub, 1);
+  read_participant_bit(bit_sub, 128);
 
   if (!(check_discovered_participants(dp) && 
         check_discovered_participants(dp2)))
@@ -371,13 +462,14 @@ bool run_test(DomainParticipant_var& dp,
     return false;
   }
 
-  read_publication_bit(bit_sub, 2, 8);
+  read_publication_bit(bit_sub, 2, 1);
 
   DataReader_var dr = create_data_reader(dp);
   if (!dr) {
     ACE_DEBUG((LM_DEBUG, "ERROR: could not create Data Reader (participant 1)\n"));
     return false;
   }
+  read_subscription_bit(dp2->get_builtin_subscriber(), 4, 1);
 
   WriterSync::wait_match(dw);
 
@@ -425,39 +517,47 @@ bool run_test(DomainParticipant_var& dp,
   {
     DomainParticipantQos dp_qos;
     dp2->get_qos(dp_qos);
-    set_qos(dp_qos.user_data.value, 17);
+    set_qos(dp_qos.user_data.value, 8);
     dp2->set_qos(dp_qos);
-  }
-  // Change dr qos
-  {
-    DataReaderQos dr_qos;
-    dr->get_qos(dr_qos);
-    set_qos(dr_qos.user_data.value, 101);
-    dr->set_qos(dr_qos);
   }
   // Change dw qos
   {
     DataWriterQos dw_qos;
     dw->get_qos(dw_qos);
-    set_qos(dw_qos.user_data.value, 21);
+    set_qos(dw_qos.user_data.value, 16);
     dw->set_qos(dw_qos);
+  }
+  // Change dr qos
+  {
+    DataReaderQos dr_qos;
+    dr->get_qos(dr_qos);
+    set_qos(dr_qos.user_data.value, 32);
+    dr->set_qos(dr_qos);
   }
   // Wait for propagation
   ACE_OS::sleep(3);
-  read_participant_bit(bit_sub, 17);
-  read_publication_bit(bit_sub, 21, 8);
+  read_participant_bit(bit_sub, 8);
+  read_publication_bit(bit_sub, 16, 1);
+  read_subscription_bit(dp2->get_builtin_subscriber(), 32, 1);
 
-
-  // Set datawriter topic qos
+  // Set dw topic qos
   Topic_var topic = dw->get_topic();
   TopicQos topic_qos;
   topic->get_qos(topic_qos);
-  set_qos(topic_qos.topic_data.value, 7);
+  set_qos(topic_qos.topic_data.value, 64);
+  topic->set_qos(topic_qos);
+
+  // Set dr topic qos
+  TopicDescription_var topic_desc = dr->get_topicdescription();
+  topic = Topic::_narrow(topic_desc);
+  topic->get_qos(topic_qos);
+  set_qos(topic_qos.topic_data.value, 64);
   topic->set_qos(topic_qos);
 
   // Wait for propagation
   ACE_OS::sleep(3);
-  read_publication_bit(bit_sub, 21, 7);
+  read_publication_bit(bit_sub, 16, 64);
+  read_subscription_bit(dp2->get_builtin_subscriber(), 32, 64);
   
   return ok;
 }
@@ -476,9 +576,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     } else {
       DomainParticipantQos dp_qos = PARTICIPANT_QOS_DEFAULT;
-      dp_qos.user_data.value.length(1);
-      dp_qos.user_data.value[0] = 1;
-
+      set_qos(dp_qos.user_data.value, 128);
       dp2 = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
 
       if (!dp2) {

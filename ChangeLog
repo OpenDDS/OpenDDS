@@ -1,3 +1,9 @@
+Wed Jan 25 21:06:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Read subscription bit, test changing of user data for reader.
+
 Wed Jan 25 20:05:51 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
