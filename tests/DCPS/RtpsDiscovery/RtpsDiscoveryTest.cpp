@@ -49,7 +49,7 @@ void set_qos(OctetSeq& qos, CORBA::Octet value)
   qos[0] = value;
 }
 
-bool read_participant_bit(const Subscriber_var& bit_sub, 
+bool read_participant_bit(const Subscriber_var& bit_sub,
                           int user_data)
 {
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
@@ -92,7 +92,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
       if (data[i].user_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "ERROR particpant[%d] user data length %d "
-                          "not expected length of 1\n",  
+                          "not expected length of 1\n",
                           i,
                           data[i].user_data.value.length()),
                          false);
@@ -107,7 +107,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
                           "not expected value %d\n",
                           i,
                           data[i].user_data.value[0],
-                          user_data), 
+                          user_data),
                          false);
       }
     }
@@ -216,7 +216,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
   return dr;
 }
 
-bool read_publication_bit(const Subscriber_var& bit_sub, 
+bool read_publication_bit(const Subscriber_var& bit_sub,
                           int user_data,
                           int topic_data)
 {
@@ -263,7 +263,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
       if (data[i].user_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "ERROR publication [%d] user data length %d "
-                          "not expected length of 1\n",  
+                          "not expected length of 1\n",
                           i,
                           data[i].user_data.value.length()),
                          false);
@@ -271,7 +271,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
       if (data[i].topic_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "ERROR publication [%d] topic data length %d "
-                          "not expected length of 1\n",  
+                          "not expected length of 1\n",
                           i,
                           data[i].topic_data.value.length()),
                          false);
@@ -285,7 +285,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           "not expected value %d\n",
                           i,
                           data[i].user_data.value[0],
-                          user_data), 
+                          user_data),
                          false);
       }
       if (data[i].topic_data.value[0] != topic_data) {
@@ -294,7 +294,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           "not expected value %d\n",
                           i,
                           data[i].topic_data.value[0],
-                          topic_data), 
+                          topic_data),
                          false);
       }
     }
@@ -302,7 +302,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
   return true;
 }
 
-bool read_subscription_bit(const Subscriber_var& bit_sub, 
+bool read_subscription_bit(const Subscriber_var& bit_sub,
                            int user_data,
                            int topic_data)
 {
@@ -349,7 +349,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
       if (data[i].user_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "ERROR subscription [%d] user data length %d "
-                          "not expected length of 1\n",  
+                          "not expected length of 1\n",
                           i,
                           data[i].user_data.value.length()),
                          false);
@@ -357,7 +357,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
       if (data[i].topic_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "ERROR subscription [%d] topic data length %d "
-                          "not expected length of 1\n",  
+                          "not expected length of 1\n",
                           i,
                           data[i].topic_data.value.length()),
                          false);
@@ -371,7 +371,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
                           "not expected value %d\n",
                           i,
                           data[i].user_data.value[0],
-                          user_data), 
+                          user_data),
                          false);
       }
       if (data[i].topic_data.value[0] != topic_data) {
@@ -380,7 +380,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
                           "not expected value %d\n",
                           i,
                           data[i].topic_data.value[0],
-                          topic_data), 
+                          topic_data),
                          false);
       }
     }
@@ -411,11 +411,11 @@ bool check_discovered_participants(DomainParticipant_var& dp)
     } else {
       DDS::ParticipantBuiltinTopicData data;
       dp->get_discovered_participant_data(data, part_handles[0]);
-      OpenDDS::DCPS::Discovery_rch disc = 
+      OpenDDS::DCPS::Discovery_rch disc =
           TheServiceParticipant->get_discovery(dp->get_domain_id());
-      OpenDDS::DCPS::DomainParticipantImpl* dp_impl = 
+      OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
           dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
-        
+
       OpenDDS::DCPS::RepoId repo_id = disc->bit_key_to_repo_id(
           dp_impl,
           OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
@@ -423,7 +423,7 @@ bool check_discovered_participants(DomainParticipant_var& dp)
       if (dp_impl->get_handle(repo_id) != part_handles[0]) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR discovered participant ")
                                     ACE_TEXT("BIT key could not be converted ")
-                                    ACE_TEXT("to repo id, then handle\n")), 
+                                    ACE_TEXT("to repo id, then handle\n")),
                          false);
       }
     }
@@ -432,7 +432,7 @@ bool check_discovered_participants(DomainParticipant_var& dp)
 }
 
 bool run_test(DomainParticipant_var& dp,
-              DomainParticipant_var& dp2) 
+              DomainParticipant_var& dp2)
 {
 
   // If we are running with an rtps_udp transport, it can't be shared between
@@ -450,7 +450,7 @@ bool run_test(DomainParticipant_var& dp,
 
   read_participant_bit(bit_sub, 128);
 
-  if (!(check_discovered_participants(dp) && 
+  if (!(check_discovered_participants(dp) &&
         check_discovered_participants(dp2)))
   {
     return false;
@@ -558,7 +558,7 @@ bool run_test(DomainParticipant_var& dp,
   ACE_OS::sleep(3);
   read_publication_bit(bit_sub, 16, 64);
   read_subscription_bit(dp2->get_builtin_subscriber(), 32, 64);
-  
+
   return ok;
 }
 

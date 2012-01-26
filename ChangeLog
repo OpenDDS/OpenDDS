@@ -1,3 +1,9 @@
+Thu Jan 26 15:17:15 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Fuzz removal.
+
 Wed Jan 25 21:35:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/transport/rtps_reliability/rtps_reliability.cpp:
