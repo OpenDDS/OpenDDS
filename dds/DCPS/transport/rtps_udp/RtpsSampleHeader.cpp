@@ -21,6 +21,7 @@
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 
 #include <sstream>
+#include <cstring>
 
 #ifndef __ACE_INLINE__
 #include "RtpsSampleHeader.inl"
