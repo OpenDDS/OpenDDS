@@ -124,13 +124,9 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     send(list_);
   }
 
-  void data_delivered(const DataSampleListElement* d)
+  void data_delivered(const DataSampleListElement*)
   {
     ACE_DEBUG((LM_INFO, "SimpleDataWriter::data_delivered()\n"));
-    if (d == &dsle_) {
-      dsle_.sample_->release();
-      dsle_.sample_ = 0;
-    }
   }
 
   void notify_publication_disconnected(const ReaderIdSeq&) {}
@@ -160,7 +156,7 @@ struct TestParticipant: ACE_Event_Handler {
       {prefix[0], prefix[1], prefix[2], prefix[3], prefix[4], prefix[5],
        prefix[6], prefix[7], prefix[8], prefix[9], prefix[10], prefix[11]}
     };
-    hdr_ = hdr;
+    std::memcpy(&hdr_, &hdr, sizeof(Header));
     for (CORBA::ULong i = 0; i < FRAG_SIZE; ++i) {
       data_for_frag_[i] = i % 256;
     }
