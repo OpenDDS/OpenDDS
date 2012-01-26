@@ -72,6 +72,7 @@ public:
                                                 bool requires_inline_qos);
   static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
                                   OpenDDS::RTPS::DataSubmessage& data);
+  static bool control_message_supported(char message_id);
 
 private:
   static void process_iqos(DataSampleHeader& opendds,

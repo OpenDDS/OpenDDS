@@ -401,6 +401,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
     break;
   }
+  // update control_message_supported() when adding new cases here
   default:
     ACE_DEBUG((LM_INFO,
                "RtpsSampleHeader::populate_control_submessages(): "

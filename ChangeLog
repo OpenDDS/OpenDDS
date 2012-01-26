@@ -1,3 +1,19 @@
+Thu Jan 26 18:01:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+
+          Allow customize_queue_element() to return null.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Return null from customize_queue_element() if the
+          DataLink is given a TransportSendControlElement for
+          a type of control message that is not handled by
+          the rtps_udp transport.
+
 Thu Jan 26 17:15:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.cpp:

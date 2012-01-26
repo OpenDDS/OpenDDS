@@ -343,10 +343,15 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
   if (tsce) {        // Control message
-    data = msg->cont()->duplicate();
-    // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
-    RtpsSampleHeader::populate_data_control_submessages(
-              subm, *tsce, this->requires_inline_qos(tsce->publication_id()));
+    if (RtpsSampleHeader::control_message_supported(tsce->header().message_id_)) {
+      data = msg->cont()->duplicate();
+      // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
+      RtpsSampleHeader::populate_data_control_submessages(
+                subm, *tsce, this->requires_inline_qos(tsce->publication_id()));
+    } else {
+      element->data_dropped(true /*dropped_by_transport*/);
+      return 0;
+    }
 
   } else if (tse) {  // Basic data message
     // {DataSampleHeader} -> {Data Payload}

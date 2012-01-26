@@ -69,5 +69,19 @@ RtpsSampleHeader::more_fragments() const
   return frag_;
 }
 
+ACE_INLINE bool
+RtpsSampleHeader::control_message_supported(char message_id)
+{
+  switch (message_id) {
+  case INSTANCE_REGISTRATION:
+  case UNREGISTER_INSTANCE:
+  case DISPOSE_INSTANCE:
+  case DISPOSE_UNREGISTER_INSTANCE:
+    return true;
+  default:
+    return false;
+  }
+}
+
 }
 }
