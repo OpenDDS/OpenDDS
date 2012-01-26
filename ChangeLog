@@ -1,3 +1,16 @@
+Thu Jan 26 17:15:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.cpp:
+
+          Fix logging copy and paste error.
+
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/rtps_disc.ini:
+        * tests/DCPS/CompatibilityTest/rtps_disc_tcp.ini:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+
+          Add rtps_disc and rtps_disc_tcp test cases.
+
 Thu Jan 26 15:17:15 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
