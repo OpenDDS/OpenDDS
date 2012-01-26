@@ -287,11 +287,24 @@ RtpsSampleHeader::populate_data_sample_submessages(
   subm.length(i + 1);
   subm[i++].info_ts_sm(ts);
 
+  EntityId_t readerId = ENTITYID_UNKNOWN;
+  if (dsle.num_subs_ == 1) {
+    readerId = dsle.subscription_ids_[0].entityId;
+    InfoDestinationSubmessage idest;
+    idest.smHeader.submessageId = INFO_DST;
+    idest.smHeader.flags = flags;
+    idest.smHeader.submessageLength = INFO_DST_SZ;
+    std::memcpy(idest.guidPrefix, dsle.subscription_ids_[0].guidPrefix,
+                sizeof(GuidPrefix_t));
+    subm.length(i + 1);
+    subm[i++].info_dst_sm(idest);
+  }
+
   DataSubmessage data = {
     {DATA, flags, 0},
     0,
     DATA_OCTETS_TO_IQOS,
-    ENTITYID_UNKNOWN,
+    readerId,
     dsle.publication_id_.entityId,
     {dsle.header_.sequence_.getHigh(), dsle.header_.sequence_.getLow()},
     ParameterList()
@@ -315,10 +328,6 @@ RtpsSampleHeader::populate_data_sample_submessages(
     populate_inline_qos(qos_data, data);
   }
 
-  if (data.inlineQos.length() > 0) {
-    data.smHeader.flags |= FLAG_Q;
-  }
-
   // Add Original writer info
   if (dsle.header_.historic_sample_) {
     RTPS::OriginalWriterInfo_t original_writer_info;
@@ -334,6 +343,10 @@ RtpsSampleHeader::populate_data_sample_submessages(
     CORBA::ULong len = data.inlineQos.length();
     data.inlineQos.length(len + 1);
     data.inlineQos[len] = owi_param;
+  }
+
+  if (data.inlineQos.length() > 0) {
+    data.smHeader.flags |= FLAG_Q;
   }
 
   subm.length(i + 1);

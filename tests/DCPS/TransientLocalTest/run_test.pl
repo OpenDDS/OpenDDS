@@ -16,8 +16,9 @@ my $status = 0;
 my $debug  = 0; #10;
 
 my $opts = $debug ? "-DCPSDebugLevel $debug " : '';
-my $pub_opts = "$opts -DCPSConfigFile pub.ini";
-my $sub_opts = "$opts -DCPSConfigFile sub.ini";
+my $cfg = ($ARGV[0] eq 'rtps') ? 'rtps.ini' : 'tcp.ini';
+my $pub_opts = "$opts -DCPSConfigFile $cfg";
+my $sub_opts = $pub_opts;
 
 my $dcpsrepo_ior = "repo.ior";
 my $repo_bit_opt = $opts;
@@ -86,7 +87,6 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
-unlink $data_file;
 
 if ($status == 0) {
   print "test PASSED.\n";

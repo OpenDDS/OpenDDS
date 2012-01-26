@@ -1,3 +1,29 @@
+Thu Jan 26 18:40:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Populate the originalSequence_ member of DataSampleListElement
+          when setting up a DURABILITY resend.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Fix setting of OriginalWriterInfo when it's the only inlineQos.
+          Set the reader EntityId and add an INFO_DST for its corresponding
+          GuidPrefix when the DataSampleListElement has 1 entry in
+          subscription_ids_.  This is used for DURABILITY resends.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TransientLocalTest/rtps.ini:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/tcp.ini:
+
+          Run this test with the rtps_udp transport in addition to tcp.
+
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/DCPS/TransientLocalTest/sub.ini:
+
+          Removed these files.
+
 Thu Jan 26 18:01:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.inl:

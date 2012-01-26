@@ -84,6 +84,7 @@ tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN !STATIC
 tests/DCPS/MultiDPTest/run_test.pl: !DCPS_MIN
 tests/DCPS/TransientLocalTest/run_test.pl: !DCPS_MIN
+tests/DCPS/TransientLocalTest/run_test.pl rtps: !DCPS_MIN RTPS !STATIC
 tests/DCPS/MultiRepoTest/run_test.pl: !DCPS_MIN
 tests/DCPS/MultiRepoTest/run_test.pl fileconfig: !DCPS_MIN
 tests/DCPS/Presentation/run_test.pl: !DCPS_MIN

@@ -480,6 +480,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
         ++this->sequence_number_;
       }
       // Reassign list element header sequence
+      list_el->originalSequence_ = list_el->header_.sequence_;
       list_el->header_.sequence_ = sequence_number_;
       list_el->header_.historic_sample_ = true;
       // Reform sequence number in blob
