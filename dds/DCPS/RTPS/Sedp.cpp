@@ -347,7 +347,7 @@ Sedp::ignore(const RepoId& to_ignore)
       std::string topic_name = get_topic_name(iter->second);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
-      if (top_it == topics_.end()) {
+      if (top_it != topics_.end()) {
         match_endpoints(to_ignore, top_it->second, true /*remove*/);
       }
       return;
@@ -365,7 +365,7 @@ Sedp::ignore(const RepoId& to_ignore)
       std::string topic_name = get_topic_name(iter->second);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
-      if (top_it == topics_.end()) {
+      if (top_it != topics_.end()) {
         match_endpoints(to_ignore, top_it->second, true /*remove*/);
       }
       return;
@@ -1461,6 +1461,10 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     static const bool writer_active = true;
 
     if (call_writer) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("adding writer association\n")));
+      }
       DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
       if (call_reader) {
         thr.activate();
@@ -1471,11 +1475,20 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       }
 
     } else if (call_reader) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("adding reader association\n")));
+      }
       drr->add_association(reader, wa, !writer_active);
     }
 
     // change this if 'writer_active' (above) changes
     if (call_writer && !call_reader) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, 
+                   ACE_TEXT("(%P|%t) Sedp::match - ")
+                   ACE_TEXT("calling writer association_complete\n")));
+      }
       dwr->association_complete(reader);
     }
 
@@ -1503,9 +1516,17 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
   } else { // something was incompatible
     ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
     if (writer_local && writerStatus.count_since_last_send) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("writer incompatible\n")));
+      }
       dwr->update_incompatible_qos(writerStatus);
     }
     if (reader_local && readerStatus.count_since_last_send) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("reader incompatible\n")));
+      }
       drr->update_incompatible_qos(readerStatus);
     }
   }
