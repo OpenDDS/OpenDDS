@@ -223,20 +223,24 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           int num_expected = 1)
 {
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
-                                                  ANY_VIEW_STATE,
-                                                  ALIVE_INSTANCE_STATE);
-  WaitSet_var waiter = new WaitSet;
-  waiter->attach_condition(rc);
-  ConditionSeq activeConditions;
-  Duration_t forever = { DURATION_INFINITE_SEC,
-                         DURATION_INFINITE_NSEC };
-  ReturnCode_t result = waiter->wait(activeConditions, forever);
-  waiter->detach_condition(rc);
-  if (result != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG,
-      "ERROR: (publication BIT) could not wait for condition: %d\n", result));
-    return false;
+  if (num_expected) {
+    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                    ANY_VIEW_STATE,
+                                                    ALIVE_INSTANCE_STATE);
+    WaitSet_var waiter = new WaitSet;
+    waiter->attach_condition(rc);
+    ConditionSeq activeConditions;
+    Duration_t forever = { DURATION_INFINITE_SEC,
+                           DURATION_INFINITE_NSEC };
+    ReturnCode_t result = waiter->wait(activeConditions, forever);
+    waiter->detach_condition(rc);
+    if (result != RETCODE_OK) {
+      ACE_DEBUG((LM_DEBUG,
+        "ERROR: (publication BIT) could not wait for condition: %d\n", result));
+      return false;
+    }
+  } else {
+    ACE_OS::sleep(1);
   }
 
   PublicationBuiltinTopicDataDataReader_var pub_bit =
@@ -245,8 +249,13 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
   PublicationBuiltinTopicDataSeq data;
   SampleInfoSeq infos;
   ReturnCode_t ret =
-    pub_bit->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
-  if (ret != RETCODE_OK) {
+    pub_bit->read(data, infos, LENGTH_UNLIMITED, 
+                  ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not read ignored publication BIT: %d\n",
+               ret));
+    return false;
+  } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
     ACE_DEBUG((LM_DEBUG, "ERROR: could not read publication BIT: %d\n", ret));
     return false;
   }
@@ -319,30 +328,38 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
                            int num_expected = 1)
 {
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
-  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
-                                                  ANY_VIEW_STATE,
-                                                  ALIVE_INSTANCE_STATE);
-  WaitSet_var waiter = new WaitSet;
-  waiter->attach_condition(rc);
-  ConditionSeq activeConditions;
-  Duration_t forever = { DURATION_INFINITE_SEC,
-                         DURATION_INFINITE_NSEC };
-  ReturnCode_t result = waiter->wait(activeConditions, forever);
-  waiter->detach_condition(rc);
-  if (result != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG,
-      "ERROR: (subscription BIT) could not wait for condition: %d\n", result));
-    return false;
+  if (num_expected) {
+    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                    ANY_VIEW_STATE,
+                                                    ALIVE_INSTANCE_STATE);
+    WaitSet_var waiter = new WaitSet;
+    waiter->attach_condition(rc);
+    ConditionSeq activeConditions;
+    Duration_t forever = { DURATION_INFINITE_SEC,
+                           DURATION_INFINITE_NSEC };
+    ReturnCode_t result = waiter->wait(activeConditions, forever);
+    waiter->detach_condition(rc);
+    if (result != RETCODE_OK) {
+      ACE_DEBUG((LM_DEBUG,
+        "ERROR: (subscription BIT) could not wait for condition: %d\n", result));
+      return false;
+    }
+  } else {
+  ACE_OS::sleep(1);
   }
-
   SubscriptionBuiltinTopicDataDataReader_var pub_bit =
     SubscriptionBuiltinTopicDataDataReader::_narrow(dr);
 
   SubscriptionBuiltinTopicDataSeq data;
   SampleInfoSeq infos;
   ReturnCode_t ret =
-    pub_bit->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
-  if (ret != RETCODE_OK) {
+    pub_bit->read(data, infos, LENGTH_UNLIMITED,
+                  ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: could not read ignored subscription BIT: %d\n",
+               ret));
+    return false;
+  } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
     ACE_DEBUG((LM_DEBUG, "ERROR: could not read subscription BIT: %d\n", ret));
     return false;
   }

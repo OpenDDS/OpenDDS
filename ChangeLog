@@ -1,3 +1,9 @@
+Thu Jan 26 21:37:32 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Fix ignore testing logic.
+
 Thu Jan 26 21:14:59 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
