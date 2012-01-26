@@ -18,6 +18,7 @@
 #include "ace/os_include/netinet/os_tcp.h"
 #include "ace/OS_NS_arpa_inet.h"
 #include <sstream>
+#include <string>
 
 #if !defined (__ACE_INLINE__)
 #include "TcpConnection.inl"
@@ -372,10 +373,11 @@ OpenDDS::DCPS::TcpConnection::active_establishment
 
   } else {
     this->connected_ = true;
+    const std::string remote_host = this->remote_address_.get_host_addr();
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
       "active_establishment(%C:%d->%C:%d)\n",
       this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
-      this->remote_address_.get_host_addr(), this->remote_address_.get_port_number()));
+      remote_host.c_str(), this->remote_address_.get_port_number()));
   }
 
   // Set the DiffServ codepoint according to the priority value.
