@@ -1,3 +1,9 @@
+Thu Jan 26 19:37:23 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Test ignore_participant, ignore_publication, ignore_subscription.
+
 Thu Jan 26 18:40:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

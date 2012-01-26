@@ -217,8 +217,10 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
 }
 
 bool read_publication_bit(const Subscriber_var& bit_sub,
+                          InstanceHandle_t& handle,
                           int user_data,
-                          int topic_data)
+                          int topic_data,
+                          int num_expected = 1)
 {
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -249,8 +251,10 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     return false;
   }
 
+  int num_valid = 0;
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
+      ++num_valid;
       ACE_DEBUG((LM_DEBUG,
                  "Read Publication BIT with key: %x %x %x and handle %d\n"
                  "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
@@ -297,14 +301,22 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           topic_data),
                          false);
       }
+      handle = infos[i].instance_handle;
     }
+  }
+  if (num_valid != num_expected) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
+                                "publications, found %d\n", 
+                                num_expected, num_valid), false);
   }
   return true;
 }
 
 bool read_subscription_bit(const Subscriber_var& bit_sub,
+                           InstanceHandle_t& handle,
                            int user_data,
-                           int topic_data)
+                           int topic_data,
+                           int num_expected = 1)
 {
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -335,8 +347,10 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     return false;
   }
 
+  int num_valid = 0;
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
+      ++num_valid;
       ACE_DEBUG((LM_DEBUG,
                  "Read Subscription BIT with key: %x %x %x and handle %d\n"
                  "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
@@ -383,12 +397,20 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
                           topic_data),
                          false);
       }
+      handle = infos[i].instance_handle;
     }
   }
+  if (num_valid != num_expected) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
+                                "subscriptionsd, found %d\n", 
+                                num_expected, num_valid), false);
+  }
+
   return true;
 }
 
-bool check_discovered_participants(DomainParticipant_var& dp)
+bool check_discovered_participants(DomainParticipant_var& dp, 
+                                   InstanceHandle_t& handle)
 {
   InstanceHandle_t my_handle    = dp->get_instance_handle();
 
@@ -426,6 +448,7 @@ bool check_discovered_participants(DomainParticipant_var& dp)
                                     ACE_TEXT("to repo id, then handle\n")),
                          false);
       }
+      handle = part_handles[0];
     }
   }
   return (stat == RETCODE_OK);
@@ -448,10 +471,16 @@ bool run_test(DomainParticipant_var& dp,
 
   Subscriber_var bit_sub = dp->get_builtin_subscriber();
 
-  read_participant_bit(bit_sub, 128);
+  if (!read_participant_bit(bit_sub, 128)) {
+    return false;
+  }
 
-  if (!(check_discovered_participants(dp) &&
-        check_discovered_participants(dp2)))
+  // Each domain participant's handle to the other
+  InstanceHandle_t dp_ih, dp2_ih;
+  InstanceHandle_t pub_ih, sub_ih, ig_ih;
+
+  if (!(check_discovered_participants(dp, dp2_ih) &&
+        check_discovered_participants(dp2, dp_ih)))
   {
     return false;
   }
@@ -462,14 +491,18 @@ bool run_test(DomainParticipant_var& dp,
     return false;
   }
 
-  read_publication_bit(bit_sub, 2, 1);
+  if (!read_publication_bit(bit_sub, pub_ih, 2, 1)) {
+    return false;
+  }
 
   DataReader_var dr = create_data_reader(dp);
   if (!dr) {
     ACE_DEBUG((LM_DEBUG, "ERROR: could not create Data Reader (participant 1)\n"));
     return false;
   }
-  read_subscription_bit(dp2->get_builtin_subscriber(), 4, 1);
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, 4, 1)) {
+    return false;
+  }
 
   WriterSync::wait_match(dw);
 
@@ -499,6 +532,7 @@ bool run_test(DomainParticipant_var& dp,
   ReturnCode_t ret = tmdr->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
   if (ret != RETCODE_OK) {
     ACE_DEBUG((LM_DEBUG, "ERROR: could not read TestMsg: %d\n", ret));
+    return false;
   }
 
   bool ok = false;
@@ -536,9 +570,15 @@ bool run_test(DomainParticipant_var& dp,
   }
   // Wait for propagation
   ACE_OS::sleep(3);
-  read_participant_bit(bit_sub, 8);
-  read_publication_bit(bit_sub, 16, 1);
-  read_subscription_bit(dp2->get_builtin_subscriber(), 32, 1);
+  if (!read_participant_bit(bit_sub, 8)) {
+    return false;
+  }
+  if (!read_publication_bit(bit_sub, ig_ih, 16, 1)) {
+    return false;
+  }
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, 32, 1)) {
+    return false;
+  }
 
   // Set dw topic qos
   Topic_var topic = dw->get_topic();
@@ -556,8 +596,33 @@ bool run_test(DomainParticipant_var& dp,
 
   // Wait for propagation
   ACE_OS::sleep(3);
-  read_publication_bit(bit_sub, 16, 64);
-  read_subscription_bit(dp2->get_builtin_subscriber(), 32, 64);
+  if (!read_publication_bit(bit_sub, ig_ih, 16, 64)) {
+    return false;
+  }
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, 32, 64)) {
+    return false;
+  }
+
+  // Test ignore
+  dp->ignore_publication(pub_ih);
+  if (!read_publication_bit(bit_sub, pub_ih, 16, 64, 0)) {
+    ACE_ERROR_RETURN((LM_ERROR, 
+                     ACE_TEXT("Could not ignore publication\n")), false);
+  }
+
+  dp2->ignore_subscription(sub_ih);
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, 32, 64, 0)) {
+    ACE_ERROR_RETURN((LM_ERROR, 
+                     ACE_TEXT("Could not ignore subscription\n")), false);
+  }
+  
+  dp->ignore_participant(dp2_ih);
+  InstanceHandleSeq handles;
+  dp->get_discovered_participants(handles);
+  if (handles.length()) {
+    ACE_ERROR_RETURN((LM_ERROR, 
+                     ACE_TEXT("Could not ignore participant\n")), false);
+  }
 
   return ok;
 }
