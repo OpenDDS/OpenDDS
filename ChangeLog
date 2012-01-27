@@ -1,3 +1,10 @@
+Fri Jan 27 18:37:15 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+
+          Updates to make DCPSInfoRepo test run for RTPS discovery (fails).
+
 Fri Jan 27 18:07:31 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAOv2_all.mwc:

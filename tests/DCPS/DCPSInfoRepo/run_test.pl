@@ -11,29 +11,38 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
-$status = 0;
-my $debug = 0 ;
+my $status = 0;
+my $debug = 1 ;
+my $is_rtps_disc = 0;
 
-$dcpsrepo_ior = "dcps_ir.ior";
-
-
+my $dcpsrepo_ior = "dcps_ir.ior";
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "-NOBITS -o $dcpsrepo_ior");
+my $opts = "";
 
-$PUBLISHER = PerlDDS::create_process ("publisher",
-                              "-k file://$dcpsrepo_ior -q");
+if ($ARGV[0] eq "rtps_disc") {
+  $is_rtps_disc = 1;
+  $opts = "-DCPSConfigFile rtps_disc.ini";
+} else {
+  $opts = "-k file://$dcpsrepo_ior";
+}
 
-$SUBSCRIBER = PerlDDS::create_process ("subscriber",
-                              "-k file://$dcpsrepo_ior");
+unless ($is_rtps_disc) {
+  $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                       "-NOBITS -o $dcpsrepo_ior");
+}
 
-print $DCPSREPO->CommandLine() . "\n" if $debug ;
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
+$PUBLISHER = PerlDDS::create_process ("publisher", "$opts -q");
+$SUBSCRIBER = PerlDDS::create_process ("subscriber", $opts);
+
+unless ($is_rtps_disc) {
+  print $DCPSREPO->CommandLine() . "\n" if $debug ;
+  $DCPSREPO->Spawn ();
+  if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
     $DCPSREPO->Kill (); $DCPSREPO->TimedWait (1);
     exit 1;
+  }
 }
 
 print $PUBLISHER->CommandLine() . "\n" if $debug ;
@@ -58,14 +67,14 @@ if ($SubResult != 0) {
     $status = 1;
 }
 
+unless ($is_rtps_disc) {
+  $ir = $DCPSREPO->TerminateWaitKill(30);
 
-$ir = $DCPSREPO->TerminateWaitKill(30);
-
-if ($ir != 0) {
+  if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
+  }
+  unlink $dcpsrepo_ior;
 }
-
-unlink $dcpsrepo_ior;
 
 exit $status;

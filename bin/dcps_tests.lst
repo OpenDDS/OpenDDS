@@ -13,6 +13,7 @@ tests/DCPS/Prst_delayed_subscriber/run_test.pl: !DCPS_MIN
 tests/DCPS/ZeroCopyRead/run_test.pl: !DCPS_MIN
 tests/DCPS/ZeroCopyRead/run_test.pl by_instance: !DCPS_MIN
 tests/DCPS/DCPSInfoRepo/run_test.pl
+tests/DCPS/DCPSInfoRepo/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/unit/run_test.pl:
 tests/DCPS/DestinationOrder/run_test.pl: !DCPS_MIN
 tests/DCPS/DestinationOrder/run_test.pl source: !DCPS_MIN
@@ -167,8 +168,8 @@ tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl: !DCPS_MIN
 tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN
-tests/DCPS/CompatibilityTest/run_test.pl rtps_disc: !DCPS_MIN !NO_BUILT_IN_TOPICS
-tests/DCPS/CompatibilityTest/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/CompatibilityTest/run_test.pl rtps_disc: !DCPS_MIN RTPS !NO_BUILT_IN_TOPICS
+tests/DCPS/CompatibilityTest/run_test.pl rtps_disc_tcp: !DCPS_MIN RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN
