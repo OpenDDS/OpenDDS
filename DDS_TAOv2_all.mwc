@@ -3,6 +3,7 @@
 
 workspace {
   $(ACE_ROOT)/ACEXML/common
+  $(ACE_ROOT)/ACEXML/parser/parser
   $(TAO_ROOT)/tao/PI_Server/PI_Server.mpc
   $(TAO_ROOT)/tao/IORManipulation/IORManipulation.mpc
   $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc
