@@ -54,7 +54,7 @@ if ($PublisherResult != 0) {
   $status = 1;
 }
 
-my $SubscriberResult = $Subscriber->WaitKill(15);
+my $SubscriberResult = $Subscriber->WaitKill(30);
 if ($SubscriberResult != 0) {
   print STDERR "ERROR: subscriber returned $SubscriberResult \n";
   $status = 1;

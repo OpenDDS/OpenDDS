@@ -326,28 +326,6 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
 }
 
 #ifdef OPENDDS_GCC33
-bool should_check_compatibility_upon_change(const DDS::DataReaderQos & qos1,
-                                            const DDS::DataReaderQos & qos2)
-{
-  return !(
-           OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline) &&
-           OpenDDS::DCPS::operator==(qos1.latency_budget, qos2.latency_budget));
-}
-
-bool should_check_compatibility_upon_change(const DDS::DataWriterQos & qos1,
-                                            const DDS::DataWriterQos & qos2)
-{
-  return !(
-           OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline) &&
-           OpenDDS::DCPS::operator==(qos1.latency_budget, qos2.latency_budget));
-}
-
-bool should_check_compatibility_upon_change(const DDS::TopicQos & qos1,
-                                            const DDS::TopicQos & qos2)
-{
-  return !OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline);
-}
-
 bool should_check_association_upon_change(const DDS::DataReaderQos & qos1,
                                           const DDS::DataReaderQos & qos2)
 {
@@ -379,28 +357,6 @@ bool should_check_association_upon_change(const DDS::PublisherQos & qos1,
 #else // !OPENDDS_GCC33
 
 using OpenDDS::DCPS::operator==;
-bool should_check_compatibility_upon_change(const DDS::DataReaderQos & qos1,
-                                            const DDS::DataReaderQos & qos2)
-{
-  return !(
-           (qos1.deadline == qos2.deadline) &&
-           (qos1.latency_budget == qos2.latency_budget));
-}
-
-bool should_check_compatibility_upon_change(const DDS::DataWriterQos & qos1,
-                                            const DDS::DataWriterQos & qos2)
-{
-  return !(
-           (qos1.deadline == qos2.deadline) &&
-           (qos1.latency_budget == qos2.latency_budget));
-}
-
-bool should_check_compatibility_upon_change(const DDS::TopicQos & qos1,
-                                            const DDS::TopicQos & qos2)
-{
-  return !(qos1.deadline == qos2.deadline);
-}
-
 bool should_check_association_upon_change(const DDS::DataReaderQos & qos1,
                                           const DDS::DataReaderQos & qos2)
 {
@@ -430,24 +386,6 @@ bool should_check_association_upon_change(const DDS::PublisherQos & qos1,
 }
 
 #endif // OPENDDS_GCC33
-
-bool should_check_compatibility_upon_change(const DDS::SubscriberQos & /*qos1*/,
-                                            const DDS::SubscriberQos & /*qos2*/)
-{
-  return false;
-}
-
-bool should_check_compatibility_upon_change(const DDS::PublisherQos & /*qos1*/,
-                                            const DDS::PublisherQos & /*qos2*/)
-{
-  return false;
-}
-
-bool should_check_compatibility_upon_change(const DDS::DomainParticipantQos & /*qos1*/,
-                                            const DDS::DomainParticipantQos & /*qos2*/)
-{
-  return false;
-}
 
 bool should_check_association_upon_change(const DDS::TopicQos & /*qos1*/,
                                           const DDS::TopicQos & /*qos2*/)

@@ -118,22 +118,41 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         }
 
         writer->start ();
+        writer->end ();
+
+        cout << "Writer changing deadline to incompatible value" << endl;
 
         // Now set DataWriter deadline to be 6 seconds which is not
         // compatible with the existing DataReader. This QoS change
-        // should not be applied and an ERROR should be returned to
-        // set_qos().
+        // should be applied and the association broken.
         dw_qos.deadline.period.sec = 6;
 
-        if (dw->set_qos (dw_qos) != ::DDS::RETCODE_ERROR)
+        if (dw->set_qos (dw_qos) != ::DDS::RETCODE_OK)
         {
-          cerr << "ERROR: DataWriter changed deadline period which should not compatible "
-            << "with all existing DataReaders" << endl;
+          cerr << "ERROR: DataWriter could not change deadline period which "
+               << "should break DataReader associations" << endl;
+          exit (1);
+        } else {
+          ::DDS::InstanceHandleSeq handles;
+          dw->get_matched_subscriptions(handles);
+          if (handles.length() != 0) {
+            cerr << "ERROR: DataWriter changed deadline period which should "
+                 << "break association with all existing DataReaders, but "
+                 << "did not" << endl;
+            exit (1);
+          }
+        }
+        cout << "Writer restoring deadline to compatible value" << endl;
 
+        // change it back
+        dw_qos.deadline.period.sec = 5;
+
+        if (dw->set_qos (dw_qos) != ::DDS::RETCODE_OK)
+        {
+          cerr << "ERROR: DataWriter could not change deadline period which "
+               << "should restore DataReader associations" << endl;
           exit (1);
         }
-
-        writer->end ();
       }
 
       {

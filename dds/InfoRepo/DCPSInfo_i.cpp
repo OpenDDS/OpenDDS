@@ -1593,7 +1593,7 @@ ACE_THROW_SPEC((CORBA::SystemException
 
   Update::SpecificQos qosType;
 
-  if (pub->set_qos(qos, publisherQos, qosType) == false)  // not compatible
+  if (pub->set_qos(qos, publisherQos, qosType) == false)  // failed 
     return 0;
 
   if (this->um_ && (partPtr->isBitPublisher() == false)) {
@@ -1728,7 +1728,7 @@ ACE_THROW_SPEC((CORBA::SystemException
 
   Update::SpecificQos qosType;
 
-  if (sub->set_qos(qos, subscriberQos, qosType) == false)
+  if (sub->set_qos(qos, subscriberQos, qosType) == false) // failed
     return 0;
 
   if (this->um_ && (partPtr->isBitPublisher() == false)) {

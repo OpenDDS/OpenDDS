@@ -499,11 +499,6 @@ void
 DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos& qos)
 {
   if (false == (qos == this->qos_)) {
-    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos, this->qos_)
-        && (false == this->compatibleQosChange(qos))) {
-      return;
-    }
-
     // Check if we should check while we have both values.
     bool check =
       OpenDDS::DCPS::should_check_association_upon_change(qos, this->qos_);
@@ -534,11 +529,6 @@ void
 DCPS_IR_Subscription::set_qos(const DDS::SubscriberQos& qos)
 {
   if (false == (qos == this->subscriberQos_)) {
-    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos, this->subscriberQos_)
-        && (false == this->compatibleQosChange(qos))) {
-      return;
-    }
-
     // Check if we should check while we have both values.
     bool check = OpenDDS::DCPS::should_check_association_upon_change(qos, this->subscriberQos_);
 
@@ -572,11 +562,6 @@ bool DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos & qos,
   bool u_dr_qos = !(qos_ == qos);
 
   if (u_dr_qos) {
-    if (OpenDDS::DCPS::should_check_compatibility_upon_change(qos_, qos)
-        && !compatibleQosChange(qos)) {
-      return false;
-    }
-
     if (OpenDDS::DCPS::should_check_association_upon_change(qos_, qos)) {
       need_evaluate = true;
     }
@@ -587,11 +572,6 @@ bool DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos & qos,
   bool u_sub_qos = !(subscriberQos_ == subscriberQos);
 
   if (u_sub_qos) {
-    if (OpenDDS::DCPS::should_check_compatibility_upon_change(subscriberQos_, subscriberQos)
-        && !compatibleQosChange(subscriberQos)) {
-      return false;
-    }
-
     if (OpenDDS::DCPS::should_check_association_upon_change(subscriberQos_, subscriberQos)) {
       need_evaluate = true;
     }
@@ -611,58 +591,6 @@ bool DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos & qos,
   specificQos = u_dr_qos?  Update::DataReaderQos:
                 u_sub_qos? Update::SubscriberQos:
                 Update::NoQos;
-
-  return true;
-}
-
-bool DCPS_IR_Subscription::compatibleQosChange(const DDS::DataReaderQos & qos)
-{
-  DCPS_IR_Publication * pub = 0;
-  DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
-  DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
-
-  while (iter != end) {
-    pub = *iter;
-    ++iter;
-
-    OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
-    writerStatus.total_count = 0;
-    writerStatus.count_since_last_send = 0;
-
-    OpenDDS::DCPS::IncompatibleQosStatus readerStatus;
-    readerStatus.total_count = 0;
-    readerStatus.count_since_last_send = 0;
-
-    if (!OpenDDS::DCPS::compatibleQOS(pub->get_datawriter_qos(), &qos,
-                                      &writerStatus, &readerStatus))
-      return false;
-  }
-
-  return true;
-}
-
-bool DCPS_IR_Subscription::compatibleQosChange(const DDS::SubscriberQos & qos)
-{
-  DCPS_IR_Publication * pub = 0;
-  DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
-  DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
-
-  OpenDDS::DCPS::IncompatibleQosStatus writerStatus;
-  writerStatus.total_count = 0;
-  writerStatus.count_since_last_send = 0;
-
-  OpenDDS::DCPS::IncompatibleQosStatus readerStatus;
-  readerStatus.total_count = 0;
-  readerStatus.count_since_last_send = 0;
-
-  while (iter != end) {
-    pub = *iter;
-    ++iter;
-
-    if (!OpenDDS::DCPS::compatibleQOS(pub->get_publisher_qos(), &qos,
-                                      &writerStatus, &readerStatus))
-      return false;
-  }
 
   return true;
 }

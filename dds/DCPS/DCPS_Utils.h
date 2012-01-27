@@ -55,33 +55,6 @@ compatibleQOS(const DDS::PublisherQos * pubQos,
               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
               OpenDDS::DCPS::IncompatibleQosStatus* readerStatus);
 
-// Should check the compatibility of the entity QoS ?
-// The changeable QoS that is supported currently and should be compatible is
-// deadline QoS.
-OpenDDS_Dcps_Export
-bool should_check_compatibility_upon_change(const DDS::DataReaderQos & qos1,
-                                            const DDS::DataReaderQos & qos2);
-
-OpenDDS_Dcps_Export
-bool should_check_compatibility_upon_change(const DDS::DataWriterQos & qos1,
-                                            const DDS::DataWriterQos & qos2);
-
-OpenDDS_Dcps_Export
-bool should_check_compatibility_upon_change(const DDS::SubscriberQos & qos1,
-                                            const DDS::SubscriberQos & qos2);
-
-OpenDDS_Dcps_Export
-bool should_check_compatibility_upon_change(const DDS::PublisherQos & qos1,
-                                            const DDS::PublisherQos & qos2);
-
-OpenDDS_Dcps_Export
-bool should_check_compatibility_upon_change(const DDS::TopicQos & qos1,
-                                            const DDS::TopicQos & qos2);
-
-OpenDDS_Dcps_Export
-bool should_check_compatibility_upon_change(const DDS::DomainParticipantQos & qos1,
-                                            const DDS::DomainParticipantQos & qos2);
-
 // Should check the association of the entity QoS ?
 // The changeable QoS that is supported currently and affect the association
 // establishment is deadline QoS and partition QoS.

@@ -180,14 +180,6 @@ public:
   void update_expr_params(const DDS::StringSeq& params);
 
 private:
-  /// Check compatibility between provided DataReader QoS and the QoS of
-  /// this subscription associated DataWriters.
-  bool compatibleQosChange(const DDS::DataReaderQos & qos);
-
-  /// Check compatibility between provided Subscriber QoS and the QoS of
-  /// this subscription associated DataWriters's Publishers.
-  bool compatibleQosChange(const DDS::SubscriberQos & qos);
-
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;

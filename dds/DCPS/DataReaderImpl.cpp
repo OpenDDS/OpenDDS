@@ -809,11 +809,20 @@ ACE_THROW_SPEC((CORBA::SystemException))
         DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
         DDS::SubscriberQos subscriberQos;
         this->subscriber_servant_->get_qos(subscriberQos);
-        repo->update_subscription_qos(this->participant_servant_->get_domain_id(),
-                                      this->participant_servant_->get_id(),
-                                      this->subscription_id_,
-                                      qos,
-                                      subscriberQos);
+        CORBA::Boolean status = 
+            repo->update_subscription_qos(
+                this->participant_servant_->get_domain_id(),
+                this->participant_servant_->get_id(),
+                this->subscription_id_,
+                qos,
+                subscriberQos);
+        if (status == 0) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
+                            ACE_TEXT("qos not updated. \n")),
+                            DDS::RETCODE_ERROR);
+        }
+
 
       } catch (const CORBA::SystemException& sysex) {
         sysex._tao_print_exception(

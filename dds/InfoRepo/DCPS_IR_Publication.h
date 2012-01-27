@@ -175,13 +175,6 @@ public:
 
 private:
 
-  /// Check compatibility between provided Publisher QoS and the QoS of
-  /// this publication associated DataReaders's subscribers.
-  bool compatibleQosChange(const DDS::PublisherQos & qos);
-  /// Check compatibility between provided DataWriter QoS and the QoS of
-  /// this publication associated DataReaders.
-  bool compatibleQosChange(const DDS::DataWriterQos & qos);
-
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;

@@ -778,7 +778,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
         if (status == 0) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                            ACE_TEXT("qos is not compatible. \n")),
+                            ACE_TEXT("qos not updated. \n")),
                            DDS::RETCODE_ERROR);
         }
 

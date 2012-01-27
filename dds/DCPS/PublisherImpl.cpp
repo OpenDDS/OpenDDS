@@ -461,7 +461,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
           if (status == 0) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
-                              ACE_TEXT("failed on compatiblity check. \n")),
+                              ACE_TEXT("failed. \n")),
                              DDS::RETCODE_ERROR);
           }
 

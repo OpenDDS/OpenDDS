@@ -1,3 +1,46 @@
+Fri Jan 27 17:48:31 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Remove false returns due to incompatible qos change.
+          Remove compatibleQosChange methods.
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/DCPS_Utils.cpp:
+
+          Remove should_check_compatibility_upon_change methods.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Update logging on failiure of update_*_qos to NOT indicate it
+            is due to incompatibility.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Update comments on failure of set_qos to NOT indicate it is due
+            to compatibility.
+
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+
+          Don't expect incompatible set_qos to fail.
+          Move incompatible set_qos outside of writer activity.
+
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+
+          Make subscriber reliable.
+
+        * tests/DCPS/SetQosDeadline/rtps_disc.ini:
+
+          Don't use multicast.
+
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+
+          Wait longer for subscriber.
+
 Fri Jan 27 15:54:11 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * bin/dcps_tests.lst:
