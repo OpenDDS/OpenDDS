@@ -104,6 +104,14 @@ namespace {
     locator_port_only
   };
 
+  void append_associated_writer(DiscoveredReaderData& reader_data, 
+                                const Parameter& param)
+  {
+    CORBA::ULong len = reader_data.readerProxy.associatedWriters.length();
+    reader_data.readerProxy.associatedWriters.length(len + 1);
+    reader_data.readerProxy.associatedWriters[len] = param.guid();
+  }
+
   void set_ipaddress(LocatorSeq& locators,
                      LocatorState& last_state,
                      const unsigned long addr) {
@@ -609,11 +617,12 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
+  CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
   // Serialize from allLocators, rather than the unicastLocatorList
   // and multicastLocatorList.  This allows OpenDDS transports to be
   // serialized in the proper order using custom PIDs.
-  for (CORBA::ULong i = 0; i < locator_len; ++i) {
+  for (i = 0; i < locator_len; ++i) {
     // Each locator has a blob of interest
     const DCPS::TransportLocator& tl = reader_data.readerProxy.allLocators[i];
     // If this is an rtps udp transport
@@ -631,6 +640,16 @@ int to_param_list(const DiscoveredReaderData& reader_data,
                    ACE_TEXT("discovery has known issues")));
       }
     }
+  }
+
+  CORBA::ULong num_associations = 
+      reader_data.readerProxy.associatedWriters.length();
+  for (i = 0; i < num_associations; ++i) {
+    Parameter param;
+    param.guid(reader_data.readerProxy.associatedWriters[i]);
+    param._d(PID_OPENDDS_ASSOCIATED_WRITER);
+    add_param(param_list, param);
+    
   }
   return 0;
 }
@@ -949,7 +968,6 @@ int from_param_list(const ParameterList& param_list,
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
 
-
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
@@ -1024,6 +1042,9 @@ int from_param_list(const ParameterList& param_list,
         rtps_udp_locators.length(0);
         append_locator(reader_data.readerProxy.allLocators,
                        param.opendds_locator());
+        break;
+      case PID_OPENDDS_ASSOCIATED_WRITER:
+        append_associated_writer(reader_data, param);
         break;
       case PID_SENTINEL:
       case PID_PAD:

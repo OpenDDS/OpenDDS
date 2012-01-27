@@ -1,3 +1,11 @@
+Fri Jan 27 22:29:52 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Custom PID for reader's writer associations.
+
 Fri Jan 27 21:33:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

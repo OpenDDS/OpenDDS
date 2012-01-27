@@ -287,7 +287,8 @@ module OpenDDS {
     // not to overlap ones that other vendors are using and are in the Wireshark
     // dissector (they could overlap, but it would confuse Wireshark).
     const ParameterId_t PID_OPENDDS_BASE = PIDMASK_VENDOR_SPECIFIC + 0x3000;
-    const ParameterId_t PID_OPENDDS_LOCATOR = PID_OPENDDS_BASE + 1;
+    const ParameterId_t PID_OPENDDS_LOCATOR           = PID_OPENDDS_BASE + 1;
+    const ParameterId_t PID_OPENDDS_ASSOCIATED_WRITER = PID_OPENDDS_BASE + 2;
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -386,6 +387,7 @@ module OpenDDS {
       case PID_PARTICIPANT_GUID:
       case PID_ENDPOINT_GUID:
       case PID_GROUP_GUID:
+      case PID_OPENDDS_ASSOCIATED_WRITER:
         GUID_t guid;
 
       case PID_PARTICIPANT_ENTITYID:

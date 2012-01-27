@@ -353,6 +353,7 @@ module OpenDDS {
       LocatorSeq unicastLocatorList;
       LocatorSeq multicastLocatorList;
       OpenDDS::DCPS::TransportLocatorSeq allLocators;
+      GUIDSeq associatedWriters;
     };
 
     // top-level data type for SEDPbuiltinSubscriptions
