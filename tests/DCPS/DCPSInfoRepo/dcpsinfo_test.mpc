@@ -1,4 +1,4 @@
-project(*publisher): dcpsexe {
+project(*publisher): dcpsexe, dcps_rtps_udp {
   exename  = publisher
 
   Source_Files {
@@ -7,7 +7,7 @@ project(*publisher): dcpsexe {
   }
 }
 
-project(*subscriber): dcpsexe {
+project(*subscriber): dcpsexe, dcps_rtps_udp {
   exename = subscriber
 
   Source_Files {

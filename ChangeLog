@@ -1,3 +1,28 @@
+Fri Jan 27 19:52:34 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added SharedTransport RTPS tests.
+
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/SharedTransport/rtps.ini:
+        * tests/DCPS/SharedTransport/rtps_disc.ini:
+        * tests/DCPS/SharedTransport/run_test.pl:
+
+          Add test cases for RTPS.
+
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Save a reference to the DomainParticipantFactory.
+
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
+
+          Static build fixes.
+
 Fri Jan 27 18:37:15 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * bin/dcps_tests.lst:

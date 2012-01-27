@@ -13,8 +13,9 @@ use PerlDDS::Run_Test;
 PerlDDS::add_lib_path('../FooType');
 PerlDDS::add_lib_path('../TestFramework');
 
-$arg_idx = 0;
-$transport = "tcp.ini";
+my $arg_idx = 0;
+my $transport = "tcp.ini";
+my $is_rtps_disc = 0;
 
 if ($ARGV[$arg_idx] eq 'udp') {
   $transport = "udp.ini";
@@ -24,6 +25,17 @@ if ($ARGV[$arg_idx] eq 'udp') {
 if ($ARGV[$arg_idx] eq 'multicast') {
   $transport = "multicast.ini";
   $arg_idx = $arg_idx + 1;
+}
+
+if ($ARGV[$arg_idx] eq 'rtps') {
+  $transport = "rtps.ini";
+  $arg_idx = $arg_idx + 1;
+}
+
+if ($ARGV[$arg_idx] eq 'rtps_disc') {
+  $transport = "rtps_disc.ini";
+  $arg_idx = $arg_idx + 1;
+  $is_rtps_disc = 1;
 }
 
 $test_opts = "-DCPSConfigFile $transport @ARGV";
@@ -39,12 +51,14 @@ $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 
 $Test = PerlDDS::create_process("test", "$test_opts");
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn();
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
+unless ($is_rtps_disc) {
+  print $DCPSREPO->CommandLine() . "\n";
+  $DCPSREPO->Spawn();
+  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
     $DCPSREPO->Kill ();
     exit 1;
+  }
 }
 
 print $Test->CommandLine() . "\n";
@@ -56,13 +70,14 @@ if ($TestResult != 0) {
   $status = 1;
 }
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-  print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-  $status = 1;
+unless ($is_rtps_disc) {
+  $ir = $DCPSREPO->TerminateWaitKill(5);
+  if ($ir != 0) {
+    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
+    $status = 1;
+  }
+  unlink $dcpsrepo_ior;
 }
-
-unlink $dcpsrepo_ior;
 
 if ($status == 0) {
   print "test PASSED.\n";

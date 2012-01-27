@@ -1,4 +1,4 @@
-project(*Publisher): dcpsexe_with_tcp {
+project(*Publisher): dcpsexe_with_tcp, dcps_rtps_udp {
   exename   = publisher
   libpaths += ../FooType4
   libpaths += ../common
@@ -14,7 +14,7 @@ project(*Publisher): dcpsexe_with_tcp {
 }
 
 
-project(*Subscriber): dcpsexe_with_tcp {
+project(*Subscriber): dcpsexe_with_tcp, dcps_rtps_udp {
   exename   = subscriber
   libpaths += ../FooType4
   libpaths += ../common

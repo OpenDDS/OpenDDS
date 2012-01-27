@@ -45,7 +45,8 @@ TestBase::init_topic(const char*& /*name*/,
 int
 TestBase::run(int& argc, ACE_TCHAR* argv[])
 {
-  TheParticipantFactoryWithArgs(argc, argv);
+  DDS::DomainParticipantFactory_var dpf = 
+      TheParticipantFactoryWithArgs(argc, argv);
 
   int error(0);
   try {
