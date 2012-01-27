@@ -43,6 +43,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   ACE_INET_Addr local_address;
   if (!this->active_) {
     local_address = this->config_->local_address_;
+  } else {
+    local_address.set_type(remote_address.get_type());
   }
 
   if (this->socket_.open(local_address) != 0) {
@@ -51,6 +53,9 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                       ACE_TEXT("UdpDataLink::open: open failed: %m\n")),
                      false);
   }
+
+  VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: listening on %C:%hu\n",
+        local_address.get_host_addr(), local_address.get_port_number()));
 
   // If listening on "any" host/port, need to record the actual port number
   // selected by the OS, as well as our actual hostname, into the config_
@@ -65,7 +70,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     const unsigned short port = address.get_port_number();
     const std::string hostname = get_fully_qualified_hostname();
     VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) UdpDataLink::open listening on %C:%hu\n"),
+              ACE_TEXT("(%P|%t) UdpDataLink::open listening on host %C:%hu\n"),
               hostname.c_str(), port), 2);
     this->config_->local_address_.set(port, hostname.c_str());
 

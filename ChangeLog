@@ -1,3 +1,29 @@
+Fri Jan 27 22:34:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+
+          Add an optional param to the constructor that takes an ACE_INET_Addr,
+          which will cause ACE to give us the hostname instead of numeric addr.
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          When opening as a "client" link, set the local address to the same
+          type (IPv4/IPv6) as the remote address.  Added logging.
+
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Added logging.
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Use hostnames instead of IP addresses in transport BLOBs.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Removed unused #includes.
+
 Fri Jan 27 22:29:52 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:

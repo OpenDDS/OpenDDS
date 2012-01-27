@@ -37,7 +37,7 @@ typedef std::vector<HostnameInfo> HostnameInfoVector;
  */
 struct OpenDDS_Dcps_Export NetworkAddress {
   NetworkAddress();
-  explicit NetworkAddress(const ACE_INET_Addr& addr);
+  explicit NetworkAddress(const ACE_INET_Addr& addr, bool use_hostname = false);
   explicit NetworkAddress(const std::string& addr);
 
   ~NetworkAddress();

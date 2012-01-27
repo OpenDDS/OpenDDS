@@ -10,7 +10,6 @@
 #include "RtpsUdpTransport.h"
 #include "RtpsUdpInst.h"
 
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"

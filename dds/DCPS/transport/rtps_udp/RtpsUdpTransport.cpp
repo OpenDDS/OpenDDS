@@ -11,7 +11,6 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
 
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
