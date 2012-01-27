@@ -8,6 +8,7 @@ workspace {
   $(TAO_ROOT)/tao/IORManipulation/IORManipulation.mpc
   $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc
   $(TAO_ROOT)/tao/Messaging/Messaging.mpc
+  $(TAO_ROOT)/tao/Strategies/Strategies.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming_Serv.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming_Skel.mpc
@@ -16,6 +17,7 @@ workspace {
   $(TAO_ROOT)/tests/Hello                  // used by Java tests
   $(TAO_ROOT)/orbsvcs/Naming_Service/Naming_Service.mpc
   $(TAO_ROOT)/orbsvcs/ImplRepo_Service/ImplRepo_Service.mpc
+  $(TAO_ROOT)/utils/nslist/nslist.mpc
   DDS_TAOv2.mwc
   examples
   performance-tests

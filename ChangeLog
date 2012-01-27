@@ -1,3 +1,9 @@
+Fri Jan 27 18:07:31 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAOv2_all.mwc:
+
+          Added nslist and its required library.
+
 Fri Jan 27 17:48:31 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Publication.cpp:
@@ -55,7 +61,7 @@ Fri Jan 27 15:54:11 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
           Normalize cleanup.
 
-        * rtps_disc.ini
+        * tests/DCPS/CompatibilityTest/rtps_disc.ini
 
           Don't use multicast
 
