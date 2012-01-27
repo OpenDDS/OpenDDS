@@ -1593,7 +1593,7 @@ ACE_THROW_SPEC((CORBA::SystemException
 
   Update::SpecificQos qosType;
 
-  if (pub->set_qos(qos, publisherQos, qosType) == false)  // failed 
+  if (pub->set_qos(qos, publisherQos, qosType) == false)  // failed
     return 0;
 
   if (this->um_ && (partPtr->isBitPublisher() == false)) {

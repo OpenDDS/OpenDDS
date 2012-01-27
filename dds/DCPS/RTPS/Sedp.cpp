@@ -1485,7 +1485,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     // change this if 'writer_active' (above) changes
     if (call_writer && !call_reader) {
       if (DCPS::DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, 
+        ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Sedp::match - ")
                    ACE_TEXT("calling writer association_complete\n")));
       }

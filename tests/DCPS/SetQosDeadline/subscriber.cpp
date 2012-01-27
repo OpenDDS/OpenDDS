@@ -143,7 +143,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       int expected = 10;
       // Writer of deadline 4 -> Reader of deadline 5
       while ( listener_servant1->num_reads() < expected) {
-        //cout << "subscriber listener1 waiting for " << expected 
+        //cout << "subscriber listener1 waiting for " << expected
              //<< " reads, got " << listener_servant1->num_reads() << std::endl;
         ACE_OS::sleep (1);
       }
@@ -171,14 +171,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // second DataReader should receive 20 messages so far.
       while ( listener_servant1->num_reads() < 2 * expected) {
-        //cout << "subscriber listener1 waiting for " << 2 * expected 
+        //cout << "subscriber listener1 waiting for " << 2 * expected
              //<< " reads, got " << listener_servant1->num_reads() << std::endl;
         ACE_OS::sleep (1);
       }
 
       // second DataReader should receive 10 messages.
       while ( listener_servant2->num_reads() < expected) {
-        //cout << "subscriber listener2 waiting for " << expected 
+        //cout << "subscriber listener2 waiting for " << expected
              //<< " reads, got " << listener_servant2->num_reads() << std::endl;
         ACE_OS::sleep (1);
       }

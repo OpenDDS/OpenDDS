@@ -249,7 +249,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
   PublicationBuiltinTopicDataSeq data;
   SampleInfoSeq infos;
   ReturnCode_t ret =
-    pub_bit->read(data, infos, LENGTH_UNLIMITED, 
+    pub_bit->read(data, infos, LENGTH_UNLIMITED,
                   ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
   if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
     ACE_DEBUG((LM_DEBUG, "ERROR: could not read ignored publication BIT: %d\n",
@@ -315,7 +315,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
   }
   if (num_valid != num_expected) {
     ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
-                                "publications, found %d\n", 
+                                "publications, found %d\n",
                                 num_expected, num_valid), false);
   }
   return true;
@@ -419,14 +419,14 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
   }
   if (num_valid != num_expected) {
     ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
-                                "subscriptionsd, found %d\n", 
+                                "subscriptionsd, found %d\n",
                                 num_expected, num_valid), false);
   }
 
   return true;
 }
 
-bool check_discovered_participants(DomainParticipant_var& dp, 
+bool check_discovered_participants(DomainParticipant_var& dp,
                                    InstanceHandle_t& handle)
 {
   InstanceHandle_t my_handle    = dp->get_instance_handle();
@@ -623,21 +623,21 @@ bool run_test(DomainParticipant_var& dp,
   // Test ignore
   dp->ignore_publication(pub_ih);
   if (!read_publication_bit(bit_sub, pub_ih, 16, 64, 0)) {
-    ACE_ERROR_RETURN((LM_ERROR, 
+    ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("Could not ignore publication\n")), false);
   }
 
   dp2->ignore_subscription(sub_ih);
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, 32, 64, 0)) {
-    ACE_ERROR_RETURN((LM_ERROR, 
+    ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("Could not ignore subscription\n")), false);
   }
-  
+
   dp->ignore_participant(dp2_ih);
   InstanceHandleSeq handles;
   dp->get_discovered_participants(handles);
   if (handles.length()) {
-    ACE_ERROR_RETURN((LM_ERROR, 
+    ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("Could not ignore participant\n")), false);
   }
 

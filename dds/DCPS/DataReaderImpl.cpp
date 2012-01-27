@@ -809,7 +809,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
         DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
         DDS::SubscriberQos subscriberQos;
         this->subscriber_servant_->get_qos(subscriberQos);
-        CORBA::Boolean status = 
+        CORBA::Boolean status =
             repo->update_subscription_qos(
                 this->participant_servant_->get_domain_id(),
                 this->participant_servant_->get_id(),

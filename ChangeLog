@@ -1,3 +1,14 @@
+Fri Jan 27 21:33:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Fuzz.
+
 Fri Jan 27 19:52:34 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * bin/dcps_tests.lst:
