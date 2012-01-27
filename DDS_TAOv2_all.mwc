@@ -2,11 +2,14 @@
 // $Id$
 
 workspace {
+  $(ACE_ROOT)/ACEXML/common
   $(TAO_ROOT)/tao/PI_Server/PI_Server.mpc
   $(TAO_ROOT)/tao/IORManipulation/IORManipulation.mpc
   $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc
   $(TAO_ROOT)/tao/Messaging/Messaging.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming.mpc
+  $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming_Serv.mpc
+  $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming_Skel.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/PortableGroup.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/FTORB.mpc
   $(TAO_ROOT)/tests/Hello                  // used by Java tests
