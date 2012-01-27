@@ -195,23 +195,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(test_duration);
 
       // Clean up publisher objects
-      pub->delete_contained_entities() ;
-
-      dp->delete_publisher(pub.in ());
-
-      dp->delete_topic(topic.in ());
+      dp->delete_contained_entities();
       dpf->delete_participant(dp.in ());
-
       TheServiceParticipant->shutdown();
 
       {
         DataWriterListenerImpl* dwl_servant =
-          dynamic_cast<DataWriterListenerImpl*>(dwl.in());
+          dynamic_cast<DataWriterListenerImpl*>(dwl.ptr());
         // check to see if the publisher worked
         if(dwl_servant->publication_matched() != compatible)
         {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Expected publication_matched to be %C, but it wasn't.")
+                      ACE_TEXT("(%P|%t) Expected publication_matched to be %C, but it wasn't. ")
                       ACE_TEXT("durability_kind=%s,liveliness_kind=%s,liveliness_duration=%s,")
                       ACE_TEXT("reliability_kind=%s\n"),
                       (compatible) ? "true" : "false",

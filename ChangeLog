@@ -1,3 +1,21 @@
+Fri Jan 27 15:54:11 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+          Added compatibility tests for RTPS.
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+
+          Wait longer for subscriber.
+
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+
+          Normalize cleanup.
+
+        * rtps_disc.ini
+
+          Don't use multicast
+
 Fri Jan 27 14:56:12 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * DDS_TAOv2_all.mwc:

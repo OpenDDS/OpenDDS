@@ -14,6 +14,7 @@ use strict;
 
 my $status = 0;
 
+my $testnum = 0;
 PerlDDS::add_lib_path('../FooType4');
 PerlDDS::add_lib_path('../common');
 # single reader with single instances test
@@ -41,6 +42,7 @@ if ($ARGV[0] eq "rtps_disc") {
 
 sub run_compatibility_tests {
   return if $status;
+
   # test multiple cases
   my $compatibility = shift;
 
@@ -54,6 +56,9 @@ sub run_compatibility_tests {
   my $sub_lease_time = shift;
   my $sub_reliability_kind = shift;
 
+  print "\n\n"; # Provide some visual relief between test cases.
+  $testnum = $testnum + 1;
+  print "Test #" . $testnum . "\n";
   print "\n\n"; # Provide some visual relief between test cases.
 
   my $sub_time = 40;

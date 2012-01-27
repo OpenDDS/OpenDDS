@@ -190,15 +190,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(test_duration);
 
       // clean up subscriber objects
-
-
-      sub->delete_contained_entities() ;
-
-      dp->delete_subscriber(sub.in ());
-
-      dp->delete_topic(topic.in ());
+      dp->delete_contained_entities() ;
       dpf->delete_participant(dp.in ());
-
       TheServiceParticipant->shutdown ();
 
       // there is an error if we matched when not compatible (or vice-versa)
