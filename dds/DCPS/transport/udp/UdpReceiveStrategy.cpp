@@ -82,7 +82,7 @@ UdpReceiveStrategy::start_i()
                      -1);
   }
 
-  if (Transport_debug_level > 5) { 
+  if (Transport_debug_level > 5) {
     ACE_INET_Addr addr;
     link_->socket().get_local_addr(addr);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) UdpReceiveStrategy::start_i: "
