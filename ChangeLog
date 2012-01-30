@@ -1,9 +1,27 @@
+Mon Jan 30 21:27:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed compile error.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/SharedTransport/rtps_disc_tcp.ini:
+        * tests/DCPS/SharedTransport/run_test.pl:
+
+          SharedTransport test uses two domain participants, so they can't
+          use the same RTPS Transport, but we can test with RTPS Discovery.
+
+        * tests/DCPS/SharedTransport/rtps.ini:
+        * tests/DCPS/SharedTransport/rtps_disc.ini:
+
+          Removed these files.
+
 Mon Jan 30 19:35:39 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:
         * dds/DCPS/RTPS/Sedp.cpp:
 
-          Complete datawriter association with discovered opendds reader after 
+          Complete datawriter association with discovered opendds reader after
           reader associates with writer.
 
 Mon Jan 30 17:32:50 UTC 2012  Adam Mitz  <mitza@ociweb.com>

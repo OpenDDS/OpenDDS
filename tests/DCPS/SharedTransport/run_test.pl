@@ -9,6 +9,7 @@ use Env qw(DDS_ROOT ACE_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
 PerlDDS::add_lib_path('../FooType');
 PerlDDS::add_lib_path('../TestFramework');
@@ -27,29 +28,24 @@ if ($ARGV[$arg_idx] eq 'multicast') {
   $arg_idx = $arg_idx + 1;
 }
 
-if ($ARGV[$arg_idx] eq 'rtps') {
-  $transport = "rtps.ini";
-  $arg_idx = $arg_idx + 1;
-}
-
-if ($ARGV[$arg_idx] eq 'rtps_disc') {
-  $transport = "rtps_disc.ini";
+if ($ARGV[$arg_idx] eq 'rtps_disc_tcp') {
+  $transport = "rtps_disc_tcp.ini";
   $arg_idx = $arg_idx + 1;
   $is_rtps_disc = 1;
 }
 
-$test_opts = "-DCPSConfigFile $transport @ARGV";
+my $test_opts = "-DCPSConfigFile $transport @ARGV";
 
-$status = 0;
+my $status = 0;
 
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-$DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "-o $dcpsrepo_ior ");
+my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
+                                       "-o $dcpsrepo_ior ");
 
-$Test = PerlDDS::create_process("test", "$test_opts");
+my $Test = PerlDDS::create_process("test", $test_opts);
 
 unless ($is_rtps_disc) {
   print $DCPSREPO->CommandLine() . "\n";
@@ -64,14 +60,14 @@ unless ($is_rtps_disc) {
 print $Test->CommandLine() . "\n";
 $Test->Spawn();
 
-$TestResult = $Test->WaitKill(300);
+my $TestResult = $Test->WaitKill(300);
 if ($TestResult != 0) {
   print STDERR "ERROR: test returned $TestResult \n";
   $status = 1;
 }
 
 unless ($is_rtps_disc) {
-  $ir = $DCPSREPO->TerminateWaitKill(5);
+  my $ir = $DCPSREPO->TerminateWaitKill(5);
   if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
