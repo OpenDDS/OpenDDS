@@ -1,3 +1,29 @@
+Mon Jan 30 15:02:16 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration:
+        * tests/DCPS/Deadline:
+        * tests/DCPS/FooTest3_0:
+        * tests/DCPS/FooTest3_1:
+        * tests/DCPS/FooTest3_2:
+        * tests/DCPS/Lifespan:
+        * tests/DCPS/Messenger:
+        * tests/DCPS/Partition:
+        * tests/DCPS/PersistentDurability:
+        * tests/DCPS/Reconnect:
+        * tests/DCPS/RtpsDiscovery:
+        * tests/DCPS/SetQosDeadline:
+        * tests/DCPS/SetQosPartition:
+        * tests/DCPS/TransientDurability:
+        * tests/DCPS/TransientLocalTest:
+        * tests/DCPS/unit:
+        * examples/DCPS/DistributedContent:
+
+          Set svn:ignore
+
+        * examples/DCPS/DistributedContent/run_test.pl:
+
+          Don't rely on tcp.conf
+
 Fri Jan 27 22:34:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/NetworkAddress.h:

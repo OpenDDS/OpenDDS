@@ -23,7 +23,7 @@ my $RepoOpts = "-ORBEndpoint iiop://:$dcpsrepo_port";
 
 # simple_tcp.conf contains the instructions to automatically load the SimpleTcp
 #  transport.
-my $opts = "-ORBSvcConf tcp.conf";
+my $opts = "";
 
 my $node_1_opts = "$opts -n node_1 -d files1 -DCPSInfoRepo corbaloc:iiop:localhost:$dcpsrepo_port/DCPSInfoRepo ";
 my $node_2_opts = "$opts -n node_2 -d files2 -DCPSInfoRepo corbaloc:iiop:localhost:$dcpsrepo_port/DCPSInfoRepo";
