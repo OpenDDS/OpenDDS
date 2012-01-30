@@ -524,40 +524,48 @@ Sedp::AssociateTask::svc()
   return 0;
 }
 
-void
+bool
 Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
 {
   RepoId part;
-  std::memcpy(part.guidPrefix, pdata.participantProxy.guidPrefix,
-              sizeof(GuidPrefix_t));
-  const BuiltinEndpointSet_t& avail =
-    pdata.participantProxy.availableBuiltinEndpoints;
+  { // Release lock, so we can call into transport
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
+    std::memcpy(part.guidPrefix, pdata.participantProxy.guidPrefix,
+                sizeof(GuidPrefix_t));
+    const BuiltinEndpointSet_t& avail =
+      pdata.participantProxy.availableBuiltinEndpoints;
 
-  // See RTPS v2.1 section 8.5.5.2
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    RepoId id = part;
-    id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    publications_writer_.disassociate(id);
+    // See RTPS v2.1 section 8.5.5.2
+    if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+      RepoId id = part;
+      id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+      publications_writer_.disassociate(id);
+    }
+    if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+      RepoId id = part;
+      id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+      publications_reader_.disassociate(id);
+    }
+    if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+      RepoId id = part;
+      id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+      subscriptions_writer_.disassociate(id);
+    }
+    if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+      RepoId id = part;
+      id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+      subscriptions_reader_.disassociate(id);
+    }
+    //FUTURE: if/when topic propagation is supported, add it here
   }
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
-    RepoId id = part;
-    id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    publications_reader_.disassociate(id);
+  if (spdp_.has_discovered_participant(part)) {
+    remove_entities_belonging_to(discovered_publications_, part);
+    remove_entities_belonging_to(discovered_subscriptions_, part);
+    return true;
+  } else {
+    return false;
   }
-  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
-    RepoId id = part;
-    id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    subscriptions_writer_.disassociate(id);
-  }
-  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
-    RepoId id = part;
-    id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    subscriptions_reader_.disassociate(id);
-  }
-  //FUTURE: if/when topic propagation is supported, add it here
-
-  remove_entities_belonging_to(discovered_publications_, part);
-  remove_entities_belonging_to(discovered_subscriptions_, part);
 }
 
 template<typename Map>
@@ -1190,11 +1198,14 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
     {
       GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
 
+ACE_DEBUG((LM_INFO, "discovererd reader is associated with some writer[%d]\n", writerIndex));
       // If the associated writer is in this participant
       LocalPublicationIter lp = local_publications_.find(writerGuid);
       if (lp != local_publications_.end()) {
+        ACE_DEBUG((LM_INFO, "That's a local writer\n"));
         // If the local writer is not fully associated with the reader
         if (lp->second.remote_opendds_associations_.insert(guid).second) {
+          ACE_DEBUG((LM_INFO, "That's a new association for the local writer\n"));
           // This is a new association
           lp->second.publication_->association_complete(guid);
         }
@@ -1626,7 +1637,7 @@ Sedp::association_complete(const RepoId& localId,
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
     // If the local endpoint is a reader
     if (sub != local_subscriptions_.end()) {
-      std::pair<RepoIdSet::iterator, bool> result = 
+      std::pair<RepoIdSet::iterator, bool> result =
           sub->second.remote_opendds_associations_.insert(remoteId);
       // If this is a new association for the local reader
       if (result.second) {
@@ -2094,7 +2105,7 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
 bool
 Sedp::is_opendds(const GUID_t& endpoint)
 {
-  return !memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI, 
+  return !memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
                  sizeof(DCPS::VENDORID_OCI));
 }
 

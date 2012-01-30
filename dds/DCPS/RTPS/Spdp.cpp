@@ -92,10 +92,20 @@ Spdp::~Spdp()
   shutdown_flag_ = 1;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    for (DiscoveredParticipantIter part = participants_.begin();
-         part != participants_.end();) {
-      remove_discovered_participant(part++);
+    // Iterate through a copy of the repo Ids, rather than the map
+    //   as it gets unlocked in remove_discovered_participant()
+    RepoIdSet participant_ids;
+    get_discovered_participant_ids(participant_ids);
+    for (RepoIdSet::iterator participant_id = participant_ids.begin();
+         participant_id != participant_ids.end();
+         ++participant_id)
+    {
+      DiscoveredParticipantIter part = participants_.find(*participant_id);
+      if (part != participants_.end()) {
+        remove_discovered_participant(part);
+      }  
     }
+    
     tport_->close();
   }
   // release lock for reset of event handler, which may delete transport
@@ -227,13 +237,15 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 void
 Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
 {
-  sedp_.disassociate(iter->second.pdata_);
-  DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-  if (bit) { // bit may be null if the DomainParticipant is shutting down
-    bit->set_instance_state(iter->second.bit_ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  bool removed = sedp_.disassociate(iter->second.pdata_);
+  if (removed) {
+    DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+    if (bit) { // bit may be null if the DomainParticipant is shutting down
+      bit->set_instance_state(iter->second.bit_ih_,
+                              DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+    }
+    participants_.erase(iter);
   }
-  participants_.erase(iter);
 }
 
 void
@@ -241,21 +253,28 @@ Spdp::remove_expired_participants()
 {
   // Find and remove any expired discovered participant
   ACE_GUARD (ACE_Thread_Mutex, g, lock_);
-  for (DiscoveredParticipantIter it = participants_.begin();
-       it != participants_.end();) {
-    if (it->second.last_seen_ <
-        ACE_OS::gettimeofday() -
-        ACE_Time_Value(it->second.pdata_.leaseDuration.seconds)) {
-      if (DCPS::DCPS_debug_level > 1) {
-        DCPS::GuidConverter conv(it->first);
-        ACE_DEBUG((LM_WARNING,
-          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_timeout() - ")
-          ACE_TEXT("participant %C exceeded lease duration, removing\n"),
-          std::string(conv).c_str()));
+  // Iterate through a copy of the repo Ids, rather than the map
+  //   as it gets unlocked in remove_discovered_participant()
+  RepoIdSet participant_ids;
+  get_discovered_participant_ids(participant_ids);
+  for (RepoIdSet::iterator participant_id = participant_ids.begin();
+       participant_id != participant_ids.end();
+       ++participant_id)
+  {
+    DiscoveredParticipantIter part = participants_.find(*participant_id);
+    if (part != participants_.end()) {
+      if (part->second.last_seen_ <
+          ACE_OS::gettimeofday() -
+          ACE_Time_Value(part->second.pdata_.leaseDuration.seconds)) {
+        if (DCPS::DCPS_debug_level > 1) {
+          DCPS::GuidConverter conv(part->first);
+          ACE_DEBUG((LM_WARNING,
+            ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_timeout() - ")
+            ACE_TEXT("participant %C exceeded lease duration, removing\n"),
+            std::string(conv).c_str()));
+        }
+        remove_discovered_participant(part);
       }
-      remove_discovered_participant(it++);
-    } else {
-      ++it;
     }
   }
 }
@@ -811,6 +830,23 @@ bool
 Spdp::associated() const
 {
   return !participants_.empty();
+}
+
+bool
+Spdp::has_discovered_participant(const DCPS::RepoId& guid)
+{
+  return participants_.find(guid) != participants_.end();
+}
+
+
+void
+Spdp::get_discovered_participant_ids(RepoIdSet& results) const
+{
+  DiscoveredParticipantMap::const_iterator idx;
+  for (idx = participants_.begin(); idx != participants_.end(); ++idx)
+  {
+    results.insert(idx->first);
+  }
 }
 
 }

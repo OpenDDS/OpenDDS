@@ -116,6 +116,7 @@ public:
   bool shutting_down() { return shutdown_flag_.value(); }
 
   bool associated() const;
+  bool has_discovered_participant(const DCPS::RepoId& guid);
 private:
   ACE_Reactor* reactor() const;
 
@@ -180,6 +181,7 @@ private:
 
   void remove_discovered_participant(DiscoveredParticipantIter iter);
   void remove_expired_participants();
+  void get_discovered_participant_ids(RepoIdSet& results) const;
 
   Sedp sedp_;
 };

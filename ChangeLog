@@ -1,3 +1,17 @@
+Mon Jan 30 22:58:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Release lock when calling into transport while removing a 
+            participant.
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Fix fuzz.
+
 Mon Jan 30 21:55:36 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

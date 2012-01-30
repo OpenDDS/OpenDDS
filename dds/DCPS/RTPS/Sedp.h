@@ -52,6 +52,8 @@ enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4 };
 class RtpsDiscovery;
 class Spdp;
 
+typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
+
 class Sedp {
 public:
   Sedp(const DCPS::RepoId& participant_id,
@@ -80,7 +82,7 @@ public:
                                   const DDS::BuiltinTopicKey_t& key);
 
   void associate(const SPDPdiscoveredParticipantData& pdata);
-  void disassociate(const SPDPdiscoveredParticipantData& pdata);
+  bool disassociate(const SPDPdiscoveredParticipantData& pdata);
 
   struct AssociateTask : ACE_Task_Base {
     AssociateTask(const SPDPdiscoveredParticipantData& pdata, Sedp* sedp)
@@ -249,8 +251,6 @@ private:
   DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
-
-  typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
 
   struct LocalEndpoint {
     DCPS::RepoId topic_id_;

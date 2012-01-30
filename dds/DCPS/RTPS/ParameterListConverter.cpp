@@ -104,7 +104,7 @@ namespace {
     locator_port_only
   };
 
-  void append_associated_writer(DiscoveredReaderData& reader_data, 
+  void append_associated_writer(DiscoveredReaderData& reader_data,
                                 const Parameter& param)
   {
     CORBA::ULong len = reader_data.readerProxy.associatedWriters.length();
@@ -642,14 +642,14 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     }
   }
 
-  CORBA::ULong num_associations = 
+  CORBA::ULong num_associations =
       reader_data.readerProxy.associatedWriters.length();
   for (i = 0; i < num_associations; ++i) {
     Parameter param;
     param.guid(reader_data.readerProxy.associatedWriters[i]);
     param._d(PID_OPENDDS_ASSOCIATED_WRITER);
     add_param(param_list, param);
-    
+   
   }
   return 0;
 }
