@@ -78,7 +78,7 @@ my $Publisher =
     PerlDDS::create_process("$DDS_ROOT/tests/DCPS/Messenger/publisher",
                             "-DCPSConfigFile $pub_config_file $common_args " .
                             $pub_opts);
-my $DCPSREPO;
+my $DCPSREPO = undef;
 if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
 
   if ($ARGV[0] !~ /^rtps_disc/) {
@@ -103,7 +103,7 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
   if ($CS->ready() == -1) {
     print STDERR "ERROR: subscriber failed to initialize.\n";
     $status = 1;
-    $DCPSREPO->Kill();
+    $DCPSREPO->Kill() if defined $DCPSREPO;
     $Publisher->Kill();
     exit 1;
   }
@@ -128,7 +128,7 @@ $role = $CS->wait();
 if ($role == -1) {
   print "ERROR: Shutdown sync failed.\n";
   $status = 1;
-  $DCPSREPO->Kill();
+  $DCPSREPO->Kill() if defined $DCPSREPO;
   exit 1;
 }
 
@@ -137,7 +137,7 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     print STDERR "ERROR: subscriber failed to finish sync properly.\n";
     $status = 1;
   }
-  my $ir = $DCPSREPO->TerminateWaitKill(5);
+  my $ir = (defined $DCPSREPO) ? $DCPSREPO->TerminateWaitKill(5) : 0;
   if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
