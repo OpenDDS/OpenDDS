@@ -1986,7 +1986,7 @@ Sedp::populate_discovered_reader_msg(
   drd.contentFilterProperty.filterClassName = ""; // See PL converter
   drd.contentFilterProperty.filterExpression = sub.filter_.c_str();
   drd.contentFilterProperty.expressionParameters = sub.params_;
-  for (RepoIdSet::iterator writer = sub.remote_opendds_associations_.begin();
+  for (RepoIdSet::const_iterator writer = sub.remote_opendds_associations_.begin();
        writer != sub.remote_opendds_associations_.end();
        ++writer)
   {
