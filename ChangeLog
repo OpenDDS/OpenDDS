@@ -1,3 +1,9 @@
+Mon Jan 30 15:55:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Test encode/decode of associated writers.
+
 Mon Jan 30 15:07:37 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * bin/dcps_tests.lst:
