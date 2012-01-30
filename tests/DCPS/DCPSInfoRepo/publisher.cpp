@@ -1,53 +1,52 @@
+#include "DCPSDataWriterI.h"
+
 #include "dds/DdsDcpsInfoC.h"
 #include "dds/DCPS/RepoIdBuilder.h"
-#include "DCPSDataWriterI.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/RTPS/RtpsDiscovery.h"
 
 #include "ace/Arg_Shifter.h"
 #include "ace/Argv_Type_Converter.h"
 
-const ACE_TCHAR *ior = ACE_TEXT("file://dcps_ir.ior");
+const ACE_TCHAR* ior = ACE_TEXT("file://dcps_ir.ior");
 bool ignore_entities = false;
 bool qos_tests = false;
+bool use_rtps = false;
 
-int
-parse_args (int argc, ACE_TCHAR *argv[])
+int parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Arg_Shifter arg_shifter (argc, argv);
+  ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  while (arg_shifter.is_anything_left ())
+  while (arg_shifter.is_anything_left())
   {
     const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0)
-    {
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-k"))) != 0) {
       ior = currentArg;
-      arg_shifter.consume_arg ();
-    }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-i")) == 0)
-    {
+      arg_shifter.consume_arg();
+
+    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-i")) == 0) {
       ignore_entities = true;
-      arg_shifter.consume_arg ();
-    }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-q")) == 0)
-    {
+      arg_shifter.consume_arg();
+
+    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-q")) == 0) {
       qos_tests = true;
-      arg_shifter.consume_arg ();
-    }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
-    {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                          "usage:  %s "
-                          "-k <ior> "
-                          "\n"
-                          "        -i (ignore tests)\n"
-                          "        -q (incompatible qos test)\n"
-                          "        -? (usage message)",
-                          argv [0]),
-                        -1);
-    }
-    else
-    {
-      arg_shifter.ignore_arg ();
+      arg_shifter.consume_arg();
+
+    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-r")) == 0) {
+      use_rtps = true;
+      arg_shifter.consume_arg();
+
+    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "usage:  %s [-r|-k <ior>]\n"
+                        "        -i (ignore tests)\n"
+                        "        -q (incompatible qos test)\n"
+                        "        -? (usage message)\n",
+                        argv[0]),
+                       -1);
+    } else {
+      arg_shifter.ignore_arg();
     }
   }
   // Indicates sucessful parsing of the command line
@@ -57,15 +56,17 @@ parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  if (parse_args (argc, argv) != 0)
+  if (parse_args(argc, argv) != 0)
     return 1;
 
   try
     {
-      ACE_Argv_Type_Converter converter (argc, argv);
+      ACE_Argv_Type_Converter converter(argc, argv);
 
       CORBA::ORB_var orb =
-        CORBA::ORB_init (converter.get_argc(), converter.get_ASCII_argv() , "");
+        CORBA::ORB_init(converter.get_argc(), converter.get_ASCII_argv(), "");
+
+      TheServiceParticipant->set_ORB(orb);
 
       //Get reference to the RootPOA.
       CORBA::Object_var obj = orb->resolve_initial_references( "RootPOA" );
@@ -75,11 +76,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       PortableServer::POAManager_var mgr = poa->the_POAManager();
       mgr->activate();
 
-      CORBA::Object_var tmp =
-        orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
+      OpenDDS::DCPS::DCPSInfo_var info;
+      OpenDDS::RTPS::RtpsDiscovery_rch disc;
 
-      OpenDDS::DCPS::DCPSInfo_var info =
-        OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
+      if (use_rtps) {
+        disc = new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery");
+        disc->resend_period(ACE_Time_Value(2));
+        info = disc->get_dcps_info();
+        //OpenDDS::DCPS::DCPS_debug_level = 10;
+        //OpenDDS::DCPS::Transport_debug_level = 10;
+        ACE_DEBUG((LM_DEBUG, "ERROR: RTPS Discovery doesn't work yet\n"));
+
+      } else {
+        CORBA::Object_var tmp =
+          orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
+        info = OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
+      }
 
       if (CORBA::is_nil (info.in ()))
         {
@@ -92,7 +104,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // check adding a participant
       ::DDS::DomainParticipantQos_var dpQos = new ::DDS::DomainParticipantQos;
-      CORBA::Long domainId = 911;
+      CORBA::Long domainId = 9;
 
       OpenDDS::DCPS::AddDomainStatus value = info->add_domain_participant(domainId, dpQos.in());
       OpenDDS::DCPS::RepoId dpId = value.id;
@@ -303,8 +315,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       info->remove_topic(domainId, dpId, topicId);
 
       info->remove_domain_participant(domainId, dpId);
+
+      disc = 0;
+
       // clean up the orb
       orb->destroy ();
+
+      TheServiceParticipant->shutdown ();
     }
   catch (const CORBA::Exception& ex)
     {

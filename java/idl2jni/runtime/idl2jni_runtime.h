@@ -10,9 +10,10 @@
 #define idl2jni_runtime_H
 
 #include "idl2jni_jni.h"
-#include "tao/Basic_Types.h"
 #include "idl2jni_runtime_Export.h"
-#include "15a_compat.h"
+
+#include "tao/Basic_Types.h"
+
 #include "ace/Global_Macros.h"
 
 #include <vector>
@@ -39,7 +40,8 @@ namespace details {
 
   typedef string_traits<CORBA::Char, true> char_string_traits;
   typedef string_sequence_element<char_string_traits> charstr_sequence_element;
-  typedef IDL2JNI_CONST_SEQ_ELEM charstr_const_sequence_element;
+  typedef string_const_sequence_element<char_string_traits>
+    charstr_const_sequence_element;
 
   template<typename obj_ref_traits> class object_reference_sequence_element;
   template<typename obj_ref_traits>

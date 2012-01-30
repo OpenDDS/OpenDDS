@@ -16,11 +16,8 @@
 #include "tao/String_Manager_T.h"
 #include "tao/String_Traits_T.h"
 #include "tao/String_Sequence_Element_T.h"
+#include "tao/String_Const_Sequence_Element_T.h"
 #include "tao/SystemException.h"
-
-#ifndef IDL2JNI_NO_INC_SCSET_H
-#  include "tao/String_Const_Sequence_Element_T.h"
-#endif
 
 namespace {
 jstring binary_name(JNIEnv *jni, const char *desc)

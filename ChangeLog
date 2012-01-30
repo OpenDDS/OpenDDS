@@ -1,3 +1,22 @@
+Mon Jan 30 23:43:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WaitSet.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          Removed compatibility checks for no-longer-supported ACE+TAO versions.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Adapted this test to optionally use RTPS Discovery.  Doesn't work yet.
+
+        * java/idl2jni/runtime/15a_compat.h:
+
+          Removed this file.
+
 Mon Jan 30 22:58:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:
@@ -5,7 +24,7 @@ Mon Jan 30 22:58:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
         * dds/DCPS/RTPS/Spdp.h:
         * dds/DCPS/RTPS/Spdp.cpp:
 
-          Release lock when calling into transport while removing a 
+          Release lock when calling into transport while removing a
             participant.
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
