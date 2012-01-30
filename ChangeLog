@@ -1,3 +1,12 @@
+Mon Jan 30 16:56:02 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Update to limit the scope of last Friday's change to udp
+          transport behavior: use local address as a hostname if it's
+          the "any" address (all zeros, the default).
+
 Mon Jan 30 15:55:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:

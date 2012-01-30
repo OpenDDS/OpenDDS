@@ -41,10 +41,10 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   this->is_loopback_ = this->remote_address_ == this->config_->local_address_;
 
   ACE_INET_Addr local_address;
-  if (!this->active_) {
-    local_address = this->config_->local_address_;
-  } else {
+  if (this->active_) {
     local_address.set_type(remote_address.get_type());
+  } else {
+    local_address = this->config_->local_address_;
   }
 
   if (this->socket_.open(local_address) != 0) {

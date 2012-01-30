@@ -216,8 +216,8 @@ UdpTransport::shutdown_i()
 bool
 UdpTransport::connection_info_i(TransportLocator& info) const
 {
-  NetworkAddress network_address(this->config_i_->local_address_, true);
-
+  NetworkAddress network_address(this->config_i_->local_address_,
+                                 this->config_i_->local_address_.is_any());
   ACE_OutputCDR cdr;
   cdr << network_address;
 
