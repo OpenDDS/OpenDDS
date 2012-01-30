@@ -216,7 +216,7 @@ tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !NO_MCAST
-tests/DCPS/SharedTransport/run_test.pl rtps !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+tests/DCPS/SharedTransport/run_test.pl rtps: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/SharedTransport/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/Ownership/run_test.pl: !DCPS_MIN
 tests/DCPS/Ownership/run_test.pl update_strength: !DCPS_MIN !NO_BUILT_IN_TOPICS

@@ -1,3 +1,9 @@
+Mon Jan 30 15:07:37 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Missing colon in list.
+
 Mon Jan 30 15:02:16 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tests/DCPS/DcpsIntegration:
