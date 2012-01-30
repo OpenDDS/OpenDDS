@@ -1,3 +1,9 @@
+Mon Jan 30 21:55:36 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fix use of invalid STL iterator (in ignore).
+
 Mon Jan 30 21:27:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

@@ -342,9 +342,9 @@ Sedp::ignore(const RepoId& to_ignore)
       // clean up tracking info
       topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
+      std::string topic_name = get_topic_name(iter->second);
       discovered_publications_.erase(iter);
       // break associations
-      std::string topic_name = get_topic_name(iter->second);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
@@ -360,9 +360,9 @@ Sedp::ignore(const RepoId& to_ignore)
       // clean up tracking info
       topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
+      std::string topic_name = get_topic_name(iter->second);
       discovered_subscriptions_.erase(iter);
       // break associations
-      std::string topic_name = get_topic_name(iter->second);
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
