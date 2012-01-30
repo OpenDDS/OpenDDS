@@ -257,6 +257,7 @@ private:
     DCPS::TransportLocatorSeq trans_info_;
     RepoIdSet matched_endpoints_;
     DCPS::SequenceNumber original_sequence_;
+    RepoIdSet remote_opendds_associations_;
   };
 
   struct LocalPublication : LocalEndpoint {
@@ -368,6 +369,8 @@ private:
 
   void write_durable_publication_data();
   void write_durable_subscription_data();
+
+  static bool is_opendds(const GUID_t& endpoint);
 
   DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid,
                                            LocalPublication& pub,

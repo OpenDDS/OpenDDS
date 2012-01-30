@@ -1184,6 +1184,22 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         }
       }
     }
+    // For each associated opendds writer to this reader
+    CORBA::ULong len = rdata.readerProxy.associatedWriters.length();
+    for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex)
+    {
+      GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
+
+      // If the associated writer is in this participant
+      LocalPublicationIter lp = local_publications_.find(writerGuid);
+      if (lp != local_publications_.end()) {
+        // If the local writer is not fully associated with the reader
+        if (lp->second.remote_opendds_associations_.insert(guid).second) {
+          // This is a new association
+          lp->second.publication_->association_complete(guid);
+        }
+      }
+    }
 
   } else if (message_id == DCPS::UNREGISTER_INSTANCE ||
              message_id == DCPS::DISPOSE_INSTANCE ||
@@ -1483,7 +1499,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     }
 
     // change this if 'writer_active' (above) changes
-    if (call_writer && !call_reader) {
+    if (call_writer && !call_reader && !is_opendds(reader)) {
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Sedp::match - ")
@@ -1580,8 +1596,11 @@ Sedp::remove_assoc(const RepoId& remove_from,
       DCPS::WriterIdSeq writer_seq(1);
       writer_seq.length(1);
       writer_seq[0] = removing;
+      lsi->second.remote_opendds_associations_.erase(removing);
       lsi->second.subscription_->remove_associations(writer_seq,
                                                      false /*notify_lost*/);
+      // Update writer
+      write_subscription_data(remove_from, lsi->second);
     }
 
   } else {
@@ -1591,6 +1610,7 @@ Sedp::remove_assoc(const RepoId& remove_from,
       DCPS::ReaderIdSeq reader_seq(1);
       reader_seq.length(1);
       reader_seq[0] = removing;
+      lpi->second.remote_opendds_associations_.erase(removing);
       lpi->second.publication_->remove_associations(reader_seq,
                                                     false /*notify_lost*/);
     }
@@ -1598,10 +1618,23 @@ Sedp::remove_assoc(const RepoId& remove_from,
 }
 
 void
-Sedp::association_complete(const RepoId& /*localId*/,
-                           const RepoId& /*remoteId*/)
+Sedp::association_complete(const RepoId& localId,
+                           const RepoId& remoteId)
 {
-  // no-op
+  // If the remote endpoint is an opendds endpoint
+  if (is_opendds(remoteId)) {
+    LocalSubscriptionIter sub = local_subscriptions_.find(localId);
+    // If the local endpoint is a reader
+    if (sub != local_subscriptions_.end()) {
+      std::pair<RepoIdSet::iterator, bool> result = 
+          sub->second.remote_opendds_associations_.insert(remoteId);
+      // If this is a new association for the local reader
+      if (result.second) {
+        // Tell other participants
+        write_subscription_data(localId, sub->second);
+      }
+    }
+  }
 }
 void
 Sedp::disassociate_participant(const RepoId& /*remoteId*/)
@@ -1953,6 +1986,14 @@ Sedp::populate_discovered_reader_msg(
   drd.contentFilterProperty.filterClassName = ""; // See PL converter
   drd.contentFilterProperty.filterExpression = sub.filter_.c_str();
   drd.contentFilterProperty.expressionParameters = sub.params_;
+  for (RepoIdSet::iterator writer = sub.remote_opendds_associations_.begin();
+       writer != sub.remote_opendds_associations_.end();
+       ++writer)
+  {
+    CORBA::ULong len = drd.readerProxy.associatedWriters.length();
+    drd.readerProxy.associatedWriters.length(len + 1);
+    drd.readerProxy.associatedWriters[len] = *writer;
+  }
 }
 
 void
@@ -2048,6 +2089,13 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
       locators[i].data[len] = CORBA::Octet(1);
     }
   }
+}
+
+bool
+Sedp::is_opendds(const GUID_t& endpoint)
+{
+  return !memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI, 
+                 sizeof(DCPS::VENDORID_OCI));
 }
 
 }
