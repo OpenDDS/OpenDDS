@@ -6,6 +6,7 @@ use Socket;
 use Sys::Hostname;
 use IO::Socket;
 use IO::Select;
+use strict;
 
 ### Constants
 

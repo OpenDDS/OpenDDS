@@ -1,3 +1,16 @@
+Mon Jan 30 17:32:50 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+
+          Use strict-mode Perl.
+          Added compatiblity for IPv6-enabled Windows hosts.
+
+        * bin/cross_tests.lst:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Enable testing with RTPS transport and discovery.
+
 Mon Jan 30 16:56:02 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/udp/UdpDataLink.cpp:

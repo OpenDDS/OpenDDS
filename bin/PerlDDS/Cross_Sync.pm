@@ -1,7 +1,9 @@
 package PerlDDS::Cross_Sync;
 
 use PerlDDS::Cross_Sync_Common;
+use strict;
 
+use vars qw(@ISA);
 @ISA = ("PerlDDS::Cross_Sync_Common"); #inherits from Cross_Syn_Common
 
 sub new {
@@ -50,7 +52,7 @@ sub uniqueid {
         open (IPNUM, "ipconfig|") || die "Can't run ipconfig: $!\n";
 
         while (<IPNUM>) {
-            if (/Address/) {
+            if (/Address/ && !/IPv6 Address/) {
                 $uid = (split (/: (\d+)\.(\d+)\.(\d+)\.(\d+)/))[4];
             }
         }
