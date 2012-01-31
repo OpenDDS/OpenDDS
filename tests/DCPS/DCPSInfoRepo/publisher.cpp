@@ -77,6 +77,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       mgr->activate();
 
       OpenDDS::DCPS::DCPSInfo_var info;
+#ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::RTPS::RtpsDiscovery_rch disc;
 
       if (use_rtps) {
@@ -88,10 +89,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, "ERROR: RTPS Discovery doesn't work yet\n"));
 
       } else {
+#endif
         CORBA::Object_var tmp =
           orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
         info = OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
+#ifndef DDS_HAS_MINIMUM_BIT
       }
+#endif
 
       if (CORBA::is_nil (info.in ()))
         {
@@ -316,7 +320,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       info->remove_domain_participant(domainId, dpId);
 
+#ifndef DDS_HAS_MINIMUM_BIT
       disc = 0;
+#endif
 
       // clean up the orb
       orb->destroy ();

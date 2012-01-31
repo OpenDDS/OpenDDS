@@ -289,9 +289,8 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
   }
 
   Parameter abe_param;
-  abe_param.builtin_endpoints(
-      participant_data.participantProxy.availableBuiltinEndpoints);
-  abe_param._d(PID_PARTICIPANT_BUILTIN_ENDPOINTS);
+  abe_param.participant_builtin_endpoints(
+    participant_data.participantProxy.availableBuiltinEndpoints);
   add_param(param_list, abe_param);
 
   // Each locator
@@ -690,6 +689,13 @@ int from_param_list(const ParameterList& param_list,
             param.expects_inline_qos();
         break;
       case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
+        participant_data.participantProxy.availableBuiltinEndpoints =
+            param.participant_builtin_endpoints();
+        break;
+      case PID_BUILTIN_ENDPOINT_SET:
+        // OpenSplice uses this in place of PID_PARTICIPANT_BUILTIN_ENDPOINTS
+        // Table 9.13 indicates that PID_PARTICIPANT_BUILTIN_ENDPOINTS should be
+        // used to represent ParticipantProxy::availableBuiltinEndpoints
         participant_data.participantProxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;

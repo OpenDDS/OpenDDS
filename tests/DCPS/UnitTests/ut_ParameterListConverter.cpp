@@ -1124,6 +1124,20 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(status != 0);
   }
 
+  { // Foreign DDS's have been observed using PID_BUILTIN_ENDPOINT_SET when
+    // they should be using PID_PARTICIPANT_BUILTIN_ENDPOINTS.
+    Parameter vs_param;
+    vs_param.builtin_endpoints(0x12345678);
+    ParameterList vs_param_list;
+    vs_param_list.length(1);
+    vs_param_list[0] = vs_param;
+    SPDPdiscoveredParticipantData part_data_out;
+    const int status = from_param_list(vs_param_list, part_data_out);
+    TEST_ASSERT(!status);
+    TEST_ASSERT(part_data_out.participantProxy.availableBuiltinEndpoints
+                == 0x12345678);
+  }
+
   { // Should ignore participant SENTINEL
     SPDPdiscoveredParticipantData part_data_out;
     ParameterList vs_param_list;

@@ -454,7 +454,6 @@ Spdp::SpdpTransport::close()
 void
 Spdp::SpdpTransport::write()
 {
-  static const LocatorSeq emptyList;
   static const BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
@@ -463,6 +462,18 @@ Spdp::SpdpTransport::write()
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
+
+  // This locator list should not be empty, but we won't actually be using it.
+  // The OpenDDS publication/subscription data will have locators included.
+  LocatorSeq nonEmptyList(1);
+  nonEmptyList.length(1);
+  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
+  nonEmptyList[0].port = 12345;
+  std::memset(nonEmptyList[0].address, 0, 12);
+  nonEmptyList[0].address[12] = 127;
+  nonEmptyList[0].address[13] = 0;
+  nonEmptyList[0].address[14] = 0;
+  nonEmptyList[0].address[15] = 1;
 
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
@@ -485,8 +496,8 @@ Spdp::SpdpTransport::write()
       availableBuiltinEndpoints,
       outer_->sedp_unicast_,
       outer_->sedp_multicast_,
-      emptyList /*defaultMulticastLocatorList*/,
-      emptyList /*defaultUnicastLocatorList*/,
+      nonEmptyList /*defaultMulticastLocatorList*/,
+      nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
     },
     { // Duration_t (leaseDuration)
@@ -611,6 +622,15 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       break;
     }
     default:
+      SubmessageHeader smHeader;
+      if (!(ser >> smHeader)) {
+        ACE_ERROR((
+              LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+              ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
+        return 0;
+      }
+      submessageLength = smHeader.submessageLength;
       if (subm != INFO_TS && DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_input() - ")

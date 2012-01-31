@@ -92,9 +92,18 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
 
   use_datalink(local_id, remote_id, remote_data,
                attribs.local_reliable_, remote_reliable);
+
+  GuidConverter local(local_id), remote(remote_id);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
+    "waiting for handshake local %C remote %C\n", std::string(local).c_str(),
+    std::string(remote).c_str()), 2);
   if (!link->wait_for_handshake(local_id, remote_id)) {
+    VDBG_LVL((LM_ERROR, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
+      "ERROR: wait for handshake failed\n"), 2);
     return 0;
   }
+  VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
+    "wait for handshake completed\n"), 2);
   return link._retn();
 }
 

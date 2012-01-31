@@ -1286,7 +1286,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
   // 1. collect details about the writer, which may be local or discovered
   const DDS::DataWriterQos* dwQos = 0;
   const DDS::PublisherQos* pubQos = 0;
-  const DCPS::TransportLocatorSeq* wTls = 0;
+  DCPS::TransportLocatorSeq* wTls = 0;
 
   const LocalPublicationIter lpi = local_publications_.find(writer);
   DiscoveredPublicationIter dpi;
@@ -1336,7 +1336,9 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 
     LocatorSeq locs;
     bool participantExpectsInlineQos = false;
-    spdp_.get_default_locators(participant_id_, locs,
+    RepoId remote_participant = reader;
+    remote_participant.entityId = ENTITYID_PARTICIPANT;
+    spdp_.get_default_locators(remote_participant, locs,
                                participantExpectsInlineQos);
     if (!rTls->length()) {     // if no locators provided, add the default
       if (locs.length()) {
@@ -1364,8 +1366,8 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       } else {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) Sedp::match - ")
-                   ACE_TEXT("remote endpoint found with no locators ")
-                   ACE_TEXT("and no deafault locators\n")));
+                   ACE_TEXT("remote reader found with no locators ")
+                   ACE_TEXT("and no default locators\n")));
       }
     }
 
@@ -1427,6 +1429,40 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     tempPubQos.entity_factory =
       TheServiceParticipant->initial_EntityFactoryQosPolicy();
     pubQos = &tempPubQos;
+
+    LocatorSeq locs;
+    bool participantExpectsInlineQos = false;
+    RepoId remote_participant = writer;
+    remote_participant.entityId = ENTITYID_PARTICIPANT;
+    spdp_.get_default_locators(remote_participant, locs,
+                               participantExpectsInlineQos);
+    if (!wTls->length()) {     // if no locators provided, add the default
+      if (locs.length()) {
+        size_t size = 0, padding = 0;
+        DCPS::gen_find_size(locs, size, padding);
+
+        ACE_Message_Block mb_locator(size + 1);   // Add space for boolean
+        using DCPS::Serializer;
+        Serializer ser_loc(&mb_locator,
+                           ACE_CDR_BYTE_ORDER,
+                           Serializer::ALIGN_CDR);
+        ser_loc << locs;
+        ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos);
+
+        // append default locators
+        DCPS::TransportLocator tl;
+        tl.transport_type = "rtps_udp";
+        tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()),
+                        &mb_locator);
+        wTls->length(1);
+        (*wTls)[0] = tl;
+      } else {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Sedp::match - ")
+                   ACE_TEXT("remote writer found with no locators ")
+                   ACE_TEXT("and no default locators\n")));
+      }
+    }
   }
 
   // Need to release lock, below, for callbacks into DCPS which could

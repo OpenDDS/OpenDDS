@@ -1,3 +1,38 @@
+Tue Jan 31 23:03:05 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          OpenSplice is sending PID_BUILTIN_ENDPOINT_SET to encode the
+          ParticipantProxy::availableBuiltinEndpoints, which Table 9.13 in the
+          spec indicates should be PID_PARTICIPANT_BUILTIN_ENDPOINTS.  Allow
+          either representation.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Code was present to get default locators for remote readers, but it
+          used the wrong GUID to find them.  This change fixes that bug and
+          adds the similar case for a remote writer.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added default multi/uni-cast locators, which aren't used but need
+          to be present for spec compliance.
+          Parse and skip incoming SPDP messages that have submessage types
+          that we aren't interested in.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Log interesting events in connect_datalink_i().
+
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Fix compile errors for built_in_topics=0 build.
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Test the ParameterListConverter change above.
+
 Tue Jan 31 15:04:36 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
