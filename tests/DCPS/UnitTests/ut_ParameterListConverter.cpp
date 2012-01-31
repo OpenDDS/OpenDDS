@@ -2682,7 +2682,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     gb1.guidPrefix0(17);
     gb1.guidPrefix1(1);
     gb1.guidPrefix2(167);
-    
+
     reader_data.readerProxy.associatedWriters.length(2);
     reader_data.readerProxy.associatedWriters[0] = writer0;
     reader_data.readerProxy.associatedWriters[1] = writer1;
@@ -2691,21 +2691,21 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!to_param_list(reader_data, param_list));
     Parameter guid0 = get(param_list, PID_OPENDDS_ASSOCIATED_WRITER, 0);
     Parameter guid1 = get(param_list, PID_OPENDDS_ASSOCIATED_WRITER, 1);
-    TEST_ASSERT(!memcmp(guid0.guid().guidPrefix, 
-                        writer0.guidPrefix, 
+    TEST_ASSERT(!memcmp(guid0.guid().guidPrefix,
+                        writer0.guidPrefix,
                         sizeof(OpenDDS::DCPS::GuidPrefix_t)));
-    TEST_ASSERT(!memcmp(guid1.guid().guidPrefix, 
-                        writer1.guidPrefix, 
+    TEST_ASSERT(!memcmp(guid1.guid().guidPrefix,
+                        writer1.guidPrefix,
                         sizeof(OpenDDS::DCPS::GuidPrefix_t)));
 
     DiscoveredReaderData reader_data_out;
     from_param_list(param_list, reader_data_out);
     TEST_ASSERT(reader_data_out.readerProxy.associatedWriters.length() == 2);
-    TEST_ASSERT(!memcmp(reader_data_out.readerProxy.associatedWriters[0].guidPrefix, 
-                        writer0.guidPrefix, 
+    TEST_ASSERT(!memcmp(reader_data_out.readerProxy.associatedWriters[0].guidPrefix,
+                        writer0.guidPrefix,
                         sizeof(OpenDDS::DCPS::GuidPrefix_t)));
     TEST_ASSERT(!memcmp(reader_data_out.readerProxy.associatedWriters[1].guidPrefix,
-                        writer1.guidPrefix, 
+                        writer1.guidPrefix,
                         sizeof(OpenDDS::DCPS::GuidPrefix_t)));
 
 

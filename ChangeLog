@@ -1,3 +1,11 @@
+Tue Jan 31 15:04:36 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Fuzz.
+
 Mon Jan 30 23:43:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/WaitSet.cpp:

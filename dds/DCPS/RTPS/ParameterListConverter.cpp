@@ -649,7 +649,6 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     param.guid(reader_data.readerProxy.associatedWriters[i]);
     param._d(PID_OPENDDS_ASSOCIATED_WRITER);
     add_param(param_list, param);
-   
   }
   return 0;
 }

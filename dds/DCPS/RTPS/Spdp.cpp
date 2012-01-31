@@ -103,9 +103,9 @@ Spdp::~Spdp()
       DiscoveredParticipantIter part = participants_.find(*participant_id);
       if (part != participants_.end()) {
         remove_discovered_participant(part);
-      }  
+      }
     }
-    
+
     tport_->close();
   }
   // release lock for reset of event handler, which may delete transport
