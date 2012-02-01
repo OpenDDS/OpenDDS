@@ -1364,10 +1364,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
         rTls->length(1);
         (*rTls)[0] = tl;
       } else {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) Sedp::match - ")
-                   ACE_TEXT("remote reader found with no locators ")
-                   ACE_TEXT("and no default locators\n")));
+        needDefaultLocators_.insert(reader);
       }
     }
 
@@ -1457,10 +1454,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
         wTls->length(1);
         (*wTls)[0] = tl;
       } else {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) Sedp::match - ")
-                   ACE_TEXT("remote writer found with no locators ")
-                   ACE_TEXT("and no default locators\n")));
+        needDefaultLocators_.insert(writer);
       }
     }
   }

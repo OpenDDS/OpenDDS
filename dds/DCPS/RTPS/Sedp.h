@@ -353,6 +353,9 @@ private:
   std::map<std::string, TopicDetailsEx> topics_;
   std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
+
+  RepoIdSet needDefaultLocators_;
+
   bool has_dcps_key(const DCPS::RepoId& topicId) const;
   DCPS::RepoId make_topic_guid();
 
