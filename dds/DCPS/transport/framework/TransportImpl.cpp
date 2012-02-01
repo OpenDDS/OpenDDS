@@ -182,6 +182,7 @@ TransportImpl::detach_client(TransportClient* client)
 {
   DBG_ENTRY_LVL("TransportImpl", "detach_client", 6);
 
+  pre_detach(client);
   GuardType guard(this->lock_);
   clients_.erase(client);
 }

@@ -44,6 +44,7 @@ namespace DCPS {
 DataLink::DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
+    default_listener_(0),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
     scheduled_(false),
@@ -679,8 +680,12 @@ DataLink::data_received(ReceivedDataSample& sample,
   }
 
   if (listener_set.is_nil()) {
-    // Nobody has any interest in this message.  Drop it on the floor.
-    if (Transport_debug_level > 4) {
+
+    if (this->default_listener_) {
+      this->default_listener_->data_received(sample);
+
+    } else if (Transport_debug_level > 4) {
+      // Nobody has any interest in this message.  Drop it on the floor.
       GuidConverter converter(publisher_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::data_received: ")

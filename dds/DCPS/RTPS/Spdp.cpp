@@ -75,7 +75,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
     sedp_unicast_[0] = uc_locator;
   }
 
-  { // Append metatraffic multicast locator
+  if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
     Locator_t mc_locator;
     mc_locator.kind = (mc_addr.get_type() == AF_INET6) ?
@@ -819,12 +819,14 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   return true;
 }
 
-void
+bool
 Spdp::get_default_locators(const RepoId& part_id, LocatorSeq& target,
                            bool& inlineQos)
 {
   DiscoveredParticipantIter part_iter = participants_.find(part_id);
-  if (part_iter != participants_.end()) {
+  if (part_iter == participants_.end()) {
+    return false;
+  } else {
     inlineQos = part_iter->second.pdata_.participantProxy.expectsInlineQos;
     LocatorSeq& mc_source =
           part_iter->second.pdata_.participantProxy.defaultMulticastLocatorList;
@@ -842,8 +844,8 @@ Spdp::get_default_locators(const RepoId& part_id, LocatorSeq& target,
     for (CORBA::ULong uci = 0; uci < uc_source.length(); ++uci) {
       target[target_len + mc_source_len + uci] = uc_source[uci];
     }
-
   }
+  return true;
 }
 
 bool

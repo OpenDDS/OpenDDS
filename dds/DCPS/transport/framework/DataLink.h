@@ -248,6 +248,13 @@ public:
   void wait_for_start();
   void unblock_wait_for_start();
 
+  void default_listener(TransportReceiveListener* trl) {
+    this->default_listener_ = trl;
+  }
+  TransportReceiveListener* default_listener() const {
+    return this->default_listener_;
+  }
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class
@@ -357,6 +364,11 @@ private:
   /// Map subscription Id value to TransportReceieveListener.
   typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> IdToRecvListenerMap;
   IdToRecvListenerMap recv_listeners_;
+
+  /// If default_listener_ is not null and this DataLink receives a sample
+  /// from a publication GUID that's not in pub_map_, it will call
+  /// data_received() on the default_listener_.
+  TransportReceiveListener* default_listener_;
 
   /// Map associating each publisher_id with a set of
   /// TransportReceiveListener objects (each with an associated

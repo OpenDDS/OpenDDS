@@ -56,6 +56,7 @@ private:
                                     bool& requires_inline_qos) const;
 
   virtual void release_datalink(DataLink* link);
+  void pre_detach(TransportClient* client);
 
   virtual std::string transport_type() const { return "rtps_udp"; }
 

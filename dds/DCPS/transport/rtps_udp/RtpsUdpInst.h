@@ -20,6 +20,7 @@ namespace RTPS {
 }
 
 namespace DCPS {
+class TransportReceiveListener;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
@@ -47,6 +48,11 @@ private:
   explicit RtpsUdpInst(const std::string& name);
 
   RtpsUdpTransport* new_impl(const TransportInst_rch& inst);
+
+  friend class RTPS::Sedp;
+  friend class RtpsUdpTransport;
+  TransportReceiveListener* opendds_discovery_default_listener_;
+  RepoId opendds_discovery_guid_;
 };
 
 } // namespace DCPS

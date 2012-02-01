@@ -1,3 +1,48 @@
+Wed Feb  1 21:56:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Allow a DataLink to have a default listener which is invoked when
+          no TransportReceiveListener can be found for a data sample.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Provide a pre_detach() hook for derived classes.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Add extra configuration options only used by discovery (SEDP).
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Use discovery-only config options to make sure the data link used
+          by SEDP can receive samples from remote endpoints that aren't yet
+          associated.  This is required for interoperability because the RTPS
+          spec does not indicate how a TRANSIENT_LOCAL writer verifies that
+          its associate reader is ready to receive samples.
+          This uses the transport framework features described above.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Use extra transport config options (see above).
+          Allow either Reader (pubs or subs) to handle data of either type
+          by switching on the publication_id_ in the sample header.
+          Handle cases where we have the discovered pub or sub information
+          before its participant info (need_default_locators_).
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          If SEDP Multicast is disabled, don't advertise a multicast
+          metatraffic locator as part of the SPDP data payload.
+          Also, get_default_locators() now returns false if the participant
+          is not found.
+
 Wed Feb  1 19:10:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

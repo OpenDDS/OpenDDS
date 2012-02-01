@@ -13,6 +13,8 @@
 
 #include "dds/DCPS/AssociationData.h"
 
+#include "dds/DCPS/transport/framework/TransportClient.h"
+
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 
@@ -279,6 +281,13 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   }
 
   create_reactor_task();
+
+  if (config_i_->opendds_discovery_default_listener_) {
+    RtpsUdpDataLink_rch link =
+      make_datalink(config_i_->opendds_discovery_guid_.guidPrefix);
+    link->default_listener(config_i_->opendds_discovery_default_listener_);
+  }
+
   return true;
 }
 
@@ -298,6 +307,14 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
   // No-op for rtps_udp: keep the link_ around until the transport is shut down.
 }
 
+void
+RtpsUdpTransport::pre_detach(TransportClient* c)
+{
+  TransportReceiveListener* trl = dynamic_cast<TransportReceiveListener*>(c);
+  if (trl && !link_.is_nil() && trl == link_->default_listener()) {
+    link_->default_listener(0);
+  }
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

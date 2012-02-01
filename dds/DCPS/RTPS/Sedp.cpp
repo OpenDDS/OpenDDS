@@ -306,7 +306,9 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   transport_cfg_->instances_.push_back(transport_inst_);
 
   // Configure and enable each reader/writer
-  bool force_reliability = true;
+  rtps_inst->opendds_discovery_default_listener_ = &publications_reader_;
+  rtps_inst->opendds_discovery_guid_ = guid;
+  const bool force_reliability = true;
   publications_writer_.enable_transport(force_reliability, transport_cfg_);
   publications_reader_.enable_transport(force_reliability, transport_cfg_);
   subscriptions_writer_.enable_transport(force_reliability, transport_cfg_);
@@ -521,6 +523,36 @@ Sedp::AssociateTask::svc()
     sedp_->write_durable_subscription_data();
   }
 
+  for (RepoIdSet::iterator it = sedp_->need_default_locators_.begin();
+       it != sedp_->need_default_locators_.end(); /*incremented in body*/) {
+    if (0 == std::memcmp(it->guidPrefix, proto.remote_id_.guidPrefix,
+                         sizeof(GuidPrefix_t))) {
+      std::string topic;
+      if (it->entityId.entityKind & 4) {
+        DiscoveredSubscriptionIter dsi =
+          sedp_->discovered_subscriptions_.find(*it);
+        if (dsi != sedp_->discovered_subscriptions_.end()) {
+          topic = dsi->second.reader_data_.ddsSubscriptionData.topic_name;
+        }
+      } else {
+        DiscoveredPublicationIter dpi =
+          sedp_->discovered_publications_.find(*it);
+        if (dpi != sedp_->discovered_publications_.end()) {
+          topic = dpi->second.writer_data_.ddsPublicationData.topic_name;
+        }
+      }
+      if (!topic.empty()) {
+        std::map<std::string, TopicDetailsEx>::iterator ti =
+          sedp_->topics_.find(topic);
+        if (ti != sedp_->topics_.end()) {
+          sedp_->match_endpoints(*it, ti->second);
+        }
+      }
+      sedp_->need_default_locators_.erase(it++);
+    } else {
+      ++it;
+    }
+  }
   return 0;
 }
 
@@ -1338,10 +1370,14 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     bool participantExpectsInlineQos = false;
     RepoId remote_participant = reader;
     remote_participant.entityId = ENTITYID_PARTICIPANT;
-    spdp_.get_default_locators(remote_participant, locs,
-                               participantExpectsInlineQos);
+    const bool participant_found =
+      spdp_.get_default_locators(remote_participant, locs,
+                                 participantExpectsInlineQos);
     if (!rTls->length()) {     // if no locators provided, add the default
-      if (locs.length()) {
+      if (!participant_found) {
+        need_default_locators_.insert(reader);
+        return;
+      } else if (locs.length()) {
         size_t size = 0, padding = 0;
         DCPS::gen_find_size(locs, size, padding);
 
@@ -1356,7 +1392,6 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
         ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos
                                                || readerExpectsInlineQos);
 
-        // append default locators
         DCPS::TransportLocator tl;
         tl.transport_type = "rtps_udp";
         tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()),
@@ -1364,7 +1399,10 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
         rTls->length(1);
         (*rTls)[0] = tl;
       } else {
-        needDefaultLocators_.insert(reader);
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Sedp::match - ")
+                   ACE_TEXT("remote reader found with no locators ")
+                   ACE_TEXT("and no default locators\n")));
       }
     }
 
@@ -1431,10 +1469,14 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     bool participantExpectsInlineQos = false;
     RepoId remote_participant = writer;
     remote_participant.entityId = ENTITYID_PARTICIPANT;
-    spdp_.get_default_locators(remote_participant, locs,
-                               participantExpectsInlineQos);
+    const bool participant_found =
+      spdp_.get_default_locators(remote_participant, locs,
+                                 participantExpectsInlineQos);
     if (!wTls->length()) {     // if no locators provided, add the default
-      if (locs.length()) {
+      if (!participant_found) {
+        need_default_locators_.insert(writer);
+        return;
+      } else if (locs.length()) {
         size_t size = 0, padding = 0;
         DCPS::gen_find_size(locs, size, padding);
 
@@ -1446,7 +1488,6 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
         ser_loc << locs;
         ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos);
 
-        // append default locators
         DCPS::TransportLocator tl;
         tl.transport_type = "rtps_udp";
         tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()),
@@ -1454,7 +1495,10 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
         wTls->length(1);
         (*wTls)[0] = tl;
       } else {
-        needDefaultLocators_.insert(writer);
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Sedp::match - ")
+                   ACE_TEXT("remote writer found with no locators ")
+                   ACE_TEXT("and no default locators\n")));
       }
     }
   }
@@ -1922,8 +1966,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       return;
     }
 
-    switch (repo_id_.entityId.entityKey[2]) {
-    case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER.entityKey[2]
+    switch (sample.header_.publication_id_.entityId.entityKey[2]) {
+    case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER.entityKey[2]
       DiscoveredWriterData wdata;
       if (ParameterListConverter::from_param_list(data, wdata) < 0) {
         ACE_DEBUG((LM_ERROR,
@@ -1935,7 +1979,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.data_received(sample.header_.message_id_, wdata);
       break;
     }
-    case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER.entityKey[2]
+    case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER.entityKey[2]
       DiscoveredReaderData rdata;
       if (ParameterListConverter::from_param_list(data, rdata) < 0) {
         ACE_DEBUG((LM_ERROR,

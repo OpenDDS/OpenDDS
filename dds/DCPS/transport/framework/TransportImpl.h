@@ -202,6 +202,7 @@ private:
 
   void attach_client(TransportClient* client);
   void detach_client(TransportClient* client);
+  virtual void pre_detach(TransportClient*) {}
 
   DataLink* find_connect_i(const RepoId& local_id,
                            const AssociationData& remote_association,
