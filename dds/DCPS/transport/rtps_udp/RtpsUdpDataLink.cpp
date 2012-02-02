@@ -167,12 +167,14 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     return;
   }
 
+  bool enable_heartbeat = false;
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const GuidConverter conv(local_id);
   const EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER && remote_reliable) {
     writers_[local_id].remote_readers_[remote_id];
-    heartbeat_.enable();
+    enable_heartbeat = true;
 
   } else if (kind == KIND_READER) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
@@ -182,6 +184,11 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     }
     rr->second.remote_writers_[remote_id];
     reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
+  }
+
+  g.release();
+  if (enable_heartbeat) {
+    heartbeat_.enable();
   }
 }
 

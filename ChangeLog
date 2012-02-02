@@ -1,3 +1,17 @@
+Thu Feb  2 17:13:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Look up participant data for storing BIT handle.  Fixed logging.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Fix use of invalid GUID for lookup of discovered participant.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Enable the reactor timer without holding the lock.
+
 Wed Feb  1 21:56:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:

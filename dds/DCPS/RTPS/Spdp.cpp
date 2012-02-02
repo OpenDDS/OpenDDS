@@ -197,9 +197,11 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         bit->store_synthetic_data(pdata.ddsParticipantData,
                                   DDS::NEW_VIEW_STATE);
     }
-    participants_[guid].bit_ih_ = bit_instance_handle;
     // Iterator is no longer valid
-    iter = participants_.end();
+    iter = participants_.find(guid);
+    if (iter != participants_.end()) {
+      iter->second.bit_ih_ = bit_instance_handle;
+    }
 
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
     remove_discovered_participant(iter);
@@ -269,7 +271,7 @@ Spdp::remove_expired_participants()
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);
           ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_timeout() - ")
+            ACE_TEXT("(%P|%t) Spdp::SpdpTransport::remove_expired_participants() - ")
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
             std::string(conv).c_str()));
         }
