@@ -1,0 +1,11 @@
+
+#pragma DCPS_DATA_TYPE "ShapeType"
+#pragma DCPS_DATA_KEY "ShapeType color"
+struct ShapeType {
+  string color;
+  long x;
+  long y;
+  long shapesize;
+};
+
+

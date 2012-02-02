@@ -1,3 +1,49 @@
+Thu Feb  2 22:41:12 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * examples/DCPS/ishapes:
+        * examples/DCPS/ishapes/BouncingShapeDynamics.hpp:
+        * examples/DCPS/ishapes/BouncingShapeDynamics.cpp:
+        * examples/DCPS/ishapes/Circle.hpp:
+        * examples/DCPS/ishapes/Circle.cpp:
+        * examples/DCPS/ishapes/DDSShapeDynamics.hpp:
+        * examples/DCPS/ishapes/DDSShapeDynamics.cpp:
+        * examples/DCPS/ishapes/FilterDialog.cpp:
+        * examples/DCPS/ishapes/FilterDialog.hpp:
+        * examples/DCPS/ishapes/LICENSING:
+        * examples/DCPS/ishapes/README:
+        * examples/DCPS/ishapes/ReaderQosDialog.hpp:
+        * examples/DCPS/ishapes/ReaderQosDialog.cpp:
+        * examples/DCPS/ishapes/Shape.hpp:
+        * examples/DCPS/ishapes/Shape.cpp:
+        * examples/DCPS/ishapes/ShapeDynamics.cpp:
+        * examples/DCPS/ishapes/ShapeDynamics.hpp:
+        * examples/DCPS/ishapes/ShapeType.idl:
+        * examples/DCPS/ishapes/ShapesDialog.cpp:
+        * examples/DCPS/ishapes/ShapesDialog.hpp:
+        * examples/DCPS/ishapes/ShapesWidget.cpp:
+        * examples/DCPS/ishapes/ShapesWidget.hpp:
+        * examples/DCPS/ishapes/Square.cpp:
+        * examples/DCPS/ishapes/Square.hpp:
+        * examples/DCPS/ishapes/Triangle.cpp:
+        * examples/DCPS/ishapes/Triangle.hpp:
+        * examples/DCPS/ishapes/WriterQosDialog.hpp:
+        * examples/DCPS/ishapes/WriterQosDialog.cpp:
+        * examples/DCPS/ishapes/config.hpp:
+        * examples/DCPS/ishapes/filterForm.ui:
+        * examples/DCPS/ishapes/iShapesForm.ui:
+        * examples/DCPS/ishapes/ishape.qrc:
+        * examples/DCPS/ishapes/ishapes.mpc:
+        * examples/DCPS/ishapes/ishapes.pro:
+        * examples/DCPS/ishapes/main.cpp:
+        * examples/DCPS/ishapes/qosForm.ui:
+        * examples/DCPS/ishapes/readerQosForm.ui:
+        * examples/DCPS/ishapes/writerQosForm.ui:
+        * examples/DCPS/ishapes/images:
+        * examples/DCPS/ishapes/images/logo.png:
+
+          Added application adapted from The Simple DDS App to use
+          to demo OpenDDS interoperability with other vendors.
+
 Thu Feb  2 17:13:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
