@@ -1071,7 +1071,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
-                                 ACE_TEXT("calling match_endpoints\n")));
+                                 ACE_TEXT("calling match_endpoints new\n")));
           }
           match_endpoints(guid, top_it->second);
         }
@@ -1087,6 +1087,10 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
+        if (DCPS::DCPS_debug_level) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
+                               ACE_TEXT("calling match_endpoints update\n")));
+        }
         match_endpoints(guid, top_it->second);
       }
     }
@@ -1104,6 +1108,10 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         match_endpoints(guid, top_it->second, true /*remove*/);
       }
       remove_from_bit(iter->second);
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
+                             ACE_TEXT("calling match_endpoints disp/unreg\n")));
+      }
       discovered_publications_.erase(iter);
     }
   }
@@ -1185,7 +1193,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
-                                 ACE_TEXT("calling match_endpoints\n")));
+                                 ACE_TEXT("calling match_endpoints new\n")));
           }
           match_endpoints(guid, top_it->second);
         }
@@ -1203,6 +1211,10 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
+                                 ACE_TEXT("calling match_endpoints update\n")));
+          }
           match_endpoints(guid, top_it->second);
         }
       }
@@ -1231,14 +1243,11 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
     {
       GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
 
-ACE_DEBUG((LM_INFO, "discovererd reader is associated with some writer[%d]\n", writerIndex));
       // If the associated writer is in this participant
       LocalPublicationIter lp = local_publications_.find(writerGuid);
       if (lp != local_publications_.end()) {
-        ACE_DEBUG((LM_INFO, "That's a local writer\n"));
         // If the local writer is not fully associated with the reader
         if (lp->second.remote_opendds_associations_.insert(guid).second) {
-          ACE_DEBUG((LM_INFO, "That's a new association for the local writer\n"));
           // This is a new association
           lp->second.publication_->association_complete(guid);
         }
@@ -1255,6 +1264,10 @@ ACE_DEBUG((LM_INFO, "discovererd reader is associated with some writer[%d]\n", w
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
+        if (DCPS::DCPS_debug_level) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
+                               ACE_TEXT("calling match_endpoints disp/unreg\n")));
+        }
         match_endpoints(guid, top_it->second, true /*remove*/);
       }
       remove_from_bit(iter->second);
@@ -1606,12 +1619,14 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
       DCPS::ReaderIdSeq reader_seq(1);
       reader_seq.length(1);
       reader_seq[0] = reader;
+      lpi->second.remote_opendds_associations_.erase(reader);
       dwr->remove_associations(reader_seq, false /*notify_lost*/);
     }
     if (reader_local) {
       DCPS::WriterIdSeq writer_seq(1);
       writer_seq.length(1);
       writer_seq[0] = writer;
+      lsi->second.remote_opendds_associations_.erase(writer);
       drr->remove_associations(writer_seq, false /*notify_lost*/);
     }
 
