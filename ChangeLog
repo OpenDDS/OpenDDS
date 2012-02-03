@@ -1,3 +1,9 @@
+Fri Feb  3 16:59:11 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Use the new *TAOv2*.mwc files when needed.
+
 Fri Feb  3 14:28:48 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * examples/DCPS/ishapes/README:
@@ -12,7 +18,7 @@ Thu Feb  2 22:02:02 UTC 2012  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp
 
-          Additional conditioal logging.
+          Additional conditional logging.
           Remove unconditional loggging.
           Clean up remote endpoint association tracking when unmatching
             due to remote QOS change.

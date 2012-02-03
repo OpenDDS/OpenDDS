@@ -315,6 +315,15 @@ elsif (!$ENV{'TAO_ROOT'} && $ENV{'ACE_ROOT'}
        && -r $ENV{'ACE_ROOT'} . '/TAO/tao/ORB.h') {
   setenv('TAO_ROOT', $ENV{'ACE_ROOT'} . $slash . 'TAO');
 }
+my $tao_maj = 1;
+open TAOVER, $ENV{'TAO_ROOT'} . '/VERSION' or die "can't open TAO VERSION\n";
+while (<TAOVER>) {
+  if (/^This is TAO version (\d)/) {
+    $tao_maj = $1;
+    last;
+  }
+}
+close TAOVER;
 
 ## Download ACE+TAO 1.6a
 
@@ -598,7 +607,7 @@ if ($needmpc) {
     }
     $DF->close;
     if ($opts{'verbose'}) {
-      print ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n"
+      print ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n";
     }
   }
 
@@ -611,6 +620,10 @@ if ($needmpc) {
   }
   elsif ($buildtao) {
     $ws = 'DDS_TAO_all.mwc';
+  }
+
+  if ($tao_maj == 2 && $ws =~ /TAO/) {
+    $ws =~ s/TAO/TAOv2/;
   }
 
   my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
