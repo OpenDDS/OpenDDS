@@ -848,6 +848,11 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const RtpsWriterMap::iterator rw = writers_.find(local);
   if (rw == writers_.end()) {
+    if (Transport_debug_level > 5) {
+      GuidConverter local_conv(local);
+      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+        "WARNING local %C no RtpsWriter\n", std::string(local_conv).c_str()));
+    }
     return;
   }
 
@@ -855,12 +860,23 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
   std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
   remote.entityId = acknack.readerId;
 
+  if (Transport_debug_level > 5) {
+    GuidConverter local_conv(local), remote_conv(remote);
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+      "local %C remote %C\n", std::string(local_conv).c_str(),
+      std::string(remote_conv).c_str()));
+  }
+
   const ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(remote);
   if (ri == rw->second.remote_readers_.end()) {
+    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+      "WARNING ReaderInfo not found\n"));
     return;
   }
 
   if (acknack.count.value <= ri->second.acknack_recvd_count_) {
+    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+      "WARNING Count indicates duplicate, dropping\n"));
     return;
   }
 

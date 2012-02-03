@@ -1,3 +1,14 @@
+Fri Feb  3 22:28:11 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          Handle PID_SENTINEL entries in the ParameterList
+          while ignoring the size field.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Added debug logging.
+
 Fri Feb  3 16:59:11 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * configure:
