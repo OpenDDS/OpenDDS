@@ -1,12 +1,18 @@
+Fri Feb  3 14:28:48 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * examples/DCPS/ishapes/README:
+
+          Removed trailing whitespace.
+
 Thu Feb  2 22:02:02 UTC 2012  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/SetQosPartition/run_test.pl
-				
-	  Update to not start InfoRepo when running rtps discovery.
+
+          Update to not start InfoRepo when running rtps discovery.
 
         * dds/DCPS/RTPS/Sedp.cpp
 
-	  Additional conditioal logging.
+          Additional conditioal logging.
           Remove unconditional loggging.
           Clean up remote endpoint association tracking when unmatching
             due to remote QOS change.

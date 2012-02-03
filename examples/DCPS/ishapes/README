@@ -1,7 +1,7 @@
 
 ishapes - QT GUI application for testing OpenDDS RTPS interoperability.
 
-This code has been adapted from The Simple DDS API 
+This code has been adapted from The Simple DDS API
 (SIMD http://code.google.com/p/simd-cxx), and can be used to demonstrate
 OpenDDS RTPS interoperability with other DDS vendors.
 
