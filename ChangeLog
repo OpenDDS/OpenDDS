@@ -1,3 +1,14 @@
+Mon Feb  6 23:04:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Set up tests for static builds to use RTPS Discovery.
+
 Mon Feb  6 22:18:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ContentFilteredTopic/rtps_disc.ini:

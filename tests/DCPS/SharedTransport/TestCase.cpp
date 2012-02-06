@@ -14,6 +14,7 @@
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #endif
 
