@@ -1,3 +1,19 @@
+Mon Feb  6 19:07:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/rtps_disc.ini:
+        * tests/DCPS/CompatibilityTest/rtps_disc_tcp.ini:
+        * tests/DCPS/ContentFilteredTopic/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger/rtps_disc.ini:
+        * tests/DCPS/Messenger/rtps_disc_tcp.ini:
+        * tests/DCPS/SetQosDeadline/rtps_disc.ini:
+        * tests/DCPS/SetQosPartition/rtps_disc.ini:
+        * tests/DCPS/SetQosPartition/rtps_disc_tcp.ini:
+        * tests/DCPS/SharedTransport/rtps_disc_tcp.ini:
+
+          Set SedpMulticast=0 for all RTPS Discovery test config files.
+
 Fri Feb  3 22:28:11 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/marshal_generator.cpp:
