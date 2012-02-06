@@ -1,3 +1,12 @@
+Mon Feb  6 22:18:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc.ini:
+        * tests/DCPS/Messenger/rtps_disc.ini:
+        * tests/DCPS/SetQosPartition/rtps_disc.ini:
+
+          Set use_multicast=0 for some RTPS Udp Transport test config files.
+
 Mon Feb  6 20:33:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:
