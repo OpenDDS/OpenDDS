@@ -523,8 +523,11 @@ Sedp::AssociateTask::svc()
     sedp_->write_durable_subscription_data();
   }
 
-  for (RepoIdSet::iterator it = sedp_->need_default_locators_.begin();
-       it != sedp_->need_default_locators_.end(); /*incremented in body*/) {
+  proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
+  sedp_->associated_participants_.insert(proto.remote_id_);
+
+  for (RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();
+       it != sedp_->defer_match_endpoints_.end(); /*incremented in body*/) {
     if (0 == std::memcmp(it->guidPrefix, proto.remote_id_.guidPrefix,
                          sizeof(GuidPrefix_t))) {
       std::string topic;
@@ -541,14 +544,25 @@ Sedp::AssociateTask::svc()
           topic = dpi->second.writer_data_.ddsPublicationData.topic_name;
         }
       }
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::AssociateTask::svc - ")
+          ACE_TEXT("processing deferred endpoints for topic %C\n"),
+          topic.c_str()));
+      }
       if (!topic.empty()) {
         std::map<std::string, TopicDetailsEx>::iterator ti =
           sedp_->topics_.find(topic);
         if (ti != sedp_->topics_.end()) {
+          if (DCPS::DCPS_debug_level > 3) {
+            DCPS::GuidConverter conv(*it);
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::AssociateTask::svc - ")
+              ACE_TEXT("calling match_endpoints %C\n"),
+              std::string(conv).c_str()));
+          }
           sedp_->match_endpoints(*it, ti->second);
         }
       }
-      sedp_->need_default_locators_.erase(it++);
+      sedp_->defer_match_endpoints_.erase(it++);
     } else {
       ++it;
     }
@@ -561,6 +575,7 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
 {
   RepoId part;
   part.entityId = ENTITYID_PARTICIPANT;
+  associated_participants_.erase(part);
   { // Release lock, so we can call into transport
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
@@ -891,7 +906,7 @@ Sedp::add_subscription(const RepoId& topicId,
   }
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::add_subscription -")
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::add_subscription - ")
                          ACE_TEXT("calling match_endpoints\n")));
   }
   match_endpoints(rid, td);
@@ -1389,7 +1404,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
                                  participantExpectsInlineQos);
     if (!rTls->length()) {     // if no locators provided, add the default
       if (!participant_found) {
-        need_default_locators_.insert(reader);
+        defer_match_endpoints_.insert(reader);
         return;
       } else if (locs.length()) {
         size_t size = 0, padding = 0;
@@ -1488,7 +1503,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
                                  participantExpectsInlineQos);
     if (!wTls->length()) {     // if no locators provided, add the default
       if (!participant_found) {
-        need_default_locators_.insert(writer);
+        defer_match_endpoints_.insert(writer);
         return;
       } else if (locs.length()) {
         size_t size = 0, padding = 0;
@@ -1541,6 +1556,31 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 
   if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                           dwQos, drQos, pubQos, subQos)) {
+    if (!writer_local) {
+      RepoId writer_participant = writer;
+      writer_participant.entityId = ENTITYID_PARTICIPANT;
+      if (!associated_participants_.count(writer_participant)) {
+        if (DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                               ACE_TEXT("remote writer deferred\n")));
+        }
+        defer_match_endpoints_.insert(writer);
+        return;
+      }
+    }
+    if (!reader_local) {
+      RepoId reader_participant = reader;
+      reader_participant.entityId = ENTITYID_PARTICIPANT;
+      if (!associated_participants_.count(reader_participant)) {
+        if (DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                               ACE_TEXT("remote reader deferred\n")));
+        }
+        defer_match_endpoints_.insert(reader);
+        return;
+      }
+    }
+
     bool call_writer = false, call_reader = false;
     if (writer_local) {
       call_writer = lpi->second.matched_endpoints_.insert(reader).second;

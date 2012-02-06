@@ -248,12 +248,8 @@ public:
   void wait_for_start();
   void unblock_wait_for_start();
 
-  void default_listener(TransportReceiveListener* trl) {
-    this->default_listener_ = trl;
-  }
-  TransportReceiveListener* default_listener() const {
-    return this->default_listener_;
-  }
+  void default_listener(TransportReceiveListener* trl);
+  TransportReceiveListener* default_listener() const;
 
 protected:
 

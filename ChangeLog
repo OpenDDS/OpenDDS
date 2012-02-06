@@ -1,3 +1,22 @@
+Mon Feb  6 20:33:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Renamed need_default_locators_ to defer_match_endpoints_.
+          Added associated_participants_, tracking which discovered
+          participants have completed the SEDP Association phase.
+          If trying to match against a remote participant's reader or writer
+          and that participant hasn't yet completed SEDP Association, put it
+          on the defer_match_endpoints_ list and try again once it has
+          completed.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Use the pub_map_lock_ to protect default_listener_.
+
 Mon Feb  6 19:07:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/rtps_disc.ini:

@@ -677,15 +677,15 @@ DataLink::data_received(ReceivedDataSample& sample,
   {
     GuardType guard(this->pub_map_lock_);
     listener_set = this->pub_map_.find(publisher_id);
+    if (listener_set.is_nil() && this->default_listener_) {
+      this->default_listener_->data_received(sample);
+      return 0;
+    }
   }
 
   if (listener_set.is_nil()) {
-
-    if (this->default_listener_) {
-      this->default_listener_->data_received(sample);
-
-    } else if (Transport_debug_level > 4) {
-      // Nobody has any interest in this message.  Drop it on the floor.
+    // Nobody has any interest in this message.  Drop it on the floor.
+    if (Transport_debug_level > 4) {
       GuidConverter converter(publisher_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::data_received: ")

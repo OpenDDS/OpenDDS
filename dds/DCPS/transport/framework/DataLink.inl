@@ -326,5 +326,21 @@ DataLink::recv_listener_for(const RepoId& sub_id) const
   return found->second;
 }
 
+ACE_INLINE
+void
+DataLink::default_listener(TransportReceiveListener* trl)
+{
+  GuardType guard(this->pub_map_lock_);
+  this->default_listener_ = trl;
+}
+
+ACE_INLINE
+TransportReceiveListener*
+DataLink::default_listener() const
+{
+  GuardType guard(this->pub_map_lock_);
+  return this->default_listener_;
+}
+
 }
 }
