@@ -10,62 +10,63 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
-
-$status = 0;
+use strict;
 
 PerlDDS::add_lib_path('../FooType4');
 
 # single reader with single instances test
-$multiple_instance=0;
-$num_samples_per_reader=3;
-$num_readers=1;
-$use_take=0;
+my $multiple_instance = 0;
+my $num_samples_per_reader = 3;
+my $num_readers = 1;
+my $use_take = 0;
 
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = 'repo.ior';
 
 unlink $dcpsrepo_ior;
-unlink $pub_id_file;
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     " -o $dcpsrepo_ior ");
+my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
+                                       "-o $dcpsrepo_ior");
 
-$parameters = "-DCPSConfigFile all.ini -r $num_readers -t $use_take"
-              . " -m $multiple_instance -i $num_samples_per_reader " ;
+my $parameters = "-DCPSConfigFile all.ini -r $num_readers -t $use_take"
+               . " -m $multiple_instance -i $num_samples_per_reader";
 
 if ($ARGV[0] eq 'udp') {
-  $parameters .= " -us -up ";
+  $parameters .= ' -us -up';
 }
 elsif ($ARGV[0] eq 'diff_trans') {
-  $parameters .= " -up ";
+  $parameters .= ' -up';
 }
-
-$FooTest5 = PerlDDS::create_process ("main", $parameters);
+elsif ($ARGV[0] eq 'rtps') {
+  $parameters .= ' -rs -rp';
+}
+my $FooTest5 = PerlDDS::create_process('main', $parameters);
 
 print $DCPSREPO->CommandLine(), "\n";
-$DCPSREPO->Spawn ();
+$DCPSREPO->Spawn();
 
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
+if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
+  print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+  $DCPSREPO->Kill();
+  exit 1;
 }
 
 print $FooTest5->CommandLine(), "\n";
-$FooTest5->Spawn ();
+$FooTest5->Spawn();
 
-$result = $FooTest5->WaitKill (60);
+my $result = $FooTest5->WaitKill(60);
 
+my $status = 0;
 if ($result != 0) {
-    print STDERR "ERROR: main returned $result \n";
-    $status = 1;
+  print STDERR "ERROR: main returned $result\n";
+  $status = 1;
 }
 
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
+my $ir = $DCPSREPO->TerminateWaitKill(5);
 
 if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
+  print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
+  $status = 1;
 }
 
 if ($status == 0) {

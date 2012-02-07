@@ -29,6 +29,7 @@ extern int history_depth;
 // default to using TCP
 extern int using_udp;
 extern int using_multicast;
+extern int using_rtps_transport;
 extern int sequence_length;
 extern int no_key;
 extern InstanceDataMap results;

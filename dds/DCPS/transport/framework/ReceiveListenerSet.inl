@@ -43,6 +43,18 @@ ReceiveListenerSet::insert(RepoId subscriber_id,
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "insert", 6);
   GuardType guard(this->lock_);
+  MapType::iterator iter = map_.find(subscriber_id);
+  if (iter != map_.end()) {
+    if (!listener && iter->second) {
+      // subscriber_id is already in the map with a non-null listener,
+      // and this call to insert() is trying to make it null.
+      return 1; // 1 ==> key already existed in map
+    } else if (listener && !iter->second) {
+      // subscriber_id is in the map with a null listener, update it.
+      iter->second = listener;
+      return 1;
+    }
+  }
   return OpenDDS::DCPS::bind(map_, subscriber_id, listener);
 }
 

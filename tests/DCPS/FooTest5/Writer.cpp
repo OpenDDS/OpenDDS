@@ -12,29 +12,12 @@
 
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
-// Only for Microsoft VC6
-#if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
-
-// Added unused arguments with default value to work around with vc6
-// bug on template function instantiation.
-template<class DT, class DW, class DW_var>
-::DDS::ReturnCode_t write (int writer_id,
-                           ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> & timeout_writes,
-                           ::DDS::DataWriter_ptr writer,
-                           DT* dt = 0, DW* dw = 0, DW_var* dw_var = 0)
-{
-  ACE_UNUSED_ARG (dt);
-  ACE_UNUSED_ARG (dw);
-  ACE_UNUSED_ARG (dw_var);
-
-#else
 
 template<class DT, class DW, class DW_var>
 ::DDS::ReturnCode_t write (int writer_id,
                            ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> & timeout_writes,
                            ::DDS::DataWriter_ptr writer)
 {
-#endif
 
   try
   {
@@ -86,7 +69,7 @@ template<class DT, class DW, class DW_var>
         }
       }
 
-      if (using_udp || using_multicast)
+      if (op_interval_ms)
       {
         // Delay between sends to avoid dropping.
         static ACE_Time_Value delay(op_interval_ms/1000,

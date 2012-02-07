@@ -16,6 +16,7 @@
 // Configurator open service configure file.
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -51,6 +52,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -d history.depth            defaults to 1
     //  -u using_udp                defaults to 0 - using TCP
     //  -c using_multicast          defaults to 0 - using TCP
+    //  -p using rtps transport flag     defaults to 0 - using TCP
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -w num_datawriters          defaults to 1
@@ -99,6 +101,15 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       if (using_multicast == 1)
       {
         ACE_DEBUG((LM_DEBUG, "Subscriber Using MULTICAST transport.\n"));
+      }
+      arg_shifter.consume_arg();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
+    {
+      using_rtps_transport = ACE_OS::atoi(currentArg);
+      if (using_rtps_transport == 1)
+      {
+        ACE_DEBUG((LM_DEBUG, "Subscriber Using RTPS transport.\n"));
       }
       arg_shifter.consume_arg();
     }
@@ -172,7 +183,8 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 ::DDS::Subscriber_ptr
 create_subscriber (::DDS::DomainParticipant_ptr participant,
                    int                          attach_to_udp,
-                   int                          attach_to_multicast)
+                   int                          attach_to_multicast,
+                   int                          attach_to_rtps)
 {
 
   // Create the subscriber
@@ -200,6 +212,11 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast \n")));
           TheTransportRegistry->bind_config("multicast", sub.in());
+        }
+      else if (attach_to_rtps)
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to RTPS\n")));
+          TheTransportRegistry->bind_config("rtps", sub);
         }
       else
         {
@@ -353,8 +370,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Create the subscriber and attach to the corresponding
       // transport.
-      ::DDS::Subscriber_var sub
-        = create_subscriber(participant.in (), attach_to_udp, attach_to_multicast);
+      DDS::Subscriber_var sub =
+        create_subscriber(participant, attach_to_udp, attach_to_multicast,
+                          using_rtps_transport);
       if (CORBA::is_nil (sub.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -367,7 +385,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           // Create the subscriber with a different transport from previous
           // subscriber.
-          sub1 = create_subscriber(participant.in (), ! attach_to_udp, attach_to_multicast);
+          sub1 = create_subscriber(participant, !attach_to_udp,
+                                   attach_to_multicast, false /*rtps*/);
           if (CORBA::is_nil (sub1.in ()))
             {
               ACE_ERROR ((LM_ERROR,

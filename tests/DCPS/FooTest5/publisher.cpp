@@ -17,6 +17,7 @@
 // Configurator open service configure file.
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -46,6 +47,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -d history.depth            defaults to 1
     //  -u using udp flag           defaults to 0 - using TCP
     //  -c using multicast flag     defaults to 0 - using TCP
+    //  -p using rtps transport flag     defaults to 0 - using TCP
     //  -z length of float sequence in data type   defaults to 10
     //  -y write operation interval                defaults to 0
     //  -b blocking timeout in milliseconds        defaults to 0
@@ -97,6 +99,15 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       if (using_multicast == 1)
       {
         ACE_DEBUG((LM_DEBUG, "Publisher Using MULTICAST transport.\n"));
+      }
+      arg_shifter.consume_arg();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
+    {
+      using_rtps_transport = ACE_OS::atoi(currentArg);
+      if (using_rtps_transport == 1)
+      {
+        ACE_DEBUG((LM_DEBUG, "Publisher Using RTPS transport.\n"));
       }
       arg_shifter.consume_arg();
     }
@@ -160,7 +171,8 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 ::DDS::Publisher_ptr
 create_publisher (::DDS::DomainParticipant_ptr participant,
                   int                          attach_to_udp,
-                  int                          attach_to_multicast)
+                  int                          attach_to_multicast,
+                  int                          attach_to_rtps)
 {
   ::DDS::Publisher_var pub;
 
@@ -188,6 +200,11 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast \n")));
           TheTransportRegistry->bind_config("multicast", pub.in());
+        }
+      else if (attach_to_rtps)
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to RTPS\n")));
+          TheTransportRegistry->bind_config("rtps", pub);
         }
       else
         {
@@ -313,7 +330,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       int attach_to_udp = using_udp;
       int attach_to_multicast = using_multicast;
       // Create the default publisher
-      ::DDS::Publisher_var pub = create_publisher(participant.in (), attach_to_udp, attach_to_multicast);
+      ::DDS::Publisher_var pub =
+        create_publisher(participant, attach_to_udp, attach_to_multicast,
+                         using_rtps_transport);
 
       if (CORBA::is_nil (pub.in ()))
         {
@@ -326,7 +345,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (mixed_trans)
         {
           // Create another publisher for a difference transport.
-          pub1 = create_publisher(participant.in (), ! attach_to_udp, attach_to_multicast);
+          pub1 = create_publisher(participant, !attach_to_udp,
+                                  attach_to_multicast, false /*rtps*/);
 
           if (CORBA::is_nil (pub1.in ()))
             {
@@ -405,12 +425,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // ensure the associations are fully established before writing.
       ACE_OS::sleep(3);
 
-      {  // Extra scope for VC6
-        for (int i = 0; i < num_datawriters; i ++)
-          {
-            writers[i]->start ();
-          }
-      }
+      for (int i = 0; i < num_datawriters; i ++)
+        {
+          writers[i]->start ();
+        }
 
       int timeout_writes = 0;
       bool writers_finished = false;
@@ -424,12 +442,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
         }
 
-      {  // Extra scope for VC6
-        for (int i = 0; i < num_datawriters; i ++)
-          {
-            timeout_writes += writers[i]->get_timeout_writes();
-          }
-      }
+      for (int i = 0; i < num_datawriters; i ++)
+        {
+          timeout_writes += writers[i]->get_timeout_writes();
+        }
       // Indicate that the publisher is done
       FILE* writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("w"));
       if (writers_completed == 0)
@@ -454,15 +470,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       ACE_OS::fclose(readers_completed);
 
-      {  // Extra scope for VC6
-        for (int i = 0; i < num_datawriters; i ++)
-          {
-            writers[i]->end ();
-            delete writers[i];
-          }
-      }
+      for (int i = 0; i < num_datawriters; i ++)
+        {
+          writers[i]->end ();
+          delete writers[i];
+        }
 
-      delete []dw;
+      delete [] dw;
       delete [] writers;
     }
   catch (const TestException&)

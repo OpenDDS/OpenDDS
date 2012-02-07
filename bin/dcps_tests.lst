@@ -61,16 +61,20 @@ tests/DCPS/FooTest4_0/run_test.pl:
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl multicast: !DCPS_MIN !NO_MCAST
+tests/DCPS/FooTest5/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl rtps mi: !DCPS_MIN RTPS
 tests/DCPS/FooTest5/run_test.pl nokey mi: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl nokey udp mi: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl nokey rtps mi: !DCPS_MIN RTPS
 tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN
 tests/DCPS/FooTest5_0/run_test.pl: !STATIC
 tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC
+tests/DCPS/FooTest5_0/run_test.pl rtps: !DCPS_MIN !STATIC RTPS
 tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN !STATIC
 tests/DCPS/MultiDPTest/run_test.pl: !DCPS_MIN
 tests/DCPS/TransientLocalTest/run_test.pl: !DCPS_MIN

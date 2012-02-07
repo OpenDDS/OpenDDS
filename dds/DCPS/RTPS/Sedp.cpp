@@ -574,13 +574,13 @@ bool
 Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
 {
   RepoId part;
+  std::memcpy(part.guidPrefix, pdata.participantProxy.guidPrefix,
+              sizeof(GuidPrefix_t));
   part.entityId = ENTITYID_PARTICIPANT;
   associated_participants_.erase(part);
   { // Release lock, so we can call into transport
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
-    std::memcpy(part.guidPrefix, pdata.participantProxy.guidPrefix,
-                sizeof(GuidPrefix_t));
     const BuiltinEndpointSet_t& avail =
       pdata.participantProxy.availableBuiltinEndpoints;
 

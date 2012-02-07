@@ -325,7 +325,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
 
   if (bytes_remaining == 0) {
     if (this->gracefully_disconnected_) {
-      VDBG_LVL((LM_ERROR,
+      VDBG_LVL((LM_INFO,
                 ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n"))
                ,1);
       return -1;

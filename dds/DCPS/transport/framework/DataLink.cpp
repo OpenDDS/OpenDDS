@@ -469,10 +469,33 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
     // The remote_id is not a publisher_id.
     // See if it is a subscriber_id by looking in our sub_map_.
     RepoIdSet_rch id_set;
+    bool has_local_listener = false;
 
     {
       GuardType guard(this->sub_map_lock_);
       id_set = this->sub_map_.find(remote_id);
+      if (id_set.is_nil()) {
+        has_local_listener = this->recv_listener_for(local_id);
+      }
+    }
+
+    if (id_set.is_nil() && !has_local_listener) {
+      GuardType guard(this->pub_map_lock_);
+      has_local_listener = this->send_listener_for(local_id);
+    }
+
+    if (has_local_listener) {
+      // Special case for "loopback" use of one DataLink for both
+      // publication and subscription: if the first release_reservations()
+      // has already completed, the second may not find anything in pub_map_
+      // and sub_map_.
+      VDBG_LVL((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
+        ACE_TEXT("the link has no reservations.\n")), 5);
+      this->release_reservations_i(remote_id, local_id);
+      this->release_remote_i(remote_id);
+      released_locals.insert_link(local_id, this);
+      return;
     }
 
     if (id_set.is_nil()) {

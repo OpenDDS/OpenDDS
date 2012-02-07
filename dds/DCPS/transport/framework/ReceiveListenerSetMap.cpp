@@ -43,32 +43,18 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
 
   int result = listener_set->insert(subscriber_id, receive_listener);
 
-  if (result == 0) {
-    // Success.  Leave now.
+  if (result == 0 || result == 1) {
     return 0;
   }
 
-  // This is error handling code from here on out...
-
-  // Handle the two possible failure cases (duplicate key or unknown)
   GuidConverter sub_converter(subscriber_id);
   GuidConverter pub_converter(publisher_id);
-  if (result == 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
-               ACE_TEXT("subscriber %C already exists for ")
-               ACE_TEXT("publisher %C.\n"),
-               std::string(sub_converter).c_str(),
-               std::string(pub_converter).c_str()));
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
-               ACE_TEXT("failed to insert subscriber %C for ")
-               ACE_TEXT("publisher %C.\n"),
-               std::string(sub_converter).c_str(),
-               std::string(pub_converter).c_str()));
-  }
+  ACE_ERROR((LM_ERROR,
+             ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
+             ACE_TEXT("failed to insert subscriber %C for ")
+             ACE_TEXT("publisher %C.\n"),
+             std::string(sub_converter).c_str(),
+             std::string(pub_converter).c_str()));
 
   // Deal with possibility that the listener_set just got
   // created - and just for us.  This is to make sure we don't leave any
@@ -77,12 +63,11 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
     listener_set = this->remove_set(publisher_id);
 
     if (listener_set.is_nil()) {
-      GuidConverter converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                  ACE_TEXT("failed to remove (undo create) ReceiveListenerSet ")
                  ACE_TEXT("for publisher %C.\n"),
-                 std::string(converter).c_str()));
+                 std::string(pub_converter).c_str()));
     }
   }
 

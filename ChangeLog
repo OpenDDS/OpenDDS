@@ -1,3 +1,51 @@
+Tue Feb  7 22:54:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed a bug in Sedp::disassociate() introduced in yesterday's commit.
+          This will now remove entries from associated_participants_ when
+          disassociating from a remote participant.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+
+          Allow the same DataLink object to be used by both a publishing
+          client and a subscribing client (for example, DataWriterImpl and
+          DataReaderImpl respectively).  Used by RtpsUdpTransport when a
+          matched reader and writer are in the same domain participant and
+          using the same TransportInst.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          "gracefully disconnected" is not an error, removed LM_ERROR.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/all.ini:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/all.ini:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+
+          Adapted to run with the RTPS Transport, cleaned up tests.
+
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Shut down service participant after all entities
+          have been dereferenced.
+
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+
+          Added extra #includes needed for static builds.
+
 Tue Feb  7 21:43:20 UTC 2012  jeff  <jeff@ociweb.com>
 
         * tests/DCPS/SetQosDeadline/publisher.cpp:

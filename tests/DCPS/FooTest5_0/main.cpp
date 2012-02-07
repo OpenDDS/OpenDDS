@@ -17,10 +17,10 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
+#include "dds/DCPS/WaitSet.h"
+
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/Arg_Shifter.h"
@@ -42,6 +42,8 @@ bool support_client_side_BIT = false;
 // default to using TCP
 int sub_using_udp = 0;
 int pub_using_udp = 0;
+int sub_using_rtps = 0;
+int pub_using_rtps = 0;
 
 
 int wait_for_data (::DDS::Subscriber_ptr sub,
@@ -68,13 +70,13 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
 }
 
 /// parse the command line arguments
-int parse_args (int argc, ACE_TCHAR *argv[])
+int parse_args(int argc, ACE_TCHAR *argv[])
 {
-  u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS) ;
-  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS) ;
-  ACE_Arg_Shifter arg_shifter (argc, argv);
+  u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
+  ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  while (arg_shifter.is_anything_left ())
+  while (arg_shifter.is_anything_left())
   {
     // options:
     //  -t use_take?1:0             defaults to 0
@@ -85,6 +87,8 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -b                          enable client side Built-In topic support
     //  -us                         Subscriber using UDP transport
     //  -up                         Publisher using UDP transport
+    //  -rs                         Subscriber using RTPS transport
+    //  -rp                         Publisher using RTPS transport
 
     const ACE_TCHAR *currentArg = 0;
 
@@ -130,6 +134,18 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       pub_using_udp = 1;
       arg_shifter.consume_arg();
     }
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-rs")) == 0)
+    {
+      ACE_DEBUG((LM_DEBUG, "Subscriber Using RTPS transport.\n"));
+      sub_using_rtps = 1;
+      arg_shifter.consume_arg();
+    }
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-rp")) == 0)
+    {
+      ACE_DEBUG((LM_DEBUG, "Publisher Using RTPS transport.\n"));
+      pub_using_rtps = 1;
+      arg_shifter.consume_arg();
+    }
     else
     {
       arg_shifter.ignore_arg ();
@@ -140,7 +156,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int run_test(int argc, ACE_TCHAR *argv[])
 {
 
   int test_failed = 0;
@@ -242,6 +258,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Attach the subscriber to the transport.
       if (sub_using_udp) {
         TheTransportRegistry->bind_config("udp", sub.in());
+      } else if (sub_using_rtps) {
+        TheTransportRegistry->bind_config("rtps", sub.in());
       } else {
         TheTransportRegistry->bind_config("tcp", sub.in());
       }
@@ -249,6 +267,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Attach the publisher to the transport.
       if (pub_using_udp) {
         TheTransportRegistry->bind_config("udp", pub.in());
+      } else if (pub_using_rtps) {
+        TheTransportRegistry->bind_config("rtps", pub.in());
       } else {
         TheTransportRegistry->bind_config("tcp", pub.in());
       }
@@ -344,15 +364,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             incompatible_transport_found = 1;
         }
 
-      ::DDS::SubscriptionMatchedStatus matched;
-
-      if (foo_dr->get_subscription_matched_status (matched) != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT ("ERROR: failed to get subscription matched status\n")),
-          1);
-      }
-
       ::DDS::InstanceHandle_t handle;
 
       if (pub_using_udp != sub_using_udp)
@@ -369,7 +380,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               ACE_DEBUG((LM_DEBUG, "Got expected offered_incompatible_qos"
                 " with TRANSPORTTYPE_QOS_POLICY_ID"
                 " existing with success.\n"));
-              goto cleanup;
+              return 0;
             }
         }
       else
@@ -381,14 +392,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               " but got it. %d incompatible_qos values.\n",
               incomp.policies.length ()),
               8);
-
-          if (matched.total_count != 1)
-            ACE_ERROR_RETURN((LM_ERROR,
-              "TEST ERROR: expected subscription_match"
-              " with count 1 but got %d\n",
-              matched.total_count),
-              9);
         }
+
+      DDS::WaitSet_var ws = new DDS::WaitSet;
+      DDS::StatusCondition_var sc = foo_dr->get_statuscondition();
+      ws->attach_condition(sc);
+
+      DDS::ConditionSeq active;
+      const DDS::Duration_t infinite = { DDS::DURATION_INFINITE_SEC,
+                                         DDS::DURATION_INFINITE_NSEC };
+      DDS::SubscriptionMatchedStatus matched;
+      while (foo_dr->get_subscription_matched_status(matched) ==
+             DDS::RETCODE_OK && matched.total_count == 0) {
+        ws->wait(active, infinite);
+      }
+      ws->detach_condition(sc);
 
       ::Xyz::Foo foo;
       foo.key = 10101;
@@ -451,7 +469,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       //======== clean up ============
 
-cleanup:
       // Clean up publisher objects
 //      pub->delete_contained_entities() ;
 
@@ -468,9 +485,6 @@ cleanup:
       // clean up common objects
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
-
-      TheServiceParticipant->shutdown ();
-
     }
   catch (const TestException&)
     {
@@ -483,6 +497,11 @@ cleanup:
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
+  return 0;
+}
 
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
+  const int test_failed = run_test(argc, argv);
+  TheServiceParticipant->shutdown();
   return test_failed;
 }

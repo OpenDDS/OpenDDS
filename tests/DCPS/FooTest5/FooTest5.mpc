@@ -1,4 +1,4 @@
-project(DcpsFooTest5Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+project(DcpsFooTest5Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
   exename   = publisher
   libpaths += ../FooType5
   libs     +=  DcpsFooType5
@@ -13,7 +13,7 @@ project(DcpsFooTest5Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast {
 }
 
 
-project(DcpsFooTest5Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+project(DcpsFooTest5Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
   exename   = subscriber
   libpaths += ../FooType5
   libs     +=  DcpsFooType5
