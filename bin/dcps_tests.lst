@@ -69,17 +69,6 @@ tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl udp: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl multicast: !DCPS_MIN !NO_MCAST
-tests/DCPS/FooTest5/run_test_multi_trans.pl mi: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl udp mi: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl nokey mi: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl nokey udp mi: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl blocking: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl blocking_timeout: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl mwmr: !DCPS_MIN
-tests/DCPS/FooTest5/run_test_multi_trans.pl mixed_trans: !DCPS_MIN
 tests/DCPS/FooTest5_0/run_test.pl: !STATIC
 tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC
 tests/DCPS/FooTest5_0/run_test.pl diff_trans: !DCPS_MIN !STATIC

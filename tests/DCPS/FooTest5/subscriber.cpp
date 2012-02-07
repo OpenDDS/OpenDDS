@@ -25,7 +25,6 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
-#include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 
@@ -62,7 +61,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -o directory of synch files used to coordinate publisher and subscriber
     //                              defaults to current directory.
     //  -v                          verbose transport debug
-    //  -b test_bit                 defaults to 0 - not testing BIT
 
     const ACE_TCHAR *currentArg = 0;
 
@@ -152,15 +150,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
-      arg_shifter.consume_arg();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-b"))) != 0)
-    {
-      test_bit = ACE_OS::atoi (currentArg);
-      if (test_bit == 1)
-      {
-        ACE_DEBUG((LM_DEBUG, "Subscriber testing BIT transport.\n"));
-      }
       arg_shifter.consume_arg();
     }
     else
@@ -411,29 +400,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) listener is nil.")));
           throw TestException ();
         }
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-      // Test that the BIT objects can be obtained on the tcp transport
-      if (test_bit != 0)
-        {
-          ::DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber () ;
-          if (CORBA::is_nil (bit_subscriber.in ()))
-            ACE_ERROR((LM_ERROR, ACE_TEXT("Error: Failed to get BIT subscriber\n")));
-          else
-            {
-              ::DDS::DataReader_var bit_dr = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
-              if(CORBA::is_nil (bit_dr.in ()))
-                  ACE_ERROR((LM_ERROR, ACE_TEXT("Error: Failed to lookup BIT Topic Data Reader\n")));
-              else
-                {
-                  ::DDS::TopicBuiltinTopicDataDataReader_var bit_topic_dr
-                      = ::DDS::TopicBuiltinTopicDataDataReader::_narrow (bit_dr.in ());
-                  if (CORBA::is_nil (bit_topic_dr.in ()))
-                      ACE_ERROR((LM_ERROR, ACE_TEXT("Error: Failed to narrow BIT Topic Data Reader\n")));
-                }
-            }
-        }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
       ::DDS::DataReader_var * drs = new ::DDS::DataReader_var[num_datareaders];
 

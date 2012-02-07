@@ -1,3 +1,17 @@
+Tue Feb  7 16:24:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          The alternate perl script (see below) only enabled a small section
+          of BIT testing code, and those are tested elsewhere.  Removed.
+
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+
+          Removed this file.
+
 Mon Feb  6 23:04:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/publisher.cpp:

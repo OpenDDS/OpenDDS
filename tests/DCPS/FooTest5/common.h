@@ -36,7 +36,6 @@ extern ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads;
 extern long op_interval_ms;
 extern long blocking_ms;
 extern int mixed_trans;
-extern int test_bit;
 
 extern ACE_TString synch_file_dir;
 // These files need to be unlinked in the run test script before and

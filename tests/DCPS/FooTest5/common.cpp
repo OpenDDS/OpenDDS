@@ -36,7 +36,6 @@ ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads = 0;
 long op_interval_ms = 0;
 long blocking_ms = 0;
 int mixed_trans = 0;
-int test_bit = 0;
 
 ACE_TString synch_file_dir;
 
