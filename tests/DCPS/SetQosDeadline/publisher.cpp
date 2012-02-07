@@ -206,7 +206,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
-      TheServiceParticipant->shutdown ();
   }
   catch (CORBA::Exception& e)
   {
@@ -214,6 +213,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
          << e << endl;
     exit(1);
   }
+  TheServiceParticipant->shutdown ();
 
   return 0;
 }

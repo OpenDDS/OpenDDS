@@ -208,6 +208,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       cerr << "SUB: Exception caught in main ():" << endl << e << endl;
       return 1;
     }
+  TheServiceParticipant->shutdown ();
 
   return 0;
 }
