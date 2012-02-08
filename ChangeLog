@@ -1,3 +1,35 @@
+Wed Feb  8 16:45:07 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/messenger/multicast.ini:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/rtps.ini:
+        * java/tests/messenger/rtps_disc.ini:
+        * java/tests/messenger/rtps_disc_tcp.ini:
+        * java/tests/messenger/rtps_uni.ini:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * java/tests/messenger/tcp.ini:
+        * java/tests/messenger/udp.ini:
+        * java/tests/messenger/publisher/pub_multicast.ini:
+        * java/tests/messenger/publisher/pub_tcp.ini:
+        * java/tests/messenger/publisher/pub_udp.ini:
+        * java/tests/messenger/publisher/sub_multicast.ini:
+        * java/tests/messenger/publisher/sub_tcp.ini:
+        * java/tests/messenger/publisher/sub_udp.ini:
+
+          Cleaned up Perl scripts and extra copies of ini files.
+          Added RTPS configurations.
+
+        * java/tests/messenger/subscriber/pub_multicast.ini:
+        * java/tests/messenger/subscriber/pub_tcp.ini:
+        * java/tests/messenger/subscriber/pub_udp.ini:
+        * java/tests/messenger/subscriber/sub_multicast.ini:
+        * java/tests/messenger/subscriber/sub_tcp.ini:
+        * java/tests/messenger/subscriber/sub_udp.ini:
+
+          Removed these files.
+
 Tue Feb  7 22:54:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
@@ -46,7 +78,7 @@ Tue Feb  7 22:54:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
           Added extra #includes needed for static builds.
 
-Tue Feb  7 21:43:20 UTC 2012  jeff  <jeff@ociweb.com>
+Tue Feb  7 21:43:20 UTC 2012  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/SetQosDeadline/publisher.cpp:
         * tests/DCPS/SetQosDeadline/subscriber.cpp:

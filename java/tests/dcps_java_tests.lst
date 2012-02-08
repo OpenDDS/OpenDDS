@@ -20,13 +20,25 @@ java/tests/transport_config/run_test.pl
 java/tests/messenger/publisher/run_test.pl tcp
 java/tests/messenger/publisher/run_test.pl udp
 java/tests/messenger/publisher/run_test.pl multicast: !NO_MCAST
+java/tests/messenger/publisher/run_test.pl rtps: !NO_MCAST RTPS
+java/tests/messenger/publisher/run_test.pl rtps_uni: RTPS
+java/tests/messenger/publisher/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+java/tests/messenger/publisher/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 
 java/tests/messenger/subscriber/run_test.pl tcp
 java/tests/messenger/subscriber/run_test.pl udp
 java/tests/messenger/subscriber/run_test.pl multicast: !NO_MCAST
+java/tests/messenger/subscriber/run_test.pl rtps: !NO_MCAST RTPS
+java/tests/messenger/subscriber/run_test.pl rtps_uni: RTPS
+java/tests/messenger/subscriber/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+java/tests/messenger/subscriber/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 
 java/tests/messenger/run_test.pl tcp
 java/tests/messenger/run_test.pl udp
 java/tests/messenger/run_test.pl multicast: !NO_MCAST
+java/tests/messenger/run_test.pl rtps: !NO_MCAST RTPS
+java/tests/messenger/run_test.pl rtps_uni: RTPS
+java/tests/messenger/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+java/tests/messenger/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 
 java/tests/messenger/both/run_test.pl
