@@ -1,3 +1,9 @@
+Wed Feb  8 22:13:02 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DCPSSubscriberI.h:
+
+          Missed adding new file for pubsub test.
+
 Wed Feb  8 21:21:24 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.cpp:
