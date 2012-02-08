@@ -390,12 +390,13 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_publication failed!\n") ));
     }
 
+  run_time = ACE_Time_Value(6,0);
   orb->run(run_time);
 
   if (dwIncQosImpl->numReceived() == 0)
     {
       failed = true;
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should have had add_association ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should have had update_incompatible_qos ")
         ACE_TEXT("called, but nothing was received\n")));
     }
   else
