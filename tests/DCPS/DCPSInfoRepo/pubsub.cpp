@@ -61,8 +61,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer::POA_var poa,
-            const bool match, const bool separateParticipant)
+bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer::POA_var poa)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
   OpenDDS::RTPS::RtpsInfo* rtpsInfo = 0;
@@ -139,8 +138,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
     }
 
   ::DDS::DataWriterQos_var dwQos = new ::DDS::DataWriterQos;
-  dwQos->reliability.kind =
-    match ? ::DDS::RELIABLE_RELIABILITY_QOS : ::DDS::BEST_EFFORT_RELIABILITY_QOS;
+  dwQos->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
   OpenDDS::DCPS::TransportLocatorSeq tii;
   tii.length(1);
   tii[0].transport_type = "fake transport for test";
@@ -208,59 +206,51 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   size_t drRcvIndex = 0;
   OpenDDS::DCPS::DataReaderRemote_var dr;
 
-  if (!separateParticipant) 
+  value = info->add_domain_participant(domain, partQos.in());
+  subPartId = value.id;
+  if( OpenDDS::DCPS::GUID_UNKNOWN == subPartId)
     {
-      subPartId = pubPartId;
-      subTopicId = pubTopicId;
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_domain_participant failed to creating new participant for same domain!\n") ));
     }
-  else
+  if( subPartId == pubPartId )
     {
-      value = info->add_domain_participant(domain, partQos.in());
-      subPartId = value.id;
-      if( OpenDDS::DCPS::GUID_UNKNOWN == subPartId)
-        {
-          failed = true;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_domain_participant failed to creating new participant for same domain!\n") ));
-        }
-      if( subPartId == pubPartId )
-        {
-          failed = true;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_domain_participant returned existing participant!\n") ));
-        }
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_domain_participant returned existing participant!\n") ));
+    }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-      if (use_rtps) {
-        sub2 = new TAO_DDS_DCPSSubscriber_i;
-        rtpsInfo->init_bit(subPartId, domain, sub2);
-      }
+  if (use_rtps) {
+    sub2 = new TAO_DDS_DCPSSubscriber_i;
+    rtpsInfo->init_bit(subPartId, domain, sub2);
+  }
 #endif
 
-      topicStatus = info->assert_topic(subTopicId,
-                                       domain,
-                                       subPartId,
-                                       tname,
-                                       dname,
-                                       topicQos.in(),
-                                       false);
+  topicStatus = info->assert_topic(subTopicId,
+                                   domain,
+                                   subPartId,
+                                   tname,
+                                   dname,
+                                   topicQos.in(),
+                                   false);
 
-      if (topicStatus != OpenDDS::DCPS::CREATED)
-        {
-          failed = true;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Topic creation failed and returned %d"), topicStatus));
-        }
-      if (subTopicId == pubTopicId)
-        {
-          failed = true;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Topic creation returned existing topic")));
-        }
+  if (topicStatus != OpenDDS::DCPS::CREATED)
+    {
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Topic creation failed and returned %d"), topicStatus));
+    }
+  if (subTopicId == pubTopicId)
+    {
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Topic creation returned existing topic")));
+    }
 
-      if (dwImpl->numReceived() > 0)
-        {
-          failed = true;
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should not receive anything after ")
-            ACE_TEXT("the same topic is created for another domain participant, received %d messages\n"),
-            dwImpl->numReceived()));
-        }
+  if (dwImpl->numReceived() > 0)
+    {
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should not receive anything after ")
+        ACE_TEXT("the same topic is created for another domain participant, received %d messages\n"),
+        dwImpl->numReceived()));
     }
 
   drImpl->domainId_ = domain;
@@ -300,10 +290,6 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
 
   TAO_DDS_DCPSDataWriter_i::Called wCalled;
   TAO_DDS_DCPSDataReader_i::Called rCalled;
-  const TAO_DDS_DCPSDataWriter_i::Called wExpectedCalled =
-    match ? TAO_DDS_DCPSDataWriter_i::ADD_ASSOC : TAO_DDS_DCPSDataWriter_i::UPDATE_INCOMP_QOS;
-  const TAO_DDS_DCPSDataReader_i::Called rExpectedCalled =
-    match ? TAO_DDS_DCPSDataReader_i::ADD_ASSOC : TAO_DDS_DCPSDataReader_i::UPDATE_INCOMP_QOS;
   if (dwImpl->numReceived() == 0)
     {
       failed = true;
@@ -312,15 +298,15 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
     }
   else
     {
-      if ((wCalled = dwImpl->next()) != wExpectedCalled)
+      if ((wCalled = dwImpl->next()) != TAO_DDS_DCPSDataWriter_i::ADD_ASSOC)
         {
           failed = true;
           ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should have had %d ")
             ACE_TEXT(", but instead received %d\n"),
-            wExpectedCalled,
+            TAO_DDS_DCPSDataWriter_i::ADD_ASSOC,
             wCalled));
         }
-      if (match && use_rtps)
+      if (use_rtps)
         {
           if (dwImpl->numReceived() == 0)
             {
@@ -352,23 +338,108 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
     }
   else
     {
-      if ((rCalled = drImpl->next()) != rExpectedCalled)
+      if ((rCalled = drImpl->next()) != TAO_DDS_DCPSDataReader_i::ADD_ASSOC)
         {
           failed = true;
           ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Reader should have had %d, but instead received %d\n"),
-            rExpectedCalled,
+            TAO_DDS_DCPSDataReader_i::ADD_ASSOC,
             rCalled));
         }
     }
 
+
+  // incompatible QOS
+  OpenDDS::DCPS::RepoId pubIncQosId = OpenDDS::DCPS::GUID_UNKNOWN;
+  TAO_DDS_DCPSDataWriter_i* dwIncQosImpl = new TAO_DDS_DCPSDataWriter_i;
+  PortableServer::ServantBase_var safe_servant3 = dwIncQosImpl;
+  size_t dwIncQosRcvIndex = 0;
+  OpenDDS::DCPS::DataWriterRemote_var dwIncQos;
+
+  // Add publication
+  oid = poa->activate_object( dwIncQosImpl );
+  obj = poa->id_to_reference( oid.in() );
+  dwIncQos = OpenDDS::DCPS::DataWriterRemote::_narrow(obj.in());
+  if (CORBA::is_nil (dwIncQos.in ()))
+    {
+      ACE_ERROR_RETURN ((LM_DEBUG,
+                         "Nil OpenDDS::DCPS::DataWriterRemote reference\n"),
+                        false);
+    }
+
+  if (dwIncQosImpl->numReceived() > 0)
+    {
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should not receive anything after ")
+        ACE_TEXT("it is created since there are no readers, received %d messages\n"),
+        dwIncQosImpl->numReceived()));
+    }
+
+  ::DDS::DataWriterQos_var dwIncQosQos = new ::DDS::DataWriterQos;
+  dwIncQosQos->reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
+
+  pubIncQosId = info->add_publication(domain,
+                                pubPartId,
+                                pubTopicId,
+                                dwIncQos.in(),
+                                dwIncQosQos.in(),
+                                tii,
+                                pQos.in());
+  if (OpenDDS::DCPS::GUID_UNKNOWN == pubIncQosId)
+    {
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_publication failed!\n") ));
+    }
+
+  orb->run(run_time);
+
+  if (dwIncQosImpl->numReceived() == 0)
+    {
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should have had add_association ")
+        ACE_TEXT("called, but nothing was received\n")));
+    }
+  else
+    {
+      if ((wCalled = dwIncQosImpl->next()) != TAO_DDS_DCPSDataWriter_i::UPDATE_INCOMP_QOS)
+        {
+          failed = true;
+          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer should have had %d ")
+            ACE_TEXT(", but instead received %d\n"),
+            TAO_DDS_DCPSDataWriter_i::UPDATE_INCOMP_QOS,
+            wCalled));
+        }
+      if (dwIncQosImpl->numReceived() > 0)
+        {
+          failed = true;
+          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Writer was not expecting any more calls,")
+            ACE_TEXT("but received %d more\n"),
+            dwIncQosImpl->numReceived()));
+        }
+    }
+
+  if (drImpl->numReceived() == 0)
+    {
+      failed = true;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Reader should have had add_association ")
+        ACE_TEXT("called, but nothing was received\n")));
+    }
+  else
+    {
+      if ((rCalled = drImpl->next()) != TAO_DDS_DCPSDataReader_i::UPDATE_INCOMP_QOS)
+        {
+          failed = true;
+          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Reader should have had %d, but instead received %d\n"),
+            TAO_DDS_DCPSDataReader_i::UPDATE_INCOMP_QOS,
+            rCalled));
+        }
+    }
+
+  info->remove_publication(domain, pubPartId, pubIncQosId);
   info->remove_subscription(domain, subPartId, subId);
   info->remove_publication(domain, pubPartId, pubId);
   info->remove_topic(domain, pubPartId, pubTopicId);
-  if (separateParticipant)
-    {
-      info->remove_topic(domain, subPartId, subTopicId);
-      info->remove_domain_participant(domain, subPartId);
-    }
+  info->remove_topic(domain, subPartId, subTopicId);
+  info->remove_domain_participant(domain, subPartId);
   info->remove_domain_participant(domain, pubPartId);
 
   return true;
@@ -424,23 +495,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             1);
         }
 
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Match Publisher and Subscriber in the same participant\n")));
-      if (!pubsub(info, orb, poa, true, false))
-        {
-          return 1;
-        }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Publisher and Subscriber with incompatible qos in the same participant\n")));
-      if (!pubsub(info, orb, poa, false, false))
-        {
-          return 1;
-        }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Match Publisher and Subscriber in different participants\n")));
-      if (!pubsub(info, orb, poa, true, true))
-        {
-          return 1;
-        }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Publisher and Subscriber with incompatible qos in different participants\n")));
-      if (!pubsub(info, orb, poa, false, true))
+      if (!pubsub(info, orb, poa))
         {
           return 1;
         }

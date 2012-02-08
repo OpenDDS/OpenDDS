@@ -1,3 +1,9 @@
+Wed Feb  8 23:11:36 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Changed test to do everything without unregistering.
+
 Wed Feb  8 22:13:02 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSSubscriberI.h:
