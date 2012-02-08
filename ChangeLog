@@ -1,3 +1,30 @@
+Wed Feb  8 21:21:24 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Changed RtpsInfo::init_bit to have participantId and domainId passed
+          in from RtpsDiscovery.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Changed data_received to not require pub/sub built in topics data reader
+          and to not retrieve it till it is used.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+
+          Added code to actually verify what is happening in readers and writers.
+
+        * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/DCPSInfoRepo/run_test.pl:
+
+          Added single process to test pub and sub.
+
 Wed Feb  8 16:45:07 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/dcps_java_tests.lst:

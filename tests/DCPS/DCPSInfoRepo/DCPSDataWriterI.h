@@ -28,6 +28,8 @@
 #include "dds/DdsDcpsDataWriterRemoteS.h"
 #include "dds/DCPS/Definitions.h"
 
+#include <vector>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -37,6 +39,7 @@ class TAO_DDS_DCPSDataWriter_i
   : public virtual POA_OpenDDS::DCPS::DataWriterRemote
 {
 public:
+  enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS, UPDATE_SUB_PARAMS };
   //Constructor
   TAO_DDS_DCPSDataWriter_i (void);
 
@@ -47,7 +50,7 @@ public:
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
-        )) { return ::DDS::RETCODE_OK;};
+        )) { received_.push_back(ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
 
 
@@ -61,7 +64,7 @@ public:
     ));
 
   virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/)
-    ACE_THROW_SPEC((CORBA::SystemException)) {}
+    ACE_THROW_SPEC((CORBA::SystemException)) { received_.push_back(ASSOC_COMPLETE); }
 
   virtual void remove_associations (
       const OpenDDS::DCPS::ReaderIdSeq & readers,
@@ -83,6 +86,20 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+  unsigned int numReceived()
+  {
+    return (received_.size() - next_);
+  }
+
+  Called next()
+  {
+    return received_[next_++];
+  }
+
+private:
+  std::vector<Called> received_;
+  unsigned int next_;
 };
 
 

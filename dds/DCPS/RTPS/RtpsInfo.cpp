@@ -78,14 +78,10 @@ RtpsInfo::update_domain_participant_qos(DDS::DomainId_t domain,
 }
 
 void
-RtpsInfo::init_bit(const DDS::Subscriber_var& bit_subscriber)
+RtpsInfo::init_bit(DCPS::RepoId participantId,
+                   DDS::DomainId_t domainId,
+                   const DDS::Subscriber_var& bit_subscriber)
 {
-  DDS::DomainParticipant_var participant = bit_subscriber->get_participant();
-  DCPS::DomainParticipantImpl* dpi =
-    dynamic_cast<DCPS::DomainParticipantImpl*>(participant.in());
-  DCPS::RepoId participantId = dpi->get_id();
-  DDS::DomainId_t domainId = participant->get_domain_id();
-
   get_part(domainId, participantId)->bit_subscriber(bit_subscriber);
 }
 

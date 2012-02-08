@@ -15,6 +15,8 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/RcHandle_T.h"
 
+#include "rtps_export.h"
+
 #include "GuidGenerator.h"
 #include "Spdp.h"
 
@@ -33,7 +35,7 @@ namespace RTPS {
 /// The RtpsInfo object implements the DCPSInfo CORBA Interface for the
 /// RTPS-standard discovery protocol.  A single RtpsInfo is used per "discovery
 /// object" in DCPS (see class RtpsDiscovery).
-class RtpsInfo : public virtual POA_OpenDDS::DCPS::DCPSInfo {
+class OpenDDS_Rtps_Export RtpsInfo : public virtual POA_OpenDDS::DCPS::DCPSInfo {
 public:
   explicit RtpsInfo(RtpsDiscovery* disco);
 
@@ -195,7 +197,9 @@ public:
 
   // used by RtpsDiscovery:
 
-  void init_bit(const DDS::Subscriber_var& bit_subscriber);
+  void init_bit(DCPS::RepoId participantId,
+                DDS::DomainId_t domainId,
+                const DDS::Subscriber_var& bit_subscriber);
 
   DCPS::RepoId bit_key_to_repo_id(DDS::DomainId_t domainId,
                                   const DCPS::RepoId& participantId,

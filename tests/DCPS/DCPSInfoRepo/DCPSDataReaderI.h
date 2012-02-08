@@ -28,6 +28,12 @@
 #include "dds/DdsDcpsDataReaderRemoteS.h"
 #include "dds/DCPS/Definitions.h"
 
+#ifndef DDS_HAS_MINIMUM_BIT
+#include "dds/DCPS/RTPS/RtpsInfo.h"
+#endif
+
+#include <vector>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -37,6 +43,7 @@ class TAO_DDS_DCPSDataReader_i
   : public virtual POA_OpenDDS::DCPS::DataReaderRemote
 {
 public:
+  enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS };
   //Constructor
   TAO_DDS_DCPSDataReader_i (void);
 
@@ -48,7 +55,7 @@ public:
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
-        )) { return ::DDS::RETCODE_OK;};
+        )) { received_.push_back(ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
 
   virtual void add_association (
@@ -61,7 +68,7 @@ public:
     ));
 
   virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/)
-    ACE_THROW_SPEC((CORBA::SystemException)) {}
+    ACE_THROW_SPEC((CORBA::SystemException)) { received_.push_back(ASSOC_COMPLETE); }
 
   virtual void remove_associations (
       const OpenDDS::DCPS::WriterIdSeq & writers,
@@ -77,6 +84,25 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+  unsigned int numReceived()
+  {
+    return (received_.size() - next_);
+  }
+
+  Called next()
+  {
+    return received_[next_++];
+  }
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  OpenDDS::RTPS::RtpsInfo* info_;
+#endif
+  DDS::DomainId_t domainId_;
+  ::OpenDDS::DCPS::RepoId participantId_;
+private:
+  std::vector<Called> received_;
+  unsigned int next_;
 };
 
 

@@ -1026,11 +1026,6 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
     return;
   }
 
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-  if (!bit) { // bit may be null if the DomainParticipant is shutting down
-    return;
-  }
-
   std::string topic_name;
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
@@ -1069,13 +1064,16 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
       // Iter no longer valid once lock released
       iter = discovered_publications_.end();
 
-      DDS::InstanceHandle_t instance_handle;
+      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
       {
         // Release lock for call into pub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        instance_handle =
-          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                    DDS::NEW_VIEW_STATE);
+        DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+        if (bit) { // bit may be null if the DomainParticipant is shutting down
+          instance_handle =
+            bit->store_synthetic_data(wdata_copy.ddsPublicationData,
+                                      DDS::NEW_VIEW_STATE);
+        }
       }
       // Publication may have been removed while lock released
       iter = discovered_publications_.find(guid);
@@ -1094,8 +1092,11 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
-      bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
-                                DDS::NOT_NEW_VIEW_STATE);
+      DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+      if (bit) { // bit may be null if the DomainParticipant is shutting down
+        bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
+                                  DDS::NOT_NEW_VIEW_STATE);
+      }
 
       // Match/unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
@@ -1148,10 +1149,6 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
     return;
   }
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-  if (!bit) { // bit may be null if the DomainParticipant is shutting down
-    return;
-  }
 
   std::string topic_name;
   // Find the publication  - iterator valid only as long as we hold the lock
@@ -1191,13 +1188,16 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
       // Iter no longer valid once lock released
       iter = discovered_subscriptions_.end();
 
-      DDS::InstanceHandle_t instance_handle;
+      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
       {
         // Release lock for call into sub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        instance_handle =
-          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                    DDS::NEW_VIEW_STATE);
+        DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+        if (bit) { // bit may be null if the DomainParticipant is shutting down
+          instance_handle =
+            bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
+                                      DDS::NEW_VIEW_STATE);
+        }
       }
       // Subscription may have been removed while lock released
       iter = discovered_subscriptions_.find(guid);
@@ -1217,9 +1217,12 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
     } else { // update existing
       if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                      rdata.ddsSubscriptionData)) {
-        bit->store_synthetic_data(
-              iter->second.reader_data_.ddsSubscriptionData,
-              DDS::NOT_NEW_VIEW_STATE);
+        DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+        if (bit) { // bit may be null if the DomainParticipant is shutting down
+          bit->store_synthetic_data(
+                iter->second.reader_data_.ddsSubscriptionData,
+                DDS::NOT_NEW_VIEW_STATE);
+        }
 
         // Match/unmatch local publication(s)
         topic_name = get_topic_name(iter->second);
@@ -2182,7 +2185,7 @@ Sedp::write_publication_data(
     }
   } else if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
-                        ACE_TEXT("not currently associcted, dropping msg.\n")));
+                        ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
 }
@@ -2214,7 +2217,7 @@ Sedp::write_subscription_data(
     }
   } else if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
-                        ACE_TEXT("not currently associcted, dropping msg.\n")));
+                        ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
 }

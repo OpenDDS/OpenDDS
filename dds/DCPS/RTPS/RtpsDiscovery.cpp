@@ -147,7 +147,7 @@ RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
   create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                 sub, dr_qos, ext_qos);
 
-  servant_->init_bit(bit_subscriber);
+  servant_->init_bit(participant->get_id(), participant->get_domain_id(), bit_subscriber);
 
   return bit_subscriber._retn();
 }

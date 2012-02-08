@@ -7,6 +7,11 @@
 
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
+: 
+#ifndef DDS_HAS_MINIMUM_BIT
+  info_(0),
+#endif
+  next_(0)
   {
   }
 
@@ -40,6 +45,14 @@ void TAO_DDS_DCPSDataReader_i::add_association (
       writer.writerTransInfo[0].transport_type.in()
     ));
 
+    received_.push_back(ADD_ASSOC);
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    if (info_)
+      {
+        info_->association_complete(domainId_, participantId_, yourId, writer.writerId);
+      }
+#endif
   }
 
 
@@ -71,6 +84,7 @@ void TAO_DDS_DCPSDataReader_i::remove_associations (
         ));
       }
 
+    received_.push_back(REM_ASSOC);
   }
 
 void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
@@ -100,5 +114,6 @@ void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
           status.policies[cnt].count
         ));
       }
+    received_.push_back(UPDATE_INCOMP_QOS);
   }
 

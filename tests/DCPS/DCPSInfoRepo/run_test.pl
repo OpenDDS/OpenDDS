@@ -23,9 +23,9 @@ my $opts = "";
 
 if ($ARGV[0] eq "rtps_disc") {
   $is_rtps_disc = 1;
-  $opts = '-r';
+  $opts .= '-r';
 } else {
-  $opts = "-k file://$dcpsrepo_ior";
+  $opts .= "-k file://$dcpsrepo_ior";
 }
 
 my $DCPSREPO = undef;
@@ -34,8 +34,7 @@ unless ($is_rtps_disc) {
                                        "-NOBITS -o $dcpsrepo_ior");
 }
 
-my $PUBLISHER = PerlDDS::create_process("publisher", "$opts -q");
-my $SUBSCRIBER = PerlDDS::create_process("subscriber", $opts);
+my $PUBSUB = PerlDDS::create_process("pubsub", "$opts -q");
 
 unless ($is_rtps_disc) {
   print $DCPSREPO->CommandLine() . "\n" if $debug;
@@ -47,25 +46,14 @@ unless ($is_rtps_disc) {
   }
 }
 
-print $PUBLISHER->CommandLine() . "\n" if $debug;
-$PUBLISHER->Spawn();
+print $PUBSUB->CommandLine() . "\n" if $debug;
+$PUBSUB->Spawn();
 sleep 2;
 
-print $SUBSCRIBER->CommandLine() . "\n" if $debug;
-$SUBSCRIBER->Spawn();
+my $PubSubResult = $PUBSUB->WaitKill(35);
 
-
-my $PubResult = $PUBLISHER->WaitKill(35);
-
-if ($PubResult != 0) {
-    print STDERR "ERROR: publisher returned $PubResult\n";
-    $status = 1;
-}
-
-my $SubResult = $SUBSCRIBER->WaitKill(35);
-
-if ($SubResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubResult\n";
+if ($PubSubResult != 0) {
+    print STDERR "ERROR: pubsub returned $PubSubResult\n";
     $status = 1;
 }
 
