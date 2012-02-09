@@ -7,7 +7,7 @@
 
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
-: 
+:
 #ifndef DDS_HAS_MINIMUM_BIT
   info_(0),
 #endif
