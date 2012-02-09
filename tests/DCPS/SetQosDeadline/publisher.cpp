@@ -15,6 +15,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -43,14 +44,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ())) {
-        cerr << "create_participant failed." << endl;
+        ACE_DEBUG((LM_DEBUG, "create_participant failed.\n"));
         return 1;
       }
 
       MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
-        cerr << "register_type failed." << endl;
+        ACE_DEBUG((LM_DEBUG, "register_type failed.\n"));
         exit(1);
       }
 
@@ -65,7 +66,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                                    DDS::TopicListener::_nil(),
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
-        cerr << "create_topic failed." << endl;
+        ACE_DEBUG((LM_DEBUG, "create_topic failed.\n"));
         exit(1);
       }
 
@@ -74,7 +75,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         DDS::PublisherListener::_nil(),
         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (pub.in ())) {
-        cerr << "create_publisher failed." << endl;
+        ACE_DEBUG((LM_DEBUG, "create_publisher failed.\n"));
         exit(1);
       }
 
@@ -89,10 +90,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // seconds deadline period and not with second DataReader
       // which has 3 seconds deadline period.
       DDS::DataWriter_var dw =
-        pub->create_datawriter (topic.in (),
-                                dw_qos,
-                                DDS::DataWriterListener::_nil (),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        pub->create_datawriter(topic, dw_qos, 0,
+                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       int const max_attempts = 20000;
       int attempts = 1;
@@ -113,44 +112,58 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
         if (attempts == max_attempts)
         {
-          cerr << "ERROR: subscriptions failed to match." << endl;
+          ACE_DEBUG((LM_DEBUG, "ERROR: subscriptions failed to match.\n"));
           exit (1);
         }
 
         writer->start ();
         writer->end ();
 
-        cout << "Writer changing deadline to incompatible value" << endl;
+        ACE_DEBUG((LM_DEBUG, "Writer changing deadline to incompatible value\n"));
 
         // Now set DataWriter deadline to be 6 seconds which is not
         // compatible with the existing DataReader. This QoS change
         // should be applied and the association broken.
         dw_qos.deadline.period.sec = 6;
 
-        if (dw->set_qos (dw_qos) != ::DDS::RETCODE_OK)
-        {
-          cerr << "ERROR: DataWriter could not change deadline period which "
-               << "should break DataReader associations" << endl;
+        if (dw->set_qos (dw_qos) != ::DDS::RETCODE_OK) {
+          ACE_DEBUG((LM_DEBUG,
+            "ERROR: DataWriter could not change deadline period which "
+             "should break DataReader associations\n"));
           exit (1);
         } else {
-          ::DDS::InstanceHandleSeq handles;
-          dw->get_matched_subscriptions(handles);
-          if (handles.length() != 0) {
-            cerr << "ERROR: DataWriter changed deadline period which should "
-                 << "break association with all existing DataReaders, but "
-                 << "did not" << endl;
-            exit (1);
+
+          DDS::WaitSet_var ws = new DDS::WaitSet;
+          DDS::StatusCondition_var sc = dw->get_statuscondition();
+          sc->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+          ws->attach_condition(sc);
+          DDS::PublicationMatchedStatus matched;
+          DDS::ConditionSeq active;
+          const DDS::Duration_t timeout = {5}; // seconds
+          while (dw->get_publication_matched_status(matched) == DDS::RETCODE_OK
+                 && matched.current_count) {
+            if (ws->wait(active, timeout) == DDS::RETCODE_TIMEOUT) {
+              break;
+            }
+          }
+          ws->detach_condition(sc);
+          if (matched.current_count != 0) {
+            ACE_DEBUG((LM_DEBUG,
+              "ERROR: DataWriter changed deadline period which should "
+              "break association with all existing DataReaders, but did not\n"));
+            exit(1);
           }
         }
-        cout << "Writer restoring deadline to compatible value" << endl;
+        ACE_DEBUG((LM_DEBUG, "Writer restoring deadline to compatible value\n"));
 
         // change it back
         dw_qos.deadline.period.sec = 5;
 
         if (dw->set_qos (dw_qos) != ::DDS::RETCODE_OK)
         {
-          cerr << "ERROR: DataWriter could not change deadline period which "
-               << "should restore DataReader associations" << endl;
+          ACE_DEBUG((LM_DEBUG,
+            "ERROR: DataWriter could not change deadline period which "
+            "should restore DataReader associations\n"));
           exit (1);
         }
       }
@@ -173,8 +186,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
         if (attempts == max_attempts)
         {
-          cerr << "ERROR: subscriptions failed to match." << endl;
-          exit (1);
+          ACE_DEBUG((LM_DEBUG, "ERROR: subscriptions failed to match.\n"));
+          exit(1);
         }
 
         writer->start ();
@@ -199,7 +212,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
         if (attempts == max_attempts)
         {
-          cerr << "ERROR: failed to wait for DataReader exit." << endl;
+          ACE_DEBUG((LM_DEBUG, "ERROR: failed to wait for DataReader exit.\n"));
           exit (1);
         }
       }

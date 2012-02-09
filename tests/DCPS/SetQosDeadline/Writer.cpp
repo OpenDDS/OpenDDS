@@ -24,11 +24,11 @@ Writer::Writer(::DDS::DataWriter_ptr writer)
 void
 Writer::start ()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
   // Launch threads.
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1)
   {
-    cerr << "Writer::start(): activate failed" << endl;
+    ACE_DEBUG((LM_DEBUG, "Writer::start(): activate failed\n"));
     exit(1);
   }
 }
@@ -54,7 +54,7 @@ Writer::svc ()
     Messenger::MessageDataWriter_var message_dw =
       Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
-      cerr << "Data Writer could not be narrowed"<< endl;
+      ACE_DEBUG((LM_DEBUG, "Data Writer could not be narrowed\n"));
       exit(1);
     }
 
@@ -62,9 +62,9 @@ Writer::svc ()
     message.subject_id = 99;
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+    message.from       = "Comic Book Guy";
+    message.subject    = "Review";
+    message.text       = "Worst. Movie. Ever.";
     message.count      = 0;
 
     ACE_DEBUG((LM_DEBUG,

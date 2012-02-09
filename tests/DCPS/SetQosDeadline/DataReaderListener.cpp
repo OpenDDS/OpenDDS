@@ -40,12 +40,12 @@ DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr reader)
 
     if (status == DDS::RETCODE_OK) {
 
-      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
-      cout << "SampleInfo.instance_state = " << si.instance_state << endl;
+      cerr << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+      cerr << "SampleInfo.instance_state = " << si.instance_state << endl;
 
       if (si.valid_data == 1)
       {
-        cout << "Message: subject    = " << message.subject.in() << endl
+        cerr << "Message: subject    = " << message.subject.in() << endl
           << "         subject_id = " << message.subject_id   << endl
           << "         from       = " << message.from.in()    << endl
           << "         count      = " << message.count        << endl
@@ -53,11 +53,11 @@ DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr reader)
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
-        cout << "instance is disposed" << endl;
+        cerr << "instance is disposed" << endl;
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
-        cout << "instance is unregistered" << endl;
+        cerr << "instance is unregistered" << endl;
       }
       else
       {
@@ -111,11 +111,13 @@ DataReaderListenerImpl::on_liveliness_changed (
 
 void
 DataReaderListenerImpl::on_subscription_matched (
-    DDS::DataReader_ptr,
-    const DDS::SubscriptionMatchedStatus &)
+    DDS::DataReader_ptr dr,
+    const DDS::SubscriptionMatchedStatus& sms)
   throw (CORBA::SystemException)
 {
-  cerr << "DataReaderListenerImpl::on_subscription_matched" << endl;
+  cerr << "DataReaderListenerImpl[" << dr << "]::on_subscription_matched "
+    "tc=" << sms.total_count << " tcc=" << sms.total_count_change << " cc=" <<
+    sms.current_count << " ccc=" << sms.current_count_change << endl;
 }
 
 void

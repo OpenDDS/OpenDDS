@@ -1,3 +1,18 @@
+Thu Feb  9 19:22:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Update remote_opendds_associations_ while lock is still held.
+
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/Writer.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+
+          Use consistent logging for tests.
+          set_qos() may match/unmatch but the effects of this
+          aren't guaranteed to be seen immeidately.  Therefore use a
+          WaitSet and a StatusCondition.
+
 Thu Feb  9 15:38:34 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:

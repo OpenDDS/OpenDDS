@@ -1653,23 +1653,23 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
   } else if (already_matched) { // break an existing associtaion
     if (writer_local) {
       lpi->second.matched_endpoints_.erase(reader);
+      lpi->second.remote_opendds_associations_.erase(reader);
     }
     if (reader_local) {
       lsi->second.matched_endpoints_.erase(writer);
+      lsi->second.remote_opendds_associations_.erase(writer);
     }
     ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
     if (writer_local) {
       DCPS::ReaderIdSeq reader_seq(1);
       reader_seq.length(1);
       reader_seq[0] = reader;
-      lpi->second.remote_opendds_associations_.erase(reader);
       dwr->remove_associations(reader_seq, false /*notify_lost*/);
     }
     if (reader_local) {
       DCPS::WriterIdSeq writer_seq(1);
       writer_seq.length(1);
       writer_seq[0] = writer;
-      lsi->second.remote_opendds_associations_.erase(writer);
       drr->remove_associations(writer_seq, false /*notify_lost*/);
     }
 
