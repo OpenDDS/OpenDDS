@@ -1,3 +1,15 @@
+Thu Feb  9 20:07:58 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+
+          Changed type to size_t to fix compiler warnings.
+
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Removed these files.
+
 Thu Feb  9 19:22:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

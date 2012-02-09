@@ -85,7 +85,7 @@ public:
       CORBA::SystemException
     ));
 
-  unsigned int numReceived()
+  size_t numReceived()
   {
     return (received_.size() - next_);
   }
@@ -102,7 +102,7 @@ public:
   ::OpenDDS::DCPS::RepoId participantId_;
 private:
   std::vector<Called> received_;
-  unsigned int next_;
+  size_t next_;
 };
 
 
