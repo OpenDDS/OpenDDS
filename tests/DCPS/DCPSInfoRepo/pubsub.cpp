@@ -79,7 +79,6 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   OpenDDS::DCPS::RepoId pubId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataWriter_i* dwImpl = new TAO_DDS_DCPSDataWriter_i;
   PortableServer::ServantBase_var safe_servant = dwImpl;
-  size_t dwRcvIndex = 0;
   OpenDDS::DCPS::DataWriterRemote_var dw;
 
   ::DDS::DomainParticipantQos_var partQos = new ::DDS::DomainParticipantQos;
@@ -239,7 +238,6 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
 #ifndef DDS_HAS_MINIMUM_BIT
   drImpl->info_ = rtpsInfo;
 #endif
-  size_t drRcvIndex = 0;
   OpenDDS::DCPS::DataReaderRemote_var dr;
 
   value = info->add_domain_participant(domain, partQos.in());
@@ -412,7 +410,6 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   OpenDDS::DCPS::RepoId pubIncQosId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataWriter_i* dwIncQosImpl = new TAO_DDS_DCPSDataWriter_i;
   PortableServer::ServantBase_var safe_servant3 = dwIncQosImpl;
-  size_t dwIncQosRcvIndex = 0;
   OpenDDS::DCPS::DataWriterRemote_var dwIncQos;
 
   // Add publication
