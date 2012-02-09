@@ -138,7 +138,43 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
     }
 
   ::DDS::DataWriterQos_var dwQos = new ::DDS::DataWriterQos;
-  dwQos->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
+  dwQos->reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  dwQos->durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+  dwQos->durability_service.service_cleanup_delay.sec =
+    DDS::DURATION_ZERO_SEC;
+  dwQos->durability_service.service_cleanup_delay.nanosec =
+    DDS::DURATION_ZERO_NSEC;
+  dwQos->durability_service.history_kind =
+    DDS::KEEP_LAST_HISTORY_QOS;
+  dwQos->durability_service.history_depth = 1;
+  dwQos->durability_service.max_samples =
+    DDS::LENGTH_UNLIMITED;
+  dwQos->durability_service.max_instances =
+    DDS::LENGTH_UNLIMITED;
+  dwQos->durability_service.max_samples_per_instance =
+    DDS::LENGTH_UNLIMITED;
+  dwQos->deadline.period.sec = DDS::DURATION_INFINITE_SEC;
+  dwQos->deadline.period.nanosec = DDS::DURATION_INFINITE_NSEC;
+  dwQos->latency_budget.duration.sec = DDS::DURATION_ZERO_SEC;
+  dwQos->latency_budget.duration.nanosec = DDS::DURATION_ZERO_NSEC;
+  dwQos->liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+  dwQos->liveliness.lease_duration.sec = DDS::DURATION_INFINITE_SEC;
+  dwQos->liveliness.lease_duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+  dwQos->reliability.max_blocking_time.sec = 0;
+  dwQos->reliability.max_blocking_time.nanosec = 100000000;
+  dwQos->destination_order.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+  dwQos->history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  dwQos->history.depth = 1;
+  dwQos->resource_limits.max_samples = DDS::LENGTH_UNLIMITED;
+  dwQos->resource_limits.max_instances = DDS::LENGTH_UNLIMITED;
+  dwQos->resource_limits.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
+  dwQos->transport_priority.value = 0;
+  dwQos->lifespan.duration.sec = DDS::DURATION_INFINITE_SEC;
+  dwQos->lifespan.duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+  dwQos->ownership.kind = DDS::SHARED_OWNERSHIP_QOS;
+  dwQos->ownership_strength.value = 0;
+  dwQos->writer_data_lifecycle.autodispose_unregistered_instances = true;
+
   OpenDDS::DCPS::TransportLocatorSeq tii;
   tii.length(1);
   tii[0].transport_type = "fake transport for test";
@@ -269,6 +305,30 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
 
   ::DDS::DataReaderQos_var drQos = new ::DDS::DataReaderQos;
   drQos->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
+  drQos->durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+  drQos->deadline.period.sec = DDS::DURATION_INFINITE_SEC;
+  drQos->deadline.period.nanosec = DDS::DURATION_INFINITE_NSEC;
+  drQos->latency_budget.duration.sec = DDS::DURATION_ZERO_SEC;
+  drQos->latency_budget.duration.nanosec = DDS::DURATION_ZERO_NSEC;
+  drQos->liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+  drQos->liveliness.lease_duration.sec = DDS::DURATION_INFINITE_SEC;
+  drQos->liveliness.lease_duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+  drQos->reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
+  drQos->reliability.max_blocking_time.nanosec = DDS::DURATION_INFINITE_NSEC;
+  drQos->destination_order.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+  drQos->history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  drQos->history.depth = 1;
+  drQos->resource_limits.max_samples = DDS::LENGTH_UNLIMITED;
+  drQos->resource_limits.max_instances = DDS::LENGTH_UNLIMITED;
+  drQos->resource_limits.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
+  drQos->time_based_filter.minimum_separation.sec = DDS::DURATION_ZERO_SEC;
+  drQos->time_based_filter.minimum_separation.nanosec = DDS::DURATION_ZERO_NSEC;
+  drQos->ownership.kind = DDS::SHARED_OWNERSHIP_QOS;
+  drQos->reader_data_lifecycle.autopurge_nowriter_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
+  drQos->reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
+  drQos->reader_data_lifecycle.autopurge_disposed_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
+  drQos->reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
+
   ::DDS::SubscriberQos_var subQos = new ::DDS::SubscriberQos;
 
   subId = info->add_subscription(domain,
@@ -376,6 +436,41 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
 
   ::DDS::DataWriterQos_var dwIncQosQos = new ::DDS::DataWriterQos;
   dwIncQosQos->reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
+  dwIncQosQos->durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+  dwIncQosQos->durability_service.service_cleanup_delay.sec =
+    DDS::DURATION_ZERO_SEC;
+  dwIncQosQos->durability_service.service_cleanup_delay.nanosec =
+    DDS::DURATION_ZERO_NSEC;
+  dwIncQosQos->durability_service.history_kind =
+    DDS::KEEP_LAST_HISTORY_QOS;
+  dwIncQosQos->durability_service.history_depth = 1;
+  dwIncQosQos->durability_service.max_samples =
+    DDS::LENGTH_UNLIMITED;
+  dwIncQosQos->durability_service.max_instances =
+    DDS::LENGTH_UNLIMITED;
+  dwIncQosQos->durability_service.max_samples_per_instance =
+    DDS::LENGTH_UNLIMITED;
+  dwIncQosQos->deadline.period.sec = DDS::DURATION_INFINITE_SEC;
+  dwIncQosQos->deadline.period.nanosec = DDS::DURATION_INFINITE_NSEC;
+  dwIncQosQos->latency_budget.duration.sec = DDS::DURATION_ZERO_SEC;
+  dwIncQosQos->latency_budget.duration.nanosec = DDS::DURATION_ZERO_NSEC;
+  dwIncQosQos->liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+  dwIncQosQos->liveliness.lease_duration.sec = DDS::DURATION_INFINITE_SEC;
+  dwIncQosQos->liveliness.lease_duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+  dwIncQosQos->reliability.max_blocking_time.sec = 0;
+  dwIncQosQos->reliability.max_blocking_time.nanosec = 100000000;
+  dwIncQosQos->destination_order.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+  dwIncQosQos->history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  dwIncQosQos->history.depth = 1;
+  dwIncQosQos->resource_limits.max_samples = DDS::LENGTH_UNLIMITED;
+  dwIncQosQos->resource_limits.max_instances = DDS::LENGTH_UNLIMITED;
+  dwIncQosQos->resource_limits.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
+  dwIncQosQos->transport_priority.value = 0;
+  dwIncQosQos->lifespan.duration.sec = DDS::DURATION_INFINITE_SEC;
+  dwIncQosQos->lifespan.duration.nanosec = DDS::DURATION_INFINITE_NSEC;
+  dwIncQosQos->ownership.kind = DDS::SHARED_OWNERSHIP_QOS;
+  dwIncQosQos->ownership_strength.value = 0;
+  dwIncQosQos->writer_data_lifecycle.autodispose_unregistered_instances = true;
 
   pubIncQosId = info->add_publication(domain,
                                 pubPartId,
