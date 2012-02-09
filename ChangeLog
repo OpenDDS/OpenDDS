@@ -1,8 +1,14 @@
+Thu Feb  9 15:21:07 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        
+          Initializing writer/reader QOS using service participant.
+
 Thu Feb  9 14:42:52 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSSubscriberI.h:
         * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
-        
+
           Cleaning up "unused parameter" warnings.
 
 Thu Feb  9 05:05:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
