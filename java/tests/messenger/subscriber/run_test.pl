@@ -9,7 +9,7 @@ use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use PerlDDS::Process_Java;
-use strict; 
+use strict;
 my $status = 0;
 my $debug = '0';
 
