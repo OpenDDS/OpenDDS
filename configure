@@ -36,7 +36,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'optimize!', 'Optimization (no)',
     'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
-    'ipv6!', 'IPv6 support (no)'
+    'ipv6!', 'IPv6 support (no)',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ../ACE_wrappers, or download)',
@@ -54,7 +54,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'wireshark:s', 'Wireshark (use WIRESHARK_SRC)',
     'glib:s', 'GLib for wireshark (use GLIB_ROOT)',
     'qt:s', 'Qt (use QTDIR)',
-    'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)'
+    'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
+    'boost:s', 'Boost (use BOOST_ROOT)',
+    'boost-version:s', 'Boost version (only if needed to find headers)',
    ],
    ['Minimizing OpenDDS:',
     'built-in-topics!', 'Support Built-in Topics (yes)',
@@ -484,12 +486,13 @@ else {
 
 my %optdep =
 # %opts key =>    [env var,         sanity check,          MPC feature]
-  ('java' =>      ['JAVA_HOME',     'include/jni.h',       'java'],
+  ('java' =>      ['JAVA_HOME',     'include/jni.h',             'java'],
    'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
    'ant' =>       ['ANT_HOME',      'bin/ant'],
-   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',       'wireshark'],
+   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',             'wireshark'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
-   'qt' =>        ['QTDIR',         '',                    'qt4'],
+   'qt' =>        ['QTDIR',         '',                          'qt4'],
+   'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp', 'boost'],
   );
 
 if (exists $opts{'java'}) {
@@ -499,14 +502,31 @@ if (exists $opts{'java'}) {
   setenv('JAVA_PLATFORM', $opts{'host'});
 }
 
+sub env_from_opt {
+  my $key = shift;
+  my $e = shift;
+  if ($opts{$key} && (!$ENV{$e} || $opts{$key} ne $ENV{$e})) {
+    setenv($e, $opts{$key});
+  }
+}
+
+if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
+  env_from_opt('boost', $optdep{'boost'}->[0]);
+  env_from_opt('boost-version', 'BOOST_VERSION');
+  if ($ENV{'BOOST_VERSION'}
+      && !-r $ENV{'BOOST_ROOT'} . '/' . $optdep{'boost'}->[1]
+      && -r $ENV{'BOOST_ROOT'} . '/include/' . $ENV{'BOOST_VERSION'}
+      . '/boost/version.hpp') {
+    $optdep{'boost'}->[1] = ''; # skip sanity check in for-loop below
+  }
+}
+
 my @features;
 for my $key(keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
     my ($e, $s, $m) = @{$optdep{$key}};
-    if ($opts{$key} && (!$ENV{$e} || $opts{$key} ne $ENV{$e})) {
-      setenv($e, $opts{$key});
-    }
+    env_from_opt($key, $e);
     if ($s && !-r $ENV{$e} . '/' . $s) {
       die "Can't find $key at $ENV{$e} (using $s)\n";
     }

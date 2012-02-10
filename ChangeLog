@@ -1,3 +1,10 @@
+Fri Feb 10 21:40:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Set up Boost as an optional dependency.  As of now, Boost is only
+          used for the GUI demo in examples/DCPS/ishapes.
+
 Fri Feb 10 20:49:54 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h:
