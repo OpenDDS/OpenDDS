@@ -1,3 +1,24 @@
+Fri Feb 10 17:53:13 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added handling for association_complete() callbacks coming from
+          discovery before the add_association() call has completed.
+
+        * tests/DCPS/FooTest5_0/main.cpp:
+
+          Fixed warning, return a non-zero value on failure.
+
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+
+          Fixed warning.
+
+        * DDS_TAO_all.mwc:
+
+          Updated lists of ACE+TAO projects needed to build
+          and run all OpenDDS tests and examples (TAO 1.6a).
+
 Thu Feb  9 20:07:58 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:

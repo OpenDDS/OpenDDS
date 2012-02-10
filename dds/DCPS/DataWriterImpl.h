@@ -541,6 +541,8 @@ private:
     return this->qos_.transport_priority.value;
   }
 
+  void association_complete_i(const RepoId& remote_id);
+
   friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_
 
   /// The name of associated topic.
@@ -650,7 +652,7 @@ private:
 
   RepoIdToSequenceMap idToSequence_;
 
-  IdSet                      pending_readers_;
+  IdSet                      pending_readers_, assoc_complete_readers_;
 
   /// The cached available data while suspending.
   DataSampleList             available_data_list_;

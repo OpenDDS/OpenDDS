@@ -497,7 +497,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
-  return 0;
+  return test_failed;
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {

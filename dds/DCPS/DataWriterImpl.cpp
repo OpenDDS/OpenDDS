@@ -249,27 +249,9 @@ DataWriterImpl::add_association(const RepoId& yourId,
 
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    // Add to pending_readers_
-
-    if (OpenDDS::DCPS::insert(pending_readers_, reader.readerId) == -1) {
-      GuidConverter converter(reader.readerId);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_association: ")
-                 ACE_TEXT("failed to mark %C as pending.\n"),
-                 std::string(converter).c_str()));
-
-    } else {
-      if (DCPS_debug_level > 0) {
-        GuidConverter converter(reader.readerId);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::add_association: ")
-                   ACE_TEXT("marked %C as pending.\n"),
-                   std::string(converter).c_str()));
-      }
       reader_info_.insert(std::make_pair(reader.readerId,
         ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
           reader.exprParams, participant_servant_)));
-    }
   }
 
   if (DCPS_debug_level > 4) {
@@ -297,7 +279,33 @@ DataWriterImpl::add_association(const RepoId& yourId,
     return;
   }
 
-  if (!active) {
+  if (active) {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+    // Have we already received an association_complete() callback?
+    if (assoc_complete_readers_.count(reader.readerId)) {
+      assoc_complete_readers_.erase(reader.readerId);
+      association_complete_i(reader.readerId);
+
+    // Add to pending_readers_ -> pending means we are waiting
+    // for the association_complete() callback.
+    } else if (OpenDDS::DCPS::insert(pending_readers_, reader.readerId) == -1) {
+      GuidConverter converter(reader.readerId);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_association: ")
+                 ACE_TEXT("failed to mark %C as pending.\n"),
+                 std::string(converter).c_str()));
+
+    } else {
+      if (DCPS_debug_level > 0) {
+        GuidConverter converter(reader.readerId);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataWriterImpl::add_association: ")
+                   ACE_TEXT("marked %C as pending.\n"),
+                   std::string(converter).c_str()));
+      }
+    }
+  } else {
     // In the current implementation, DataWriter is always active, so this
     // code will not be applicable.
     DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
@@ -359,26 +367,23 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
                std::string(reader_converter).c_str()));
   }
 
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
+    // Not found in pending_readers_, defer calling association_complete_i()
+    // until add_association() resumes and sees this ID in assoc_complete_readers_.
+    assoc_complete_readers_.insert(remote_id);
+  } else {
+    association_complete_i(remote_id);
+  }
+}
+
+void
+DataWriterImpl::association_complete_i(const RepoId& remote_id)
+{
+  DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
+
   {
-    // protect readers_
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-    // If the reader is not in pending association list, which indicates it's already
-    // removed by remove_association. In other words, the remove_association()
-    // is called before assocation_complete() call.
-    if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-      GuidConverter converter(remote_id);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataWriterImpl::association_complete: ")
-                 ACE_TEXT("reader %C is not in pending list ")
-                 ACE_TEXT("because remove_association is already called.\n"),
-                 std::string(converter).c_str()));
-      return;
-    }
-
-    // The reader is in the pending reader, now add it to fully associated reader
-    // list.
-
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
       GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,

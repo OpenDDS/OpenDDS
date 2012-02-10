@@ -139,7 +139,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           ws->attach_condition(sc);
           DDS::PublicationMatchedStatus matched;
           DDS::ConditionSeq active;
-          const DDS::Duration_t timeout = {5}; // seconds
+          const DDS::Duration_t timeout = {5, 0}; // seconds
           while (dw->get_publication_matched_status(matched) == DDS::RETCODE_OK
                  && matched.current_count) {
             if (ws->wait(active, timeout) == DDS::RETCODE_TIMEOUT) {
