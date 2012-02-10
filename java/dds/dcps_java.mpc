@@ -64,6 +64,7 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     OpenDDS/DCPS/transport/TcpInst.java
     OpenDDS/DCPS/transport/UdpInst.java
     OpenDDS/DCPS/transport/MulticastInst.java
+    OpenDDS/DCPS/transport/RtpsUdpInst.java
     OpenDDS/DCPS/transport/TransportInst.java
     OpenDDS/DCPS/transport/TransportConfig.java
     OpenDDS/DCPS/transport/TransportException.java
@@ -90,9 +91,10 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     classes/OpenDDS/DCPS/transport/TheTransportRegistry.class
     classes/OpenDDS/DCPS/transport/TcpInst.class
     classes/OpenDDS/DCPS/transport/UdpInst.class
+    classes/OpenDDS/DCPS/transport/MulticastInst.class
+    classes/OpenDDS/DCPS/transport/RtpsUdpInst.class
     classes/OpenDDS/DCPS/transport/TransportInst.class
     classes/OpenDDS/DCPS/transport/TransportConfig.class
-    classes/OpenDDS/DCPS/transport/MulticastInst.class
   }
 
 }

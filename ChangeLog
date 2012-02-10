@@ -1,3 +1,24 @@
+Fri Feb 10 20:49:54 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h:
+
+          Added *Inst_rch.h header for convenience.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Use RtpsUdpInst_rch.h.
+
+        * java/dds/OpenDDS/DCPS/transport/RtpsUdpInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+
+          Added Java APIs for configuration of the rtps_udp transport.
+
+        * bin/dcps_tests.lst:
+
+          Run the ContentFilteredTopic test with nopub and rtps_disc options.
+
 Fri Feb 10 17:53:13 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

@@ -8,6 +8,7 @@
 
 #include "RtpsUdpTransport.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpInst_rch.h"
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
@@ -221,7 +222,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
 bool
 RtpsUdpTransport::configure_i(TransportInst* config)
 {
-  config_i_ = RcHandle<RtpsUdpInst>(dynamic_cast<RtpsUdpInst*>(config), false);
+  config_i_ = RtpsUdpInst_rch(dynamic_cast<RtpsUdpInst*>(config), false);
 
   if (config_i_.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,

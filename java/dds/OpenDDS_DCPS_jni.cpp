@@ -13,6 +13,7 @@
 #include "OpenDDS_DCPS_transport_TcpInst.h"
 #include "OpenDDS_DCPS_transport_UdpInst.h"
 #include "OpenDDS_DCPS_transport_MulticastInst.h"
+#include "OpenDDS_DCPS_transport_RtpsUdpInst.h"
 #include "OpenDDS_DCPS_transport_TransportInst.h"
 #include "DDS_WaitSet.h"
 #include "DDS_GuardCondition.h"
@@ -31,9 +32,11 @@
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #include "dds/DCPS/transport/udp/UdpInst_rch.h"
 #include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h"
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "dds/DCPS/DomainParticipantImpl.h"
@@ -185,6 +188,8 @@ jobject constructTransportInst(JNIEnv *jni,
       instClazz = findClass(jni, "OpenDDS/DCPS/transport/UdpInst");
     } else if (inst->transport_type_ == "multicast") {
       instClazz = findClass(jni, "OpenDDS/DCPS/transport/MulticastInst");
+    } else if (inst->transport_type_ == "rtps_udp") {
+      instClazz = findClass(jni, "OpenDDS/DCPS/transport/RtpsUdpInst");
     } else {
       throw_java_exception(jni, OpenDDS::DCPS::Transport::UnableToCreate());
     }
@@ -1081,6 +1086,160 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setRcvBufferSize
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
                                         false); // Don't take ownership
   inst->rcv_buffer_size_ = val;
+}
+
+// RtpsUdpInst
+
+// RtpsUdpInst::getLocalAddress
+jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getLocalAddress
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  ACE_TCHAR buffer[1024];
+  inst->local_address_.addr_to_string(buffer, 1024, 1);
+  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
+  return jni->NewStringUTF(addr_str.c_str());
+}
+
+// RtpsUdpInst::setLocalAddress
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setLocalAddress
+(JNIEnv * jni, jobject jthis, jstring val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  JStringMgr jsm_val(jni, val);
+  inst->local_address_.set(jsm_val.c_str());
+}
+
+// RtpsUdpInst::isUseMulticast
+jboolean JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_isUseMulticast
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  return inst->use_multicast_;
+}
+
+// RtpsUdpInst::setUseMulticast
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setUseMulticast
+(JNIEnv * jni, jobject jthis, jboolean val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  inst->use_multicast_ = val;
+}
+
+// RtpsUdpInst::getMulticastGroupAddress
+jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  ACE_TCHAR buffer[1024];
+  inst->multicast_group_address_.addr_to_string(buffer, 1024, 1);
+  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
+  return jni->NewStringUTF(addr_str.c_str());
+}
+
+// RtpsUdpInst::setMulticastGroupAddress
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setMulticastGroupAddress
+(JNIEnv * jni, jobject jthis, jstring val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  JStringMgr jsm_val(jni, val);
+  inst->multicast_group_address_.set(jsm_val.c_str());
+}
+
+// RtpsUdpInst::getNakDepth
+jint JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getNakDepth
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  return static_cast<jint>(inst->nak_depth_);
+}
+
+// RtpsUdpInst::setNakDepth
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setNakDepth
+(JNIEnv * jni, jobject jthis, jint val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  inst->nak_depth_ = val;
+}
+
+// RtpsUdpInst::getNakResponseDelay
+jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getNakResponseDelay
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  return inst->nak_response_delay_.msec();
+}
+
+// RtpsUdpInst::setNakResponseDelay
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setNakResponseDelay
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  inst->nak_response_delay_.msec(long(val));
+}
+
+// RtpsUdpInst::getHeartbeatPeriod
+jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHeartbeatPeriod
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  return inst->heartbeat_period_.msec();
+}
+
+// RtpsUdpInst::setHeartbeatPeriod
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatPeriod
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  inst->heartbeat_period_.msec(long(val));
+}
+
+// RtpsUdpInst::getHeartbeatResponseDelay
+jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHeartbeatResponseDelay
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  return inst->heartbeat_response_delay_.msec();
+}
+
+// RtpsUdpInst::setHeartbeatResponseDelay
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatResponseDelay
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  inst->heartbeat_response_delay_.msec(long(val));
+}
+
+// RtpsUdpInst::getHandshakeTimeout
+jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHandshakeTimeout
+(JNIEnv * jni, jobject jthis)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  return inst->handshake_timeout_.msec();
+}
+
+// RtpsUdpInst::setHandshakeTimeout
+void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHandshakeTimeout
+(JNIEnv * jni, jobject jthis, jlong val)
+{
+  OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
+                                      false); // Don't take ownership
+  inst->handshake_timeout_.msec(long(val));
 }
 
 // WaitSet and GuardCondition

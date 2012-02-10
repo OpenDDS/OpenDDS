@@ -17,6 +17,7 @@
 
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h"
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/Definitions.h"
@@ -221,10 +222,6 @@ bool paramsChanged(OpenDDS::RTPS::ContentFilterProperty_t& dest,
 }
 
 namespace OpenDDS {
-namespace DCPS {
-  typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
-}
-
 namespace RTPS {
 using DCPS::RepoId;
 
