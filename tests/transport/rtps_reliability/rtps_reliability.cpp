@@ -10,6 +10,7 @@
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
@@ -19,12 +20,15 @@
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/DisjointSequence.h"
+#include "dds/DCPS/DataSampleList.h"
 
 #include <tao/Exception.h>
 
 #include <ace/OS_main.h>
 #include <ace/Thread_Manager.h>
 #include <ace/Reactor.h>
+#include <ace/SOCK_Dgram.h>
 
 #include <cstdlib>
 #include <typeinfo>

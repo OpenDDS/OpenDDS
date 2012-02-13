@@ -8,6 +8,7 @@
 
 #include "RtpsUdpInst.h"
 #include "RtpsUdpLoader.h"
+#include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
@@ -32,7 +33,7 @@ RtpsUdpInst::RtpsUdpInst(const std::string& name)
 {
 }
 
-RtpsUdpTransport*
+TransportImpl*
 RtpsUdpInst::new_impl(const TransportInst_rch& inst)
 {
   return new RtpsUdpTransport(inst);

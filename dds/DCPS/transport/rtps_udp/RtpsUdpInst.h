@@ -10,7 +10,6 @@
 #define DCPS_RTPSUDPINST_H
 
 #include "Rtps_Udp_Export.h"
-#include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportInst.h"
 
@@ -20,6 +19,7 @@ namespace RTPS {
 }
 
 namespace DCPS {
+class RtpsUdpTransport;
 class TransportReceiveListener;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
@@ -47,7 +47,7 @@ private:
   friend class RtpsUdpType;
   explicit RtpsUdpInst(const std::string& name);
 
-  RtpsUdpTransport* new_impl(const TransportInst_rch& inst);
+  TransportImpl* new_impl(const TransportInst_rch& inst);
 
   friend class RTPS::Sedp;
   friend class RtpsUdpTransport;

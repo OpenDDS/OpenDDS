@@ -6,6 +6,7 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/GuidConverter.h"
@@ -19,6 +20,7 @@
 #include <ace/OS_NS_time.h>
 
 #include <cstdio>
+#include <cstring>
 #include <ctime>
 #include <iostream>
 #include <sstream>

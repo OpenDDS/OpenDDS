@@ -1,3 +1,17 @@
+Mon Feb 13 15:57:06 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Don't #include RtpsUdpTransport.h from RtpsUdpInst.h, to avoid
+          unneeded dependencies.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Fix #includes to work with the above change.
+
 Mon Feb 13 15:22:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * configure:
