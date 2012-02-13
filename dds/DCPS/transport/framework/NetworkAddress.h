@@ -64,7 +64,7 @@ struct OpenDDS_Dcps_Export NetworkAddress {
 /// warning is logged. If there is no any name discovered from network interfaces,
 /// an error is logged.
 extern OpenDDS_Dcps_Export
-std::string get_fully_qualified_hostname();
+std::string get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
 
 } // namespace DCPS
 } // namespace OpenDDS

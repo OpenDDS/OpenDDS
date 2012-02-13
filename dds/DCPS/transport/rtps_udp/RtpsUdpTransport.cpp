@@ -248,26 +248,8 @@ RtpsUdpTransport::configure_i(TransportInst* config)
 
   if (config_i_->local_address_.is_any()) {
 
-    size_t count;
-    ACE_INET_Addr* addrs_raw = 0;
-    const int res = ACE::get_ip_interfaces(count, addrs_raw);
-    ACE_Auto_Array_Ptr<ACE_INET_Addr> addrs(addrs_raw);
-    if (res != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
-        ACE_TEXT("ACE::get_ip_interfaces")), false);
-    }
+    OpenDDS::DCPS::get_fully_qualified_hostname(&config_i_->local_address_);
 
-    for (int i = 0; i < static_cast<int>(count); ++i) {
-      if (!addrs[i].is_loopback()) {
-        config_i_->local_address_ = addrs[i];
-      }
-    }
-
-    // if it's still "any" at this point, we may only have loopback interface
-    if (config_i_->local_address_.is_any() && count > 0) {
-      config_i_->local_address_ = addrs[0];
-    }
   }
 
   if (config_i_->local_address_.get_port_number() == 0) {

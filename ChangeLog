@@ -1,3 +1,21 @@
+Mon Feb 13 18:32:48 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Changed get_fully_qualified_hostname to optionally
+          take a ACE_INET_Addr* that will be set to the 
+          ACE_INET_Addr that corresponds to the selected
+          fullname.  This is to allow rtps to use this logic
+          since it should select the address associated with 
+          the fully qualified hostname.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Changed to call get_fully_qualified_hostname and 
+          pass in config_i_->local_address_ to select the
+          proper default address.
+
 Mon Feb 13 15:57:06 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:

@@ -54,9 +54,12 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
 namespace OpenDDS {
 namespace DCPS {
 
-std::string get_fully_qualified_hostname()
+std::string get_fully_qualified_hostname(ACE_INET_Addr* addr)
 {
+  // cache the determined fully qualified hostname and its
+  // address to be used on subsequent calls
   static std::string fullname;
+  static ACE_INET_Addr selected_address;
 
   if (fullname.length() == 0) {
     size_t addr_count;
@@ -88,7 +91,11 @@ std::string get_fully_qualified_hostname()
           if (addr_array[i].is_loopback() == false && ACE_OS::strchr(hostname, '.') != 0) {
             VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
                       hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
+            selected_address = addr_array[i];
             fullname = hostname;
+            if (addr) {
+              *addr = selected_address;
+            }
             return fullname;
 
           } else {
@@ -116,7 +123,11 @@ std::string get_fully_qualified_hostname()
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Could not find FQDN. Using "
                    "\"%C\" as fully qualified hostname, please "
                    "correct system configuration.\n", it->hostname_.c_str()));
+        selected_address = addr_array[it->index_];
         fullname = it->hostname_;
+        if (addr) {
+          *addr = selected_address;
+        }
         return fullname;
       }
     }
@@ -125,7 +136,11 @@ std::string get_fully_qualified_hostname()
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Could not find FQDN. Using "
                  "\"%C\" as fully qualified hostname, please "
                  "correct system configuration.\n", itBegin->hostname_.c_str()));
+      selected_address = addr_array[itBegin->index_];
       fullname = itBegin->hostname_;
+      if (addr) {
+        *addr = selected_address;
+      }
       return fullname;
     }
 
@@ -133,6 +148,9 @@ std::string get_fully_qualified_hostname()
                "(%P|%t) ERROR: failed to discover the fully qualified hostname\n"));
   }
 
+  if (addr) {
+    *addr = selected_address;
+  }
   return fullname;
 }
 
