@@ -116,7 +116,7 @@ locator_to_address(ACE_INET_Addr& dest, const Locator_t& locator)
   case LOCATOR_KIND_UDPv6:
     dest.set_type(AF_INET6);
     if (dest.set_address(reinterpret_cast<const char*>(locator.address),
-                         16) == -1) {
+                         16, 0 /*encode*/) == -1) {
       return -1;
     }
     dest.set_port_number(locator.port);

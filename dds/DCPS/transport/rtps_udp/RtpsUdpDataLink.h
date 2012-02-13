@@ -59,6 +59,10 @@ public:
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();
 
+#ifdef ACE_HAS_IPV6
+  ACE_SOCK_Dgram& socket_for(int address_type);
+#endif
+
   bool open(const ACE_SOCK_Dgram& unicast_socket);
 
   void received(const OpenDDS::RTPS::DataSubmessage& data,
@@ -129,6 +133,10 @@ private:
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
+#ifdef ACE_HAS_IPV6
+  ACE_SOCK_Dgram ipv6_alternate_socket_;
+  int unicast_socket_type_;
+#endif
 
   TransportCustomizedElementAllocator transport_customized_element_allocator_;
 

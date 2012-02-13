@@ -116,7 +116,13 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   ssize_t result = -1;
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
-    ssize_t result_per_dest = link_->unicast_socket().send(iov, n, *iter);
+#ifdef ACE_HAS_IPV6
+    ACE_SOCK_Dgram& sock = link_->socket_for(iter->get_type());
+#define USE_SOCKET sock
+#else
+#define USE_SOCKET link_->unicast_socket()
+#endif
+    ssize_t result_per_dest = USE_SOCKET.send(iov, n, *iter);
     if (result_per_dest < 0) {
       ACE_TCHAR addr_buff[256] = {};
       iter->addr_to_string(addr_buff, 256, 0);

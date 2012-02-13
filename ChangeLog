@@ -1,18 +1,43 @@
+Mon Feb 13 20:29:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        Changes for handling IPv6 in the rtps_udp transport.
+        This requires an ACE_HAS_IPV6 build of ACE.
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          When calling ACE_INET_Addrr::set_address() for IPv6,
+          the 'encode' argument must be zero.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Open a second socket using the opposite address family as
+          unicast_socket_.  When sending datagrams, pick the correct
+          socket based on the send-to address.  This is similar to
+          the recent change made to the OpenDDS udp transport.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          If the local_address string in the config file is empty, leave
+          the local_address_ object alone.  Calling ACE_INET_Addr::set()
+          with an empty string changes an IPv6 address to IPv4.
+
 Mon Feb 13 18:32:48 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/framework/NetworkAddress.h:
         * dds/DCPS/transport/framework/NetworkAddress.cpp:
 
           Changed get_fully_qualified_hostname to optionally
-          take a ACE_INET_Addr* that will be set to the 
+          take a ACE_INET_Addr* that will be set to the
           ACE_INET_Addr that corresponds to the selected
           fullname.  This is to allow rtps to use this logic
-          since it should select the address associated with 
+          since it should select the address associated with
           the fully qualified hostname.
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
 
-          Changed to call get_fully_qualified_hostname and 
+          Changed to call get_fully_qualified_hostname and
           pass in config_i_->local_address_ to select the
           proper default address.
 
