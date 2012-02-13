@@ -8,6 +8,7 @@ workspace {
   $(TAO_ROOT)/tao/IORManipulation.mpc
   $(TAO_ROOT)/tao/Valuetype.mpc
   $(TAO_ROOT)/tao/Messaging.mpc
+  $(TAO_ROOT)/tao/Strategies.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming_Skel.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming_Serv.mpc

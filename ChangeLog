@@ -1,3 +1,13 @@
+Mon Feb 13 15:22:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Moved TAO version check to the correct location.
+
+        * DDS_TAO_all.mwc:
+
+          Added TAO_Strategies library.
+
 Fri Feb 10 21:40:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * configure:

@@ -317,15 +317,6 @@ elsif (!$ENV{'TAO_ROOT'} && $ENV{'ACE_ROOT'}
        && -r $ENV{'ACE_ROOT'} . '/TAO/tao/ORB.h') {
   setenv('TAO_ROOT', $ENV{'ACE_ROOT'} . $slash . 'TAO');
 }
-my $tao_maj = 1;
-open TAOVER, $ENV{'TAO_ROOT'} . '/VERSION' or die "can't open TAO VERSION\n";
-while (<TAOVER>) {
-  if (/^This is TAO version (\d)/) {
-    $tao_maj = $1;
-    last;
-  }
-}
-close TAOVER;
 
 ## Download ACE+TAO 1.6a
 
@@ -395,6 +386,15 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
 
 print "Using ACE_ROOT: $ENV{'ACE_ROOT'}\n" if $opts{'verbose'};
 print "Using TAO_ROOT: $ENV{'TAO_ROOT'}\n" if $opts{'verbose'};
+my $tao_maj = 1;
+open TAOVER, $ENV{'TAO_ROOT'} . '/VERSION' or die "can't open TAO VERSION\n";
+while (<TAOVER>) {
+  if (/^This is TAO version (\d)/) {
+    $tao_maj = $1;
+    last;
+  }
+}
+close TAOVER;
 
 ## Configure ACE+TAO
 
