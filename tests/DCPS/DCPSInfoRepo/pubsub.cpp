@@ -82,6 +82,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   OpenDDS::DCPS::DataWriterRemote_var dw;
 
   ::DDS::DomainParticipantQos_var partQos = new ::DDS::DomainParticipantQos;
+  *partQos = TheServiceParticipant->initial_DomainParticipantQos();
   OpenDDS::DCPS::AddDomainStatus value = info->add_domain_participant(domain, partQos.in());
   pubPartId = value.id;
   if (OpenDDS::DCPS::GUID_UNKNOWN == pubPartId)
@@ -103,6 +104,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   const char* tname = "MYtopic";
   const char* dname = "MYdataname";
   ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
+  *topicQos = TheServiceParticipant->initial_TopicQos();
   OpenDDS::DCPS::TopicStatus topicStatus = info->assert_topic(pubTopicId,
                                                        domain,
                                                        pubPartId,
@@ -145,7 +147,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   tii[0].transport_type = "fake transport for test";
 
   ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
-
+  *pQos = TheServiceParticipant->initial_PublisherQos();
   pubId = info->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
@@ -172,6 +174,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   const char* tnameIncompatible = "MYtopic";
   const char* dnameIncompatible = "MYnewdataname";
   ::DDS::TopicQos_var topicQosIncompatible = new ::DDS::TopicQos;
+  *topicQosIncompatible = TheServiceParticipant->initial_TopicQos();
   topicStatus = info->assert_topic(topicId2,
                                                         domain,
                                                         pubPartId,
@@ -226,6 +229,8 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   }
 #endif
 
+  topicQos = new ::DDS::TopicQos;
+  *topicQos = TheServiceParticipant->initial_TopicQos();
   topicStatus = info->assert_topic(subTopicId,
                                    domain,
                                    subPartId,
@@ -272,7 +277,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   drQos->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
 
   ::DDS::SubscriberQos_var subQos = new ::DDS::SubscriberQos;
-
+  *subQos = TheServiceParticipant->initial_SubscriberQos();
   subId = info->add_subscription(domain,
                                  subPartId,
                                  subTopicId,
@@ -379,6 +384,8 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   *dwIncQosQos = TheServiceParticipant->initial_DataWriterQos();
   dwIncQosQos->reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
 
+  pQos = new ::DDS::PublisherQos;
+  *pQos = TheServiceParticipant->initial_PublisherQos();
   pubIncQosId = info->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,

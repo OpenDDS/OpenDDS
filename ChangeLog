@@ -1,3 +1,9 @@
+Mon Feb 13 21:42:30 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Initializing all Qos.
+
 Mon Feb 13 20:29:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         Changes for handling IPv6 in the rtps_udp transport.
