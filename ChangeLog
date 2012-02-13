@@ -1,3 +1,10 @@
+Mon Feb 13 22:35:25 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Revised strategy for keeping track of the default receive listener.
+
 Mon Feb 13 21:42:30 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/pubsub.cpp:

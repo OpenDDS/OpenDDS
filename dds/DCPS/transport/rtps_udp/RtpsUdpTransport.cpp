@@ -28,6 +28,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
+  : default_listener_(0)
 {
   if (!inst.is_nil()) {
     configure(inst.in());
@@ -269,6 +270,8 @@ RtpsUdpTransport::configure_i(TransportInst* config)
     RtpsUdpDataLink_rch link =
       make_datalink(config_i_->opendds_discovery_guid_.guidPrefix);
     link->default_listener(config_i_->opendds_discovery_default_listener_);
+    default_listener_ =
+      dynamic_cast<TransportClient*>(config_i_->opendds_discovery_default_listener_);
   }
 
   return true;
@@ -293,9 +296,9 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
 void
 RtpsUdpTransport::pre_detach(TransportClient* c)
 {
-  TransportReceiveListener* trl = dynamic_cast<TransportReceiveListener*>(c);
-  if (trl && !link_.is_nil() && trl == link_->default_listener()) {
+  if (default_listener_ && !link_.is_nil() && c == default_listener_) {
     link_->default_listener(0);
+    default_listener_ = 0;
   }
 }
 

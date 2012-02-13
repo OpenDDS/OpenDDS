@@ -78,6 +78,8 @@ private:
   RtpsUdpDataLink_rch link_;
 
   ACE_SOCK_Dgram unicast_socket_;
+
+  TransportClient* default_listener_;
 };
 
 } // namespace DCPS
