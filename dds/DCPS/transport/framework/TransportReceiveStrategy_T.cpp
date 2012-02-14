@@ -599,7 +599,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
                 "header.  Demarshall the sample header now.\n"));
 
           // only do the hexdump if it will be printed - to not impact perfomance.
-          if (Transport_debug_level) {
+          if (Transport_debug_level > 5) {
             ACE_TCHAR ebuffer[4096];
             ACE::format_hexdump
             (this->receive_buffers_[this->buffer_index_]->rd_ptr(),

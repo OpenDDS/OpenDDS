@@ -1,3 +1,30 @@
+Tue Feb 14 17:14:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Allow command-line, config-file, and API-based setting of the
+          default discovery object (used when a given domain ID has no
+          discovery configured).
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+        * tests/DCPS/ConfigFile/test1_nobits.ini:
+        * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
+
+          Test the above.
+
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/idl/be_global.cpp:
+
+          Porting for GCC on Windows (MinGW).  This is experimental.
+          DCPSInfoRepo persistence seems not to work on MinGW.
+          Fixed some other minor issues while reviewing FileSystemStorage.cpp.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Check transport debug level before formatting hexdump.
+
 Mon Feb 13 22:35:25 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:

@@ -80,11 +80,13 @@ static bool got_publisher_content_filter = false;
 static bool got_transport_debug_level = false;
 static bool got_pending_timeout = false;
 static bool got_persistent_data_dir = false;
+static bool got_default_discovery = false;
 
 Service_Participant::Service_Participant()
   : orb_(CORBA::ORB::_nil()),
     orb_from_user_(0),
     dp_factory_servant_(0),
+    defaultDiscovery_(Discovery::DEFAULT_REPO),
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
     liveliness_factor_(80),
@@ -505,6 +507,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       this->publisher_content_filter_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_publisher_content_filter = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultDiscovery"))) != 0) {
+      this->defaultDiscovery_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
+      arg_shifter.consume_arg();
+      got_default_discovery = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
@@ -1021,11 +1028,24 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
   ACE_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
 }
 
+void
+Service_Participant::set_default_discovery(const Discovery::RepoKey& key)
+{
+  this->defaultDiscovery_ = key;
+}
+
+Discovery::RepoKey
+Service_Participant::get_default_discovery()
+{
+  return this->defaultDiscovery_;
+}
+
 Discovery_rch
 Service_Participant::get_discovery(const DDS::DomainId_t domain)
 {
-  // Default to the Default InfoRepo-based discovery
-  Discovery::RepoKey repo = Discovery::DEFAULT_REPO;
+  // Default to the Default InfoRepo-based discovery unless the user has
+  // changed defaultDiscovery_ using the API or config file
+  Discovery::RepoKey repo = defaultDiscovery_;
 
   // Find if this domain has a repo key (really a discovery key)
   // mapped to it.
@@ -1432,6 +1452,18 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSPublisherContentFilter"),
         this->publisher_content_filter_, bool)
+    }
+
+    if (got_default_discovery) {
+      ACE_Configuration::VALUETYPE type;
+      if (cf.find_value(sect, ACE_TEXT("DCPSDefaultDiscovery"), type) != -1) {
+        ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: using DCPSDefaultDiscovery value ")
+                   ACE_TEXT("from command option, overriding config file\n")));
+      }
+    } else {
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultDiscovery"),
+        this->defaultDiscovery_);
     }
 
     // These are not handled on the command line.

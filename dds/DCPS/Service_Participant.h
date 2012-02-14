@@ -239,6 +239,9 @@ public:
                        Discovery::RepoKey repo,
                        bool attach_participant = true);
 
+  void set_default_discovery(const Discovery::RepoKey& defaultDiscovery);
+  Discovery::RepoKey get_default_discovery();
+
   /// Convert domainId to repository key.
   Discovery::RepoKey domain_to_repo(const DDS::DomainId_t domain) const;
 
@@ -415,6 +418,8 @@ private:
 
   /// The DomainId to RepoKey mapping.
   DomainRepoMap domainRepoMap_;
+
+  Discovery::RepoKey defaultDiscovery_;
 
   /// The lock to serialize DomainParticipantFactory singleton
   /// creation and shutdown.

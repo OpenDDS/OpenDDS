@@ -26,7 +26,7 @@ typedef size_t String_Index_t;
 namespace {
 
 const size_t FSS_MAX_FILE_NAME = 150, FSS_MAX_FILE_NAME_ENCODED = 240,
-                                                                  FSS_MAX_OVERFLOW_DIR = 9999;
+  FSS_MAX_OVERFLOW_DIR = 9999;
 const ACE_TCHAR FSS_DEFAULT_FILE_NAME[] = ACE_TEXT("F00000000000000");
 const ACE_TCHAR FSS_DEFAULT_DIR_NAME[]  = ACE_TEXT("D00000000000000");
 
@@ -93,7 +93,7 @@ ACE_WString to_win32_long_path(const ACE_TCHAR* path)
     DWORD sz = ::GetCurrentDirectoryW(0, 0);
     ACE_Vector<wchar_t> cur(sz);
     cur.resize(sz, L'\0');
-  ::GetCurrentDirectoryW(sz, &cur[0]);
+    ::GetCurrentDirectoryW(sz, &cur[0]);
     dir = &cur[0];
 
     if (dir[dir.length() - 1] != L'\\') dir += L'\\';
@@ -121,7 +121,7 @@ int dds_chdir(const ACE_TCHAR* path)
   wchar_t spath[MAX_PATH];
 
   if (0 == ::GetShortPathNameW(wpath.c_str(), spath, MAX_PATH)) {
-    throw std::exception("GetShortPathNameW failed.");
+    throw std::runtime_error("GetShortPathNameW failed.");
   }
 
   ACE_OSCALL_RETURN(::_wchdir(spath), int, -1);
@@ -212,7 +212,9 @@ void recursive_remove(const ACE_TString& dirname)
     CwdGuard cg(dirname);
 
     for (DDS_DIRENT* ent = dir.read(); ent; ent = dir.read()) {
-      if (ent->d_name[0] == ACE_TEXT('.')) continue; // skip '.' and '..'
+      if (ent->d_name[0] == ACE_TEXT('.') && !ent->d_name[1]) {
+        continue; // skip '.' and '..'
+      }
 
       if (is_dir(ent->d_name)) {
         recursive_remove(ent->d_name);
@@ -319,10 +321,13 @@ DDS_DIRENT* DDS_Dirent::read()
   if (!dirp_) return 0;
 
   // taken from ACE_OS::readdir_emulation() and translated to wchar
-  //   note that the file name inside ACE_DIRENT is still in ACE_TCHARs
+  //   note that the file name inside ACE_DIRENT is still in ACE_TCHARs as long
+  //   as ACE_HAS_TCHAR_DIRENT is defined (true for MSVC, false for GCC/MinGW)
 
   if (dirp_->dirent_ != 0) {
+#ifdef ACE_HAS_TCHAR_DIRENT
     ACE_OS::free(dirp_->dirent_->d_name);
+#endif
     ACE_OS::free(dirp_->dirent_);
     dirp_->dirent_ = 0;
   }
@@ -337,20 +342,26 @@ DDS_DIRENT* DDS_Dirent::read()
 
     if (retval == 0) {
       // Make sure to close the handle explicitly to avoid a leak!
-  ::FindClose(dirp_->current_handle_);
+      ::FindClose(dirp_->current_handle_);
       dirp_->current_handle_ = INVALID_HANDLE_VALUE;
     }
   }
 
   if (dirp_->current_handle_ != INVALID_HANDLE_VALUE) {
-    dirp_->dirent_ = (DDS_DIRENT *) ACE_OS::malloc(sizeof(DDS_DIRENT));
+    dirp_->dirent_ = (DDS_DIRENT*) ACE_OS::malloc(sizeof(DDS_DIRENT));
 
     if (dirp_->dirent_ != 0) {
-      dirp_->dirent_->d_name = (ACE_TCHAR*)
-                               ACE_OS::malloc((ACE_OS::strlen(dirp_->fdata_.cFileName) + 1)
-                                              * sizeof(ACE_TCHAR));
+#ifdef ACE_HAS_TCHAR_DIRENT
+      dirp_->dirent_->d_name =
+        (ACE_TCHAR*) ACE_OS::malloc((ACE_OS::strlen(dirp_->fdata_.cFileName)
+                                     + 1) * sizeof(ACE_TCHAR));
       ACE_OS::strcpy(dirp_->dirent_->d_name,
                      ACE_TEXT_WCHAR_TO_TCHAR(dirp_->fdata_.cFileName));
+#else // MinGW: d_name is a fixed-size char array
+      ACE_OS::strncpy(dirp_->dirent_->d_name,
+                      ACE_Wide_To_Ascii(dirp_->fdata_.cFileName).char_rep(),
+                      sizeof(dirp_->dirent_->d_name));
+#endif
       dirp_->dirent_->d_reclen = sizeof(DDS_DIRENT);
     }
 
@@ -364,13 +375,15 @@ void DDS_Dirent::close()
 {
   if (dirp_) {
     if (dirp_->current_handle_ != INVALID_HANDLE_VALUE)
-  ::FindClose(dirp_->current_handle_);
+      ::FindClose(dirp_->current_handle_);
 
     dirp_->current_handle_ = INVALID_HANDLE_VALUE;
     dirp_->started_reading_ = 0;
 
     if (dirp_->dirent_ != 0) {
+#ifdef ACE_HAS_TCHAR_DIRENT
       ACE_OS::free(dirp_->dirent_->d_name);
+#endif
       ACE_OS::free(dirp_->dirent_);
     }
 
@@ -770,7 +783,9 @@ void Directory::scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
   add_slash(path);
 
   while (DDS_DIRENT* ent = dir.read()) {
-    if (ent->d_name[0] == ACE_TEXT('.')) continue; // skip '.' and '..'
+    if (ent->d_name[0] == ACE_TEXT('.') && !ent->d_name[1]) {
+      continue; // skip '.' and '..'
+    }
 
     ACE_TString file = path + ent->d_name;
 
