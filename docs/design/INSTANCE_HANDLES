@@ -1,8 +1,7 @@
 
 Instance handles:
 
-  "You can think of them as essentially local identifiers for objects
-  that live within the global data space."
+  "local identifiers for objects that live within the global data space."
 
 This is a good working definition and covers all of the cases which
 need to be handled by the opaque handle values.  The global data space
@@ -18,50 +17,50 @@ opaque value:
 
   DDS::DomainParticipant
     Returns handle value:
-      get_discovered_participants( inout: InstanceHandle_t)
-      get_discovered_topics( inout: InstanceHandle_t)
+      get_discovered_participants(inout: InstanceHandle_t)
+      get_discovered_topics(inout: InstanceHandle_t)
 
     Requires handle value:
-      ignore_participant( InstanceHandle_t)
-      ignore_topic( InstanceHandle_t)
-      ignore_publication( InstanceHandle_t)
+      ignore_participant(InstanceHandle_t)
+      ignore_topic(InstanceHandle_t)
+      ignore_publication(InstanceHandle_t)
       ignore_subscription(
       InstanceHandle_t)
-      get_discovered_participant_data( ..., InstanceHandle_t)
-      get_discovered_topic_data( ..., InstanceHandle_t)
-      contains_entity( InstanceHandle_t)
+      get_discovered_participant_data(..., InstanceHandle_t)
+      get_discovered_topic_data(..., InstanceHandle_t)
+      contains_entity(InstanceHandle_t)
 
   DDS::DataWriter
     Returns handle value:
       InstanceHandle_t = register_instance(...)
       InstanceHandle_t = register_instance_w_timestamp(...)
       InstanceHandle_t = lookup_instance(...)
-      get_matched_subscriptions( inout: InstanceHandle_t)
+      get_matched_subscriptions(inout: InstanceHandle_t)
 
     Requires handle value:
-      unregister_instance( ..., InstanceHandle_t)
-      unregister_instance_w_timestamp( ..., InstanceHandle_t, ...)
-      get_key_value( ..., InstanceHandle_t)
-      write( ..., InstanceHandle_t)
-      write_w_timestamp( ..., InstanceHandle_t, ...)
-      dispose( ..., InstanceHandle_t)
-      dispose_w_timestamp( ..., InstanceHandle_t, ...)
-      get_matched_subscription_data( ..., InstanceHandle_t)
+      unregister_instance(..., InstanceHandle_t)
+      unregister_instance_w_timestamp(..., InstanceHandle_t, ...)
+      get_key_value(..., InstanceHandle_t)
+      write(..., InstanceHandle_t)
+      write_w_timestamp(..., InstanceHandle_t, ...)
+      dispose(..., InstanceHandle_t)
+      dispose_w_timestamp(..., InstanceHandle_t, ...)
+      get_matched_subscription_data(..., InstanceHandle_t)
 
   DDS::DataReader
     Returns handle value:
       InstanceHandle_t = lookup_instance(...)
-      get_matched_publications( inout: InstanceHandle_t)
+      get_matched_publications(inout: InstanceHandle_t)
 
     Requires handle value:
-      read_instance( ..., InstanceHandle_t, ...)
-      take_instance( ..., InstanceHandle_t, ...)
-      read_next_instance( ..., InstanceHandle_t, ...)
-      take_next_instance( ..., InstanceHandle_t, ...)
-      read_next_instance_w_condition( ..., InstanceHandle_t, ...)
-      take_next_instance_w_condition( ..., InstanceHandle_t, ...)
-      get_key_value( ..., InstanceHandle_t)
-      get_matched_publication_data( ..., InstanceHandle_t)
+      read_instance(..., InstanceHandle_t, ...)
+      take_instance(..., InstanceHandle_t, ...)
+      read_next_instance(..., InstanceHandle_t, ...)
+      take_next_instance(..., InstanceHandle_t, ...)
+      read_next_instance_w_condition(..., InstanceHandle_t, ...)
+      take_next_instance_w_condition(..., InstanceHandle_t, ...)
+      get_key_value(..., InstanceHandle_t)
+      get_matched_publication_data(..., InstanceHandle_t)
 
   DDS::SampleInfo
     instance_handle publication_handle
@@ -162,30 +161,41 @@ implementation of OpenDDS:
     - Class provides the Sequence implementation used to generate
       unique handle values.
 
-  DomainParticipant::participant_handles_
+  DomainParticipantImpl::participant_handles_
     - Object of InstanceHandleGenerator used as the generating Sequence
       for handles.
 
-  DomainParticipant::handles_,handles_protector_
+  DomainParticipantImpl::handles_,handles_protector_
     - Mapping of GUID_t values to instance handles and lock for guarding
       access to the container.
 
-  InstanceHandle_t = DomainParticipant::get_handle( GUID_t)
+  InstanceHandle_t = DomainParticipant::get_handle(GUID_t)
     - If the GUID_t value represents and Entity, an index is searched for
       that Entity and any existing handle value returned.  Otherwise a
       unique new handle value is generated.  The new value is stored in
-      the index if it represents and Entity.
+      the index if it represents an Entity.
 
   InstanceHandle_t = DataWriterImpl::get_next_instance()
     - Obtains a handle value for unique data key value instances as they
       are created.
 
-  InstanceHandle_t = DataReaderImpl::get_next_handle( BuiltinTopicKey_t)
+  InstanceHandle_t = DataReaderImpl::get_next_handle(BuiltinTopicKey_t)
     - If the reader is for a BuiltinTopic Topic, then a handle is
       obtained representing the Entity described in the sample with the
       given key value.  Otherwise a unique new handle value is generated.
 
-  BuiltinTopicKey_t = keyFromSample<T>( T* sample)
+  BuiltinTopicKey_t = keyFromSample<T>(T* sample)
     - Template function to extract BuiltinTopicKey_t values from
       BuiltinTopic data samples.
 
+Instance handles, BIT Keys, and GUIDs (aka RepoIds) are all related:
+- Starting from an Instance Handle:
+  - Convert to a GUID using DomainParticipantImpl::get_repoid()
+  - Convert to a BIT Key using BIT_Helper_1 or the BIT Data Reader
+- Starting from a GUID (aka RepoId):
+  - Convert to an Instance Handle using DomainParticipantImpl::get_handle()
+  - Direct conversion to a BIT Key is not supported (first get the handle)
+- Starting from a BIT Key:
+  - Convert to a GUID using Discovery::bit_key_to_repo_id()
+    - The relevant Discovery object can be obtained from TheServiceParticipant
+  - Convert to an Instance Handle using the BIT Data Reader

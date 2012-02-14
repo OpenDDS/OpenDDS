@@ -3,7 +3,11 @@ RTPS
 - Spec is DDS-RTPS v2.1
   - In this document, section numbers refer to RTPS v2.1 (formal/2010-11-01)
 - Implemented as an OpenDDS pluggable transport + a new discovery mechanism
-  - See RTPS_DISCOVERY in this directory for discovery details
+  - See RTPS_DISCOVERY in this directory for further discovery details
+  - Note that transport and discovery mechanisms are separately configured
+    - Any combination of discovery and transport should work together, but both
+      RTPS transport and RTPS discovery are needed for interoperability
+    - One exception: RTPS discovery with OpenDDS multicast, described below
 
 Not Currently Implemented
 -------------------------
@@ -14,9 +18,10 @@ Not Currently Implemented
   - OpenDDS may still drop samples that aren't needed (due to content filtering)
     by any associated readers -- this is done above the transport layer
 - Coherent sets for PRESENTATION QoS (8.7.5)
-- Directed writes (8.7.6) -- impacts DURABLE data?
+- Directed writes (8.7.6) -- these don't exist in the DDS spec
 - Property lists (8.7.7) -- these don't exist in the DDS spec
-- Original writer info for DURABLE data (8.7.8)
+- Original writer info for DURABLE data (8.7.8) is implemented, but the
+  OriginalWriterInfo_t::originalWriterQos field is left as an empty list
 - Key Hashes (8.7.9) are not generated, but they are optional anyway
 - wait_for_acknowledgements()
 - nackSuppressionDuration (Table 8.47) and heartbeatSuppressionDuration
@@ -30,16 +35,21 @@ Implementation Limits
   domain participants are supported in each domain.
 - Topic names and type identifiers are limited to 256 characters.
 
-Migration Notes
+Migration Notes (InfoRepo discovery to RTPS discovery)
 ---------------
 - DCPSInfoRepo-based discovery generates Built-In Topic data once (inside the
   info repo process) and therefore all known entities in the domain are
   reflected in the Built-In Topics.  RTPS discovery, on the other hand, follows
   the DDS specification and omits "local" entities from the Built-In Topics.
   The definition of "local" means those entities belonging to the same Domain
-  Participant as the given Built-In Topic Subscriber.
+  Participant as the given Built-In Topic Subscriber.  Ignored entities will
+  also be omitted from Built-In Topics when RTPS discovery is used.
 - Topic Built-In Topic data is not propagated through RTPS discovery, it is
   optional in both DDS and RTPS specs.
+- InfoRepo discovery makes the Data Writer's TRANSPORT_PRIORITY value known to
+  the matched Data Readers.  RTPS discovery does not do this since it's not in
+  the standard Built-In Topics.  It could be added at some point in the future
+  with a vendor-specific ParameterId.
 
 Implementation Issues
 ---------------------
@@ -47,10 +57,10 @@ Implementation Issues
 - WRITER_DATA_LIFECYCLE (8.7.2.2.7) notes that the same Data submessage should
   dispose and unregister an instance.  OpenDDS may use two Data submessages.
 - RTPS transport instances can not be shared by different Domain Participants.
-- Transport auto-selection (negotiation) is partially supported with RTPS.
-  The rtps_udp transport doesn't ever fail in the handshaking phase, so from
-  the framework's point of view, once it's attempted it is the selected
-  transport and no subsequent transports will be tried.
+- Transport auto-selection (negotiation) is partially supported with RTPS:
+  the rtps_udp transport goes through a handshaking phase only in reliable mode.
+- OpenDDS's native multicast transport does not work with RTPS Discovery due
+  to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
 Notes for Maintainers
 ---------------------
