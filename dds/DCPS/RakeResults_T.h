@@ -100,7 +100,9 @@ private:
     IndexList sampleinfo_positions_;
     CORBA::Long MRSIC_disposed_gc_, MRSIC_nowriters_gc_,
     MRS_disposed_gc_, MRS_nowriters_gc_;
-    InstanceData() : most_recent_generation_(false), MRSIC_index_(0) {}
+    InstanceData() : most_recent_generation_(false), MRSIC_index_(0),
+      MRSIC_disposed_gc_(0), MRSIC_nowriters_gc_(0), MRS_disposed_gc_(0),
+      MRS_nowriters_gc_(0) {}
   };
 };
 

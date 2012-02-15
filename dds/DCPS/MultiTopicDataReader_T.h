@@ -109,7 +109,8 @@ private:
 
   struct SampleWithInfo {
     SampleWithInfo(const std::string& topic, const DDS::SampleInfo& sampinfo)
-      : view_(sampinfo.view_state) {
+      : sample_(),
+        view_(sampinfo.view_state) {
       info_[topic] = sampinfo.instance_handle;
     }
     void combine(const SampleWithInfo& other) {
