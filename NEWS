@@ -1,5 +1,8 @@
 Version 3.1 of OpenDDS.
 
+- Added send_buffer_size and rcv_buffer_size parameters to the udp
+  transport configuration.
+
 ========================================================================
 
 Version 3.0.1 of OpenDDS.
