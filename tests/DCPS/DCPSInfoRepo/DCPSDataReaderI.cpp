@@ -9,9 +9,8 @@
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
 :
 #ifndef DDS_HAS_MINIMUM_BIT
-  info_(0),
+  info_(0)
 #endif
-  next_(0)
   {
   }
 
@@ -45,7 +44,7 @@ void TAO_DDS_DCPSDataReader_i::add_association (
       writer.writerTransInfo[0].transport_type.in()
     ));
 
-    received_.push_back(ADD_ASSOC);
+    received_.received(DiscReceivedCalls::ADD_ASSOC);
 
 #ifndef DDS_HAS_MINIMUM_BIT
     if (info_)
@@ -84,7 +83,7 @@ void TAO_DDS_DCPSDataReader_i::remove_associations (
         ));
       }
 
-    received_.push_back(REM_ASSOC);
+    received_.received(DiscReceivedCalls::REM_ASSOC);
   }
 
 void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
@@ -114,6 +113,6 @@ void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
           status.policies[cnt].count
         ));
       }
-    received_.push_back(UPDATE_INCOMP_QOS);
+    received_.received(DiscReceivedCalls::UPDATE_INCOMP_QOS);
   }
 

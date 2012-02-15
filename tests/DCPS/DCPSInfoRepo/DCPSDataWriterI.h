@@ -34,12 +34,13 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "DiscReceivedCalls.h"
+
 //Class TAO_DDS_DCPSDataWriter_i
 class TAO_DDS_DCPSDataWriter_i
   : public virtual POA_OpenDDS::DCPS::DataWriterRemote
 {
 public:
-  enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS, UPDATE_SUB_PARAMS };
   //Constructor
   TAO_DDS_DCPSDataWriter_i (void);
 
@@ -50,7 +51,7 @@ public:
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
-        )) { received_.push_back(ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
+        )) { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
 
 
@@ -64,7 +65,7 @@ public:
     ));
 
   virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/)
-    ACE_THROW_SPEC((CORBA::SystemException)) { received_.push_back(ASSOC_COMPLETE); }
+    ACE_THROW_SPEC((CORBA::SystemException)) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
 
   virtual void remove_associations (
       const OpenDDS::DCPS::ReaderIdSeq & readers,
@@ -87,19 +88,12 @@ public:
       CORBA::SystemException
     ));
 
-  size_t numReceived()
-  {
-    return (received_.size() - next_);
-  }
-
-  Called next()
-  {
-    return received_[next_++];
-  }
-
+  DiscReceivedCalls& received()
+    {
+      return received_;
+    }
 private:
-  std::vector<Called> received_;
-  size_t next_;
+  DiscReceivedCalls received_;
 };
 
 

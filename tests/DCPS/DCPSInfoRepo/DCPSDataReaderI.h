@@ -28,6 +28,8 @@
 #include "dds/DdsDcpsDataReaderRemoteS.h"
 #include "dds/DCPS/Definitions.h"
 
+#include "DiscReceivedCalls.h"
+
 #ifndef DDS_HAS_MINIMUM_BIT
 #include "dds/DCPS/RTPS/RtpsInfo.h"
 #endif
@@ -55,7 +57,7 @@ public:
       )
       ACE_THROW_SPEC ((
         CORBA::SystemException
-        )) { received_.push_back(ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
+        )) { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
 
   virtual void add_association (
@@ -68,7 +70,7 @@ public:
     ));
 
   virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/)
-    ACE_THROW_SPEC((CORBA::SystemException)) { received_.push_back(ASSOC_COMPLETE); }
+    ACE_THROW_SPEC((CORBA::SystemException)) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
 
   virtual void remove_associations (
       const OpenDDS::DCPS::WriterIdSeq & writers,
@@ -85,24 +87,17 @@ public:
       CORBA::SystemException
     ));
 
-  size_t numReceived()
-  {
-    return (received_.size() - next_);
-  }
-
-  Called next()
-  {
-    return received_[next_++];
-  }
-
+  DiscReceivedCalls& received()
+    {
+      return received_;
+    }
 #ifndef DDS_HAS_MINIMUM_BIT
   OpenDDS::RTPS::RtpsInfo* info_;
 #endif
   DDS::DomainId_t domainId_;
   ::OpenDDS::DCPS::RepoId participantId_;
 private:
-  std::vector<Called> received_;
-  size_t next_;
+  DiscReceivedCalls received_;
 };
 
 

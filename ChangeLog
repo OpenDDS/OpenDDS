@@ -1,3 +1,17 @@
+Wed Feb 15 17:29:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DiscReceivedCalls.h:
+        * tests/DCPS/DCPSInfoRepo/DiscReceivedCalls.cpp:
+        * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        
+          Fixed occassional failures due to ordering of calls made on
+          the writer and removed fixed delays.
+
 Wed Feb 15 15:05:17 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.cpp:

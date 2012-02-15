@@ -7,7 +7,6 @@
 
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataWriter_i::TAO_DDS_DCPSDataWriter_i (void)
-: next_(0)
   {
   }
 
@@ -39,7 +38,7 @@ void TAO_DDS_DCPSDataWriter_i::add_association (
                std::string(converterR).c_str(),
                reader.readerTransInfo[0].transport_type.in()
            ));
-    received_.push_back(ADD_ASSOC);
+    received_.received(DiscReceivedCalls::ADD_ASSOC);
   }
 
 
@@ -70,7 +69,7 @@ void TAO_DDS_DCPSDataWriter_i::remove_associations (
                    std::string(converter).c_str()
                ));
       }
-    received_.push_back(REM_ASSOC);
+    received_.received(DiscReceivedCalls::REM_ASSOC);
   }
 
 
@@ -101,7 +100,7 @@ void TAO_DDS_DCPSDataWriter_i::update_incompatible_qos (
                    status.policies[cnt].count
                ));
       }
-    received_.push_back(UPDATE_INCOMP_QOS);
+    received_.received(DiscReceivedCalls::UPDATE_INCOMP_QOS);
   }
 
 
@@ -119,5 +118,5 @@ ACE_THROW_SPEC((CORBA::SystemException))
   for (CORBA::ULong i = 0; i < length; ++i) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("\tparams[%d] = %C\n"), i, params[i].in()));
   }
-  received_.push_back(UPDATE_SUB_PARAMS);
+  received_.received(DiscReceivedCalls::UPDATE_SUB_PARAMS);
 }

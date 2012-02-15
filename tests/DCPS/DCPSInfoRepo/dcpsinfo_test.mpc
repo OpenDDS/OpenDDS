@@ -1,10 +1,5 @@
 project(*pubsub): dcpsexe, dcps_rtps_udp {
   exename  = pubsub
 
-  Source_Files {
-    pubsub.cpp
-    DCPSDataWriterI.cpp
-    DCPSDataReaderI.cpp
-  }
 }
 
