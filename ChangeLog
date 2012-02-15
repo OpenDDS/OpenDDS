@@ -1,3 +1,9 @@
+Wed Feb 15 15:05:17 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Fixed bug introduced in yesterday's commit.
+
 Tue Feb 14 22:43:07 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * docs/design/INSTANCE_HANDLES:

@@ -212,7 +212,8 @@ void recursive_remove(const ACE_TString& dirname)
     CwdGuard cg(dirname);
 
     for (DDS_DIRENT* ent = dir.read(); ent; ent = dir.read()) {
-      if (ent->d_name[0] == ACE_TEXT('.') && !ent->d_name[1]) {
+      if (ent->d_name[0] == ACE_TEXT('.') && (!ent->d_name[1] ||
+          (ent->d_name[1] == ACE_TEXT('.') && !ent->d_name[2]))) {
         continue; // skip '.' and '..'
       }
 
@@ -783,7 +784,8 @@ void Directory::scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
   add_slash(path);
 
   while (DDS_DIRENT* ent = dir.read()) {
-    if (ent->d_name[0] == ACE_TEXT('.') && !ent->d_name[1]) {
+    if (ent->d_name[0] == ACE_TEXT('.') && (!ent->d_name[1] ||
+        (ent->d_name[1] == ACE_TEXT('.') && !ent->d_name[2]))) {
       continue; // skip '.' and '..'
     }
 
