@@ -1,3 +1,12 @@
+Thu Feb 16 23:32:54 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Attempt to forward SEDP data received on the SPDP port to the Sedp
+          object.  This shouldn't be necessary, but it might be needed for
+          interoperability with other DDS implementations.
+
 Thu Feb 16 22:48:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:

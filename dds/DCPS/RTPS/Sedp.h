@@ -69,6 +69,11 @@ public:
   const ACE_INET_Addr& local_address() const;
   const ACE_INET_Addr& multicast_group() const;
 
+  template <typename DiscoveredReaderOrWriterData>
+  void received_on_spdp(char msg_id, const DiscoveredReaderOrWriterData& rwd) {
+    data_received(msg_id, rwd);
+  }
+
   void ignore(const DCPS::RepoId& to_ignore);
 
   bool ignoring(const DCPS::RepoId& guid) const {

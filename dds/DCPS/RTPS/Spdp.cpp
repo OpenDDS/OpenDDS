@@ -620,6 +620,23 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
       if (data.writerId == ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
         outer_->data_received(data, plist);
+
+      } else if (data.writerId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_input() - ")
+                   ACE_TEXT("SEDP publication data seen on SPDP endpoint\n")));
+        DiscoveredWriterData wdata;
+        ParameterListConverter::from_param_list(plist, wdata);
+        outer_->sedp_.received_on_spdp(DCPS::SAMPLE_DATA, wdata);
+
+      } else if (data.writerId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_input() - ")
+                   ACE_TEXT("SEDP subscription data seen on SPDP endpoint\n")));
+        DiscoveredReaderData rdata;
+        ParameterListConverter::from_param_list(plist, rdata);
+        outer_->sedp_.received_on_spdp(DCPS::SAMPLE_DATA, rdata);
+
       }
       break;
     }
