@@ -1,5 +1,11 @@
 Version 3.1 of OpenDDS.
 
+- Changed set_qos() of DataWriter, DataReader, Publisher and Subscriber so 
+  when provided a QOS value incompatible with an existing association, that the
+  value will be changed, association will be broken, and true returned.
+  Previously, if any association would be broken, no change would take place
+  and false would be returned.  New version is compatible with DDS spec.
+
 - Added send_buffer_size and rcv_buffer_size parameters to the udp
   transport configuration.
 

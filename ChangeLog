@@ -1,3 +1,9 @@
+Thu Feb 16 15:31:52 UTC 2012  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * NEWS:
+
+          Updated for set_qos change.
+
 Thu Feb 16 12:27:50 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DiscReceivedCalls.cpp:
