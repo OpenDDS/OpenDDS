@@ -1,6 +1,8 @@
 #include "DiscReceivedCalls.h"
 
-#include "ace/OS_NS_sys_time.h"
+#include <ace/OS_NS_sys_time.h>
+
+#include <string>
 
 DiscReceivedCalls::DiscReceivedCalls ()
 : next_(0)

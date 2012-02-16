@@ -1,3 +1,20 @@
+Thu Feb 16 12:27:50 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DiscReceivedCalls.cpp:
+
+          Added missing include.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+
+          Fixed DDS_HAS_MINIMUM_BIT compiler error.
+
+Wed Feb 15 20:37:31 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/RakeResults_T.h:
+
+          Added initialization of member variables to clean up coverity output.
+
 Wed Feb 15 17:29:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
@@ -8,7 +25,7 @@ Wed Feb 15 17:29:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
         * tests/DCPS/DCPSInfoRepo/DiscReceivedCalls.cpp:
         * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
         * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
-        
+
           Fixed occassional failures due to ordering of calls made on
           the writer and removed fixed delays.
 
