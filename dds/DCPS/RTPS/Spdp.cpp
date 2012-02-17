@@ -509,7 +509,13 @@ Spdp::SpdpTransport::write()
   };
 
   ParameterList plist;
-  ParameterListConverter::to_param_list(pdata, plist);
+  if (ParameterListConverter::to_param_list(pdata, plist) < 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::SpdpTransport::write() - ")
+      ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
+      ACE_TEXT("to ParameterList\n")));
+    return;
+  }
 
   buff_.reset();
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
