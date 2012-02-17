@@ -1,3 +1,9 @@
+Fri Feb 17 20:57:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Extend the timeout for waiting for the data to arrive.
+
 Fri Feb 17 17:22:22 UTC 2012  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.cpp:
