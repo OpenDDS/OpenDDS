@@ -1,13 +1,30 @@
 Version 3.1 of OpenDDS.
 
+- This release includes the initial implementation of DDS Interoperability
+  in OpenDDS, using the DDS-RTPS spec v2.1 from the OMG (formal/2010-11-01).
+  RTPS support in OpenDDS consists of two main features:
+    - A pluggable transport implementation, known as "rtps_udp" because it
+      implements the UDP PSM of the DDS-RTPS spec.  This is a peer of the
+      existing OpenDDS-native transports: "tcp", "udp", and "multicast".
+    - A new discovery mechanism for RTPS's distributed discovery.  This can
+      replace the DCPSInfoRepo in existing OpenDDS deployments.
+  Neither of these features is enabled by default.  See the OpenDDS Developer's
+  Guide* for configuration details.  Also, note that not every OpenDDS feature
+  (for example, certain QoS values) is supported with RTPS in the initial
+  implementation.  These exceptions are documented in the Developer's Guide*.
+
 - Changed set_qos() of DataWriter, DataReader, Publisher and Subscriber so
   when provided a QoS value incompatible with an existing association, that the
   value will be changed, association will be broken, and RETCODE_OK returned.
   Previously, if any association would be broken, no change would take place
   and false would be returned.  New version is compatible with DDS spec.
 
-- Added send_buffer_size and rcv_buffer_size parameters to the udp
-  transport configuration.
+- OpenDDS udp transport enhancements:
+    - Added send_buffer_size and rcv_buffer_size parameters to the udp
+      transport configuration.
+    - The default local address will use DNS host names instead of IP
+      addresses.
+    - Added support for IPv6 when ACE is built with IPv6 support.
 
 
 ========================================================================

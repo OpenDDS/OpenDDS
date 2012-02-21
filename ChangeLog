@@ -1,3 +1,9 @@
+Tue Feb 21 20:42:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          Added NEWS entries for new and changed features.
+
 Fri Feb 17 20:57:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
