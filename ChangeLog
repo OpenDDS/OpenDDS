@@ -1,3 +1,24 @@
+Wed Feb 22 20:02:27 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/ConfigUtils.cpp:
+
+          Verifying section was actually opened (coverity).
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Cleaned up overly complex code and ctor initialization
+          (coverity).
+
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/RepoIdConverter.cpp:
+
+          Changed federationId and participantId to use appropriate
+          type (coverity).
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Fixed missed setting of sc_buffer_ (coverity).
+
 Wed Feb 22 19:52:02 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/KeyTest/run_test.pl:

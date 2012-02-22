@@ -43,7 +43,9 @@ namespace OpenDDS { namespace DCPS {
     ACE_TString name;
     while (cf.enumerate_sections( key, index, name ) == 0) {
       ACE_Configuration_Section_Key subkey;
-      cf.open_section( key, name.c_str(), 0, subkey );
+      if (cf.open_section( key, name.c_str(), 0, subkey ) != 0) {
+        return 1;
+      }
       subsections.push_back( SubsectionPair( ACE_TEXT_ALWAYS_CHAR(name.c_str()),
                                              subkey ) );
       int subindex = 0;

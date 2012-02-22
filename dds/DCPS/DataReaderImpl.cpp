@@ -2053,6 +2053,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
     state_(NOT_SET),
     reader_(reader),
     writer_id_(writer_id),
+    handle_(DDS::HANDLE_NIL),
     writer_qos_(writer_qos)
 {
   this->reset_coherent_info();
@@ -2201,26 +2202,18 @@ OpenDDS::DCPS::WriterInfo::ack_deadline(SequenceNumber sequence, ACE_Time_Value 
     return;
   }
 
-  for (DeadlineList::iterator current = this->ack_deadlines_.begin();
-       current != this->ack_deadlines_.end();
-       ++current) {
+  DeadlineList::iterator current = this->ack_deadlines_.begin();
+  if (current != this->ack_deadlines_.end()) {
     // Insertion sort.
     if (sequence < current->first) {
       this->ack_deadlines_.insert(
         current,
         std::make_pair(sequence, when));
-      return;
-
     } else if (sequence == current->first) {
       // Only update the deadline to be *later* than any existing one.
       if (current->second < when) {
         current->second = when;
       }
-
-      return;
-
-    } else {
-      break;
     }
   }
 }

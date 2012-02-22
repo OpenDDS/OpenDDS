@@ -128,7 +128,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer(
   if (is_zero_copy()) make_single_copy(max_slots());
 
   if (!sc_buffer_) {
-    allocbuf(sc_maximum_);
+    sc_buffer_ = allocbuf(sc_maximum_);
 
     if (!orphan) sc_release_ = true;
   }

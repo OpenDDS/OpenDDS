@@ -19,7 +19,14 @@
 #include "dcps_export.h"
 
 namespace OpenDDS {
+
+namespace Federator {
+  // reproducing type created by dds/InfoRepo/Federator.idl
+  typedef ::CORBA::Long RepoKey;
+}
+
 namespace DCPS {
+  typedef ::CORBA::Long ParticipantId;
 
 /**
  * @class RepoIdConverter
@@ -68,9 +75,9 @@ public:
 
   ~RepoIdConverter();
 
-  long federationId() const;
+  OpenDDS::Federator::RepoKey federationId() const;
 
-  long participantId() const;
+  ParticipantId participantId() const;
 };
 
 } // namespace DCPS

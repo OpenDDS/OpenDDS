@@ -20,7 +20,7 @@ RepoIdConverter::RepoIdConverter(const RepoId& repoId)
 RepoIdConverter::~RepoIdConverter()
 {}
 
-long
+OpenDDS::Federator::RepoKey
 RepoIdConverter::federationId() const
 {
   return guid_.guidPrefix[4] << 24 |
@@ -29,7 +29,7 @@ RepoIdConverter::federationId() const
          guid_.guidPrefix[7];
 }
 
-long
+ParticipantId
 RepoIdConverter::participantId() const
 {
   return guid_.guidPrefix[ 8] << 24 |
