@@ -18,11 +18,12 @@ $status = 0;
 $pub_opts = "-DCPSConfigFile pub.ini -DCPSPersistentDataDir $DDS_ROOT/tests/DCPS/PersistentDurability/data";
 $sub_opts = "-DCPSConfigFile sub.ini";
 
+my $LONE_PROCESS = 1; #only one publisher process runs at a time
 
 sub rmtree {
   # this invocation of the publisher just cleans up the durability files
   my $name = shift;
-  my $Pub_delete = PerlDDS::create_process ("publisher", "$pub_opts -d $name");
+  my $Pub_delete = PerlDDS::create_process ("publisher", "$pub_opts -d $name", $LONE_PROCESS);
   $Pub_delete->SpawnWaitKill(60);
 }
 
@@ -39,9 +40,11 @@ $DCPSREPO =
                            "-o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
 $Publisher1 = PerlDDS::create_process ("publisher",
-                                       "$pub_opts -w -ORBLogFile $data_file");
+                                       "$pub_opts -w -ORBLogFile $data_file",
+                                       $LONE_PROCESS);
 $Publisher2 = PerlDDS::create_process ("publisher",
-                                       "$pub_opts -ORBLogFile $data_file");
+                                       "$pub_opts -ORBLogFile $data_file",
+                                       $LONE_PROCESS);
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher1->CommandLine() . "\n";

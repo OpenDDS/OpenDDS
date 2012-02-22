@@ -1,3 +1,12 @@
+Wed Feb 22 19:52:02 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/KeyTest/run_test.pl:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/UnitTests/run_test_coverage.pl:
+
+          Added "lone" process flag to create_process to allow better
+          coverage metrics.
+
 Wed Feb 22 18:49:42 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/ProcessFactory.pm:
@@ -8,7 +17,7 @@ Wed Feb 22 18:49:42 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/UnitTests/run_test.pl:
 
-          Called create_process passing in "lone" process, so each unit 
+          Called create_process passing in "lone" process, so each unit
           test will collect coverage metrics.
 
 Wed Feb 22 18:21:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>

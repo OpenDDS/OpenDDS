@@ -17,14 +17,15 @@ use Cwd;
 
 my $status = 0;
 
-$TST = PerlDDS::create_process("KeyMarshaling", "");
+my $LONE_PROCESS = 1; #only one "other" process runs at a time
+$TST = PerlDDS::create_process("KeyMarshaling", "", $LONE_PROCESS);
 print STDERR "Running KeyMarshaling\n";
 my $retcode = $TST->SpawnWaitKill(60);
 if ($retcode != 0) {
     $status = 1;
 }
 
-$TST = PerlDDS::create_process("KeyTest_MD5", "");
+$TST = PerlDDS::create_process("KeyTest_MD5", "", $LONE_PROCESS);
 print STDERR "Running KeyTest_MD5\n";
 my $retcode = $TST->SpawnWaitKill(60);
 if ($retcode != 0) {
@@ -32,7 +33,7 @@ if ($retcode != 0) {
 }
 
 
-$TST = PerlDDS::create_process("IsBounded", "");
+$TST = PerlDDS::create_process("IsBounded", "", $LONE_PROCESS);
 print STDERR "Running IsBounded\n";
 my $retcode = $TST->SpawnWaitKill(60);
 if ($retcode != 0) {
@@ -54,7 +55,8 @@ my @error_files = ("KeyTypeError_array_noindex.idl",
                    );
 foreach my $file (@error_files) {
   my $idl = PerlDDS::create_process ("$ENV{DDS_ROOT}/dds/idl/opendds_idl",
-                                     $file);
+                                     $file,
+                                     $LONE_PROCESS);
   open(SAVEOUT, ">&STDOUT");
   open(SAVEERR, ">&STDERR");
   open(STDOUT, '>' . File::Spec->devnull());

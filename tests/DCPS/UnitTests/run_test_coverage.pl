@@ -42,13 +42,15 @@ sub run_unit_tests {
   elsif (opendir($fh, $dir)) {
     foreach my $file (readdir($fh)) {
       my $TST;
+      # each process runs to completion before the next starts
+      my $LONE_PROCESS = 1;
       if ($file =~ /$unixTestExe/o) {
-        $TST = PerlDDS::create_process("$file", "");
+        $TST = PerlDDS::create_process("$file", "", $LONE_PROCESS);
       }
       elsif ($file =~ /$windowsTestExe/o) {
         $exename = "$file";
         $exename =~ s/\.exe$//i;
-        $TST = PerlDDS::create_process("$exename", "");
+        $TST = PerlDDS::create_process("$exename", "", $LONE_PROCESS);
       }
       else {
         next;
