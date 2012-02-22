@@ -44,10 +44,12 @@ sub run_unit_tests {
         my $TST;
         if ($file =~ /$testExe/o) {
           my $executable = $1;
+          # each process runs to completion before the next starts
+          my $LONE_PROCESS = 1;
           if ($executable eq "UnitTests_BIT_DataReader") {
-            $TST = PerlDDS::create_process("$executable", "-DCPSConfigFile rtps.ini");
+            $TST = PerlDDS::create_process("$executable", "-DCPSConfigFile rtps.ini", $LONE_PROCESS);
           } else {
-            $TST = PerlDDS::create_process("$executable", "");
+            $TST = PerlDDS::create_process("$executable", "", $LONE_PROCESS);
           }
         }
         else {

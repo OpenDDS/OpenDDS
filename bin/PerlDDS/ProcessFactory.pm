@@ -11,6 +11,9 @@ use Cwd;
 sub create_process {
   my $executable = shift;
   my $arguments = shift;
+  # indicates that the created process will be the only process running
+  # so coverage can be run on all lone processes
+  my $lone_process = shift;
   my $created;
 
   if ((PerlACE::is_vxworks_test()) &&
@@ -18,12 +21,14 @@ sub create_process {
     # until we figure out how we want to handle rtp, only
     # allow one process to be on VxWorks
     PerlDDS::special_process_created();
+    # NOTE: $lone_process was added for coverage, but it may allow us to
+    # create more than one special process in a run
     $created = new PerlACE::ProcessVX($executable, $arguments);
   }
   elsif ((!PerlDDS::is_coverage_test()) ||
          (non_dds_test($executable)) ||
          (is_process_special($executable))){
-    if(PerlDDS::is_coverage_test())
+    if(PerlDDS::is_coverage_test() && $lone_process != 1)
     {
       PerlDDS::special_process_created();
     }
@@ -61,10 +66,6 @@ sub is_process_special {
   # NOTE: may want to move this and log a message if we are trying to start 2
   if(!PerlDDS::is_special_process_created())
   {
-    my $inforepo = PerlDDS::is_special_InfoRepo_test();
-    my $pub = PerlDDS::is_special_pub_test();
-    my $sub = PerlDDS::is_special_sub_test();
-    my $other = PerlDDS::is_special_other_test();
     if(PerlDDS::is_special_InfoRepo_test()) {
       if(match($executable, "DCPSInfoRepo")) {
         return 1;

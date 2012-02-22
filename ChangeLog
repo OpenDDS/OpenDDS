@@ -1,3 +1,16 @@
+Wed Feb 22 18:49:42 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/ProcessFactory.pm:
+
+          Added optional parameter to create_process to indicate that
+          a process will be a "lone" process, so more than one coverage
+          process can be created in a single run.
+
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Called create_process passing in "lone" process, so each unit 
+          test will collect coverage metrics.
+
 Wed Feb 22 18:21:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/ParameterListConverter.cpp:
