@@ -480,6 +480,10 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
               "Not enough bytes read to account for a transport "
               "packet header.  We are done here - we need to "
               "receive more bytes.\n"));
+
+        this->receive_transport_header_.incomplete(
+          *this->receive_buffers_[this->buffer_index_]);
+
         return 0;
 
       } else {
@@ -488,7 +492,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
               "packet header.\n"));
 
         // only do the hexdump if it will be printed - to not impact perfomance.
-        if (Transport_debug_level) {
+        if (Transport_debug_level > 5) {
           ACE_TCHAR xbuffer[4096];
           const ACE_Message_Block& mb =
             *this->receive_buffers_[this->buffer_index_];

@@ -33,6 +33,7 @@ struct RtpsTransportHeader {
   const SequenceNumber& sequence();
 
   void init(ACE_Message_Block& mb);
+  void incomplete(ACE_Message_Block& mb);
 
   size_t length_;
   OpenDDS::RTPS::Header header_;

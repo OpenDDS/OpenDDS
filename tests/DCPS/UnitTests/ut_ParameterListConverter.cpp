@@ -733,6 +733,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
     Parameter param = get(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS);
     TEST_ASSERT(param.participant_builtin_endpoints() == 72393L);
+    TEST_ASSERT(is_present(param_list, PID_BUILTIN_ENDPOINT_SET));
+    Parameter param2 = get(param_list, PID_BUILTIN_ENDPOINT_SET);
+    TEST_ASSERT(param2.builtin_endpoints() == 72393L);
   }
 
   { // Should decode participant builtin endpoints properly

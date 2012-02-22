@@ -40,6 +40,19 @@ RtpsTransportHeader::operator=(ACE_Message_Block& mb)
   return *this;
 }
 
+ACE_INLINE void
+RtpsTransportHeader::incomplete(ACE_Message_Block& mb)
+{
+  // If we get a datagram with an incomplete header, we need to skip
+  // and consume the received bytes so the transport framework doesn't
+  // try to give us these bytes again on the next call to handle_input().
+  ACE_Message_Block* cur = &mb;
+  for (size_t len = mb.total_length(); cur && len; cur = cur->cont()) {
+    len -= cur->length();
+    cur->rd_ptr(cur->length());
+  }
+}
+
 ACE_INLINE bool
 RtpsTransportHeader::valid() const
 {

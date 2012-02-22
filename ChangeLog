@@ -1,3 +1,36 @@
+Wed Feb 22 18:21:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Allow infinite durations with 0xffffffff as the nanoseconds.
+          Adjust how we support PIDMASK_INCOMPATIBLE.
+          Write PID_BUILTIN_ENDPOINT_SET.
+          Read PID_TIME_BASED_FILTER in discovered reader data.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Reverted the following change, it was not necessary:
+          Thu Feb 16 23:32:54 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Added a method for handling incomplete (too-short) transport headers.
+
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+
+          Allow (and drop) datagrams with incomplete RTPS Headers.
+
+        * examples/DCPS/ishapes/main.cpp:
+
+          Added #include for static build.
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Test the PID_BUILTIN_ENDPOINT_SET change.
+
 Tue Feb 21 20:42:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:

@@ -243,6 +243,15 @@ namespace {
     return (strlen(cfprop.filterExpression.in()));
   }
 
+  void normalize(DDS::Duration_t& dur)
+  {
+    // Some other DDS implementations were observed sending
+    // "infinite" durations using 0xffffffff nanoseconds
+    if (dur.sec == DDS::DURATION_INFINITE_SEC &&
+        dur.nanosec == DDS::TIME_INVALID_NSEC) {
+      dur.nanosec = DDS::DURATION_INFINITE_NSEC;
+    }
+  }
 };
 
 namespace ParameterListConverter {
@@ -292,6 +301,14 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
   abe_param.participant_builtin_endpoints(
     participant_data.participantProxy.availableBuiltinEndpoints);
   add_param(param_list, abe_param);
+
+  // For interoperability with other DDS implemenations, we'll encode the
+  // availableBuiltinEndpoints as PID_BUILTIN_ENDPOINT_SET in addition to
+  // PID_PARTICIPANT_BUILTIN_ENDPOINTS (above).
+  Parameter be_param;
+  be_param.builtin_endpoints(
+    participant_data.participantProxy.availableBuiltinEndpoints);
+  add_param(param_list, be_param);
 
   // Each locator
   add_param_locator_seq(
@@ -764,14 +781,7 @@ int from_param_list(const ParameterList& param_list,
         // ignore
         break;
       default:
-        // If this param is vendor specific, ignore
-        if (param._d() & PIDMASK_VENDOR_SPECIFIC) {
-          // skip
-        // Else if this param is not required for compatibility, ignore
-        } else if (!(param._d() & PIDMASK_INCOMPATIBLE)) {
-          // skip
-        // Else error
-        } else {
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
           return -1;
         }
     }
@@ -838,15 +848,19 @@ int from_param_list(const ParameterList& param_list,
       case PID_DURABILITY_SERVICE:
         writer_data.ddsPublicationData.durability_service =
              param.durability_service();
+        normalize(writer_data.ddsPublicationData.durability_service.service_cleanup_delay);
         break;
       case PID_DEADLINE:
         writer_data.ddsPublicationData.deadline = param.deadline();
+        normalize(writer_data.ddsPublicationData.deadline.period);
         break;
       case PID_LATENCY_BUDGET:
         writer_data.ddsPublicationData.latency_budget = param.latency_budget();
+        normalize(writer_data.ddsPublicationData.latency_budget.duration);
         break;
       case PID_LIVELINESS:
         writer_data.ddsPublicationData.liveliness = param.liveliness();
+        normalize(writer_data.ddsPublicationData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
         writer_data.ddsPublicationData.reliability = param.reliability();
@@ -854,9 +868,11 @@ int from_param_list(const ParameterList& param_list,
         writer_data.ddsPublicationData.reliability.kind =
           (DDS::ReliabilityQosPolicyKind)
               ((int)writer_data.ddsPublicationData.reliability.kind - 1);
+        normalize(writer_data.ddsPublicationData.reliability.max_blocking_time);
         break;
       case PID_LIFESPAN:
         writer_data.ddsPublicationData.lifespan = param.lifespan();
+        normalize(writer_data.ddsPublicationData.lifespan.duration);
         break;
       case PID_USER_DATA:
         writer_data.ddsPublicationData.user_data = param.user_data();
@@ -909,14 +925,7 @@ int from_param_list(const ParameterList& param_list,
         // ignore
         break;
       default:
-        // If this param is vendor specific, ignore
-        if (param._d() & PIDMASK_VENDOR_SPECIFIC) {
-          // skip
-        // Else if this param is not required for compatibility, ignore
-        } else if (!(param._d() & PIDMASK_INCOMPATIBLE)) {
-          // skip
-        // Else error
-        } else {
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
           return -1;
         }
     }
@@ -988,12 +997,15 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_DEADLINE:
         reader_data.ddsSubscriptionData.deadline = param.deadline();
+        normalize(reader_data.ddsSubscriptionData.deadline.period);
         break;
       case PID_LATENCY_BUDGET:
         reader_data.ddsSubscriptionData.latency_budget = param.latency_budget();
+        normalize(reader_data.ddsSubscriptionData.latency_budget.duration);
         break;
       case PID_LIVELINESS:
         reader_data.ddsSubscriptionData.liveliness = param.liveliness();
+        normalize(reader_data.ddsSubscriptionData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
         reader_data.ddsSubscriptionData.reliability = param.reliability();
@@ -1010,6 +1022,10 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_DESTINATION_ORDER:
         reader_data.ddsSubscriptionData.destination_order = param.destination_order();
+        break;
+      case PID_TIME_BASED_FILTER:
+        reader_data.ddsSubscriptionData.time_based_filter = param.time_based_filter();
+        normalize(reader_data.ddsSubscriptionData.time_based_filter.minimum_separation);
         break;
       case PID_PRESENTATION:
         reader_data.ddsSubscriptionData.presentation = param.presentation();
@@ -1056,14 +1072,7 @@ int from_param_list(const ParameterList& param_list,
         // ignore
         break;
       default:
-        // If this param is vendor specific, ignore
-        if (param._d() & PIDMASK_VENDOR_SPECIFIC) {
-          // skip
-        // Else if this param is not required for compatibility, ignore
-        } else if (!(param._d() & PIDMASK_INCOMPATIBLE)) {
-          // skip
-        // Else error
-        } else {
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
           return -1;
         }
     }

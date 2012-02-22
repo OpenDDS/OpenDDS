@@ -39,6 +39,8 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// Assignment from an ACE_Message_Block.
   TransportHeader& operator=(ACE_Message_Block& buffer);
 
+  void incomplete(ACE_Message_Block&) {}
+
   /// Determine if the serializer should swap bytes.
   bool swap_bytes() const;
 

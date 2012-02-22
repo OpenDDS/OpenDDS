@@ -17,6 +17,10 @@
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
+
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
 
