@@ -400,7 +400,8 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.reliability, true))
+  // For interoperability, always write the reliability info
+  // if (not_default(writer_data.ddsPublicationData.reliability, true))
   {
     Parameter param;
     // Spec creators for RTPS have reliability indexed at 1
@@ -554,7 +555,8 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.reliability, false))
+  // For interoperability, always write the reliability info
+  // if (not_default(reader_data.ddsSubscriptionData.reliability, false))
   {
     Parameter param;
     // Spec creators for RTPS have reliability indexed at 1

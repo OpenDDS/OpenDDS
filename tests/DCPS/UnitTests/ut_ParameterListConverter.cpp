@@ -3376,7 +3376,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!is_present(param_list, PID_DEADLINE));
     TEST_ASSERT(!is_present(param_list, PID_LATENCY_BUDGET));
     TEST_ASSERT(!is_present(param_list, PID_LIVELINESS));
-    TEST_ASSERT(!is_present(param_list, PID_RELIABILITY));
+    // reliability info is always written:
+    //    TEST_ASSERT(!is_present(param_list, PID_RELIABILITY));
     TEST_ASSERT(!is_present(param_list, PID_LIFESPAN));
     TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP));
@@ -3396,7 +3397,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!is_present(param_list, PID_DEADLINE));
     TEST_ASSERT(!is_present(param_list, PID_LATENCY_BUDGET));
     TEST_ASSERT(!is_present(param_list, PID_LIVELINESS));
-    TEST_ASSERT(!is_present(param_list, PID_RELIABILITY));
+    // reliability info is always written:
+    //    TEST_ASSERT(!is_present(param_list, PID_RELIABILITY));
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP));
     TEST_ASSERT(!is_present(param_list, PID_DESTINATION_ORDER));
     TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
