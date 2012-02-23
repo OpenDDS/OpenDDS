@@ -2053,8 +2053,8 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
     state_(NOT_SET),
     reader_(reader),
     writer_id_(writer_id),
-    handle_(DDS::HANDLE_NIL),
-    writer_qos_(writer_qos)
+    writer_qos_(writer_qos),
+    handle_(DDS::HANDLE_NIL)
 {
   this->reset_coherent_info();
 

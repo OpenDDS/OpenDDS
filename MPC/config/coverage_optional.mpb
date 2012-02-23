@@ -6,8 +6,8 @@ feature(!dds_non_coverage) {
 
   verbatim(gnuace,local) {
 
-    CCFLAGS += -fprofile-arcs -ftest-coverage
-    LDFLAGS += -fprofile-arcs -ftest-coverage
+    CCFLAGS += --coverage
+    LDFLAGS += --coverage
 
   }
 

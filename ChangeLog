@@ -1,3 +1,14 @@
+Thu Feb 23 15:08:10 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * MPC/config/coverage_optional.mpb:
+
+          Changed to "--coverage" flags which set all appropriate flags
+          for coverage.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed initialization order.
+
 Wed Feb 22 20:02:27 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/ConfigUtils.cpp:
