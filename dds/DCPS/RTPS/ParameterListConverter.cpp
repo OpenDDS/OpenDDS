@@ -495,7 +495,7 @@ int to_param_list(const DiscoveredWriterData& writer_data,
       add_param_rtps_locator(param_list, tl);
     // Otherwise, this is an OpenDDS, custom transport
     } else {
-      // TODO Append the blob and a custom PID
+      // Append the blob and a custom PID
       add_param_dcps_locator(param_list, tl);
       if (!strcmp(tl.transport_type.in(), "multicast")) {
         ACE_DEBUG((LM_WARNING,
@@ -647,7 +647,7 @@ int to_param_list(const DiscoveredReaderData& reader_data,
       add_param_rtps_locator(param_list, tl);
     // Otherwise, this is an OpenDDS, custom transport
     } else {
-      // TODO Append the blob and a custom PID
+      // Append the blob and a custom PID
       add_param_dcps_locator(param_list, tl);
       if (!strcmp(tl.transport_type.in(), "multicast")) {
         ACE_DEBUG((LM_WARNING,

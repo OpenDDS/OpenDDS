@@ -1,3 +1,9 @@
+Thu Feb 23 16:37:44 UTC 2012  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Adjust comments to no longer say TODO.
+
 Thu Feb 23 15:08:10 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * MPC/config/coverage_optional.mpb:
