@@ -281,10 +281,16 @@ print "Coverage: combine all coverage data\n" if $verbose;
 my $status = 0;
 if (!combineInfos($run_dir)) {
     if (-d $output) {
-        rmtree($output, 1, 1);
+        rmtree($output, $verbose, 1);
     }
-    my $command = "genhtml -o $output $run_dir/all_cov.info";
-    print "Coverage: generating html\n" if $verbose;
+    my $prefix = "";
+    if (defined($limit)) {
+        $prefix = $limit;
+        $prefix =~ s/\/[^\/]+\/?$//;
+        $prefix = "--prefix $prefix";
+    }
+    my $command = "genhtml $prefix -o $output $run_dir/all_cov.info";
+    print "Coverage: generating html <$command>\n" if $verbose;
     $status = system ($command) == 0;
 }
 

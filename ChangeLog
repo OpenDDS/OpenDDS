@@ -1,7 +1,13 @@
+Tue Feb 28 19:20:55 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Removing prefix for generated coverage html.
+
 Tue Feb 28 17:01:00 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
-        
+
           Script for processing DDS coverage data with lcov.
 
 Thu Feb 23 17:12:24 UTC 2012  Adam Mitz  <mitza@ociweb.com>
