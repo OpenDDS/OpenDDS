@@ -179,7 +179,7 @@ sub combineInfos
             }
             $group += 1;
             my $covFile = "$run_dir/intermediate_cov" . $group . ".info";
-            
+
             print "\ncombining $info_groups info files $covFile <$addstr>\n if $verbose";
             my $status = system("lcov -d $source_root $addstr -o $covFile");
             if ($status == 0) {
@@ -198,7 +198,7 @@ sub combineInfos
     foreach my $info (@infoKeys) {
         $addstr .= " -a $info";
     }
-    my $covFile = "$run_dir/all_cov.info"; 
+    my $covFile = "$run_dir/all_cov.info";
     print "\ncreating $covFile <$addstr>\n" if $verbose;
     my $status = system("lcov -d $source_root $addstr -o $covFile");
     if ($status != 0) {

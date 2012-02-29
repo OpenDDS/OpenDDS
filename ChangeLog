@@ -1,3 +1,9 @@
+Wed Feb 29 15:00:12 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Cleanup whitespace.
+
 Tue Feb 28 19:20:55 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
