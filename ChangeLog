@@ -1,3 +1,9 @@
+Wed Feb 29 20:03:51 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+        Removing some verbose logging.
+
 Wed Feb 29 18:56:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.cpp:

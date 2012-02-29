@@ -281,7 +281,7 @@ print "Coverage: combine all coverage data\n" if $verbose;
 my $status = 0;
 if (!combineInfos($run_dir)) {
     if (-d $output) {
-        rmtree($output, $verbose, 1);
+        rmtree($output, 0, 1);
     }
     my $prefix = "";
     if (defined($limit)) {
