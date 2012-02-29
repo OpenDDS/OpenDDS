@@ -417,18 +417,26 @@ Spdp::SpdpTransport::dispose_unregister()
   // Send the dispose/unregister SPDP sample
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
-  data_.smHeader.flags = 1 /*FLAG_E*/ | 2 /*FLAG_Q*/; // note no FLAG_D
+  data_.smHeader.flags = 1 /*FLAG_E*/ | 2 /*FLAG_Q*/ | 8 /*FLAG_K*/;
   data_.inlineQos.length(1);
   static const StatusInfo_t dispose_unregister = { {0, 0, 0, 3} };
   data_.inlineQos[0].status_info(dispose_unregister);
+
+  ParameterList plist(1);
+  plist.length(1);
+  plist[0].guid(outer_->guid_);
+  plist[0]._d(PID_PARTICIPANT_GUID);
+
   buff_.reset();
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
-  if (!(ser << hdr_) || !(ser << data_)) {
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) ||
+      !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
       ACE_TEXT("failed to serialize headers for dispose/unregister\n")));
     return;
   }
+
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
     const ssize_t res =
@@ -597,6 +605,13 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         return 0;
       }
       submessageLength = data.smHeader.submessageLength;
+
+      if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
+        // Not our message: this could be the same multicast group used
+        // for SEDP and other traffic.
+        break;
+      }
+
       ParameterList plist;
       if (data.smHeader.flags & (4 /*FLAG_D*/ | 8 /*FLAG_K*/)) {
         ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
@@ -624,9 +639,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         plist[0]._d(PID_PARTICIPANT_GUID);
       }
 
-      if (data.writerId == ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
-        outer_->data_received(data, plist);
-      }
+      outer_->data_received(data, plist);
       break;
     }
     default:
@@ -639,7 +652,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         return 0;
       }
       submessageLength = smHeader.submessageLength;
-      if (subm != INFO_TS && DCPS::DCPS_debug_level) {
+      if (subm != INFO_TS && DCPS::DCPS_debug_level > 5) {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_input() - ")
                    ACE_TEXT("ignored submessage type: %x, DATA is %x\n"),
@@ -652,6 +665,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       if (read < static_cast<size_t>(submessageLength + SMHDR_SZ)) {
         ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ - read));
       }
+    } else if (!submessageLength) {
+      break; // submessageLength of 0 indicates the last submessage
     }
   }
 

@@ -1,3 +1,11 @@
+Wed Feb 29 18:56:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          More changes for interoperability:
+          - Send the "key" in the SPDP dispose/unregister message
+          - Better support for skipping unrecognized data received on SPDP
+
 Wed Feb 29 15:00:12 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
