@@ -286,7 +286,7 @@ if (!combineInfos($run_dir)) {
     my $prefix = "";
     if (defined($limit)) {
         $prefix = $limit;
-        $prefix =~ s/\/[^\/]+\/?$//;
+        $prefix =~ s/\/[^\/]+\/\*$//;
         $prefix = "--prefix $prefix";
     }
     my $command = "genhtml $prefix -o $output $run_dir/all_cov.info";
