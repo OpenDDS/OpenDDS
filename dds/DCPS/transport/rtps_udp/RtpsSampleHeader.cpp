@@ -12,6 +12,7 @@
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
@@ -329,23 +330,6 @@ RtpsSampleHeader::populate_data_sample_submessages(
     populate_inline_qos(qos_data, data);
   }
 
-  // Add Original writer info
-  if (dsle.header_.historic_sample_) {
-    RTPS::OriginalWriterInfo_t original_writer_info;
-    original_writer_info.originalWriterGUID = dsle.publication_id_;
-    original_writer_info.originalWriterSN.high =
-          dsle.originalSequence_.getHigh();
-    original_writer_info.originalWriterSN.low  =
-          dsle.originalSequence_.getLow();
-    // ignore original_writer_info.originalWriterQos;
-
-    Parameter owi_param;
-    owi_param.original_writer_info(original_writer_info);
-    CORBA::ULong len = data.inlineQos.length();
-    data.inlineQos.length(len + 1);
-    data.inlineQos[len] = owi_param;
-  }
-
   if (data.inlineQos.length() > 0) {
     data.smHeader.flags |= FLAG_Q;
   }
@@ -463,11 +447,13 @@ RtpsSampleHeader::populate_inline_qos(
 
   // Conditionally include other QoS inline when the differ from the
   // default value.
-  DDS::PublisherQos default_pub_qos = PUBLISHER_QOS_DEFAULT;
+  DDS::PublisherQos default_pub_qos =
+    TheServiceParticipant->initial_PublisherQos();
   PROCESS_INLINE_QOS(presentation, default_pub_qos, qos_data.pub_qos);
   PROCESS_INLINE_QOS(partition, default_pub_qos, qos_data.pub_qos);
 
-  DDS::DataWriterQos default_dw_qos = DATAWRITER_QOS_DEFAULT;
+  DDS::DataWriterQos default_dw_qos =
+    TheServiceParticipant->initial_DataWriterQos();
   PROCESS_INLINE_QOS(durability, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(deadline, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(latency_budget, default_dw_qos, qos_data.dw_qos);

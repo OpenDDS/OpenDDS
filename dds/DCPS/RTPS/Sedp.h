@@ -201,10 +201,9 @@ private:
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
-    DDS::ReturnCode_t write_sample(
-        const ParameterList& plist,
-        bool is_retransmission,
-        DCPS::SequenceNumber* sequence_storage = NULL);
+    DDS::ReturnCode_t write_sample(const ParameterList& plist,
+                                   const DCPS::RepoId& reader,
+                                   DCPS::SequenceNumber& sequence);
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
   private:
@@ -217,7 +216,8 @@ private:
                            DCPS::MessageId id);
     void set_header_fields(DCPS::DataSampleHeader& dsh,
                            size_t size,
-                           bool is_retransmission = false,
+                           const DCPS::RepoId& reader,
+                           DCPS::SequenceNumber& sequence,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
   } publications_writer_, subscriptions_writer_;
@@ -256,7 +256,7 @@ private:
     DCPS::RepoId topic_id_;
     DCPS::TransportLocatorSeq trans_info_;
     RepoIdSet matched_endpoints_;
-    DCPS::SequenceNumber original_sequence_;
+    DCPS::SequenceNumber sequence_;
     RepoIdSet remote_opendds_associations_;
   };
 
@@ -370,17 +370,17 @@ private:
 
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
-  void write_durable_publication_data();
-  void write_durable_subscription_data();
+  void write_durable_publication_data(const DCPS::RepoId& reader);
+  void write_durable_subscription_data(const DCPS::RepoId& reader);
 
   static bool is_opendds(const GUID_t& endpoint);
 
   DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid,
                                            LocalPublication& pub,
-                                           bool is_retransmission = false);
+                                           const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
   DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
                                             LocalSubscription& pub,
-                                            bool is_retransmission = false);
+                                            const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 };
 
 }

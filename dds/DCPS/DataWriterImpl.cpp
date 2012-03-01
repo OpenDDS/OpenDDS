@@ -474,31 +474,17 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
     DataSampleList list = data_container_->get_resend_data();
 
-    // Assign new sequence numbers to the durable samples
-    for (DataSampleListElement* list_el = list.head_;
-         list_el != NULL;
+    // Update the reader's expected sequence
+    SequenceNumber& seq =
+      reader_info_.find(remote_id)->second.expected_sequence_;
+
+    for (DataSampleListElement* list_el = list.head_; list_el;
          list_el = list_el->next_send_sample_) {
-      // Durable data gets a new sequence number
-      if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-        this->sequence_number_ = SequenceNumber();
-      } else {
-        ++this->sequence_number_;
-      }
-      // Reassign list element header sequence
-      list_el->originalSequence_ = list_el->header_.sequence_;
-      list_el->header_.sequence_ = sequence_number_;
       list_el->header_.historic_sample_ = true;
-      // Reform sequence number in blob
-      list_el->sample_->wr_ptr(list_el->sample_->base());
-      if (!(*list_el->sample_ << list_el->header_)) {
-        ACE_DEBUG((LM_ERROR,
-              ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-              ACE_TEXT(" failed to serialize header for historic sample\n")));
+      if (list_el->header_.sequence_ > seq) {
+        seq = list_el->header_.sequence_;
       }
     }
-
-    // Update the reader's expected sequence
-    reader_info_.find(remote_id)->second.expected_sequence_ = sequence_number_;
 
     if (this->publisher_servant_->is_suspended()) {
       this->available_data_list_.enqueue_tail_next_send_sample(list);

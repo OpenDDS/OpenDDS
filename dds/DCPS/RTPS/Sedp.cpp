@@ -514,10 +514,12 @@ Sedp::AssociateTask::svc()
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_->lock_, 1);
   // Write durable data
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    sedp_->write_durable_publication_data();
+    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    sedp_->write_durable_publication_data(proto.remote_id_);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
-    sedp_->write_durable_subscription_data();
+    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    sedp_->write_durable_subscription_data(proto.remote_id_);
   }
 
   proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
@@ -1837,15 +1839,15 @@ Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
 }
 
 void
-Sedp::Writer::data_delivered(const DCPS::DataSampleListElement*)
+Sedp::Writer::data_delivered(const DCPS::DataSampleListElement* dsle)
 {
-  // list el allocated on stack, will delete sample
+  delete dsle;
 }
 
 void
-Sedp::Writer::data_dropped(const DCPS::DataSampleListElement*, bool)
+Sedp::Writer::data_dropped(const DCPS::DataSampleListElement* dsle, bool)
 {
-  // list el allocated on stack, will delete sample
+  delete dsle;
 }
 
 void
@@ -1863,10 +1865,9 @@ Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_sample(
-    const ParameterList& plist,
-    bool is_retransmission,
-    DCPS::SequenceNumber* sequence_storage)
+Sedp::Writer::write_sample(const ParameterList& plist,
+                           const DCPS::RepoId& reader,
+                           DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -1892,20 +1893,22 @@ Sedp::Writer::write_sample(
 
   if (result == DDS::RETCODE_OK) {
     // Send sample
-    DCPS::DataSampleListElement list_el(repo_id_, this, 0, &alloc_, 0);
-    set_header_fields(list_el.header_, size, is_retransmission);
-    // Sequence now set in header
-    if (sequence_storage) {
-      *sequence_storage = list_el.header_.sequence_;
+    DCPS::DataSampleListElement* list_el =
+      new DCPS::DataSampleListElement(repo_id_, this, 0, &alloc_, 0);
+    set_header_fields(list_el->header_, size, reader, sequence);
+
+    list_el->sample_ = new ACE_Message_Block(size);
+    *list_el->sample_ << list_el->header_;
+    list_el->sample_->cont(payload.duplicate());
+
+    if (reader != GUID_UNKNOWN) {
+      list_el->subscription_ids_[0] = reader;
+      list_el->num_subs_ = 1;
     }
 
-
-    DCPS::DataSampleList list;  // Container of list elements
-    list.head_ = list.tail_ = &list_el;
+    DCPS::DataSampleList list;
+    list.head_ = list.tail_ = list_el;
     list.size_ = 1;
-    list_el.sample_ = new ACE_Message_Block(size);
-    *list_el.sample_ << list_el.header_;
-    list_el.sample_->cont(payload.duplicate());
 
     send(list);
   }
@@ -1961,27 +1964,34 @@ Sedp::Writer::write_control_msg(
     DCPS::MessageId id)
 {
   DCPS::DataSampleHeader header;
-  set_header_fields(header, size, false, id);
+  DCPS::SequenceNumber seq;
+  set_header_fields(header, size, GUID_UNKNOWN, seq, id);
   send_control(header, &payload);
 }
 
 void
 Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
                                 size_t size,
-                                bool is_retransmission,
+                                const DCPS::RepoId& reader,
+                                DCPS::SequenceNumber& sequence,
                                 DCPS::MessageId id)
 {
   dsh.message_id_ = id;
   dsh.byte_order_ = ACE_CDR_BYTE_ORDER;
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
   dsh.publication_id_ = repo_id_;
-  dsh.historic_sample_ = is_retransmission;
+
+  if (reader != GUID_UNKNOWN) {
+    // retransmit with same seq# for durability
+    dsh.historic_sample_ = true;
+    dsh.sequence_ = sequence;
+  } else {
+    sequence = dsh.sequence_ = ++seq_;
+  }
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
   dsh.source_timestamp_nanosec_ = now.usec() * 1000;
-
-  dsh.sequence_ = ++seq_;
 }
 
 //-------------------------------------------------------------------------
@@ -2138,20 +2148,20 @@ Sedp::populate_discovered_reader_msg(
 }
 
 void
-Sedp::write_durable_publication_data()
+Sedp::write_durable_publication_data(const DCPS::RepoId& reader)
 {
   LocalPublicationIter pub, end = local_publications_.end();
   for (pub = local_publications_.begin(); pub != end; ++pub) {
-    write_publication_data(pub->first, pub->second, true);
+    write_publication_data(pub->first, pub->second, reader);
   }
 }
 
 void
-Sedp::write_durable_subscription_data()
+Sedp::write_durable_subscription_data(const DCPS::RepoId& reader)
 {
   LocalSubscriptionIter sub, end = local_subscriptions_.end();
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-    write_subscription_data(sub->first, sub->second, true);
+    write_subscription_data(sub->first, sub->second, reader);
   }
 }
 
@@ -2159,7 +2169,7 @@ DDS::ReturnCode_t
 Sedp::write_publication_data(
     const RepoId& rid,
     LocalPublication& lp,
-    bool is_retransmission)
+    const DCPS::RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated()) {
@@ -2175,10 +2185,7 @@ Sedp::write_publication_data(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      result = publications_writer_.write_sample(
-          plist,
-          is_retransmission,
-          is_retransmission ? NULL : &lp.original_sequence_);
+      result = publications_writer_.write_sample(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
@@ -2191,7 +2198,7 @@ DDS::ReturnCode_t
 Sedp::write_subscription_data(
     const RepoId& rid,
     LocalSubscription& ls,
-    bool is_retransmission)
+    const DCPS::RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated()) {
@@ -2207,10 +2214,7 @@ Sedp::write_subscription_data(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      result = subscriptions_writer_.write_sample(
-          plist,
-          is_retransmission,
-          is_retransmission ? NULL : &ls.original_sequence_);
+      result = subscriptions_writer_.write_sample(plist, reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")

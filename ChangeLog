@@ -1,3 +1,27 @@
+Thu Mar  1 19:06:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Go back to the earlier (pre-RTPS-merge) strategy of using the same
+          sequence number for durability resends.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Write durability data to a particular reader GUID,
+          and use the same sequence number as the original send.
+          Allocate the DataSampleListElement on the heap, since (once the
+          transport gets support for it) the TransportSendElement could
+          be held after the send() returns.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Removed OriginalWriterInfo, it's no longer needed since the
+          sequence numbers are the same for durability resends.
+          Get initial QoS values from TheServiceParticipant.
+
 Thu Mar  1 14:10:48 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:

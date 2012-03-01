@@ -111,9 +111,6 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
   /// The OpenDDS DCPS header for this sample
   DataSampleHeader       header_;
 
-  // Original sequence number - set if this is a "historic sample"
-  SequenceNumber originalSequence_;
-
   /// Message being sent which includes the DataSampleHeader message block
   /// and DataSample message block.
   DataSample*            sample_;
