@@ -207,6 +207,23 @@ sub combineInfos
     return $status;
 }
 
+sub yesterday
+{
+    my $day = shift;
+
+    if ($day eq "sun") { return "sat" };
+    if ($day eq "mon") { return "sun" };
+    if ($day eq "tue") { return "mon" };
+    if ($day eq "wed") { return "tue" };
+    if ($day eq "thu") { return "wed" };
+    if ($day eq "fri") { return "thu" };
+    if ($day eq "sat") { return "fri" };
+
+    print STDERR "Failed to identify $day as day of the week, cannot determine yesterday\n";
+    exit 0;
+}
+
+my %days = ();
 my $cleanup_only = 0;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
     my $arg = $ARGV[$i];
@@ -216,30 +233,62 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif ($arg eq "-v" || $arg eq "-verbose") {
         $verbose = 1;
     }
-    elsif ($arg eq "-o" || $arg eq "-output") {
-        $output = $ARGV[$i] if (++$i <= $#ARGV);
+    elsif (($arg eq "-o" || $arg eq "-output") && (++$i <= $#ARGV)) {
+        $output = $ARGV[$i];
     }
-    elsif ($arg eq "-gcov_tool") {
-        $gcov_tool = $ARGV[$i] if (++$i <= $#ARGV);
+    elsif (($arg eq "-gcov_tool") && (++$i <= $#ARGV)) {
+        $gcov_tool = $ARGV[$i];
     }
-    elsif ($arg eq "-info_groups") {
-        $info_groups = $ARGV[$i] if (++$i <= $#ARGV);
+    elsif (($arg eq "-info_groups") && (++$i <= $#ARGV)) {
+        $info_groups = $ARGV[$i];
     }
-    elsif ($arg eq "-x" || $arg eq "-exclude") {
-        $excludes{$ARGV[$i]} = 1 if (++$i <= $#ARGV);
+    elsif (($arg eq "-x" || $arg eq "-exclude") && (++$i <= $#ARGV)) {
+        $excludes{$ARGV[$i]} = 1;
     }
-    elsif ($arg eq "-limit") {
-        $limit = $ARGV[$i] if (++$i <= $#ARGV);
+    elsif (($arg eq "-limit") && (++$i <= $#ARGV)) {
+        $limit = $ARGV[$i];
     }
-    elsif ($arg eq "-source_root") {
-        $source_root = $ARGV[$i] if (++$i <= $#ARGV);
+    elsif (($arg eq "-source_root") && (++$i <= $#ARGV)) {
+        $source_root = $ARGV[$i];
     }
-    elsif ($arg eq "-run_dir") {
-        $run_dir = $ARGV[$i] if (++$i <= $#ARGV);
+    elsif (($arg eq "-run_dir") && (++$i <= $#ARGV)) {
+        $run_dir = $ARGV[$i];
+    }
+    elsif (($arg eq "-day") && (++$i <= $#ARGV)) {
+        my $day = lc($ARGV[$i]);
+        $days{$day} = 1;
     }
     else {
         print "Ignoring unkown argument: $ARGV[$i]\n";
     }
+}
+
+if (keys(%days) > 0) {
+    my $now_str = localtime;
+    #                  day     month date   hour   min  sec    year
+    if ($now_str !~ /^(\S+)\s+\S+\s+\S+\s+(\d\d?):\d\d:\d\d\s+\S+/) {
+        print "ERROR: couldn't parse localtime string, skipping coverage\n";
+        exit 0;
+    }
+    my $day = lc($1);
+    my $hour = $2;
+    # before 6pm builds start, shift to previous day
+    if ($hour < 18) {
+        $day = yesterday($day);
+    }
+
+    if (!$days{$day}) {
+        print "Skipping coverage on $day (build time frame)\n";
+        exit 1;
+    }
+}
+
+if ($cleanup_only) {
+    print "Coverage removing *.gcda\n" if $verbose;
+    # traverse $run_dir and remove all *.gcda files
+    traverse( { 'file_function' => \&removeFiles, 'extension' => 'gcda' });
+
+    exit 1;
 }
 
 if (defined($limit)) {
@@ -256,14 +305,6 @@ print "run_dir=$run_dir\n" if $verbose;
 print "verbose=$verbose\n" if $verbose;
 print "output=$output\n" if $verbose;
 print "limit=$limit\n" if $verbose && defined($limit);
-
-if ($cleanup_only) {
-    print "Coverage removing *.gcda\n" if $verbose;
-    # traverse $run_dir and remove all *.gcda files
-    traverse( { 'file_function' => \&removeFiles, 'extension' => 'gcda' });
-
-    exit 1;
-}
 
 print "Coverage: removing *.info\n" if $verbose;
 # traverse $run_dir and remove all *.info files
