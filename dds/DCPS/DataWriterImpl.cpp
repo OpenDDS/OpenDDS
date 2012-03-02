@@ -1485,7 +1485,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   this->set_enabled();
 
   try {
-    this->enable_transport(reliable);
+    this->enable_transport(reliable,
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
     const TransportLocatorSeq& trans_conf_info = connection_info();
 

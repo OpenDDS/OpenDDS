@@ -87,7 +87,7 @@ protected:
 
   struct ConnectionAttribs {
     CORBA::Long priority_;
-    bool local_reliable_;
+    bool local_reliable_, local_durable_;
   };
 
   DataLink* find_datalink(const RepoId& local_id,

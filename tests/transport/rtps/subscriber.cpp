@@ -228,7 +228,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   remote.entityKind(ENTITYKIND_USER_WRITER_WITH_KEY);
 
   SimpleDataReader sdr(local);
-  sdr.enable_transport(false /*reliable*/);
+  sdr.enable_transport(false /*reliable*/, false /*durable*/);
   // Write a file so that test script knows we're ready
   FILE* file = std::fopen("subready.txt", "w");
   std::fprintf(file, "Ready\n");

@@ -66,7 +66,8 @@ private:
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
                     bool local_reliable,
-                    bool remote_reliable);
+                    bool remote_reliable,
+                    bool local_durable);
 
   RcHandle<RtpsUdpInst> config_i_;
 

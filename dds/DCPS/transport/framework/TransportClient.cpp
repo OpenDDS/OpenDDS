@@ -54,7 +54,7 @@ TransportClient::~TransportClient()
 }
 
 void
-TransportClient::enable_transport(bool reliable)
+TransportClient::enable_transport(bool reliable, bool durable)
 {
   EntityImpl* ent = dynamic_cast<EntityImpl*>(this);
 
@@ -80,15 +80,17 @@ TransportClient::enable_transport(bool reliable)
     throw Transport::NotConfigured();
   }
 
-  enable_transport(reliable, tc);
+  enable_transport_using_config(reliable, durable, tc);
 }
 
 void
-TransportClient::enable_transport(bool reliable, const TransportConfig_rch& tc)
+TransportClient::enable_transport_using_config(bool reliable, bool durable,
+                                               const TransportConfig_rch& tc)
 {
   swap_bytes_ = tc->swap_bytes_;
   cdr_encapsulation_ = false;
   reliable_ = reliable;
+  durable_ = durable;
   passive_connect_duration_.set(tc->passive_connect_duration_ / 1000,
                                 (tc->passive_connect_duration_ % 1000) * 1000);
 
@@ -156,7 +158,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
   repo_id_ = get_repo_id();
   const TransportImpl::ConnectionAttribs attribs =
-    {get_priority_value(data), reliable_};
+    {get_priority_value(data), reliable_, durable_};
 
   MultiReservLock mrl(impls_);
   ACE_GUARD_RETURN(MultiReservLock, guard2, mrl, false);

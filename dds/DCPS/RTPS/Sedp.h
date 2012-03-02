@@ -169,7 +169,7 @@ private:
     CORBA::Long get_priority_value(const DCPS::AssociationData&) const
       { return 0; }
 
-    using DCPS::TransportClient::enable_transport;
+    using DCPS::TransportClient::enable_transport_using_config;
     using DCPS::TransportClient::disassociate;
 
   protected:
@@ -246,7 +246,6 @@ private:
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;
-  DCPS::TransportConfig_rch transport_cfg_;
 
   DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();

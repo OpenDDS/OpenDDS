@@ -92,7 +92,8 @@ public:
                     std::set<ACE_INET_Addr>& addrs) const;
 
   void associated(const RepoId& local, const RepoId& remote,
-                  bool local_reliable, bool remote_reliable);
+                  bool local_reliable, bool remote_reliable,
+                  bool local_durable);
 
   bool wait_for_handshake(const RepoId& local_id, const RepoId& remote_id);
 
@@ -188,19 +189,22 @@ private:
     DisjointSequence recvd_;
     SequenceRange hb_range_;
     std::map<SequenceNumber, RTPS::FragmentNumber_t> frags_;
-    bool ack_pending_;
+    bool ack_pending_, initial_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_,
       acknack_count_, nackfrag_count_;
 
     WriterInfo()
-      : ack_pending_(false), heartbeat_recvd_count_(0),
+      : ack_pending_(false), initial_hb_(true), heartbeat_recvd_count_(0),
         hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) {}
+
+    bool should_nack(bool durable) const;
   };
 
   typedef std::map<RepoId, WriterInfo, GUID_tKeyLessThan> WriterInfoMap;
 
   struct RtpsReader {
     WriterInfoMap remote_writers_;
+    bool durable_;
   };
 
   typedef std::map<RepoId, RtpsReader, GUID_tKeyLessThan> RtpsReaderMap;

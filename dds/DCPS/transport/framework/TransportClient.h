@@ -46,8 +46,10 @@ protected:
 
   // Local setup:
 
-  void enable_transport(bool reliable);
-  void enable_transport(bool reliable, const TransportConfig_rch& tc);
+  void enable_transport(bool reliable, bool durable);
+
+  void enable_transport_using_config(bool reliable, bool durable,
+                                     const TransportConfig_rch& tc);
 
 protected:
   bool swap_bytes() const { return swap_bytes_; }
@@ -105,7 +107,7 @@ private:
 
   // Configuration details:
 
-  bool swap_bytes_, cdr_encapsulation_, reliable_;
+  bool swap_bytes_, cdr_encapsulation_, reliable_, durable_;
   ACE_Time_Value passive_connect_duration_;
 
 

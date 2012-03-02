@@ -239,7 +239,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
 
   SimpleDataWriter sdw(local_guid);
-  sdw.enable_transport(true /*reliable*/);
+  sdw.enable_transport(true /*reliable*/, false /*durable*/);
   AssociationData subscription;
   subscription.remote_id_ = remote;
   subscription.remote_reliable_ = false;

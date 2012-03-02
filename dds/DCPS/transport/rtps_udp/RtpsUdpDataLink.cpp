@@ -196,7 +196,8 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
 
 void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
-                            bool local_reliable, bool remote_reliable)
+                            bool local_reliable, bool remote_reliable,
+                            bool local_durable)
 {
   if (!local_reliable) {
     return;
@@ -216,6 +217,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     if (rr == readers_.end()) {
       rr = readers_.insert(RtpsReaderMap::value_type(local_id, RtpsReader()))
         .first;
+      rr->second.durable_ = local_durable;
     }
     rr->second.remote_writers_[remote_id];
     reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
@@ -599,18 +601,19 @@ RtpsUdpDataLink::process_heartbeat_i(
     return;
   }
 
-  if (heartbeat.count.value <= wi->second.heartbeat_recvd_count_) {
+  WriterInfo& info = wi->second;
+
+  if (heartbeat.count.value <= info.heartbeat_recvd_count_) {
     return;
   }
+  info.heartbeat_recvd_count_ = heartbeat.count.value;
 
-  wi->second.heartbeat_recvd_count_ = heartbeat.count.value;
-
-  SequenceNumber& first = wi->second.hb_range_.first;
+  SequenceNumber& first = info.hb_range_.first;
   first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
-  SequenceNumber& last = wi->second.hb_range_.second;
+  SequenceNumber& last = info.hb_range_.second;
   last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
 
-  DisjointSequence& recvd = wi->second.recvd_;
+  DisjointSequence& recvd = info.recvd_;
   // the cumulative ack may only increase ("once acked, always acked" rule) and
   // the cumultaive ack must be at least first - 1
   if (!recvd.empty() && recvd.cumulative_ack() < first.previous()) {
@@ -619,16 +622,30 @@ RtpsUdpDataLink::process_heartbeat_i(
   //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
   //        numbers (dropped) we no longer expect to receive due to HEARTBEAT
 
-  const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
-    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */,
-    frags = recv_strategy_->has_fragments(wi->second.hb_range_, wi->first);
+  if (!rr.second.durable_ && info.initial_hb_) {
+    recvd.insert(SequenceRange(SequenceNumber(),
+                               recvd.empty() ? last.previous() : recvd.low()));
+  }
+  info.initial_hb_ = false;
 
-  if (!final || (!liveliness && (recvd.disjoint() || frags))) {
-    wi->second.ack_pending_ = true;
+  const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
+    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
+
+  if (!final || (!liveliness && (info.should_nack(rr.second.durable_) ||
+      recv_strategy_->has_fragments(info.hb_range_, wi->first)))) {
+    info.ack_pending_ = true;
     heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
   }
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
+}
+
+bool
+RtpsUdpDataLink::WriterInfo::should_nack(bool durable) const
+{
+  return recvd_.disjoint()
+    || (!recvd_.empty() && recvd_.high() < hb_range_.second)
+    || (durable && (recvd_.empty() || recvd_.low() > hb_range_.first));
 }
 
 void
@@ -645,6 +662,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
       // if we have some negative acknowledgements, we'll ask for a reply
       DisjointSequence& recvd = wi->second.recvd_;
       const bool nack = recvd.disjoint();
+      //TODO: Need to account for new nacking logic in WriterInfo::should_nack()
 
       if (wi->second.ack_pending_ || nack) {
         wi->second.ack_pending_ = false;

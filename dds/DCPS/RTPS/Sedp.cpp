@@ -299,17 +299,22 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   // Crete a config
   std::string config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                             "_SEDP_TransportCfg_" + key + domainStr;
-  transport_cfg_ = TheTransportRegistry->create_config(config_name);
-  transport_cfg_->instances_.push_back(transport_inst_);
+  DCPS::TransportConfig_rch transport_cfg =
+    TheTransportRegistry->create_config(config_name);
+  transport_cfg->instances_.push_back(transport_inst_);
 
   // Configure and enable each reader/writer
   rtps_inst->opendds_discovery_default_listener_ = &publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
-  const bool force_reliability = true;
-  publications_writer_.enable_transport(force_reliability, transport_cfg_);
-  publications_reader_.enable_transport(force_reliability, transport_cfg_);
-  subscriptions_writer_.enable_transport(force_reliability, transport_cfg_);
-  subscriptions_reader_.enable_transport(force_reliability, transport_cfg_);
+  const bool reliability = true, durability = true;
+  publications_writer_.enable_transport_using_config(reliability, durability,
+                                                     transport_cfg);
+  publications_reader_.enable_transport_using_config(reliability, durability,
+                                                     transport_cfg);
+  subscriptions_writer_.enable_transport_using_config(reliability, durability,
+                                                      transport_cfg);
+  subscriptions_reader_.enable_transport_using_config(reliability, durability,
+                                                      transport_cfg);
   return DDS::RETCODE_OK;
 }
 
