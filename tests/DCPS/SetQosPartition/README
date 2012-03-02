@@ -1,0 +1,21 @@
+# $Id$
+
+This is to test the behavior how DCPSInfoRepo re-evaluate the
+compatibility and associations when the PARTITION QoS policy
+is changed. The PARTICIPANT QoS should not fail the compatibility
+checking but may cause associations changes.
+
+
+Test sequence:
+
+- The DataWriter has compatible PARTITION with first DataReader, but
+  not second DataReader. So first DataReader receives samples but
+  second does not receive samples.
+
+- The DataWriter reset PARTITION to be compatible with second DataReader
+  but not first DataReader, then the second DataReader is associated
+  with the DataWriter but the first DataReader is disassociated.
+
+- First DataReader reset PARTITION to be compatible with the DataWriter
+  so both DataReaders receives sample from DataWriter.
+

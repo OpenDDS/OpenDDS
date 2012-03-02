@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/connector-api-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/jms-api-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="lib/shared/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="lib/shared/commons-collections-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/shared/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/shared/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/shared/hibernate-3.2.6.jar"/>
+	<classpathentry kind="lib" path="lib/shared/javassist-3.4.jar"/>
+	<classpathentry kind="lib" path="native/classes" sourcepath="native"/>
+	<classpathentry kind="var" path="DDS_ROOT/lib/i2jrt.jar" sourcepath="/DDS_ROOT/java/idl2jni/runtime"/>
+	<classpathentry kind="var" path="DDS_ROOT/lib/OpenDDS_DCPS.jar" sourcepath="/DDS_ROOT/java/dds"/>
+	<classpathentry kind="var" path="DDS_ROOT/lib/tao_java.jar" sourcepath="/DDS_ROOT/java/tao"/>
+	<classpathentry kind="var" path="DDS_ROOT/java/jms/lib/opendds-ant.jar" sourcepath="/DDS_ROOT/java/ant/src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

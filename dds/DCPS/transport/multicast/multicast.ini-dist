@@ -1,0 +1,64 @@
+#
+# $Id$
+#
+
+[transport/multicast1]
+transport_type=multicast
+
+# Enables IPv6 default group address selection.
+# The default value is: 0 (disabled).
+default_to_ipv6=0
+
+# The offset used to determine default port numbers; this value
+# will be added to the transport ID for the actual port number.
+# The default value is: 49400.
+port_offset=49400
+
+# The multicast group to join to send/receive data.
+# The default value is:
+#   224.0.0.128:<port> (IPv4), or
+#    [FF01::80]:<port> (IPv6)
+group_address=224.0.0.128:49401
+
+# Enables reliable communication. This option will eventually
+# be deprecated.
+# The default value is: 1 (enabled).
+reliable=1
+
+# The exponential base used during handshake retries; smaller
+# values yield shorter delays between attempts (reliable only).
+# The default value is: 2.0.
+syn_backoff=2.0
+
+# The minimum number of milliseconds to wait between handshake
+# attempts during association (reliable only).
+# The default value is: 250.
+syn_interval=250
+
+# The maximum number of milliseconds to wait before giving up
+# on a handshake response during association (reliable only).
+# The default value is: 30000 (30 seconds).
+syn_timeout=30000
+
+# The number of datagrams to retain in order to service repair
+# requests (reliable only).
+# The default value is: 32.
+nak_depth=32
+
+# The minimum number of milliseconds to wait between repair
+# requests (reliable only).
+# The default value is: 500.
+nak_interval=500
+
+# The number of interval's between nak's (after initial nak).
+# The default value is: 4.
+nak_delay_intervals=4
+
+# The maximum number of a missing sample will be nak'ed.
+# The default value is: 3.
+nak_max=3
+
+# The maximum number of milliseconds to wait before giving up
+# on a repair response (reliable only).
+# The default value is: 30000 (30 seconds).
+nak_timeout=30000

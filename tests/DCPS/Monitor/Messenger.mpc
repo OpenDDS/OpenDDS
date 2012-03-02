@@ -1,0 +1,69 @@
+
+project(Monitor*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=Messenger_export.h \
+                   -Wb,stub_export_macro=Messenger_Export
+  dcps_ts_flags += -Wb,export_macro=Messenger_Export
+  dynamicflags  += MESSENGER_BUILD_DLL
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+}
+
+
+project(Monitor*Publisher) : dcpsexe_with_tcp {
+
+  exename   = publisher
+  after    += Monitor*idl
+  after    += monitor
+  libs     += OpenDDS_monitor Monitor*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(Monitor*Subscriber) : dcpsexe_with_tcp {
+
+  exename   = subscriber
+  after    += Monitor*idl
+  after    += monitor
+  libs     += OpenDDS_monitor Monitor*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}
+
+project(Monitor*monitor) : dcpsexe_with_tcp {
+
+  exename   = monitor
+  after    += Monitor*idl
+  after    += monitor
+  libs     += OpenDDS_monitor Monitor*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    monitor.cpp
+    SPMDataReaderListener.cpp
+    DPMDataReaderListener.cpp
+    TopicMDataReaderListener.cpp
+    PublisherMDataReaderListener.cpp
+    SubscriberMDataReaderListener.cpp
+    DWMDataReaderListener.cpp
+    DWPerMDataReaderListener.cpp
+    DRMDataReaderListener.cpp
+    DRPerMDataReaderListener.cpp
+    TransportMDataReaderListener.cpp
+  }
+}

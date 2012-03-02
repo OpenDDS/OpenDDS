@@ -1,0 +1,8 @@
+A basic liveliness test of DDS.
+
+run_test.pl
+  Run a separate publisher and subscriber process.
+
+run_test.pl take
+  Run the same test but "take" instead of "read".
+

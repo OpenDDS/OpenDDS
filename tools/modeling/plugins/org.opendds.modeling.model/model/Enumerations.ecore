@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="enumerations"
+    nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0" nsPrefix="enumerations">
+  <eClassifiers xsi:type="ecore:EEnum" name="ReliabilityQosPolicyKind">
+    <eLiterals name="BEST_EFFORT"/>
+    <eLiterals name="RELIABLE" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PresentationQosPolicyAccessScopeKind">
+    <eLiterals name="INSTANCE"/>
+    <eLiterals name="TOPIC" value="1"/>
+    <eLiterals name="GROUP" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Period">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nanosecond" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="ELong closest to CORBA unsigned long used in DDS spec."/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="second" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="EInt corresponds to CORBA long used in DDS spec."/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="OwnershipQosPolicyKind">
+    <eLiterals name="SHARED"/>
+    <eLiterals name="EXCLUSIVE" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="LivelinessQosPolicyKind">
+    <eLiterals name="AUTOMATIC"/>
+    <eLiterals name="MANUAL_BY_PARTICIPANT" value="1"/>
+    <eLiterals name="MANUAL_BY_TOPIC" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DurabilityQosPolicyKind">
+    <eLiterals name="TRANSIENT"/>
+    <eLiterals name="TRANSIENT_LOCAL" value="1"/>
+    <eLiterals name="VOLATILE" value="2"/>
+    <eLiterals name="PERSISTENT" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DestinationOrderQosPolicyKind">
+    <eLiterals name="BY_RECEPTION_TIMESTAMP"/>
+    <eLiterals name="BY_SOURCE_TIMESTAMP" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="HistoryQosPolicyKind">
+    <eLiterals name="KEEP_LAST"/>
+    <eLiterals name="KEEP_ALL" value="1"/>
+  </eClassifiers>
+</ecore:EPackage>

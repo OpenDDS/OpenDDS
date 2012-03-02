@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_R8ZmoDSOEeCQdY7V0enm4Q" name="Exchange">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_TdSxoDSOEeCQdY7V0enm4Q" name="ExchangeLib">
+    <domains xmi:id="_bIimEDSOEeCQdY7V0enm4Q" name="Exchange" domainId="0"/>
+    <participants xmi:id="_d-BlcDSOEeCQdY7V0enm4Q" name="FeedDistribution" domain="_bIimEDSOEeCQdY7V0enm4Q">
+      <publishers xsi:type="opendds:publisher" xmi:id="_lH6ZQDSOEeCQdY7V0enm4Q" name="QuotesPub" transportConfig="trans1">
+        <writers xmi:id="_lH8OcDSOEeCQdY7V0enm4Q" name="QuotesWriter" copyFromTopicQos="true" topic="_niUmMDSOEeCQdY7V0enm4Q"/>
+        <writers xmi:id="_-vcNETSOEeCQdY7V0enm4Q" name="TradesWriter" copyFromTopicQos="true" topic="_TExugDSPEeCQdY7V0enm4Q"/>
+      </publishers>
+    </participants>
+    <participants xmi:id="_Y_XdoDSPEeCQdY7V0enm4Q" name="FeedConsumption" domain="_bIimEDSOEeCQdY7V0enm4Q">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_arK4IDSPEeCQdY7V0enm4Q" name="MatchingSub" transportConfig="trans3">
+        <readers xmi:id="_arK4ITSPEeCQdY7V0enm4Q" name="MatchReader" copyFromTopicQos="false" topic="_iQ1B8DSPEeCQdY7V0enm4Q"/>
+      </subscribers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_niUmMDSOEeCQdY7V0enm4Q" name="Quotes" datatype="_Yrf74DSOEeCQdY7V0enm4Q"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_TExugDSPEeCQdY7V0enm4Q" name="Trades" datatype="_uVRgsDSOEeCQdY7V0enm4Q"/>
+    <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_iQ1B8DSPEeCQdY7V0enm4Q" name="TradeMatchingQuote" datatype="__F4PwDSREeCQdY7V0enm4Q" subscription_expression="SELECT symbol, price, size, ask, bid FROM Trades NATURAL JOIN Quotes"/>
+  </libs>
+  <libs xsi:type="types:DataLib" xmi:id="_Uq3YADSOEeCQdY7V0enm4Q" name="ExhangeData">
+    <types xsi:type="types:Struct" xmi:id="_Yrf74DSOEeCQdY7V0enm4Q" name="Quote" isDcpsDataType="true">
+      <fields xmi:id="_oI1sQDSREeCQdY7V0enm4Q" name="symbol" type="_pkzT8DSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_sY1h0DSREeCQdY7V0enm4Q" name="bid" type="_pkvpkDSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_v9Qq0DSREeCQdY7V0enm4Q" name="ask" type="_pkvpkDSREeCQdY7V0enm4Q"/>
+    </types>
+    <types xsi:type="types:Struct" xmi:id="_uVRgsDSOEeCQdY7V0enm4Q" name="Trade" isDcpsDataType="true">
+      <fields xmi:id="_qNBxkDSREeCQdY7V0enm4Q" name="symbol" type="_pkzT8DSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_xEZ5EDSREeCQdY7V0enm4Q" name="price" type="_pkvpkDSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_yndnQDSREeCQdY7V0enm4Q" name="size" type="_pkwQoTSREeCQdY7V0enm4Q"/>
+    </types>
+    <types xsi:type="types:Struct" xmi:id="__F4PwDSREeCQdY7V0enm4Q" name="TMQ" isDcpsDataType="true">
+      <fields xmi:id="_BLdcMDSSEeCQdY7V0enm4Q" name="symbol" type="_pkzT8DSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_Cdz04DSSEeCQdY7V0enm4Q" name="price" type="_pkvpkDSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_EBE-cDSSEeCQdY7V0enm4Q" name="size" type="_pkwQoTSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_FRsRwDSSEeCQdY7V0enm4Q" name="bid" type="_pkvpkDSREeCQdY7V0enm4Q"/>
+      <fields xmi:id="_GTRqkDSSEeCQdY7V0enm4Q" name="ask" type="_pkvpkDSREeCQdY7V0enm4Q"/>
+    </types>
+  </libs>
+  <basicTypes xmi:id="_pklRgDSREeCQdY7V0enm4Q">
+    <types xsi:type="types:Boolean" xmi:id="_pkt0YDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:Char" xmi:id="_pkubcDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:Double" xmi:id="_pkvpkDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:Float" xmi:id="_pkwQoDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:Long" xmi:id="_pkwQoTSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:LongDouble" xmi:id="_pkw3sDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:LongLong" xmi:id="_pkxewDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:Octet" xmi:id="_pkyF0DSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:Short" xmi:id="_pkys4DSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:String" xmi:id="_pkzT8DSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:ULong" xmi:id="_pk2-UDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:ULongLong" xmi:id="_pk3lYDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:UShort" xmi:id="_pk4McDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:WChar" xmi:id="_pk4zgDSREeCQdY7V0enm4Q"/>
+    <types xsi:type="types:WString" xmi:id="_pk5akDSREeCQdY7V0enm4Q"/>
+  </basicTypes>
+</opendds:OpenDDSModel>

@@ -1,0 +1,34 @@
+A test for built-in-topic implementation.
+
+Test steps:
+
+1) start InfoRepo
+2) start monitor1 process which just create a domain participant. It reads bit data
+   via bit datareader after a few seconds.
+3) start publisher which create a domain participant and a datawriter.
+4) start subscriber which create a domain participant and a datareader.
+5) start monitor2 process which just create a domain participant and read the bit
+   data via bit datareader.
+
+
+The monitor1 and monitor2 should both get following bit info.
+
+ 4 domainparticipants,
+ 2 topics,
+ 1 datareader
+ 1 datawriter
+
+
+The test log was redirected to a file since it has an error on the InfoRepo during
+shutdown. The problem is the InfoRepo bit datawriter try to dispose samples upon
+remove_association for a remote bit datareader, the dispose() sends the control messages
+to each associated link while the remote is shutting down and remove_association came
+after.
+
+===errors from test===
+
+(3500|2792)send_bytes: iov[0].iov_len = 11 .iob_base =1951978
+(3500|2792)send_bytes: iov[1].iov_len = 19 .iob_base =18B7788
+(3500|2792)send_bytes: iov[2].iov_len = 165 .iob_base =1885150
+(3500|1052) ERROR: Failed to connect. connect: No connection could be made because the target machine actively refused it.
+

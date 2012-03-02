@@ -1,0 +1,48 @@
+«REM»
+	Do not enable copy and paste.
+«ENDREM»
+
+«AROUND menu FOR gmfgen::GenPlugin»
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders" id="global-actions">
+      «EXPAND xpt::Common::xmlGeneratedTag»
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.providers.DiagramGlobalActionHandlerProvider"
+         id="«editorGen.modelID»Presentation">
+         <Priority name="Lowest"/>
+         <ViewId id="«editorGen.editor.iD»">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="delete"/>
+            </ElementType>
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.DiagramEditPart">
+               <GlobalActionId actionId="save"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+«IF printingEnabled-»
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.printing.render.providers.DiagramWithPrintGlobalActionHandlerProvider"
+         id="«editorGen.modelID»PresentationPrint">
+         <Priority name="Lowest"/>
+         <ViewId id="«editorGen.editor.iD»">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="print"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+«ENDIF-»
+«IF null = editorGen.application-»
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.providers.ide.providers.DiagramIDEGlobalActionHandlerProvider"
+         id="«editorGen.modelID»PresentationIDE">
+         <Priority name="Lowest"/>
+         <ViewId id="«editorGen.editor.iD»">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="bookmark"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+«ENDIF-»
+      <!-- Copy and paste disabled because of issues found in GMF 2.2.2 -->
+   </extension>
+
+«ENDAROUND»

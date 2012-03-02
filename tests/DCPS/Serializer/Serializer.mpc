@@ -1,0 +1,3 @@
+project(SerializerTest): dcpsexe {
+  exename = SerializerTest
+}

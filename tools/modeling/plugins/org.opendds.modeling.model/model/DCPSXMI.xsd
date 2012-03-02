@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:dcps="http://www.opendds.org/modeling/schemas/DCPS/1.0" xmlns:domain="http://www.opendds.org/modeling/schemas/Domain/1.0" xmlns:qos="http://www.opendds.org/modeling/schemas/QoS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/DCPS/1.0">
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Topics/1.0" schemaLocation="topics.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/QoS/1.0" schemaLocation="qos.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Domain/1.0" schemaLocation="domain.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
+  <xsd:complexType name="Domain">
+    <xsd:complexContent>
+      <xsd:extension base="core:Entity">
+        <xsd:attribute name="domainId" type="xsd:long"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Domain" type="dcps:Domain"/>
+  <xsd:complexType name="DomainParticipant">
+    <xsd:complexContent>
+      <xsd:extension base="domain:DomainEntity">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="domain" type="dcps:Domain"/>
+          <xsd:element name="publishers" type="dcps:Publisher"/>
+          <xsd:element name="subscribers" type="dcps:Subscriber"/>
+          <xsd:element name="entity_factory" type="qos:EntityFactoryQosPolicy"/>
+          <xsd:element name="user_data" type="qos:UserDataQosPolicy"/>
+        </xsd:choice>
+        <xsd:attribute name="domain" type="xsd:string"/>
+        <xsd:attribute name="entity_factory" type="xsd:string"/>
+        <xsd:attribute name="user_data" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DomainParticipant" type="dcps:DomainParticipant"/>
+  <xsd:complexType abstract="true" name="PublisherSubscriber">
+    <xsd:complexContent>
+      <xsd:extension base="domain:DomainEntity">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="entity_factory" type="qos:EntityFactoryQosPolicy"/>
+          <xsd:element name="group_data" type="qos:GroupDataQosPolicy"/>
+          <xsd:element name="presentation" type="qos:PresentationQosPolicy"/>
+          <xsd:element name="partition" type="qos:PartitionQosPolicy"/>
+        </xsd:choice>
+        <xsd:attribute name="transportId" type="xsd:int"/>
+        <xsd:attribute name="entity_factory" type="xsd:string"/>
+        <xsd:attribute name="group_data" type="xsd:string"/>
+        <xsd:attribute name="presentation" type="xsd:string"/>
+        <xsd:attribute name="partition" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="PublisherSubscriber" type="dcps:PublisherSubscriber"/>
+  <xsd:complexType name="Subscriber">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:PublisherSubscriber">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="readers" type="dcps:DataReader"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Subscriber" type="dcps:Subscriber"/>
+  <xsd:complexType name="Publisher">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:PublisherSubscriber">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="writers" type="dcps:DataWriter"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Publisher" type="dcps:Publisher"/>
+  <xsd:complexType abstract="true" name="DataReaderWriter">
+    <xsd:complexContent>
+      <xsd:extension base="domain:DomainEntity">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="deadline" type="qos:DeadlineQosPolicy"/>
+          <xsd:element name="destination_order" type="qos:DestinationOrderQosPolicy"/>
+          <xsd:element name="durability" type="qos:DurabilityQosPolicy"/>
+          <xsd:element name="history" type="qos:HistoryQosPolicy"/>
+          <xsd:element name="latency_budget" type="qos:LatencyBudgetQosPolicy"/>
+          <xsd:element name="liveliness" type="qos:LivelinessQosPolicy"/>
+          <xsd:element name="ownership" type="qos:OwnershipQosPolicy"/>
+          <xsd:element name="reliability" type="qos:ReliabilityQosPolicy"/>
+          <xsd:element name="resource_limits" type="qos:ResourceLimitsQosPolicy"/>
+          <xsd:element name="user_data" type="qos:UserDataQosPolicy"/>
+        </xsd:choice>
+        <xsd:attribute name="copyFromTopicQos" type="xsd:boolean"/>
+        <xsd:attribute name="deadline" type="xsd:string"/>
+        <xsd:attribute name="destination_order" type="xsd:string"/>
+        <xsd:attribute name="durability" type="xsd:string"/>
+        <xsd:attribute name="history" type="xsd:string"/>
+        <xsd:attribute name="latency_budget" type="xsd:string"/>
+        <xsd:attribute name="liveliness" type="xsd:string"/>
+        <xsd:attribute name="ownership" type="xsd:string"/>
+        <xsd:attribute name="reliability" type="xsd:string"/>
+        <xsd:attribute name="resource_limits" type="xsd:string"/>
+        <xsd:attribute name="user_data" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DataReaderWriter" type="dcps:DataReaderWriter"/>
+  <xsd:complexType name="DataReader">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:DataReaderWriter">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="reader_data_lifecycle" type="qos:ReaderDataLifecycleQosPolicy"/>
+          <xsd:element name="time_based_filter" type="qos:TimeBasedFilterQosPolicy"/>
+          <xsd:element name="topic" type="topics:TopicDescription"/>
+        </xsd:choice>
+        <xsd:attribute name="reader_data_lifecycle" type="xsd:string"/>
+        <xsd:attribute name="time_based_filter" type="xsd:string"/>
+        <xsd:attribute name="topic" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DataReader" type="dcps:DataReader"/>
+  <xsd:complexType name="DataWriter">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:DataReaderWriter">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="durability_service" type="qos:DurabilityServiceQosPolicy"/>
+          <xsd:element name="ownership_strength" type="qos:OwnershipStrengthQosPolicy"/>
+          <xsd:element name="transport_priority" type="qos:TransportPriorityQosPolicy"/>
+          <xsd:element name="writer_data_lifecycle" type="qos:WriterDataLifecycleQosPolicy"/>
+          <xsd:element name="lifespan" type="qos:LifespanQosPolicy"/>
+          <xsd:element name="topic" type="topics:Topic"/>
+        </xsd:choice>
+        <xsd:attribute name="durability_service" type="xsd:string"/>
+        <xsd:attribute name="ownership_strength" type="xsd:string"/>
+        <xsd:attribute name="transport_priority" type="xsd:string"/>
+        <xsd:attribute name="writer_data_lifecycle" type="xsd:string"/>
+        <xsd:attribute name="lifespan" type="xsd:string"/>
+        <xsd:attribute name="topic" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DataWriter" type="dcps:DataWriter"/>
+</xsd:schema>

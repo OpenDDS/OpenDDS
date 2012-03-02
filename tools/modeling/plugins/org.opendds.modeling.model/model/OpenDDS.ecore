@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="opendds"
+    nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" nsPrefix="opendds">
+  <eClassifiers xsi:type="ecore:EClass" name="ddsSpecification" abstract="true" eSuperTypes="Core.ecore#//Specification"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ddsProperty" abstract="true" eSuperTypes="Core.ecore#//TypedEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="qosProperty" eSuperTypes="Domain.ecore#//QosProperty #//ddsProperty"/>
+  <eClassifiers xsi:type="ecore:EClass" name="qosPolicy" abstract="true" eSuperTypes="#//ddsSpecification QoS.ecore#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="topic" eSuperTypes="Topics.ecore#//Topic"/>
+  <eClassifiers xsi:type="ecore:EClass" name="domainParticipant" eSuperTypes="DCPS.ecore#//DomainParticipant"/>
+  <eClassifiers xsi:type="ecore:EClass" name="publisher" eSuperTypes="DCPS.ecore#//Publisher"/>
+  <eClassifiers xsi:type="ecore:EClass" name="subscriber" eSuperTypes="DCPS.ecore#//Subscriber"/>
+  <eClassifiers xsi:type="ecore:EClass" name="domain" eSuperTypes="DCPS.ecore#//Domain"/>
+  <eClassifiers xsi:type="ecore:EClass" name="dataReader" eSuperTypes="DCPS.ecore#//DataReader"/>
+  <eClassifiers xsi:type="ecore:EClass" name="dataWriter" eSuperTypes="DCPS.ecore#//DataWriter"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ddsAppTarget" eSuperTypes="Application.ecore#//ApplicationTarget"/>
+  <eClassifiers xsi:type="ecore:EClass" name="deadlineQosPolicy" eSuperTypes="QoS.ecore#//DeadlineQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="destinationOrderQosPolicy" eSuperTypes="QoS.ecore#//DestinationOrderQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="dsQosPolicy" eSuperTypes="QoS.ecore#//DurabilityServiceQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="durabilityQosPolicy" eSuperTypes="QoS.ecore#//DurabilityQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="efQosPolicy" eSuperTypes="QoS.ecore#//EntityFactoryQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="gdQosPolicy" eSuperTypes="QoS.ecore#//GroupDataQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="historyQosPolicy" eSuperTypes="QoS.ecore#//HistoryQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="lbQosPolicy" eSuperTypes="QoS.ecore#//LatencyBudgetQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="lifespanQosPolicy" eSuperTypes="QoS.ecore#//LifespanQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="livelinessQosPolicy" eSuperTypes="QoS.ecore#//LivelinessQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="osQosPolicy" eSuperTypes="QoS.ecore#//OwnershipStrengthQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ownershipQosPolicy" eSuperTypes="QoS.ecore#//OwnershipQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="partitionQosPolicy" eSuperTypes="QoS.ecore#//PartitionQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="presentationQosPolicy" eSuperTypes="QoS.ecore#//PresentationQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="rdlQosPolicy" eSuperTypes="QoS.ecore#//ReaderDataLifecycleQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="reliabilityQosPolicy" eSuperTypes="QoS.ecore#//ReliabilityQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="rlQosPolicy" eSuperTypes="QoS.ecore#//ResourceLimitsQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="tbfQosPolicy" eSuperTypes="QoS.ecore#//TimeBasedFilterQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="tdQosPolicy" eSuperTypes="QoS.ecore#//TopicDataQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="tpQosPolicy" eSuperTypes="QoS.ecore#//TransportPriorityQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="udQosPolicy" eSuperTypes="QoS.ecore#//UserDataQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="wdlQosPolicy" eSuperTypes="QoS.ecore#//WriterDataLifecycleQosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OpenDDSModel" eSuperTypes="Core.ecore#//Element">
+    <eAnnotations source="GenModel">
+      <details key="documentation" value="This is the container used by GMF for the objects that can reside on the main diagram."/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="libs" upperBound="-1" eType="#//OpenDDSLib"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="packages" upperBound="-1"
+        eType="#//LibPackage" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="basicTypes" eType="#//BasicTypes"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LibPackage" eSuperTypes="Core.ecore#//Element">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="packages" upperBound="-1"
+        eType="#//LibPackage" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="libs" upperBound="-1" eType="#//OpenDDSLib"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OpenDDSLib" abstract="true" eSuperTypes="Core.ecore#//Element">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" ordered="false" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PolicyLib" eSuperTypes="#//OpenDDSLib">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="policies" upperBound="-1"
+        eType="ecore:EClass QoS.ecore#//QosPolicy" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DcpsLib" eSuperTypes="#//OpenDDSLib">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="domains" upperBound="-1"
+        eType="#//domain" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="participants" upperBound="-1"
+        eType="#//domainParticipant" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topicDescriptions" upperBound="-1"
+        eType="ecore:EClass Topics.ecore#//TopicDescription" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="policies" upperBound="-1"
+        eType="ecore:EClass QoS.ecore#//QosPolicy" containment="true">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="This is an extension to the DDS Profile specification to allow domain entities policies to be either from a policy lib or custom to the entity. If custom, then the owner of the policy is the DCPS lib."/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BasicTypes">
+    <eAnnotations source="GenModel">
+      <details key="documentation" value="To avoid the user needing to explicitly create basic types on a DataLib diagram when defining Field types, instances of this class will contain these Simple types on demand if they are needed. The Field type will then refer the type in the instance of this class.&#xA;Basic types used here are Type-derived types that do not require any attributes. This includes Simple types except Enum, and String and WString with length of 0. "/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="ecore:EClass Types.ecore#//Type" containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>

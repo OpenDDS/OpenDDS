@@ -1,0 +1,3 @@
+workspace {
+  cmdline += -include Chained_Topic/model -include Chained_Data/model -include CfTopic/model -include MessengerMixed/model
+}

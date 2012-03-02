@@ -1,0 +1,24 @@
+project(*Publisher) : dcpsexe, dds_model, Chained_Topic, Chained_Topic_paths {
+  exename   = publisher
+  libpaths      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+  includes      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+  idlflags      += -I$(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+  dcps_ts_flags += -I$(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe, dds_model, Chained_Topic, Chained_Topic_paths {
+  exename   = subscriber
+  libpaths      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+  includes      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+  idlflags      += -I$(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+  dcps_ts_flags += -I$(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
+

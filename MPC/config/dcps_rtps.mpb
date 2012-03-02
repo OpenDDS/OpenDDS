@@ -1,0 +1,4 @@
+project : dcps {
+  after += rtps
+  libs  += OpenDDS_Rtps
+}

@@ -1,0 +1,8 @@
+project: dcpsexe, dcps_tcp, dcps_rtps_udp, dds_model {
+  exename = RtpsDiscoveryTest
+  requires += built_in_topics
+
+  TypeSupport_Files {
+    TestMsg.idl
+  }
+}

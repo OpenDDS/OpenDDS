@@ -1,0 +1,137 @@
+Verify transport configuration scenarios for DDS Transport Configuration Enhancements
+Part of RT#13920 (https://support.ociweb.com/Ticket/Display.html?id=13920)
+
+run_test.pl
+  Runs multiple scenarios, each consisting of a separate publisher and subscriber process.
+
+Use Case Partitioning
+
+Individual use-cases can be identified by a tuple of values: (s, e, c, t), where s is the Configuration name to use, e is the Entity, c is the Collocation type, and t is the Effective transport. Each combination of Entity, Source, Collocation and Transport describes a use-case. A test based on the use case will assertain that in the given configuration, a specific transport has been selected by the data writer and the reader.
+
+For example, (ReaderWriter, None, Host, _OPENDDS_0500_TCP) describes an use where entities run on the same host, but in separate address spaces; the configuration data file is not provided; the case applies to both the Reader and the Writer. Possible Entities are None (none), ReaderWriter (rw), PublisherSubscriber (pubsub), and domain Participant (participant). Configuration is either None, or a named configuration of potentialy many transports, provided through a configuration file. Collocation type determines relative entity distribution: None, Memory, Host, and Network.
+
+Source: None
+No explicitly provided configuration and DDS defults apply.
+
+Source: (name)
+Transport configuration name is explicitly provided in the accompanying INI-formatted file.
+
+Entity: None
+None of the entities has bound to explicitly provided configuration. No setup/configuration code is used either.
+
+Entity: ReaderWriter (rw)
+Transport configuration is applied at the Reader (Writer) entity level.
+
+Entity: PublisherSubscriber (pubsub)
+Transport configuration is applied at the Subscriber (Publisher) entity level. The effective transport chosen by the reader/writer shall be inherited from Subscriber (Publisher)'s configuration.
+
+Entity: Domain Participant
+Transport configuration is applied at the Domain Participant entity level. The effective transport chosen by the reader/writer shall be inherited from Subscriber (Publisher)'s configuration, which in turn is derived from Domain Participant's configuration.
+
+Collocation: None
+Refers to the cases where relative spatial distribution of communicating entities is of no consequence, because we are interested in testing the effective transport configuration. Not the negotiated transport configuration.
+
+Collocation: Memory
+Refers to the cases where the two communicating processes have access to the same address space (are in the same process instance).
+
+Collocation: Host
+Refers to the cases where the two communicating processes have access to shared memory (are physically on the same host).
+
+Collocation: Network
+For example, same or different network segments for UDP. Or, same or different networks for TCP
+
+
+All Possible Use Cases
+
+No configuration, None participant, None collocation
+Is this a trivial use case that does not need any tests? Perhaps, it can be used to assert what the default transport configuration is?
+
+No configuration, None participant, Memory collocation
+...
+
+No configuration, None participant, Host collocation
+...
+
+No configuration, None participant, Network collocation
+...
+
+No configuration, Reader/Writer, None collocation
+Test that the explicit transport configuration for the Entity supersedes the default transport configuration. The other Entities must have the same as the default transport configuration.
+
+No configuration, Reader/Writer, Memory collocation
+...
+
+No configuration, Reader/Writer, Host collocation
+...
+
+No configuration, Reader/Writer, Network collocation
+...
+
+No configuration, Publisher/Subscriber, None collocation
+Test that the explicit transport configuration for the Entity supersedes the default transport configuration. The other Entities must have the same as the default transport configuration.
+
+No configuration, Publisher/Subscriber, Memory collocation
+...
+
+No configuration, Publisher/Subscriber, Host collocation
+...
+
+No configuration, Publisher/Subscriber, Network collocation
+...
+
+No configuration, Domain Participant, None collocation
+Test that the explicit transport configuration for the Entity supersedes the default transport configuration. The other Entities must have the same as the default transport configuration.
+
+No configuration, Domain Participant, Memory collocation
+...
+
+No configuration, Domain Participant, Host collocation
+...
+
+No configuration, Domain Participant, Network collocation
+...
+
+Named configuration, None participant, None collocation
+Is this a trivial use case that does not need testing? Perhaps, it can be used to assert what the default transport configuration is?
+
+Named configuration, None participant, Memory collocation
+...
+
+Named configuration, None participant, Host collocation
+...
+
+Named configuration, None participant, Network collocation
+...
+
+Named configuration, Reader/Writer, None collocation
+Test that the explicit transport configuration for the Entity supersedes the default transport configuration. The other Entities must have the same as the default transport configuration.
+
+Named configuration, Reader/Writer, Memory collocation
+...
+
+Named configuration, Reader/Writer, Host collocation
+...
+
+Named configuration, Reader/Writer, Network collocation
+...
+
+Named configuration, Publisher/Subscriber, Memory collocation
+...
+
+Named configuration, Publisher/Subscriber, Host collocation
+...
+
+Named configuration, Publisher/Subscriber, Network collocation
+...
+
+Named configuration, Domain Participant, Memory collocation
+...
+
+Named configuration, Domain Participant, Host collocation
+...
+
+Named configuration, Domain Participant, Network collocation
+...
+
+
+

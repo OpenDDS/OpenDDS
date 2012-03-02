@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Steven Stallion
+    Version: $Revision$
+-->
+<project name="opendds-jms" default="rar" basedir="."
+         xmlns:opendds="antlib:org.opendds.ant">
+
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="doc.dir" value="${basedir}/doc"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="native.dir" value="${basedir}/native"/>
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="test.dir" value="${basedir}/test"/>
+
+    <property file="build.properties"/>
+
+    <!--
+        Project Paths
+    -->
+    <taskdef uri="antlib:org.opendds.ant"
+             resource="org/opendds/ant/antlib.xml"
+             classpath="${lib.dir}/opendds-ant.jar"/>
+
+    <opendds:init environment="env"/>
+
+    <property name="project.filename"
+              value="${ant.project.name}-${opendds.version}"/>
+
+    <fileset id="DDS.jars" dir="${env.DDS_ROOT}/lib">
+        <include name="OpenDDS_DCPS.jar"/>
+        <include name="i2jrt.jar"/>
+        <include name="tao_java.jar"/>
+    </fileset>
+
+    <path id="project.classpath">
+        <pathelement location="${build.dir}/classes"/>
+        <pathelement location="${build.dir}/tests"/>
+
+        <pathelement location="${native.dir}/classes"/>
+
+        <pathelement location="${src.dir}"/>
+        <pathelement location="${test.dir}"/>
+
+        <fileset dir="${lib.dir}"/>
+        <fileset dir="${lib.dir}/shared"/>
+
+        <fileset refid="DDS.jars"/>
+    </path>
+
+    <macrodef name="antnative">
+        <attribute name="target"/>
+        <sequential>
+            <subant buildpath="${native.dir}" target="@{target}"/>
+        </sequential>
+    </macrodef>
+
+    <!--
+        Project Targets
+    -->
+    <target name="all" depends="clean, test, rar"
+            description="Meta-target for: clean, test, rar"/>
+
+    <target name="clean" depends="javadoc.clean, test.clean, native.clean"
+            description="Delete all build artifacts">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+
+        <uptodate property="jar.uptodate"
+                  targetfile="${build.dir}/${project.filename}.jar">
+            <srcfiles dir="${src.dir}">
+                <exclude name="META-INF/ra.xml"/>
+            </srcfiles>
+            <srcfiles dir="${native.dir}">
+                <include name="**/*.java"/>
+            </srcfiles>
+        </uptodate>
+
+        <uptodate property="rar.uptodate"
+                  targetfile="${build.dir}/${project.filename}.rar">
+            <srcfiles dir="${build.dir}">
+                <include name="/${project.filename}.jar"/>
+            </srcfiles>
+            <srcfiles dir="${src.dir}/META-INF">
+                <include name="ra.xml"/>
+            </srcfiles>
+            <srcfiles dir="${lib.dir}/shared"/>
+            <srcfiles dir="${env.ACE_ROOT}/lib"/>
+            <srcfiles dir="${env.DDS_ROOT}/lib"/>
+        </uptodate>
+    </target>
+
+    <target name="native.clean">
+        <antnative target="clean"/>
+    </target>
+
+    <target name="native">
+        <antnative target="compile"/>
+    </target>
+
+    <target name="compile" depends="init, native"
+            description="Compile classes under src/">
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/classes"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath"
+               includeAntRuntime="no">
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile" unless="jar.uptodate"
+            description="Archive compiled classes and resources">
+        <!-- Create version.properties -->
+        <propertyfile file="${build.dir}/version.properties">
+            <entry key="version.dds" value="${opendds.version}"/>
+            <entry key="version.dds.major" value="${opendds.version.major}"/>
+            <entry key="version.dds.minor" value="${opendds.version.minor}"/>
+            <entry key="version.jms" value="${version.jms}"/>
+            <entry key="version.jms.minor" value="${version.jms.minor}"/>
+            <entry key="version.jms.major" value="${version.jms.major}"/>
+        </propertyfile>
+
+        <jar destfile="${build.dir}/${project.filename}.jar"
+             compress="${jar.compress}"
+             index="${jar.index}">
+            <fileset dir="${build.dir}/classes"/>
+            <fileset dir="${build.dir}">
+                <include name="version.properties"/>
+            </fileset>
+
+            <fileset dir="${native.dir}/classes"/>
+
+            <fileset dir="${src.dir}">
+                <exclude name="META-INF/ra.xml"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+
+            <manifest>
+                <attribute name="Specification-Title" value="Java Message Service (JMS)"/>
+                <attribute name="Specification-Version" value="${version.jms}"/>
+                <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+                <attribute name="Implementation-Title" value="OpenDDS JMS Provider"/>
+                <attribute name="Implementation-Version" value="${opendds.version}"/>
+                <attribute name="Implementation-Vendor" value="OpenDDS (http://www.opendds.org)"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="rar" depends="jar" unless="rar.uptodate"
+            description="Create a Resource Adapter Archive (RAR) under build/">
+        <!-- Collect native libraries to package -->
+        <opendds:libfileset id="ACE+TAO.libs" debug="${native.debug}"
+                            dir="${env.ACE_ROOT}/lib">
+            <include name="ACE"/>
+            <include name="TAO"/>
+            <include name="TAO_AnyTypeCode"/>
+            <include name="TAO_CodecFactory"/>
+            <include name="TAO_Codeset"/>
+            <include name="TAO_ImR_Client"/>
+            <include name="TAO_IORTable"/>
+            <include name="TAO_PI"/>
+            <include name="TAO_PortableServer"/>
+            <include name="TAO_Svc_Utils"/>
+        </opendds:libfileset>
+        <opendds:libfileset id="DDS.libs" debug="${native.debug}"
+                            dir="${env.DDS_ROOT}/lib">
+            <include name="OpenDDS_InfoRepoServ"/>
+            <include name="OpenDDS_Federator"/>
+            <include name="OpenDDS_InfoRepoLib"/>
+            <include name="OpenDDS_Dcps"/>
+            <include name="OpenDDS_Tcp"/>
+            <include name="OpenDDS_Udp"/>
+            <include name="OpenDDS_Multicast"/>
+            <include name="OpenDDS_DCPS_Java"/>
+            <include name="idl2jni_runtime"/>
+            <include name="tao_java"/>
+            <include name="opendds-jms-native"/>
+        </opendds:libfileset>
+
+        <!-- Create native library index for runtime -->
+        <opendds:libindex dir="${build.dir}" prefix="native">
+            <fileset refid="ACE+TAO.libs"/>
+            <fileset refid="DDS.libs"/>
+        </opendds:libindex>
+
+        <!-- Update Resource Adapter descriptor -->
+        <copy file="${src.dir}/META-INF/ra.xml" todir="${build.dir}">
+            <filterset>
+                <filter token="VERSION" value="${opendds.version}"/>
+            </filterset>
+        </copy>
+
+        <jar destfile="${build.dir}/${project.filename}.rar"
+             compress="${rar.compress}"
+             index="${rar.index}">
+            <fileset dir="${build.dir}">
+                <include name="${project.filename}.jar"/>
+            </fileset>
+
+            <fileset dir="${lib.dir}/shared"/>
+
+            <fileset refid="DDS.jars"/>
+
+            <zipfileset refid="ACE+TAO.libs" prefix="native"/>
+            <zipfileset refid="DDS.libs" prefix="native"/>
+
+            <metainf dir="${build.dir}">
+                <include name="ra.xml"/>
+                <include name="INDEX.LIBS"/>
+            </metainf>
+
+            <manifest>
+                <attribute name="Specification-Title" value="J2EE Connector Architecture"/>
+                <attribute name="Specification-Version" value="${version.jca}"/>
+                <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+                <attribute name="Implementation-Title" value="OpenDDS JMS Resource Adapter"/>
+                <attribute name="Implementation-Version" value="${opendds.version}"/>
+                <attribute name="Implementation-Vendor" value="OpenDDS (http://www.opendds.org)"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="test.clean">
+        <delete dir="${build.dir}/tests"/>
+    </target>
+
+    <target name="test.init" depends="init">
+        <mkdir dir="${build.dir}/tests"/>
+
+        <condition property="test.jvmargs"
+                   value="-Dopendds.native.debug=true">
+            <and>
+                <os family="windows"/>
+                <istrue value="${native.debug}"/>
+            </and>
+        </condition>
+        <property name="test.jvmargs" value=""/>
+    </target>
+
+    <target name="test.compile" depends="compile, test.init">
+        <javac srcdir="${test.dir}"
+               destdir="${build.dir}/tests"
+               debug="${compile.debug}"
+               deprecation="${compile.deprecation}"
+               optimize="${compile.optimize}"
+               source="${project.source}"
+               classpathref="project.classpath">
+        </javac>
+    </target>
+
+    <target name="test" depends="test.compile"
+            description="Run test suites under test/">
+        <junit haltonerror="false"
+               haltonfailure="false"
+               printsummary="true"
+               fork="true">
+            <formatter type="xml"/>
+            <batchtest todir="${build.dir}/tests">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+            <jvmarg value="-ea"/> <!-- Enable assertions -->
+            <jvmarg line="${test.jvmargs}"/>
+            <classpath refid="project.classpath"/>
+        </junit>
+    </target>
+
+    <target name="test.report" depends="test">
+        <junitreport todir="${build.dir}/tests">
+            <fileset dir="${build.dir}/tests">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${build.dir}/tests/report"/>
+        </junitreport>
+    </target>
+
+    <target name="javadoc.clean">
+        <delete dir="${doc.dir}/api"/>
+    </target>
+
+    <target name="javadoc.init">
+        <mkdir dir="${doc.dir}/api"/>
+    </target>
+
+    <target name="javadoc" depends="native, javadoc.init"
+            description="Generate API documentation under doc/api/">
+        <javadoc destdir="${doc.dir}/api"
+                 source="${project.source}"
+                 author="true"
+                 version="true"
+                 overview="${doc.dir}/overview.html"
+                 doctitle="OpenDDS ${opendds.version} JMS API Specification"
+                 windowtitle="${ant.project.name}">
+            <link href="http://java.sun.com/j2se/${project.source}/docs/api/"/>
+            <link href="http://java.sun.com/javaee/5/docs/api/"/>
+            <classpath refid="project.classpath"/>
+            <packageset dir="${src.dir}"/>
+            <packageset dir="${native.dir}"/>
+        </javadoc>
+    </target>
+</project>

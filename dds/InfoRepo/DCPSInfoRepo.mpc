@@ -1,0 +1,155 @@
+project(*Lib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install_lib {
+  sharedname = OpenDDS_InfoRepoLib
+  dynamicflags = OPENDDS_INFOREPOLIB_BUILD_DLL
+  libout     = $(DDS_ROOT)/lib
+  includes  += $(DDS_ROOT)
+
+  IDL_Files {
+  }
+
+  Source_Files {
+    DCPSInfo_i.cpp
+    DcpsInfo_pch.cpp
+    DCPS_IR_Domain.cpp
+    DCPS_IR_Participant.cpp
+    DCPS_IR_Publication.cpp
+    DCPS_IR_Subscription.cpp
+    DCPS_IR_Topic.cpp
+    DCPS_IR_Topic_Description.cpp
+    DomainParticipantListener_i.cpp
+    PersistenceUpdater.cpp
+    UpdateManager.cpp
+  }
+
+  Template_Files {
+    UpdateManager_T.cpp
+  }
+
+  Resource_Files {
+    InfoRepoLib.rc
+  }
+
+  TypeSupport_Files {
+  }
+}
+
+
+project(*Serv): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install_lib {
+  sharedname = OpenDDS_InfoRepoServ
+  dynamicflags = OPENDDS_DCPSINFOREPOSERV_BUILD_DLL
+  libout     = $(DDS_ROOT)/lib
+  includes  += $(DDS_ROOT)
+  libs      += OpenDDS_InfoRepoLib OpenDDS_Federator
+  after     += *Lib *Federator
+
+  Source_Files {
+    DCPSInfoRepoServ.cpp
+  }
+
+  Header_Files {
+    DCPSInfoRepoServ.h
+  }
+
+  IDL_Files {
+  }
+
+  Template_Files {
+  }
+
+  Resource_Files {
+    DCPSInfoRepoServ.rc
+  }
+
+  TypeSupport_Files {
+  }
+}
+
+
+project(*Federator): dcps, dcps_tcp, iortable, install {
+  sharedname = OpenDDS_Federator
+  dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
+  libout     = $(DDS_ROOT)/lib
+  includes  += $(DDS_ROOT)
+  libs     += OpenDDS_InfoRepoLib
+  after    += *Lib
+
+  idlflags    += -Wb,export_macro=OpenDDS_Federator_Export -Wb,export_include=federator_export.h -Wb,pch_include=DcpsInfo_pch.h
+  dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Federator_Export -Wb,pch_include=DcpsInfo_pch.h
+
+  pch_header   =
+  pch_source   =
+
+  TypeSupport_Files {
+    Federator.idl
+  }
+
+  IDL_Files {
+    Federator.idl
+    FederatorTypeSupport.idl
+  }
+
+  Source_Files {
+    FederatorConfig.cpp
+    FederatorManagerImpl.cpp
+    FederatorManagerImpl_updates.cpp
+    FederatorTypeSupportImpl.cpp
+    InfoRepoMulticastResponder.cpp
+  }
+
+  Header_Files {
+    federator_export.h
+    UpdateListener_T.h
+    UpdateReceiver_T.h
+    UpdateProcessor_T.h
+  }
+
+  Template_Files {
+    UpdateListener_T.cpp
+    UpdateReceiver_T.cpp
+    UpdateProcessor_T.cpp
+  }
+
+  Resource_Files {
+    Federator.rc
+  }
+
+  specific {
+    install_dir = dds/InfoRepo
+  }
+}
+
+
+project(*Main): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install {
+  exename = DCPSInfoRepo
+  exeout  = $(DDS_ROOT)/bin
+
+  libpaths += $(DDS_ROOT)/lib
+  libs     += OpenDDS_InfoRepoServ OpenDDS_InfoRepoLib OpenDDS_Federator
+  after    += *Lib *Federator *Serv
+
+  pch_header   =
+  pch_source   =
+
+  IDL_Files {
+  }
+
+  Source_Files {
+    DCPSInfoRepo.cpp
+  }
+
+  Header_Files {
+  }
+
+  Inline_Files {
+  }
+
+  Template_Files {
+  }
+
+  Resource_Files {
+  }
+
+  TypeSupport_Files {
+  }
+}

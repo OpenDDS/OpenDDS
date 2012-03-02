@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0" xmi:id="_k8FtQLk0EeCtnMwt00SzyA">
+  <source xmi:id="_k8FtQbk0EeCtnMwt00SzyA" name="Messenger.opendds"/>
+  <target xmi:id="_k8FtQrk0EeCtnMwt00SzyA" name="model"/>
+  <instances xmi:id="_k8FtQ7k0EeCtnMwt00SzyA">
+    <instance xmi:id="_k8FtRLk0EeCtnMwt00SzyA" name="default">
+      <config xmi:id="_wxsFcbk4EeCnZ-BwQ1thbQ" name="one">
+        <transportRef xmi:id="_IUX3Mbk6EeCQlM76etQRyQ" transport="_fcfbkLk1EeCtnMwt00SzyA"/>
+      </config>
+      <config xmi:id="_yVO70Lk4EeCnZ-BwQ1thbQ" name="three">
+        <transportRef xmi:id="_4R68cbxIEeCux_vHm5zpDw" transport="_fcfbkLk1EeCtnMwt00SzyA"/>
+        <transportRef xmi:id="_d13OQL4SEeCtlIIkuP1-1g" transport="_1kew4LxrEeCux_vHm5zpDw"/>
+        <passive_connect_duration xmi:id="_i1T3sL36EeCp7pL4wVoG1g" value="10000"/>
+        <swap_bytes xmi:id="_JKQwob4MEeCtlIIkuP1-1g" value="true"/>
+      </config>
+    </instance>
+  </instances>
+  <searchPaths xmi:id="_k8J-trk0EeCtnMwt00SzyA"/>
+  <transports xmi:id="_eQVxgLk1EeCtnMwt00SzyA">
+    <transport xsi:type="generator:TcpTransport" xmi:id="_fcfbkLk1EeCtnMwt00SzyA" name="mytcp">
+      <queue_messages_per_pool xmi:id="_xhI8wL1nEeCK6udzbWnTWA" value="10"/>
+      <queue_initial_pools xmi:id="_EFeKcL3zEeCGcr6CMOwNRA" value="5"/>
+      <max_packet_size xmi:id="_bA6LcL3zEeCGcr6CMOwNRA" value="123456789"/>
+      <max_samples_per_packet xmi:id="_gTCMYL3zEeCGcr6CMOwNRA" value="10"/>
+      <optimum_packet_size xmi:id="_kWHAQL3zEeCGcr6CMOwNRA" value="4096"/>
+      <thread_per_connection xmi:id="_iZ1SEb35EeCp7pL4wVoG1g" value="false"/>
+      <datalink_release_delay xmi:id="_q1J4kL35EeCp7pL4wVoG1g" value="10000"/>
+      <datalink_control_chunks xmi:id="_vbz6oL35EeCp7pL4wVoG1g" value="32"/>
+      <local_address_str xmi:id="_l5qDob1kEeC34_mmUHdSBg" value="127.0.0.1"/>
+      <enable_nagle_algorithm xmi:id="_vNDFIL1lEeC34_mmUHdSBg" value="true"/>
+      <conn_retry_initial_delay xmi:id="_-zU2cL1lEeC34_mmUHdSBg" value="500"/>
+      <conn_retry_backoff_multiplier xmi:id="_W9G54L1mEeC34_mmUHdSBg" value="2.0"/>
+      <conn_retry_attempts xmi:id="_SUvAkL1mEeC34_mmUHdSBg" value="3"/>
+      <max_output_pause_period xmi:id="_a7ieUL1mEeC34_mmUHdSBg" value="3"/>
+      <passive_reconnect_duration xmi:id="_gfqOML1mEeC34_mmUHdSBg" value="2000"/>
+    </transport>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_1kew4LxrEeCux_vHm5zpDw" name="mymcast">
+      <reliable xmi:id="_LmEAgL4TEeCtlIIkuP1-1g" value="true"/>
+    </transport>
+    <transport xsi:type="generator:UdpTransport" xmi:id="_1G658L4SEeCtlIIkuP1-1g" name="myudp">
+      <local_address_str xmi:id="_2GVvkL4SEeCtlIIkuP1-1g" value="127.0.0.1"/>
+    </transport>
+  </transports>
+</generator:CodeGen>

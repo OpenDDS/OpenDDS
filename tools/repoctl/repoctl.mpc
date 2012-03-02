@@ -1,0 +1,11 @@
+project: dcpsexe_with_tcp  {
+  exename   = repoctl
+  exeout    = $(DDS_ROOT)/bin
+  libs     += OpenDDS_InfoRepoLib OpenDDS_Federator
+  after    += DCPSInfoRepo_Federator
+
+  Source_Files {
+    repoctl.cpp
+  }
+}
+

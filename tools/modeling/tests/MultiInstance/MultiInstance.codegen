@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0" xmi:id="_mFtgQMISEeC5zIhEj39DdA">
+  <source xmi:id="_mFtgQcISEeC5zIhEj39DdA" name="MultiInstance.opendds"/>
+  <target xmi:id="_mFtgQsISEeC5zIhEj39DdA" name="model"/>
+  <instances xmi:id="_mFtgQ8ISEeC5zIhEj39DdA">
+    <instance xmi:id="_mFtgRMISEeC5zIhEj39DdA" name="Primary">
+      <config xmi:id="_mFtgRcISEeC5zIhEj39DdA" name="trans1">
+        <transportRef xmi:id="_mFtgRsISEeC5zIhEj39DdA" transport="_900dc6c0-a434-012e-966b-0017a4e90546"/>
+        <passive_connect_duration xmi:id="_mFuHUMISEeC5zIhEj39DdA" value="0"/>
+        <swap_bytes xmi:id="_mFtgR8ISEeC5zIhEj39DdA" value="false"/>
+      </config>
+      <config xmi:id="_mFuHUcISEeC5zIhEj39DdA" name="trans2">
+        <transportRef xmi:id="_mFuHUsISEeC5zIhEj39DdA" transport="_900dd3f0-a434-012e-966c-0017a4e90546"/>
+        <swap_bytes xmi:id="_mFuHU8ISEeC5zIhEj39DdA" value="false"/>
+      </config>
+      <config xmi:id="_mFuHVMISEeC5zIhEj39DdA" name="trans3">
+        <transportRef xmi:id="_mFuHVcISEeC5zIhEj39DdA" transport="_900de230-a434-012e-966d-0017a4e90546"/>
+        <passive_connect_duration xmi:id="_mFuHV8ISEeC5zIhEj39DdA" value="0"/>
+        <swap_bytes xmi:id="_mFuHVsISEeC5zIhEj39DdA" value="false"/>
+      </config>
+      <config xmi:id="_mFuHWMISEeC5zIhEj39DdA" name="trans4">
+        <transportRef xmi:id="_mFuHWcISEeC5zIhEj39DdA" transport="_900deed0-a434-012e-966e-0017a4e90546"/>
+        <swap_bytes xmi:id="_mFuHWsISEeC5zIhEj39DdA" value="false"/>
+      </config>
+    </instance>
+    <instance xmi:id="_mFuHW8ISEeC5zIhEj39DdA" name="Secondary">
+      <config xmi:id="_mFuuYMISEeC5zIhEj39DdA" name="trans1">
+        <transportRef xmi:id="_mFuuYcISEeC5zIhEj39DdA" transport="_900dfd80-a434-012e-966f-0017a4e90546"/>
+        <passive_connect_duration xmi:id="_mFuuY8ISEeC5zIhEj39DdA" value="0"/>
+        <swap_bytes xmi:id="_mFuuYsISEeC5zIhEj39DdA" value="false"/>
+      </config>
+      <config xmi:id="_mFuuZMISEeC5zIhEj39DdA" name="trans2">
+        <transportRef xmi:id="_mFuuZcISEeC5zIhEj39DdA" transport="_900e09f0-a434-012e-9670-0017a4e90546"/>
+        <swap_bytes xmi:id="_mFuuZsISEeC5zIhEj39DdA" value="false"/>
+      </config>
+      <config xmi:id="_mFuuZ8ISEeC5zIhEj39DdA" name="trans3">
+        <transportRef xmi:id="_mFuuaMISEeC5zIhEj39DdA" transport="_900e1780-a434-012e-9671-0017a4e90546"/>
+        <passive_connect_duration xmi:id="_mFvVccISEeC5zIhEj39DdA" value="0"/>
+        <swap_bytes xmi:id="_mFvVcMISEeC5zIhEj39DdA" value="false"/>
+      </config>
+      <config xmi:id="_mFvVcsISEeC5zIhEj39DdA" name="trans4">
+        <transportRef xmi:id="_mFvVc8ISEeC5zIhEj39DdA" transport="_900e23f0-a434-012e-9672-0017a4e90546"/>
+        <swap_bytes xmi:id="_mFvVdMISEeC5zIhEj39DdA" value="false"/>
+      </config>
+    </instance>
+    <instance xmi:id="_mFvVdcISEeC5zIhEj39DdA" name="Incomplete"/>
+  </instances>
+  <searchPaths xmi:id="_mFvVdsISEeC5zIhEj39DdA"/>
+  <transports xmi:id="_mFvVd8ISEeC5zIhEj39DdA">
+    <transport xsi:type="generator:TcpTransport" xmi:id="_900dc6c0-a434-012e-966b-0017a4e90546" name="trans1">
+      <queue_messages_per_pool xmi:id="_mFvVeMISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mFvVecISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mFvVesISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mFvVe8ISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mFv8gMISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mFv8gcISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mFv8gsISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mFv8g8ISEeC5zIhEj39DdA" value="32"/>
+      <local_address_str xmi:id="_mFv8hMISEeC5zIhEj39DdA" value="127.0.0.1"/>
+      <enable_nagle_algorithm xmi:id="_mFv8hcISEeC5zIhEj39DdA" value="false"/>
+      <conn_retry_initial_delay xmi:id="_mFv8hsISEeC5zIhEj39DdA" value="500"/>
+      <conn_retry_backoff_multiplier xmi:id="_mFv8h8ISEeC5zIhEj39DdA" value="2.0"/>
+      <conn_retry_attempts xmi:id="_mFv8iMISEeC5zIhEj39DdA" value="3"/>
+      <max_output_pause_period xmi:id="_mFv8icISEeC5zIhEj39DdA" value="0"/>
+      <passive_reconnect_duration xmi:id="_mFv8isISEeC5zIhEj39DdA" value="2000"/>
+    </transport>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_900dd3f0-a434-012e-966c-0017a4e90546" name="trans2">
+      <queue_messages_per_pool xmi:id="_mFv8i8ISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mFv8jMISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mFv8jcISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mFv8jsISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mFwjkMISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mFwjkcISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mFwjksISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mFwjk8ISEeC5zIhEj39DdA" value="32"/>
+      <default_to_ipv6 xmi:id="_mFwjlMISEeC5zIhEj39DdA" value="false"/>
+      <port_offset xmi:id="_mFwjlcISEeC5zIhEj39DdA" value="49400"/>
+      <group_address xmi:id="_mFwjlsISEeC5zIhEj39DdA" value="&quot;224.0.0.128&quot;"/>
+      <reliable xmi:id="_mFwjl8ISEeC5zIhEj39DdA" value="true"/>
+      <syn_backoff xmi:id="_mFwjmMISEeC5zIhEj39DdA" value="2.0"/>
+      <syn_interval xmi:id="_mFwjmcISEeC5zIhEj39DdA" value="250"/>
+      <syn_timeout xmi:id="_mFwjmsISEeC5zIhEj39DdA" value="30000"/>
+      <nak_depth xmi:id="_mFwjm8ISEeC5zIhEj39DdA" value="32"/>
+      <nak_interval xmi:id="_mFwjnMISEeC5zIhEj39DdA" value="500"/>
+      <nak_timeout xmi:id="_mFwjncISEeC5zIhEj39DdA" value="30000"/>
+      <ttl xmi:id="_mFwjnsISEeC5zIhEj39DdA" value="1"/>
+      <rcv_buffer_size xmi:id="_mFwjn8ISEeC5zIhEj39DdA" value="0"/>
+    </transport>
+    <transport xsi:type="generator:TcpTransport" xmi:id="_900de230-a434-012e-966d-0017a4e90546" name="trans3">
+      <queue_messages_per_pool xmi:id="_mFxKoMISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mFxKocISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mFxKosISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mFxKo8ISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mFxKpMISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mFxKpcISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mFxKpsISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mFxKp8ISEeC5zIhEj39DdA" value="32"/>
+      <local_address_str xmi:id="_mFxKqMISEeC5zIhEj39DdA" value="127.0.0.1"/>
+      <enable_nagle_algorithm xmi:id="_mFxKqcISEeC5zIhEj39DdA" value="false"/>
+      <conn_retry_initial_delay xmi:id="_mFxKqsISEeC5zIhEj39DdA" value="500"/>
+      <conn_retry_backoff_multiplier xmi:id="_mFxKq8ISEeC5zIhEj39DdA" value="2.0"/>
+      <conn_retry_attempts xmi:id="_mFxKrMISEeC5zIhEj39DdA" value="3"/>
+      <max_output_pause_period xmi:id="_mFxKrcISEeC5zIhEj39DdA" value="0"/>
+      <passive_reconnect_duration xmi:id="_mFxKrsISEeC5zIhEj39DdA" value="2000"/>
+    </transport>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_900deed0-a434-012e-966e-0017a4e90546" name="trans4">
+      <queue_messages_per_pool xmi:id="_mFxKr8ISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mFxxsMISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mFxxscISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mFxxssISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mFxxs8ISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mFxxtMISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mFxxtcISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mFxxtsISEeC5zIhEj39DdA" value="32"/>
+      <default_to_ipv6 xmi:id="_mFxxt8ISEeC5zIhEj39DdA" value="false"/>
+      <port_offset xmi:id="_mFxxuMISEeC5zIhEj39DdA" value="49400"/>
+      <group_address xmi:id="_mFxxucISEeC5zIhEj39DdA" value="&quot;224.0.0.128&quot;"/>
+      <reliable xmi:id="_mFxxusISEeC5zIhEj39DdA" value="true"/>
+      <syn_backoff xmi:id="_mFxxu8ISEeC5zIhEj39DdA" value="2.0"/>
+      <syn_interval xmi:id="_mFxxvMISEeC5zIhEj39DdA" value="250"/>
+      <syn_timeout xmi:id="_mFxxvcISEeC5zIhEj39DdA" value="30000"/>
+      <nak_depth xmi:id="_mFxxvsISEeC5zIhEj39DdA" value="32"/>
+      <nak_interval xmi:id="_mFxxv8ISEeC5zIhEj39DdA" value="500"/>
+      <nak_timeout xmi:id="_mFxxwMISEeC5zIhEj39DdA" value="30000"/>
+      <ttl xmi:id="_mFxxwcISEeC5zIhEj39DdA" value="1"/>
+      <rcv_buffer_size xmi:id="_mFxxwsISEeC5zIhEj39DdA" value="0"/>
+    </transport>
+    <transport xsi:type="generator:TcpTransport" xmi:id="_900dfd80-a434-012e-966f-0017a4e90546" name="trans1_2">
+      <queue_messages_per_pool xmi:id="_mFyYwMISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mFyYwcISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mFyYwsISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mFyYw8ISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mFyYxMISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mFyYxcISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mFyYxsISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mFyYx8ISEeC5zIhEj39DdA" value="32"/>
+      <local_address_str xmi:id="_mFyYyMISEeC5zIhEj39DdA" value="127.0.0.1"/>
+      <enable_nagle_algorithm xmi:id="_mFyYycISEeC5zIhEj39DdA" value="false"/>
+      <conn_retry_initial_delay xmi:id="_mFyYysISEeC5zIhEj39DdA" value="500"/>
+      <conn_retry_backoff_multiplier xmi:id="_mFyYy8ISEeC5zIhEj39DdA" value="2.0"/>
+      <conn_retry_attempts xmi:id="_mFyYzMISEeC5zIhEj39DdA" value="3"/>
+      <max_output_pause_period xmi:id="_mFyYzcISEeC5zIhEj39DdA" value="0"/>
+      <passive_reconnect_duration xmi:id="_mFyYzsISEeC5zIhEj39DdA" value="2000"/>
+    </transport>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_900e09f0-a434-012e-9670-0017a4e90546" name="trans2_2">
+      <queue_messages_per_pool xmi:id="_mFy_0MISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mFy_0cISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mFy_0sISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mFy_08ISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mFy_1MISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mFy_1cISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mFy_1sISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mFy_18ISEeC5zIhEj39DdA" value="32"/>
+      <default_to_ipv6 xmi:id="_mFy_2MISEeC5zIhEj39DdA" value="false"/>
+      <port_offset xmi:id="_mFy_2cISEeC5zIhEj39DdA" value="49400"/>
+      <group_address xmi:id="_mFy_2sISEeC5zIhEj39DdA" value="&quot;224.0.0.128&quot;"/>
+      <reliable xmi:id="_mFy_28ISEeC5zIhEj39DdA" value="true"/>
+      <syn_backoff xmi:id="_mFy_3MISEeC5zIhEj39DdA" value="2.0"/>
+      <syn_interval xmi:id="_mFy_3cISEeC5zIhEj39DdA" value="250"/>
+      <syn_timeout xmi:id="_mFy_3sISEeC5zIhEj39DdA" value="30000"/>
+      <nak_depth xmi:id="_mFy_38ISEeC5zIhEj39DdA" value="32"/>
+      <nak_interval xmi:id="_mFy_4MISEeC5zIhEj39DdA" value="500"/>
+      <nak_timeout xmi:id="_mFy_4cISEeC5zIhEj39DdA" value="30000"/>
+      <ttl xmi:id="_mFzm4MISEeC5zIhEj39DdA" value="1"/>
+      <rcv_buffer_size xmi:id="_mFzm4cISEeC5zIhEj39DdA" value="0"/>
+    </transport>
+    <transport xsi:type="generator:TcpTransport" xmi:id="_900e1780-a434-012e-9671-0017a4e90546" name="trans3_2">
+      <queue_messages_per_pool xmi:id="_mFzm4sISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mFzm48ISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mFzm5MISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mFzm5cISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mFzm5sISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mFzm58ISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mFzm6MISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mFzm6cISEeC5zIhEj39DdA" value="32"/>
+      <local_address_str xmi:id="_mFzm6sISEeC5zIhEj39DdA" value="127.0.0.1"/>
+      <enable_nagle_algorithm xmi:id="_mFzm68ISEeC5zIhEj39DdA" value="false"/>
+      <conn_retry_initial_delay xmi:id="_mFzm7MISEeC5zIhEj39DdA" value="500"/>
+      <conn_retry_backoff_multiplier xmi:id="_mFzm7cISEeC5zIhEj39DdA" value="2.0"/>
+      <conn_retry_attempts xmi:id="_mFzm7sISEeC5zIhEj39DdA" value="3"/>
+      <max_output_pause_period xmi:id="_mFzm78ISEeC5zIhEj39DdA" value="0"/>
+      <passive_reconnect_duration xmi:id="_mFzm8MISEeC5zIhEj39DdA" value="2000"/>
+    </transport>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_900e23f0-a434-012e-9672-0017a4e90546" name="trans4_2">
+      <queue_messages_per_pool xmi:id="_mF0N8MISEeC5zIhEj39DdA" value="10"/>
+      <queue_initial_pools xmi:id="_mF0N8cISEeC5zIhEj39DdA" value="10"/>
+      <max_packet_size xmi:id="_mF0N8sISEeC5zIhEj39DdA" value="65536"/>
+      <max_samples_per_packet xmi:id="_mF0N88ISEeC5zIhEj39DdA" value="20"/>
+      <optimum_packet_size xmi:id="_mF0N9MISEeC5zIhEj39DdA" value="1450"/>
+      <thread_per_connection xmi:id="_mF0N9cISEeC5zIhEj39DdA" value="false"/>
+      <datalink_release_delay xmi:id="_mF0N9sISEeC5zIhEj39DdA" value="10000"/>
+      <datalink_control_chunks xmi:id="_mF0N98ISEeC5zIhEj39DdA" value="32"/>
+      <default_to_ipv6 xmi:id="_mF0N-MISEeC5zIhEj39DdA" value="false"/>
+      <port_offset xmi:id="_mF0N-cISEeC5zIhEj39DdA" value="49400"/>
+      <group_address xmi:id="_mF0N-sISEeC5zIhEj39DdA" value="&quot;224.0.0.128&quot;"/>
+      <reliable xmi:id="_mF0N-8ISEeC5zIhEj39DdA" value="true"/>
+      <syn_backoff xmi:id="_mF0N_MISEeC5zIhEj39DdA" value="2.0"/>
+      <syn_interval xmi:id="_mF0N_cISEeC5zIhEj39DdA" value="250"/>
+      <syn_timeout xmi:id="_mF0N_sISEeC5zIhEj39DdA" value="30000"/>
+      <nak_depth xmi:id="_mF0N_8ISEeC5zIhEj39DdA" value="32"/>
+      <nak_interval xmi:id="_mF0OAMISEeC5zIhEj39DdA" value="500"/>
+      <nak_timeout xmi:id="_mF01AMISEeC5zIhEj39DdA" value="30000"/>
+      <ttl xmi:id="_mF01AcISEeC5zIhEj39DdA" value="1"/>
+      <rcv_buffer_size xmi:id="_mF01AsISEeC5zIhEj39DdA" value="0"/>
+    </transport>
+  </transports>
+</generator:CodeGen>

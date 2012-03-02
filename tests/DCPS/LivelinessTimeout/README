@@ -1,0 +1,7 @@
+A basic liveliness timeout test of DDS.  Multiple publishers are created and one subscriber.  One of the publishers has a liveliness factor of 300%, so it will miss its deadline.
+
+run_test.pl
+  Run a separate publisher and subscriber process.
+
+This test is to verify RT#12036. Prior to the fix in DataReaderImpl to set the timer to the smallest(shortest) deadline, this would have failed less often (sub has 2ms liveliness lease, pub1 hasn't been heard from for 1.5sec, but we just heard from pub10 100 msec ago, so we should set the timer to 0.5 sec, but previously, it would have just been the deadline of the last publisher in the list)
+

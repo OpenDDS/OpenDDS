@@ -1,0 +1,5 @@
+project(*pubsub): dcpsexe, dcps_rtps_udp {
+  exename  = pubsub
+
+}
+

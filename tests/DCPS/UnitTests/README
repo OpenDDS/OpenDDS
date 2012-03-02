@@ -1,0 +1,12 @@
+These are simple, single process unit tests.
+
+run_test.pl
+  Runs every UnitTests_XXXXXX executable in this directory or if YYYYYY is passed to the script, it runs only UnitTests_YYYYYY.
+
+This directory is intended for simple tests to allow easy addition of new tests and to lessen the cluttering of the tests directory.  All that is needed to add a new unit test is to add a new file with a main, add a project to UnitTests.mpc, add the new file to that project, and add the line to $DDS_ROOT/bin/dcps_tests.lst passing in the new project's ending (YYYYYY).
+
+
+UnitTest description:
+  LivelinessTest:
+  This test exercises Qos_Helper::lease_greater_than, to verify that the
+  function correctly handles the infinite lease and other values.

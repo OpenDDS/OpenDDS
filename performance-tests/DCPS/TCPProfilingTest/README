@@ -1,0 +1,51 @@
+This performance test is also used as an example to show the application uses the file
+configuration and can overwrite part of the configuration value.
+
+
+The configuration file specified the publisher and subscriber to use the same address
+which is a problem. But the test code uses address from command line to reset the
+address for the publisher and subscriber and makes the test pass.
+
+
+1) manually run test:
+
+  - start InfoRepo:
+
+    ../../../dds/InfoRepo/DCPSInfoRepo -NOBITS -o repo.ior -d domain_ids
+
+  - start subscriber:
+
+    ./subscriber -DCPSConfigFile conf.ini -a localhost:16701 -p 1 -i 10 -n 10 -d 13 -msi 30 -mxs 30
+
+  - start publisher:
+
+    ./publisher -DCPSConfigFile conf.ini -a localhost:29803 -p 1 -n 10 -d 13 -msi 1000 -mxs 1000
+
+
+  Note the "-a" option gives the address which overwrites the configuration value.
+
+
+2) auto run test:
+
+   run_test.pl
+
+
+---------------------------------------------
+Run manually on Windows for a "long" period:
+
+cd %DDS_ROOT%\performance-tests\Dcps\TCPListenerTest
+
+  - start InfoRepo:
+
+    start
+    ..\..\..\dds\InfoRepo\DCPSInfoRepo -NOBITS -o repo.ior -d domain_ids
+
+  - start subscriber:
+
+    start
+    .\subscriber -DCPSConfigFile conf.ini -a localhost:0 -p 1 -i 10 -n 10000 -d 13 -msi 30 -mxs 30
+
+  - start publisher:
+
+    .\publisher -DCPSConfigFile conf.ini -a localhost:0 -p 1 -n 10000 -d 13 -msi 1000 -mxs 1000
+

@@ -1,0 +1,79 @@
+project (ExcelRTD): taolib, dcps, dcps_tcp, dcps_monitor, qt4_gui {
+  requires += microsoft
+  requires += built_in_topics
+  includes += $(DDS_ROOT)/tools/monitor
+
+  macros += _USRDLL RTDServer_EXPORTS
+
+  specific(vc10) {
+    macros += RTD_DLL_NAME=<%quote%>$(TargetFileName)<%quote%>
+  } else {
+    macros += RTD_DLL_NAME=<%equote%>$(TargetFileName)<%equote%>
+  }
+
+  sharedname = OpenDDS_ExcelRTD
+  dllout  = $(DDS_ROOT)/lib
+  libs  += OpenDDS_monitor 
+
+  MOC_Files {
+    gendir = .
+    ../monitor/MonitorDataModel.h
+  }
+
+  Header_Files {
+    RTDMonitor.h
+    IRTDServer.h
+    RTDDataThread.h
+    RTDServerDLL.h
+    RTDServer.h
+
+    ../monitor/Options.h
+    ../monitor/MonitorTask.h
+    ../monitor/MonitorData.h
+    ../monitor/MonitorDataModel.h
+    ../monitor/MonitorDataStorage.h
+    ../monitor/QosFormatter.h
+    ../monitor/TreeNode.h
+  }
+
+  Source_Files {
+    IRTDServer.idl
+
+    RTDMonitor.cpp
+    IRTDServer_i.c
+    RTDDataThread.cpp
+    RTDServer.def
+    RTDServerDLL.cpp
+    RTDServer.cpp
+
+    MonitorDataModel_moc.cpp
+
+    ../monitor/Options.cpp
+    ../monitor/MonitorTask.cpp
+    ../monitor/MonitorData.cpp
+    ../monitor/MonitorDataModel.cpp
+    ../monitor/MonitorDataStorage.cpp
+    ../monitor/QosFormatter.cpp
+  }
+
+  IDL_Files {
+
+  }
+
+  specific(prop:microsoft) {
+    moduledefinitionfile=./RTDServer.def
+  }
+
+  Resource_Files {
+    resource.h
+    Script.rc
+  }
+
+  Define_Custom(Excel_Addin) {
+
+  }
+
+  Excel_Addin_Files {
+    OpenDDS.xlam
+  }
+}

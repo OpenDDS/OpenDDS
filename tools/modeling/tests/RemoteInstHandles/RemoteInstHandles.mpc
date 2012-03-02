@@ -1,0 +1,24 @@
+project(*xmlPublisher) : dcpsexe, dds_model {
+  exename   = publisher
+  after    += RemoteInstHandles
+  libs     += RemoteInstHandles
+  libpaths += model
+  requires += built_in_topics
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*xmlSubscriber) : dcpsexe, dds_model {
+  exename   = subscriber
+  after    += RemoteInstHandles
+  libs     += RemoteInstHandles
+  libpaths += model
+  requires += built_in_topics
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
+

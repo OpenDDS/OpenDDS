@@ -1,0 +1,18 @@
+project(*xmlPublisher) : dcpsexe, dds_model, CfTopic_paths, CfTopic {
+  exename   = publisher
+  libpaths += model
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*xmlSubscriber) : dcpsexe, dds_model, CfTopic_paths, CfTopic {
+  exename   = subscriber
+  libpaths += model
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
+

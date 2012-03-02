@@ -1,0 +1,33 @@
+This example is a very simple distributed data system that demonstrates
+ the following capabilites:
+
+ - abstraction of DDS from the application logic
+
+ - using a data writer and a data reader connected to
+   the same topic but not associated to each other
+
+
+
+What the nodes do:
+
+Each node connects a subscriber and publisher for sending an receiving file
+ differences.  The node connects the DDS components and then either publishes
+ the starter file or waits until it receives the first published file.  The
+ node writes the file into the file directory.  The node then waits a random
+ amount of time then publishes a "diff" to the published file.  The "diff"
+ is just created data.  Each "diff" is written into a file in the file directory.
+  The filename specifies that it is a diff and the file it applies to and the
+ version numbers.  Each node publishes 3 "diff"s.
+
+
+How to run this example:
+
+Run the DCPSInfoRepo:
+$DDS_ROOT/bin/DCPSInfoRepo -ORBSvcConf simple_tcp.conf -o repo.ior -d domain_ids -ORBEndpoint iiop://:2007
+
+Run the nodes:
+node -ORBSvcConf simple_tcp.conf -DCPSInfoRepo corbaloc:iiop:[repo machine]:2007/DCPSInfoRepo -n node_1 -d files_1
+node -ORBSvcConf simple_tcp.conf -DCPSInfoRepo corbaloc:iiop:[repo machine]:2007/DCPSInfoRepo -n node_2 -d files_2
+
+Run the node to publish the first file:
+node -ORBSvcConf simple_tcp.conf -DCPSInfoRepo corbaloc:iiop:[repo machine]:2007/DCPSInfoRepo -n node_3 -d files_3 -f starter_file

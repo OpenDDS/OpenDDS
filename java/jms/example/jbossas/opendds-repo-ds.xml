@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<!DOCTYPE connection-factories PUBLIC "-//JBoss//DTD JBOSS JCA Config 1.5//EN"
+    "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">
+
+<connection-factories>
+    <mbean code="org.opendds.jms.management.DCPSInfoRepoService"
+           name="OpenDDS:service=DCPSInfoRepo">
+        <attribute name="ORBListenEndpoints">iiop://:6666</attribute>
+        <attribute name="ORBLogFile">${jboss.server.log.dir}/opendds-repo.log</attribute>
+        <attribute name="TransportType">tcp</attribute>
+        <depends>jboss.jca:service=RARDeployment,name='opendds-jms-3.0.1.rar'</depends>
+    </mbean>
+</connection-factories>

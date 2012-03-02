@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:domain="http://www.opendds.org/modeling/schemas/Domain/1.0" xmlns:qos="http://www.opendds.org/modeling/schemas/QoS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/Topics/1.0">
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Types/1.0" schemaLocation="types.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/QoS/1.0" schemaLocation="qos.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Domain/1.0" schemaLocation="domain.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
+  <xsd:complexType abstract="true" name="TopicDescription">
+    <xsd:complexContent>
+      <xsd:extension base="core:Entity"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TopicDescription" type="topics:TopicDescription"/>
+  <xsd:complexType name="Topic">
+    <xsd:complexContent>
+      <xsd:extension base="domain:DomainEntity">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="deadline" type="qos:DeadlineQosPolicy"/>
+          <xsd:element name="destination_order" type="qos:DestinationOrderQosPolicy"/>
+          <xsd:element name="durability" type="qos:DurabilityQosPolicy"/>
+          <xsd:element name="durability_service" type="qos:DurabilityServiceQosPolicy"/>
+          <xsd:element name="history" type="qos:HistoryQosPolicy"/>
+          <xsd:element name="latency_budget" type="qos:LatencyBudgetQosPolicy"/>
+          <xsd:element name="liveliness" type="qos:LivelinessQosPolicy"/>
+          <xsd:element name="ownership" type="qos:OwnershipQosPolicy"/>
+          <xsd:element name="reliability" type="qos:ReliabilityQosPolicy"/>
+          <xsd:element name="resource_limits" type="qos:ResourceLimitsQosPolicy"/>
+          <xsd:element name="topic_data" type="qos:TopicDataQosPolicy"/>
+          <xsd:element name="transport_priority" type="qos:TransportPriorityQosPolicy"/>
+          <xsd:element name="lifespan" type="qos:LifespanQosPolicy"/>
+          <xsd:element name="datatype" type="types:Struct"/>
+        </xsd:choice>
+        <xsd:attribute name="deadline" type="xsd:string"/>
+        <xsd:attribute name="destination_order" type="xsd:string"/>
+        <xsd:attribute name="durability" type="xsd:string"/>
+        <xsd:attribute name="durability_service" type="xsd:string"/>
+        <xsd:attribute name="history" type="xsd:string"/>
+        <xsd:attribute name="latency_budget" type="xsd:string"/>
+        <xsd:attribute name="liveliness" type="xsd:string"/>
+        <xsd:attribute name="ownership" type="xsd:string"/>
+        <xsd:attribute name="reliability" type="xsd:string"/>
+        <xsd:attribute name="resource_limits" type="xsd:string"/>
+        <xsd:attribute name="topic_data" type="xsd:string"/>
+        <xsd:attribute name="transport_priority" type="xsd:string"/>
+        <xsd:attribute name="lifespan" type="xsd:string"/>
+        <xsd:attribute name="datatype" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Topic" type="topics:Topic"/>
+  <xsd:complexType name="ContentFilteredTopic">
+    <xsd:complexContent>
+      <xsd:extension base="topics:TopicDescription">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="related_topic" type="topics:Topic"/>
+        </xsd:choice>
+        <xsd:attribute name="filter_expression" type="xsd:string"/>
+        <xsd:attribute name="related_topic" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ContentFilteredTopic" type="topics:ContentFilteredTopic"/>
+  <xsd:complexType name="MultiTopic">
+    <xsd:complexContent>
+      <xsd:extension base="topics:TopicDescription">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="datatype" type="types:Struct"/>
+        </xsd:choice>
+        <xsd:attribute name="subscription_expression" type="xsd:string"/>
+        <xsd:attribute name="datatype" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="MultiTopic" type="topics:MultiTopic"/>
+</xsd:schema>

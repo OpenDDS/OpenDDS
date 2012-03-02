@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/Types/1.0">
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" schemaLocation="opendds.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
+  <xsd:complexType name="Array">
+    <xsd:complexContent>
+      <xsd:extension base="types:Collection">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="subtype" type="types:Type"/>
+        </xsd:choice>
+        <xsd:attribute name="subtype" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Array" type="types:Array"/>
+  <xsd:complexType name="Boolean">
+    <xsd:complexContent>
+      <xsd:extension base="types:Simple"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Boolean" type="types:Boolean"/>
+  <xsd:complexType name="Branch">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="field" type="types:Field"/>
+          <xsd:element name="cases" type="types:Case"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Branch" type="types:Branch"/>
+  <xsd:complexType name="Case">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:attribute name="literal" type="xsd:string" use="required"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Case" type="types:Case"/>
+  <xsd:complexType name="Char">
+    <xsd:complexContent>
+      <xsd:extension base="types:Simple"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Char" type="types:Char"/>
+  <xsd:complexType abstract="true" name="Collection">
+    <xsd:complexContent>
+      <xsd:extension base="types:Type">
+        <xsd:attribute name="length" type="xsd:long" use="required"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Collection" type="types:Collection"/>
+  <xsd:complexType name="Double">
+    <xsd:complexContent>
+      <xsd:extension base="types:FloatingPoint"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Double" type="types:Double"/>
+  <xsd:complexType name="Enum">
+    <xsd:complexContent>
+      <xsd:extension base="types:Simple">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="literals" nillable="true" type="xsd:string"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Enum" type="types:Enum"/>
+  <xsd:complexType name="Field">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="type" type="types:Type"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="type" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Field" type="types:Field"/>
+  <xsd:complexType name="Float">
+    <xsd:complexContent>
+      <xsd:extension base="types:FloatingPoint"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Float" type="types:Float"/>
+  <xsd:complexType abstract="true" name="FloatingPoint">
+    <xsd:complexContent>
+      <xsd:extension base="types:Simple"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="FloatingPoint" type="types:FloatingPoint"/>
+  <xsd:complexType abstract="true" name="Int">
+    <xsd:complexContent>
+      <xsd:extension base="types:Simple"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Int" type="types:Int"/>
+  <xsd:complexType name="Key">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="field" type="types:Field"/>
+        </xsd:choice>
+        <xsd:attribute name="field" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Key" type="types:Key"/>
+  <xsd:complexType name="Long">
+    <xsd:complexContent>
+      <xsd:extension base="types:SignedInt"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Long" type="types:Long"/>
+  <xsd:complexType name="LongDouble">
+    <xsd:complexContent>
+      <xsd:extension base="types:FloatingPoint"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="LongDouble" type="types:LongDouble"/>
+  <xsd:complexType name="LongLong">
+    <xsd:complexContent>
+      <xsd:extension base="types:SignedInt"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="LongLong" type="types:LongLong"/>
+  <xsd:complexType name="Octet">
+    <xsd:complexContent>
+      <xsd:extension base="types:Simple"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Octet" type="types:Octet"/>
+  <xsd:complexType name="Sequence">
+    <xsd:complexContent>
+      <xsd:extension base="types:Collection">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="subtype" type="types:Type"/>
+        </xsd:choice>
+        <xsd:attribute name="subtype" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Sequence" type="types:Sequence"/>
+  <xsd:complexType name="Short">
+    <xsd:complexContent>
+      <xsd:extension base="types:SignedInt"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Short" type="types:Short"/>
+  <xsd:complexType abstract="true" name="SignedInt">
+    <xsd:complexContent>
+      <xsd:extension base="types:Int"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="SignedInt" type="types:SignedInt"/>
+  <xsd:complexType abstract="true" name="Simple">
+    <xsd:complexContent>
+      <xsd:extension base="types:Type"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Simple" type="types:Simple"/>
+  <xsd:complexType name="String">
+    <xsd:complexContent>
+      <xsd:extension base="types:Collection"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="String" type="types:String"/>
+  <xsd:complexType name="Struct">
+    <xsd:complexContent>
+      <xsd:extension base="types:Type">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="fields" type="types:Field"/>
+          <xsd:element name="keys" type="types:Key"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="isDcpsDataType" type="xsd:boolean"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Struct" type="types:Struct"/>
+  <xsd:complexType abstract="true" name="Type">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Type" type="types:Type"/>
+  <xsd:complexType name="Typedef">
+    <xsd:complexContent>
+      <xsd:extension base="types:Type">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="type" type="types:Type"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="type" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Typedef" type="types:Typedef"/>
+  <xsd:complexType name="ULong">
+    <xsd:complexContent>
+      <xsd:extension base="types:UnsignedInt"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ULong" type="types:ULong"/>
+  <xsd:complexType name="ULongLong">
+    <xsd:complexContent>
+      <xsd:extension base="types:UnsignedInt"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ULongLong" type="types:ULongLong"/>
+  <xsd:complexType name="UShort">
+    <xsd:complexContent>
+      <xsd:extension base="types:UnsignedInt"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="UShort" type="types:UShort"/>
+  <xsd:complexType name="Union">
+    <xsd:complexContent>
+      <xsd:extension base="types:Type">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="branches" type="types:Branch"/>
+          <xsd:element name="switch" type="types:Type"/>
+          <xsd:element name="default" type="types:Field"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="switch" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Union" type="types:Union"/>
+  <xsd:complexType abstract="true" name="UnsignedInt">
+    <xsd:complexContent>
+      <xsd:extension base="types:Int"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="UnsignedInt" type="types:UnsignedInt"/>
+  <xsd:complexType name="WChar">
+    <xsd:complexContent>
+      <xsd:extension base="types:Simple"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="WChar" type="types:WChar"/>
+  <xsd:complexType name="WString">
+    <xsd:complexContent>
+      <xsd:extension base="types:Collection"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="WString" type="types:WString"/>
+  <xsd:complexType name="DataLib">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:OpenDDSLib">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="types" type="types:Type"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DataLib" type="types:DataLib"/>
+</xsd:schema>

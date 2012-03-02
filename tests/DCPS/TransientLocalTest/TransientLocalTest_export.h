@@ -1,0 +1,58 @@
+
+// -*- C++ -*-
+// $Id$
+// Definition for Win32 Export directives.
+// This file is generated automatically by generate_export_file.pl TransientLocalTest
+// ------------------------------
+#ifndef TRANSIENTLOCALTEST_EXPORT_H
+#define TRANSIENTLOCALTEST_EXPORT_H
+
+#include "ace/config-all.h"
+
+#if defined (ACE_AS_STATIC_LIBS) && !defined (TRANSIENTLOCALTEST_HAS_DLL)
+#  define TRANSIENTLOCALTEST_HAS_DLL 0
+#endif /* ACE_AS_STATIC_LIBS && TRANSIENTLOCALTEST_HAS_DLL */
+
+#if !defined (TRANSIENTLOCALTEST_HAS_DLL)
+#  define TRANSIENTLOCALTEST_HAS_DLL 1
+#endif /* ! TRANSIENTLOCALTEST_HAS_DLL */
+
+#if defined (TRANSIENTLOCALTEST_HAS_DLL) && (TRANSIENTLOCALTEST_HAS_DLL == 1)
+#  if defined (TRANSIENTLOCALTEST_BUILD_DLL)
+#    define TransientLocalTest_Export ACE_Proper_Export_Flag
+#    define TRANSIENTLOCALTEST_SINGLETON_DECLARATION(T) ACE_EXPORT_SINGLETON_DECLARATION (T)
+#    define TRANSIENTLOCALTEST_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) ACE_EXPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
+#  else /* TRANSIENTLOCALTEST_BUILD_DLL */
+#    define TransientLocalTest_Export ACE_Proper_Import_Flag
+#    define TRANSIENTLOCALTEST_SINGLETON_DECLARATION(T) ACE_IMPORT_SINGLETON_DECLARATION (T)
+#    define TRANSIENTLOCALTEST_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) ACE_IMPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
+#  endif /* TRANSIENTLOCALTEST_BUILD_DLL */
+#else /* TRANSIENTLOCALTEST_HAS_DLL == 1 */
+#  define TransientLocalTest_Export
+#  define TRANSIENTLOCALTEST_SINGLETON_DECLARATION(T)
+#  define TRANSIENTLOCALTEST_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
+#endif /* TRANSIENTLOCALTEST_HAS_DLL == 1 */
+
+// Set TRANSIENTLOCALTEST_NTRACE = 0 to turn on library specific tracing even if
+// tracing is turned off for ACE.
+#if !defined (TRANSIENTLOCALTEST_NTRACE)
+#  if (ACE_NTRACE == 1)
+#    define TRANSIENTLOCALTEST_NTRACE 1
+#  else /* (ACE_NTRACE == 1) */
+#    define TRANSIENTLOCALTEST_NTRACE 0
+#  endif /* (ACE_NTRACE == 1) */
+#endif /* !TRANSIENTLOCALTEST_NTRACE */
+
+#if (TRANSIENTLOCALTEST_NTRACE == 1)
+#  define TRANSIENTLOCALTEST_TRACE(X)
+#else /* (TRANSIENTLOCALTEST_NTRACE == 1) */
+#  if !defined (ACE_HAS_TRACE)
+#    define ACE_HAS_TRACE
+#  endif /* ACE_HAS_TRACE */
+#  define TRANSIENTLOCALTEST_TRACE(X) ACE_TRACE_IMPL(X)
+#  include "ace/Trace.h"
+#endif /* (TRANSIENTLOCALTEST_NTRACE == 1) */
+
+#endif /* TRANSIENTLOCALTEST_EXPORT_H */
+
+// End of auto generated file.

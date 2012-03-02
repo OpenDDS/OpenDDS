@@ -1,0 +1,11 @@
+//
+// $Id$
+//
+
+project : dcps_test_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
+  exename = test
+
+  Source_Files {
+    TestCase.cpp
+  }
+}

@@ -1,0 +1,44 @@
+tools/modeling/tests/MessengerNoSub/run_test.pl
+tools/modeling/tests/InvalidNames/run_test.pl
+tools/modeling/tests/TopicQos/run_test.pl
+tools/modeling/tests/ExternalPolicies/run_test.pl
+tools/modeling/tests/MessengerGlobalNs/run_test.pl
+tools/modeling/tests/MultiInstance/run_test.pl
+tools/modeling/tests/MultiDCPS/run_test.pl
+tools/modeling/tests/MessengerMixed/run_test.pl
+tools/modeling/tests/CompositeKey/run_test.pl
+tools/modeling/tests/MessengerMC/run_test.pl: !NO_MCAST
+tools/modeling/tests/SubscriberQos/run_test.pl
+tools/modeling/tests/MessengerMulti/run_test.pl
+tools/modeling/tests/Messenger/run_test.pl
+tools/modeling/tests/PolicyLib/run_test.pl
+tools/modeling/tests/MessengerSplit/run_test.pl
+tools/modeling/tests/MessengerPubQos/run_test.pl
+tools/modeling/tests/ReaderQos/run_test.pl
+tools/modeling/tests/MessengerNoPub/run_test.pl
+tools/modeling/tests/Sequences/run_test.pl
+tools/modeling/tests/DomainZero/run_test.pl
+tools/modeling/tests/Arrays/run_test.pl
+tools/modeling/tests/MessengerWriterQos/run_test.pl
+tools/modeling/tests/MessengerDpQos/run_test.pl
+tools/modeling/tests/UDP/run_test.pl
+tools/modeling/tests/DataLibRef/run_test.pl
+tools/modeling/tests/Codegen/run_test.pl
+tools/modeling/tests/CopyTopicQos/run_test.pl
+tools/modeling/tests/ReferExternalProj/run_test.pl
+tools/modeling/tests/Deep/Down/Reference/run_test.pl
+tools/modeling/tests/EmptyLibs/run_test.pl
+tools/modeling/tests/MessengerSimpleTypes/run_test.pl
+tools/modeling/tests/CfTopic/run_test.pl
+tools/modeling/tests/MultiTopic/run_test.pl
+tools/modeling/tests/Exchange/run_test.pl: COMPILE_ONLY
+tools/modeling/tests/RemoteInstHandles/run_test.pl: !NO_BUILT_IN_TOPICS
+tools/modeling/tests/Comments/run_test.pl
+tools/modeling/tests/ReusedTypes/run_test.pl
+tools/modeling/tests/ReusedExtTypes/run_test.pl
+tools/modeling/tests/StockQuoter/run_test.pl
+tools/modeling/tests/Looped/run_test.pl: COMPILE_ONLY
+tools/modeling/tests/ModuleNameConflict/run_test.pl
+tools/modeling/tests/Chained/run_test.pl
+tools/modeling/tests/Chained_Topic/run_test.pl: COMPILE_ONLY
+tools/modeling/tests/Chained_Data/run_test.pl: COMPILE_ONLY

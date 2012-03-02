@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <title>Performing Validations</title>
+  <script type="text/javascript" src=
+  "PLUGINS_ROOT/org.eclipse.help/livehelp.js">
+</script>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+  <h2>Performing Validations</h2>
+
+  <p>Validation checks can be performed on your modeling elements
+  to help ensure that they are semantically correct and suitable to
+  use as a basis for automatically generated code.</p>
+
+  <p>To validate the modeling elements shown in a diagram, select
+  the menu item <b>Edit -&gt; Validate</b>.</p>
+
+  <p>Where feasible, individual elements will be decorated with a
+  small icon if there is an error or warning associated with that
+  element. The following figure shows the yellow warning decoration
+  on the left figure and the red error decoration on the right
+  figure</p>. <img alt="Validation decorated figures" src=
+  "../images/validation_decorated_figures.png">
+
+  <p>An error indicates that there is a semantic problem with the
+  model that would result in code generation problems. A warning
+  indicates a modeling construct may not be complete and in some
+  cases could be ignored.</p>
+
+  <p>If you hover your mouse over an error or warning icon a pop-up
+  will show the validation failures for that element.</p>
+
+  <p>Validation failures can also be seen in the Problems view as
+  shown in the figure below. To bring up the Problems view select
+  menu item <a href=
+  'javascript:executeCommand("org.eclipse.ui.views.showView")'><b>Window
+  -&gt; Show View</b></a> <b>-&gt; Problems</b></p><img alt=
+  "Validations in Problem View" src=
+  "../images/validations_in_problem_view.png">
+
+  <br>
+  <div class="caution">
+  When validations are done for two or more libraries of the same type in the same model file,
+  the last validations done are the only ones that will remain. For example,
+  suppose you have a model with PolicyLibs PolicyLibA and PolicyLibB, both with validation errors. If you
+  open the model file and then
+  <ol>
+    <li>Open PolicyLibA</li>
+    <li>Perform validations</li>
+    <li>Open PolicyLibB</li>
+    <li>Perform validations</li>
+  </ol>
+  only the validation errors from PolicyLibB will be in the Problems view.
+  </div>
+  
+  <h3>Limiting Errors Shown in Problems View</h3>
+  
+  <p>By default, the scope of the validation messages that are shown in the Problems view
+  include all files in your workspace. If you have multiple models with validation
+  messages it may be difficult to find messages specific to the opened diagram.</p>
+  
+  <p>You can configure the Problem view to limit the scope of messages shown.
+  This is done by selecting Show from the view menu for the Problem view and
+  indicating the scope of the messages.</p>
+  <img src="../images/problems_view_menu.png">
+</body>
+</html>

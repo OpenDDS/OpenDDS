@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+	<title>Customizing Code Generation</title>
+</head>
+
+<body>
+<h1>Customizing Code Generation</h1>
+
+<p>The code generation allows some customization for transport configuration.</p>
+
+<img src="../images/ModelCustomization.png" alt="Model Customization tab"/>
+
+<h2>Customization Instances</h2>
+
+<p>The customization includes a series of <b>instances</b>, which represent potential 
+deployment scenarios for the underlying application.</p>
+
+<p>For example, one instance can be specified representing a TCP deployment, while a second instance
+represents a multicast deployment.</p>
+
+<h3>Instance Transport Offset</h3>
+
+<p>In the case of multiple instances, the generated code allows for all of the transport configurations
+to be instantiated.  The transport IDs within an instance all match those from the underlying model, but
+the generated code still must have a unique ID.</p>
+
+<p>To accomplish this, the generated ID is the instance transport ID added to the instance transport offset
+to create a unique ID.  In this way, multiple transport configurations can be generated from a single model.</p>
+
+<h2>Customization Transports</h2>
+
+<p>Each transport needs a child transport configuration.  To do this use the context menu to add a child TCP, multicast, or 
+UDP transport.</p>
+
+<h2>Customizing a Transport</h2>
+
+<p>Each transport can be further customized through its context menu, again through the add Child menu.</p>
+
+<h2>Default Customization Content</h2>
+
+<p>By default, when a codegen file is created, the editor finds a list of transport IDs 
+from the .opendds model file selected.  It creates an instance named default with offset of 0 \
+and an empty transport with each of the IDs referenced in the model file.  </p>
+
+<p>At a minimum, specific configurations should be added to these generic transports in 
+order to select the correct transport type.</p>
+
+</body>
+</html>

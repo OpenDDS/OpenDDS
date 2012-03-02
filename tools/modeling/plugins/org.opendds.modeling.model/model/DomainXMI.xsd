@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:domain="http://www.opendds.org/modeling/schemas/Domain/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/Domain/1.0">
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
+  <xsd:complexType name="QosProperty">
+    <xsd:complexContent>
+      <xsd:extension base="core:TypedEntity"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="QosProperty" type="domain:QosProperty"/>
+  <xsd:complexType name="DomainEntity">
+    <xsd:complexContent>
+      <xsd:extension base="core:Entity">
+        <xsd:attribute name="transportConfig" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DomainEntity" type="domain:DomainEntity"/>
+</xsd:schema>

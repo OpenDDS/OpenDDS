@@ -1,0 +1,7 @@
+project(DcpsFooTest4_0): dcpsexe_with_tcp {
+  exename   = FooTest4_0
+  libpaths += ../FooType4
+  libpaths += ../common
+  libs     +=  DcpsFooType4 common
+  after    += DcpsFooType4 common
+}

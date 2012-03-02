@@ -1,0 +1,305 @@
+Starting with release 1.3, OpenDDS provides partial support for JMS 1.1.
+Enterprise Java applications can make use of the complete OpenDDS middleware
+just like standard Java and C++ applications.
+
+See the INSTALL file in the $DDS_ROOT/java/jms directory (in this directory)
+for information on getting started, including the prerequisites and
+dependencies.
+
+
+======================================================================
+* See also
+
+  - Sun Java Message Service (JMS) Product Page
+      <http://java.sun.com/products/jms/>
+  - JSR 112 J2EE Connector Architecture 1.5
+      <http://jcp.org/aboutJava/communityprocess/final/jsr112/index.html>
+  - JSR 914 Java Message Service (JMS)
+      <http://jcp.org/aboutJava/communityprocess/final/jsr914/index.html>
+
+
+======================================================================
+* Deploying the OpenDDS JMS Provider
+
+Please refer to your application server documentation on how to install and
+deploy a new resource adapter.
+
+Some application servers support file based configuration (i.e. JBoss).  For
+these servers, example configurations are provided under
+$DDS_ROOT/java/jms/example.
+
+
+======================================================================
+* Configuring the OpenDDS JMS Provider
+
+The OpenDDS JMS Provider was designed to be deployed into any Java EE 5
+compliant application server.  As such, it relies on a number of standardized
+APIs for configuration and deployment.
+
+The OpenDDS JMS Provider uses a combination of JMX and JCA to configure its
+components and administered objects.
+
+The following JMX MBeans are provided:
+
+ 1. org.opendds.jms.management.ParticipantFactoryService (required)
+    This component is responsible for initializing the DomainParticipantFactory
+    for use by JMS clients.  Only one instance of this component may be
+    configured per process (JVM instance).
+
+    This component supports the following attributes:
+
+      DCPSDebugLevel
+      DCPSConfigFile
+      DCPSInfoRepo
+      DCPSChunks
+      DCPSChunkMultiplier
+      DCPSLivelinessFactor
+      DCPSBit
+      DCPSBitTransportIPAddress
+      DCPSBitTransportPort
+      DCPSBitLookupDurationMsec
+      DCPSPendingTimeout
+      DCPSPersistentDataDir
+      DCPSTransportDebugLevel
+      ORBListenEndpoints
+      ORBDebugLevel
+      ORBLogFile
+        The attributes defined above correspond to standard configuration
+        options as defined in the DDS and TAO documentation,
+        see: $DDS_ROOT/docs
+
+      ORBArgs
+        The ORBArgs attribute allows the user to define additional ORB
+        arguments manually.  Arguments are separated according to whitespace.
+
+      ORBDirectives
+        The ORBDirectives attribute allows the user to define
+        ORBSvcConfDirectives manually.  Directives must defined one per line.
+
+      ORBDisableNestedUpcalls
+        The ORBDisableNestedUpcalls attribute provides a convenience mechanism
+        for disabling upcalls in TAO.  For more information see the OCI
+        TAO FAQ.
+
+      TransportType
+        The TransportType attribute defines the default DCPS transport type.
+        This option is most often defined when using built in topic support.
+
+        The following transport types are supported:
+          - SimpleTcp
+          - udp
+          - multicast
+
+
+ 2. org.opendds.jms.management.Destination (required)
+    This component is responsible for initializing Destinations for use by
+    JMS clients.  The Destination MBean requires 'destination' and 'type'
+    key properties for identification.
+
+    This component supports the following attributes:
+
+      JndiName (required)
+        The JNDI name the resulting Destination is bound to.
+
+      DataReaderQosPolicy
+        The DDS DataReader QosPolicies used by MessageConsumers for this
+        Destination.
+
+      DataWriterQosPolicy
+        The DDS DataWriter QosPolicies used by MessageProducers for this
+        Destination.
+
+      TopicQosPolicy
+        The DDS Topic QosPolicies used by this Destination.
+
+
+ 3. org.opendds.jms.management.HibernatePersistenceService (optional)
+    This component is responsible for persisting state in between JMS provider
+    shutdowns.  This component is required if durable subscriptions are used
+    by JMS client code.
+
+    This component supports the following attributes:
+
+      JndiName (required)
+        The JNDI name the resulting PersistenceManager is bound to.
+
+      CacheProviderClass
+      CacheRegionPrefix
+      CacheUseMinimalPuts
+      CacheUseQueryCache
+      DataSource
+      DefaultSchema
+      Dialect
+      GenerateStatistics
+      Hbm2ddlAuto
+      JdbcBatchSize
+      JdbcBatchVersionedData
+      JdbcFetchSize
+      JdbcUseGetGeneratedKeys
+      JdbcUseScrollableResultSet
+      JdbcUseStreamsForBinary
+      MaxFetchDepth
+      Password
+      QuerySubstitutions
+      ShowSql
+      UseSqlComments
+      Username
+        The attributes defined above correspond to standard configuration
+        options as defined in the Hibernate documentation.
+
+
+The following JCA config properties are supported for ConnectionFactories:
+
+  ClientID
+    The administratively configured client identifier (used by durable
+    subscriptions).
+
+  DomainID (required)
+    The DDS domainId Connections created by this ConnectionFactory belong to.
+
+  ParticipantQosPolicy
+    The DDS DomainParticipant QosPolicies used by Connections created
+    by this ConnectionFactory.
+
+  SubscriberQosPolicy
+    The DDS Subscriber QosPolicies used by Connections created by this
+    ConnectionFactory.
+
+  SubscriberTransport
+    The OpenDDS TransportConfiguration used by the Subscriber.
+
+  PublisherQosPolicy
+    The DDS Publisher QosPolicies used by Connections created by this
+    ConnectionFactory.
+
+  PublisherTransport
+    The OpenDDS TransportConfiguration used by the Publisher.
+
+  TransportType (required)
+    See: TransportType attribute in ParticipantFactoryService
+
+  PersistenceManager
+    The JNDI name the configured PersistenceManager is bound to.
+
+
+======================================================================
+* Configuring QoS Policies
+
+The various QoS policy attributes/properties follow the java.util.Properties
+syntax.  The property names are based on the QoS policy names as defined in
+the Supported QoS section of the Platform Independent Module (PIM)
+in the DDS specification.
+
+For example:
+
+  PRESENTATION.access_scope=GROUP
+  PRESENTATION.coherent_access=true
+
+The following QoS policies are reserved for internal use by the OpenDDS
+JMS Provider and may not be used by JMS client code:
+  - DURABILITY
+  - LIFESPAN
+  - PARTITION
+
+The above policies are used internally to configure a number of builtin
+JMS provider behaviors.  These QoS policies will be applied based on arguments
+passed to the JMS provider, including:
+  - JMS message persistence (i.e. DeliveryMode)
+  - JMS message time to live (i.e. TTL)
+  - JMS noLocal delivery (inhibits messages sent on the same Connection)
+
+For a list of supported QoS policies, please review the OpenDDS documentation.
+
+
+======================================================================
+* Configuring Transports
+
+The various transport configuration attributes/properties also follow the
+java.util.Properties syntax.  The property names are based on the JavaBeans
+property name of the TransportConfiguration subclasses (i.e.
+SimpleTcpConfiguration).
+
+For example:
+
+  swapBytes=false
+  maxSamplesPerPacket=8
+
+For a list of supported properties, please review the OpenDDS DCPS
+API Specification, see: $DDS_ROOT/java/docs/api
+
+
+======================================================================
+* Native Library Support
+
+Because the OpenDDS JMS Provider relies heavily on JNI to communicate with
+OpenDDS, the following restrictions must be observed when deploying the
+resource adapter:
+
+  - The resource adapter is not portable between operating systems or
+    platforms.  All restrictions defined in $DDS_ROOT/java/README must
+    be observed.
+  - On Windows platforms, the 'opendds.native.debug' system property should
+    be set to 'true' if OpenDDS was built in "debug" mode (native libraries
+    have names ending in d.dll).
+    Failure to set this system property will result in incorrect library
+    loading behavior.
+  - Some application servers do not correctly load native libraries packaged
+    within resource adapter archives.  If your application server does not
+    support this, the resource adapter will attempt to load the libraries
+    manually to a temporary directory at startup.
+  - To override the default location where native libraries are extracted, you
+    may define the 'opendds.native.dir' system property with an alternate path.
+    You may also need to add this library path to your environment.
+
+
+======================================================================
+* DCPSInfoRepo Support
+
+Experimental support for running the DCPSInfoRepo as a JMX component within
+the JVM is supported with the following restrictions:
+
+  - The DCPSInfoRepoService may not run within the same JVM instance
+    as the ParticipantFactoryService.  This means that the DCPSInfoRepo
+    cannot be used within the same JVM as JMS client code.
+  - DCPSInfoRepo persistence is not supported at this time.
+
+The DCPSInfoRepo may be managed via the DCPSInfoRepoService MBean class
+(org.opendds.jms.management.DCPSInfoRepoService).  In addition to the
+configuration options provided by the ParticipantFactoryService the
+DCPSInfoRepoService also accepts the following attributes:
+
+  BitListenAddress            (corresponds to -a)
+  IORFile                     (corresponds to -o)
+  NOBITS
+  VerboseTransportLogging     (corresponds to -z)
+  PersistentFile              (corresponds to PersistenceUpdaterSvc)
+  ResurrectFromFile           (corresponds to -r)
+  FederatorConfig
+  FederationId
+  FederateWith
+
+Each of the attributes described above correspond to a DCPSInfoRepo command
+line option.  For more information, issue: '$DDS_ROOT/bin/DCPSInfoRepo -?'
+
+It is strongly suggested that if the DCPSInfoRepoService is deployed, a
+dedicated server instance should be created which also serves administered
+objects (i.e. ConnectionFactory and Destination instances) via JNDI to
+eliminate redundancy.
+
+
+======================================================================
+* Known Limitations
+
+As DDS represents only a subset of the functionality exposed by the JMS API,
+a number of features remain to be implemented:
+
+- JCA Message Inflow
+- JMS Transactions
+- JMS Queueing
+- Java SE Support (currently requires JCA)
+- JMS 1.0 Compatible Interfaces
+
+The above features have not been implemented.  Any attempt to use one of these
+features will result in undefined behavior.
+
+

@@ -1,0 +1,6 @@
+This test is similar to the FooTest3_1. The only difference is that this test
+tests a data type with an unbounded sequence. This test depends on the
+FooType3Unbounded test library, but the FooTest3_1 depends on the FooType3
+test library.
+
+See FooTest3_1/README for detail.

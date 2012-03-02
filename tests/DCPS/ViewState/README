@@ -1,0 +1,25 @@
+Verify bug fix of view state.
+
+The samples of same instance returned from a read/take operation should
+have same view state. The view state is only changed when the samples
+from most recent generation are actually read.
+
+Both publication and subscription work in the main thread
+to simplify the coordination of writes and reads.
+
+
+run_test.pl will run the test but here is how to do it by hand:
+
+
+It needs to launch DCPSInfoRepo:
+
+  $DDS_ROOT/bin/DCPSInfoRepo -o repo.ior -d domain_ids
+
+Command line option:
+
+    // options:
+    //  -z                          verbose transport debug
+
+run the test
+
+./main -DcpsBit 0  -ORBSvcConf ../../tcp.conf

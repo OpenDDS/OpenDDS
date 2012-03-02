@@ -1,0 +1,32 @@
+//
+// $Id$
+//
+
+project : dcps, wireshark {
+  sharedname    = OpenDDS_Dissector
+  dynamicflags += DISSECTOR_BUILD_DLL
+  macros       += NOMINMAX
+  libout        = .
+
+  Source_Files {
+    giop_base.cpp
+    packet-opendds.cpp
+    packet-datawriter.cpp
+    packet-repo.cpp
+    plugin.cpp
+    sample_dissector.cpp
+    sample_manager.cpp
+  }
+
+  Resource_Files {
+    dissector.rc
+  }
+
+  // Wireshark does not support traditional `lib' prefixes
+  // when applied to plugins; omit on affected platforms:
+  verbatim(gnuace, macros) {
+    LIB_NAME        = OpenDDS_Dissector
+    LIB_UNCHECKED   = $(LIB_NAME).$(LIBEXT)
+    SHLIB_UNCHECKED = $(LIB_NAME).$(SOEXT)
+  }
+}

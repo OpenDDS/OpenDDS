@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="Comments">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="CommentsLib">
+    <comment xmi:id="_aYzCcFGeEeCMQJ_D-ilfng" body="What would one do with a dcpslib comment?" format="PLAIN"/>
+    <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="Needsaname" domainId="42">
+      <comment xmi:id="_yJiFAFGkEeCMQJ_D-ilfng" body="Main Domain" format="PLAIN"/>
+    </domains>
+    <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <comment xmi:id="_NwzYcFGkEeCMQJ_D-ilfng" body="Another Participant" format="PLAIN"/>
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportConfig="trans1">
+        <comment xmi:id="_AWmAoFGlEeCMQJ_D-ilfng" body="Publisher&#xA;" format="PLAIN"/>
+        <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw">
+          <comment xmi:id="_DrzB4FGlEeCMQJ_D-ilfng" body="Data writer" format="PLAIN"/>
+        </writers>
+      </publishers>
+    </participants>
+    <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <comment xmi:id="_Mc1PIFGkEeCMQJ_D-ilfng" body="Participant comment" format="PLAIN"/>
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
+        <comment xmi:id="_BfrIkFGlEeCMQJ_D-ilfng" body="Subscriber" format="PLAIN"/>
+        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw">
+          <comment xmi:id="_CfGlQFGlEeCMQJ_D-ilfng" body="Data Reader" format="PLAIN"/>
+        </readers>
+      </subscribers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw">
+      <comment xmi:id="_wmlrkFGkEeCMQJ_D-ilfng" body="Typical&#xA;topical&#xA;comments" format="PLAIN"/>
+    </topicDescriptions>
+    <topicDescriptions xsi:type="topics:ContentFilteredTopic" xmi:id="_3B8lcFGkEeCMQJ_D-ilfng" name="cft" filter_expression="count > 3" related_topic="_mcVnwPDxEd-I4rwicuuPOw">
+      <comment xmi:id="_6eHKUFGkEeCMQJ_D-ilfng" body="Filter Me" format="PLAIN"/>
+    </topicDescriptions>
+    <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_31TVAFGkEeCMQJ_D-ilfng" name="mt" datatype="_5STIgPDuEd-I4rwicuuPOw">
+      <comment xmi:id="_5lp4UFGkEeCMQJ_D-ilfng" body="One is never enough" format="PLAIN"/>
+    </topicDescriptions>
+  </libs>
+  <packages xmi:id="_cIgqYVGPEeC4Mtx8N7wnBw" name="data1">
+    <comment xmi:id="_XD_CwFGeEeCMQJ_D-ilfng" body="Comments can appear at the module level" format="PLAIN"/>
+    <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="datalib1">
+      <comment xmi:id="_bKgUkFGQEeCMQJ_D-ilfng" body="Main diagram comment." format="PLAIN"/>
+      <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
+        <comment xmi:id="_-U23kFGSEeCMQJ_D-ilfng" body="The struct can have a comment." format="PLAIN"/>
+        <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw">
+          <comment xmi:id="_WDtZ4FGQEeCMQJ_D-ilfng" body="This is a single line plain comment." format="PLAIN"/>
+        </fields>
+        <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw">
+          <comment xmi:id="_cWip4FGQEeCMQJ_D-ilfng" body="This is a single-line doxygen comment." format="DOXYGEN"/>
+        </fields>
+        <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw">
+          <comment xmi:id="_xwmXsFGQEeCMQJ_D-ilfng" body="This is a multiline&#xA;plain comment.&#xA;These can get long &#xA;you know!" format="PLAIN"/>
+        </fields>
+        <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw">
+          <comment xmi:id="_3HpC8FGSEeCMQJ_D-ilfng" body="This is a &#xA;multiline doxygen comment with a blank line.&#xA;&#xA;Don't be fooled, these can get long &#xA;too!" format="DOXYGEN"/>
+        </fields>
+        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw">
+          <comment xmi:id="_8f8kYFGSEeCMQJ_D-ilfng" body="This field has no comment.  &#xA;jk" format="PLAIN"/>
+        </fields>
+        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
+      </types>
+      <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Typedef" xmi:id="_C6F8UFGeEeCMQJ_D-ilfng" type="_DlBIoFGeEeCMQJ_D-ilfng" name="LongArray">
+        <comment xmi:id="_NBqpQFGeEeCMQJ_D-ilfng" body="A typedef can certainly have a comment.&#xA;So you'd better do it." format="PLAIN"/>
+      </types>
+      <types xsi:type="types:Array" xmi:id="_DlBIoFGeEeCMQJ_D-ilfng" length="7" subtype="_PXgFEPDvEd-I4rwicuuPOw">
+        <comment xmi:id="_wrbXAFGeEeCMQJ_D-ilfng" body="Where would I put an array comment?" format="PLAIN"/>
+      </types>
+      <types xsi:type="types:Enum" xmi:id="_DkdAkFGhEeCMQJ_D-ilfng" name="Jeff">
+        <comment xmi:id="_ISxw4FGhEeCMQJ_D-ilfng" body="an enum comment" format="PLAIN"/>
+        <literals>a</literals>
+        <literals>b</literals>
+        <literals>c</literals>
+      </types>
+      <types xsi:type="types:Union" xmi:id="_hBDogFGhEeCMQJ_D-ilfng" name="MyUnion" switch="_PXgFEPDvEd-I4rwicuuPOw">
+        <comment xmi:id="_6fiOAFGhEeCMQJ_D-ilfng" body="This is a union comment" format="PLAIN"/>
+        <branches xmi:id="_hBFdsFGhEeCMQJ_D-ilfng">
+          <comment xmi:id="_VvoiIFGiEeCMQJ_D-ilfng" body="This is a union branch comment&#xA;multiline" format="PLAIN"/>
+          <field xmi:id="_1JiZsFGhEeCMQJ_D-ilfng" name="abc" type="_E8F2IPDvEd-I4rwicuuPOw">
+            <comment xmi:id="_5IpTkFGhEeCMQJ_D-ilfng" body="" format="PLAIN"/>
+          </field>
+          <cases xmi:id="_hBGEwFGhEeCMQJ_D-ilfng" literal="2"/>
+          <cases xmi:id="_m6IUsFGhEeCMQJ_D-ilfng" literal="7"/>
+        </branches>
+        <branches xmi:id="_ZP8AIFGiEeCMQJ_D-ilfng">
+          <comment xmi:id="_bDUpUFGiEeCMQJ_D-ilfng" body="This is another union branch comment&#xA;multiline" format="PLAIN"/>
+          <field xmi:id="_kwKiEFGiEeCMQJ_D-ilfng" name="jjs" type="_DkdAkFGhEeCMQJ_D-ilfng"/>
+          <cases xmi:id="_gDq9wFGiEeCMQJ_D-ilfng" literal="22"/>
+        </branches>
+      </types>
+    </libs>
+  </packages>
+</opendds:OpenDDSModel>

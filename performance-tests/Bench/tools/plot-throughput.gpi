@@ -1,0 +1,9 @@
+
+set loadpath "`echo $DDS_ROOT/performance-tests/Bench/bin`"
+show loadpath
+
+print 'Plotting test format charts'
+call 'plot-throughput-testformats.gpi' 'data/throughput.csv' 'images'
+
+print 'Plotting transport charts'
+call 'plot-throughput-transports.gpi' 'data/throughput.csv' 'images'

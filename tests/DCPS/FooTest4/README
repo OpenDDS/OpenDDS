@@ -1,0 +1,53 @@
+This is the unit test for the subscriber.
+
+
+
+Each test case needs to launch DCPSInfoRepo:
+
+  ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+
+Command line option:
+
+    -i num_samples_per_reader   defaults to 1
+    -r num_datareaders          defaults to 1
+    -m multiple_instances?1:0   defaults to 0
+    -t use_take?1:0             defaults to 0
+
+Single datareader with single instance test:     - run_test.pl
+
+Single datareader with multiple instances test:  - run_test.pl mi
+
+Multiple datareader with single instance test:    - run_test.pl mr
+
+Multiple datareader with multiple instances test: - run_test.pl mri
+
+Multiple datareader with multiple instances test,
+  taking instead of reading:                      - run_test.pl mrit
+
+Each test also tests the following:
+
+ Subscriber unit tests
+  get_qos
+  set_qos
+  get_default_subscriber_qos
+  set_default_datareader_qos
+  get_participant
+  create_datareader
+  delete_datareader
+
+ Datareader unit tests
+  get_qos
+  set_qos
+  copy_from_topic_qos
+  get_topicdescription
+  get_subscriber
+  get_key_value
+  read_next_sample
+  take_next_sample
+  read_instance
+  take_instance
+  read_next_instance
+  take_next_instance
+  simple loan(read)/return_loan
+
