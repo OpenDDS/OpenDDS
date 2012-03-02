@@ -44,8 +44,7 @@ public:
   { return true; }
 
   bool gen_union(UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
-                 AST_Type*, AST_Expression::ExprType,
-                 const AST_Union::DefaultValue&, const char*)
+                 AST_Type*, const char*)
   { return true; }
 
 private:

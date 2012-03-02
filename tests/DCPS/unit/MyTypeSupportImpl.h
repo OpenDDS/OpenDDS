@@ -135,6 +135,8 @@ public:
       ACE_THROW_SPEC ((
         CORBA::SystemException
         )) {return ::DDS::RETCODE_OK;};
+
+  virtual void unregistered(DDS::InstanceHandle_t /* instance_handle */) {};
 };
 
 #endif /* MYTYPESUPPORTIMPL_H_  */

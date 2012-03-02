@@ -1677,7 +1677,7 @@ namespace {
 
 bool marshal_generator::gen_union(UTL_ScopedName* name,
    const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-   AST_Expression::ExprType, const AST_Union::DefaultValue&, const char*)
+   const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");

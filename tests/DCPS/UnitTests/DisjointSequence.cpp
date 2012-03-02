@@ -114,6 +114,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.cumulative_ack() == SequenceNumber(1));
     TEST_CHECK(sequence.last_ack() == SequenceNumber(3));
     TEST_CHECK(sequence.disjoint());
+    TEST_CHECK(sequence.contains(1));
+    TEST_CHECK(!sequence.contains(2));
+    TEST_CHECK(sequence.contains(3));
+    TEST_CHECK(sequence.contains(4));
+    TEST_CHECK(sequence.contains(5));
+    TEST_CHECK(sequence.contains(6));
+    TEST_CHECK(!sequence.contains(7));
 
     sequence.insert(2);
 
@@ -660,6 +667,28 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(static_cast<unsigned int>(anti_bitmap[0]) == 0xFFC00FFF);
     TEST_CHECK(static_cast<unsigned int>(anti_bitmap[1]) == 0xFFFFFFFF);
     TEST_CHECK((anti_bitmap[2] & 0xF0000000) == 0xF0000000);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(31); // set base to 32
+    CORBA::Long bitmap[2] = { 0, 0 };
+    CORBA::ULong num_bits;
+    TEST_CHECK(sequence.to_bitmap(bitmap, 2, num_bits));
+    TEST_CHECK(num_bits == 0);
+    TEST_CHECK(bitmap[0] == 0);
+    TEST_CHECK(bitmap[1] == 0);
+  }
+  {
+    DisjointSequence sequence;
+    sequence.insert(31); // set base to 32
+    sequence.insert(SequenceRange(32 + 10, 32 + 19));
+    sequence.insert(SequenceRange(32 + 63, 32 + 66));
+    CORBA::Long bitmap[2];
+    CORBA::ULong num_bits;
+    TEST_CHECK(!sequence.to_bitmap(bitmap, 2, num_bits));
+    TEST_CHECK(num_bits == 64);
+    TEST_CHECK(bitmap[0] == 0x003FF000);
+    TEST_CHECK(bitmap[1] == 0x00000001);
   }
   return 0;
 }

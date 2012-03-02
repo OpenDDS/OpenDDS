@@ -170,8 +170,6 @@ bool wireshark_generator::gen_struct(UTL_ScopedName* name,
 bool wireshark_generator::gen_union(UTL_ScopedName* name,
                                     const std::vector<AST_UnionBranch*>& cases,
                                     AST_Type* _d,
-                                    AST_Expression::ExprType,
-                                    const AST_Union::DefaultValue&,
                                     const char* repoid)
 {
   if (!be_global->generate_wireshark())

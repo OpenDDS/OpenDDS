@@ -327,44 +327,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t
-DomainParticipantFactoryImpl::delete_contained_participants()
-{
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   tao_mon,
-                   this->participants_protector_,
-                   DDS::RETCODE_ERROR);
-
-  DPMap::iterator curMapIter;
-
-  for (DPMap::iterator mapIter = participants_.begin();
-       mapIter != participants_.end();
-       ++mapIter) {
-    // Move the iterator to next before delete_participant
-    // since it will erase this iterator.
-    curMapIter = mapIter;
-    ++ mapIter;
-
-    DPSet::iterator cur;
-
-    for (DPSet::iterator iter = curMapIter->second.begin();
-         iter != curMapIter->second.end();
-         ++iter) {
-      // Move the iterator to next before delete_participant
-      // since it will erase this iterator.
-      cur = iter;
-      ++ iter;
-      DDS::ReturnCode_t result = delete_participant((*cur).obj_.in());
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-    }
-  }
-
-  return DDS::RETCODE_OK;
-}
-
 DDS::DomainParticipantFactory_ptr
 DomainParticipantFactoryImpl::get_instance()
 ACE_THROW_SPEC((CORBA::SystemException))

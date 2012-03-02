@@ -472,7 +472,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
               guard,
               this->get_lock());
 
-    DataSampleList list = data_container_->get_resend_data();
+    DataSampleList list = this->get_resend_data();
 
     // Update the reader's expected sequence
     SequenceNumber& seq =
@@ -1821,18 +1821,6 @@ DataWriterImpl::num_samples(::DDS::InstanceHandle_t handle,
   return data_container_->num_samples(handle, size);
 }
 
-DataSampleList
-DataWriterImpl::get_unsent_data()
-{
-  return data_container_->get_unsent_data();
-}
-
-DataSampleList
-DataWriterImpl::get_resend_data()
-{
-  return data_container_->get_resend_data();
-}
-
 void
 DataWriterImpl::unregister_all()
 {
@@ -2164,12 +2152,6 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   this->coherent_samples_ = 0;
 }
 
-PublisherImpl*
-DataWriterImpl::get_publisher_servant()
-{
-  return publisher_servant_;
-}
-
 void
 DataWriterImpl::data_dropped(const DataSampleListElement* element,
                              bool dropped_by_transport)
@@ -2187,11 +2169,6 @@ DataWriterImpl::control_dropped(ACE_Message_Block* sample,
   DBG_ENTRY_LVL("DataWriterImpl","control_dropped",6);
   ++control_dropped_count_;
   sample->release();
-}
-
-void
-DataWriterImpl::unregistered(::DDS::InstanceHandle_t /* instance_handle */)
-{
 }
 
 DDS::DataWriterListener*

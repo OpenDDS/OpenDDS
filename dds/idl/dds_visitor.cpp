@@ -407,12 +407,8 @@ dds_visitor::visit_union(AST_Union* node)
     branches.push_back(ub);
   }
 
-  AST_Union::DefaultValue defval;
-  node->default_value(defval);
-
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_union(node->name(), branches, node->disc_type(),
-                                     node->udisc_type(), defval,
                                      node->repoID());
   }
 

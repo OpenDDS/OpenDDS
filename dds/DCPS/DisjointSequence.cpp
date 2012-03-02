@@ -243,6 +243,7 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
     // clamp to largest number we can represent
     high = length * 32 - 1;
     idx_high = length - 1;
+    bit_high = high % 32;
     clamped = true;
   }
 

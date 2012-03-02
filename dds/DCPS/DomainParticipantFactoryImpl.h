@@ -88,15 +88,6 @@ public:
     DDS::DomainParticipantFactoryQos & qos)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  /** This method is not defined in the IDL and is defined for
-  *  internal use.
-  *  Delete all participants belong to this factory and hence
-  *  delete all entities created by the participants.
-  *  Note: The delete will terminate and return error code if
-  *        any contained participant is not empty.
-  */
-  DDS::ReturnCode_t delete_contained_participants();
-
   // Expose the participants for reading.
   const DPMap& participants() const;
 

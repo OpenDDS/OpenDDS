@@ -280,8 +280,13 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-  DataSampleList get_unsent_data();
-  DataSampleList get_resend_data();
+  DataSampleList get_unsent_data() {
+    return data_container_->get_unsent_data();
+  }
+
+  DataSampleList get_resend_data() {
+    return data_container_->get_resend_data();
+  }
 
   /**
    * Accessor of the repository id of this datawriter/publication.
@@ -386,7 +391,7 @@ public:
    * The subclass must provide the implementation to unregister
    * the instance from its own map.
    */
-  virtual void unregistered(DDS::InstanceHandle_t instance_handle);
+  virtual void unregistered(DDS::InstanceHandle_t instance_handle) = 0;
 
   /**
    * This is used to retrieve the listener for a certain status
@@ -457,11 +462,6 @@ public:
   virtual EntityImpl* parent() const;
 
 protected:
-
-  /**
-   * Accessor of the cached publisher servant.
-   */
-  PublisherImpl* get_publisher_servant();
 
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific()

@@ -33,7 +33,6 @@ public:
   virtual ~DataBlockLockPool();
 
   DataBlockLock * get_lock();
-  void return_lock(DataBlockLock * lock);
 
 private:
   typedef ACE_Array<DataBlockLock> Pool;

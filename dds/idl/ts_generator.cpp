@@ -154,8 +154,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
 }
 
 bool ts_generator::gen_union(UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>&, AST_Type*, AST_Expression::ExprType,
-  const AST_Union::DefaultValue&, const char*)
+  const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
   if (idl_global->is_dcps_type(name)) {
     std::cerr << "ERROR: union " << scoped(name) << " can not be used as a "

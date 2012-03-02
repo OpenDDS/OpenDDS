@@ -41,8 +41,6 @@ public:
   bool gen_union(UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
-                 AST_Expression::ExprType udisc_type,
-                 const AST_Union::DefaultValue& default_value,
                  const char* repoid);
 };
 

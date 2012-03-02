@@ -182,152 +182,192 @@ MonitorFactoryImpl::initialize()
 
   OpenDDS::DCPS::ServiceParticipantReportTypeSupport_var sp_ts =
     new OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl();
-  sp_ts->register_type(participant.in(), "");
-  CORBA::String_var sp_type_name = sp_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              sp_type_name.in(),
-                              SERVICE_PARTICIPANT_MONITOR_TOPIC,
-                              dw_qos);
-  this->sp_writer_ =
-    OpenDDS::DCPS::ServiceParticipantReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->sp_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow sp_writer\n"));
+  ::DDS::ReturnCode_t ret = sp_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var sp_type_name = sp_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                sp_type_name.in(),
+                                SERVICE_PARTICIPANT_MONITOR_TOPIC,
+                                dw_qos);
+    this->sp_writer_ =
+      OpenDDS::DCPS::ServiceParticipantReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->sp_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow sp_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register sp_ts\n"));
   }
 
   OpenDDS::DCPS::DomainParticipantReportTypeSupport_var dp_ts =
     new OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl();
-  dp_ts->register_type(participant.in(), "");
-  CORBA::String_var dp_type_name = dp_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              dp_type_name.in(),
-                              DOMAIN_PARTICIPANT_MONITOR_TOPIC,
-                              dw_qos);
-  this->dp_writer_ =
-    OpenDDS::DCPS::DomainParticipantReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->dp_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dp_writer\n"));
+  ret = dp_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var dp_type_name = dp_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                dp_type_name.in(),
+                                DOMAIN_PARTICIPANT_MONITOR_TOPIC,
+                                dw_qos);
+    this->dp_writer_ =
+      OpenDDS::DCPS::DomainParticipantReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->dp_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dp_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register dp_ts\n"));
   }
 
   OpenDDS::DCPS::TopicReportTypeSupport_var topic_ts =
     new OpenDDS::DCPS::TopicReportTypeSupportImpl();
-  topic_ts->register_type(participant.in(), "");
-  CORBA::String_var topic_type_name = topic_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              topic_type_name.in(),
-                              TOPIC_MONITOR_TOPIC,
-                              dw_qos);
-  this->topic_writer_ =
-    OpenDDS::DCPS::TopicReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->topic_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow topic_writer\n"));
+  ret = topic_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var topic_type_name = topic_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                topic_type_name.in(),
+                                TOPIC_MONITOR_TOPIC,
+                                dw_qos);
+    this->topic_writer_ =
+      OpenDDS::DCPS::TopicReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->topic_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow topic_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register topic_ts\n"));
   }
 
   OpenDDS::DCPS::PublisherReportTypeSupport_var pub_ts =
     new OpenDDS::DCPS::PublisherReportTypeSupportImpl();
-  pub_ts->register_type(participant.in(), "");
-  CORBA::String_var pub_type_name = pub_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              pub_type_name.in(),
-                              PUBLISHER_MONITOR_TOPIC,
-                              dw_qos);
-  this->pub_writer_ =
-    OpenDDS::DCPS::PublisherReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->pub_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow pub_writer\n"));
+  ret = pub_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var pub_type_name = pub_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                pub_type_name.in(),
+                                PUBLISHER_MONITOR_TOPIC,
+                                dw_qos);
+    this->pub_writer_ =
+      OpenDDS::DCPS::PublisherReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->pub_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow pub_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register pub_ts\n"));
   }
 
   OpenDDS::DCPS::SubscriberReportTypeSupport_var sub_ts =
     new OpenDDS::DCPS::SubscriberReportTypeSupportImpl();
-  sub_ts->register_type(participant.in(), "");
-  CORBA::String_var sub_type_name = sub_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              sub_type_name.in(),
-                              SUBSCRIBER_MONITOR_TOPIC,
-                              dw_qos);
-  this->sub_writer_ =
-    OpenDDS::DCPS::SubscriberReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->sub_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow sub_writer\n"));
+  ret = sub_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var sub_type_name = sub_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                sub_type_name.in(),
+                                SUBSCRIBER_MONITOR_TOPIC,
+                                dw_qos);
+    this->sub_writer_ =
+      OpenDDS::DCPS::SubscriberReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->sub_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow sub_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register sub_ts\n"));
   }
 
   OpenDDS::DCPS::DataWriterReportTypeSupport_var dw_ts =
     new OpenDDS::DCPS::DataWriterReportTypeSupportImpl();
-  dw_ts->register_type(participant.in(), "");
-  CORBA::String_var dw_type_name = dw_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              dw_type_name.in(),
-                              DATA_WRITER_MONITOR_TOPIC,
-                              dw_qos);
-  this->dw_writer_ =
-    OpenDDS::DCPS::DataWriterReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->dw_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dw_writer\n"));
+  ret = dw_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var dw_type_name = dw_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                dw_type_name.in(),
+                                DATA_WRITER_MONITOR_TOPIC,
+                                dw_qos);
+    this->dw_writer_ =
+      OpenDDS::DCPS::DataWriterReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->dw_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dw_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register sp_ts\n"));
   }
 
   OpenDDS::DCPS::DataWriterPeriodicReportTypeSupport_var dw_per_ts =
     new OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl();
-  dw_per_ts->register_type(participant.in(), "");
-  CORBA::String_var dw_per_type_name = dw_per_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              dw_per_type_name.in(),
-                              DATA_WRITER_PERIODIC_MONITOR_TOPIC,
-                              dw_qos);
-  this->dw_per_writer_ =
-    OpenDDS::DCPS::DataWriterPeriodicReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->dw_per_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dw_per_writer\n"));
+  ret = dw_per_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var dw_per_type_name = dw_per_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                dw_per_type_name.in(),
+                                DATA_WRITER_PERIODIC_MONITOR_TOPIC,
+                                dw_qos);
+    this->dw_per_writer_ =
+      OpenDDS::DCPS::DataWriterPeriodicReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->dw_per_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dw_per_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register dw_per_ts\n"));
   }
 
   OpenDDS::DCPS::DataReaderReportTypeSupport_var dr_ts =
     new OpenDDS::DCPS::DataReaderReportTypeSupportImpl();
-  dr_ts->register_type(participant.in(), "");
-  CORBA::String_var dr_type_name = dr_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              dr_type_name.in(),
-                              DATA_READER_MONITOR_TOPIC,
-                              dw_qos);
-  this->dr_writer_ =
-    OpenDDS::DCPS::DataReaderReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->dr_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dr_writer\n"));
+  ret = dr_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var dr_type_name = dr_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                dr_type_name.in(),
+                                DATA_READER_MONITOR_TOPIC,
+                                dw_qos);
+    this->dr_writer_ =
+      OpenDDS::DCPS::DataReaderReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->dr_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dr_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register dr_ts\n"));
   }
 
   OpenDDS::DCPS::DataReaderPeriodicReportTypeSupport_var dr_per_ts =
     new OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl();
-  dr_per_ts->register_type(participant.in(), "");
-  CORBA::String_var dr_per_type_name = dr_per_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              dr_per_type_name.in(),
-                              DATA_READER_PERIODIC_MONITOR_TOPIC,
-                              dw_qos);
-  this->dr_per_writer_ =
-    OpenDDS::DCPS::DataReaderPeriodicReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->dr_per_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dr_per_writer\n"));
+  ret = dr_per_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var dr_per_type_name = dr_per_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                dr_per_type_name.in(),
+                                DATA_READER_PERIODIC_MONITOR_TOPIC,
+                                dw_qos);
+    this->dr_per_writer_ =
+      OpenDDS::DCPS::DataReaderPeriodicReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->dr_per_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow dr_per_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register dr_per_ts\n"));
   }
 
   OpenDDS::DCPS::TransportReportTypeSupport_var transport_ts =
     new OpenDDS::DCPS::TransportReportTypeSupportImpl();
-  transport_ts->register_type(participant.in(), "");
-  CORBA::String_var transport_type_name = transport_ts->get_type_name();
-  writer = create_data_writer(participant.in(),
-                              publisher.in(),
-                              transport_type_name.in(),
-                              TRANSPORT_MONITOR_TOPIC,
-                              dw_qos);
-  this->transport_writer_ =
-    OpenDDS::DCPS::TransportReportDataWriter::_narrow(writer.in());
-  if (CORBA::is_nil(this->transport_writer_)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow transport_writer\n"));
+  ret = transport_ts->register_type(participant.in(), "");
+  if (DDS::RETCODE_OK == ret) {
+    CORBA::String_var transport_type_name = transport_ts->get_type_name();
+    writer = create_data_writer(participant.in(),
+                                publisher.in(),
+                                transport_type_name.in(),
+                                TRANSPORT_MONITOR_TOPIC,
+                                dw_qos);
+    this->transport_writer_ =
+      OpenDDS::DCPS::TransportReportDataWriter::_narrow(writer.in());
+    if (CORBA::is_nil(this->transport_writer_)) {
+      ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to narrow transport_writer\n"));
+    }
+  } else {
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::initialize(): Failed to register transport_ts\n"));
   }
 }
 

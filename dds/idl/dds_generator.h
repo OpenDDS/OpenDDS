@@ -55,8 +55,6 @@ public:
   virtual bool gen_union(UTL_ScopedName* name,
                          const std::vector<AST_UnionBranch*>& branches,
                          AST_Type* discriminator,
-                         AST_Expression::ExprType udisc_type,
-                         const AST_Union::DefaultValue& default_value,
                          const char* repoid) = 0;
 
   static std::string scoped_helper(UTL_ScopedName* sn, const char* sep);
@@ -89,8 +87,6 @@ public:
   bool gen_union(UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
-                 AST_Expression::ExprType udisc_type,
-                 const AST_Union::DefaultValue& default_value,
                  const char* repoid);
 
   template <typename InputIterator>

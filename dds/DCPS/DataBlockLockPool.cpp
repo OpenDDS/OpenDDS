@@ -31,9 +31,3 @@ DataBlockLockPool::get_lock()
 
   return lock;
 }
-
-void
-DataBlockLockPool::return_lock(DataBlockLockPool::DataBlockLock * /* lock */)
-{
-  // Do Nothing.
-}

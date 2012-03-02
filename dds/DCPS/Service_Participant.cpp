@@ -242,20 +242,6 @@ Service_Participant::shutdown()
         this->wait();
       }
 
-      // Don't delete the participants - require the client code
-      // to delete participants
-#if 0
-
-      //TBD return error code from this call
-      // -- non-empty entity will make this call return failure
-      if (dp_factory_impl_->delete_contained_participants() != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::shutdown, ")
-                   ACE_TEXT("delete_contained_participants failed.\n")));
-      }
-
-#endif
-
       if (!orb_from_user_) {
         root_poa_->destroy(1, 1);
         orb_->destroy();

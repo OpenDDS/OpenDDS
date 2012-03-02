@@ -119,13 +119,11 @@ bool composite_generator::gen_native(UTL_ScopedName* name, const char* repoid)
 
 bool composite_generator::gen_union(UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-  AST_Expression::ExprType udisc_type,
-  const AST_Union::DefaultValue& default_value, const char* repoid)
+  const char* repoid)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
-    if (!(*it)->gen_union(name, branches, discriminator, udisc_type,
-                          default_value, repoid))
+    if (!(*it)->gen_union(name, branches, discriminator, repoid))
       return false;
   }
 

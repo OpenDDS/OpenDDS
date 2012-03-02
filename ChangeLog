@@ -1,3 +1,52 @@
+Fri Mar  2 21:18:21 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added test to cover when the disjoint sequence
+          has more data than could fit in a bitmap range
+          and fixed error exposed in fill_bitmap_range.
+
+        * dds/DCPS/DataBlockLockPool.h:
+        * dds/DCPS/DataBlockLockPool.cpp:
+
+          Removed unused functions.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Moved simple functions to inline, removed unused functions,
+          and made unregistered pure virtual.
+
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed unused function and useless comments.
+
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/keys_generator.h:
+        * dds/idl/marshal_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.h:
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+        * dds/idl/wireshark_generator.h:
+        * dds/idl/wireshark_generator.cpp:
+
+          Removed dead code and unused function parameters.
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+
+          Fixing coverity identified errors.
+
+        * tests/DCPS/unit/Main.cpp:
+
+          Added unit tests to cover DataSamplListIterator.
+
 Thu Mar  1 19:13:47 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
