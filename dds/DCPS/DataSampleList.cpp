@@ -194,13 +194,6 @@ DataSampleList::enqueue_tail_next_send_sample(DataSampleList list)
 
 // -----------------------------------------------
 
-DataSampleListIterator::DataSampleListIterator()
-  : head_(0)
-  , tail_(0)
-  , current_(0)
-{
-}
-
 DataSampleListIterator::DataSampleListIterator(
   DataSampleListElement* head,
   DataSampleListElement* tail,
@@ -209,24 +202,6 @@ DataSampleListIterator::DataSampleListIterator(
   , tail_(tail)
   , current_(current)
 {
-}
-
-DataSampleListIterator::DataSampleListIterator(
-  DataSampleListIterator const & rhs)
-  : head_(rhs.head_)
-  , tail_(rhs.tail_)
-  , current_(rhs.current_)
-{
-}
-
-DataSampleListIterator&
-DataSampleListIterator::operator=(DataSampleListIterator const & rhs)
-{
-  this->head_ = rhs.head_;
-  this->tail_ = rhs.tail_;
-  this->current_ = rhs.current_;
-
-  return *this;
 }
 
 DataSampleListIterator&
