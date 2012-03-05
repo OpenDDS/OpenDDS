@@ -178,14 +178,11 @@ public:
   /**
    * This constructor is used when constructing an "end" iterator.
    */
-  DataSampleListIterator();
 
   DataSampleListIterator(DataSampleListElement* head,
                          DataSampleListElement* tail,
                          DataSampleListElement* current);
-  DataSampleListIterator(DataSampleListIterator const & rhs);
 
-  DataSampleListIterator& operator=(DataSampleListIterator const & rhs);
   DataSampleListIterator& operator++();
   DataSampleListIterator  operator++(int);
   DataSampleListIterator& operator--();
@@ -206,6 +203,7 @@ public:
   }
 
 private:
+  DataSampleListIterator();
 
   DataSampleListElement* head_;
   DataSampleListElement* tail_;

@@ -291,6 +291,8 @@ if ($cleanup_only) {
     exit 1;
 }
 
+print "Collect Coverage Data\n";
+
 if (defined($limit)) {
     $limit = "$source_root/$limit/*";
     $limit =~ s/\\+/\//g;

@@ -1,3 +1,17 @@
+Sat Mar  3 06:28:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Minor context log message.
+
+Sat Mar  3 05:35:51 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+
+          Removed copy ctor & operator= and let compiler generate,
+          removed and prevented default ctor.
+
 Fri Mar  2 21:18:21 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/UnitTests/DisjointSequence.cpp:
