@@ -197,7 +197,7 @@ private:
       : ack_pending_(false), initial_hb_(true), heartbeat_recvd_count_(0),
         hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) {}
 
-    bool should_nack(bool durable) const;
+    bool should_nack() const;
   };
 
   typedef std::map<RepoId, WriterInfo, GUID_tKeyLessThan> WriterInfoMap;

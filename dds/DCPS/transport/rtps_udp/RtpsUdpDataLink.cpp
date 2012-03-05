@@ -631,7 +631,7 @@ RtpsUdpDataLink::process_heartbeat_i(
   const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
     liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
 
-  if (!final || (!liveliness && (info.should_nack(rr.second.durable_) ||
+  if (!final || (!liveliness && (info.should_nack() ||
       recv_strategy_->has_fragments(info.hb_range_, wi->first)))) {
     info.ack_pending_ = true;
     heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
@@ -641,11 +641,11 @@ RtpsUdpDataLink::process_heartbeat_i(
 }
 
 bool
-RtpsUdpDataLink::WriterInfo::should_nack(bool durable) const
+RtpsUdpDataLink::WriterInfo::should_nack() const
 {
   return recvd_.disjoint()
-    || (!recvd_.empty() && recvd_.high() < hb_range_.second)
-    || (durable && (recvd_.empty() || recvd_.low() > hb_range_.first));
+    || (!recvd_.empty() && (recvd_.high() < hb_range_.second ||
+                            recvd_.low() > hb_range_.first));
 }
 
 void
