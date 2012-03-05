@@ -20,8 +20,9 @@ Not Currently Implemented
 - Coherent sets for PRESENTATION QoS (8.7.5)
 - Directed writes (8.7.6) -- these don't exist in the DDS spec
 - Property lists (8.7.7) -- these don't exist in the DDS spec
-- Original writer info for DURABLE data (8.7.8) is implemented, but the
-  OriginalWriterInfo_t::originalWriterQos field is left as an empty list
+- Original writer info for DURABLE data (8.7.8) -- this would only be used for
+  transient and persistent durability, which are not supported by the RTPS
+  spec (8.7.2.2.1)
 - Key Hashes (8.7.9) are not generated, but they are optional anyway
 - wait_for_acknowledgements()
 - nackSuppressionDuration (Table 8.47) and heartbeatSuppressionDuration
