@@ -1,3 +1,13 @@
+Tue Mar  6 20:00:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/ReceivedDataElementList.h:
+
+          Removing dead code.
+
+        * tools/scripts/lcov.pl:
+
+          Added check to identify when code has no coverage at all.
+
 Tue Mar  6 19:51:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Definitions.h:

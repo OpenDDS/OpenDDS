@@ -120,9 +120,7 @@ public:
   ReceivedDataFilter() {}
   virtual ~ReceivedDataFilter() {}
 
-  virtual bool operator()(ReceivedDataElement* /* data_sample */) {
-    return false;
-  }
+  virtual bool operator()(ReceivedDataElement* data_sample) = 0;
 };
 
 class OpenDDS_Dcps_Export ReceivedDataOperation {
@@ -130,7 +128,7 @@ public:
   ReceivedDataOperation() {}
   virtual ~ReceivedDataOperation() {}
 
-  virtual void operator()(ReceivedDataElement* /* data_sample */) {}
+  virtual void operator()(ReceivedDataElement* data_sample) = 0;
 };
 
 class OpenDDS_Dcps_Export ReceivedDataElementList {

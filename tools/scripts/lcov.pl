@@ -79,39 +79,28 @@ sub removeFiles
     }
 }
 
-sub reduce
+sub findNoCoverage
 {
-    my $input_file = shift;
-    my $file = shift;
-
-    if (!open(INPUT, "<", "$input_file")) {
-        print STDERR __FILE__, ": Cannot open $input_file for limiting coverage to root\n";
-        next;
-    }
-    if (!open(OUTPUT, ">", "$file")) {
-        print STDERR __FILE__, ": Cannot write to $file for limiting coverage to root\n";
-        close(INPUT);
-        next;
-    }
-    my $record = "";
-    my $print = 0;
-    while (<INPUT>) {
-        $record .= $_;
-        if (/^\s*SF:$limit/) {
-            $print = 1;
+    my $params = shift;
+    my $dir = shift;
+    
+    my $dh;
+    opendir($dh, $dir);
+    # collect all *.gdno and *.gcda files
+    my @gcno_entries = grep { s/\.gcno$// } readdir($dh);
+    my @gcda_entries = grep { s/\.gcda$// } readdir($dh);
+    closedir($dh);
+    if (scalar(@gnco_entries) > scalar(@gcda_entries)) {
+        my %gcda_hash = ();
+        foreach my $entry (@gcda_entries) {
+            $gcda_hash{$entry} = 1;
         }
-        if (/^\s*end_of_record\s*$/) {
-            # complete record found, only write it if it is under the $source_root
-            if ($print) {
-                print OUTPUT "$record";
+        foreach my $prefix (@gcno_entries) {
+            if (!$gcda_hash{$prefix}) {
+                print {$params->{no_cov_fh}} "$dir/$prefix\n";
             }
-            $record = "";
-            $print = 0;
         }
     }
-    close(INPUT);
-    close(OUTPUT);
-    unlink($input_file);
 }
 
 sub createInfo
@@ -130,7 +119,7 @@ sub createInfo
         my $dh;
         opendir($dh, $obj_dir);
         # collect all *.gcda files
-        my @entries = grep { /\.gcda$/ } readdir($dh);
+        my @entries = sort grep { /\.gcda$/ } readdir($dh);
         closedir($dh);
         if (scalar(@entries) > 0) {
             my $info = "$dir.info";
@@ -139,12 +128,18 @@ sub createInfo
                 $initial_info .= ".tmp";
             }
             my $status = system("lcov -c --gcov-tool $gcov_tool -b $dir -d $obj_dir -o $initial_info");
-            if (!$status && defined($limit)) {
+            if ($status) {
+                print {$params->{no_cov_fh}} "$dir\n";
+            }
+            elsif (defined($limit)) {
                 $status = system("lcov --gcov-tool $gcov_tool -o $info -e $initial_info \"$limit\"");
                 unlink($initial_info);
                 # if lcov failed, or if there is no coverage
                 # in the code we care about, then remove the file
                 if ($status || -z $info) {
+                    if ($dir =~ /^$limit/) {
+                        print {$params->{no_cov_fh}} "$dir\n";
+                    }
                     unlink($info);
                     $status = 1;
                 }
@@ -300,7 +295,6 @@ if (defined($limit)) {
     $limit =~ s/\/\.\//\//g;
     $limit =~ s/\/[^\/]+\/\.\.\//\//g;
     $limit =~ s/\/\./\//g;
-#    $limit =~ s/\//\\\//g;
 }
 print "source_root=$source_root\n" if $verbose;
 print "run_dir=$run_dir\n" if $verbose;
@@ -313,12 +307,31 @@ print "Coverage: removing *.info\n" if $verbose;
 traverse( { 'file_function' => \&removeFiles, 'extension' => 'info' });
 
 print "Coverage: collect coverage data\n" if $verbose;
+
+my $no_cov_filename = "$run_dir/file_dirs_with_no_coverage.lst";
+if (!open(NO_COV_FILE, ">", "$no_cov_filename")) {
+    print STDERR __FILE__, ": Cannot write to $no_cov_filename for indicating files with no coverage data\n";
+    exit 1;
+}
+traverse({ 'dir_function' => \&findNoCoverage,
+           'no_cov_fh' => \*NO_COV_FILE });
 # createInfo accounts for .*obj directories, so don't traverse
 $excludes{".obj"} = 1;
 $excludes{".shobj"} = 1;
 $excludes{".cov_temp_obj"} = 1;
 # use lcov to convert *.gcda files into a *.info file
-traverse({ 'dir_function' => \&createInfo });
+traverse({ 'dir_function' => \&createInfo,
+           'no_cov_fh' => \*NO_COV_FILE });
+close(NO_COV_FILE);
+
+if (!open(NO_COV_FILE, "<", "$no_cov_filename")) {
+    print STDERR __FILE__, ": Cannot open $no_cov_filename for limiting coverage to root\n";
+    next;
+}
+if (<NO_COV_FILE>) {
+    print "Coverage: see $no_cov_filename for files with no coverage data\n";
+}
+close(NO_COV_FILE);
 
 print "Coverage: combine all coverage data\n" if $verbose;
 my $status = 0;
