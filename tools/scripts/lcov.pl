@@ -90,7 +90,7 @@ sub findNoCoverage
     my @gcno_entries = grep { s/\.gcno$// } readdir($dh);
     my @gcda_entries = grep { s/\.gcda$// } readdir($dh);
     closedir($dh);
-    if (scalar(@gnco_entries) > scalar(@gcda_entries)) {
+    if (scalar(@gcno_entries) > scalar(@gcda_entries)) {
         my %gcda_hash = ();
         foreach my $entry (@gcda_entries) {
             $gcda_hash{$entry} = 1;
