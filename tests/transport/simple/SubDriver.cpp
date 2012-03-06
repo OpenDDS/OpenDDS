@@ -218,7 +218,7 @@ SubDriver::run()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimpleSubscriber object.\n"));
 
-  this->reader_.enable_transport(false /*reliable*/);
+  this->reader_.enable_transport(false /*reliable*/, false /*durable*/);
 
   // Write a file so that test script knows we're ready
   FILE * file = ACE_OS::fopen ("subready.txt", ACE_TEXT("w"));

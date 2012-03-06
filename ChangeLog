@@ -1,3 +1,41 @@
+Tue Mar  6 00:36:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Pass durability attribute down from DCPS to transport.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Keep track of whether or not each local (reliable) reader using the
+          data link is durable (has a durability level greater than volatile).
+          Implemented reader's side of transient-local durability for RTPS.
+          Disabled sending of INFO_REPLY submessage as this caused problems for
+          interoperability.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          SEDP readers and writers have transient-local durability.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+
+          Updated tests to account for changed transport client API.
+
+        * docs/design/RTPS:
+
+          Updated note about Original Writer Info.
+
 Sat Mar  3 06:28:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:

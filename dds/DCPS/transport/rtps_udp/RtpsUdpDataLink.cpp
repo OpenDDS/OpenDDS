@@ -29,6 +29,20 @@
 # include "RtpsUdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
+namespace {
+
+/// Return the number of CORBA::Longs required for the bitmap representation of
+/// sequence numbers between low and high, inclusive (maximum 8 longs).
+CORBA::ULong
+bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
+                 const OpenDDS::DCPS::SequenceNumber& high)
+{
+  return std::min(CORBA::ULong(8),
+                  CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
+}
+
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -196,7 +210,8 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
 
 void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
-                            bool local_reliable, bool remote_reliable)
+                            bool local_reliable, bool remote_reliable,
+                            bool local_durable)
 {
   if (!local_reliable) {
     return;
@@ -216,6 +231,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     if (rr == readers_.end()) {
       rr = readers_.insert(RtpsReaderMap::value_type(local_id, RtpsReader()))
         .first;
+      rr->second.durable_ = local_durable;
     }
     rr->second.remote_writers_[remote_id];
     reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
@@ -599,36 +615,62 @@ RtpsUdpDataLink::process_heartbeat_i(
     return;
   }
 
-  if (heartbeat.count.value <= wi->second.heartbeat_recvd_count_) {
+  WriterInfo& info = wi->second;
+
+  if (heartbeat.count.value <= info.heartbeat_recvd_count_) {
     return;
   }
+  info.heartbeat_recvd_count_ = heartbeat.count.value;
 
-  wi->second.heartbeat_recvd_count_ = heartbeat.count.value;
-
-  SequenceNumber& first = wi->second.hb_range_.first;
+  SequenceNumber& first = info.hb_range_.first;
   first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
-  SequenceNumber& last = wi->second.hb_range_.second;
+  SequenceNumber& last = info.hb_range_.second;
   last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
+  static const SequenceNumber starting;
 
-  DisjointSequence& recvd = wi->second.recvd_;
-  // the cumulative ack may only increase ("once acked, always acked" rule) and
-  // the cumultaive ack must be at least first - 1
-  if (!recvd.empty() && recvd.cumulative_ack() < first.previous()) {
-    recvd.insert(SequenceRange(recvd.cumulative_ack(), first.previous()));
+  DisjointSequence& recvd = info.recvd_;
+  if (!rr.second.durable_ && info.initial_hb_) {
+    // For the non-durable reader, the first received HB or DATA establishes
+    // a baseline of the lowest sequence number we'd ever need to NACK.
+    if (recvd.empty() || recvd.low() >= last) {
+      recvd.insert(SequenceRange(starting, (last > starting)
+                                           ? last.previous() : starting));
+    } else {
+      recvd.insert(SequenceRange(starting, recvd.low()));
+    }
+  } else if (!recvd.empty() && first > starting) {
+    // All sequence numbers below 'first' should not be NACKed.
+    // The value of 'first' may not decrease with subsequent HBs.
+    recvd.insert(SequenceRange(SequenceNumber(), first.previous()));
   }
   //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
-  //        numbers (dropped) we no longer expect to receive due to HEARTBEAT
+  //        numbers we no longer expect to receive due to HEARTBEAT
+
+  info.initial_hb_ = false;
 
   const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
-    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */,
-    frags = recv_strategy_->has_fragments(wi->second.hb_range_, wi->first);
+    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
 
-  if (!final || (!liveliness && (recvd.disjoint() || frags))) {
-    wi->second.ack_pending_ = true;
+  if (!final || (!liveliness && (info.should_nack() ||
+      (rr.second.durable_ && recvd.empty()) ||
+      recv_strategy_->has_fragments(info.hb_range_, wi->first)))) {
+    info.ack_pending_ = true;
     heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
   }
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
+}
+
+bool
+RtpsUdpDataLink::WriterInfo::should_nack() const
+{
+  if (recvd_.disjoint() && recvd_.cumulative_ack() < hb_range_.second) {
+    return true;
+  }
+  if (!recvd_.empty()) {
+    return recvd_.high() < hb_range_.second;
+  }
+  return false;
 }
 
 void
@@ -644,7 +686,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
       // if we have some negative acknowledgements, we'll ask for a reply
       DisjointSequence& recvd = wi->second.recvd_;
-      const bool nack = recvd.disjoint();
+      const bool nack = wi->second.should_nack() ||
+                        (rr->second.durable_ && recvd.empty());
 
       if (wi->second.ack_pending_ || nack) {
         wi->second.ack_pending_ = false;
@@ -655,27 +698,58 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         bitmap.length(1);
         bitmap[0] = 0;
 
-        if (!recvd.empty()) {
+        const SequenceNumber& hb_high = wi->second.hb_range_.second;
+        const SequenceNumber::Value hb_high_val = hb_high.getValue();
+
+        if (recvd.empty()) {
+          // Nack the entire heartbeat range.  Only reached when durable.
+          ack = wi->second.hb_range_.first;
+          bitmap.length(bitmap_num_longs(ack, hb_high));
+          const CORBA::ULong idx = (hb_high_val > ack.getValue() + 255)
+                                   ? 255
+                                   : CORBA::ULong(hb_high_val - ack.getValue());
+          DisjointSequence::fill_bitmap_range(0, idx,
+                                              bitmap.get_buffer(),
+                                              bitmap.length(), num_bits);
+        } else {
           ack = ++SequenceNumber(recvd.cumulative_ack());
           if (recvd.low() > 1) {
             // since the "ack" really is cumulative, we need to make
             // sure that a lower discontinuity is not possible later
-            recvd.insert(SequenceRange(1, recvd.cumulative_ack()));
+            recvd.insert(SequenceRange(SequenceNumber(),
+                                       recvd.cumulative_ack()));
           }
         }
 
         if (recvd.disjoint()) {
-          bitmap.length(std::min(CORBA::ULong(8),
-                                 CORBA::ULong((recvd.last_ack().getValue() -
-                                               ack.getValue() + 31) / 32)));
+          bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
           recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
-
-          // If the receive strategy is holding any fragments, those should
-          // not be "nacked" in the ACKNACK reply.  They will be accounted for
-          // in the NACK_FRAG(s) instead.
-          recv_strategy_->remove_frags_from_bitmap(bitmap.get_buffer(),
-                                                   num_bits, ack, wi->first);
         }
+
+        const SequenceNumber::Value ack_val = ack.getValue();
+
+        if (!recvd.empty() && hb_high > recvd.high()
+            && hb_high <= ack_val + 255) {
+          const CORBA::ULong old_len = bitmap.length(),
+            new_len = bitmap_num_longs(ack, hb_high);
+          if (new_len > old_len) {
+            bitmap.length(new_len);
+            for (CORBA::ULong i = old_len; i < new_len; ++i) {
+              bitmap[i] = 0;
+            }
+          }
+          const CORBA::ULong idx_hb_high = CORBA::ULong(hb_high_val - ack_val),
+            idx_recv_high = CORBA::ULong(recvd.high().getValue() - ack_val);
+          DisjointSequence::fill_bitmap_range(idx_recv_high, idx_hb_high,
+                                              bitmap.get_buffer(), new_len,
+                                              num_bits);
+        }
+
+        // If the receive strategy is holding any fragments, those should
+        // not be "nacked" in the ACKNACK reply.  They will be accounted for
+        // in the NACK_FRAG(s) instead.
+        recv_strategy_->remove_frags_from_bitmap(bitmap.get_buffer(),
+                                                 num_bits, ack, wi->first);
 
         AckNackSubmessage acknack = {
           {ACKNACK, 1 /*FLAG_E*/ | (nack ? 0 : 2 /*FLAG_F*/), 0 /*length*/},
@@ -692,9 +766,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         gen_find_size(acknack, size, padding);
         acknack.smHeader.submessageLength =
           static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
-        // ok to visit these next two out-of-order, all of these are aligned
         gen_find_size(info_dst_, size, padding);
-        gen_find_size(info_reply_, size, padding);
 
         std::vector<NackFragSubmessage> nack_frags;
         size += generate_nack_frags(nack_frags, wi->second, wi->first);
@@ -705,7 +777,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         std::memcpy(info_dst_.guidPrefix, wi->first.guidPrefix,
                     sizeof(GuidPrefix_t));
         ser << info_dst_;
-        ser << info_reply_;
+        //NOTE: we used to insert "info_reply_" here, but interoperability
+        //testing indicated that other DDS implementations didn't allow it
         ser << acknack;
         for (size_t i = 0; i < nack_frags.size(); ++i) {
           nack_frags[i].readerId = rr->first.entityId;
@@ -1000,9 +1073,7 @@ RtpsUdpDataLink::send_nack_replies()
     LongSeq8 bitmap;
 
     if (gaps.disjoint()) {
-      bitmap.length(std::min(CORBA::ULong(8),
-                             CORBA::ULong(gaps.high().getValue() -
-                                          base.getValue()) / 32));
+      bitmap.length(bitmap_num_longs(base, gaps.high()));
       gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
 
     } else {
