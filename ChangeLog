@@ -1,3 +1,10 @@
+Tue Mar  6 23:31:35 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Fixed a bug in handling sequence number 0 combining with 1.
+
 Tue Mar  6 20:16:10 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:

@@ -48,7 +48,9 @@ DisjointSequence::insert_i(const SequenceRange& range,
   // find the lower_bound for the SequenceNumber just before this range
   // to see if any ranges need to combine
   const RangeSet::iterator range_below =
-    sequences_.lower_bound(SequenceRange(1 /*ignored*/, previous));
+    sequences_.lower_bound(SequenceRange(1 /*ignored*/,
+                                         (previous > 0) ? previous
+                                         : SequenceNumber::ZERO()));
   if (range_below != sequences_.end()) {
     // if low end falls inside of the range_below range
     // then combine

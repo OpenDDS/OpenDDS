@@ -287,6 +287,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     std::vector<SequenceRange> ranges = sequence.missing_sequence_ranges();
     TEST_CHECK(ranges.size() == 1);
     TEST_CHECK(ranges[0] == SequenceRange(1, 1));
+    sequence.reset();
+    sequence.insert(SequenceRange(zero, zero));
+    sequence.insert(SequenceRange(1, 2));
+    TEST_CHECK(!sequence.disjoint());
+    sequence.reset();
+    sequence.insert(SequenceRange(1, 2));
+    sequence.insert(SequenceRange(zero, zero));
+    TEST_CHECK(!sequence.disjoint());
   }
   {
     DisjointSequence sequence;
