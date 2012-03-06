@@ -1,3 +1,23 @@
+Tue Mar  6 19:51:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Allow a 0-valued sequence number only with a special accessor
+          function like the unknown sequence number.
+          Less-than comparison for SequenceNumber no longer accounts for
+          wrap-around (which won't happen with 64-bit sequence numbers).
+          Cleaned up some other cruft in the SequenceNumber class.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Use the 0 sequence number to avoid needing special case code when
+          the heartbeat low is 1.
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+
+          Updated unit tests for sequence number changes.
+
 Tue Mar  6 14:34:37 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

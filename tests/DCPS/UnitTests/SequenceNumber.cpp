@@ -27,6 +27,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // Construction (default)
   TEST_CHECK(SequenceNumber(SN_MIN) == SequenceNumber());
 
+  TEST_CHECK(SequenceNumber::ZERO().getValue() == 0);
+  TEST_CHECK(SequenceNumber::ZERO() < SequenceNumber());
+  TEST_CHECK(++SequenceNumber(SequenceNumber::ZERO()) == SequenceNumber());
+
   // testing numerical sequence
   TEST_CHECK(SequenceNumber(SN_MIN) < SequenceNumber(SN_MIN+1));
   TEST_CHECK(!(SequenceNumber(SN_MIN+1) < SequenceNumber(SN_MIN)));
@@ -34,18 +38,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   TEST_CHECK(!(SequenceNumber(SN_SEAM+1) < SequenceNumber(SN_SEAM)));
   TEST_CHECK(SequenceNumber(SN_MAX-1) < SequenceNumber(SN_MAX));
   TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_MAX-1)));
-
-  // testing wide ranges
-  TEST_CHECK(SequenceNumber() < SequenceNumber(SN_RANGE/2));
-  TEST_CHECK(!(SequenceNumber(SN_RANGE/2) < SequenceNumber()));
-  TEST_CHECK(SequenceNumber(SN_RANGE/2+1) < SequenceNumber());
-  TEST_CHECK(!(SequenceNumber() < SequenceNumber(SN_RANGE/2+1)));
-  TEST_CHECK(SequenceNumber(SN_RANGE/2+1) < SequenceNumber(SN_MAX));
-  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_RANGE/2+1)));
-  TEST_CHECK(SequenceNumber(SN_MAX) < SequenceNumber(SN_RANGE/2));
-  TEST_CHECK(!(SequenceNumber(SN_RANGE/2) < SequenceNumber(SN_MAX)));
-  TEST_CHECK(SequenceNumber(SN_MAX) < SequenceNumber());
-  TEST_CHECK(!(SequenceNumber() < SequenceNumber(SN_MAX)));
 
   // testing values and increment operator
   {

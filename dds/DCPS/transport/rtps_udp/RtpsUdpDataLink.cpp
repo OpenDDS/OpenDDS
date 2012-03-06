@@ -626,22 +626,27 @@ RtpsUdpDataLink::process_heartbeat_i(
   first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
   SequenceNumber& last = info.hb_range_.second;
   last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
-  static const SequenceNumber starting;
+  static const SequenceNumber starting, zero = SequenceNumber::ZERO();
 
   DisjointSequence& recvd = info.recvd_;
   if (!rr.second.durable_ && info.initial_hb_) {
+    if (last.getValue() < starting.getValue()) {
+      // this is an invalid heartbeat -- last must be positive
+      return;
+    }
     // For the non-durable reader, the first received HB or DATA establishes
     // a baseline of the lowest sequence number we'd ever need to NACK.
     if (recvd.empty() || recvd.low() >= last) {
-      recvd.insert(SequenceRange(starting, (last > starting)
-                                           ? last.previous() : starting));
+      recvd.insert(SequenceRange(zero,
+                                 (last > starting) ? last.previous() : zero));
     } else {
-      recvd.insert(SequenceRange(starting, recvd.low()));
+      recvd.insert(SequenceRange(zero, recvd.low()));
     }
-  } else if (!recvd.empty() && first > starting) {
+  } else if (!recvd.empty()) {
     // All sequence numbers below 'first' should not be NACKed.
     // The value of 'first' may not decrease with subsequent HBs.
-    recvd.insert(SequenceRange(SequenceNumber(), first.previous()));
+    recvd.insert(SequenceRange(zero,
+                               (first > starting) ? first.previous() : zero));
   }
   //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
   //        numbers we no longer expect to receive due to HEARTBEAT
@@ -713,11 +718,10 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
                                               bitmap.length(), num_bits);
         } else {
           ack = ++SequenceNumber(recvd.cumulative_ack());
-          if (recvd.low() > 1) {
+          if (recvd.low().getValue() > 1) {
             // since the "ack" really is cumulative, we need to make
             // sure that a lower discontinuity is not possible later
-            recvd.insert(SequenceRange(SequenceNumber(),
-                                       recvd.cumulative_ack()));
+            recvd.insert(SequenceRange(SequenceNumber::ZERO(), recvd.low()));
           }
         }
 

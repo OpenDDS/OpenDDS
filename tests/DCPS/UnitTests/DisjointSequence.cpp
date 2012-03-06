@@ -181,37 +181,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_CHECK(false);
     } catch (const std::exception&) {
     }
-
-    // Carefully pick values such that:
-    //   first < second
-    //   second < third
-    //   third < first
-    SequenceNumber first(SN_SEAM+1);
-    SequenceNumber second(SN_RANGE/2+1);
-    SequenceNumber third(1);
-
-    sequence.reset();
-    sequence.insert(1);
-    sequence.insert(3);
-
-    try {
-      sequence.insert(SequenceRange(SN_RANGE/2, SN_MAX));
-      TEST_CHECK(false);
-    } catch (const std::exception&) {
-    }
-
-    sequence.reset();
-    sequence.insert(0);
-
-    try {
-      sequence.insert(SequenceRange(4, 3));
-      TEST_CHECK(false);
-    } catch (const std::exception&) {
-    }
-
-    sequence.reset();
-    sequence.insert(first);
-    sequence.insert(second);
   }
 
   // Range iterator
@@ -286,32 +255,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(range.second == SequenceNumber(9));
     TEST_CHECK(++it == missingSet.end());
 
-
-    // ASSERT rollover ranges return proper missing sequences:
-    sequence.reset();
-    sequence.insert(SN_MAX-2);
-    sequence.insert(1);   // discontiguity
-    sequence.insert(6);   // discontiguity
-    sequence.insert(10);  // discontiguity
-
-    missingSet = sequence.missing_sequence_ranges();
-    it = missingSet.begin();
-
-    range = *it;
-    TEST_CHECK(range.first == SequenceNumber(SN_MAX-1));
-    TEST_CHECK(range.second == SequenceNumber(SN_MAX));
-    TEST_CHECK(++it != missingSet.end());
-
-    range = *it;
-    TEST_CHECK(range.first == SequenceNumber(2));
-    TEST_CHECK(range.second == SequenceNumber(5));
-    TEST_CHECK(++it != missingSet.end());
-
-    range = *it;
-    TEST_CHECK(range.first == SequenceNumber(7));
-    TEST_CHECK(range.second == SequenceNumber(9));
-    TEST_CHECK(++it == missingSet.end());
-
     // ASSERT a range insert returns the proper iterators
     sequence.reset();
     sequence.insert(1);
@@ -333,6 +276,17 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(!sequence.disjoint());
     TEST_CHECK(sequence.low() == 2);
     TEST_CHECK(sequence.high() == 5);
+  }
+  {
+    DisjointSequence sequence;
+    SequenceNumber zero = SequenceNumber::ZERO();
+    sequence.insert(SequenceRange(zero, zero));
+    TEST_CHECK(!sequence.empty() && !sequence.disjoint());
+    TEST_CHECK(zero == sequence.low() && zero == sequence.high());
+    sequence.insert(2);
+    std::vector<SequenceRange> ranges = sequence.missing_sequence_ranges();
+    TEST_CHECK(ranges.size() == 1);
+    TEST_CHECK(ranges[0] == SequenceRange(1, 1));
   }
   {
     DisjointSequence sequence;

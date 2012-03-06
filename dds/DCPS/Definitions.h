@@ -63,15 +63,6 @@ public:
     setValue(value);
   }
 
-  // N.B: Default copy constructor is sufficient.
-
-  /// Allow assignments.
-  SequenceNumber& operator=(const SequenceNumber& rhs) {
-    high_ = rhs.high_;
-    low_  = rhs.low_;
-    return *this;
-  }
-
   /// Pre-increment.
   SequenceNumber& operator++() {
     if (this->low_ == ACE_UINT32_MAX) {
@@ -133,19 +124,9 @@ public:
     return LOW_BASE * this->high_ + this->low_;
   }
 
-  /// N.B. This comparison assumes that the shortest distance between
-  ///      the values being compared is the positive counting
-  ///      sequence between them.  This means that MAX-2 is less
-  ///      than 2 since they are separated by only four counts from
-  ///      MAX-2 to 2.  But that 2 is less than MAX/2 since the
-  ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
-    const ACE_INT64 distance = ACE_INT64(rvalue.high_ - high_)*2;
-    return (distance == 0) ?
-             (this->low_ < rvalue.low_) :   // High values equal, compare low
-             (distance < 0) ?               // Otherwise just use high
-               (ACE_INT32_MAX < -distance) :
-               (distance < ACE_INT32_MAX);
+    return (this->high_ < rvalue.high_) 
+      || (this->high_ == rvalue.high_ && this->low_ < rvalue.low_);
   }
 
   /// Derive a full suite of logical operations.
@@ -180,6 +161,10 @@ public:
     return SequenceNumber(-1, 0);
   }
 
+  static SequenceNumber ZERO() {
+    return SequenceNumber(0, 0);
+  }
+
   static const Value MAX_VALUE = ACE_INT64_MAX;
   static const Value MIN_VALUE = 1;
   static const Value LOW_BASE = 0x0000000100000000LL;
@@ -194,7 +179,6 @@ private:
     : high_(high), low_(low) {
   }
 
-  //Value value_;
   ACE_INT32  high_;
   ACE_UINT32 low_;
 };
@@ -216,6 +200,18 @@ operator>>(Serializer& s, SequenceNumber& x) {
   if (!s.good_bit()) return false;
   x = SequenceNumber(high, low);
   return true;
+}
+
+inline SequenceNumber
+operator+(const SequenceNumber& lhs, int rhs)
+{
+  return SequenceNumber(lhs.getValue() + rhs);
+}
+
+inline SequenceNumber
+operator+(int lhs, const SequenceNumber& rhs)
+{
+  return rhs + lhs;
 }
 
 inline void
@@ -282,16 +278,5 @@ struct VarLess : public std::binary_function<V, V, bool> {
 } // namespace OpenDDS
 } // namespace DCPS
 
-inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber
-operator+(const OpenDDS::DCPS::SequenceNumber& lhs, int rhs)
-{
-  return OpenDDS::DCPS::SequenceNumber(lhs.getValue() + rhs);
-}
-
-inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber
-operator+(int lhs, const OpenDDS::DCPS::SequenceNumber& rhs)
-{
-  return rhs + lhs;
-}
 
 #endif /* OPENDDS_DCPS_DEFINITION_H */
