@@ -253,6 +253,8 @@ Service_Participant::shutdown()
 
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
+    transient_data_cache_.reset();
+    persistent_data_cache_.reset();
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
     return;

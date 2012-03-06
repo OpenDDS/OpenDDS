@@ -338,12 +338,16 @@ PubDriver::end()
   // Verify the number of instances and the number of samples
   // written to the datawriter.
 
-  publisher_->delete_contained_entities ();
-  // publisher_->delete_datawriter(datawriter_.in ());
-
   CORBA::String_var topic_name = topic_->get_name ();
 
   ::DDS::DataWriter_var dw = publisher_->lookup_datawriter (topic_name.in ());
+
+  TEST_CHECK (!CORBA::is_nil (dw.in ()));
+
+  publisher_->delete_contained_entities ();
+  // publisher_->delete_datawriter(datawriter_.in ());
+
+  dw = publisher_->lookup_datawriter (topic_name.in ());
 
   TEST_CHECK (CORBA::is_nil (dw.in ()));
 

@@ -229,6 +229,103 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   return passed;
 }
 
+bool run_change_parameter_test(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub)
+{
+  bool success = true;
+
+  DataWriter_var dw;
+  DataReader_var dr;
+  test_setup(dp, ts, pub, sub, "MyTopic3", dw, dr);
+
+  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Message sample;
+  sample.key = 3;
+  ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+  if (!waitForSample(dr)) return false;
+
+  DDS::StringSeq params(1);
+  params.length(1);
+  params[0] = "2";
+  ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
+    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params);
+  if (!dr_qc.in()) {
+    cout << "ERROR: failed to create QueryCondition" << endl;
+    return false;
+  }
+
+  QueryCondition_var query_cond = QueryCondition::_narrow(dr_qc);
+  if (std::string(query_cond->get_query_expression()) != "key = %0") {
+    cout << "ERROR: get_query_expression() query expression should match " << endl;
+    return false;
+  }
+
+  params = DDS::StringSeq();
+  ret = query_cond->get_query_parameters(params);
+  if (ret != RETCODE_OK) {
+    cout << "ERROR: get_query_parameters() failed " << endl;
+    return false;
+  } else if (params.length() != 1 || std::string(params[0]) != "2") {
+    cout << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
+    return false;
+  }
+
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_qc);
+  ConditionSeq active;
+  Duration_t three_sec = {3, 0};
+  ret = ws->wait(active, three_sec);
+  // expect a timeout because the sample doesn't match the query string
+  if (ret != RETCODE_TIMEOUT) {
+    cout << "ERROR: wait(qc) should have timed out" << endl;
+    return false;
+  }
+  ws->detach_condition(dr_qc);
+
+  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  MessageSeq data;
+  SampleInfoSeq infoseq;
+  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  if (ret != RETCODE_NO_DATA) {
+    cout << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
+    return false;
+  }
+
+  params = DDS::StringSeq(1);
+  params.length(1);
+  params[0] = "3";
+  ret = query_cond->set_query_parameters(params);
+
+  params = DDS::StringSeq();
+  ret = query_cond->get_query_parameters(params);
+  if (ret != RETCODE_OK) {
+    cout << "ERROR: get_query_parameters() failed " << endl;
+    return false;
+  } else if (params.length() != 1 || std::string(params[0]) != "3") {
+    cout << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
+    return false;
+  }
+
+  ws->attach_condition(dr_qc);
+  ret = ws->wait(active, three_sec);
+  if (ret != RETCODE_OK) {
+    cout << "ERROR: wait(qc) should not time out" << endl;
+    return false;
+  }
+  ws->detach_condition(dr_qc);
+
+  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  if (ret != RETCODE_OK) {
+    cout << "ERROR: take_w_condition(qc) should have returned data" << endl;
+    return false;
+  }
+
+  dr->delete_readcondition(dr_qc);
+  return true;
+}
+
 int run_test(int argc, ACE_TCHAR *argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -246,6 +343,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   bool passed = run_sorting_test(dp, ts, pub, sub);
   passed &= run_filtering_test(dp, ts, pub, sub);
+  passed &= run_change_parameter_test(dp, ts, pub, sub);
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);

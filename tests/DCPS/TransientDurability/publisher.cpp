@@ -206,6 +206,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
         // Write samples using multiple threads.
         std::auto_ptr<Writer> writer (new Writer (dummy_dw.in ()));
+        if (!writer->start () || !writer->end ())
+        {
+          // Error logging performed in above method call.
+          exit (1);
+        }
 
         // Explicitly destroy the DataWriter.
         if (pub->delete_datawriter (dummy_dw.in ())
