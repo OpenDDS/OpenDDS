@@ -1,3 +1,9 @@
+Tue Mar  6 20:16:10 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Maintaining old list.
+
 Tue Mar  6 20:00:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/ReceivedDataElementList.h:

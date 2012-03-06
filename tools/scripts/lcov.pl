@@ -309,6 +309,12 @@ traverse( { 'file_function' => \&removeFiles, 'extension' => 'info' });
 print "Coverage: collect coverage data\n" if $verbose;
 
 my $no_cov_filename = "$run_dir/file_dirs_with_no_coverage.lst";
+if (-f $no_cov_filename) {
+    # maintain the previous file so we know if new classes are added
+    # to the list
+    system("mv $no_cov_filename $no_cov_filename.bak");
+}
+
 if (!open(NO_COV_FILE, ">", "$no_cov_filename")) {
     print STDERR __FILE__, ": Cannot write to $no_cov_filename for indicating files with no coverage data\n";
     exit 1;
