@@ -83,7 +83,7 @@ sub findNoCoverage
 {
     my $params = shift;
     my $dir = shift;
-    
+
     my $dh;
     opendir($dh, $dir);
     my @entries = readdir($dh);
