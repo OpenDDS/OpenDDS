@@ -27,7 +27,7 @@ class StatusConditionImpl
 public:
   explicit StatusConditionImpl(EntityImpl* e)
     : parent_(e)
-    , mask_(0xFFFFFFFF)
+    , mask_(::OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {}
 
   virtual ~StatusConditionImpl() {}
@@ -35,13 +35,13 @@ public:
   CORBA::Boolean get_trigger_value()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  DDS::StatusMask get_enabled_statuses()
+  virtual DDS::StatusMask get_enabled_statuses()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  DDS::ReturnCode_t set_enabled_statuses(DDS::StatusMask mask)
+  virtual DDS::ReturnCode_t set_enabled_statuses(DDS::StatusMask mask)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  DDS::Entity_ptr get_entity()
+  virtual DDS::Entity_ptr get_entity()
   ACE_THROW_SPEC((CORBA::SystemException));
 
 private:

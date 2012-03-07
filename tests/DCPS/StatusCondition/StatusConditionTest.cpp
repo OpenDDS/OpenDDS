@@ -55,7 +55,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DataWriter_var dw = pub->create_datawriter(topic, DATAWRITER_QOS_DEFAULT, 0,
                                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   StatusCondition_var cond = dw->get_statuscondition();
+  bool passed = cond->get_enabled_statuses() == ::OpenDDS::DCPS::DEFAULT_STATUS_MASK;
   cond->set_enabled_statuses(OFFERED_INCOMPATIBLE_QOS_STATUS);
+  passed = cond->get_enabled_statuses() == OFFERED_INCOMPATIBLE_QOS_STATUS;
   ws->attach_condition(cond);
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
@@ -68,7 +70,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
                                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   w.wait();
-  bool passed = (w.result() == RETCODE_OK);
+  passed &= (w.result() == RETCODE_OK);
   ws->detach_condition(cond);
 
   dp->delete_contained_entities();

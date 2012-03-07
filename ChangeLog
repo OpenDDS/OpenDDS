@@ -1,3 +1,17 @@
+Wed Mar  7 16:37:11 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/StatusConditionImpl.h:
+
+          Made virtual explicit and intialized mask to constant.
+
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+
+          Added calls to participant_->contains_entity, like PubDriver already does.
+
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+
+          Added test to verify enabled status.
+
 Wed Mar  7 14:52:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:

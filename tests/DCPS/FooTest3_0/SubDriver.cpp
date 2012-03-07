@@ -112,6 +112,11 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                             ::DDS::DomainParticipantListener::_nil(),
                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (participant_.in ()));
+  if (participant_->contains_entity(participant_->get_instance_handle()))
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: participant_ should not contain itself\n")));
+  }
 
   ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
 
@@ -135,12 +140,22 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                        ::DDS::TopicListener::_nil(),
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (topic_.in ()));
+  if (!participant_->contains_entity(topic_->get_instance_handle()))
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains topic_\n")));
+  }
 
   subscriber_ =
     participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                     ::DDS::SubscriberListener::_nil(),
                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (subscriber_.in ()));
+  if (!participant_->contains_entity(subscriber_->get_instance_handle()))
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains subscriber_\n")));
+  }
 
   std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
 
@@ -176,6 +191,12 @@ SubDriver::run()
 
   while (this->listener_->samples_read() != num_writes_) {
     ACE_OS::sleep(1);
+  }
+
+  if (!participant_->contains_entity(datareader_->get_instance_handle()))
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains datareader_\n")));
   }
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
