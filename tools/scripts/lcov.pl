@@ -100,7 +100,7 @@ sub findNoCoverage
         }
     }
     foreach my $prefix (@gcno_entries) {
-        if (!define($gcda_entries{$prefix})) {
+        if (!defined($gcda_entries{$prefix})) {
             print {$params->{no_cov_fh}} "$dir/$prefix\n";
         }
     }
