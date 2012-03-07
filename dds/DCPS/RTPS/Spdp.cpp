@@ -246,6 +246,11 @@ Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
       bit->set_instance_state(iter->second.bit_ih_,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
+    if (DCPS::DCPS_debug_level > 3) {
+      DCPS::GuidConverter conv(iter->first);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Spdp::remove_discovered_participant")
+                 ACE_TEXT(" - erasing %C\n"), std::string(conv).c_str()));
+    }
     participants_.erase(iter);
   }
 }
@@ -271,7 +276,7 @@ Spdp::remove_expired_participants()
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);
           ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) Spdp::SpdpTransport::remove_expired_participants() - ")
+            ACE_TEXT("(%P|%t) Spdp::remove_expired_participants() - ")
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
             std::string(conv).c_str()));
         }
@@ -823,7 +828,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   }
 
   if (0 != unicast_socket_.open(local_addr)) {
-    if (DCPS::DCPS_debug_level) {
+    if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((
             LM_WARNING,
             ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")

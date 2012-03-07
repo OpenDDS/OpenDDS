@@ -54,6 +54,11 @@ This release of OpenDDS is based on the DDS Specification formal/07-01-01
 ** TCP/IP
 ** UDP/IP
 ** IP multicast
+** RTPS over UDP/IP (unicast and multicast)
+
+RTPS (Interoperability) features are based on the DDS-RTPS Specification
+formal/2010-11-01 (version 2.1).  See the OpenDDS Developer's Guide and
+the file docs/design/RTPS for more details on RTPS.
 
 OpenDDS has been found to perform better than other similar TAO
 services (notification and real-time event channel) by a factor of two
@@ -84,11 +89,11 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-*** TAO 1.6a patch 11
+*** TAO 1.6a patch 13
 *** TAO 2.0a
-*** TAO 2.0.3 (DOC Group)
+*** TAO 2.1.0 (DOC Group)
 
-Note that the 1.6a release is from OCI and can be obtained from
+Note that the 1.6a and 2.0a releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
 
@@ -113,10 +118,10 @@ recommend the use of ActiveState Perl.  The "configure" script also uses Perl.
 This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
-** RedHat EL 5, x86_64
+** Red Hat EL 5, x86_64
+** Red Hat EL 6.2, x86_64
 ** Fedora Core 6, x86
 ** Fedora 12, x86_64
-** CentOS 5, x86_64
 ** Ubuntu 10.04 LTS, x86_64 and x86
 ** openSUSE 11.4, x86_64
 
@@ -133,7 +138,7 @@ Others:
 ** SunOS 5.11 (OpenSolaris 2009.06) (x86)
 ** QNX Neutrino 6.3.2 (x86)
 ** Macintosh OS X 10.6 "Snow Leopard" (x86)
-** VxWorks 6.8 RTP (x86) -- compiled but not yet tested
+** VxWorks 6.9 RTP (x86) -- compiled but not yet tested
 
 
 ======================================================================
@@ -151,9 +156,10 @@ This release of OpenDDS has been tested using the following compilers:
 ** gcc 4.2.1 (Apple Inc. build 5646 dot 1)
 ** gcc 4.4.3 (Ubuntu 4.4.3-4ubuntu5)
 ** gcc 4.4.4 (Red Hat 4.4.4-4)
+** gcc 4.4.6 (Red Hat 4.4.6-3)
 ** gcc 4.5.1 (20101208 SUSE)
 ** gcc 4.5.3
-** gcc 4.6.1
+** gcc 4.6.3
 ** QNX gcc 3.3.5
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 ** Sun C++ 5.9 SunOS_i386 Patch 124864-07 2008/08/22

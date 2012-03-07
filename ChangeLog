@@ -1,3 +1,22 @@
+Wed Mar  7 21:19:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          When a remote participant lease expires or shuts down,
+          removing its endpoints needs to unmatch any locally-matched
+          endpoints.
+          Cleaned-up logging.
+
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Updated the WaitSet/StatusCondition usage pattern to check
+          the status before waiting.
+
+        * README:
+
+          Updated info for upcoming release.
+
 Wed Mar  7 16:37:11 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/StatusConditionImpl.h:

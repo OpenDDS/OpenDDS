@@ -632,7 +632,18 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
        i != m.end() && 0 == std::memcmp(i->first.guidPrefix,
                                         participant.guidPrefix,
                                         sizeof(GuidPrefix_t));) {
-    topics_[get_topic_name(i->second)].endpoints_.erase(i->first);
+    std::string topic_name = get_topic_name(i->second);
+    std::map<std::string, TopicDetailsEx>::iterator top_it =
+      topics_.find(topic_name);
+    if (top_it != topics_.end()) {
+      top_it->second.endpoints_.erase(i->first);
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Sedp::remove_entities_belonging_to - ")
+                   ACE_TEXT("calling match_endpoints remove\n")));
+      }
+      match_endpoints(i->first, top_it->second, true /*remove*/);
+    }
     remove_from_bit(i->second);
     m.erase(i++);
   }
@@ -1086,7 +1097,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
-          if (DCPS::DCPS_debug_level) {
+          if (DCPS::DCPS_debug_level > 3) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
                                  ACE_TEXT("calling match_endpoints new\n")));
           }
@@ -1107,7 +1118,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
       std::map<std::string, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
-        if (DCPS::DCPS_debug_level) {
+        if (DCPS::DCPS_debug_level > 3) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
                                ACE_TEXT("calling match_endpoints update\n")));
         }
@@ -1128,7 +1139,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
         match_endpoints(guid, top_it->second, true /*remove*/);
       }
       remove_from_bit(iter->second);
-      if (DCPS::DCPS_debug_level) {
+      if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
                              ACE_TEXT("calling match_endpoints disp/unreg\n")));
       }
@@ -1210,7 +1221,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
-          if (DCPS::DCPS_debug_level) {
+          if (DCPS::DCPS_debug_level > 3) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
                                  ACE_TEXT("calling match_endpoints new\n")));
           }
@@ -1233,7 +1244,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
         std::map<std::string, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
-          if (DCPS::DCPS_debug_level) {
+          if (DCPS::DCPS_debug_level > 3) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
                                  ACE_TEXT("calling match_endpoints update\n")));
           }
@@ -1286,7 +1297,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
-        if (DCPS::DCPS_debug_level) {
+        if (DCPS::DCPS_debug_level > 3) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
                                ACE_TEXT("calling match_endpoints disp/unreg\n")));
         }
@@ -2192,7 +2203,7 @@ Sedp::write_publication_data(
     if (DDS::RETCODE_OK == result) {
       result = publications_writer_.write_sample(plist, reader, lp.sequence_);
     }
-  } else if (DCPS::DCPS_debug_level) {
+  } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
@@ -2221,7 +2232,7 @@ Sedp::write_subscription_data(
     if (DDS::RETCODE_OK == result) {
       result = subscriptions_writer_.write_sample(plist, reader, ls.sequence_);
     }
-  } else if (DCPS::DCPS_debug_level) {
+  } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
