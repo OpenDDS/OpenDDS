@@ -1,3 +1,9 @@
+Wed Mar  7 13:55:13 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixing identifying files with no coverage.
+
 Wed Mar  7 13:22:48 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/QueryCondition/QueryConditionTest.cpp:

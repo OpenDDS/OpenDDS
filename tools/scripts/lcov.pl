@@ -86,19 +86,22 @@ sub findNoCoverage
     
     my $dh;
     opendir($dh, $dir);
-    # collect all *.gdno and *.gcda files
-    my @gcno_entries = grep { s/\.gcno$// } readdir($dh);
-    my @gcda_entries = grep { s/\.gcda$// } readdir($dh);
+    my @entries = readdir($dh);
     closedir($dh);
-    if (scalar(@gcno_entries) > scalar(@gcda_entries)) {
-        my %gcda_hash = ();
-        foreach my $entry (@gcda_entries) {
-            $gcda_hash{$entry} = 1;
+    # collect all *.gdno and *.gcda files
+    my @gcno_entries = ();
+    my %gcda_entries = ();
+    foreach my $entry (@entries) {
+        if ($entry =~ s/\.gcno$//) {
+            push(@gcno_entries, $entry);
         }
-        foreach my $prefix (@gcno_entries) {
-            if (!$gcda_hash{$prefix}) {
-                print {$params->{no_cov_fh}} "$dir/$prefix\n";
-            }
+        elsif ($entry =~ s/\.gcda$//) {
+            $gcda_entries{$entry} = 1;
+        }
+    }
+    foreach my $prefix (@gcno_entries) {
+        if (!define($gcda_entries{$prefix})) {
+            print {$params->{no_cov_fh}} "$dir/$prefix\n";
         }
     }
 }
