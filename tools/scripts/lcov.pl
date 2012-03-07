@@ -99,10 +99,17 @@ sub findNoCoverage
             $gcda_entries{$entry} = 1;
         }
     }
-    foreach my $prefix (@gcno_entries) {
-        if (!defined($gcda_entries{$prefix})) {
-            print {$params->{no_cov_fh}} "$dir/$prefix\n";
-        }
+    if ((scalar(@gcno_entries) > 0) &&
+        (scalar(keys(%gcda_entries)) == 0)) {
+        # just record the whole directory
+        print {$params->{no_cov_fh}} "$dir\n";
+    }
+    else {
+      foreach my $prefix (@gcno_entries) {
+          if (!defined($gcda_entries{$prefix})) {
+              print {$params->{no_cov_fh}} "$dir/$prefix\n";
+          }
+      }
     }
 }
 
