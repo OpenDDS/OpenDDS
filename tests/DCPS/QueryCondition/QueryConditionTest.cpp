@@ -233,8 +233,6 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   const MessageTypeSupport_var& ts, const Publisher_var& pub,
   const Subscriber_var& sub)
 {
-  bool success = true;
-
   DataWriter_var dw;
   DataReader_var dr;
   test_setup(dp, ts, pub, sub, "MyTopic3", dw, dr);
