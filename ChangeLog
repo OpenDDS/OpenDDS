@@ -1,3 +1,13 @@
+Thu Mar  8 19:25:15 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Corrected value returned for process when max processes are reached.
+
+        * tools/scripts/lcov.pl:
+
+          Cleanup.
+
 Thu Mar  8 16:47:13 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportCustomizedElement.h:

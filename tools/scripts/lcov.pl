@@ -364,7 +364,6 @@ traverse({ 'dir_function' => \&findNoCoverage,
 # createInfo accounts for .*obj directories, so don't traverse
 $excludes{".obj"} = 1;
 $excludes{".shobj"} = 1;
-$excludes{".cov_temp_obj"} = 1;
 # use lcov to convert *.gcda files into a *.info file
 traverse({ 'dir_function' => \&createInfo,
            'no_cov_fh' => \*NO_COV_FILE });

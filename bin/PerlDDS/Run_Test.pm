@@ -66,6 +66,7 @@ sub next_coverage_process {
   # use the next count, since all the counts are currently being used
   if ($PerlDDS::Coverage_Count == $PerlDDS::Coverage_MAX_COUNT) {
     ++$PerlDDS::Coverage_Overflow_Count;
+    $next = $PerlDDS::Coverage_MAX_COUNT - 1;
     print STDERR "ERROR: maximum coverage processes reached, " .
       "$PerlDDS::Coverage_Overflow_Count processes active.\n";
   }
