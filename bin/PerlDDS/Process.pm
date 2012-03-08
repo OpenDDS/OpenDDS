@@ -6,6 +6,7 @@ package PerlDDS::Process;
 use strict;
 use English;
 use POSIX qw(:time_h);
+use Cwd;
 
 our @ISA = qw(PerlACE::Process);
 
@@ -21,10 +22,10 @@ sub new {
   if($executable !~ /$local_dir/) {
     # since it didn't match the executable must be
     # a relative path so add the cwd
-    $executable = getcwd() . '/' . $executable;
+    $executable = Cwd::abs_path($executable);
   }
   my $cov_process = PerlDDS::next_coverage_process();
-  my $swap_ext = "\\/coverage\\/$cov_process";
+  my $swap_ext = "/coverage/$cov_process";
   if($executable !~ s/$local_dir/$local_dir$swap_ext/) {
     print STDERR "ERROR: could not swap out $local_dir in $executable for coverage.\n";
   }

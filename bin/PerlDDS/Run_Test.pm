@@ -52,27 +52,22 @@ sub return_coverage_process {
       ($PerlDDS::Coverage_Count - 1) . " processes have been created.\n";
     return;
   }
-  $PerlDDS::Coverage_Count->[$count] = 0;
+  $PerlDDS::Coverage_Processes->[$count] = 0;
 }
 
 sub next_coverage_process {
   my $next;
-  for ($next = 0; $next < $PerlDDS::Coverage_Count; ++$next) {
-    if ($PerlDDS::Coverage_Count->[$next] == 0) {
-      $PerlDDS::Coverage_Count->[$next] = 0;
+  for ($next = 0; $next < $PerlDDS::Coverage_MAX_COUNT; ++$next) {
+    if (!$PerlDDS::Coverage_Processes->[$next]) {
+      $PerlDDS::Coverage_Processes->[$next] = 1;
       return $next;
     }
   }
-  # use the next count, since all the counts are currently being used
-  if ($PerlDDS::Coverage_Count == $PerlDDS::Coverage_MAX_COUNT) {
-    ++$PerlDDS::Coverage_Overflow_Count;
-    $next = $PerlDDS::Coverage_MAX_COUNT - 1;
-    print STDERR "ERROR: maximum coverage processes reached, " .
-      "$PerlDDS::Coverage_Overflow_Count processes active.\n";
-  }
-  else {
-    ++$PerlDDS::Coverage_Count;
-  }
+  ++$PerlDDS::Coverage_Overflow_Count;
+  $next = $PerlDDS::Coverage_MAX_COUNT - 1;
+  print STDERR "ERROR: maximum coverage processes reached, " .
+    "$PerlDDS::Coverage_Overflow_Count processes active.\n";
+
   return $next;
 }
 

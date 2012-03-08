@@ -1,3 +1,10 @@
+Thu Mar  8 20:36:02 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/Run_Test.pm:
+
+          Coverage fixes.
+
 Thu Mar  8 19:25:15 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
