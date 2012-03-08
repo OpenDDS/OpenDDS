@@ -26,32 +26,11 @@ sub create_process {
     $created = new PerlACE::ProcessVX($executable, $arguments);
   }
   elsif ((!PerlDDS::is_coverage_test()) ||
-         (non_dds_test($executable)) ||
-         (is_process_special($executable))){
-    if(PerlDDS::is_coverage_test() && $lone_process != 1)
-    {
-      PerlDDS::special_process_created();
-    }
+         (non_dds_test($executable))) {
     $created = new PerlACE::Process($executable, $arguments);
   }
   elsif (PerlDDS::is_coverage_test()) {
-    print STDOUT "Remote Process \n";
-    my $cov_executable = $executable;
-    my $local_dir = $ENV{"DDS_ROOT"};
-    my $cov_dir = $ENV{"COV_DDS_ROOT"};
-    # try and substitute the coverage dir for the local dir
-    if($cov_executable !~ /$local_dir/)
-    {
-      # since it didn't match the executable must be
-      # a relative path so add the cwd
-      $cov_executable = getcwd() . '/' . $executable;
-    }
-    if($cov_executable !~ s/$local_dir/$cov_dir/)
-    {
-      print STDERR "This shouldn't be reached, something wrong with the cwd \n";
-    }
-    print STDOUT "cov_exe=$cov_executable \n";
-    $created = new PerlDDS::Process($cov_executable, $arguments);
+    $created = new PerlDDS::Process($executable, $arguments);
   }
   else {
     print STDERR "This shouldn't be reached, no Process created \n";

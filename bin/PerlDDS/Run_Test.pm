@@ -37,8 +37,43 @@ $PerlDDS::Special_Pub = $config->check_config("Special_Pub");
 
 $PerlDDS::Special_Other = $config->check_config("Special_Other");
 
-# used to prevent multiple processes from running remotely
-$PerlDDS::Coverage_Process_Created = 0;
+# used to prevent multiple special processes from running remotely
+$PerlDDS::Special_Process_Created = 0;
+
+$PerlDDS::Coverage_Count = 0;
+$PerlDDS::Coverage_MAX_COUNT = 7;
+$PerlDDS::Coverage_Overflow_Count = $PerlDDS::Coverage_MAX_COUNT;
+$PerlDDS::Coverage_Processes = [];
+
+sub return_coverage_process {
+  my $count = shift;
+  if ($count >= $PerlDDS::Coverage_Count) {
+    print STDERR "return_coverage_process called with $count, but only" .
+      ($PerlDDS::Coverage_Count - 1) . " processes have been created.\n";
+    return;
+  }
+  $PerlDDS::Coverage_Count->[$count] = 0;
+}
+
+sub next_coverage_process {
+  my $next;
+  for ($next = 0; $next < $PerlDDS::Coverage_Count; ++$next) {
+    if ($PerlDDS::Coverage_Count->[$next] == 0) {
+      $PerlDDS::Coverage_Count->[$next] = 0;
+      return $next;
+    }
+  }
+  # use the next count, since all the counts are currently being used
+  if ($PerlDDS::Coverage_Count == $PerlDDS::Coverage_MAX_COUNT) {
+    ++$PerlDDS::Coverage_Overflow_Count;
+    print STDERR "ERROR: maximum coverage processes reached, " .
+      "$PerlDDS::Coverage_Overflow_Count processes active.\n";
+  }
+  else {
+    ++$PerlDDS::Coverage_Count;
+  }
+  return $next;
+}
 
 sub is_coverage_test()
 {
