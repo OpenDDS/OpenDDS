@@ -31,6 +31,8 @@ public:
   /// Accessor for the publisher id.
   virtual RepoId publication_id() const;
 
+  virtual RepoId subscription_id() const;
+
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
 

@@ -44,6 +44,15 @@ OpenDDS::DCPS::TransportSendElement::publication_id() const
   return this->element_->publication_id_;
 }
 
+OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::TransportSendElement::subscription_id() const
+{
+  if (this->element_->num_subs_ == 1) {
+    return this->element_->subscription_ids_[0];
+  }
+  return GUID_UNKNOWN;
+}
+
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportSendElement::msg() const
 {
@@ -56,11 +65,4 @@ OpenDDS::DCPS::TransportSendElement::msg_payload() const
 {
   DBG_ENTRY_LVL("TransportSendElement", "msg_payload", 6);
   return this->element_->sample_ ? this->element_->sample_->cont() : 0;
-}
-
-const OpenDDS::DCPS::DataSampleListElement*
-OpenDDS::DCPS::TransportSendElement::sample() const
-{
-  DBG_ENTRY_LVL("TransportSendElement","sample",6);
-  return this->element_;
 }

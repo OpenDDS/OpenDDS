@@ -54,6 +54,8 @@ private:
                              ACE_Allocator* allocator);
   virtual ~TransportCustomizedElement();
 
+  RepoId subscription_id() const;
+
   TransportQueueElement* orig_;
   ACE_Message_Block* msg_;
   ACE_Allocator* allocator_;

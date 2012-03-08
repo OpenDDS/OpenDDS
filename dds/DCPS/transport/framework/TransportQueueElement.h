@@ -96,11 +96,15 @@ public:
   /// Does the sample require an exclusive transport packet?
   virtual bool requires_exclusive_packet() const;
 
-  /// Accessor for the publisher id that sent the sample.
+  /// Accessor for the publication id that sent the sample.
   virtual RepoId publication_id() const = 0;
 
-  virtual SequenceNumber sequence() const
-  {
+  /// Accessor for the subscription id, if sent the sample is sent to 1 sub
+  virtual RepoId subscription_id() const {
+    return GUID_UNKNOWN;
+  }
+
+  virtual SequenceNumber sequence() const {
     return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   }
 

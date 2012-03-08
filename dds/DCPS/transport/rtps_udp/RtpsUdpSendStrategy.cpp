@@ -62,8 +62,20 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
     return -1;
   }
 
+  const RepoId remote_id = elem->subscription_id();
   std::set<ACE_INET_Addr> addrs;
-  link_->get_locators(elem->publication_id(), addrs);
+
+  if (remote_id != GUID_UNKNOWN) {
+    const ACE_INET_Addr remote = link_->get_locator(remote_id);
+    if (remote != ACE_INET_Addr()) {
+      addrs.insert(remote);
+    }
+  }
+
+  if (addrs.empty()) {
+    link_->get_locators(elem->publication_id(), addrs);
+  }
+
   if (addrs.empty()) {
     errno = ENOTCONN;
     return -1;

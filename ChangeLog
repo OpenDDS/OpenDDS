@@ -1,3 +1,26 @@
+Thu Mar  8 16:47:13 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+
+          Provide a subscription_id() accessor for Queue Elements.
+          This is only used when sending to a particular single subscription.
+          DataWriterImpl uses that feature to implement durability.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          If sending to a (single) subscription, only use that one locator.
+
+        * NEWS:
+
+          Updated info for upcoming release.
+
 Thu Mar  8 16:49:28 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
@@ -230,7 +253,7 @@ Fri Mar  2 21:18:21 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/unit/Main.cpp:
 
-          Added unit tests to cover DataSamplListIterator.
+          Added unit tests to cover DataSampleListIterator.
 
 Thu Mar  1 19:13:47 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 

@@ -49,6 +49,14 @@ TransportCustomizedElement::publication_id() const
   return publication_id_;
 }
 
+RepoId
+TransportCustomizedElement::subscription_id() const
+{
+  DBG_ENTRY_LVL("TransportCustomizedElement", "subscription_id", 6);
+  const TransportSendElement* ose = original_send_element();
+  return ose ? ose->subscription_id() : GUID_UNKNOWN;
+}
+
 void
 TransportCustomizedElement::set_publication_id(const RepoId& id)
 {

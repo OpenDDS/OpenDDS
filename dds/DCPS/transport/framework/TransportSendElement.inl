@@ -46,3 +46,10 @@ OpenDDS::DCPS::TransportSendElement::sequence() const
 {
   return this->element_->header_.sequence_;
 }
+
+ACE_INLINE
+const OpenDDS::DCPS::DataSampleListElement*
+OpenDDS::DCPS::TransportSendElement::sample() const
+{
+  return this->element_;
+}

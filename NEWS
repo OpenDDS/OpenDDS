@@ -9,9 +9,10 @@ Version 3.1 of OpenDDS.
     - A new discovery mechanism for RTPS's distributed discovery.  This can
       replace the DCPSInfoRepo in existing OpenDDS deployments.
   Neither of these features is enabled by default.  See the OpenDDS Developer's
-  Guide* for configuration details.  Also, note that not every OpenDDS feature
-  (for example, certain QoS values) is supported with RTPS in the initial
-  implementation.  These exceptions are documented in the Developer's Guide*.
+  Guide chapter 7 for configuration details.  Also, note that not every OpenDDS
+  feature (for example, certain QoS values) is supported with RTPS in the
+  initial implementation.  These exceptions are documented in the Developer's
+  Guide sections 7.3.3 and 7.4.5.5.
 
 - Changed set_qos() of DataWriter, DataReader, Publisher and Subscriber so
   when provided a QoS value incompatible with an existing association, that the

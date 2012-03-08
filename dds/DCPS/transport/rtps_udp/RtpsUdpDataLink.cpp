@@ -195,17 +195,28 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
   if (!peers.ptr()) {
     return;
   }
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (CORBA::ULong i = 0; i < peers->length(); ++i) {
-    const iter_t iter = locators_.find(peers[i]);
-    if (iter == locators_.end()) {
-      const GuidConverter conv(peers[i]);
-      ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locators() - "
-        "no locator found for peer %C\n", std::string(conv).c_str()));
-    } else {
-      addrs.insert(iter->second.addr_);
+    const ACE_INET_Addr addr = get_locator(peers[i]);
+    if (addr != ACE_INET_Addr()) {
+      addrs.insert(addr);
     }
   }
+}
+
+ACE_INET_Addr
+RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+  using std::map;
+  typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
+  const iter_t iter = locators_.find(remote_id);
+  if (iter == locators_.end()) {
+    const GuidConverter conv(remote_id);
+    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locators() - "
+      "no locator found for peer %C\n", std::string(conv).c_str()));
+    return ACE_INET_Addr();
+  }
+  return iter->second.addr_;
 }
 
 void

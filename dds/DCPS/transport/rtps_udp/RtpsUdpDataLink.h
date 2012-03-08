@@ -91,6 +91,8 @@ public:
   void get_locators(const RepoId& local_id,
                     std::set<ACE_INET_Addr>& addrs) const;
 
+  ACE_INET_Addr get_locator(const RepoId& remote_id) const;
+
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable);
