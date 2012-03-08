@@ -41,7 +41,7 @@ $PerlDDS::Special_Other = $config->check_config("Special_Other");
 $PerlDDS::Special_Process_Created = 0;
 
 $PerlDDS::Coverage_Count = 0;
-$PerlDDS::Coverage_MAX_COUNT = 7;
+$PerlDDS::Coverage_MAX_COUNT = 6;
 $PerlDDS::Coverage_Overflow_Count = $PerlDDS::Coverage_MAX_COUNT;
 $PerlDDS::Coverage_Processes = [];
 
