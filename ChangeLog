@@ -1,3 +1,9 @@
+Thu Mar  8 16:49:28 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Added flag to indicate staging area for coverage.
+
 Thu Mar  8 16:01:32 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

@@ -26,6 +26,8 @@ my $verbose = 0;
 my $source_root = $DDS_ROOT;
 my $run_dir = $DDS_ROOT;
 my $limit;
+my $staging = "";
+my $staging_search;
 
 sub traverse {
     my $params = shift;
@@ -33,7 +35,7 @@ sub traverse {
     my $depth = shift;
 
     if (!defined($dir)) {
-      $dir = $run_dir;
+      $dir = "$run_dir$staging";
     }
     if (!defined($depth)) {
       $depth = 1;
@@ -50,11 +52,12 @@ sub traverse {
             if ($excludes{$entry}) {
                 next;
             }
+            my $continue = 1;
             if ($params->{dir_function}) {
-                &{$params->{dir_function}}($params, $full_entry);
+                $continue = &{$params->{dir_function}}($params, $full_entry);
             }
 
-            if (!defined($params->{depth}) || $params->{depth} > $depth) {
+            if ($continue && (!defined($params->{depth}) || $params->{depth} > $depth)) {
                 traverse($params, $full_entry, $depth + 1);
             }
         }
@@ -105,12 +108,13 @@ sub findNoCoverage
         print {$params->{no_cov_fh}} "$dir/\n";
     }
     else {
-      foreach my $prefix (@gcno_entries) {
-          if (!defined($gcda_entries{$prefix})) {
-              print {$params->{no_cov_fh}} "$dir/$prefix\n";
-          }
-      }
+        foreach my $prefix (@gcno_entries) {
+            if (!defined($gcda_entries{$prefix})) {
+                print {$params->{no_cov_fh}} "$dir/$prefix\n";
+            }
+        }
     }
+    return 1;
 }
 
 sub createInfo
@@ -137,7 +141,11 @@ sub createInfo
             if (defined($limit)) {
                 $initial_info .= ".tmp";
             }
-            my $status = system("lcov -c --gcov-tool $gcov_tool -b $dir -d $obj_dir -o $initial_info");
+            my $source_dir = $dir;
+            if ($staging ne "") {
+                $source_dir =~ s/$staging_search/\//;
+            }
+            my $status = system("lcov -c --gcov-tool $gcov_tool -b $source_dir -d $obj_dir -o $initial_info");
             if ($status) {
                 print {$params->{no_cov_fh}} "$dir\n";
             }
@@ -156,10 +164,12 @@ sub createInfo
             }
             $infos{"$info"} = 1 if $status == 0;
 
-            # don't need to keep looking for *.gcda files
-            last;
+            # don't need to keep looking for *.gcda files in child directories
+            return 0;
         }
     }
+    
+    return 1;
 }
 
 sub combineInfos
@@ -247,6 +257,9 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif (($arg eq "-info_groups") && (++$i <= $#ARGV)) {
         $info_groups = $ARGV[$i];
     }
+    elsif (($arg eq "-s" || $arg eq "-staging") && (++$i <= $#ARGV)) {
+        $staging = "/$ARGV[$i]";
+    }
     elsif (($arg eq "-x" || $arg eq "-exclude") && (++$i <= $#ARGV)) {
         $excludes{$ARGV[$i]} = 1;
     }
@@ -298,14 +311,31 @@ if ($cleanup_only) {
 
 print "Collect Coverage Data\n";
 
+sub clean_path {
+    my $path = shift;
+    $path =~ s/\\+/\//g;
+    $path =~ s/\/+/\//g;
+    $path =~ s/\/\.\//\//g;
+    $path =~ s/\/[^\/]+\/\.\.\//\//g;
+    $path =~ s/\/\.$//g;
+    $path =~ s/\/$//g;
+    $path =~ s/^\.\///g;
+    return $path;
+}
+
 if (defined($limit)) {
     $limit = "$source_root/$limit/*";
-    $limit =~ s/\\+/\//g;
-    $limit =~ s/\/+/\//g;
-    $limit =~ s/\/\.\//\//g;
-    $limit =~ s/\/[^\/]+\/\.\.\//\//g;
-    $limit =~ s/\/\./\//g;
+    clean_path($limit);
 }
+
+if (defined($staging)) {
+    clean_path($staging);
+    $staging_search = $staging;
+    $staging_search =~ s/\//\\\//g;
+    # add the staging subdirectory
+    $staging_search .= "\\/[^\\/]+\\/";
+}
+
 print "source_root=$source_root\n" if $verbose;
 print "run_dir=$run_dir\n" if $verbose;
 print "verbose=$verbose\n" if $verbose;
