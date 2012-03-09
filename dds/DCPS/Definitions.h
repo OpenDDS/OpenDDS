@@ -125,7 +125,7 @@ public:
   }
 
   bool operator<(const SequenceNumber& rvalue) const {
-    return (this->high_ < rvalue.high_) 
+    return (this->high_ < rvalue.high_)
       || (this->high_ == rvalue.high_ && this->low_ < rvalue.low_);
   }
 

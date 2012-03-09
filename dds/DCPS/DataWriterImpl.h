@@ -476,8 +476,9 @@ protected:
     RcHandle<FilterEvaluator> eval_;
 #endif
     SequenceNumber expected_sequence_;
+    bool durable_;
     ReaderInfo(const char* filter, const DDS::StringSeq& params,
-               DomainParticipantImpl* participant);
+               DomainParticipantImpl* participant, bool durable);
     ~ReaderInfo();
   };
 

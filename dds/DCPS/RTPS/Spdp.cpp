@@ -23,8 +23,6 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h"
-
 #include "ace/Reactor.h"
 
 #include <cstring>

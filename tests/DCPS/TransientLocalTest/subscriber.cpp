@@ -87,6 +87,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
       dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
                                                       dr_qos,
                                                       listener.in (),

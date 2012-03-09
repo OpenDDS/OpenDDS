@@ -247,9 +247,10 @@ DataWriterImpl::add_association(const RepoId& yourId,
 
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-      reader_info_.insert(std::make_pair(reader.readerId,
-        ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
-          reader.exprParams, participant_servant_)));
+    reader_info_.insert(std::make_pair(reader.readerId,
+      ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+                 reader.exprParams, participant_servant_,
+                 reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
 
   if (DCPS_debug_level > 4) {
@@ -321,16 +322,19 @@ DataWriterImpl::add_association(const RepoId& yourId,
 
 DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
                                        const DDS::StringSeq& params,
-                                       DomainParticipantImpl* participant)
+                                       DomainParticipantImpl* participant,
+                                       bool durable)
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   : participant_(participant)
   , expression_params_(params)
   , filter_(filter)
   , eval_(*filter ? participant->get_filter_eval(filter) : 0)
   , expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , durable_(durable)
 {}
 #else
   : expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , durable_(durable)
 {
   ACE_UNUSED_ARG(filter);
   ACE_UNUSED_ARG(params);
@@ -379,7 +383,7 @@ void
 DataWriterImpl::association_complete_i(const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
-
+  bool reader_durable = false;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
@@ -388,6 +392,10 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
                  std::string(converter).c_str()));
+    }
+    RepoIdToReaderInfoMap::const_iterator it = reader_info_.find(remote_id);
+    if (it != reader_info_.end()) {
+      reader_durable = it->second.durable_;
     }
   }
 
@@ -450,7 +458,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
   }
 
   // Support DURABILITY QoS
-  if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+  if (reader_durable) {
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     ReaderIdSeq rd_ids(1);

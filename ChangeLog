@@ -1,3 +1,30 @@
+Fri Mar  9 23:19:06 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Track which readers are durable, only send durable data to them.
+
+        * dds/DCPS/Definitions.h:
+
+          Fuzz fixed.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Removed unused #include.
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Extended timeout for the subscriber process.  With RTPS discovery
+          it may take until the lease duration for the publisher has expired.
+
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Enable Reliable RELIABILTY QoS for the DataReader.
+
 Fri Mar  9 20:48:25 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:
