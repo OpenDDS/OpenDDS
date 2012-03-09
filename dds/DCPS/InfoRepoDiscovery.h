@@ -22,6 +22,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class FailoverListener;
+
 /**
  * @class InfoRepoDiscovery
  *
@@ -34,6 +36,8 @@ namespace DCPS {
 class OpenDDS_Dcps_Export InfoRepoDiscovery : public Discovery {
 public:
   InfoRepoDiscovery(const RepoKey& key, const std::string& ior);
+  virtual ~InfoRepoDiscovery();
+
   virtual std::string get_stringified_dcps_info_ior();
   virtual DCPSInfo_ptr get_dcps_info();
 
@@ -68,6 +72,9 @@ private:
 
   bool use_local_bit_config_;
   TransportConfig_rch bit_config_;
+
+  /// Listener to initiate failover with.
+  FailoverListener*    failoverListener_;
 };
 
 typedef RcHandle<InfoRepoDiscovery> InfoRepoDiscovery_rch;

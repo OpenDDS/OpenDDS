@@ -1,3 +1,23 @@
+Fri Mar  9 20:48:25 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+
+          Moved FailoverListener to InfoRepoDiscovery that
+          was missed when r5266.
+
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removed unused public interface.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Added missing config of dx for rtps.
+
 Fri Mar  9 14:37:49 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/DataReaderListenerImpl.h:

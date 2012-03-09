@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "InfoRepoDiscovery.h"
+#include "FailoverListener.h"
 #include "Service_Participant.h"
 #include "InfoRepoUtils.h"
 #include "RepoIdBuilder.h"
@@ -32,8 +33,14 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
   : Discovery(key),
     ior_(ior),
     bit_transport_port_(0),
-    use_local_bit_config_(false)
+    use_local_bit_config_(false),
+    failoverListener_(0)
 {
+}
+
+InfoRepoDiscovery::~InfoRepoDiscovery()
+{
+  delete this->failoverListener_;
 }
 
 DCPSInfo_ptr
@@ -158,6 +165,16 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                                         participantReaderQos,
                                         DDS::DataReaderListener::_nil(),
                                         DEFAULT_STATUS_MASK);
+
+    if (participant->federated()) {
+      DDS::ParticipantBuiltinTopicDataDataReader* pbit_dr =
+        DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr.in());
+
+      // Create and attach the listener.
+      failoverListener_ = new FailoverListener(key());
+      pbit_dr->set_listener(failoverListener_, DEFAULT_STATUS_MASK);
+    }
+
     DDS::DataReaderQos dr_qos;
     bit_subscriber->get_default_datareader_qos(dr_qos);
     dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;

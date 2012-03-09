@@ -43,7 +43,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class FailoverListener;
 class PublisherImpl;
 class SubscriberImpl;
 class DomainParticipantFactoryImpl;
@@ -399,9 +398,6 @@ private:
 
   /// The built in topic subscriber.
   DDS::Subscriber_var        bit_subscriber_;
-
-  /// Listener to initiate failover with.
-  FailoverListener*    failoverListener_;
 
   /// Instance handle generators for non-repo backed entities
   /// (i.e. subscribers and publishers).

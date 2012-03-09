@@ -16,7 +16,6 @@
 #include "Marked_Default_Qos.h"
 #include "Registered_Data_Types.h"
 #include "Transient_Kludge.h"
-#include "FailoverListener.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "Util.h"
 #include "MonitorFactory.h"
@@ -80,7 +79,6 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     domain_id_(domain_id),
     dp_id_(dp_id),
     federated_(federated),
-    failoverListener_(0),
     monitor_(0),
     pub_id_gen_(dp_id_)
 {
@@ -91,7 +89,6 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
 // Implementation skeleton destructor
 DomainParticipantImpl::~DomainParticipantImpl()
 {
-  delete this->failoverListener_;
 }
 
 DDS::Publisher_ptr

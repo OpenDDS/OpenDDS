@@ -195,6 +195,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(rd->pg() == 2);
     TEST_CHECK(rd->d0() == 1);
     TEST_CHECK(rd->d1() == 9);
+    TEST_CHECK(rd->dx() == 15);
     TEST_CHECK(rd->spdp_send_addrs().size() == 1);
     TEST_CHECK(rd->spdp_send_addrs()[0] == "host1:10001");
   }

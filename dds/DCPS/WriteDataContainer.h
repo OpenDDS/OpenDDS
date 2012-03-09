@@ -216,19 +216,6 @@ public:
   DataSampleList get_resend_data() ;
 
   /**
-   * Obtain a list of data that are still referencing by the
-   * transport but have not been acknowledged by transport as
-   * delivered or dropped.
-   */
-  DataSampleList get_sending_data() ;
-
-  /**
-   * Obtain a list of data that has already been sent
-   * successfully.
-   */
-  DataSampleList get_sent_data() ;
-
-  /**
    * Returns if pending data exists.  This includes released,
    * sending, and unsent data.
    */

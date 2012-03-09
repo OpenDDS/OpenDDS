@@ -462,18 +462,6 @@ WriteDataContainer::get_resend_data()
   return list;
 }
 
-DataSampleList
-WriteDataContainer::get_sending_data()
-{
-  return this->sending_data_;
-}
-
-DataSampleList
-WriteDataContainer::get_sent_data()
-{
-  return this->sent_data_;
-}
-
 bool
 WriteDataContainer::pending_data()
 {
