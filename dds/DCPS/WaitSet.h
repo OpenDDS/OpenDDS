@@ -53,22 +53,17 @@ public:
   virtual ~WaitSet() {}
 
   ReturnCode_t wait(ConditionSeq& active_conditions,
-                    const Duration_t& timeout)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                    const Duration_t& timeout);
 
-  ReturnCode_t attach_condition(Condition_ptr cond)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  ReturnCode_t attach_condition(Condition_ptr cond);
 
-  ReturnCode_t detach_condition(Condition_ptr cond)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  ReturnCode_t detach_condition(Condition_ptr cond);
 
-  ReturnCode_t get_conditions(ConditionSeq& attached_conditions)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  ReturnCode_t get_conditions(ConditionSeq& attached_conditions);
 
   /// Convenience method for detaching multiple conditions,
   /// for example when shutting down.
-  ReturnCode_t detach_conditions(const ConditionSeq& conditions)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  ReturnCode_t detach_conditions(const ConditionSeq& conditions);
 
   static WaitSet_ptr _duplicate(WaitSet_ptr obj);
 

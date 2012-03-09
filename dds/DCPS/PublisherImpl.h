@@ -59,8 +59,7 @@ public:
 
   virtual ~PublisherImpl();
 
-  virtual DDS::InstanceHandle_t get_instance_handle()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::InstanceHandle_t get_instance_handle();
 
   bool contains_writer(DDS::InstanceHandle_t a_handle);
 
@@ -68,70 +67,52 @@ public:
     DDS::Topic_ptr a_topic,
     const DDS::DataWriterQos& qos,
     DDS::DataWriterListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
   virtual DDS::ReturnCode_t delete_datawriter(
-    DDS::DataWriter_ptr a_datawriter)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataWriter_ptr a_datawriter);
 
   virtual DDS::DataWriter_ptr lookup_datawriter(
-    const char* topic_name)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const char* topic_name);
 
-  virtual DDS::ReturnCode_t delete_contained_entities()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t delete_contained_entities();
 
   virtual DDS::ReturnCode_t set_qos(
-    const DDS::PublisherQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::PublisherQos& qos);
 
   virtual DDS::ReturnCode_t get_qos(
-    DDS::PublisherQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::PublisherQos& qos);
 
   virtual DDS::ReturnCode_t set_listener(
     DDS::PublisherListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
-  virtual DDS::PublisherListener_ptr get_listener()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::PublisherListener_ptr get_listener();
 
-  virtual DDS::ReturnCode_t suspend_publications()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t suspend_publications();
 
-  virtual DDS::ReturnCode_t resume_publications()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t resume_publications();
 
-  virtual DDS::ReturnCode_t begin_coherent_changes()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t begin_coherent_changes();
 
-  virtual DDS::ReturnCode_t end_coherent_changes()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t end_coherent_changes();
 
   virtual DDS::ReturnCode_t wait_for_acknowledgments(
-    const DDS::Duration_t& max_wait)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::Duration_t& max_wait);
 
-  virtual DDS::DomainParticipant_ptr get_participant()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::DomainParticipant_ptr get_participant();
 
   virtual DDS::ReturnCode_t set_default_datawriter_qos(
-    const DDS::DataWriterQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::DataWriterQos& qos);
 
   virtual DDS::ReturnCode_t get_default_datawriter_qos(
-    DDS::DataWriterQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataWriterQos& qos);
 
   virtual DDS::ReturnCode_t copy_from_topic_qos(
     DDS::DataWriterQos& a_datawriter_qos,
-    const DDS::TopicQos& a_topic_qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::TopicQos& a_topic_qos);
 
-  virtual DDS::ReturnCode_t enable()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t enable();
 
   ACE_Recursive_Thread_Mutex& get_pi_lock() { return pi_lock_; }
 

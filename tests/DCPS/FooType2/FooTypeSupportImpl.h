@@ -39,22 +39,13 @@ public:
   virtual ::DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual ::OpenDDS::DCPS::DataWriterRemote_ptr create_datawriter (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual ::OpenDDS::DCPS::DataReaderRemote_ptr create_datareader (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 };
 
 

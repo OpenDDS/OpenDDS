@@ -19,11 +19,6 @@
 #include <vector>
 #include <string>
 
-// Newer versions of ACE+TAO do not define ACE_THROW_SPEC
-#ifndef ACE_THROW_SPEC
-#define ACE_THROW_SPEC(X)
-#endif
-
 namespace TAO {
 
 template<typename charT> class String_Manager_T;

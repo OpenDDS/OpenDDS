@@ -71,7 +71,6 @@ PublisherImpl::~PublisherImpl()
 
 DDS::InstanceHandle_t
 PublisherImpl::get_instance_handle()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return handle_;
 }
@@ -100,7 +99,6 @@ PublisherImpl::create_datawriter(
   const DDS::DataWriterQos & qos,
   DDS::DataWriterListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (CORBA::is_nil(a_topic)) {
     ACE_ERROR((LM_ERROR,
@@ -204,7 +202,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
 
@@ -330,7 +327,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DataWriter_ptr
 PublisherImpl::lookup_datawriter(const char* topic_name)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -359,7 +355,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::delete_contained_entities()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // mark that the entity is being deleted
   set_deleted(true);
@@ -404,7 +399,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::set_qos(const DDS::PublisherQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
@@ -491,7 +485,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::get_qos(DDS::PublisherQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = qos_;
   return DDS::RETCODE_OK;
@@ -500,7 +493,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
                             DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -511,14 +503,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::PublisherListener_ptr
 PublisherImpl::get_listener()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::PublisherListener::_duplicate(listener_.in());
 }
 
 DDS::ReturnCode_t
 PublisherImpl::suspend_publications()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -548,7 +538,6 @@ PublisherImpl::is_suspended() const
 
 DDS::ReturnCode_t
 PublisherImpl::resume_publications()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -583,7 +572,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -626,7 +614,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::end_coherent_changes()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -703,7 +690,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(
   const DDS::Duration_t& max_wait)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -777,14 +763,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DomainParticipant_ptr
 PublisherImpl::get_participant()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::DomainParticipant::_duplicate(participant_);
 }
 
 DDS::ReturnCode_t
 PublisherImpl::set_default_datawriter_qos(const DDS::DataWriterQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     default_datawriter_qos_ = qos;
@@ -797,7 +781,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::get_default_datawriter_qos(DDS::DataWriterQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = default_datawriter_qos_;
   return DDS::RETCODE_OK;
@@ -806,7 +789,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 PublisherImpl::copy_from_topic_qos(DDS::DataWriterQos & a_datawriter_qos,
                                    const DDS::TopicQos & a_topic_qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(a_topic_qos)
       && Qos_Helper::consistent(a_topic_qos)) {
@@ -833,7 +815,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 PublisherImpl::enable()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no

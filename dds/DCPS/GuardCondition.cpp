@@ -12,13 +12,11 @@
 namespace DDS {
 
 CORBA::Boolean GuardCondition::get_trigger_value()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return trigger_value_;
 }
 
 ReturnCode_t GuardCondition::set_trigger_value(CORBA::Boolean value)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   trigger_value_ = value;
   signal_all();

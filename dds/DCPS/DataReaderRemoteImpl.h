@@ -41,18 +41,14 @@ public:
 
   virtual void add_association(const RepoId& yourId,
                                const WriterAssociation& writer,
-                               bool active)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                               bool active);
 
-  virtual void association_complete(const RepoId& remote_id)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void association_complete(const RepoId& remote_id);
 
   virtual void remove_associations(const WriterIdSeq& writers,
-                                   CORBA::Boolean callback)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                                   CORBA::Boolean callback);
 
-  virtual void update_incompatible_qos(const IncompatibleQosStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
   void detach_parent();
 

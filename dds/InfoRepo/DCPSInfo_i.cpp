@@ -84,7 +84,7 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
 }
 
 void
-TAO_DDS_DCPSInfo_i::shutdown() ACE_THROW_SPEC((CORBA::SystemException))
+TAO_DDS_DCPSInfo_i::shutdown()
 {
   this->shutdown_->shutdown();
 }
@@ -98,9 +98,6 @@ TAO_DDS_DCPSInfo_i::orb()
 CORBA::Boolean TAO_DDS_DCPSInfo_i::attach_participant(
   DDS::DomainId_t            domainId,
   const OpenDDS::DCPS::RepoId& participantId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
@@ -162,9 +159,6 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
   const char * dataTypeName,
   const DDS::TopicQos & qos,
   bool /*hasDcpsKey -- only used for RTPS Discovery*/)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
 
@@ -276,8 +270,6 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::find_topic(
   CORBA::String_out dataTypeName,
   DDS::TopicQos_out qos,
   OpenDDS::DCPS::RepoId_out topicId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
 
@@ -310,10 +302,6 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::remove_topic(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId,
   const OpenDDS::DCPS::RepoId& topicId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Topic))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
 
@@ -367,10 +355,6 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
   const DDS::DataWriterQos & qos,
   const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::PublisherQos & publisherQos)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Topic))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
 
@@ -583,10 +567,6 @@ void TAO_DDS_DCPSInfo_i::remove_publication(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId,
   const OpenDDS::DCPS::RepoId& publicationId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Publication))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -641,10 +621,6 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
   const DDS::SubscriberQos & subscriberQos,
   const char* filterExpression,
   const DDS::StringSeq& exprParams)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Topic))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
 
@@ -867,10 +843,6 @@ void TAO_DDS_DCPSInfo_i::remove_subscription(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId,
   const OpenDDS::DCPS::RepoId& subscriptionId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Subscription))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -916,8 +888,6 @@ ACE_THROW_SPEC((CORBA::SystemException
 OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
   DDS::DomainId_t domain,
   const DDS::DomainParticipantQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain))
 {
   // A value to return.
   OpenDDS::DCPS::AddDomainStatus value;
@@ -1236,9 +1206,6 @@ TAO_DDS_DCPSInfo_i::disassociate_participant(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& local_id,
   const OpenDDS::DCPS::RepoId& remote_id)
-ACE_THROW_SPEC((CORBA::SystemException,
-                OpenDDS::DCPS::Invalid_Domain,
-                OpenDDS::DCPS::Invalid_Participant))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1274,10 +1241,6 @@ TAO_DDS_DCPSInfo_i::disassociate_subscription(
   const OpenDDS::DCPS::RepoId& participantId,
   const OpenDDS::DCPS::RepoId& local_id,
   const OpenDDS::DCPS::RepoId& remote_id)
-ACE_THROW_SPEC((CORBA::SystemException,
-                OpenDDS::DCPS::Invalid_Domain,
-                OpenDDS::DCPS::Invalid_Participant,
-                OpenDDS::DCPS::Invalid_Subscription))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1309,10 +1272,6 @@ TAO_DDS_DCPSInfo_i::disassociate_publication(
   const OpenDDS::DCPS::RepoId& participantId,
   const OpenDDS::DCPS::RepoId& local_id,
   const OpenDDS::DCPS::RepoId& remote_id)
-ACE_THROW_SPEC((CORBA::SystemException,
-                OpenDDS::DCPS::Invalid_Domain,
-                OpenDDS::DCPS::Invalid_Participant,
-                OpenDDS::DCPS::Invalid_Publication))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1341,9 +1300,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void TAO_DDS_DCPSInfo_i::remove_domain_participant(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1402,11 +1358,6 @@ void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId,
   const OpenDDS::DCPS::RepoId& localId,
   const OpenDDS::DCPS::RepoId& remoteId)
-ACE_THROW_SPEC((CORBA::SystemException,
-                OpenDDS::DCPS::Invalid_Domain,
-                OpenDDS::DCPS::Invalid_Participant,
-                OpenDDS::DCPS::Invalid_Publication,
-                OpenDDS::DCPS::Invalid_Subscription))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1438,9 +1389,6 @@ void TAO_DDS_DCPSInfo_i::ignore_domain_participant(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& myParticipantId,
   const OpenDDS::DCPS::RepoId& ignoreId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1468,10 +1416,6 @@ void TAO_DDS_DCPSInfo_i::ignore_topic(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& myParticipantId,
   const OpenDDS::DCPS::RepoId& ignoreId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Topic))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1499,10 +1443,6 @@ void TAO_DDS_DCPSInfo_i::ignore_subscription(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& myParticipantId,
   const OpenDDS::DCPS::RepoId& ignoreId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Subscription))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1530,10 +1470,6 @@ void TAO_DDS_DCPSInfo_i::ignore_publication(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& myParticipantId,
   const OpenDDS::DCPS::RepoId& ignoreId)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Publication))
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
@@ -1563,10 +1499,6 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos(
   const OpenDDS::DCPS::RepoId& dwId,
   const DDS::DataWriterQos & qos,
   const DDS::PublisherQos & publisherQos)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Publication))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
@@ -1698,10 +1630,6 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos(
   const OpenDDS::DCPS::RepoId& drId,
   const DDS::DataReaderQos & qos,
   const DDS::SubscriberQos & subscriberQos)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Subscription))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
@@ -1833,10 +1761,6 @@ TAO_DDS_DCPSInfo_i::update_subscription_params(
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& subscriptionId,
     const DDS::StringSeq& params)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                  OpenDDS::DCPS::Invalid_Domain,
-                  OpenDDS::DCPS::Invalid_Participant,
-                  OpenDDS::DCPS::Invalid_Subscription))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
@@ -1870,10 +1794,6 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId,
   const DDS::TopicQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException
-                 , OpenDDS::DCPS::Invalid_Domain
-                 , OpenDDS::DCPS::Invalid_Participant
-                 , OpenDDS::DCPS::Invalid_Topic))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
@@ -1924,9 +1844,6 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos(
   DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId,
   const DDS::DomainParticipantQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 OpenDDS::DCPS::Invalid_Domain,
-                 OpenDDS::DCPS::Invalid_Participant))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 

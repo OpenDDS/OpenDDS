@@ -68,10 +68,7 @@ public:
 
   virtual CORBA::Boolean attach_participant(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant));
+    const OpenDDS::DCPS::RepoId& participantId);
 
   virtual OpenDDS::DCPS::TopicStatus assert_topic(
     OpenDDS::DCPS::RepoId_out topicId,
@@ -80,10 +77,7 @@ public:
     const char * topicName,
     const char * dataTypeName,
     const DDS::TopicQos & qos,
-    bool hasDcpsKey)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant));
+    bool hasDcpsKey);
 
   /**
    * @brief Add a previously existing topic to the repository.
@@ -114,18 +108,12 @@ public:
     const char * topicName,
     CORBA::String_out dataTypeName,
     DDS::TopicQos_out qos,
-    OpenDDS::DCPS::RepoId_out topicId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain));
+    OpenDDS::DCPS::RepoId_out topicId);
 
   virtual OpenDDS::DCPS::TopicStatus remove_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& topicId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Topic));
+    const OpenDDS::DCPS::RepoId& topicId);
 
   virtual OpenDDS::DCPS::RepoId add_publication(
     DDS::DomainId_t domainId,
@@ -134,11 +122,7 @@ public:
     OpenDDS::DCPS::DataWriterRemote_ptr publication,
     const DDS::DataWriterQos & qos,
     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
-    const DDS::PublisherQos & publisherQos)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Topic));
+    const DDS::PublisherQos & publisherQos);
 
   /**
    * @brief Add a previously existing publication to the repository.
@@ -174,11 +158,7 @@ public:
   virtual void remove_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& publicationId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Publication));
+    const OpenDDS::DCPS::RepoId& publicationId);
 
   virtual OpenDDS::DCPS::RepoId add_subscription(
     DDS::DomainId_t domainId,
@@ -189,11 +169,7 @@ public:
     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
     const DDS::SubscriberQos & subscriberQos,
     const char* filterExpression,
-    const DDS::StringSeq& exprParams)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Topic));
+    const DDS::StringSeq& exprParams);
 
   /**
    * @brief Add a previously existing subscription to the repository.
@@ -231,17 +207,11 @@ public:
   virtual void remove_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& subscriptionId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Subscription));
+    const OpenDDS::DCPS::RepoId& subscriptionId);
 
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
-    const DDS::DomainParticipantQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain));
+    const DDS::DomainParticipantQos & qos);
 
   /**
    * @brief Add a previously existing participant to the repository.
@@ -264,20 +234,12 @@ public:
 
   virtual void remove_domain_participant(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant));
+    const OpenDDS::DCPS::RepoId& participantId);
 
   virtual void association_complete(DDS::DomainId_t domainId,
                                     const OpenDDS::DCPS::RepoId& participantId,
                                     const OpenDDS::DCPS::RepoId& localId,
-                                    const OpenDDS::DCPS::RepoId& remoteId)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                  OpenDDS::DCPS::Invalid_Domain,
-                  OpenDDS::DCPS::Invalid_Participant,
-                  OpenDDS::DCPS::Invalid_Publication,
-                  OpenDDS::DCPS::Invalid_Subscription));
+                                    const OpenDDS::DCPS::RepoId& remoteId);
 
   bool remove_by_owner(
     DDS::DomainId_t domain,
@@ -286,76 +248,46 @@ public:
   virtual void disassociate_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                  OpenDDS::DCPS::Invalid_Domain,
-                  OpenDDS::DCPS::Invalid_Participant));
+    const OpenDDS::DCPS::RepoId& remote_id);
 
   virtual void disassociate_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                  OpenDDS::DCPS::Invalid_Domain,
-                  OpenDDS::DCPS::Invalid_Participant,
-                  OpenDDS::DCPS::Invalid_Subscription));
+    const OpenDDS::DCPS::RepoId& remote_id);
 
   virtual void disassociate_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                  OpenDDS::DCPS::Invalid_Domain,
-                  OpenDDS::DCPS::Invalid_Participant,
-                  OpenDDS::DCPS::Invalid_Publication));
+    const OpenDDS::DCPS::RepoId& remote_id);
 
   virtual void ignore_domain_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant));
+    const OpenDDS::DCPS::RepoId& ignoreId);
 
   virtual void ignore_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Topic));
+    const OpenDDS::DCPS::RepoId& ignoreId);
 
   virtual void ignore_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Subscription));
+    const OpenDDS::DCPS::RepoId& ignoreId);
 
   virtual void ignore_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Publication));
+    const OpenDDS::DCPS::RepoId& ignoreId);
 
   virtual CORBA::Boolean update_publication_qos(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& partId,
     const OpenDDS::DCPS::RepoId& dwId,
     const DDS::DataWriterQos & qos,
-    const DDS::PublisherQos & publisherQos)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Publication));
+    const DDS::PublisherQos & publisherQos);
 
   /// Entry for federation updates of DataWriterQos values.
   void update_publication_qos(
@@ -376,11 +308,7 @@ public:
     const OpenDDS::DCPS::RepoId& partId,
     const OpenDDS::DCPS::RepoId& drId,
     const DDS::DataReaderQos & qos,
-    const DDS::SubscriberQos & subscriberQos)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Subscription));
+    const DDS::SubscriberQos & subscriberQos);
 
   /// Entry for federation updates of DataReaderQos values.
   void update_subscription_qos(
@@ -400,32 +328,21 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& subscriptionId,
-    const DDS::StringSeq& params)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                  OpenDDS::DCPS::Invalid_Domain,
-                  OpenDDS::DCPS::Invalid_Participant,
-                  OpenDDS::DCPS::Invalid_Subscription));
+    const DDS::StringSeq& params);
 
   virtual CORBA::Boolean update_topic_qos(
     const OpenDDS::DCPS::RepoId& topicId,
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
-    const DDS::TopicQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException
-                   , OpenDDS::DCPS::Invalid_Domain
-                   , OpenDDS::DCPS::Invalid_Participant
-                   , OpenDDS::DCPS::Invalid_Topic));
+    const DDS::TopicQos & qos);
 
   virtual CORBA::Boolean update_domain_participant_qos(
     DDS::DomainId_t domain,
     const OpenDDS::DCPS::RepoId& participantId,
-    const DDS::DomainParticipantQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   OpenDDS::DCPS::Invalid_Domain,
-                   OpenDDS::DCPS::Invalid_Participant));
+    const DDS::DomainParticipantQos & qos);
 
   /// Cause the entire repository to exit.
-  virtual void shutdown() ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void shutdown();
 
   /**
    * @brief assert new ownership for a participant and its contained entities.

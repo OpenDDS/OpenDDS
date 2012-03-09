@@ -54,38 +54,25 @@ public:
 
 
   virtual ::DDS::ReturnCode_t enable_specific (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-        )) { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
+      ) { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
 
   virtual void add_association (
       const ::OpenDDS::DCPS::RepoId& yourId,
       const OpenDDS::DCPS::WriterAssociation& writer,
       bool active
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
-  virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/)
-    ACE_THROW_SPEC((CORBA::SystemException)) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
+  virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
 
   virtual void remove_associations (
       const OpenDDS::DCPS::WriterIdSeq & writers,
       ::CORBA::Boolean notify_lost
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual void update_incompatible_qos (
       const OpenDDS::DCPS::IncompatibleQosStatus & status
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   DiscReceivedCalls& received()
     {

@@ -49,28 +49,21 @@ public:
 
   virtual ~TopicImpl();
 
-  virtual DDS::InstanceHandle_t get_instance_handle()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::InstanceHandle_t get_instance_handle();
 
-  virtual DDS::ReturnCode_t set_qos(const DDS::TopicQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t set_qos(const DDS::TopicQos& qos);
 
-  virtual DDS::ReturnCode_t get_qos(DDS::TopicQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t get_qos(DDS::TopicQos& qos);
 
   virtual DDS::ReturnCode_t set_listener(DDS::TopicListener_ptr a_listener,
-                                         DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                                         DDS::StatusMask mask);
 
-  virtual DDS::TopicListener_ptr get_listener()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::TopicListener_ptr get_listener();
 
   virtual DDS::ReturnCode_t get_inconsistent_topic_status(
-    DDS::InconsistentTopicStatus& a_status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InconsistentTopicStatus& a_status);
 
-  virtual DDS::ReturnCode_t enable()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t enable();
 
   /** This method is not defined in the IDL and is defined for
   *  internal use.

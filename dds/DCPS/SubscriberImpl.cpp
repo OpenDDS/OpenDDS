@@ -84,7 +84,6 @@ SubscriberImpl::~SubscriberImpl()
 
 DDS::InstanceHandle_t
 SubscriberImpl::get_instance_handle()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return handle_;
 }
@@ -112,7 +111,6 @@ SubscriberImpl::create_datareader(
   const DDS::DataReaderQos & qos,
   DDS::DataReaderListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataReaderQosExt ext_qos;
   get_default_datareader_qos_ext(ext_qos);
@@ -126,7 +124,6 @@ SubscriberImpl::create_opendds_datareader(
   const DataReaderQosExt & ext_qos,
   DDS::DataReaderListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (CORBA::is_nil(a_topic_desc)) {
     ACE_ERROR((LM_ERROR,
@@ -301,7 +298,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("SubscriberImpl", "delete_datareader", 6);
 
@@ -412,7 +408,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 SubscriberImpl::delete_contained_entities()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // mark that the entity is being deleted
   set_deleted(true);
@@ -464,7 +459,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::DataReader_ptr
 SubscriberImpl::lookup_datareader(
   const char * topic_name)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -505,7 +499,6 @@ SubscriberImpl::get_datareaders(
   DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -555,7 +548,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 SubscriberImpl::notify_datareaders()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -597,7 +589,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 SubscriberImpl::set_qos(
   const DDS::SubscriberQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
@@ -684,7 +675,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 SubscriberImpl::get_qos(
   DDS::SubscriberQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = qos_;
   return DDS::RETCODE_OK;
@@ -694,7 +684,6 @@ DDS::ReturnCode_t
 SubscriberImpl::set_listener(
   DDS::SubscriberListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -705,14 +694,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::SubscriberListener_ptr
 SubscriberImpl::get_listener()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::SubscriberListener::_duplicate(listener_.in());
 }
 
 DDS::ReturnCode_t
 SubscriberImpl::begin_access()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -746,7 +733,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 SubscriberImpl::end_access()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -787,7 +773,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DomainParticipant_ptr
 SubscriberImpl::get_participant()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::DomainParticipant::_duplicate(participant_);
 }
@@ -795,7 +780,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 SubscriberImpl::set_default_datareader_qos(
   const DDS::DataReaderQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     default_datareader_qos_ = qos;
@@ -809,7 +793,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 SubscriberImpl::get_default_datareader_qos(
   DDS::DataReaderQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = default_datareader_qos_;
   return DDS::RETCODE_OK;
@@ -818,7 +801,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void
 SubscriberImpl::get_default_datareader_qos_ext(
   DataReaderQosExt & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos.durability.always_get_history = false;
 }
@@ -827,7 +809,6 @@ DDS::ReturnCode_t
 SubscriberImpl::copy_from_topic_qos(
   DDS::DataReaderQos & a_datareader_qos,
   const DDS::TopicQos & a_topic_qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(a_topic_qos) &&
       Qos_Helper::consistent(a_topic_qos)) {
@@ -851,7 +832,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 SubscriberImpl::enable()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no

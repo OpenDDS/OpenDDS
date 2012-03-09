@@ -860,7 +860,6 @@ ManagerImpl::finalize()
 
 RepoKey
 ManagerImpl::federation_id()
-ACE_THROW_SPEC((::CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -872,7 +871,6 @@ ACE_THROW_SPEC((::CORBA::SystemException))
 
 OpenDDS::DCPS::DCPSInfo_ptr
 ManagerImpl::repository()
-ACE_THROW_SPEC((::CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -893,7 +891,6 @@ ACE_THROW_SPEC((::CORBA::SystemException))
 
 CORBA::Boolean
 ManagerImpl::discover_federation(const char * ior)
-ACE_THROW_SPEC((::CORBA::SystemException, Incomplete))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -909,7 +906,7 @@ Manager_ptr
 ManagerImpl::join_federation(
   Manager_ptr peer,
   FederationDomain federation
-) ACE_THROW_SPEC((::CORBA::SystemException, Incomplete))
+)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -1070,8 +1067,6 @@ ManagerImpl::join_federation(
 void
 ManagerImpl::leave_federation(
   RepoKey id)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 Incomplete))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -1102,8 +1097,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void
 ManagerImpl::leave_and_shutdown(
   void)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 Incomplete))
 {
   // Shutdown the process via the repository object.
   this->info_->shutdown();
@@ -1112,8 +1105,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void
 ManagerImpl::shutdown(
   void)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 Incomplete))
 {
   // Prevent the removal of this repository from the federation during
   // shutdown processing.
@@ -1126,8 +1117,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void
 ManagerImpl::initializeOwner(
   const OpenDDS::Federator::OwnerUpdate & data)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 OpenDDS::Federator::Incomplete))
 {
   this->processCreate(&data, 0);
 }
@@ -1135,8 +1124,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void
 ManagerImpl::initializeTopic(
   const OpenDDS::Federator::TopicUpdate & data)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 OpenDDS::Federator::Incomplete))
 {
   this->processCreate(&data, 0);
 }
@@ -1144,8 +1131,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void
 ManagerImpl::initializeParticipant(
   const OpenDDS::Federator::ParticipantUpdate & data)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 OpenDDS::Federator::Incomplete))
 {
   this->processCreate(&data, 0);
 }
@@ -1153,8 +1138,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void
 ManagerImpl::initializePublication(
   const OpenDDS::Federator::PublicationUpdate & data)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 OpenDDS::Federator::Incomplete))
 {
   this->processCreate(&data, 0);
 }
@@ -1162,8 +1145,6 @@ ACE_THROW_SPEC((CORBA::SystemException,
 void
 ManagerImpl::initializeSubscription(
   const OpenDDS::Federator::SubscriptionUpdate & data)
-ACE_THROW_SPEC((CORBA::SystemException,
-                 OpenDDS::Federator::Incomplete))
 {
   this->processCreate(&data, 0);
 }

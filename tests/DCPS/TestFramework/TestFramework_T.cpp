@@ -96,7 +96,6 @@ TestPublisher<Writer>::wait_for_subscribers(CORBA::Long count,
 template<typename Writer>
 void
 TestPublisher<Writer>::init_i()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   this->publisher_ = create_publisher();
 
@@ -114,14 +113,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 template<typename Writer>
 void
 TestPublisher<Writer>::fini_i()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 template<typename Writer>
 DDS::Publisher_var
 TestPublisher<Writer>::create_publisher()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DDS::PublisherQos qos;
   if (this->participant_->get_default_publisher_qos(qos) != DDS::RETCODE_OK) {
@@ -159,7 +156,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 template<typename Writer>
 DDS::DataWriter_var
 TestPublisher<Writer>::create_datawriter()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DDS::DataWriterQos qos;
   if (this->publisher_->get_default_datawriter_qos(qos) != DDS::RETCODE_OK) {
@@ -225,7 +221,6 @@ TestSubscriber<Reader>::init_datareader(DDS::DataReaderQos& /*qos*/,
 template<typename Reader>
 void
 TestSubscriber<Reader>::init_i()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   this->subscriber_ = create_subscriber();
 
@@ -243,14 +238,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 template<typename Reader>
 void
 TestSubscriber<Reader>::fini_i()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 template<typename Reader>
 DDS::Subscriber_var
 TestSubscriber<Reader>::create_subscriber()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DDS::SubscriberQos qos;
   if (this->participant_->get_default_subscriber_qos(qos) != DDS::RETCODE_OK) {
@@ -288,7 +281,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 template<typename Reader>
 DDS::DataReader_var
 TestSubscriber<Reader>::create_datareader()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DDS::DataReaderQos qos;
   if (this->subscriber_->get_default_datareader_qos(qos) != DDS::RETCODE_OK) {
@@ -376,7 +368,6 @@ TestPair<Reader, Writer>::~TestPair()
 template<typename Reader, typename Writer>
 void
 TestPair<Reader, Writer>::init_i()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   TestSubscriber<Reader>::init_i();
   TestPublisher<Writer>::init_i();
@@ -385,7 +376,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 template<typename Reader, typename Writer>
 void
 TestPair<Reader, Writer>::fini_i()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   TestPublisher<Writer>::fini_i();
   TestSubscriber<Reader>::fini_i();

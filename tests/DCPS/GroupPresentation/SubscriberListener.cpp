@@ -32,7 +32,6 @@ SubscriberListenerImpl::~SubscriberListenerImpl()
 void
 SubscriberListenerImpl::on_data_on_readers(
   DDS::Subscriber_ptr subs)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ::DDS::ReturnCode_t ret = subs->begin_access ();
   if (ret != ::DDS::RETCODE_OK) {
@@ -261,7 +260,6 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg,
 }
 
 void SubscriberListenerImpl::on_data_available(DDS::DataReader_ptr /*reader*/)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_data_available()\n")));
 }
@@ -269,7 +267,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void SubscriberListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
   const DDS::RequestedDeadlineMissedStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_deadline_missed()\n")));
 }
@@ -277,7 +274,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void SubscriberListenerImpl::on_requested_incompatible_qos(
   DDS::DataReader_ptr,
   const DDS::RequestedIncompatibleQosStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
 }
@@ -285,7 +281,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void SubscriberListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed()\n")));
 }
@@ -293,7 +288,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void SubscriberListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
 }
@@ -301,7 +295,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void SubscriberListenerImpl::on_sample_rejected(
   DDS::DataReader_ptr,
   const DDS::SampleRejectedStatus&)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
 }
@@ -309,7 +302,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void SubscriberListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }

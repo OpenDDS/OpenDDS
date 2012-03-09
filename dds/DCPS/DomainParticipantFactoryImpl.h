@@ -58,35 +58,27 @@ public:
     DDS::DomainId_t domainId,
     const DDS::DomainParticipantQos & qos,
     DDS::DomainParticipantListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
   virtual DDS::ReturnCode_t delete_participant(
-    DDS::DomainParticipant_ptr a_participant)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DomainParticipant_ptr a_participant);
 
   virtual DDS::DomainParticipant_ptr lookup_participant(
-    DDS::DomainId_t domainId)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DomainId_t domainId);
 
   virtual DDS::ReturnCode_t set_default_participant_qos(
-    const DDS::DomainParticipantQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::DomainParticipantQos & qos);
 
   virtual DDS::ReturnCode_t get_default_participant_qos(
-    DDS::DomainParticipantQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DomainParticipantQos & qos);
 
-  virtual DDS::DomainParticipantFactory_ptr get_instance()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::DomainParticipantFactory_ptr get_instance();
 
   virtual DDS::ReturnCode_t set_qos(
-    const DDS::DomainParticipantFactoryQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::DomainParticipantFactoryQos & qos);
 
   virtual DDS::ReturnCode_t get_qos(
-    DDS::DomainParticipantFactoryQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DomainParticipantFactoryQos & qos);
 
   // Expose the participants for reading.
   const DPMap& participants() const;

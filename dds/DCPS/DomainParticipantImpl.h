@@ -126,52 +126,42 @@ public:
   ///Destructor
   virtual ~DomainParticipantImpl();
 
-  virtual DDS::InstanceHandle_t get_instance_handle()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::InstanceHandle_t get_instance_handle();
 
   virtual DDS::Publisher_ptr create_publisher(
     const DDS::PublisherQos & qos,
     DDS::PublisherListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
   virtual DDS::ReturnCode_t delete_publisher(
-    DDS::Publisher_ptr p)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::Publisher_ptr p);
 
   virtual DDS::Subscriber_ptr create_subscriber(
     const DDS::SubscriberQos & qos,
     DDS::SubscriberListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
   virtual DDS::ReturnCode_t delete_subscriber(
-    DDS::Subscriber_ptr s)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::Subscriber_ptr s);
 
-  virtual DDS::Subscriber_ptr get_builtin_subscriber()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::Subscriber_ptr get_builtin_subscriber();
 
   virtual DDS::Topic_ptr create_topic(
     const char * topic_name,
     const char * type_name,
     const DDS::TopicQos & qos,
     DDS::TopicListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
   virtual DDS::ReturnCode_t delete_topic(
-    DDS::Topic_ptr a_topic)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::Topic_ptr a_topic);
 
   virtual DDS::Topic_ptr find_topic(
     const char * topic_name,
-    const DDS::Duration_t & timeout)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::Duration_t & timeout);
 
   virtual DDS::TopicDescription_ptr lookup_topicdescription(
-    const char * name)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const char * name);
 
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -180,124 +170,96 @@ public:
     const char * name,
     DDS::Topic_ptr related_topic,
     const char * filter_expression,
-    const DDS::StringSeq & expression_parameters)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::StringSeq & expression_parameters);
 
   virtual DDS::ReturnCode_t delete_contentfilteredtopic(
-    DDS::ContentFilteredTopic_ptr a_contentfilteredtopic)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ContentFilteredTopic_ptr a_contentfilteredtopic);
 
   virtual DDS::MultiTopic_ptr create_multitopic(
     const char * name,
     const char * type_name,
     const char * subscription_expression,
-    const DDS::StringSeq & expression_parameters)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::StringSeq & expression_parameters);
 
-  virtual DDS::ReturnCode_t delete_multitopic(DDS::MultiTopic_ptr a_multitopic)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t delete_multitopic(DDS::MultiTopic_ptr a_multitopic);
 
   RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
   void deref_filter_eval(const char* filter);
 
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-  virtual DDS::ReturnCode_t delete_contained_entities()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t delete_contained_entities();
 
-  virtual CORBA::Boolean contains_entity(DDS::InstanceHandle_t a_handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual CORBA::Boolean contains_entity(DDS::InstanceHandle_t a_handle);
 
   virtual DDS::ReturnCode_t set_qos(
-    const DDS::DomainParticipantQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::DomainParticipantQos & qos);
 
   virtual DDS::ReturnCode_t get_qos(
-    DDS::DomainParticipantQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DomainParticipantQos & qos);
 
   virtual DDS::ReturnCode_t set_listener(
     DDS::DomainParticipantListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
-  virtual DDS::DomainParticipantListener_ptr get_listener()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::DomainParticipantListener_ptr get_listener();
 
   virtual DDS::ReturnCode_t ignore_participant(
-    DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t handle);
 
   virtual DDS::ReturnCode_t ignore_topic(
-    DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t handle);
 
   virtual DDS::ReturnCode_t ignore_publication(
-    DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t handle);
 
   virtual DDS::ReturnCode_t ignore_subscription(
-    DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t handle);
 
-  virtual DDS::DomainId_t get_domain_id()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::DomainId_t get_domain_id();
 
-  virtual DDS::ReturnCode_t assert_liveliness()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t assert_liveliness();
 
   virtual DDS::ReturnCode_t set_default_publisher_qos(
-    const DDS::PublisherQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::PublisherQos & qos);
 
   virtual DDS::ReturnCode_t get_default_publisher_qos(
-    DDS::PublisherQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::PublisherQos & qos);
 
   virtual DDS::ReturnCode_t set_default_subscriber_qos(
-    const DDS::SubscriberQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::SubscriberQos & qos);
 
   virtual DDS::ReturnCode_t get_default_subscriber_qos(
-    DDS::SubscriberQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::SubscriberQos & qos);
 
   virtual DDS::ReturnCode_t set_default_topic_qos(
-    const DDS::TopicQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::TopicQos & qos);
 
   virtual DDS::ReturnCode_t get_default_topic_qos(
-    DDS::TopicQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::TopicQos & qos);
 
   virtual DDS::ReturnCode_t get_current_time(
-    DDS::Time_t & current_time)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::Time_t & current_time);
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   virtual DDS::ReturnCode_t get_discovered_participants(
-    DDS::InstanceHandleSeq & participant_handles)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandleSeq & participant_handles);
 
   virtual DDS::ReturnCode_t get_discovered_participant_data(
     DDS::ParticipantBuiltinTopicData & participant_data,
-    DDS::InstanceHandle_t participant_handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t participant_handle);
 
   virtual DDS::ReturnCode_t get_discovered_topics(
-    DDS::InstanceHandleSeq & topic_handles)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandleSeq & topic_handles);
 
   virtual DDS::ReturnCode_t get_discovered_topic_data(
     DDS::TopicBuiltinTopicData & topic_data,
-    DDS::InstanceHandle_t topic_handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t topic_handle);
 
 #endif
 
-  virtual DDS::ReturnCode_t enable()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t enable();
 
   /// Following methods are not the idl interfaces and are
   /// local operations.
@@ -371,8 +333,7 @@ private:
     const char * type_name,
     const DDS::TopicQos & qos,
     DDS::TopicListener_ptr a_listener,
-    const DDS::StatusMask & mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::StatusMask & mask);
 
   /** Delete the topic with option of whether the
    *  topic object reference should be removed.

@@ -73,14 +73,12 @@ MultiTopicImpl::~MultiTopicImpl()
 }
 
 char* MultiTopicImpl::get_subscription_expression()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return CORBA::string_dup(subscription_expression_.c_str());
 }
 
 DDS::ReturnCode_t
 MultiTopicImpl::get_expression_parameters(DDS::StringSeq& params)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_,
     DDS::RETCODE_OUT_OF_RESOURCES);
@@ -90,7 +88,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 MultiTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_,
     DDS::RETCODE_OUT_OF_RESOURCES);

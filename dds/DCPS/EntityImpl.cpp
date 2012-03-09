@@ -45,14 +45,12 @@ EntityImpl::is_enabled() const
 
 DDS::StatusCondition_ptr
 EntityImpl::get_statuscondition()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::StatusCondition::_duplicate(status_condition_);
 }
 
 DDS::StatusMask
 EntityImpl::get_status_changes()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
   return status_changes_;

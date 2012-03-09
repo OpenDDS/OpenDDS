@@ -37,7 +37,6 @@ DomainParticipantFactoryImpl::create_participant(
   const DDS::DomainParticipantQos & qos,
   DDS::DomainParticipantListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (!Qos_Helper::valid(qos)) {
     ACE_ERROR((LM_ERROR,
@@ -171,7 +170,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantFactoryImpl::delete_participant(
   DDS::DomainParticipant_ptr a_participant)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 //xxx rc = 4
   if (CORBA::is_nil(a_participant)) {
@@ -275,7 +273,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::DomainParticipant_ptr
 DomainParticipantFactoryImpl::lookup_participant(
   DDS::DomainId_t domainId)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,
@@ -306,7 +303,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantFactoryImpl::set_default_participant_qos(
   const DDS::DomainParticipantQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos)
       && Qos_Helper::consistent(qos)) {
@@ -321,7 +317,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantFactoryImpl::get_default_participant_qos(
   DDS::DomainParticipantQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = default_participant_qos_;
   return DDS::RETCODE_OK;
@@ -329,7 +324,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DomainParticipantFactory_ptr
 DomainParticipantFactoryImpl::get_instance()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return TheParticipantFactory;
 }
@@ -337,7 +331,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantFactoryImpl::set_qos(
   const DDS::DomainParticipantFactoryQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (!(qos_ == qos) && Qos_Helper::changeable(qos_, qos))
@@ -353,7 +346,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantFactoryImpl::get_qos(
   DDS::DomainParticipantFactoryQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = this->qos_;
   return DDS::RETCODE_OK;

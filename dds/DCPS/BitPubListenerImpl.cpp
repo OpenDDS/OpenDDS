@@ -30,7 +30,6 @@ BitPubListenerImpl::~BitPubListenerImpl()
 }
 
 void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   try {
     ::DDS::PublicationBuiltinTopicDataDataReader_var bit_dr =
@@ -83,42 +82,36 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void BitPubListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
   const DDS::RequestedDeadlineMissedStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void BitPubListenerImpl::on_requested_incompatible_qos(
   DDS::DataReader_ptr,
   const DDS::RequestedIncompatibleQosStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void BitPubListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void BitPubListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus &)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void BitPubListenerImpl::on_sample_rejected(
   DDS::DataReader_ptr,
   const DDS::SampleRejectedStatus&)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void BitPubListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 

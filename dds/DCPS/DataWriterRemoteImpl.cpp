@@ -35,7 +35,6 @@ void
 DataWriterRemoteImpl::add_association(const RepoId& yourId,
                                       const ReaderAssociation& reader,
                                       bool active)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* parent = 0;
   DDS::DataWriter_var dwv;
@@ -51,7 +50,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 void
 DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* parent = 0;
   DDS::DataWriter_var dwv;
@@ -68,7 +66,6 @@ DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
 void
 DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* parent = 0;
   DDS::DataWriter_var dwv;
@@ -85,7 +82,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void
 DataWriterRemoteImpl::update_incompatible_qos(
   const IncompatibleQosStatus& status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* parent = 0;
   DDS::DataWriter_var dwv;
@@ -102,7 +98,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void
 DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
                                                  const DDS::StringSeq& params)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataWriterImpl* parent = 0;
   DDS::DataWriter_var dwv;

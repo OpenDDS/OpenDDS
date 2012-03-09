@@ -34,20 +34,15 @@ public:
 
   virtual ~ReadConditionImpl() {}
 
-  CORBA::Boolean get_trigger_value()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  CORBA::Boolean get_trigger_value();
 
-  DDS::SampleStateMask get_sample_state_mask()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::SampleStateMask get_sample_state_mask();
 
-  DDS::ViewStateMask get_view_state_mask()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ViewStateMask get_view_state_mask();
 
-  DDS::InstanceStateMask get_instance_state_mask()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::InstanceStateMask get_instance_state_mask();
 
-  DDS::DataReader_ptr get_datareader()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::DataReader_ptr get_datareader();
 
 protected:
   DataReaderImpl* parent_;

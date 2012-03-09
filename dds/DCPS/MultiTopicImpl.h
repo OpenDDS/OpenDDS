@@ -36,14 +36,11 @@ public:
 
   virtual ~MultiTopicImpl();
 
-  char* get_subscription_expression()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  char* get_subscription_expression();
 
-  DDS::ReturnCode_t get_expression_parameters(DDS::StringSeq& parameters)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t get_expression_parameters(DDS::StringSeq& parameters);
 
-  DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters);
 
   struct SubjectFieldSpec {
     std::string incoming_name_;

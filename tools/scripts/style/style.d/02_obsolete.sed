@@ -31,5 +31,3 @@ s/\([ (,;]\{1,\}\)::\(OpenDDS\)/\1\2/g
 # NOTE: This may break C-style casts.
 s/\([^ ]\)(void)/\1()/
 
-# Strip trailing spaces from known macros.
-s/\(ACE_THROW_SPEC\) \{1,\}/\1/g

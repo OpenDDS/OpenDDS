@@ -202,31 +202,26 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 
 void MultiTopicDataReaderBase::Listener::on_requested_deadline_missed(
   DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_requested_incompatible_qos(
   DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_sample_rejected(
   DDS::DataReader_ptr, const DDS::SampleRejectedStatus&)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_liveliness_changed(
   DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_data_available(
   DDS::DataReader_ptr reader)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   try {
     outer_->data_available(reader);
@@ -240,13 +235,11 @@ void MultiTopicDataReaderBase::Listener::on_data_available(
 
 void MultiTopicDataReaderBase::Listener::on_subscription_matched(
   DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus&)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_sample_lost(DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
@@ -274,25 +267,21 @@ void MultiTopicDataReaderBase::cleanup()
 }
 
 DDS::InstanceHandle_t MultiTopicDataReaderBase::get_instance_handle()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_instance_handle();
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::enable()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->enable();
 }
 
 DDS::StatusCondition_ptr MultiTopicDataReaderBase::get_statuscondition()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_statuscondition();
 }
 
 DDS::StatusMask MultiTopicDataReaderBase::get_status_changes()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_status_changes();
 }
@@ -300,7 +289,6 @@ DDS::StatusMask MultiTopicDataReaderBase::get_status_changes()
 DDS::ReadCondition_ptr MultiTopicDataReaderBase::create_readcondition(
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->create_readcondition(sample_states, view_states,
     instance_states);
@@ -310,7 +298,6 @@ DDS::QueryCondition_ptr MultiTopicDataReaderBase::create_querycondition(
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states, const char* query_expression,
   const DDS::StringSeq& query_parameters)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->create_querycondition(sample_states, view_states,
     instance_states, query_expression, query_parameters);
@@ -318,107 +305,91 @@ DDS::QueryCondition_ptr MultiTopicDataReaderBase::create_querycondition(
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::delete_readcondition(
   DDS::ReadCondition_ptr a_condition)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->delete_readcondition(a_condition);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::delete_contained_entities()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->delete_contained_entities();
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::set_qos(
   const DDS::DataReaderQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->set_qos(qos);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_qos(DDS::DataReaderQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_qos(qos);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::set_listener(
   DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask)
- ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->set_listener(a_listener, mask);
 }
 
 DDS::DataReaderListener_ptr MultiTopicDataReaderBase::get_listener()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_listener();
 }
 
 DDS::TopicDescription_ptr MultiTopicDataReaderBase::get_topicdescription()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_topicdescription();
 }
 
 DDS::Subscriber_ptr MultiTopicDataReaderBase::get_subscriber()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_subscriber();
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_sample_rejected_status(
   DDS::SampleRejectedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_sample_rejected_status(status);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_liveliness_changed_status(
   DDS::LivelinessChangedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_liveliness_changed_status(status);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_requested_deadline_missed_status(
   DDS::RequestedDeadlineMissedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_requested_deadline_missed_status(status);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_requested_incompatible_qos_status(
   DDS::RequestedIncompatibleQosStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_requested_incompatible_qos_status(status);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_subscription_matched_status(
   DDS::SubscriptionMatchedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_subscription_matched_status(status);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_sample_lost_status(
   DDS::SampleLostStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_sample_lost_status(status);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::wait_for_historical_data(
   const DDS::Duration_t& max_wait)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->wait_for_historical_data(max_wait);
 }
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publications(
   DDS::InstanceHandleSeq& publication_handles)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_matched_publications(publication_handles);
 }
@@ -427,7 +398,6 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publications(
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
   DDS::PublicationBuiltinTopicData& publication_data,
   DDS::InstanceHandle_t publication_handle)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_matched_publication_data(publication_data,
     publication_handle);
@@ -435,26 +405,22 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
 #endif
 
 void MultiTopicDataReaderBase::get_latency_stats(LatencyStatisticsSeq& stats)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   resulting_reader_->get_latency_stats(stats);
 }
 
 void MultiTopicDataReaderBase::reset_latency_stats()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   resulting_reader_->reset_latency_stats();
 }
 
 CORBA::Boolean MultiTopicDataReaderBase::statistics_enabled()
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->statistics_enabled();
 }
 
 void MultiTopicDataReaderBase::statistics_enabled(
   CORBA::Boolean statistics_enabled)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   resulting_reader_->statistics_enabled(statistics_enabled);
 }

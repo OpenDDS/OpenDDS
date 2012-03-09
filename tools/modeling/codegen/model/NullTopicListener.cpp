@@ -25,7 +25,7 @@ void
 OpenDDS::Model::NullTopicListener::on_inconsistent_topic(
   DDS::Topic_ptr,
   const DDS::InconsistentTopicStatus&
-) ACE_THROW_SPEC((CORBA::SystemException))
+)
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,

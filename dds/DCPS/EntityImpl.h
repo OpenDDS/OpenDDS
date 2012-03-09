@@ -43,14 +43,11 @@ public:
   virtual DDS::ReturnCode_t set_enabled();
   bool is_enabled() const;
 
-  virtual DDS::StatusCondition_ptr get_statuscondition()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::StatusCondition_ptr get_statuscondition();
 
-  virtual DDS::StatusMask get_status_changes()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::StatusMask get_status_changes();
 
-  virtual DDS::InstanceHandle_t get_instance_handle()
-  ACE_THROW_SPEC((CORBA::SystemException)) = 0;
+  virtual DDS::InstanceHandle_t get_instance_handle() = 0;
 
   virtual void set_deleted(bool state);
 

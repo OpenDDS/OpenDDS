@@ -15,8 +15,7 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
     ReaderListener(bool& disposed) : _disposed(disposed)
     { }
   virtual void on_data_available(
-    DDS::DataReader_ptr reader)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataReader_ptr reader);
   private:
     bool& _disposed;
 };
@@ -25,7 +24,6 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
 
 void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   TMQDataReader_var reader_i =
     TMQDataReader::_narrow(reader);

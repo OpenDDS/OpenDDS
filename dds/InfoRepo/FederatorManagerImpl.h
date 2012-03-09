@@ -50,63 +50,37 @@ public:
   // IDL methods.
 
   virtual CORBA::Boolean discover_federation(
-    const char * ior)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   Incomplete));
+    const char * ior);
 
   virtual Manager_ptr join_federation(
     Manager_ptr peer,
-    FederationDomain federation)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   Incomplete));
+    FederationDomain federation);
 
   virtual void leave_federation(
-    RepoKey id)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   Incomplete));
+    RepoKey id);
 
-  virtual RepoKey federation_id(
-    void)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual RepoKey federation_id();
 
-  virtual OpenDDS::DCPS::DCPSInfo_ptr repository(
-    void)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual OpenDDS::DCPS::DCPSInfo_ptr repository();
 
   virtual void initializeOwner(
-    const OpenDDS::Federator::OwnerUpdate & data)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   OpenDDS::Federator::Incomplete));
+    const OpenDDS::Federator::OwnerUpdate & data);
 
   virtual void initializeTopic(
-    const OpenDDS::Federator::TopicUpdate & data)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   OpenDDS::Federator::Incomplete));
+    const OpenDDS::Federator::TopicUpdate & data);
 
   virtual void initializeParticipant(
-    const OpenDDS::Federator::ParticipantUpdate & data)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   OpenDDS::Federator::Incomplete));
+    const OpenDDS::Federator::ParticipantUpdate & data);
 
   virtual void initializePublication(
-    const OpenDDS::Federator::PublicationUpdate & data)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   OpenDDS::Federator::Incomplete));
+    const OpenDDS::Federator::PublicationUpdate & data);
 
   virtual void initializeSubscription(
-    const OpenDDS::Federator::SubscriptionUpdate & data)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   OpenDDS::Federator::Incomplete));
+    const OpenDDS::Federator::SubscriptionUpdate & data);
 
-  virtual void leave_and_shutdown(
-    void)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   Incomplete));
+  virtual void leave_and_shutdown();
 
-  virtual void shutdown(
-    void)
-  ACE_THROW_SPEC((CORBA::SystemException,
-                   Incomplete));
+  virtual void shutdown();
 
   // Servant methods
 

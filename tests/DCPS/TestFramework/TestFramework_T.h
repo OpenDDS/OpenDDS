@@ -43,17 +43,13 @@ protected:
   DDS::DataWriter_var writer_;
   Writer_ptr writer_i_;
 
-  virtual void init_i()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void init_i();
 
-  virtual void fini_i()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void fini_i();
 
-  DDS::Publisher_var create_publisher()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::Publisher_var create_publisher();
 
-  DDS::DataWriter_var create_datawriter()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::DataWriter_var create_datawriter();
 };
 
 template<typename Reader>
@@ -85,17 +81,13 @@ protected:
   DDS::DataReader_var reader_;
   Reader_ptr reader_i_;
 
-  virtual void init_i()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void init_i();
 
-  virtual void fini_i()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void fini_i();
 
-  DDS::Subscriber_var create_subscriber()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::Subscriber_var create_subscriber();
 
-  DDS::DataReader_var create_datareader()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::DataReader_var create_datareader();
 };
 
 template<typename Reader, typename Writer>
@@ -106,11 +98,9 @@ public:
   virtual ~TestPair();
 
 protected:
-  virtual void init_i()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void init_i();
 
-  virtual void fini_i()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void fini_i();
 };
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)

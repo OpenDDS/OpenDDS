@@ -12,15 +12,13 @@
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
   virtual void on_data_available(
-    DDS::DataReader_ptr reader)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataReader_ptr reader);
 };
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
 
 void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   MTMdata2::MTM_MessageDataReader_var reader_i =
     MTMdata2::MTM_MessageDataReader::_narrow(reader);

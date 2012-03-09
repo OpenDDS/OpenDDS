@@ -14,32 +14,27 @@ namespace OpenDDS {
 namespace DCPS {
 
 CORBA::Boolean ReadConditionImpl::get_trigger_value()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return parent_->contains_sample(sample_states_,
                                   view_states_, instance_states_);
 }
 
 DDS::SampleStateMask ReadConditionImpl::get_sample_state_mask()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return sample_states_;
 }
 
 DDS::ViewStateMask ReadConditionImpl::get_view_state_mask()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return view_states_;
 }
 
 DDS::InstanceStateMask ReadConditionImpl::get_instance_state_mask()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return instance_states_;
 }
 
 DDS::DataReader_ptr ReadConditionImpl::get_datareader()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::DataReader::_duplicate(parent_);
 }

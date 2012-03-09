@@ -49,7 +49,6 @@ template<class DataType, class ReaderType>
 void
 UpdateListener<DataType, ReaderType>::on_data_available(
   DDS::DataReader_ptr reader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -102,7 +101,6 @@ void
 UpdateListener<DataType, ReaderType>::on_requested_deadline_missed(
   DDS::DataReader_ptr /* reader */,
   const DDS::RequestedDeadlineMissedStatus & /* status */)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -116,7 +114,6 @@ void
 UpdateListener<DataType, ReaderType>::on_requested_incompatible_qos(
   DDS::DataReader_ptr /* reader */,
   const DDS::RequestedIncompatibleQosStatus & /* status */)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -130,7 +127,6 @@ void
 UpdateListener<DataType, ReaderType>::on_liveliness_changed(
   DDS::DataReader_ptr /* reader */,
   const DDS::LivelinessChangedStatus & /* status */)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -143,7 +139,6 @@ void
 UpdateListener<DataType, ReaderType>::on_subscription_matched(
   DDS::DataReader_ptr /* reader */,
   const DDS::SubscriptionMatchedStatus & /* status */)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -156,7 +151,6 @@ void
 UpdateListener<DataType, ReaderType>::on_sample_rejected(
   DDS::DataReader_ptr /* reader */,
   const DDS::SampleRejectedStatus& /* status */)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -169,7 +163,6 @@ void
 UpdateListener<DataType, ReaderType>::on_sample_lost(
   DDS::DataReader_ptr /* reader */,
   const DDS::SampleLostStatus& /* status */)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,

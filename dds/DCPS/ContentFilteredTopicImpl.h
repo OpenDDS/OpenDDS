@@ -36,17 +36,13 @@ public:
 
   virtual ~ContentFilteredTopicImpl() {}
 
-  char* get_filter_expression()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  char* get_filter_expression();
 
-  DDS::ReturnCode_t get_expression_parameters(DDS::StringSeq& parameters)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t get_expression_parameters(DDS::StringSeq& parameters);
 
-  DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters);
 
-  DDS::Topic_ptr get_related_topic()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::Topic_ptr get_related_topic();
 
   template<typename Sample>
   bool filter(const Sample& s) const

@@ -31,42 +31,34 @@ public:
   virtual ~SubscriberListenerImpl();
 
   virtual void on_data_on_readers(
-    DDS::Subscriber_ptr subs)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::Subscriber_ptr subs);
 
   virtual void on_requested_deadline_missed(
     DDS::DataReader_ptr reader,
-    const DDS::RequestedDeadlineMissedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::RequestedDeadlineMissedStatus& status);
 
   virtual void on_requested_incompatible_qos(
     DDS::DataReader_ptr reader,
-    const DDS::RequestedIncompatibleQosStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::RequestedIncompatibleQosStatus& status);
 
   virtual void on_liveliness_changed(
     DDS::DataReader_ptr reader,
-    const DDS::LivelinessChangedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::LivelinessChangedStatus& status);
 
   virtual void on_subscription_matched(
     DDS::DataReader_ptr reader,
-    const DDS::SubscriptionMatchedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::SubscriptionMatchedStatus& status);
 
   virtual void on_sample_rejected(
     DDS::DataReader_ptr reader,
-    const DDS::SampleRejectedStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::SampleRejectedStatus& status);
 
   virtual void on_data_available(
-    DDS::DataReader_ptr reader)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataReader_ptr reader);
 
   virtual void on_sample_lost(
     DDS::DataReader_ptr reader,
-    const DDS::SampleLostStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::SampleLostStatus& status);
 
   bool verify_result () const {
     return verify_result_;

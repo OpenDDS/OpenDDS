@@ -41,18 +41,14 @@ public:
 
   virtual ~QueryConditionImpl() {}
 
-  char* get_query_expression()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  char* get_query_expression();
 
-  DDS::ReturnCode_t get_query_parameters(DDS::StringSeq& query_parameters)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t get_query_parameters(DDS::StringSeq& query_parameters);
 
   DDS::ReturnCode_t set_query_parameters(
-    const DDS::StringSeq& query_parameters)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::StringSeq& query_parameters);
 
-  CORBA::Boolean get_trigger_value()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  CORBA::Boolean get_trigger_value();
 
   std::vector<std::string> getOrderBys() const;
 

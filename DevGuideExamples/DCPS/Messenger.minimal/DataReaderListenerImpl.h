@@ -24,8 +24,7 @@ public:
   DataReaderListenerImpl();
 
   virtual void on_data_available(
-    DDS::DataReader_ptr reader)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataReader_ptr reader);
 
   int sample_count;
 };

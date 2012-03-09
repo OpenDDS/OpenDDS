@@ -50,7 +50,6 @@ TopicImpl::~TopicImpl()
 
 DDS::ReturnCode_t
 TopicImpl::set_qos(const DDS::TopicQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
@@ -99,7 +98,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 TopicImpl::get_qos(DDS::TopicQos& qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = qos_;
   return DDS::RETCODE_OK;
@@ -107,7 +105,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -118,14 +115,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::TopicListener_ptr
 TopicImpl::get_listener()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::TopicListener::_duplicate(listener_.in());
 }
 
 DDS::ReturnCode_t
 TopicImpl::get_inconsistent_topic_status(DDS::InconsistentTopicStatus& a_status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   a_status = inconsistent_topic_status_;
   return DDS::RETCODE_OK;
@@ -133,7 +128,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 TopicImpl::enable()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no
@@ -166,7 +160,6 @@ TopicImpl::get_id() const
 
 DDS::InstanceHandle_t
 TopicImpl::get_instance_handle()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return this->participant_->get_handle(this->id_);
 }

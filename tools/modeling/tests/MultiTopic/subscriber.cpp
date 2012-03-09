@@ -13,8 +13,7 @@
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
   virtual void on_data_available(
-    DDS::DataReader_ptr reader)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataReader_ptr reader);
 };
 
 
@@ -22,7 +21,6 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
 
 void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   data1::AnnotatedTradeDataReader_var reader_i =
     data1::AnnotatedTradeDataReader::_narrow(reader);

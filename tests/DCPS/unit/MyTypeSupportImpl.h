@@ -43,33 +43,20 @@ public:
   virtual ::DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,
       const char * type_name
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual
   char * get_type_name (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual ::DDS::DataWriter_ptr create_datawriter (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
   virtual ::DDS::DataReader_ptr create_datareader (
-    )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ));
+    );
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual ::DDS::DataReader_ptr create_multitopic_datareader()
-    ACE_THROW_SPEC ((CORBA::SystemException));
+  virtual ::DDS::DataReader_ptr create_multitopic_datareader();
 
   virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
@@ -81,10 +68,7 @@ class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-        )) { return ::DDS::RETCODE_OK;};
+      ) { return ::DDS::RETCODE_OK;};
 
   virtual ::DDS::ReturnCode_t auto_return_loan (void *)
   {
@@ -131,10 +115,7 @@ class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
   virtual ::DDS::ReturnCode_t enable_specific (
-      )
-      ACE_THROW_SPEC ((
-        CORBA::SystemException
-        )) {return ::DDS::RETCODE_OK;};
+      ) {return ::DDS::RETCODE_OK;};
 
   virtual void unregistered(DDS::InstanceHandle_t /* instance_handle */) {};
 };

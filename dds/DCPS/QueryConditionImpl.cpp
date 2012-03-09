@@ -16,14 +16,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 char* QueryConditionImpl::get_query_expression()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return CORBA::string_dup(query_expression_);
 }
 
 DDS::ReturnCode_t
 QueryConditionImpl::get_query_parameters(DDS::StringSeq& query_parameters)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   query_parameters = query_parameters_;
@@ -32,7 +30,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 QueryConditionImpl::set_query_parameters(const DDS::StringSeq& query_parameters)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   query_parameters_ = query_parameters;
@@ -53,7 +50,6 @@ QueryConditionImpl::hasFilter() const
 
 CORBA::Boolean
 QueryConditionImpl::get_trigger_value()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (hasFilter()) {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard2, parent_->sample_lock_, false);

@@ -157,7 +157,6 @@ DataWriterImpl::init(
   OpenDDS::DCPS::PublisherImpl *         publisher_servant,
   DDS::DataWriter_ptr                  dw_local,
   OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","init",6);
   topic_objref_ = DDS::Topic::_duplicate(topic);
@@ -205,7 +204,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return this->participant_servant_->get_handle(publication_id_);
 }
@@ -745,7 +743,6 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 
 DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
@@ -826,7 +823,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 DataWriterImpl::get_qos(::DDS::DataWriterQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = qos_;
   return DDS::RETCODE_OK;
@@ -835,7 +831,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataWriterImpl::set_listener(::DDS::DataWriterListener_ptr a_listener,
                              DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -846,14 +841,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DataWriterListener_ptr
 DataWriterImpl::get_listener()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::DataWriterListener::_duplicate(listener_.in());
 }
 
 DDS::Topic_ptr
 DataWriterImpl::get_topic()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::Topic::_duplicate(topic_objref_.in());
 }
@@ -1140,7 +1133,6 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
 
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (!should_ack()) {
     if (DCPS_debug_level > 0) {
@@ -1167,7 +1159,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::Publisher_ptr
 DataWriterImpl::get_publisher()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::Publisher::_duplicate(publisher_servant_);
 }
@@ -1175,7 +1166,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataWriterImpl::get_liveliness_lost_status(
   DDS::LivelinessLostStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -1190,7 +1180,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataWriterImpl::get_offered_deadline_missed_status(
   DDS::OfferedDeadlineMissedStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -1217,7 +1206,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataWriterImpl::get_offered_incompatible_qos_status(
   DDS::OfferedIncompatibleQosStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -1232,7 +1220,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataWriterImpl::get_publication_matched_status(
   DDS::PublicationMatchedStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -1247,7 +1234,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // This operation need only be used if the LIVELINESS setting
   // is either MANUAL_BY_PARTICIPANT or MANUAL_BY_TOPIC.
@@ -1292,7 +1278,6 @@ DataWriterImpl::assert_liveliness_by_participant()
 DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscriptions(
   DDS::InstanceHandleSeq & subscription_handles)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1327,7 +1312,6 @@ DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscription_data(
   DDS::SubscriptionBuiltinTopicData & subscription_data,
   DDS::InstanceHandle_t subscription_handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1359,7 +1343,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 DataWriterImpl::enable()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no
@@ -1561,7 +1544,6 @@ DDS::ReturnCode_t
 DataWriterImpl::register_instance_i(::DDS::InstanceHandle_t& handle,
                                     DataSample* data,
                                     const DDS::Time_t & source_timestamp)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
 
@@ -1609,7 +1591,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataWriterImpl::unregister_instance_i(::DDS::InstanceHandle_t handle,
                                       const DDS::Time_t & source_timestamp)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","unregister_instance_i",6);
 
@@ -1774,7 +1755,6 @@ DataWriterImpl::send_suspended_data()
 DDS::ReturnCode_t
 DataWriterImpl::dispose(::DDS::InstanceHandle_t handle,
                         const DDS::Time_t & source_timestamp)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","dispose",6);
 

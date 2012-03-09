@@ -40,106 +40,79 @@ public:
 
   // DDS::Entity interface
 
-  DDS::InstanceHandle_t get_instance_handle()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::InstanceHandle_t get_instance_handle();
 
-  DDS::ReturnCode_t enable()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t enable();
 
-  DDS::StatusCondition_ptr get_statuscondition()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::StatusCondition_ptr get_statuscondition();
 
-  DDS::StatusMask get_status_changes()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::StatusMask get_status_changes();
 
   // DDS::DataReader interface
 
   DDS::ReadCondition_ptr create_readcondition(
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceStateMask instance_states);
 
   DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states, const char* query_expression,
-    const DDS::StringSeq& query_parameters)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::StringSeq& query_parameters);
 
-  DDS::ReturnCode_t delete_readcondition(DDS::ReadCondition_ptr a_condition)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t delete_readcondition(DDS::ReadCondition_ptr a_condition);
 
-  DDS::ReturnCode_t delete_contained_entities()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t delete_contained_entities();
 
-  DDS::ReturnCode_t set_qos(const DDS::DataReaderQos& qos)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t set_qos(const DDS::DataReaderQos& qos);
 
-  DDS::ReturnCode_t get_qos(DDS::DataReaderQos& qos)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t get_qos(DDS::DataReaderQos& qos);
 
   DDS::ReturnCode_t set_listener(DDS::DataReaderListener_ptr a_listener,
-    DDS::StatusMask mask)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
-  DDS::DataReaderListener_ptr get_listener()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::DataReaderListener_ptr get_listener();
 
-  DDS::TopicDescription_ptr get_topicdescription()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::TopicDescription_ptr get_topicdescription();
 
-  DDS::Subscriber_ptr get_subscriber()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::Subscriber_ptr get_subscriber();
 
   DDS::ReturnCode_t get_sample_rejected_status(
-    DDS::SampleRejectedStatus& status)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::SampleRejectedStatus& status);
 
   DDS::ReturnCode_t get_liveliness_changed_status(
-    DDS::LivelinessChangedStatus& status)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::LivelinessChangedStatus& status);
 
   DDS::ReturnCode_t get_requested_deadline_missed_status(
-    DDS::RequestedDeadlineMissedStatus& status)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::RequestedDeadlineMissedStatus& status);
 
   DDS::ReturnCode_t get_requested_incompatible_qos_status(
-    DDS::RequestedIncompatibleQosStatus& status)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::RequestedIncompatibleQosStatus& status);
 
   DDS::ReturnCode_t get_subscription_matched_status(
-    DDS::SubscriptionMatchedStatus& status)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::SubscriptionMatchedStatus& status);
 
-  DDS::ReturnCode_t get_sample_lost_status(DDS::SampleLostStatus& status)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t get_sample_lost_status(DDS::SampleLostStatus& status);
 
-  DDS::ReturnCode_t wait_for_historical_data(const DDS::Duration_t& max_wait)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::ReturnCode_t wait_for_historical_data(const DDS::Duration_t& max_wait);
 
   DDS::ReturnCode_t get_matched_publications(
-    DDS::InstanceHandleSeq& publication_handles)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandleSeq& publication_handles);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   DDS::ReturnCode_t get_matched_publication_data(
     DDS::PublicationBuiltinTopicData& publication_data,
-    DDS::InstanceHandle_t publication_handle)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t publication_handle);
 #endif
 
   // OpenDDS::DCPS::DataReaderEx interface
 
-  void get_latency_stats(LatencyStatisticsSeq& stats)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  void get_latency_stats(LatencyStatisticsSeq& stats);
 
-  void reset_latency_stats()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  void reset_latency_stats();
 
-  CORBA::Boolean statistics_enabled()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  CORBA::Boolean statistics_enabled();
 
-  void statistics_enabled(CORBA::Boolean statistics_enabled)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  void statistics_enabled(CORBA::Boolean statistics_enabled);
 
 private:
   virtual void init_typed(DataReaderEx* dr) = 0;
@@ -155,31 +128,24 @@ private:
     {}
 
     void on_requested_deadline_missed(DDS::DataReader_ptr reader,
-      const DDS::RequestedDeadlineMissedStatus& status)
-      ACE_THROW_SPEC((CORBA::SystemException));
+      const DDS::RequestedDeadlineMissedStatus& status);
 
     void on_requested_incompatible_qos(DDS::DataReader_ptr reader,
-      const DDS::RequestedIncompatibleQosStatus& status)
-      ACE_THROW_SPEC((CORBA::SystemException));
+      const DDS::RequestedIncompatibleQosStatus& status);
 
     void on_sample_rejected(DDS::DataReader_ptr reader,
-      const DDS::SampleRejectedStatus& status)
-      ACE_THROW_SPEC((CORBA::SystemException));
+      const DDS::SampleRejectedStatus& status);
 
     void on_liveliness_changed(DDS::DataReader_ptr reader,
-      const DDS::LivelinessChangedStatus& status)
-      ACE_THROW_SPEC((CORBA::SystemException));
+      const DDS::LivelinessChangedStatus& status);
 
-    void on_data_available(DDS::DataReader_ptr reader)
-      ACE_THROW_SPEC((CORBA::SystemException));
+    void on_data_available(DDS::DataReader_ptr reader);
 
     void on_subscription_matched(DDS::DataReader_ptr reader,
-      const DDS::SubscriptionMatchedStatus& status)
-      ACE_THROW_SPEC((CORBA::SystemException));
+      const DDS::SubscriptionMatchedStatus& status);
 
     void on_sample_lost(DDS::DataReader_ptr reader,
-      const DDS::SampleLostStatus& status)
-      ACE_THROW_SPEC((CORBA::SystemException));
+      const DDS::SampleLostStatus& status);
 
   private:
     MultiTopicDataReaderBase* outer_;

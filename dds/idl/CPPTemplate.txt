@@ -10,7 +10,6 @@ DDS::ReturnCode_t
 <%TYPE%>TypeSupportImpl::register_type (
     ::DDS::DomainParticipant_ptr participant,
     const char * type_name)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (type_name == 0 || type_name[0] == '\0')
      this->type_name_ = this->get_type_name();
@@ -27,7 +26,6 @@ DDS::ReturnCode_t
 
 char *
 <%TYPE%>TypeSupportImpl::get_type_name ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if (this->type_name_.in () == 0)
     return CORBA::string_dup (this->_interface_repository_id());
@@ -38,7 +36,6 @@ char *
 
 ::DDS::DataWriter_ptr
 <%TYPE%>TypeSupportImpl::create_datawriter ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   <%TYPE%>DataWriterImpl* writer_impl;
   ACE_NEW_RETURN(writer_impl,
@@ -50,7 +47,6 @@ char *
 
 ::DDS::DataReader_ptr
 <%TYPE%>TypeSupportImpl::create_datareader ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   <%TYPE%>DataReaderImpl* reader_impl = 0;
   ACE_NEW_RETURN(reader_impl,
@@ -63,7 +59,6 @@ char *
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 ::DDS::DataReader_ptr
 <%TYPE%>TypeSupportImpl::create_multitopic_datareader()
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   return new OpenDDS::DCPS::MultiTopicDataReader_T<<%TYPE%>,
     <%TYPE%>DataReaderImpl>;
@@ -105,7 +100,6 @@ bool
 DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::register_instance (
     const ::<%SCOPED%> & instance)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -116,7 +110,6 @@ DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::register_instance_w_timestamp (
     const ::<%SCOPED%> & instance,
     const ::DDS::Time_t & timestamp)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
 
@@ -147,7 +140,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::unregister_instance (
     const ::<%SCOPED%> & instance,
     ::DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -162,7 +154,6 @@ DDS::ReturnCode_t
     const ::<%SCOPED%> & instance,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & timestamp)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::InstanceHandle_t const registered_handle =
       this->lookup_instance(instance);
@@ -206,7 +197,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::write (
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const source_timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -220,7 +210,6 @@ DDS::ReturnCode_t
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   //  A lock is obtained on entering this method to serialize access to
   //  the contained data storage and interfaces.  This lock protects the
@@ -285,7 +274,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::dispose (
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::DDS::Time_t const source_timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -299,7 +287,6 @@ DDS::ReturnCode_t
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle,
     const ::DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   if(instance_handle == ::DDS::HANDLE_NIL)
   {
@@ -327,7 +314,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::get_key_value (
     ::<%SCOPED%> & key_holder,
     ::DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -353,7 +339,6 @@ DDS::ReturnCode_t
 ::DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::lookup_instance (
     const ::<%SCOPED%> & instance_data)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -385,9 +370,6 @@ void
       ::DDS::DataWriter_ptr                  dw_objref,
       ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
 {
   OpenDDS::DCPS::DataWriterImpl::init (topic,
                                        topic_servant,
@@ -418,7 +400,6 @@ void
 
 ::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::enable_specific ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::<%SCOPED%> data;
   if (OpenDDS::DCPS::gen_is_bounded_size (data))
@@ -636,7 +617,6 @@ void
 
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::enable_specific ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   data_allocator_ = new DataAllocator(get_n_chunks ());
   if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
@@ -668,7 +648,6 @@ void
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::delete_contained_entities ()
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   return this->delete_contained_entities();
 }
@@ -682,7 +661,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("read", received_data, info_seq, max_samples);
@@ -784,7 +762,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("take", received_data, info_seq, max_samples);
@@ -884,7 +861,6 @@ DDS::ReturnCode_t
     ::DDS::SampleInfoSeq & sample_info,
     ::CORBA::Long max_samples,
     ::DDS::ReadCondition_ptr a_condition)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("read_w_condition", received_data, sample_info, max_samples);
@@ -914,7 +890,6 @@ DDS::ReturnCode_t
     ::DDS::SampleInfoSeq & sample_info,
     ::CORBA::Long max_samples,
     ::DDS::ReadCondition_ptr a_condition)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("take_w_condition", received_data, sample_info, max_samples);
@@ -942,7 +917,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_sample (
     ::<%SCOPED%> & received_data,
     ::DDS::SampleInfo & sample_info)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
 
   bool found_data = false;
@@ -1013,7 +987,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_sample (
     ::<%SCOPED%> & received_data,
     ::DDS::SampleInfo & sample_info)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   bool found_data = false;
 
@@ -1121,7 +1094,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("read_instance", received_data, info_seq, max_samples);
@@ -1198,7 +1170,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("take_instance", received_data, info_seq, max_samples);
@@ -1274,7 +1245,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("read_next_instance", received_data, info_seq, max_samples);
@@ -1353,7 +1323,6 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("take_next_instance", received_data, info_seq, max_samples);
@@ -1428,7 +1397,6 @@ DDS::ReturnCode_t
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::ReadCondition_ptr a_condition)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("read_next_instance_w_condition", received_data, info_seq,
@@ -1463,7 +1431,6 @@ DDS::ReturnCode_t
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::ReadCondition_ptr a_condition)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   DDS::ReturnCode_t const precond =
     check_inputs("take_next_instance_w_condition", received_data, info_seq,
@@ -1529,7 +1496,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::return_loan (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   // Some incomplete tests to see that the data and info are from the
   // same read.
@@ -1555,7 +1521,6 @@ DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::get_key_value (
     ::<%SCOPED%> & key_holder,
     ::DDS::InstanceHandle_t handle)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -1581,7 +1546,6 @@ DDS::ReturnCode_t
 ::DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::lookup_instance (
     const ::<%SCOPED%> & instance_data)
-  ACE_THROW_SPEC ((CORBA::SystemException))
 {
   InstanceMap::const_iterator const it = instance_map_.find(instance_data);
 

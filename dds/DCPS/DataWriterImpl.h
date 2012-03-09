@@ -120,51 +120,38 @@ public:
   ///Destructor
   virtual ~DataWriterImpl();
 
-  virtual DDS::InstanceHandle_t get_instance_handle()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::InstanceHandle_t get_instance_handle();
 
-  virtual DDS::ReturnCode_t set_qos(const DDS::DataWriterQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t set_qos(const DDS::DataWriterQos & qos);
 
-  virtual DDS::ReturnCode_t get_qos(DDS::DataWriterQos & qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t get_qos(DDS::DataWriterQos & qos);
 
   virtual DDS::ReturnCode_t set_listener(
     DDS::DataWriterListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
-  virtual DDS::DataWriterListener_ptr get_listener()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::DataWriterListener_ptr get_listener();
 
-  virtual DDS::Topic_ptr get_topic()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::Topic_ptr get_topic();
 
   virtual DDS::ReturnCode_t wait_for_acknowledgments(
-    const DDS::Duration_t & max_wait)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::Duration_t & max_wait);
 
-  virtual DDS::Publisher_ptr get_publisher()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::Publisher_ptr get_publisher();
 
   virtual DDS::ReturnCode_t get_liveliness_lost_status(
-    DDS::LivelinessLostStatus & status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::LivelinessLostStatus & status);
 
   virtual DDS::ReturnCode_t get_offered_deadline_missed_status(
-    DDS::OfferedDeadlineMissedStatus & status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::OfferedDeadlineMissedStatus & status);
 
   virtual DDS::ReturnCode_t get_offered_incompatible_qos_status(
-    DDS::OfferedIncompatibleQosStatus & status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::OfferedIncompatibleQosStatus & status);
 
   virtual DDS::ReturnCode_t get_publication_matched_status(
-    DDS::PublicationMatchedStatus & status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::PublicationMatchedStatus & status);
 
-  virtual DDS::ReturnCode_t assert_liveliness()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t assert_liveliness();
 
   virtual DDS::ReturnCode_t assert_liveliness_by_participant();
 
@@ -175,18 +162,15 @@ public:
   void get_readers(IdSet& readers);
 
   virtual DDS::ReturnCode_t get_matched_subscriptions(
-    DDS::InstanceHandleSeq & subscription_handles)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandleSeq & subscription_handles);
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   virtual DDS::ReturnCode_t get_matched_subscription_data(
     DDS::SubscriptionBuiltinTopicData & subscription_data,
-    DDS::InstanceHandle_t subscription_handle)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t subscription_handle);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-  virtual DDS::ReturnCode_t enable()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t enable();
 
   void add_association(const RepoId& yourId,
                        const ReaderAssociation& reader,
@@ -219,8 +203,7 @@ public:
     OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
     OpenDDS::DCPS::PublisherImpl*         publisher_servant,
     DDS::DataWriter_ptr                   dw_local,
-    OpenDDS::DCPS::DataWriterRemote_ptr   dw_remote)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    OpenDDS::DCPS::DataWriterRemote_ptr   dw_remote);
 
   /**
    * Delegate to the WriteDataContainer to register and tell
@@ -230,8 +213,7 @@ public:
   register_instance_i(
     DDS::InstanceHandle_t& handle,
     DataSample* data,
-    const DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::Time_t & source_timestamp);
 
   /**
    * Delegate to the WriteDataContainer to unregister and tell
@@ -240,8 +222,7 @@ public:
   DDS::ReturnCode_t
   unregister_instance_i(
     DDS::InstanceHandle_t handle,
-    const DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::Time_t & source_timestamp);
 
   /**
    * Unregister all registered instances and tell the transport
@@ -268,8 +249,7 @@ public:
    * broadcast the disposed instance.
    */
   DDS::ReturnCode_t dispose(DDS::InstanceHandle_t handle,
-                            const DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                            const DDS::Time_t & source_timestamp);
 
   /**
    * Return the number of samples for a given instance.
@@ -464,8 +444,7 @@ public:
 protected:
 
   // type specific DataWriter's part of enable.
-  virtual DDS::ReturnCode_t enable_specific()
-  ACE_THROW_SPEC((CORBA::SystemException)) = 0;
+  virtual DDS::ReturnCode_t enable_specific() = 0;
 
   /// The number of chunks for the cached allocator.
   size_t                     n_chunks_;

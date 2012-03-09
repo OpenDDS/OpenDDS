@@ -17,7 +17,6 @@ DataReaderListenerImpl::DataReaderListenerImpl() : sample_count(0)
 
 void
 DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // Safely downcast data reader to type-specific data reader
   Messenger::MessageDataReader_var reader_i = narrow(reader);

@@ -20,9 +20,6 @@ void TAO_DDS_DCPSDataWriter_i::add_association (
     const OpenDDS::DCPS::ReaderAssociation& reader,
     bool /*active*/
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
 
     OpenDDS::DCPS::RepoIdConverter converterY(yourId);
@@ -46,9 +43,6 @@ void TAO_DDS_DCPSDataWriter_i::remove_associations (
     const OpenDDS::DCPS::ReaderIdSeq & readers,
     ::CORBA::Boolean notify_lost
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_UNUSED_ARG (notify_lost);
     CORBA::ULong length = readers.length();
@@ -76,9 +70,6 @@ void TAO_DDS_DCPSDataWriter_i::remove_associations (
 void TAO_DDS_DCPSDataWriter_i::update_incompatible_qos (
     const OpenDDS::DCPS::IncompatibleQosStatus & status
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("\n!!! TAO_DDS_DCPSDataWriter_i::update_incompatible_qos () :\n")
@@ -107,7 +98,6 @@ void TAO_DDS_DCPSDataWriter_i::update_incompatible_qos (
 void
 TAO_DDS_DCPSDataWriter_i::update_subscription_params(
   const OpenDDS::DCPS::RepoId& id, const DDS::StringSeq& params)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   OpenDDS::DCPS::RepoIdConverter readerConv(id);
   ACE_DEBUG((LM_INFO,

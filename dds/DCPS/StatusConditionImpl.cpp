@@ -14,7 +14,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 CORBA::Boolean StatusConditionImpl::get_trigger_value()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
@@ -29,7 +28,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::StatusMask StatusConditionImpl::get_enabled_statuses()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_, 0);
   return mask_;
@@ -37,7 +35,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 StatusConditionImpl::set_enabled_statuses(DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
@@ -47,7 +44,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::Entity_ptr StatusConditionImpl::get_entity()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::Entity::_duplicate(parent_);
 }

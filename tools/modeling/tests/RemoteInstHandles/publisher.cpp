@@ -20,14 +20,12 @@ data1::Message message;
 namespace RIH {
   class WriterListener : public OpenDDS::Model::NullWriterListener {
     virtual void on_publication_matched(DDS::DataWriter_ptr writer,
-                    const ::DDS::PublicationMatchedStatus & status)
-        ACE_THROW_SPEC((CORBA::SystemException));
+                    const ::DDS::PublicationMatchedStatus & status);
   };
 };
 
 void RIH::WriterListener::on_publication_matched(DDS::DataWriter_ptr writer,
                              const ::DDS::PublicationMatchedStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   std::cout << "pub match" << std::endl;
   if (status.current_count_change == 1) {

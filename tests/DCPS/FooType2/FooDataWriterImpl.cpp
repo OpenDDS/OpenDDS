@@ -29,9 +29,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
 ::DDS::InstanceHandle_t FooDataWriterImpl::register_instance(
     const Foo & instance_data
     )
-    ACE_THROW_SPEC ((
-    CORBA::SystemException
-    ))
 {
   ::DDS::Time_t source_timestamp
     = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -45,9 +42,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t ,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -78,9 +72,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::Time_t source_timestamp
     = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -94,9 +85,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -138,9 +126,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::Time_t source_timestamp
     = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -154,9 +139,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   //  A lock is obtained on entering this method to serialize access to
   //  the contained data storage and interfaces.  This lock protects the
@@ -222,9 +204,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     const Foo & instance_data,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ::DDS::Time_t source_timestamp
     = ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
@@ -238,9 +217,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
 {
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -285,9 +261,6 @@ FooDataWriterImpl::~FooDataWriterImpl (void)
     Foo & key_holder,
     ::DDS::InstanceHandle_t handle
   )
-  ACE_THROW_SPEC ((
-    CORBA::SystemException
-  ))
   {
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                       guard,
@@ -427,9 +400,6 @@ void FooDataWriterImpl::init (
       ::DDS::Publisher_ptr                   publisher_objref,
       OpenDDS::DCPS::DataWriterRemote_ptr        dw_remote_objref
     )
-    ACE_THROW_SPEC ((
-      CORBA::SystemException
-    ))
 {
   DataWriterImpl::init (a_topic,
                         qos,

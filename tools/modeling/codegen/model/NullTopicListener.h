@@ -25,7 +25,7 @@ namespace OpenDDS { namespace Model {
     virtual void on_inconsistent_topic (
       DDS::Topic_ptr topic,
       const DDS::InconsistentTopicStatus& status
-    ) ACE_THROW_SPEC((CORBA::SystemException));
+    );
 
   };
 

@@ -35,7 +35,6 @@ void
 DataReaderRemoteImpl::add_association(const RepoId& yourId,
                                       const WriterAssociation& writer,
                                       bool active)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataReaderImpl* parent = 0;
   DDS::DataReader_var drv;
@@ -51,7 +50,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 void
 DataReaderRemoteImpl::association_complete(const RepoId& remote_id)
-  ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataReaderImpl* parent = 0;
   DDS::DataReader_var drv;
@@ -68,7 +66,6 @@ DataReaderRemoteImpl::association_complete(const RepoId& remote_id)
 void
 DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
                                           CORBA::Boolean notify_lost)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataReaderImpl* parent = 0;
   DDS::DataReader_var drv;
@@ -85,7 +82,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void
 DataReaderRemoteImpl::update_incompatible_qos(
   const IncompatibleQosStatus& status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DataReaderImpl* parent = 0;
   DDS::DataReader_var drv;

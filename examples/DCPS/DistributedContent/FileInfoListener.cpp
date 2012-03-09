@@ -18,7 +18,6 @@ FileInfoListener::~FileInfoListener()
 
 
 void FileInfoListener::on_data_available (::DDS::DataReader_ptr reader)
-    ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 
   try {
@@ -65,7 +64,6 @@ void FileInfoListener::on_data_available (::DDS::DataReader_ptr reader)
 void FileInfoListener::on_requested_deadline_missed (
                                    ::DDS::DataReader_ptr,
                                    const ::DDS::RequestedDeadlineMissedStatus &)
-    ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -73,7 +71,6 @@ void FileInfoListener::on_requested_deadline_missed (
 void FileInfoListener::on_requested_incompatible_qos (
                                     ::DDS::DataReader_ptr,
                                     const ::DDS::RequestedIncompatibleQosStatus &)
-    ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -82,7 +79,6 @@ void FileInfoListener::on_sample_rejected (
                          ::DDS::DataReader_ptr,
                          const ::DDS::SampleRejectedStatus &
                          )
-    ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -91,7 +87,6 @@ void FileInfoListener::on_sample_rejected (
 void FileInfoListener::on_liveliness_changed (
                             ::DDS::DataReader_ptr,
                             const ::DDS::LivelinessChangedStatus &)
-    ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -99,7 +94,6 @@ void FileInfoListener::on_liveliness_changed (
 void FileInfoListener::on_subscription_matched (
                             ::DDS::DataReader_ptr,
                             const ::DDS::SubscriptionMatchedStatus &)
-    ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -107,6 +101,5 @@ void FileInfoListener::on_subscription_matched (
 void FileInfoListener::on_sample_lost (
                      ::DDS::DataReader_ptr,
                      const ::DDS::SampleLostStatus &)
-    ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }

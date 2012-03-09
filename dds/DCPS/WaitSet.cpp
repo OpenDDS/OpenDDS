@@ -33,7 +33,6 @@ void copyInto(DDS::ConditionSeq& target,
 namespace DDS {
 
 ReturnCode_t WaitSet::attach_condition(Condition_ptr cond)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   using OpenDDS::DCPS::ConditionImpl;
   Condition_var condv(Condition::_duplicate(cond));
@@ -62,7 +61,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 ReturnCode_t WaitSet::detach_condition(Condition_ptr cond)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    RETCODE_OUT_OF_RESOURCES);
@@ -70,7 +68,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 ReturnCode_t WaitSet::detach_conditions(const ConditionSeq& conds)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    RETCODE_OUT_OF_RESOURCES);
@@ -102,7 +99,6 @@ ReturnCode_t WaitSet::detach_i(const Condition_ptr cond)
 }
 
 ReturnCode_t WaitSet::get_conditions(ConditionSeq& conds)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    RETCODE_OUT_OF_RESOURCES);
@@ -112,7 +108,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
                            const Duration_t& timeout)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (waiting_.value()) return RETCODE_PRECONDITION_NOT_MET;
 

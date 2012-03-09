@@ -57,23 +57,17 @@ protected:
 
   TestBase();
 
-  void init()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void init();
 
-  void fini()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void fini();
 
-  virtual void init_i()
-  ACE_THROW_SPEC((CORBA::SystemException)) = 0;
+  virtual void init_i() = 0;
 
-  virtual void fini_i()
-  ACE_THROW_SPEC((CORBA::SystemException)) = 0;
+  virtual void fini_i() = 0;
 
-  DDS::DomainParticipant_var create_participant()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::DomainParticipant_var create_participant();
 
-  DDS::Topic_var create_topic()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::Topic_var create_topic();
 };
 
 #endif  /* DCPS_TESTFRAMEWORK_H */

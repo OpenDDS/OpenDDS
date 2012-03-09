@@ -26,7 +26,6 @@ void
 Test::DataWriterListener::on_offered_deadline_missed (
     ::DDS::DataWriter_ptr /* writer */,
     ::DDS::OfferedDeadlineMissedStatus const & /* status */)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -34,7 +33,6 @@ void
 Test::DataWriterListener::on_offered_incompatible_qos (
     ::DDS::DataWriter_ptr writer,
     ::DDS::OfferedIncompatibleQosStatus const & status)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
   // This test only modifies the PARTITION QoS policy.
   // By design, PARTITION incompatibilities should not be reported.
@@ -51,7 +49,6 @@ void
 Test::DataWriterListener::on_liveliness_lost (
     ::DDS::DataWriter_ptr /* writer */,
     const ::DDS::LivelinessLostStatus & /* status */)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -59,7 +56,6 @@ void
 Test::DataWriterListener::on_publication_matched (
     ::DDS::DataWriter_ptr writer,
     ::DDS::PublicationMatchedStatus const& status)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
   if( status.total_count_change > 0) {
     this->publication_matches_ += status.total_count_change;
@@ -76,7 +72,6 @@ void
 Test::DataWriterListener::on_publication_disconnected (
     ::DDS::DataWriter_ptr /* writer */,
     ::OpenDDS::DCPS::PublicationDisconnectedStatus const & /* status */)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -84,7 +79,6 @@ void
 Test::DataWriterListener::on_publication_reconnected (
     ::DDS::DataWriter_ptr /* writer */,
     ::OpenDDS::DCPS::PublicationReconnectedStatus const & /* status */)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
@@ -92,14 +86,12 @@ void
 Test::DataWriterListener::on_publication_lost (
     ::DDS::DataWriter_ptr /* writer */,
     ::OpenDDS::DCPS::PublicationLostStatus const & /* status */)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 
 void
 Test::DataWriterListener::on_connection_deleted (
     ::DDS::DataWriter_ptr /* writer */)
-  ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
 

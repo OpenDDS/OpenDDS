@@ -16,8 +16,7 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
   public:
     ReaderListener(OpenDDS::Model::ReaderCondSync& rcs) : rcs_(rcs),
         count_(0) {}
-    virtual void on_data_available(DDS::DataReader_ptr reader)
-        ACE_THROW_SPEC((CORBA::SystemException));
+    virtual void on_data_available(DDS::DataReader_ptr reader);
   private:
     OpenDDS::Model::ReaderCondSync& rcs_;
     int count_;
@@ -28,7 +27,6 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
 
 void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   data1::QuoteDataReader_var reader_i =
     data1::QuoteDataReader::_narrow(reader);

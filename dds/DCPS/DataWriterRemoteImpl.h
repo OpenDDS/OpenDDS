@@ -38,22 +38,17 @@ public:
 
   virtual void add_association(const RepoId& yourId,
                                const ReaderAssociation& readers,
-                               bool active)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                               bool active);
 
-  virtual void association_complete(const RepoId& remote_id)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void association_complete(const RepoId& remote_id);
 
   virtual void remove_associations(const ReaderIdSeq& readers,
-                                   CORBA::Boolean callback)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                                   CORBA::Boolean callback);
 
-  virtual void update_incompatible_qos(const IncompatibleQosStatus& status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
   virtual void update_subscription_params(const RepoId& readerId,
-                                          const DDS::StringSeq& exprParams)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                                          const DDS::StringSeq& exprParams);
 
   void detach_parent();
 

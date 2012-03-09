@@ -187,7 +187,6 @@ void DataReaderImpl::init(
   SubscriberImpl*               subscriber,
   DDS::DataReader_ptr         dr_objref,
   OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
@@ -246,7 +245,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return this->participant_servant_->get_handle(subscription_id_);
 }
@@ -728,7 +726,6 @@ DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
   DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
   DDS::ReadCondition_var rc = new ReadConditionImpl(this, sample_states,
@@ -744,7 +741,6 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
   DDS::InstanceStateMask instance_states,
   const char* query_expression,
   const DDS::StringSeq& query_parameters)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
   try {
@@ -773,7 +769,6 @@ bool DataReaderImpl::has_readcondition(DDS::ReadCondition_ptr a_condition)
 
 DDS::ReturnCode_t DataReaderImpl::delete_readcondition(
   DDS::ReadCondition_ptr a_condition)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
@@ -783,7 +778,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (DCPS_debug_level >= 2)
     ACE_DEBUG((LM_DEBUG,
@@ -795,7 +789,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t DataReaderImpl::set_qos(
   const DDS::DataReaderQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
@@ -876,7 +869,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_qos(
   DDS::DataReaderQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = qos_;
   return DDS::RETCODE_OK;
@@ -885,7 +877,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t DataReaderImpl::set_listener(
   DDS::DataReaderListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -895,13 +886,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::DataReaderListener::_duplicate(listener_.in());
 }
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::ContentFilteredTopic_ptr cft = this->get_cf_topic();
@@ -913,7 +902,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::Subscriber_ptr DataReaderImpl::get_subscriber()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::Subscriber::_duplicate(subscriber_servant_);
 }
@@ -921,7 +909,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_sample_rejected_status(
   DDS::SampleRejectedStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(this->sample_lock_);
 
@@ -934,7 +921,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_liveliness_changed_status(
   DDS::LivelinessChangedStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(this->sample_lock_);
 
@@ -951,7 +937,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_requested_deadline_missed_status(
   DDS::RequestedDeadlineMissedStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(this->sample_lock_);
 
@@ -977,7 +962,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_requested_incompatible_qos_status(
   DDS::RequestedIncompatibleQosStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
     this->publication_handle_lock_);
@@ -993,7 +977,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_subscription_matched_status(
   DDS::SubscriptionMatchedStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
     this->publication_handle_lock_);
@@ -1009,7 +992,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_sample_lost_status(
   DDS::SampleLostStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(this->sample_lock_);
 
@@ -1022,7 +1004,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::wait_for_historical_data(
   const DDS::Duration_t & /* max_wait */)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // Add your implementation here
   return 0;
@@ -1031,7 +1012,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DataReaderImpl::get_matched_publications(
   DDS::InstanceHandleSeq & publication_handles)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1064,7 +1044,6 @@ DDS::ReturnCode_t
 DataReaderImpl::get_matched_publication_data(
   DDS::PublicationBuiltinTopicData & publication_data,
   DDS::InstanceHandle_t publication_handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1101,7 +1080,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 DataReaderImpl::enable()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no
@@ -2650,7 +2628,6 @@ void DataReaderImpl::notify_latency(PublicationId writer)
 void
 DataReaderImpl::get_latency_stats(
   OpenDDS::DCPS::LatencyStatisticsSeq & stats)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   stats.length(static_cast<CORBA::ULong>(this->statistics_.size()));
   int index = 0;
@@ -2665,7 +2642,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 void
 DataReaderImpl::reset_latency_stats()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   for (StatsMapType::iterator current = this->statistics_.begin();
        current != this->statistics_.end();
@@ -2676,7 +2652,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 CORBA::Boolean
 DataReaderImpl::statistics_enabled()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return this->statistics_enabled_;
 }
@@ -2684,7 +2659,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 void
 DataReaderImpl::statistics_enabled(
   CORBA::Boolean statistics_enabled)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   this->statistics_enabled_ = statistics_enabled;
 }

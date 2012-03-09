@@ -34,76 +34,61 @@ public:
 
   DDS::ReturnCode_t read(SampleSeq& received_data, DDS::SampleInfoSeq& info_seq,
     CORBA::Long max_samples, DDS::SampleStateMask sample_states,
-    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states);
 
   DDS::ReturnCode_t take(SampleSeq& received_data, DDS::SampleInfoSeq& info_seq,
     CORBA::Long max_samples, DDS::SampleStateMask sample_states,
-    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states);
 
   DDS::ReturnCode_t read_w_condition(SampleSeq& data_values,
     DDS::SampleInfoSeq& sample_infos, CORBA::Long max_samples,
-    DDS::ReadCondition_ptr a_condition)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ReadCondition_ptr a_condition);
 
   DDS::ReturnCode_t take_w_condition(SampleSeq& data_values,
     DDS::SampleInfoSeq& sample_infos, CORBA::Long max_samples,
-    DDS::ReadCondition_ptr a_condition)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ReadCondition_ptr a_condition);
 
   DDS::ReturnCode_t read_next_sample(Sample& received_data,
-    DDS::SampleInfo& sample_info)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::SampleInfo& sample_info);
 
   DDS::ReturnCode_t take_next_sample(Sample& received_data,
-    DDS::SampleInfo& sample_info)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::SampleInfo& sample_info);
 
   DDS::ReturnCode_t read_instance(SampleSeq& received_data,
     DDS::SampleInfoSeq & info_seq, CORBA::Long max_samples,
     DDS::InstanceHandle_t a_handle, DDS::SampleStateMask sample_states,
-    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states);
 
   DDS::ReturnCode_t take_instance(SampleSeq& received_data,
     DDS::SampleInfoSeq & info_seq, CORBA::Long max_samples,
     DDS::InstanceHandle_t a_handle, DDS::SampleStateMask sample_states,
-    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states);
 
   DDS::ReturnCode_t read_next_instance(SampleSeq& received_data,
     DDS::SampleInfoSeq& info_seq, CORBA::Long max_samples,
     DDS::InstanceHandle_t a_handle, DDS::SampleStateMask sample_states,
-    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states);
 
   DDS::ReturnCode_t take_next_instance(SampleSeq& received_data,
     DDS::SampleInfoSeq& info_seq, CORBA::Long max_samples,
     DDS::InstanceHandle_t a_handle, DDS::SampleStateMask sample_states,
-    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states);
 
   DDS::ReturnCode_t read_next_instance_w_condition(SampleSeq& data_values,
     DDS::SampleInfoSeq& sample_infos, CORBA::Long max_samples,
-    DDS::InstanceHandle_t previous_handle, DDS::ReadCondition_ptr a_condition)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t previous_handle, DDS::ReadCondition_ptr a_condition);
 
   DDS::ReturnCode_t take_next_instance_w_condition(SampleSeq& data_values,
     DDS::SampleInfoSeq & sample_infos, CORBA::Long max_samples,
-    DDS::InstanceHandle_t previous_handle, DDS::ReadCondition_ptr a_condition)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t previous_handle, DDS::ReadCondition_ptr a_condition);
 
   DDS::ReturnCode_t return_loan(SampleSeq& received_data,
-    DDS::SampleInfoSeq& info_seq)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::SampleInfoSeq& info_seq);
 
   DDS::ReturnCode_t get_key_value(Sample& key_holder,
-    DDS::InstanceHandle_t handle)
-    ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceHandle_t handle);
 
-  DDS::InstanceHandle_t lookup_instance(const Sample& instance_data)
-    ACE_THROW_SPEC((CORBA::SystemException));
+  DDS::InstanceHandle_t lookup_instance(const Sample& instance_data);
 
 private:
 

@@ -99,7 +99,6 @@ DomainParticipantImpl::create_publisher(
   const DDS::PublisherQos & qos,
   DDS::PublisherListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_UNUSED_ARG(mask);
 
@@ -166,7 +165,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_publisher(
   DDS::Publisher_ptr p)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // The servant's ref count should be 2 at this point,
   // one referenced by poa, one referenced by the subscriber
@@ -205,7 +203,6 @@ DomainParticipantImpl::create_subscriber(
   const DDS::SubscriberQos & qos,
   DDS::SubscriberListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DDS::SubscriberQos sub_qos;
 
@@ -268,7 +265,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_subscriber(
   DDS::Subscriber_ptr s)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // The servant's ref count should be 2 at this point,
   // one referenced by poa, one referenced by the subscriber
@@ -315,7 +311,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::Subscriber_ptr
 DomainParticipantImpl::get_builtin_subscriber()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::Subscriber::_duplicate(bit_subscriber_.in());
 }
@@ -327,7 +322,6 @@ DomainParticipantImpl::create_topic(
   const DDS::TopicQos & qos,
   DDS::TopicListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DDS::TopicQos topic_qos;
 
@@ -472,7 +466,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_topic(
   DDS::Topic_ptr a_topic)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return delete_topic_i(a_topic, false);
 }
@@ -581,7 +574,6 @@ DDS::Topic_ptr
 DomainParticipantImpl::find_topic(
   const char * topic_name,
   const DDS::Duration_t & timeout)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   try {
     ACE_Time_Value timeout_tv
@@ -668,7 +660,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::TopicDescription_ptr
 DomainParticipantImpl::lookup_topicdescription(const char* name)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,
@@ -700,7 +691,6 @@ DomainParticipantImpl::create_contentfilteredtopic(
   DDS::Topic_ptr related_topic,
   const char* filter_expression,
   const DDS::StringSeq& expression_parameters)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (CORBA::is_nil(related_topic)) {
     if (DCPS_debug_level > 3) {
@@ -754,7 +744,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   DDS::ContentFilteredTopic_ptr a_contentfilteredtopic)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
@@ -776,7 +765,6 @@ DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   const char* name, const char* type_name,
   const char* subscription_expression,
   const DDS::StringSeq& expression_parameters)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_, 0);
 
@@ -820,7 +808,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   DDS::MultiTopic_ptr a_multitopic)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
@@ -866,7 +853,6 @@ DomainParticipantImpl::deref_filter_eval(const char* filter)
 
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // mark that the entity is being deleted
   set_deleted(true);
@@ -971,7 +957,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 CORBA::Boolean
 DomainParticipantImpl::contains_entity(DDS::InstanceHandle_t a_handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   /// Check top-level containers for Topic, Subscriber,
   /// and Publisher instances.
@@ -1034,7 +1019,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::set_qos(
   const DDS::DomainParticipantQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
@@ -1085,7 +1069,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::get_qos(
   DDS::DomainParticipantQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = qos_;
   return DDS::RETCODE_OK;
@@ -1095,7 +1078,6 @@ DDS::ReturnCode_t
 DomainParticipantImpl::set_listener(
   DDS::DomainParticipantListener_ptr a_listener,
   DDS::StatusMask mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -1106,7 +1088,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DomainParticipantListener_ptr
 DomainParticipantImpl::get_listener()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return DDS::DomainParticipantListener::_duplicate(listener_.in());
 }
@@ -1114,7 +1095,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_participant(
   DDS::InstanceHandle_t handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -1181,7 +1161,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_topic(
   DDS::InstanceHandle_t handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -1240,7 +1219,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_publication(
   DDS::InstanceHandle_t handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -1290,7 +1268,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_subscription(
   DDS::InstanceHandle_t handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -1340,14 +1317,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DomainId_t
 DomainParticipantImpl::get_domain_id()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return domain_id_;
 }
 
 DDS::ReturnCode_t
 DomainParticipantImpl::assert_liveliness()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   // This operation needs to only be used if the DomainParticipant contains
   // DataWriter entities with the LIVELINESS set to MANUAL_BY_PARTICIPANT and
@@ -1373,7 +1348,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::set_default_publisher_qos(
   const DDS::PublisherQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     default_publisher_qos_ = qos;
@@ -1387,7 +1361,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::get_default_publisher_qos(
   DDS::PublisherQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = default_publisher_qos_;
   return DDS::RETCODE_OK;
@@ -1396,7 +1369,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::set_default_subscriber_qos(
   const DDS::SubscriberQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     default_subscriber_qos_ = qos;
@@ -1410,7 +1382,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::get_default_subscriber_qos(
   DDS::SubscriberQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = default_subscriber_qos_;
   return DDS::RETCODE_OK;
@@ -1419,7 +1390,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::set_default_topic_qos(
   const DDS::TopicQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     default_topic_qos_ = qos;
@@ -1433,7 +1403,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::get_default_topic_qos(
   DDS::TopicQos & qos)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = default_topic_qos_;
   return DDS::RETCODE_OK;
@@ -1442,7 +1411,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::get_current_time(
   DDS::Time_t & current_time)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   current_time
   = OpenDDS::DCPS::time_value_to_time(
@@ -1455,7 +1423,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_participants(
   DDS::InstanceHandleSeq & participant_handles)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -1488,7 +1455,6 @@ DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_participant_data(
   DDS::ParticipantBuiltinTopicData & participant_data,
   DDS::InstanceHandle_t participant_handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -1542,7 +1508,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_topics(
   DDS::InstanceHandleSeq & topic_handles)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -1574,7 +1539,6 @@ DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_topic_data(
   DDS::TopicBuiltinTopicData & topic_data,
   DDS::InstanceHandle_t topic_handle)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -1631,7 +1595,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ReturnCode_t
 DomainParticipantImpl::enable()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no
@@ -1687,7 +1650,6 @@ DomainParticipantImpl::get_unique_id()
 
 DDS::InstanceHandle_t
 DomainParticipantImpl::get_instance_handle()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   return this->get_handle(this->dp_id_);
 }
@@ -1742,7 +1704,6 @@ DomainParticipantImpl::create_topic_i(
   const DDS::TopicQos & qos,
   DDS::TopicListener_ptr a_listener,
   const DDS::StatusMask & mask)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,

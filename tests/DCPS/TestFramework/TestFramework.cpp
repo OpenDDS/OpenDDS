@@ -66,7 +66,6 @@ TestBase::run(int& argc, ACE_TCHAR* argv[])
 
 void
 TestBase::init()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   this->participant_ = create_participant();
   this->topic_ = create_topic();
@@ -76,7 +75,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 void
 TestBase::fini()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   fini_i();  // delegate to child
 
@@ -86,7 +84,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::DomainParticipant_var
 TestBase::create_participant()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DDS::DomainId_t domain = DEFAULT_DOMAIN;
 
@@ -125,7 +122,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::Topic_var
 TestBase::create_topic()
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   const char* name = DEFAULT_TOPIC;
 

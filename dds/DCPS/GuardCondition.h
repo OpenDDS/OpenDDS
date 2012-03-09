@@ -33,11 +33,9 @@ public:
 
   virtual ~GuardCondition() {}
 
-  CORBA::Boolean get_trigger_value()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  CORBA::Boolean get_trigger_value();
 
-  ReturnCode_t set_trigger_value(CORBA::Boolean value)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  ReturnCode_t set_trigger_value(CORBA::Boolean value);
 
   static GuardCondition_ptr _duplicate(GuardCondition_ptr obj);
 

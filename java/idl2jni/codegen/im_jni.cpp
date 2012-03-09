@@ -1078,16 +1078,13 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
 
   if (local) {
     string attrname_cxx = isCxxKeyword(attrname) ? (string("_cxx_")
-                                                    + attrname) : attrname,
-                          exception_spec = "ACE_THROW_SPEC((CORBA::SystemException))";
+                                                    + attrname) : attrname;
     //FUTURE: support user exceptions
     be_global->stub_header_ <<
-    "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ")\n"
-    "    " << exception_spec << ";\n\n";
+      "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ");\n\n";
     be_global->stub_impl_ <<
     tao_ret << ' ' << idl_mapping_jni::scoped_helper(name, "_")
-    << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
-    "  " << exception_spec << "\n"
+            << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
     "{\n"
     "  JNIThreadAttacher _jta (jvm_, cl_);\n"
     "  JNIEnv *_jni = _jta.getJNI ();\n"
@@ -1174,16 +1171,13 @@ void write_native_attribute_w(UTL_ScopedName *name, const char *javaStub,
 
   if (local) {
     string attrname_cxx = isCxxKeyword(attrname) ? (string("_cxx_")
-                                                    + attrname) : attrname,
-                          exception_spec = "ACE_THROW_SPEC((CORBA::SystemException))";
+                                                    + attrname) : attrname;
     //FUTURE: support user exceptions
     be_global->stub_header_ <<
-    "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ")\n"
-    "    " << exception_spec << ";\n\n";
+      "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ");\n\n";
     be_global->stub_impl_ <<
     tao_ret << ' ' << idl_mapping_jni::scoped_helper(name, "_")
-    << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
-    "  " << exception_spec << "\n"
+            << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
     "{\n"
     "  JNIThreadAttacher _jta (jvm_, cl_);\n"
     "  JNIEnv *_jni = _jta.getJNI ();\n"
@@ -1328,16 +1322,13 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
 
   if (local) {
     string opname_cxx = isCxxKeyword(opname) ? (string("_cxx_") + opname)
-                        : opname,
-                        exception_spec = "ACE_THROW_SPEC((CORBA::SystemException))";
+                        : opname;
     //FUTURE: support user exceptions
     be_global->stub_header_ <<
-    "  " << tao_ret << ' ' << opname_cxx << " (" << tao_args << ")\n"
-    "    " << exception_spec << ";\n\n";
+      "  " << tao_ret << ' ' << opname_cxx << " (" << tao_args << ");\n\n";
     be_global->stub_impl_ <<
     tao_ret << ' ' << idl_mapping_jni::scoped_helper(name, "_")
-    << "JavaPeer::" << opname_cxx << " (" << tao_args << ")\n"
-    "  " << exception_spec << "\n"
+            << "JavaPeer::" << opname_cxx << " (" << tao_args << ")\n"
     "{\n"
     "  JNIThreadAttacher _jta (jvm_, cl_);\n"
     "  JNIEnv *_jni = _jta.getJNI ();\n"

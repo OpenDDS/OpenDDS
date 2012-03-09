@@ -32,17 +32,13 @@ public:
 
   virtual ~StatusConditionImpl() {}
 
-  CORBA::Boolean get_trigger_value()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  CORBA::Boolean get_trigger_value();
 
-  virtual DDS::StatusMask get_enabled_statuses()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::StatusMask get_enabled_statuses();
 
-  virtual DDS::ReturnCode_t set_enabled_statuses(DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t set_enabled_statuses(DDS::StatusMask mask);
 
-  virtual DDS::Entity_ptr get_entity()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::Entity_ptr get_entity();
 
 private:
   //deliberately not a _var, don't hold a reference to the parent since

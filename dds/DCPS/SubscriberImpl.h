@@ -50,8 +50,7 @@ public:
 
   virtual ~SubscriberImpl();
 
-  virtual DDS::InstanceHandle_t get_instance_handle()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::InstanceHandle_t get_instance_handle();
 
   bool contains_reader(DDS::InstanceHandle_t a_handle);
 
@@ -59,82 +58,63 @@ public:
     DDS::TopicDescription_ptr a_topic_desc,
     const DDS::DataReaderQos& qos,
     DDS::DataReaderListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
   virtual DDS::DataReader_ptr create_opendds_datareader(
     DDS::TopicDescription_ptr a_topic_desc,
     const DDS::DataReaderQos& qos,
     const DataReaderQosExt& ext_qos,
     DDS::DataReaderListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
   virtual DDS::ReturnCode_t delete_datareader(
-    DDS::DataReader_ptr a_datareader)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataReader_ptr a_datareader);
 
-  virtual DDS::ReturnCode_t delete_contained_entities()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t delete_contained_entities();
 
   virtual DDS::DataReader_ptr lookup_datareader(
-    const char* topic_name)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const char* topic_name);
 
   virtual DDS::ReturnCode_t get_datareaders(
     DDS::DataReaderSeq& readers,
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::InstanceStateMask instance_states);
 
-  virtual DDS::ReturnCode_t notify_datareaders()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t notify_datareaders();
 
   virtual DDS::ReturnCode_t set_qos(
-    const DDS::SubscriberQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::SubscriberQos& qos);
 
   virtual DDS::ReturnCode_t get_qos(
-    DDS::SubscriberQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::SubscriberQos& qos);
 
   virtual DDS::ReturnCode_t set_listener(
     DDS::SubscriberListener_ptr a_listener,
-    DDS::StatusMask mask)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::StatusMask mask);
 
-  virtual DDS::SubscriberListener_ptr get_listener()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::SubscriberListener_ptr get_listener();
 
-  virtual DDS::ReturnCode_t begin_access()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t begin_access();
 
-  virtual DDS::ReturnCode_t end_access()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t end_access();
 
-  virtual DDS::DomainParticipant_ptr get_participant()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::DomainParticipant_ptr get_participant();
 
   virtual DDS::ReturnCode_t set_default_datareader_qos(
-    const DDS::DataReaderQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::DataReaderQos& qos);
 
   virtual DDS::ReturnCode_t get_default_datareader_qos(
-    DDS::DataReaderQos& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DDS::DataReaderQos& qos);
 
   virtual void get_default_datareader_qos_ext(
-    DataReaderQosExt& qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    DataReaderQosExt& qos);
 
   virtual DDS::ReturnCode_t copy_from_topic_qos(
     DDS::DataReaderQos& a_datareader_qos,
-    const DDS::TopicQos& a_topic_qos)
-  ACE_THROW_SPEC((CORBA::SystemException));
+    const DDS::TopicQos& a_topic_qos);
 
-  virtual DDS::ReturnCode_t enable()
-  ACE_THROW_SPEC((CORBA::SystemException));
+  virtual DDS::ReturnCode_t enable();
 
   /** This method is not defined in the IDL and is defined for
   *  internal use.
