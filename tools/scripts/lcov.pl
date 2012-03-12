@@ -168,7 +168,7 @@ sub createInfo
             return 0;
         }
     }
-    
+
     return 1;
 }
 
