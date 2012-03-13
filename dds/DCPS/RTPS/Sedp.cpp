@@ -35,8 +35,10 @@
 
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
-#include <cstring>
 #include <ace/Reverse_Lock_T.h>
+#include <ace/Auto_Ptr.h>
+
+#include <cstring>
 
 namespace {
 bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
@@ -231,6 +233,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   : participant_id_(participant_id)
   , spdp_(owner)
   , lock_(lock)
+  , task_(this)
   , publications_writer_(make_id(participant_id,
                                  ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
                          *this)
@@ -388,6 +391,7 @@ Sedp::ignore(const RepoId& to_ignore)
         RepoIdSet::iterator ep;
         for (ep = td.endpoints_.begin(); ep!= td.endpoints_.end(); ++ep) {
           match_endpoints(*ep, td, true /*remove*/);
+          if (spdp_.shutting_down()) { return; }
         }
       }
     }
@@ -444,20 +448,14 @@ Sedp::increment_key(DDS::BuiltinTopicKey_t& key)
 void
 Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
 {
-  new AssociateTask(pdata, this);
+  task_.enqueue(new SPDPdiscoveredParticipantData(pdata));
 }
 
-int
-Sedp::AssociateTask::close(u_long)
+void
+Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
 {
-  delete this;
-  return 0;
-}
-
-int
-Sedp::AssociateTask::svc()
-{
-  const SPDPdiscoveredParticipantData& pdata = pdata_;
+  ACE_Auto_Basic_Ptr<const SPDPdiscoveredParticipantData> delete_the_data(ppdata);
+  const SPDPdiscoveredParticipantData& pdata = *ppdata;
   // First create a 'prototypical' instance of AssociationData.  It will
   // be copied and modified for each of the (up to) four SEDP Endpoints.
   DCPS::AssociationData proto;
@@ -516,7 +514,7 @@ Sedp::AssociateTask::svc()
   }
   //FUTURE: if/when topic propagation is supported, add it here
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_->lock_, 1);
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp_->lock_);
   // Write durable data
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
@@ -564,6 +562,7 @@ Sedp::AssociateTask::svc()
               std::string(conv).c_str()));
           }
           sedp_->match_endpoints(*it, ti->second);
+          if (spdp_->shutting_down()) { return; }
         }
       }
       sedp_->defer_match_endpoints_.erase(it++);
@@ -571,7 +570,6 @@ Sedp::AssociateTask::svc()
       ++it;
     }
   }
-  return 0;
 }
 
 bool
@@ -643,6 +641,7 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
                    ACE_TEXT("calling match_endpoints remove\n")));
       }
       match_endpoints(i->first, top_it->second, true /*remove*/);
+      if (spdp_.shutting_down()) { return; }
     }
     remove_from_bit(i->second);
     m.erase(i++);
@@ -1026,7 +1025,16 @@ Sedp::make_topic_guid()
 }
 
 void
-Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
+Sedp::Task::svc_i(DCPS::MessageId message_id,
+                  const DiscoveredWriterData* pwdata)
+{
+  ACE_Auto_Basic_Ptr<const DiscoveredWriterData> delete_the_data(pwdata);
+  sedp_->data_received(message_id, *pwdata);
+}
+
+void
+Sedp::data_received(DCPS::MessageId message_id,
+                    const DiscoveredWriterData& wdata)
 {
   if (spdp_.shutting_down()) { return; }
 
@@ -1090,6 +1098,8 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
                                       DDS::NEW_VIEW_STATE);
         }
       }
+
+      if (spdp_.shutting_down()) { return; }
       // Publication may have been removed while lock released
       iter = discovered_publications_.find(guid);
       if (iter != discovered_publications_.end()) {
@@ -1137,6 +1147,7 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
         match_endpoints(guid, top_it->second, true /*remove*/);
+        if (spdp_.shutting_down()) { return; }
       }
       remove_from_bit(iter->second);
       if (DCPS::DCPS_debug_level > 3) {
@@ -1149,7 +1160,16 @@ Sedp::data_received(char message_id, const DiscoveredWriterData& wdata)
 }
 
 void
-Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
+Sedp::Task::svc_i(DCPS::MessageId message_id,
+                  const DiscoveredReaderData* prdata)
+{
+  ACE_Auto_Basic_Ptr<const DiscoveredReaderData> delete_the_data(prdata);
+  sedp_->data_received(message_id, *prdata);
+}
+
+void
+Sedp::data_received(DCPS::MessageId message_id,
+                    const DiscoveredReaderData& rdata)
 {
   if (spdp_.shutting_down()) { return; }
 
@@ -1214,6 +1234,8 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
                                       DDS::NEW_VIEW_STATE);
         }
       }
+
+      if (spdp_.shutting_down()) { return; }
       // Subscription may have been removed while lock released
       iter = discovered_subscriptions_.find(guid);
       if (iter != discovered_subscriptions_.end()) {
@@ -1302,6 +1324,7 @@ Sedp::data_received(char message_id, const DiscoveredReaderData& rdata)
                                ACE_TEXT("calling match_endpoints disp/unreg\n")));
         }
         match_endpoints(guid, top_it->second, true /*remove*/);
+        if (spdp_.shutting_down()) { return; }
       }
       remove_from_bit(iter->second);
       discovered_subscriptions_.erase(iter);
@@ -2048,32 +2071,35 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       return;
     }
 
+    const DCPS::MessageId id =
+      static_cast<DCPS::MessageId>(sample.header_.message_id_);
+
     switch (sample.header_.publication_id_.entityId.entityKey[2]) {
     case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER.entityKey[2]
-      DiscoveredWriterData wdata;
-      if (ParameterListConverter::from_param_list(data, wdata) < 0) {
+      ACE_Auto_Ptr<DiscoveredWriterData> wdata(new DiscoveredWriterData);
+      if (ParameterListConverter::from_param_list(data, *wdata) < 0) {
         ACE_DEBUG((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredWriterData\n")));
         return;
       }
-      sedp_.data_received(sample.header_.message_id_, wdata);
+      sedp_.task_.enqueue(id, wdata.release());
       break;
     }
     case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER.entityKey[2]
-      DiscoveredReaderData rdata;
-      if (ParameterListConverter::from_param_list(data, rdata) < 0) {
+      ACE_Auto_Ptr<DiscoveredReaderData> rdata(new DiscoveredReaderData);
+      if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
         ACE_DEBUG((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredReaderData\n")));
         return;
       }
-      if (rdata.readerProxy.expectsInlineQos) {
-        set_inline_qos(rdata.readerProxy.allLocators);
+      if (rdata->readerProxy.expectsInlineQos) {
+        set_inline_qos(rdata->readerProxy.allLocators);
       }
-      sedp_.data_received(sample.header_.message_id_, rdata);
+      sedp_.task_.enqueue(id, rdata.release());
       break;
     }
     default:
@@ -2257,6 +2283,54 @@ Sedp::is_opendds(const GUID_t& endpoint)
 {
   return !memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
                  sizeof(DCPS::VENDORID_OCI));
+}
+
+//---------------------------------------------------------------
+
+void
+Sedp::Task::enqueue(const SPDPdiscoveredParticipantData* pdata)
+{
+  putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata));
+}
+
+void
+Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata)
+{
+  putq(new Msg(Msg::MSG_WRITER, id, wdata));
+}
+
+void
+Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata)
+{
+  putq(new Msg(Msg::MSG_READER, id, rdata));
+}
+
+int
+Sedp::Task::svc()
+{
+  for (Msg* msg = 0; getq(msg) != -1; /*no increment*/) {
+    ACE_Auto_Basic_Ptr<Msg> delete_the_msg(msg);
+    switch (msg->type_) {
+    case Msg::MSG_PARTICIPANT:
+      svc_i(static_cast<const SPDPdiscoveredParticipantData*>(msg->payload_));
+      break;
+    case Msg::MSG_WRITER:
+      svc_i(msg->id_, static_cast<const DiscoveredWriterData*>(msg->payload_));
+      break;
+    case Msg::MSG_READER:
+      svc_i(msg->id_, static_cast<const DiscoveredReaderData*>(msg->payload_));
+      break;
+    case Msg::MSG_STOP:
+      return 0;
+    }
+  }
+  return 0;
+}
+
+Sedp::Task::~Task()
+{
+  putq(new Msg(Msg::MSG_STOP, DCPS::GRACEFUL_DISCONNECT, 0));
+  wait();
 }
 
 }

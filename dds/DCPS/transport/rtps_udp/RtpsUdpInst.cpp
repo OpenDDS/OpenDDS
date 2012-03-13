@@ -28,6 +28,7 @@ RtpsUdpInst::RtpsUdpInst(const std::string& name)
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
+  , durable_data_timeout_(60)
   , opendds_discovery_default_listener_(0)
   , opendds_discovery_guid_(GUID_UNKNOWN)
 {

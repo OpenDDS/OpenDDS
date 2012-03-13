@@ -166,7 +166,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   DiscoveredParticipantIter iter = participants_.find(guid);
 
   // Must unlock when calling into part_bit() as it may call back into us
-  ACE_Reverse_Lock< ACE_Thread_Mutex> rev_lock(lock_);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
   if (iter == participants_.end()) {
     // copy guid prefix (octet[12]) into BIT key (long[3])

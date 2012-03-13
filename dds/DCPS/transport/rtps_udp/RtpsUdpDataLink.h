@@ -166,8 +166,12 @@ private:
     CORBA::Long acknack_recvd_count_;
     std::vector<OpenDDS::RTPS::SequenceNumberSet> requested_changes_;
     bool handshake_done_;
+    std::map<SequenceNumber, TransportQueueElement*> durable_data_;
+    ACE_Time_Value durable_timestamp_;
 
     ReaderInfo() : acknack_recvd_count_(0), handshake_done_(false) {}
+    ~ReaderInfo();
+    void expire_durable_data();
   };
 
   typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> ReaderInfoMap;
@@ -177,6 +181,7 @@ private:
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
     CORBA::Long heartbeat_count_;
+    bool durable_;
 
     RtpsWriter() : heartbeat_count_(0) {}
   };
@@ -242,6 +247,7 @@ private:
   void process_data_i(const OpenDDS::RTPS::DataSubmessage& data,
                       const RepoId& src, RtpsReaderMap::value_type& rr);
 
+  void durability_resend(TransportQueueElement* element);
 
   template<typename T, typename FN>
   void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,

@@ -1,3 +1,23 @@
+Tue Mar 13 20:09:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Add writer-side handling of durable data.  Durable data for each
+          reader is queued until a timeout expires or the reader requests
+          it using an ACKNACK, the writer writes it an the reader acknowledges.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Now that the transport is doing the above, discovery can't hijack
+          the transport's reactor thread during add_association().  Instead
+          Sedp will have a dedicated thread for processing both SEDP Association
+          events and also incoming data on the two SEDP readers.
+
 Tue Mar 13 13:28:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -32,7 +32,7 @@ public:
 
   size_t nak_depth_;
   ACE_Time_Value nak_response_delay_, heartbeat_period_,
-    heartbeat_response_delay_, handshake_timeout_;
+    heartbeat_response_delay_, handshake_timeout_, durable_data_timeout_;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);

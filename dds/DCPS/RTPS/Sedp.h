@@ -23,11 +23,14 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleHeader.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
+
+#include "ace/Task_Ex_T.h"
 
 #include <map>
 #include <set>
@@ -83,17 +86,6 @@ public:
 
   void associate(const SPDPdiscoveredParticipantData& pdata);
   bool disassociate(const SPDPdiscoveredParticipantData& pdata);
-
-  struct AssociateTask : ACE_Task_Base {
-    AssociateTask(const SPDPdiscoveredParticipantData& pdata, Sedp* sedp)
-      : pdata_(pdata), spdp_(&sedp->spdp_, false), sedp_(sedp)
-    { activate(); }
-    int svc();
-    int close(u_long flags);
-    SPDPdiscoveredParticipantData pdata_;
-    DCPS::RcHandle<Spdp> spdp_;
-    Sedp* sedp_;
-  };
 
   // Topic
   DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
@@ -151,6 +143,37 @@ private:
   DCPS::RepoId participant_id_;
   Spdp& spdp_;
   ACE_Thread_Mutex& lock_;
+
+  struct Msg {
+    enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER, MSG_STOP } type_;
+    DCPS::MessageId id_;
+    const void* payload_;
+    Msg(MsgType mt, DCPS::MessageId id, const void* p)
+      : type_(mt), id_(id), payload_(p) {}
+  };
+
+  struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
+    explicit Task(Sedp* sedp)
+      : spdp_(&sedp->spdp_), sedp_(sedp)
+    {
+      activate();
+    }
+    ~Task();
+
+    void enqueue(const SPDPdiscoveredParticipantData* pdata);
+    void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
+    void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+
+  private:
+    int svc();
+
+    void svc_i(const SPDPdiscoveredParticipantData* pdata);
+    void svc_i(DCPS::MessageId id, const DiscoveredWriterData* wdata);
+    void svc_i(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+
+    Spdp* spdp_;
+    Sedp* sedp_;
+  } task_;
 
   class Endpoint : public DCPS::TransportClient {
   public:
@@ -292,8 +315,10 @@ private:
       const LocalSubscription& sub);
   unsigned int publication_counter_, subscription_counter_;
 
-  void data_received(char message_id, const DiscoveredWriterData& wdata);
-  void data_received(char message_id, const DiscoveredReaderData& rdata);
+  void data_received(DCPS::MessageId message_id,
+                     const DiscoveredWriterData& wdata);
+  void data_received(DCPS::MessageId message_id,
+                     const DiscoveredReaderData& rdata);
 
   struct DiscoveredPublication {
     DiscoveredPublication() {}
@@ -387,4 +412,3 @@ private:
 
 #endif // DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_RTPS_SEDP_H
-

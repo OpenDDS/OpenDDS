@@ -235,6 +235,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   const EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER && remote_reliable) {
     writers_[local_id].remote_readers_[remote_id];
+    writers_[local_id].durable_ = local_durable;
     enable_heartbeat = true;
 
   } else if (kind == KIND_READER) {
@@ -395,10 +396,32 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
+  const RepoId pub_id = element->publication_id();
+
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
 
   OpenDDS::RTPS::SubmessageSeq subm;
-  add_gap_submsg(subm, *element);
+
+  const RtpsWriterMap::iterator rw = writers_.find(pub_id);
+
+  bool gap_ok = true;
+  if (rw != writers_.end() && !rw->second.remote_readers_.empty()) {
+    for (ReaderInfoMap::iterator ri = rw->second.remote_readers_.begin();
+         ri != rw->second.remote_readers_.end(); ++ri) {
+      if (!ri->second.durable_data_.empty()) {
+        // Can't add an in-line GAP if some Data Reader is expecting durable
+        // data, the GAP could cause that Data Reader to ignore the durable
+        // data.  The other readers will eventually learn about the GAP by
+        // sending an ACKNACK and getting a GAP reply.
+        gap_ok = false;
+        break;
+      }
+    }
+  }
+
+  if (gap_ok) {
+    add_gap_submsg(subm, *element);
+  }
 
   TransportSendElement* tse = dynamic_cast<TransportSendElement*>(element);
   TransportCustomizedElement* tce =
@@ -407,6 +430,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     dynamic_cast<TransportSendControlElement*>(element);
 
   ACE_Message_Block* data = 0;
+  bool durable = false;
 
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
@@ -415,7 +439,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
       data = msg->cont()->duplicate();
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
       RtpsSampleHeader::populate_data_control_submessages(
-                subm, *tsce, this->requires_inline_qos(tsce->publication_id()));
+                subm, *tsce, this->requires_inline_qos(pub_id));
     } else {
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
@@ -427,7 +451,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleListElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, this->requires_inline_qos(dsle->publication_id_));
+              subm, *dsle, this->requires_inline_qos(pub_id));
+    durable = dsle->header_.historic_sample_;
 
   } else if (tce) {  // Customized data message
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
@@ -435,7 +460,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleListElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, this->requires_inline_qos(dsle->publication_id_));
+              subm, *dsle, this->requires_inline_qos(pub_id));
+    durable = dsle->header_.historic_sample_;
 
   } else {
     return element;
@@ -470,6 +496,32 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   // Let the framework know each TransportCustomizedElement must be in its own
   // Transport packet (i.e. have its own RTPS Message Header).
   rtps->set_requires_exclusive();
+
+  // Handle durability resends
+  if (durable && rw != writers_.end()) {
+    const RepoId sub = element->subscription_id();
+    if (sub != GUID_UNKNOWN) {
+      ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(sub);
+      if (ri != rw->second.remote_readers_.end()) {
+        ri->second.durable_data_[rtps->sequence()] = rtps;
+        ri->second.durable_timestamp_ = ACE_OS::gettimeofday();
+        if (Transport_debug_level > 3) {
+          const GuidConverter conv(pub_id);
+          ACE_DEBUG((LM_ERROR,
+            "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
+            "storing durable data for local %C\n", std::string(conv).c_str()));
+        }
+        return 0;
+      }
+    }
+  } else if (durable && Transport_debug_level) {
+    const GuidConverter conv(pub_id);
+    ACE_DEBUG((LM_ERROR,
+      "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
+      "WARNING: no RtpsWriter to store durable data for local %C\n",
+      std::string(conv).c_str()));
+  }
+
   return rtps;
 }
 
@@ -509,7 +561,8 @@ RtpsUdpDataLink::add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
 
   const SequenceNumber seq = tqe.sequence();
   const RepoId pub = tqe.publication_id();
-  if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || pub == GUID_UNKNOWN) {
+  if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || pub == GUID_UNKNOWN
+      || tqe.subscription_id() != GUID_UNKNOWN) {
     return;
   }
 
@@ -1010,6 +1063,43 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
     handshake_condition_.broadcast();
   }
 
+  if (!ri->second.durable_data_.empty()) {
+    SequenceNumber ack;
+    ack.setValue(acknack.readerSNState.bitmapBase.high,
+                 acknack.readerSNState.bitmapBase.low);
+    if (ack > ri->second.durable_data_.rbegin()->first) {
+      // Reader acknowledges durable data, we no longer need to store it
+      typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+      for (iter_t it = ri->second.durable_data_.begin();
+           it != ri->second.durable_data_.end(); ++it) {
+        it->second->data_delivered();
+      }
+      ri->second.durable_data_.clear();
+    } else {
+      DisjointSequence requests;
+      requests.insert(ack, acknack.readerSNState.numBits,
+                      acknack.readerSNState.bitmap.get_buffer());
+      // Attempt to reply to nacks for durable data
+      bool sent_some = false;
+      typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+      iter_t it = ri->second.durable_data_.begin();
+      std::vector<SequenceRange> psr = requests.present_sequence_ranges();
+      for (size_t i = 0; i < psr.size(); ++i) {
+        for (; it != ri->second.durable_data_.end()
+             && it->first < psr[i].first; ++it) ; // empty for-loop
+        for (; it != ri->second.durable_data_.end()
+             && it->first <= psr[i].second; ++it) {
+          durability_resend(it->second);
+          //FUTURE: combine multiple resends into one RTPS Message?
+          sent_some = true;
+        }
+      }
+      if (sent_some) {
+        return;
+      }
+    }
+  }
+
   const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
@@ -1119,6 +1209,15 @@ RtpsUdpDataLink::send_nack_replies()
 }
 
 void
+RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
+{
+  std::set<ACE_INET_Addr> recipient;
+  recipient.insert(get_locator(element->subscription_id()));
+  ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
+  send_strategy_->send_rtps_control(*msg, recipient);
+}
+
+void
 RtpsUdpDataLink::send_heartbeats()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -1130,13 +1229,15 @@ RtpsUdpDataLink::send_heartbeats()
   using namespace OpenDDS::RTPS;
   std::vector<HeartBeatSubmessage> subm;
   std::set<ACE_INET_Addr> recipients;
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
 
   typedef RtpsWriterMap::iterator rw_iter;
   for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
     const bool has_data = !rw->second.send_buff_.is_nil()
                           && !rw->second.send_buff_->empty();
-    bool final = true;
+    bool final = true, has_durable_data = false;
+    SequenceNumber durable_max;
 
     typedef ReaderInfoMap::iterator ri_iter;
     const ri_iter end = rw->second.remote_readers_.end();
@@ -1148,14 +1249,38 @@ RtpsUdpDataLink::send_heartbeats()
           final = false;
         }
       }
+      if (!ri->second.durable_data_.empty()) {
+        const ACE_Time_Value expiration =
+          ri->second.durable_timestamp_ + config_->durable_data_timeout_;
+        if (now > expiration) {
+          ri->second.expire_durable_data();
+          ri->second.durable_data_.clear();
+          if (Transport_debug_level > 3) {
+            const GuidConverter gw(rw->first), gr(ri->first);
+            VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::send_heartbeats - "
+              "removed expired durable data for %C -> %C\n",
+              std::string(gw).c_str(), std::string(gr).c_str()), 3);
+          }
+        } else {
+          has_durable_data = true;
+          if (ri->second.durable_data_.rbegin()->first > durable_max) {
+            durable_max = ri->second.durable_data_.rbegin()->first;
+          }
+          if (locators_.count(ri->first)) {
+            recipients.insert(locators_[ri->first].addr_);
+          }
+        }
+      }
     }
 
-    if (final && !has_data) {
+    if (final && !has_data && !has_durable_data) {
       continue;
     }
 
-    const SequenceNumber firstSN = has_data ? rw->second.send_buff_->low() : 1,
-      lastSN = has_data ? rw->second.send_buff_->high() : 1;
+    const SequenceNumber firstSN = (rw->second.durable_ || !has_data)
+                                   ? 1 : rw->second.send_buff_->low(),
+        lastSN = std::max(durable_max,
+                          has_data ? rw->second.send_buff_->high() : 1);
 
     const HeartBeatSubmessage hb = {
       {HEARTBEAT, 1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0), HEARTBEAT_SZ},
@@ -1180,6 +1305,20 @@ RtpsUdpDataLink::send_heartbeats()
       }
     }
     send_strategy_->send_rtps_control(mb, recipients);
+  }
+}
+
+RtpsUdpDataLink::ReaderInfo::~ReaderInfo()
+{
+  expire_durable_data();
+}
+
+void
+RtpsUdpDataLink::ReaderInfo::expire_durable_data()
+{
+  typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+  for (iter_t it = durable_data_.begin(); it != durable_data_.end(); ++it) {
+    it->second->data_dropped();
   }
 }
 
