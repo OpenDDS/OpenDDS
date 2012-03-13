@@ -27,6 +27,11 @@ Version 3.1 of OpenDDS.
       addresses.
     - Added support for IPv6 when ACE is built with IPv6 support.
 
+- Removed DataReaderQosExt from DdsDcpsSubscriptionExt.idl.  This was only
+  being used to provide a non-standard-compliant backwards-compatibility
+  setting to get the DURABILITY QoS behavior matching that of OpenDDS v1.2
+  and earlier.  It was not being used in any OpenDDS code.
+
 
 ========================================================================
 

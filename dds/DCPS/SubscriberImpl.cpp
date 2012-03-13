@@ -112,19 +112,6 @@ SubscriberImpl::create_datareader(
   DDS::DataReaderListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  DataReaderQosExt ext_qos;
-  get_default_datareader_qos_ext(ext_qos);
-  return create_opendds_datareader(a_topic_desc, qos, ext_qos, a_listener, mask);
-}
-
-DDS::DataReader_ptr
-SubscriberImpl::create_opendds_datareader(
-  DDS::TopicDescription_ptr a_topic_desc,
-  const DDS::DataReaderQos & qos,
-  const DataReaderQosExt & ext_qos,
-  DDS::DataReaderListener_ptr a_listener,
-  DDS::StatusMask mask)
-{
   if (CORBA::is_nil(a_topic_desc)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -160,7 +147,7 @@ SubscriberImpl::create_opendds_datareader(
     if (mt) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("SubscriberImpl::create_opendds_datareader, ")
+          ACE_TEXT("SubscriberImpl::create_datareader, ")
           ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
           ACE_TEXT("to create a MultiTopic DataReader.\n")));
       }
@@ -202,7 +189,7 @@ SubscriberImpl::create_opendds_datareader(
         mt->get_type_support()->create_multitopic_datareader();
       MultiTopicDataReaderBase* mtdr =
         dynamic_cast<MultiTopicDataReaderBase*>(dr.in());
-      mtdr->init(dr_qos, ext_qos, a_listener, mask, this, mt);
+      mtdr->init(dr_qos, a_listener, mask, this, mt);
       if (enabled_.value() && qos_.entity_factory.autoenable_created_entities) {
         if (dr->enable() != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
@@ -269,7 +256,6 @@ SubscriberImpl::create_opendds_datareader(
 
   dr_servant->init(topic_servant,
                    dr_qos,
-                   ext_qos,
                    a_listener,
                    mask,
                    participant_,
@@ -796,13 +782,6 @@ SubscriberImpl::get_default_datareader_qos(
 {
   qos = default_datareader_qos_;
   return DDS::RETCODE_OK;
-}
-
-void
-SubscriberImpl::get_default_datareader_qos_ext(
-  DataReaderQosExt & qos)
-{
-  qos.durability.always_get_history = false;
 }
 
 DDS::ReturnCode_t

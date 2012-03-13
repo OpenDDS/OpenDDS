@@ -83,8 +83,8 @@ RtpsDiscovery::bit_key_to_repo_id(DCPS::DomainParticipantImpl* participant,
 
 namespace {
   void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
-                     DCPS::SubscriberImpl* sub, const DDS::DataReaderQos& qos,
-                     const DCPS::DataReaderQosExt& ext_qos)
+                     DCPS::SubscriberImpl* sub,
+                     const DDS::DataReaderQos& qos)
   {
     using namespace DCPS;
     TopicDescriptionImpl* bit_topic_i =
@@ -100,7 +100,7 @@ namespace {
     DDS::DataReader_var dr = type_support->create_datareader();
     DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(dr.in());
 
-    dri->init(bit_topic_i, qos, ext_qos, 0 /*listener*/, 0 /*mask*/,
+    dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/,
               participant_i, sub, dr, 0 /*remote*/);
     dri->disable_transport();
     dri->enable();
@@ -124,28 +124,26 @@ RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
   DDS::DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-  DataReaderQosExt ext_qos;
-  sub->get_default_datareader_qos_ext(ext_qos);
 
   DDS::TopicDescription_var bit_part_topic =
     participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
   create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
-                sub, dr_qos, ext_qos);
+                sub, dr_qos);
 
   DDS::TopicDescription_var bit_topic_topic =
     participant->lookup_topicdescription(BUILT_IN_TOPIC_TOPIC);
   create_bit_dr(bit_topic_topic, BUILT_IN_TOPIC_TOPIC_TYPE,
-                sub, dr_qos, ext_qos);
+                sub, dr_qos);
 
   DDS::TopicDescription_var bit_pub_topic =
     participant->lookup_topicdescription(BUILT_IN_PUBLICATION_TOPIC);
   create_bit_dr(bit_pub_topic, BUILT_IN_PUBLICATION_TOPIC_TYPE,
-                sub, dr_qos, ext_qos);
+                sub, dr_qos);
 
   DDS::TopicDescription_var bit_sub_topic =
     participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
   create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
-                sub, dr_qos, ext_qos);
+                sub, dr_qos);
 
   servant_->init_bit(participant->get_id(), participant->get_domain_id(), bit_subscriber);
 

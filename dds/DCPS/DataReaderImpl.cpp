@@ -180,7 +180,6 @@ DataReaderImpl::cleanup()
 void DataReaderImpl::init(
   TopicDescriptionImpl* a_topic_desc,
   const DDS::DataReaderQos &  qos,
-  const DataReaderQosExt &      ext_qos,
   DDS::DataReaderListener_ptr a_listener,
   const DDS::StatusMask &     mask,
   DomainParticipantImpl*        participant,
@@ -207,7 +206,6 @@ void DataReaderImpl::init(
 
   qos_ = qos;
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
-  always_get_history_ = ext_qos.durability.always_get_history;
 
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
 

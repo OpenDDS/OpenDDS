@@ -26,7 +26,7 @@ class OpenDDS_Dcps_Export MultiTopicDataReaderBase
   : public virtual LocalObject<DataReaderEx> {
 public:
 
-  void init(const DDS::DataReaderQos& dr_qos, const DataReaderQosExt& ext_qos,
+  void init(const DDS::DataReaderQos& dr_qos,
     DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask,
     SubscriberImpl* parent, MultiTopicImpl* multitopic);
 

@@ -1,3 +1,30 @@
+Tue Mar 13 23:15:11 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DdsDcpsSubscriptionExt.idl:
+        * tests/DCPS/DCPSInfoRepo/DCPSSubscriberI.h:
+
+          Removed DataReaderQosExt from DdsDcpsSubscriptionExt.idl.  This was
+          only being used to provide a non-standard-compliant
+          backwards-compatibility setting to get the DURABILITY QoS behavior
+          matching that of OpenDDS v1.2 and earlier.  It was not being used in
+          any OpenDDS code.
+
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+
+          Change the test to use PERSISTENT_DURABILITY_QOS instead of the
+          OpenDDS-custom QoS value.
+
 Tue Mar 13 20:09:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:

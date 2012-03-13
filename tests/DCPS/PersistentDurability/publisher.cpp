@@ -139,10 +139,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // -------------------------------------------------------
 
       {
-        ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> publication_matched;
-        ::DDS::DataWriterListener_var dwl (
-            new DataWriterListenerImpl (publication_matched));
-
+        DataWriterListenerImpl* listener = new DataWriterListenerImpl;
+        DDS::DataWriterListener_var dwl = listener;
 
         // Create a DataWriter.
 
@@ -189,7 +187,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           int attempts;
           for (attempts = 1;
                attempts != max_attempts
-                 && publication_matched.value () == false;
+                 && listener->publication_matched_.value () == false;
                ++attempts)
           {
             ACE_OS::sleep (5);

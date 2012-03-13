@@ -33,8 +33,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
-  const DataReaderQosExt& ext_qos, DDS::DataReaderListener_ptr a_listener,
-  DDS::StatusMask mask, SubscriberImpl* parent, MultiTopicImpl* multitopic)
+  DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask,
+  SubscriberImpl* parent, MultiTopicImpl* multitopic)
 {
   using namespace std;
   DDS::DataReader_var dr = multitopic->get_type_support()->create_datareader();
@@ -46,7 +46,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   resulting_impl->raw_latency_buffer_type() = parent->raw_latency_buffer_type();
 
   DDS::DomainParticipant_var participant = parent->get_participant();
-  resulting_impl->init(multitopic, dr_qos, ext_qos, a_listener, mask,
+  resulting_impl->init(multitopic, dr_qos, a_listener, mask,
     dynamic_cast<DomainParticipantImpl*>(participant.in()), parent,
     resulting_reader_, 0 /*no remote object*/);
 
@@ -68,8 +68,8 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
       throw runtime_error("Topic: " + selection[i] + " not found.");
     }
 
-    DDS::DataReader_var incoming = parent->create_opendds_datareader(t, dr_qos,
-      ext_qos, listener_, ALL_STATUS_MASK);
+    DDS::DataReader_var incoming =
+      parent->create_datareader(t, dr_qos, listener_, ALL_STATUS_MASK);
     if (!incoming.in()) {
       throw runtime_error("Could not create incoming DataReader "
         + selection[i]);

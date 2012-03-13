@@ -38,7 +38,7 @@ class MultiTopicImpl;
 #endif
 
 class OpenDDS_Dcps_Export SubscriberImpl
-  : public virtual OpenDDS::DCPS::LocalObject<SubscriberExt>
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::Subscriber>
   , public virtual EntityImpl {
 public:
 
@@ -57,13 +57,6 @@ public:
   virtual DDS::DataReader_ptr create_datareader(
     DDS::TopicDescription_ptr a_topic_desc,
     const DDS::DataReaderQos& qos,
-    DDS::DataReaderListener_ptr a_listener,
-    DDS::StatusMask mask);
-
-  virtual DDS::DataReader_ptr create_opendds_datareader(
-    DDS::TopicDescription_ptr a_topic_desc,
-    const DDS::DataReaderQos& qos,
-    const DataReaderQosExt& ext_qos,
     DDS::DataReaderListener_ptr a_listener,
     DDS::StatusMask mask);
 
@@ -106,9 +99,6 @@ public:
 
   virtual DDS::ReturnCode_t get_default_datareader_qos(
     DDS::DataReaderQos& qos);
-
-  virtual void get_default_datareader_qos_ext(
-    DataReaderQosExt& qos);
 
   virtual DDS::ReturnCode_t copy_from_topic_qos(
     DDS::DataReaderQos& a_datareader_qos,

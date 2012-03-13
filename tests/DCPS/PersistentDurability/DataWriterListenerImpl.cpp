@@ -3,9 +3,8 @@
 #include "DataWriterListenerImpl.h"
 #include "dds/DdsDcpsPublicationC.h"
 
-DataWriterListenerImpl::DataWriterListenerImpl (
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> & publication_matched)
-  : publication_matched_ (publication_matched)
+DataWriterListenerImpl::DataWriterListenerImpl()
+  : publication_matched_(false)
 {
 }
 

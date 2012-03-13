@@ -27,13 +27,6 @@ public:
     DDS::DataReaderListener_ptr /* a_listener */,
     DDS::StatusMask /* mask */) { return 0; }
 
-  virtual DDS::DataReader_ptr create_opendds_datareader(
-    DDS::TopicDescription_ptr /* a_topic_desc */,
-    const DDS::DataReaderQos& /* qos */,
-    const OpenDDS::DCPS::DataReaderQosExt& /* ext_qos */,
-    DDS::DataReaderListener_ptr /* a_listener */,
-    DDS::StatusMask /* mask */) { return 0; }
-
   virtual DDS::ReturnCode_t delete_datareader(
     DDS::DataReader_ptr /* a_datareader */) { return ::DDS::RETCODE_OK; }
 
@@ -76,9 +69,6 @@ public:
 
   virtual DDS::ReturnCode_t get_default_datareader_qos(
     DDS::DataReaderQos& /* qos */) { return ::DDS::RETCODE_OK; }
-
-  virtual void get_default_datareader_qos_ext(
-    OpenDDS::DCPS::DataReaderQosExt& /* qos */) { }
 
   virtual DDS::ReturnCode_t copy_from_topic_qos(
     DDS::DataReaderQos& /* a_datareader_qos */,

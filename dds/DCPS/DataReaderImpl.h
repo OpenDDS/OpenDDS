@@ -289,7 +289,6 @@ public:
   void init(
     TopicDescriptionImpl* a_topic_desc,
     const DDS::DataReaderQos &  qos,
-    const DataReaderQosExt &      ext_qos,
     DDS::DataReaderListener_ptr a_listener,
     const DDS::StatusMask &     mask,
     DomainParticipantImpl*        participant,

@@ -18,8 +18,7 @@ class DataWriterListenerImpl
 {
 public:
 
-  DataWriterListenerImpl (
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> & publication_matched);
+  DataWriterListenerImpl();
 
   virtual void on_offered_deadline_missed (
       ::DDS::DataWriter_ptr writer,
@@ -52,13 +51,9 @@ public:
 
   virtual void on_connection_deleted (::DDS::DataWriter_ptr writer);
 
-protected:
-
   virtual ~DataWriterListenerImpl (void);
 
-private:
-
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> & publication_matched_;
+  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> publication_matched_;
 
 };
 
