@@ -1,3 +1,13 @@
+Tue Mar 13 13:16:30 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/Args.h:
+
+          Added "-p" flag to set thread_per_connection_=true.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Added "thread_per" flag to set "-p" flag for publisher.
+
 Mon Mar 12 13:08:33 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/scripts/lcov.pl:
