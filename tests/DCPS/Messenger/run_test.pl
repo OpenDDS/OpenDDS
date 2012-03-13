@@ -26,60 +26,67 @@ my $DCPSREPO;
 
 unlink qw/DCPSInfoRepo.log pub.log sub.log/;
 
-if ($ARGV[0] eq 'udp') {
+my $arg = 0;
+my $thread_per_connection = "";
+if ($ARGV[0] eq 'thread_per' || $#ARGV > 0 && $ARGV[1] eq 'thread_per') {
+    $thread_per_connection = " -p ";
+    $arg = 1 if ($ARGV[0] eq 'thread_per');
+}
+
+if ($ARGV[$arg] eq 'udp') {
     $pub_opts .= " -DCPSConfigFile pub_udp.ini";
     $sub_opts .= " -DCPSConfigFile sub_udp.ini";
 }
-elsif ($ARGV[0] eq 'multicast') {
+elsif ($ARGV[$arg] eq 'multicast') {
     $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
     $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
 }
-elsif ($ARGV[0] eq 'default_tcp') {
+elsif ($ARGV[$arg] eq 'default_tcp') {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
 }
-elsif ($ARGV[0] eq 'default_udp') {
+elsif ($ARGV[$arg] eq 'default_udp') {
     $pub_opts .= " -t udp";
     $sub_opts .= " -t udp";
 }
-elsif ($ARGV[0] eq 'default_multicast') {
+elsif ($ARGV[$arg] eq 'default_multicast') {
     $pub_opts .= " -t multicast";
     $sub_opts .= " -t multicast";
 }
-elsif ($ARGV[0] eq 'nobits') {
+elsif ($ARGV[$arg] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= ' -DCPSConfigFile pub.ini -DCPSBit 0';
     $sub_opts .= ' -DCPSConfigFile sub.ini -DCPSBit 0';
 }
-elsif ($ARGV[0] eq 'ipv6') {
+elsif ($ARGV[$arg] eq 'ipv6') {
     $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
     $sub_opts .= " -DCPSConfigFile sub_ipv6.ini";
 }
-elsif ($ARGV[0] eq 'stack') {
+elsif ($ARGV[$arg] eq 'stack') {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
     $stack_based = 1;
 }
-elsif ($ARGV[0] eq 'rtps') {
+elsif ($ARGV[$arg] eq 'rtps') {
     $pub_opts .= " -DCPSConfigFile rtps.ini";
     $sub_opts .= " -DCPSConfigFile rtps.ini";
 }
-elsif ($ARGV[0] eq 'rtps_disc') {
+elsif ($ARGV[$arg] eq 'rtps_disc') {
     $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
 }
-elsif ($ARGV[0] eq 'rtps_disc_tcp') {
+elsif ($ARGV[$arg] eq 'rtps_disc_tcp') {
     $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $is_rtps_disc = 1;
 }
-elsif ($ARGV[0] eq 'rtps_unicast') {
+elsif ($ARGV[$arg] eq 'rtps_unicast') {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
     $sub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
 }
-elsif ($ARGV[0] eq 'all') {
+elsif ($ARGV[$arg] eq 'all') {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
                         nobits stack
@@ -90,7 +97,7 @@ elsif ($ARGV[0] eq 'all') {
     }
     exit $status;
 }
-elsif ($ARGV[0] ne '') {
+elsif ($ARGV[$arg] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;
 }
@@ -98,6 +105,8 @@ else {
     $pub_opts .= ' -DCPSConfigFile pub.ini';
     $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
+
+$pub_opts .= $thread_per_connection;
 
 my $dcpsrepo_ior = "repo.ior";
 
