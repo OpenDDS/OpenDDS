@@ -1,3 +1,10 @@
+Tue Mar 13 13:28:35 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added tests/Messenger/run_test.pl runs with thread_per_connection for
+          tcp and rtps_disc_tcp.
+
 Tue Mar 13 13:16:30 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Messenger/Args.h:
