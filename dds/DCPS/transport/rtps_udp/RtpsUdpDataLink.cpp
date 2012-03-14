@@ -759,6 +759,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
                         (rr->second.durable_ && recvd.empty());
 
       if (wi->second.ack_pending_ || nack) {
+        const bool prev_empty =
+          rr->second.durable_ && wi->second.ack_pending_ && !nack;
         wi->second.ack_pending_ = false;
 
         SequenceNumber ack;
@@ -767,19 +769,35 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         bitmap.length(1);
         bitmap[0] = 0;
 
-        const SequenceNumber& hb_high = wi->second.hb_range_.second;
-        const SequenceNumber::Value hb_high_val = hb_high.getValue();
+        const SequenceNumber& hb_low = wi->second.hb_range_.first,
+          hb_high = wi->second.hb_range_.second;
+        const SequenceNumber::Value hb_low_val = hb_low.getValue(),
+          hb_high_val = hb_high.getValue();
 
         if (recvd.empty()) {
           // Nack the entire heartbeat range.  Only reached when durable.
-          ack = wi->second.hb_range_.first;
+          ack = hb_low;
           bitmap.length(bitmap_num_longs(ack, hb_high));
-          const CORBA::ULong idx = (hb_high_val > ack.getValue() + 255)
+          const CORBA::ULong idx = (hb_high_val > hb_low_val + 255)
                                    ? 255
-                                   : CORBA::ULong(hb_high_val - ack.getValue());
+                                   : CORBA::ULong(hb_high_val - hb_low_val);
           DisjointSequence::fill_bitmap_range(0, idx,
                                               bitmap.get_buffer(),
                                               bitmap.length(), num_bits);
+
+        } else if (prev_empty && recvd.low() > hb_low) {
+          // Nack the range between the heartbeat low and the recvd low.
+          ack = hb_low;
+          const SequenceNumber& rec_low = recvd.low();
+          const SequenceNumber::Value rec_low_val = rec_low.getValue();
+          bitmap.length(bitmap_num_longs(ack, rec_low));
+          const CORBA::ULong idx = (rec_low_val > hb_low_val + 255)
+                                   ? 255
+                                   : CORBA::ULong(rec_low_val - hb_low_val);
+          DisjointSequence::fill_bitmap_range(0, idx,
+                                              bitmap.get_buffer(),
+                                              bitmap.length(), num_bits);
+
         } else {
           ack = ++SequenceNumber(recvd.cumulative_ack());
           if (recvd.low().getValue() > 1) {
@@ -787,17 +805,19 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
             // sure that a lower discontinuity is not possible later
             recvd.insert(SequenceRange(SequenceNumber::ZERO(), recvd.low()));
           }
-        }
 
-        if (recvd.disjoint()) {
-          bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
-          recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
+          if (recvd.disjoint()) {
+            bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
+            recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
+                            num_bits, true);
+          }
         }
 
         const SequenceNumber::Value ack_val = ack.getValue();
 
         if (!recvd.empty() && hb_high > recvd.high()
             && hb_high <= ack_val + 255) {
+          // Nack the range between the received high and the heartbeat high.
           const CORBA::ULong old_len = bitmap.length(),
             new_len = bitmap_num_longs(ack, hb_high);
           if (new_len > old_len) {

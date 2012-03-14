@@ -1,3 +1,10 @@
+Wed Mar 14 15:05:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          For reader-side durability, need to send nacks if data is
+          received but there are still missing lower sequence numbers.
+
 Tue Mar 13 23:15:11 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
