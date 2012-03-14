@@ -207,12 +207,18 @@ ACE_INET_Addr
 RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+  return get_locator_i(remote_id);
+}
+
+ACE_INET_Addr
+RtpsUdpDataLink::get_locator_i(const RepoId& remote_id) const
+{
   using std::map;
   typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
   const iter_t iter = locators_.find(remote_id);
   if (iter == locators_.end()) {
     const GuidConverter conv(remote_id);
-    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locators() - "
+    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locator_i() - "
       "no locator found for peer %C\n", std::string(conv).c_str()));
     return ACE_INET_Addr();
   }
@@ -1232,7 +1238,7 @@ void
 RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
   std::set<ACE_INET_Addr> recipient;
-  recipient.insert(get_locator(element->subscription_id()));
+  recipient.insert(get_locator_i(element->subscription_id()));
   ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
   send_strategy_->send_rtps_control(*msg, recipient);
 }

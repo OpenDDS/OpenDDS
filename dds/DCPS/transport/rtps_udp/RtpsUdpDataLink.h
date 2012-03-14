@@ -134,6 +134,8 @@ private:
   };
   std::map<RepoId, RemoteInfo, GUID_tKeyLessThan> locators_;
 
+  ACE_INET_Addr get_locator_i(const RepoId& remote_id) const;
+
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
 #ifdef ACE_HAS_IPV6
