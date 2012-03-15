@@ -149,22 +149,30 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 const Sample_T&
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator[](CORBA::ULong i) const
 {
-  if (is_zero_copy())
-    return *static_cast<const Sample_T*>(ptrs_[i]->registered_data_);
+  if (is_zero_copy()) {
+    if (ptrs_[i]->registered_data_) {
+      return *static_cast<const Sample_T*>(ptrs_[i]->registered_data_);
+    }
+    return default_;
 
-  else
+  } else {
     return sc_buffer_[i];
+  }
 }
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 Sample_T&
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::operator[](CORBA::ULong i)
 {
-  if (is_zero_copy())
-    return *static_cast<Sample_T*>(ptrs_[i]->registered_data_);
+  if (is_zero_copy()) {
+    if (ptrs_[i]->registered_data_) {
+      return *static_cast<Sample_T*>(ptrs_[i]->registered_data_);
+    }
+    return default_;
 
-  else
+  } else {
     return sc_buffer_[i];
+  }
 }
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE

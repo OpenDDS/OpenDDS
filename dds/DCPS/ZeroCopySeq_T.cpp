@@ -23,6 +23,9 @@ namespace TAO {
 namespace DCPS {
 
 template <class Sample_T, size_t DEF_MAX>
+Sample_T ZeroCopyDataSeq<Sample_T, DEF_MAX>::default_;
+
+template <class Sample_T, size_t DEF_MAX>
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
   const ZeroCopyDataSeq& frm)
   : loaner_(frm.loaner_)

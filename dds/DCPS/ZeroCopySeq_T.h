@@ -191,6 +191,7 @@ private:
 
   /// array of pointers if the sequence is supporting zero-copy reads
   Ptr_Seq_Type ptrs_;
+  static Sample_T default_;
 
   //single-copy (aka non-zero-copy) support
   CORBA::ULong sc_maximum_;

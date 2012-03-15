@@ -1,3 +1,27 @@
+Thu Mar 15 18:44:34 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Allow for indexing the sequence even when there is no "valid_data"
+          present.  In these cases it will return a reference to a
+          default-constructed instance of the data type.  Users should not read
+          or modify this instance.  This change makes the zero-copy sequence
+          closer to a conforming CORBA sequence and fixes a crash in the Java
+          wrappers.
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/zerocopy/ZeroCopy.java:
+        * java/tests/zerocopy/run_test.pl:
+        * java/tests/zerocopy/zerocopy.mpc:
+
+          New test for this bug.
+
+        * java/tests/messenger/both/run_test.pl:
+
+          Fixed typo.
+
 Wed Mar 14 15:41:55 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:

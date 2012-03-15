@@ -42,3 +42,4 @@ java/tests/messenger/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 java/tests/messenger/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 
 java/tests/messenger/both/run_test.pl
+java/tests/zerocopy/run_test.pl

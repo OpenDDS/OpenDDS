@@ -2,8 +2,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
      & eval 'exec perl -S $0 $argv:q'
      if 0;
 
-# -*- perl -*-
-
 use Env qw(ACE_ROOT DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
@@ -29,25 +27,25 @@ my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-my $DCPSREPO = PerlDDS::create_process ("$DDS_ROOT/bin/DCPSInfoRepo", "-NOBITS".
-            " -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior");
+my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo", "-NOBITS ".
+            "-ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior");
 
-PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
+my $idl_dir = "$DDS_ROOT/java/tests/messenger/messenger_idl";
+PerlACE::add_lib_path($idl_dir);
 
-my $PUB = new PerlDDS::Process_Java ('Both', $pub_opts,
-                           ["$DDS_ROOT/java/tests/messenger/messenger_idl/".
-                            "messenger_idl_test.jar"]);
+my $PUB = new PerlDDS::Process_Java('ZeroCopy', $pub_opts,
+                                    [$idl_dir . "/messenger_idl_test.jar"]);
 
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
+$DCPSREPO->Spawn();
+if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-    $DCPSREPO->Kill ();
+    $DCPSREPO->Kill();
     exit 1;
 }
 
-$PUB->Spawn ();
+$PUB->Spawn();
 
-my $PublisherResult = $PUB->WaitKill (300);
+my $PublisherResult = $PUB->WaitKill(300);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: participant returned $PublisherResult \n";
     $status = 1;
