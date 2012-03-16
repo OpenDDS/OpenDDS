@@ -62,15 +62,15 @@ void
 SingleSendBuffer::release_all()
 {
   for (BufferMap::iterator it(this->buffers_.begin());
-       it != this->buffers_.end(); ++it) {
-    release(it->second);
+       it != this->buffers_.end();) {
+    release(it++);
   }
-  this->buffers_.clear();
 }
 
 void
-SingleSendBuffer::release(BufferType& buffer)
+SingleSendBuffer::release(BufferMap::iterator buffer_iter)
 {
+  BufferType& buffer(buffer_iter->second);
   if (Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::release() - ")
@@ -84,6 +84,8 @@ SingleSendBuffer::release(BufferType& buffer)
 
   buffer.second->release();
   buffer.second = 0;
+
+  this->buffers_.erase(buffer_iter);
 }
 
 void
@@ -98,7 +100,7 @@ SingleSendBuffer::retain_all(RepoId pub_id)
     ));
   }
   for (BufferMap::iterator it(this->buffers_.begin());
-       it != this->buffers_.end(); ++it) {
+       it != this->buffers_.end();) {
 
     BufferType& buffer(it->second);
 
@@ -118,7 +120,9 @@ SingleSendBuffer::retain_all(RepoId pub_id)
                  ACE_TEXT("SingleSendBuffer::retain_all: ")
                  ACE_TEXT("failed to retain data from publication: %C!\n"),
                  std::string(converter).c_str()));
-      release(buffer);
+      release(it++);
+    } else {
+      ++it;
     }
   }
 }
@@ -143,8 +147,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
       ));
     }
 
-    release(it->second);
-    this->buffers_.erase(it);
+    release(it);
   }
 
   BufferType& buffer = this->buffers_[sequence];

@@ -1,3 +1,31 @@
+Fri Mar 16 21:51:44 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Start sequence numbers at 1.  Don't even attempt to write on the
+          SEDP writers if there are no associated participants.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          release()ing a buffer needs to remove it from the buffers_ map.
+          This avoids a double-delete during shutdown.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Skip wait_for_handshake() in the loopback case, we should already
+          be guaranteed that the reader is ready (since it's local).
+
+        * dds/idl/CPPTemplate.txt:
+
+          In store_synthetic_data(), handle the case where store_instance_data()
+          has failed to give us a SubscriptionInstance.  This is a problem with
+          RTPS-based built-in topics that needs further investigation.
+
+        * README:
+
+          Updated required 2.0a patch level.
+
 Fri Mar 16 12:56:49 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/RakeResults_T.h:

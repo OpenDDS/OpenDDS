@@ -265,6 +265,10 @@ bool
 RtpsUdpDataLink::wait_for_handshake(const RepoId& local_id,
                                     const RepoId& remote_id)
 {
+  if (0 == std::memcmp(local_id.guidPrefix, remote_id.guidPrefix,
+                       sizeof(GuidPrefix_t))) {
+    return true; // no wait for "loopback" connection
+  }
   ACE_Time_Value abs_timeout = ACE_OS::gettimeofday()
     + config_->handshake_timeout_;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);

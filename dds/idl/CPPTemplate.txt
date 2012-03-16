@@ -1685,7 +1685,7 @@ DDS::InstanceHandle_t
       static_cast< <%SCOPED%>*>(data_allocator_->malloc(sizeof(<%SCOPED%>))),
       <%SCOPED%>(sample));
     store_instance_data(data, header, instance, just_registered, filtered);
-    inst = instance->instance_handle_;
+    if (instance) inst = instance->instance_handle_;
   }
 
   if (!filtered) {

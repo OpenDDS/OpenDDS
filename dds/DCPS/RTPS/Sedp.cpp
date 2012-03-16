@@ -2025,7 +2025,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
     dsh.historic_sample_ = true;
     dsh.sequence_ = sequence;
   } else {
-    sequence = dsh.sequence_ = ++seq_;
+    sequence = dsh.sequence_ = seq_++;
   }
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
@@ -2214,7 +2214,8 @@ Sedp::write_publication_data(
     const DCPS::RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  if (spdp_.associated()) {
+  if (spdp_.associated() && (reader != GUID_UNKNOWN ||
+                             !associated_participants_.empty())) {
     DiscoveredWriterData dwd;
     ParameterList plist;
     populate_discovered_writer_msg(dwd, rid, lp);
@@ -2243,7 +2244,8 @@ Sedp::write_subscription_data(
     const DCPS::RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  if (spdp_.associated()) {
+  if (spdp_.associated() && (reader != GUID_UNKNOWN ||
+                             !associated_participants_.empty())) {
     DiscoveredReaderData drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd, rid, ls);

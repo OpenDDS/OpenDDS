@@ -68,7 +68,8 @@ class OpenDDS_Dcps_Export SingleSendBuffer
   : public TransportSendBuffer, public RcObject<ACE_SYNCH_MUTEX> {
 public:
   void release_all();
-  void release(BufferType& buffer);
+  typedef std::map<SequenceNumber, BufferType> BufferMap;
+  void release(BufferMap::iterator buffer_iter);
 
   size_t n_chunks() const;
 
@@ -99,7 +100,6 @@ private:
   MessageBlockAllocator replaced_mb_allocator_;
   DataBlockAllocator replaced_db_allocator_;
 
-  typedef std::map<SequenceNumber, BufferType> BufferMap;
   BufferMap buffers_;
 };
 
