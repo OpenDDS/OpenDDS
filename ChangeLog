@@ -1,3 +1,8 @@
+Fri Mar 16 12:56:49 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/RakeResults_T.h:
+          Fixed typo
+
 Thu Mar 15 18:44:34 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.h:

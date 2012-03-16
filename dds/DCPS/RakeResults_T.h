@@ -92,7 +92,7 @@ private:
   // Contains data for all other use cases
   std::vector<RakeData> unsorted_;
 
-  // data strucutres used by copy_into()
+  // data structures used by copy_into()
   typedef std::vector<CORBA::ULong> IndexList;
   struct InstanceData {
     bool most_recent_generation_;
