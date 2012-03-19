@@ -1093,18 +1093,15 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
     handshake_condition_.broadcast();
   }
 
+  std::map<SequenceNumber, TransportQueueElement*> pendingCallbacks;
+
   if (!ri->second.durable_data_.empty()) {
     SequenceNumber ack;
     ack.setValue(acknack.readerSNState.bitmapBase.high,
                  acknack.readerSNState.bitmapBase.low);
     if (ack > ri->second.durable_data_.rbegin()->first) {
       // Reader acknowledges durable data, we no longer need to store it
-      typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
-      for (iter_t it = ri->second.durable_data_.begin();
-           it != ri->second.durable_data_.end(); ++it) {
-        it->second->data_delivered();
-      }
-      ri->second.durable_data_.clear();
+      ri->second.durable_data_.swap(pendingCallbacks);
     } else {
       DisjointSequence requests;
       requests.insert(ack, acknack.readerSNState.numBits,
@@ -1114,7 +1111,7 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
       typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
       iter_t it = ri->second.durable_data_.begin();
       const std::vector<SequenceRange> psr = requests.present_sequence_ranges();
-      SequenceNumber lastSent = requests.low().previous();
+      SequenceNumber::Value lastSent = requests.low().getValue() - 1;
       DisjointSequence gaps;
       for (size_t i = 0; i < psr.size(); ++i) {
         for (; it != ri->second.durable_data_.end()
@@ -1124,11 +1121,10 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
           durability_resend(it->second);
           //FUTURE: combine multiple resends into one RTPS Message?
           sent_some = true;
-          if (it->first.getValue() > lastSent.getValue() + 1) {
-            gaps.insert(SequenceRange(lastSent.getValue() + 1,
-                                      it->first.previous()));
+          if (it->first.getValue() > lastSent + 1) {
+            gaps.insert(SequenceRange(lastSent + 1, it->first.previous()));
           }
-          lastSent = it->first;
+          lastSent = it->first.getValue();
         }
       }
       if (!gaps.empty()) {
@@ -1147,6 +1143,13 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
   if (!final) {
     ri->second.requested_changes_.push_back(acknack.readerSNState);
     nack_reply_.schedule(); // timer will invoke send_nack_replies()
+  }
+
+  g.release();
+  typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+  for (iter_t it = pendingCallbacks.begin();
+       it != pendingCallbacks.end(); ++it) {
+    it->second->data_delivered();
   }
 }
 
@@ -1296,6 +1299,7 @@ RtpsUdpDataLink::send_heartbeats()
   using namespace OpenDDS::RTPS;
   std::vector<HeartBeatSubmessage> subm;
   std::set<ACE_INET_Addr> recipients;
+  std::vector<TransportQueueElement*> pendingCallbacks;
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
   typedef RtpsWriterMap::iterator rw_iter;
@@ -1320,7 +1324,12 @@ RtpsUdpDataLink::send_heartbeats()
         const ACE_Time_Value expiration =
           ri->second.durable_timestamp_ + config_->durable_data_timeout_;
         if (now > expiration) {
-          ri->second.expire_durable_data();
+          typedef std::map<SequenceNumber, TransportQueueElement*>::iterator
+            dd_iter;
+          for (dd_iter it = ri->second.durable_data_.begin();
+               it != ri->second.durable_data_.end(); ++it) {
+            pendingCallbacks.push_back(it->second);
+          }
           ri->second.durable_data_.clear();
           if (Transport_debug_level > 3) {
             const GuidConverter gw(rw->first), gr(ri->first);
@@ -1364,14 +1373,22 @@ RtpsUdpDataLink::send_heartbeats()
     ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * subm.size()); //FUTURE: allocators?
     // byte swapping is handled in the operator<<() implementation
     Serializer ser(&mb, false, Serializer::ALIGN_CDR);
+    bool send_ok = true;
     for (size_t i = 0; i < subm.size(); ++i) {
       if (!(ser << subm[i])) {
         ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_heartbeats() - "
           "failed to serialize HEARTBEAT submessage %B\n", i));
-        return;
+        send_ok = false;
+        break;
       }
     }
-    send_strategy_->send_rtps_control(mb, recipients);
+    if (send_ok) {
+      send_strategy_->send_rtps_control(mb, recipients);
+    }
+  }
+  g.release();
+  for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
+    pendingCallbacks[i]->data_dropped();
   }
 }
 
