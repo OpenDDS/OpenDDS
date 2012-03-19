@@ -41,6 +41,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         DDS::DomainId_t domain = 0;
         bool multicast = true;
         unsigned int resend = 2;
+        std::string partition;
 
         if (argc > 1) {
             domain = ACE_OS::atoi (argv[1]);
@@ -87,6 +88,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
             std::cout << "dx: " << temp << std::endl;
             disc->dx(temp);
           }
+          else if ((ACE_OS::strcmp("-partition", argv[curr]) == 0) && (curr + 1 < argc)) {
+            partition = argv[++curr];
+          }
           else {
             std::cout << "Ignoring unkown param: " << argv[curr] << std::endl;
           }
@@ -122,7 +126,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         QApplication app(argc, argv);
         Q_INIT_RESOURCE(ishape);
         // create and show your widgets here
-        ShapesDialog shapes(participant);
+        ShapesDialog shapes(participant, partition);
         shapes.show();
         retval = app.exec();
 
