@@ -1281,7 +1281,7 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
   std::set<ACE_INET_Addr> recipient;
   recipient.insert(get_locator_i(reader));
   send_strategy_->send_rtps_control(mb, recipient);
-  mb.release();
+  mb.cont()->release();
 }
 
 void
