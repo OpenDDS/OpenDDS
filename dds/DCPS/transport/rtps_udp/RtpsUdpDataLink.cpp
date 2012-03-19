@@ -1113,7 +1113,9 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
       bool sent_some = false;
       typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
       iter_t it = ri->second.durable_data_.begin();
-      std::vector<SequenceRange> psr = requests.present_sequence_ranges();
+      const std::vector<SequenceRange> psr = requests.present_sequence_ranges();
+      SequenceNumber lastSent = requests.low().previous();
+      DisjointSequence gaps;
       for (size_t i = 0; i < psr.size(); ++i) {
         for (; it != ri->second.durable_data_.end()
              && it->first < psr[i].first; ++it) ; // empty for-loop
@@ -1122,7 +1124,15 @@ RtpsUdpDataLink::received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
           durability_resend(it->second);
           //FUTURE: combine multiple resends into one RTPS Message?
           sent_some = true;
+          if (it->first.getValue() > lastSent.getValue() + 1) {
+            gaps.insert(SequenceRange(lastSent.getValue() + 1,
+                                      it->first.previous()));
+          }
+          lastSent = it->first;
         }
+      }
+      if (!gaps.empty()) {
+        send_durability_gaps(local, remote, gaps);
       }
       if (sent_some) {
         return;
@@ -1197,45 +1207,56 @@ RtpsUdpDataLink::send_nack_replies()
       continue;
     }
 
-    // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
-    // [gapStart, gapListBase) and those in the SNSet.
-    const SequenceNumber firstMissing = gaps.low(),
-                         base = ++SequenceNumber(gaps.cumulative_ack());
-    const SequenceNumber_t gapStart = {firstMissing.getHigh(),
-                                       firstMissing.getLow()},
-                           gapListBase = {base.getHigh(), base.getLow()};
-    CORBA::ULong num_bits = 0;
-    LongSeq8 bitmap;
-
-    if (gaps.disjoint()) {
-      bitmap.length(bitmap_num_longs(base, gaps.high()));
-      gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
-
-    } else {
-      bitmap.length(1);
-      bitmap[0] = 0;
-      num_bits = 1;
-    }
-
-    GapSubmessage gap = {
-      {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
-      ENTITYID_UNKNOWN, // readerId: applies to all matched readers
-      rw->first.entityId,
-      gapStart,
-      {gapListBase, num_bits, bitmap}
-    };
-
-    size_t size = 0, padding = 0;
-    gen_find_size(gap, size, padding);
-    gap.smHeader.submessageLength =
-      static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
-
-    ACE_Message_Block mb_gap(size + padding); //FUTURE: allocators?
-    // byte swapping is handled in the operator<<() implementation
-    Serializer ser(&mb_gap, false, Serializer::ALIGN_CDR);
-    ser << gap;
-    send_strategy_->send_rtps_control(mb_gap, recipients);
+    ACE_Message_Block* mb_gap = marshal_gaps(rw->first, GUID_UNKNOWN, gaps);
+    send_strategy_->send_rtps_control(*mb_gap, recipients);
+    mb_gap->release();
   }
+}
+
+ACE_Message_Block*
+RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
+                              const DisjointSequence& gaps)
+{
+  using namespace RTPS;
+  // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
+  // [gapStart, gapListBase) and those in the SNSet.
+  const SequenceNumber firstMissing = gaps.low(),
+                       base = ++SequenceNumber(gaps.cumulative_ack());
+  const SequenceNumber_t gapStart = {firstMissing.getHigh(),
+                                     firstMissing.getLow()},
+                         gapListBase = {base.getHigh(), base.getLow()};
+  CORBA::ULong num_bits = 0;
+  LongSeq8 bitmap;
+
+  if (gaps.disjoint()) {
+    bitmap.length(bitmap_num_longs(base, gaps.high()));
+    gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
+
+  } else {
+    bitmap.length(1);
+    bitmap[0] = 0;
+    num_bits = 1;
+  }
+
+  GapSubmessage gap = {
+    {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
+    reader.entityId,
+    writer.entityId,
+    gapStart,
+    {gapListBase, num_bits, bitmap}
+  };
+
+  size_t size = 0, padding = 0;
+  gen_find_size(gap, size, padding);
+  gap.smHeader.submessageLength =
+    static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+
+  ACE_Message_Block* mb_gap = new ACE_Message_Block(size + padding);
+  //FUTURE: allocators?
+  // byte swapping is handled in the operator<<() implementation
+  Serializer ser(mb_gap, false, Serializer::ALIGN_CDR);
+  ser << gap;
+  return mb_gap;
 }
 
 void
@@ -1245,6 +1266,22 @@ RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
   recipient.insert(get_locator_i(element->subscription_id()));
   ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
   send_strategy_->send_rtps_control(*msg, recipient);
+}
+
+void
+RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
+                                      const RepoId& reader,
+                                      const DisjointSequence& gaps)
+{
+  ACE_Message_Block mb(RTPS::INFO_DST_SZ + RTPS::SMHDR_SZ);
+  Serializer ser(&mb, false, Serializer::ALIGN_CDR);
+  std::memcpy(info_dst_.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
+  ser << info_dst_;
+  mb.cont(marshal_gaps(writer, reader, gaps));
+  std::set<ACE_INET_Addr> recipient;
+  recipient.insert(get_locator_i(reader));
+  send_strategy_->send_rtps_control(mb, recipient);
+  mb.release();
 }
 
 void

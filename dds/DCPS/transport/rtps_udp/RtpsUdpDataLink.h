@@ -250,6 +250,10 @@ private:
                       const RepoId& src, RtpsReaderMap::value_type& rr);
 
   void durability_resend(TransportQueueElement* element);
+  void send_durability_gaps(const RepoId& writer, const RepoId& reader,
+                            const DisjointSequence& gaps);
+  ACE_Message_Block* marshal_gaps(const RepoId& writer, const RepoId& reader,
+                                  const DisjointSequence& gaps);
 
   template<typename T, typename FN>
   void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
