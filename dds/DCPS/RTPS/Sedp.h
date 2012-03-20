@@ -145,7 +145,9 @@ private:
   ACE_Thread_Mutex& lock_;
 
   struct Msg {
-    enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER, MSG_STOP } type_;
+    enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER,
+                   MSG_REMOVE_FROM_PUB_BIT, MSG_REMOVE_FROM_SUB_BIT,
+                   MSG_STOP } type_;
     DCPS::MessageId id_;
     const void* payload_;
     Msg(MsgType mt, DCPS::MessageId id, const void* p)
@@ -163,6 +165,7 @@ private:
     void enqueue(const SPDPdiscoveredParticipantData* pdata);
     void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+    void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
 
   private:
     int svc();
@@ -170,6 +173,7 @@ private:
     void svc_i(const SPDPdiscoveredParticipantData* pdata);
     void svc_i(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+    void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
 
     Spdp* spdp_;
     Sedp* sedp_;

@@ -681,6 +681,7 @@ int from_param_list(const ParameterList& param_list,
 
   // Start by setting defaults
   participant_data.ddsParticipantData.user_data.value.length(0);
+  participant_data.participantProxy.availableBuiltinEndpoints = 0;
   participant_data.participantProxy.expectsInlineQos = false;
   participant_data.leaseDuration.seconds = 100;
   participant_data.leaseDuration.fraction = 0;

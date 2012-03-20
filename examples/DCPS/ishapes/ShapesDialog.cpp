@@ -143,6 +143,8 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
 }
 
 ShapesDialog::~ShapesDialog() {
+  delete filterDialog_;
+  delete shapesWidget;
 }
 
 void

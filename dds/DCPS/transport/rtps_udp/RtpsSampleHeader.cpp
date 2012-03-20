@@ -225,14 +225,38 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     if (rtps.smHeader.flags & FLAG_K_IN_DATA) {
       opendds.key_fields_only_ = true;
     } else if (!(rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA))) {
+      // Interoperability: if FLAG_Q, the Key may be hiding in the "key hash"
+      // part of InlinQos.  We will have to assume the key was 16 bytes or less.
+      if ((rtps.writerId.entityKind & 0xC0) == 0xC0 // Only Built-in endpoints
+          && (rtps.smHeader.flags & FLAG_Q) && !rds.sample_) {
+        for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
+          if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
+            rds.sample_ = new ACE_Message_Block(20);
+            // CDR_BE encapsuation scheme (endianness is not used for key hash)
+            rds.sample_->copy("\x00\x00\x00\x00", 4);
+            const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
+            rds.sample_->copy(reinterpret_cast<const char*>(data), 16);
+            opendds.message_length_ = rds.sample_->length();
+            opendds.key_fields_only_ = true;
+            if (Transport_debug_level) {
+              ACE_DEBUG((LM_DEBUG,
+                         "(%P|%t) RtpsSampleHeader::into_received_data_sample()"
+                         " - used KeyHash data as the key-only payload\n"));
+            }
+            break;
+          }
+        }
+      } else {
       // FUTURE: Handle the case of D = 0 and K = 0
       // used for Coherent Sets in PRESENTATION QoS (see 8.7.5)
-      if (Transport_debug_level) {
-        ACE_DEBUG((LM_WARNING,
-          "(%P|%t) RtpsSampleHeader::into_received_data_sample() - "
-          "Received a DATA Submessage with D = 0 and K = 0, dropping\n"));
+        if (Transport_debug_level) {
+          ACE_DEBUG((LM_WARNING,
+                     "(%P|%t) RtpsSampleHeader::into_received_data_sample() - "
+                     "Received a DATA Submessage with D = 0 and K = 0, "
+                     "dropping\n"));
+        }
+        return false;
       }
-      return false;
     }
 
     if (rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
