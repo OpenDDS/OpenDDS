@@ -135,6 +135,10 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
   color_[CYAN] = QColor(0x99, 0xCC, 0xFF);
   color_[GRAY] = QColor(0x99, 0x99, 0x99);
   color_[BLACK] = QColor(0x33, 0x33, 0x33);
+
+  const int index = mainWidget.colorList->findText("Green");
+  mainWidget.colorList->setCurrentIndex(index);
+
   timer.start(40);
 }
 
