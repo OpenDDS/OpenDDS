@@ -23,6 +23,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
