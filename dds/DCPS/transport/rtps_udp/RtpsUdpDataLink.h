@@ -185,7 +185,7 @@ private:
     CORBA::Long heartbeat_count_;
     bool durable_;
 
-    RtpsWriter() : heartbeat_count_(0) {}
+    RtpsWriter() : heartbeat_count_(0), durable_(false) {}
   };
 
   typedef std::map<RepoId, RtpsWriter, GUID_tKeyLessThan> RtpsWriterMap;
