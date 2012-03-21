@@ -327,7 +327,7 @@ private:
   struct DiscoveredPublication {
     DiscoveredPublication() {}
     explicit DiscoveredPublication(const DiscoveredWriterData& w)
-      : writer_data_(w) {}
+      : writer_data_(w), bit_ih_(DDS::HANDLE_NIL) {}
     DiscoveredWriterData writer_data_;
     DDS::InstanceHandle_t bit_ih_;
   };
@@ -339,7 +339,7 @@ private:
   struct DiscoveredSubscription {
     DiscoveredSubscription() {}
     explicit DiscoveredSubscription(const DiscoveredReaderData& r)
-      : reader_data_(r) {}
+      : reader_data_(r), bit_ih_(DDS::HANDLE_NIL) {}
     DiscoveredReaderData reader_data_;
     DDS::InstanceHandle_t bit_ih_;
   };

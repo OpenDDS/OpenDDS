@@ -365,6 +365,22 @@ RtpsSampleHeader::populate_data_sample_submessages(
   subm[i].data_sm(data);
 }
 
+namespace {
+  // Interoperability note:
+  // used for discovery (SEDP) only, this helps interoperability because they
+  // spec is unclear about the use of PID_KEY_HASH vs. the key as the payload
+  void add_key_hash(RTPS::ParameterList& plist, const ACE_Message_Block* data)
+  {
+    RTPS::KeyHash_t kh;
+    static const size_t offset = 8 /*skip encap (4) and plist hdr (4)*/;
+    std::memcpy(kh.value, data->rd_ptr() + offset, sizeof(GUID_t));
+    RTPS::Parameter p;
+    p.key_hash(kh);
+    const CORBA::ULong i = plist.length();
+    plist.length(i + 1);
+    plist[i] = p;
+  }
+}
 
 void
 RtpsSampleHeader::populate_data_control_submessages(
@@ -384,6 +400,8 @@ RtpsSampleHeader::populate_data_control_submessages(
   CORBA::ULong i = subm.length();
   subm.length(i + 1);
   subm[i++].info_ts_sm(ts);
+
+  static const CORBA::Octet BUILT_IN_WRITER = 0xC2;
 
   DataSubmessage data = {
     {DATA, flags, 0},
@@ -410,6 +428,9 @@ RtpsSampleHeader::populate_data_control_submessages(
     const int qos_len = data.inlineQos.length();
     data.inlineQos.length(qos_len+1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_UNREGISTER);
+    if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
+      add_key_hash(data.inlineQos, tsce.msg_payload());
+    }
     break;
   }
   case DISPOSE_INSTANCE: {
@@ -417,6 +438,9 @@ RtpsSampleHeader::populate_data_control_submessages(
     const int qos_len = data.inlineQos.length();
     data.inlineQos.length(qos_len + 1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
+    if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
+      add_key_hash(data.inlineQos, tsce.msg_payload());
+    }
     break;
   }
   case DISPOSE_UNREGISTER_INSTANCE: {
@@ -424,6 +448,9 @@ RtpsSampleHeader::populate_data_control_submessages(
     const int qos_len = data.inlineQos.length();
     data.inlineQos.length(qos_len + 1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
+    if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
+      add_key_hash(data.inlineQos, tsce.msg_payload());
+    }
     break;
   }
   // update control_message_supported() when adding new cases here
