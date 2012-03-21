@@ -168,7 +168,7 @@ private:
     DiscoveredParticipant() {}
     DiscoveredParticipant(const SPDPdiscoveredParticipantData& p,
                           const ACE_Time_Value& t)
-      : pdata_(p), last_seen_(t) {}
+      : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL) {}
 
     SPDPdiscoveredParticipantData pdata_;
     ACE_Time_Value last_seen_;

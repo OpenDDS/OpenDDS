@@ -238,6 +238,14 @@ namespace {
         TheServiceParticipant->initial_PartitionQosPolicy();
     return qos != def_qos;
   }
+
+  bool not_default(const DDS::TimeBasedFilterQosPolicy& qos)
+  {
+    DDS::TimeBasedFilterQosPolicy def_qos =
+      TheServiceParticipant->initial_TimeBasedFilterQosPolicy();
+    return qos != def_qos;
+  }
+
   bool not_default(const ContentFilterProperty_t& cfprop)
   {
     return (strlen(cfprop.filterExpression.in()));
@@ -245,6 +253,7 @@ namespace {
 
   void normalize(DDS::Duration_t& dur)
   {
+    // Interoperability note:
     // Some other DDS implementations were observed sending
     // "infinite" durations using 0xffffffff nanoseconds
     if (dur.sec == DDS::DURATION_INFINITE_SEC &&
@@ -302,6 +311,7 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
     participant_data.participantProxy.availableBuiltinEndpoints);
   add_param(param_list, abe_param);
 
+  // Interoperability note:
   // For interoperability with other DDS implemenations, we'll encode the
   // availableBuiltinEndpoints as PID_BUILTIN_ENDPOINT_SET in addition to
   // PID_PARTICIPANT_BUILTIN_ENDPOINTS (above).
@@ -338,7 +348,6 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
   if ((participant_data.leaseDuration.seconds != 100) ||
       (participant_data.leaseDuration.fraction != 0))
   {
-    // Parameterize Duration_t
     Parameter ld_param;
     ld_param.duration(participant_data.leaseDuration);
     add_param(param_list, ld_param);
@@ -400,10 +409,12 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
+  // Interoperability note:
   // For interoperability, always write the reliability info
   // if (not_default(writer_data.ddsPublicationData.reliability, true))
   {
     Parameter param;
+    // Interoperability note:
     // Spec creators for RTPS have reliability indexed at 1
     DDS::ReliabilityQosPolicy reliability_copy =
         writer_data.ddsPublicationData.reliability;
@@ -555,10 +566,12 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
+  // Interoperability note:
   // For interoperability, always write the reliability info
   // if (not_default(reader_data.ddsSubscriptionData.reliability, false))
   {
     Parameter param;
+    // Interoperability note:
     // Spec creators for RTPS have reliability indexed at 1
     DDS::ReliabilityQosPolicy reliability_copy =
         reader_data.ddsSubscriptionData.reliability;
@@ -586,6 +599,13 @@ int to_param_list(const DiscoveredReaderData& reader_data,
   {
     Parameter param;
     param.destination_order(reader_data.ddsSubscriptionData.destination_order);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.time_based_filter))
+  {
+    Parameter param;
+    param.time_based_filter(reader_data.ddsSubscriptionData.time_based_filter);
     add_param(param_list, param);
   }
 
@@ -681,6 +701,7 @@ int from_param_list(const ParameterList& param_list,
 
   // Start by setting defaults
   participant_data.ddsParticipantData.user_data.value.length(0);
+  participant_data.participantProxy.availableBuiltinEndpoints = 0;
   participant_data.participantProxy.expectsInlineQos = false;
   participant_data.leaseDuration.seconds = 100;
   participant_data.leaseDuration.fraction = 0;
@@ -712,6 +733,7 @@ int from_param_list(const ParameterList& param_list,
             param.participant_builtin_endpoints();
         break;
       case PID_BUILTIN_ENDPOINT_SET:
+        // Interoperability note:
         // OpenSplice uses this in place of PID_PARTICIPANT_BUILTIN_ENDPOINTS
         // Table 9.13 indicates that PID_PARTICIPANT_BUILTIN_ENDPOINTS should be
         // used to represent ParticipantProxy::availableBuiltinEndpoints
@@ -850,22 +872,27 @@ int from_param_list(const ParameterList& param_list,
       case PID_DURABILITY_SERVICE:
         writer_data.ddsPublicationData.durability_service =
              param.durability_service();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.durability_service.service_cleanup_delay);
         break;
       case PID_DEADLINE:
         writer_data.ddsPublicationData.deadline = param.deadline();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.deadline.period);
         break;
       case PID_LATENCY_BUDGET:
         writer_data.ddsPublicationData.latency_budget = param.latency_budget();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.latency_budget.duration);
         break;
       case PID_LIVELINESS:
         writer_data.ddsPublicationData.liveliness = param.liveliness();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
         writer_data.ddsPublicationData.reliability = param.reliability();
+        // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         writer_data.ddsPublicationData.reliability.kind =
           (DDS::ReliabilityQosPolicyKind)
@@ -874,6 +901,7 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_LIFESPAN:
         writer_data.ddsPublicationData.lifespan = param.lifespan();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.lifespan.duration);
         break;
       case PID_USER_DATA:
@@ -999,18 +1027,22 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_DEADLINE:
         reader_data.ddsSubscriptionData.deadline = param.deadline();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.deadline.period);
         break;
       case PID_LATENCY_BUDGET:
         reader_data.ddsSubscriptionData.latency_budget = param.latency_budget();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.latency_budget.duration);
         break;
       case PID_LIVELINESS:
         reader_data.ddsSubscriptionData.liveliness = param.liveliness();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
         reader_data.ddsSubscriptionData.reliability = param.reliability();
+        // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         reader_data.ddsSubscriptionData.reliability.kind =
           (DDS::ReliabilityQosPolicyKind)
@@ -1027,6 +1059,7 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_TIME_BASED_FILTER:
         reader_data.ddsSubscriptionData.time_based_filter = param.time_based_filter();
+        // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.time_based_filter.minimum_separation);
         break;
       case PID_PRESENTATION:
