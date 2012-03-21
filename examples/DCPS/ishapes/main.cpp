@@ -20,6 +20,9 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
+
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
 
@@ -33,12 +36,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
     TransportConfig_rch config =
       TransportRegistry::instance()->create_config("rtps_interop_demo");
-    config->instances_.push_back(TransportRegistry::instance()->create_inst("the_rtps_transport","rtps_udp"));
+    TransportInst_rch inst =
+      TransportRegistry::instance()->create_inst("the_rtps_transport",
+                                                 "rtps_udp");
+    RtpsUdpInst_rch rui = static_rchandle_cast<RtpsUdpInst>(inst);
+    rui->handshake_timeout_ = 1;
+
+    config->instances_.push_back(inst);
     TransportRegistry::instance()->global_config(config);
 
     DDS::DomainId_t domain = 0;
     bool multicast = true;
-    unsigned int resend = 2;
+    unsigned int resend = 1;
     std::string partition;
 
     if (argc > 1) {
