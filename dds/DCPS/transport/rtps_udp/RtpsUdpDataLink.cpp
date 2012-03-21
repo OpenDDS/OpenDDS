@@ -875,8 +875,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         std::memcpy(info_dst_.guidPrefix, wi->first.guidPrefix,
                     sizeof(GuidPrefix_t));
         ser << info_dst_;
-        //NOTE: we used to insert "info_reply_" here, but interoperability
-        //testing indicated that other DDS implementations didn't allow it
+        // Interoperability note: we used to insert "info_reply_" here, but
+        // testing indicated that other DDS implementations didn't accept it.
         ser << acknack;
         for (size_t i = 0; i < nack_frags.size(); ++i) {
           nack_frags[i].readerId = rr->first.entityId;

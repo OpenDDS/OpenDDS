@@ -225,8 +225,11 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     if (rtps.smHeader.flags & FLAG_K_IN_DATA) {
       opendds.key_fields_only_ = true;
     } else if (!(rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA))) {
-      // Interoperability: if FLAG_Q, the Key may be hiding in the "key hash"
-      // part of InlinQos.  We will have to assume the key was 16 bytes or less.
+      // Interoperability note: the Key may be hiding in the "key hash" param
+      // in the InlineQos.  In order to make use of this Key, it mst be 16
+      // bytes or less.  We have observed other DDS implementations only send
+      // the MD5 hash of a >16 byte key, so we must limit this to Built-in
+      // endpoints which are assumed to use GUIDs as keys.
       if ((rtps.writerId.entityKind & 0xC0) == 0xC0 // Only Built-in endpoints
           && (rtps.smHeader.flags & FLAG_Q) && !rds.sample_) {
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {

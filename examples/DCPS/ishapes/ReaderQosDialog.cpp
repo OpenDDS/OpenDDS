@@ -50,7 +50,7 @@ ReaderQosDialog::get_qos()
   case 3:
     qos_.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
     break;
-  };
+  }
 
   if (qosForm_.exclusiveRButt->isChecked())
     qos_.ownership.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
@@ -62,6 +62,9 @@ ReaderQosDialog::get_qos()
   }
   else
     qos_.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+
+  qos_.time_based_filter.minimum_separation.sec =
+    std::atoi(qosForm_.tbFilterInput->text().toAscii().constData());
 
   return qos_;
 }
