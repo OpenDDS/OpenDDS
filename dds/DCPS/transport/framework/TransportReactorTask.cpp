@@ -14,19 +14,43 @@
 #endif /* __ACE_INLINE__ */
 
 #include <ace/Select_Reactor.h>
+#include <ace/WFMO_Reactor.h>
+#include <ace/Proactor.h>
+#include <ace/WIN32_Proactor.h>
 
-OpenDDS::DCPS::TransportReactorTask::TransportReactorTask()
+OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
   : state_(STATE_NOT_RUNNING),
     condition_(this->lock_)
 {
   DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",6);
-  // Set our reactor pointer to a new reactor object.
-  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
+  
+#if !defined (ACE_WIN32) || !defined (ACE_HAS_WIN32_OVERLAPPED_IO)
+  useAsyncSend = false;
+#endif
+
+  // Set our reactor and proactor pointers to a new reactor/proactor objects.
+  if (useAsyncSend) {
+    this->reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
+    
+    ACE_WIN32_Proactor* proactor_impl = new ACE_WIN32_Proactor(0, 1);
+    this->proactor_ = new ACE_Proactor(proactor_impl, 1);
+    this->reactor_->register_handler(proactor_impl, proactor_impl->get_handle());
+  } else {
+    this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
+    this->proactor_ = 0;
+  }
 }
 
 OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
 {
   DBG_ENTRY_LVL("TransportReactorTask","~TransportReactorTask",6);
+
+  if (this->proactor_) {
+    this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
+                                   ACE_Event_Handler::DONT_CALL);
+    delete this->proactor_;
+  }
+
   delete this->reactor_;
 }
 
@@ -161,10 +185,26 @@ OpenDDS::DCPS::TransportReactorTask::stop()
 
     this->state_ = STATE_NOT_RUNNING;
   }
+  
+  // Remove the proactor handler so the reactor stops forwarding messages.
+  if (this->proactor_) {
+    this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
+                                   ACE_Event_Handler::DONT_CALL);
+  }
 
   this->reactor_->end_reactor_event_loop();
 
   // Let's wait for the reactor task's thread to complete before we
   // leave this stop method.
   this->wait();
+
+  // Delete the reactor and proactor now, we're done with them.
+  // Waiting for the dtor to delete them caused a crash on shutdown.
+  delete this->reactor_;
+  this->reactor_ = 0;
+
+  if (this->proactor_) {
+    delete this->proactor_;
+    this->proactor_ = 0;
+  }
 }

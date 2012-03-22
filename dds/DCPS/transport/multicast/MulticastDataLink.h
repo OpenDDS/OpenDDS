@@ -64,6 +64,7 @@ public:
 
   TransportReactorTask* reactor_task();
   ACE_Reactor* get_reactor();
+  ACE_Proactor* get_proactor();
 
   ACE_SOCK_Dgram_Mcast& socket();
 

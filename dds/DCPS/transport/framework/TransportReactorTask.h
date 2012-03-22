@@ -14,6 +14,7 @@
 #include "ace/Condition_T.h"
 #include "ace/Task.h"
 
+class ACE_Proactor;
 class ACE_Reactor;
 
 namespace OpenDDS {
@@ -23,7 +24,7 @@ class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
       public virtual RcObject<ACE_SYNCH_MUTEX> {
 public:
 
-  TransportReactorTask();
+  TransportReactorTask(bool useAsyncSend);
   virtual ~TransportReactorTask();
 
   virtual int open(void*);
@@ -34,6 +35,9 @@ public:
 
   ACE_Reactor* get_reactor();
   const ACE_Reactor* get_reactor() const;
+  
+  ACE_Proactor* get_proactor();
+  const ACE_Proactor* get_proactor() const;
 
 private:
 
@@ -47,6 +51,7 @@ private:
   State         state_;
   ConditionType condition_;
   ACE_Reactor*  reactor_;
+  ACE_Proactor* proactor_;
 };
 
 } // namespace DCPS

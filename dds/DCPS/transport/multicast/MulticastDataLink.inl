@@ -58,6 +58,13 @@ MulticastDataLink::get_reactor()
   return this->reactor_task_->get_reactor();
 }
 
+ACE_INLINE ACE_Proactor*
+MulticastDataLink::get_proactor()
+{
+  if (this->reactor_task_ == 0) return 0;
+  return this->reactor_task_->get_proactor();
+}
+
 ACE_INLINE ACE_SOCK_Dgram_Mcast&
 MulticastDataLink::socket()
 {
