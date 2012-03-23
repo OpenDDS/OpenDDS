@@ -38,6 +38,7 @@ const long DEFAULT_NAK_MAX(3);
 const long DEFAULT_NAK_TIMEOUT(30000);
 
 const char DEFAULT_TTL(1);
+const bool DEFAULT_ASYNC_SEND(false);
 
 } // namespace
 
@@ -55,11 +56,12 @@ MulticastInst::MulticastInst(const std::string& name)
     nak_max_(DEFAULT_NAK_MAX),
     ttl_(DEFAULT_TTL),
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-    rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+    rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ),
 #else
     // Use system default values.
-    rcv_buffer_size_(0)
+    rcv_buffer_size_(0),
 #endif
+    async_send_(DEFAULT_ASYNC_SEND)
 {
   default_group_address(this->group_address_);
 
@@ -118,7 +120,11 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"),
                    this->rcv_buffer_size_, size_t)
 
-   return 0;
+#if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("async_send"), this->async_send_, bool)
+#endif
+
+  return 0;
 }
 
 void
@@ -163,6 +169,14 @@ MulticastInst::dump(std::ostream& os)
   } else {
     os << this->rcv_buffer_size_ << std::endl;
   }
+
+  os << formatNameForDump("async_send");
+
+#if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
+  os << (this->async_send_ ? "true" : "false") << std::endl;
+#else
+  os << "Not Supported on this Platform" << std::endl;
+#endif
 }
 
 } // namespace DCPS

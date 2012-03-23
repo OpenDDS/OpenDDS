@@ -1,3 +1,37 @@
+Fri Mar 23 21:25:49 UTC 2012  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Added proactor when optional async send is used and setup integrated
+          proactor/reactor event loops.  When async send is used, changed
+          reactor to ACE_WFMO_Reactor because it's required for the event loop
+          integration and the features of the additional features of the
+          ACE_Select_Reactor aren't required.
+          In TransportReactorTask, changed stop() method to only delete
+          proactor and reactor if proactor exists.  Otherwise, deletion is left
+          to dtor.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added optional async send on Windows platforms that supported it.
+          New configuration parameter is async_send.  Defaults to false.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LargeSample/pub_multicast_async.ini:
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Added run of LargeSample multicast test with publishers sending async.
+
 Wed Mar 21 21:46:51 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

@@ -91,6 +91,12 @@ public:
   /// If the value is 0, the system default value is used.
   size_t rcv_buffer_size_;
 
+  /// Sending using asynchronous I/O on Windows platforms that support it.
+  /// The default value is: false.
+  /// This parameter has no effect on non-Windows platforms and Windows platforms
+  /// that don't support asynchronous I/O.
+  bool async_send_;
+
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 
@@ -98,6 +104,8 @@ public:
   virtual void dump(std::ostream& os);
 
   bool is_reliable() const { return this->reliable_; }
+
+  bool async_send() const { return this->async_send_; }
 
 private:
   friend class MulticastType;

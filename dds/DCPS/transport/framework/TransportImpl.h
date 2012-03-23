@@ -223,7 +223,9 @@ public:
   ReservationLockType& reservation_lock();
   const ReservationLockType& reservation_lock() const;
 
-  void create_reactor_task();
+  /// Create the reactor task using sync send or optionally async send
+  /// by parameter on supported Windows platforms only.
+  void create_reactor_task(bool useAsyncSend = false);
 
 private:
   /// Called by our friend, the TransportClient.

@@ -12,6 +12,7 @@
 #include "Multicast_Export.h"
 
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
+#include "ace/Asynch_IO.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -19,7 +20,7 @@ namespace DCPS {
 class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastSendStrategy
-  : public TransportSendStrategy {
+  : public TransportSendStrategy, public ACE_Handler {
 public:
   explicit MulticastSendStrategy(MulticastDataLink* link);
 
@@ -29,11 +30,16 @@ protected:
   virtual void prepare_header_i();
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
+  ssize_t sync_send(const iovec iov[], int n);
+  ssize_t async_send(const iovec iov[], int n);
 
   virtual size_t max_message_size() const
   {
     return UDP_MAX_MESSAGE_SIZE;
   }
+
+  // Callback from async send.
+  virtual void handle_write_dgram(const ACE_Asynch_Write_Dgram::Result& res);
 
 private:
   MulticastDataLink* link_;

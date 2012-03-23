@@ -156,13 +156,13 @@ TransportImpl::configure(TransportInst* config)
 }
 
 void
-TransportImpl::create_reactor_task()
+TransportImpl::create_reactor_task(bool useAsyncSend)
 {
   if (this->reactor_task_.in()) {
     return;
   }
 
-  this->reactor_task_ = new TransportReactorTask;
+  this->reactor_task_ = new TransportReactorTask(useAsyncSend);
   if (0 != this->reactor_task_->open(0)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }
