@@ -197,14 +197,4 @@ OpenDDS::DCPS::TransportReactorTask::stop()
   // Let's wait for the reactor task's thread to complete before we
   // leave this stop method.
   this->wait();
-  
-  if (this->proactor_) {
-    // Delete the reactor and proactor now, we're done with them.
-    // Waiting for the dtor to delete them caused a crash on shutdown.
-    delete this->reactor_;
-    this->reactor_ = 0;
-
-    delete this->proactor_;
-    this->proactor_ = 0;
-  }
 }

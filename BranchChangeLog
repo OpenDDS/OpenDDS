@@ -1,8 +1,15 @@
+Fri Mar 23 18:13:26 UTC 2012  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Changed stop() method to only remove proactor handler from reactor
+          if proactor exists.
+
 Fri Mar 23 15:23:26 UTC 2012  Don Hudson <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReactorTask.cpp:
 
-          Changed stop() method to only delete proactor and reactor 
+          Changed stop() method to only delete proactor and reactor
           if proactor exists.  Otherwise, deletion is left to dtor.
 
 Thu Mar 22 21:00:21 UTC 2012  Don Hudson  <hudsond@ociweb.com>
