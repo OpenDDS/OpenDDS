@@ -54,7 +54,7 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
   ACE_Asynch_Write_Dgram wd;
 
   if (-1 == wd.open(*this, socket.get_handle(), 0 /*completion_key*/, this->link_->get_proactor())) {
-    return 1;
+    return -1;
   }
 
   ACE_Message_Block* mb = 0;
@@ -70,7 +70,6 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
   ssize_t result = wd.send(mb, bytes_sent, 0 /*flags*/, this->link_->config()->group_address_);
 
   if (result < 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MulticastSendStrategy::async_send returned %d\n", result));
     mb->release();
     return result;
   }

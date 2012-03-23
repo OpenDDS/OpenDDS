@@ -1,3 +1,12 @@
+Fri Mar 23 20:30:26 UTC 2012  Don Hudson <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+          Changed async_send() to return -1 when there is a failure 
+          to open ACE_Asynch_Write_Dgram and removed log error
+          messages as TransportSendStrategy logs when a failure is 
+          returned by this method.
+
 Fri Mar 23 18:13:26 UTC 2012  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReactorTask.cpp:
