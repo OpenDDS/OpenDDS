@@ -16,6 +16,7 @@
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
 #include <ace/Proactor.h>
+#include <ace/Proactor_Impl.h>
 #include <ace/WIN32_Proactor.h>
 
 OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
@@ -24,10 +25,7 @@ OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
 {
   DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",6);
 
-#if !defined (ACE_WIN32) || !defined (ACE_HAS_WIN32_OVERLAPPED_IO)
-  useAsyncSend = false;
-#endif
-
+#if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
   if (useAsyncSend) {
     this->reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
@@ -35,10 +33,14 @@ OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
     ACE_WIN32_Proactor* proactor_impl = new ACE_WIN32_Proactor(0, 1);
     this->proactor_ = new ACE_Proactor(proactor_impl, 1);
     this->reactor_->register_handler(proactor_impl, proactor_impl->get_handle());
-  } else {
-    this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
-    this->proactor_ = 0;
+    return;
   }
+#else
+  ACE_UNUSED_ARG(useAsyncSend);
+#endif
+
+  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
+  this->proactor_ = 0;
 }
 
 OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()

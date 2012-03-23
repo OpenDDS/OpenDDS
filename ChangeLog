@@ -1,3 +1,10 @@
+Fri Mar 23 22:39:02 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+          Fixed Linux build errors.
+
 Fri Mar 23 21:25:49 UTC 2012  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.h:
