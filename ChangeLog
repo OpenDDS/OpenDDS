@@ -1,3 +1,18 @@
+Fri Mar 23 22:47:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+          With the new async send feature, need to tell the framework the
+          entire datagram was sent (unless there was an error).
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Fixed a warning on systems with 64-bit size_t.
+
+        * README:
+
+          Updated GCC versions used in testing.
+
 Fri Mar 23 22:39:02 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReactorTask.cpp:

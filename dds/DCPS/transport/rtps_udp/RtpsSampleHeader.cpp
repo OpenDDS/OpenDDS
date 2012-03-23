@@ -239,7 +239,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
             rds.sample_->copy("\x00\x00\x00\x00", 4);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
             rds.sample_->copy(reinterpret_cast<const char*>(data), 16);
-            opendds.message_length_ = rds.sample_->length();
+            opendds.message_length_ =
+              static_cast<ACE_UINT32>(rds.sample_->length());
             opendds.key_fields_only_ = true;
             if (Transport_debug_level) {
               ACE_DEBUG((LM_DEBUG,

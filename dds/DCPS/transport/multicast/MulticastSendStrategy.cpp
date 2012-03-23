@@ -58,12 +58,14 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
   }
 
   ACE_Message_Block* mb = 0;
+  size_t total_length = 0;
 
   for (int i = n - 1; i >= 0; --i) {
     ACE_Message_Block* next =
       new ACE_Message_Block(static_cast<const char*>(iov[i].iov_base),
                             iov[i].iov_len);
     next->wr_ptr(iov[i].iov_len);
+    total_length += iov[i].iov_len;
     next->cont(mb);
     mb = next;
   }
@@ -76,7 +78,8 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
     return result;
   }
 
-  return bytes_sent;
+  // framework needs to think we sent the entire datagram
+  return total_length;
 }
 
 void
