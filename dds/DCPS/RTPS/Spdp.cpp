@@ -37,8 +37,8 @@ namespace {
   // if a remote discovery misses this many resends from us it will consider
   // us offline / unreachable.
   const int LEASE_MULT = 10;
-  const CORBA::ULong encap_LE = 0x00000300; // {options, PL_CDR_LE} in LE
-  const CORBA::ULong encap_BE = 0x00000200; // {options, PL_CDR_BE} in LE
+  const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
+  const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
 
   bool disposed(const ParameterList& inlineQos)
   {
@@ -432,8 +432,9 @@ Spdp::SpdpTransport::dispose_unregister()
 
   buff_.reset();
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) ||
-      !(ser << plist)) {
+  CORBA::UShort options = 0;
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
+      || !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
       ACE_TEXT("failed to serialize headers for dispose/unregister\n")));
@@ -529,9 +530,10 @@ Spdp::SpdpTransport::write()
   }
 
   buff_.reset();
+  CORBA::UShort options = 0;
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) ||
-      !(ser << plist)) {
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
+      || !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
       ACE_TEXT("failed to serialize headers for SPDP\n")));
@@ -618,13 +620,14 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       ParameterList plist;
       if (data.smHeader.flags & (4 /*FLAG_D*/ | 8 /*FLAG_K*/)) {
         ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
-        CORBA::ULong encap;
+        CORBA::UShort encap, options;
         if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
             ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
           return 0;
         }
+        ser >> options;
         // bit 8 in encap is on if it's PL_CDR_LE
         ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
         if (!(ser >> plist)) {

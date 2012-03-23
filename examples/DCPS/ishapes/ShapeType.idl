@@ -1,7 +1,11 @@
 
 #pragma DCPS_DATA_TYPE "ShapeType"
 #pragma DCPS_DATA_KEY "ShapeType color"
+
+typedef string<11> BoundedString; // trying to keep in inside KeyHash_t
+
 struct ShapeType {
+ // BoundedString color; // this is "string<128>" in the official version
   string color;
   long x;
   long y;

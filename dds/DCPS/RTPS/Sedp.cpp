@@ -23,6 +23,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -652,21 +653,39 @@ void
 Sedp::remove_from_bit(const DiscoveredPublication& pub)
 {
   pub_key_to_id_.erase(pub.writer_data_.ddsPublicationData.key);
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-  if (bit) { // bit may be null if the DomainParticipant is shutting down
-    bit->set_instance_state(pub.bit_ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  }
+  task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT,
+                new DDS::InstanceHandle_t(pub.bit_ih_));
 }
 
 void
 Sedp::remove_from_bit(const DiscoveredSubscription& sub)
 {
   sub_key_to_id_.erase(sub.reader_data_.ddsSubscriptionData.key);
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-  if (bit) { // bit may be null if the DomainParticipant is shutting down
-    bit->set_instance_state(sub.bit_ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT,
+                new DDS::InstanceHandle_t(sub.bit_ih_));
+}
+
+void
+Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
+{
+  ACE_Auto_Basic_Ptr<const DDS::InstanceHandle_t> delete_the_ih(bit_ih);
+  switch (which_bit) {
+  case Msg::MSG_REMOVE_FROM_PUB_BIT: {
+    DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
+    if (bit) { // bit may be null if the DomainParticipant is shutting down
+      bit->set_instance_state(*bit_ih,
+                              DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+    }
+  }
+  case Msg::MSG_REMOVE_FROM_SUB_BIT: {
+    DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
+    if (bit) { // bit may be null if the DomainParticipant is shutting down
+      bit->set_instance_state(*bit_ih,
+                              DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+    }
+  }
+  default:
+    break;
   }
 }
 
@@ -2059,12 +2078,23 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                          sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                          DCPS::Serializer::ALIGN_CDR);
     bool ok = true;
-    ACE_CDR::ULong encap;
-    ok &= (ser >> encap);
-    // Ignore the 'encap' header since we use sample.header_.byte_order_
+    ACE_CDR::Octet encap, dummy;
+    ACE_CDR::UShort options;
+    ok &= (ser >> ACE_InputCDR::to_octet(dummy))
+      && (ser >> ACE_InputCDR::to_octet(encap))
+      && (ser >> options);
+    // Ignore the 'encap' byte order since we use sample.header_.byte_order_
     // to determine whether or not to swap bytes.
     ParameterList data;
-    ok &= (ser >> data);
+    if (sample.header_.key_fields_only_ && encap < 2) {
+      GUID_t guid;
+      ok &= (ser >> guid);
+      data.length(1);
+      data[0].guid(guid);
+      data[0]._d(PID_ENDPOINT_GUID);
+    } else {
+      ok &= (ser >> data);
+    }
     if (!ok) {
       ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                            ACE_TEXT("failed to deserialize data\n")));
@@ -2307,6 +2337,12 @@ Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata)
   putq(new Msg(Msg::MSG_READER, id, rdata));
 }
 
+void
+Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
+{
+  putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
+}
+
 int
 Sedp::Task::svc()
 {
@@ -2321,6 +2357,11 @@ Sedp::Task::svc()
       break;
     case Msg::MSG_READER:
       svc_i(msg->id_, static_cast<const DiscoveredReaderData*>(msg->payload_));
+      break;
+    case Msg::MSG_REMOVE_FROM_PUB_BIT:
+    case Msg::MSG_REMOVE_FROM_SUB_BIT:
+      svc_i(msg->type_,
+            static_cast<const DDS::InstanceHandle_t*>(msg->payload_));
       break;
     case Msg::MSG_STOP:
       return 0;

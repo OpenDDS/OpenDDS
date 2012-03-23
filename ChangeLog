@@ -1,3 +1,56 @@
+Wed Mar 21 21:46:51 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Updated DCPS_debug_level used for logging every single sample.
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Encode TIME_BASED_FILTER QoS for subscription BIT.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Use the task for BIT removal.
+          Allow a straight CDR (not ParameterList) key payload.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Allow a non-zero options field in the encapsulation header.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+
+          Coverity fixes.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          For built-in endpoints: read the key from PID_KEY_HASH if no FLAG_K,
+          also write the key in PID_KEY_HASH in dispose/unregister.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Implemented sending of GAPs for durable data and completed
+          writer-side durability support.
+
+        * examples/DCPS/ishapes/ReaderQosDialog.cpp:
+        * examples/DCPS/ishapes/ShapeType.idl:
+        * examples/DCPS/ishapes/ShapesDialog.cpp:
+        * examples/DCPS/ishapes/ShapesDialog.hpp:
+        * examples/DCPS/ishapes/main.cpp:
+        * examples/DCPS/ishapes/readerQosForm.ui:
+
+          Allow PARTITION QoS as a command-line argument.
+          Default color assigned to OpenDDS is GREEN.
+          Cleaned up code.
+          Added TIME_BASED_FILTER QoS to the GUI.
+          Adjusted default timing parameters for SPDP and handshake.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+           Enable durability in this test.
+
 Fri Mar 16 21:51:44 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

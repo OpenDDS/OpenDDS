@@ -45,7 +45,8 @@ public:
   LockType& strategy_lock() { return this->strategy_->lock_; }
 
 protected:
-  explicit TransportSendBuffer(size_t capacity) : capacity_(capacity) {}
+  explicit TransportSendBuffer(size_t capacity)
+    : strategy_(0), capacity_(capacity) {}
   virtual ~TransportSendBuffer();
 
   typedef TransportSendStrategy::QueueType QueueType;

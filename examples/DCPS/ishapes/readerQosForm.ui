@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>222</width>
-    <height>352</height>
+    <height>421</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>310</y>
+     <y>380</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -49,7 +49,7 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>181</width>
+      <width>186</width>
       <height>25</height>
      </rect>
     </property>
@@ -97,8 +97,8 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>181</width>
-      <height>24</height>
+      <width>212</width>
+      <height>33</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -156,8 +156,8 @@
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>181</width>
-      <height>58</height>
+      <width>183</width>
+      <height>61</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -227,7 +227,7 @@
       <x>10</x>
       <y>20</y>
       <width>181</width>
-      <height>21</height>
+      <height>24</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -252,6 +252,51 @@
        <attribute name="buttonGroup">
         <string>buttonGroup</string>
        </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_6">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>310</y>
+     <width>201</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Time Based Filter QoS</string>
+   </property>
+   <widget class="QWidget" name="horizontalLayoutWidget_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>212</width>
+      <height>33</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Min Sep:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="tbFilterInput">
+       <property name="inputMethodHints">
+        <set>Qt::ImhDigitsOnly</set>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -295,7 +340,6 @@
  </connections>
  <buttongroups>
   <buttongroup name="reliabilityButtonGroup"/>
-  <buttongroup name="ownershipButtonGroup"/>
   <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
