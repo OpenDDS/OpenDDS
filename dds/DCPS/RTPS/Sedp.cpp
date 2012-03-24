@@ -676,6 +676,7 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
       bit->set_instance_state(*bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
+    break;
   }
   case Msg::MSG_REMOVE_FROM_SUB_BIT: {
     DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
@@ -683,6 +684,7 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
       bit->set_instance_state(*bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
+    break;
   }
   default:
     break;
