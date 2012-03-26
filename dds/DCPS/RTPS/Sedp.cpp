@@ -2088,7 +2088,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     // Ignore the 'encap' byte order since we use sample.header_.byte_order_
     // to determine whether or not to swap bytes.
     ParameterList data;
-    if (sample.header_.key_fields_only_ && encap < 2) {
+    if (ok && sample.header_.key_fields_only_ && encap < 2) {
       GUID_t guid;
       ok &= (ser >> guid);
       data.length(1);
