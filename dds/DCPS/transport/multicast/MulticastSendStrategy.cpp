@@ -50,6 +50,7 @@ MulticastSendStrategy::sync_send(const iovec iov[], int n)
 ssize_t
 MulticastSendStrategy::async_send(const iovec iov[], int n)
 {
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
   ACE_Asynch_Write_Dgram wd;
 
@@ -80,6 +81,11 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
 
   // framework needs to think we sent the entire datagram
   return total_length;
+#else
+  ACE_UNUSED_ARG(iov);
+  ACE_UNUSED_ARG(n);
+  return -1;
+#endif
 }
 
 void
@@ -87,13 +93,17 @@ MulticastSendStrategy::stop_i()
 {
 }
 
-void MulticastSendStrategy::handle_write_dgram(const ACE_Asynch_Write_Dgram::Result& res)
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
+void
+MulticastSendStrategy::handle_write_dgram(const ACE_Asynch_Write_Dgram::Result& res)
 {
   if (!res.success()) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MulticastSendStrategy::handle_write_dgram: %d\n", res.error()));
   }
   res.message_block()->release();
 }
+#endif
+
 
 } // namespace DCPS
 } // namespace OpenDDS

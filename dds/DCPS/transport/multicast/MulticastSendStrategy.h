@@ -20,7 +20,12 @@ namespace DCPS {
 class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastSendStrategy
-  : public TransportSendStrategy, public ACE_Handler {
+  : public TransportSendStrategy
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
+  , public ACE_Handler {
+#else
+  {
+#endif
 public:
   explicit MulticastSendStrategy(MulticastDataLink* link);
 
@@ -38,8 +43,10 @@ protected:
     return UDP_MAX_MESSAGE_SIZE;
   }
 
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   // Callback from async send.
   virtual void handle_write_dgram(const ACE_Asynch_Write_Dgram::Result& res);
+#endif
 
 private:
   MulticastDataLink* link_;

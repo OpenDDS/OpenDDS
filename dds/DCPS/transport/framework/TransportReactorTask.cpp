@@ -47,11 +47,13 @@ OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
 {
   DBG_ENTRY_LVL("TransportReactorTask","~TransportReactorTask",6);
 
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (this->proactor_) {
     this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
                                    ACE_Event_Handler::DONT_CALL);
     delete this->proactor_;
   }
+#endif
 
   delete this->reactor_;
 }
@@ -188,11 +190,13 @@ OpenDDS::DCPS::TransportReactorTask::stop()
     this->state_ = STATE_NOT_RUNNING;
   }
 
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   // Remove the proactor handler so the reactor stops forwarding messages.
   if (this->proactor_) {
     this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
                                    ACE_Event_Handler::DONT_CALL);
   }
+#endif
 
   this->reactor_->end_reactor_event_loop();
 
