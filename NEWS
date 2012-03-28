@@ -27,6 +27,14 @@ Version 3.1 of OpenDDS.
       addresses.
     - Added support for IPv6 when ACE is built with IPv6 support.
 
+- OpenDDS multicast transport enhancements:
+    - Added a configuration parameter "async_send" (defaults to false)
+      that will send multicast datagrams using async I/O if supported
+      by the platform.  As of now this is only implemented on Windows.
+      It could be extended to Unix aio_*() functions in theory, but these
+      are generally not preferred and the regular socket functions are
+      sufficiently fast.
+
 - Removed DataReaderQosExt from DdsDcpsSubscriptionExt.idl.  This was only
   being used to provide a non-standard-compliant backwards-compatibility
   setting to get the DURABILITY QoS behavior matching that of OpenDDS v1.2

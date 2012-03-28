@@ -1,3 +1,17 @@
+Wed Mar 28 16:50:48 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          Added note for new multicast async_send feature.
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/*/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/*.gmfgen:
+
+          Updated version numbers for upcoming release.
+
 Mon Mar 26 17:00:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReactorTask.cpp:
