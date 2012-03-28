@@ -70,6 +70,8 @@ BUILDING OpenDDS
         DDS_Static_vc8.sln - VC8, Static libs
         DDS_vc9.sln - VC9, DLLs
         DDS_Static_vc9.sln - VC9, Static libs
+        DDS_vc10.sln - VC10, DLLs
+        DDS_Static_vc10.sln - VC10, Static libs
     (Do not up-convert a VC71 solution or project to VC8/VC9)
 
   5 Test
@@ -213,7 +215,7 @@ BUILDING OpenDDS
      On Windows:
       cd %DDS_ROOT%
       perl %ACE_ROOT%\bin\mwc.pl -type [CompilerType] DDS.mwc
-        "CompilerTypes" tested include vc71, vc8, vc9, and nmake
+        "CompilerTypes" tested include vc71, vc8, vc9, vc10, and nmake
 
 * Platform specific notes:
 
