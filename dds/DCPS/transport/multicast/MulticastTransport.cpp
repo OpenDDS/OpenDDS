@@ -119,7 +119,8 @@ MulticastTransport::make_datalink(const RepoId& local_id,
                  0);
 
   // Configure link with transport configuration and reactor task:
-  link->configure(this->config_i_.in(), reactor_task());
+  TransportReactorTask_rch rtask = reactor_task();
+  link->configure(this->config_i_.in(), rtask.in());
 
   // Assign send strategy:
   MulticastSendStrategy* send_strategy;

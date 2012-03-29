@@ -1,3 +1,14 @@
+Thu Mar 29 20:42:00 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Improved debug logging for joining the multicast group.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Fixed a bug in reference counting the TransportReactorTask.
+
 Wed Mar 28 18:52:34 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * ChangeLog:

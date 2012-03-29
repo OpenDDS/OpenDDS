@@ -43,7 +43,8 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address, bool active)
   }
 
   // Configure link with transport configuration and reactor task:
-  link->configure(this->config_i_.in(), reactor_task());
+  TransportReactorTask_rch rtask = reactor_task();
+  link->configure(this->config_i_.in(), rtask.in());
 
   // Assign send strategy:
   UdpSendStrategy* send_strategy;

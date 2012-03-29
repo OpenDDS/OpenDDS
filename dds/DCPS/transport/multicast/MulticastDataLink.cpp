@@ -90,11 +90,11 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
 {
   if (this->socket_.join(group_address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed.\n")),
+                      ACE_TEXT("(%P|%t) ERROR: MulticastDataLink::join: ")
+                      ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed %m.\n")),
                      false);
   }
+  VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::join OK\n")), 6);
 
   ACE_HANDLE handle = this->socket_.get_handle();
   char ttl = this->config_->ttl_;
