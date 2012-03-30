@@ -55,7 +55,6 @@ TransportReassembly::insert(std::list<FragRange>& flist,
     if (next < fr.transport_seq_.first.getValue()) {
       // insert before 'it'
       flist.insert(it, FragRange(seqRange, data));
-      data.sample_ = 0;
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "inserted on left\n"));
       return true;
@@ -144,7 +143,6 @@ TransportReassembly::insert(std::list<FragRange>& flist,
 
   // add to end of list
   flist.push_back(FragRange(seqRange, data));
-  data.sample_ = 0;
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
     "inserted at end of list\n"));
   return true;
@@ -241,7 +239,6 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   FragMap::iterator iter = fragments_.find(key);
   if (iter == fragments_.end()) {
     fragments_[key].push_back(FragRange(seqRange, data));
-    data.sample_ = 0;
     // since this is the first fragment we've seen, it can't possibly be done
     VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "stored first frag, returning false (incomplete)\n"));

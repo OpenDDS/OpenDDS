@@ -30,6 +30,14 @@ struct Fragments {
   }
 };
 
+void release_cfentries(ACE_Message_Block& mb_hdr)
+{
+  ACE_Message_Block* cf = mb_hdr.cont();
+  mb_hdr.cont(mb_hdr.cont()->cont());
+  cf->cont(0);
+  cf->release();
+}
+
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   DataSampleHeader dsh;
@@ -73,7 +81,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     rds2.header_ = header2;
     TransportReassembly tr;
     TEST_CHECK(!tr.reassemble(4, true, rds1));
-    TEST_CHECK(!rds1.sample_);
     TEST_CHECK(tr.reassemble(5, false, rds2));
     TEST_CHECK(rds2.sample_ && rds2.sample_->total_length() == N);
 
@@ -83,7 +90,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     rds2b.header_ = header2;
     TransportReassembly tr2;
     TEST_CHECK(!tr2.reassemble(5, false, rds2b));
-    TEST_CHECK(!rds2b.sample_);
     TEST_CHECK(tr2.reassemble(4, true, rds1b));
     TEST_CHECK(rds1b.sample_ && rds1b.sample_->total_length() == N);
   }
@@ -196,9 +202,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(1, true, rds1));
-      TEST_CHECK(!rds1.sample_);
       TEST_CHECK(!tr.reassemble(2, false, rds2));
-      TEST_CHECK(!rds2.sample_);
       TEST_CHECK(tr.reassemble(3, false, rds3));
       TEST_CHECK(rds3.sample_ && rds3.sample_->total_length() == N);
     }
@@ -211,9 +215,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(1, true, rds1));
-      TEST_CHECK(!rds1.sample_);
       TEST_CHECK(!tr.reassemble(3, false, rds3));
-      TEST_CHECK(!rds3.sample_);
       TEST_CHECK(tr.reassemble(2, false, rds2));
       TEST_CHECK(rds2.sample_ && rds2.sample_->total_length() == N);
     }
@@ -226,9 +228,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(2, false, rds2));
-      TEST_CHECK(!rds2.sample_);
       TEST_CHECK(!tr.reassemble(1, true, rds1));
-      TEST_CHECK(!rds1.sample_);
       TEST_CHECK(tr.reassemble(3, false, rds3));
       TEST_CHECK(rds3.sample_ && rds3.sample_->total_length() == N);
     }
@@ -241,9 +241,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(2, false, rds2));
-      TEST_CHECK(!rds2.sample_);
       TEST_CHECK(!tr.reassemble(3, false, rds3));
-      TEST_CHECK(!rds3.sample_);
       TEST_CHECK(tr.reassemble(1, true, rds1));
       TEST_CHECK(rds1.sample_ && rds1.sample_->total_length() == N);
     }
@@ -256,9 +254,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(3, false, rds3));
-      TEST_CHECK(!rds3.sample_);
       TEST_CHECK(!tr.reassemble(1, true, rds1));
-      TEST_CHECK(!rds1.sample_);
       TEST_CHECK(tr.reassemble(2, false, rds2));
       TEST_CHECK(rds2.sample_ && rds2.sample_->total_length() == N);
     }
@@ -271,9 +267,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(3, false, rds3));
-      TEST_CHECK(!rds3.sample_);
       TEST_CHECK(!tr.reassemble(2, false, rds2));
-      TEST_CHECK(!rds2.sample_);
       TEST_CHECK(tr.reassemble(1, true, rds1));
       TEST_CHECK(rds1.sample_ && rds1.sample_->total_length() == N);
     }
@@ -285,10 +279,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(1, true, rds1));
-      TEST_CHECK(!rds1.sample_);
       tr.data_unavailable(SequenceRange(2, 2));
       TEST_CHECK(!tr.reassemble(3, false, rds3));
-      TEST_CHECK(!rds3.sample_);
     }
     {
       ReceivedDataSample rds1(f.head_->cont()->duplicate()),
@@ -297,10 +289,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds3.header_ = header2b;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(3, false, rds3));
-      TEST_CHECK(!rds3.sample_);
       tr.data_unavailable(SequenceRange(2, 2));
       TEST_CHECK(!tr.reassemble(1, true, rds1));
-      TEST_CHECK(!rds1.sample_);
     }
     {
       ReceivedDataSample rds1(f.head_->cont()->duplicate()),
@@ -309,10 +299,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       rds2.header_ = header2a;
       TransportReassembly tr;
       TEST_CHECK(!tr.reassemble(2, false, rds2));
-      TEST_CHECK(!rds2.sample_);
       tr.data_unavailable(SequenceRange(3, 3));
       TEST_CHECK(!tr.reassemble(1, true, rds1));
-      TEST_CHECK(!rds1.sample_);
     }
   }
   { // content filtering flag with no "entries" (adds another MB to the chain)
@@ -330,6 +318,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(header1.content_filter_);
     TEST_CHECK(header1.content_filter_entries_.length() == 0);
     const size_t hdr_len = header_mb.length() + header_mb.cont()->length();
+    release_cfentries(header_mb);
+
     TEST_CHECK(header1.message_length_ == FRAG - hdr_len);
     TEST_CHECK(f.head_->length() == 0); // consumed by DataSampleHeader
     TEST_CHECK(f.head_->cont());
@@ -367,6 +357,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     Fragments f;
     const size_t FRAG = 200;
     DataSampleHeader::split(header_mb, FRAG, f.head_, f.tail_);
+    release_cfentries(header_mb);
 
     DataSampleHeader header1(*f.head_);
     TEST_CHECK(header1.more_fragments_);
@@ -411,6 +402,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     Fragments f;
     const size_t FRAG = 68;
     DataSampleHeader::split(header_mb, FRAG, f.head_, f.tail_);
+    release_cfentries(header_mb);
 
     DataSampleHeader header1(*f.head_);
     TEST_CHECK(header1.more_fragments_);

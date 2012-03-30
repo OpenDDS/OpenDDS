@@ -1,3 +1,18 @@
+Fri Mar 30 22:14:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Manage the ACE_Message_Block inside the ReceivedDataSample
+          consistently for all cases of reassembling fragments.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+
+          Don't call data_unavailable() with an invalid range.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Update test for TransportReassembly change above.
+
 Thu Mar 29 20:42:00 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:

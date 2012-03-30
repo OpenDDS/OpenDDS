@@ -27,8 +27,10 @@ BestEffortSession::check_header(const TransportHeader& header)
                ACE_TEXT("(%P|%t) WARNING: BestEffortSession::check_header ")
                ACE_TEXT("expected %q received %q\n"),
                this->expected_.getValue(), header.sequence_.getValue()), 2);
-    SequenceRange range(this->expected_, header.sequence_.previous());
-    this->reassembly_.data_unavailable(range);
+    if (header.sequence_ > this->expected_) {
+      SequenceRange range(this->expected_, header.sequence_.previous());
+      this->reassembly_.data_unavailable(range);
+    }
   }
 
   this->expected_ = header.sequence_;
