@@ -279,6 +279,7 @@ private:
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 
   struct LocalEndpoint {
+    LocalEndpoint() : sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}
     DCPS::RepoId topic_id_;
     DCPS::TransportLocatorSeq trans_info_;
     RepoIdSet matched_endpoints_;

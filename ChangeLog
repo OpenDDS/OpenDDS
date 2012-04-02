@@ -1,3 +1,13 @@
+Mon Apr  2 14:51:40 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        
+          Storing associated_participants_ prior to writing the 
+          publication/subscription data. Changed add publication/
+          subscription to have an invalid sequence number, so new
+          sequence number can be used in set_header_fields.
+
 Fri Mar 30 22:14:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReassembly.cpp:

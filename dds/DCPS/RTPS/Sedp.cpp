@@ -516,6 +516,10 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   //FUTURE: if/when topic propagation is supported, add it here
 
   ACE_GUARD(ACE_Thread_Mutex, g, sedp_->lock_);
+
+  proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
+  sedp_->associated_participants_.insert(proto.remote_id_);
+
   // Write durable data
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
@@ -525,9 +529,6 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
     proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     sedp_->write_durable_subscription_data(proto.remote_id_);
   }
-
-  proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
-  sedp_->associated_participants_.insert(proto.remote_id_);
 
   for (RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();
        it != sedp_->defer_match_endpoints_.end(); /*incremented in body*/) {
@@ -2041,13 +2042,18 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
   dsh.publication_id_ = repo_id_;
 
+  if (reader == GUID_UNKNOWN ||
+      sequence == DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    sequence = seq_++;
+  }
+
   if (reader != GUID_UNKNOWN) {
     // retransmit with same seq# for durability
     dsh.historic_sample_ = true;
-    dsh.sequence_ = sequence;
-  } else {
-    sequence = dsh.sequence_ = seq_++;
   }
+
+  dsh.sequence_ = sequence;
+
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
