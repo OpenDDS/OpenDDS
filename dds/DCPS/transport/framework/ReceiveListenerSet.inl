@@ -100,19 +100,21 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
 
   GuardType guard(this->lock_);
 
-  char* ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
-
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
 
     if (itr->second == 0) continue; // invalid listener
 
-    if (ptr) {
-      // reset read pointer because demarshal (in data_received()) moves it.
-      sample.sample_->rd_ptr(ptr);
+    if (map_.size() > 1 && sample.sample_) {
+      // demarshal (in data_received()) updates the rd_ptr() of any of
+      // the message blocks in the chain, so give it a duplicated chain.
+      ReceivedDataSample rds(sample);
+      itr->second->data_received(rds);
+
+    } else {
+      itr->second->data_received(sample);
     }
-    itr->second->data_received(sample);
   }
 }
 

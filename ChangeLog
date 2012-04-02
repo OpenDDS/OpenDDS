@@ -1,9 +1,17 @@
+Mon Apr  2 18:00:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          The method for re-setting rd_ptr() when there are multiple
+          listeners needs to account for the fact that continuation
+          blocks also have their rd_ptr()s modified during demarshaling.
+
 Mon Apr  2 14:51:40 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
         * dds/DCPS/RTPS/Sedp.h:
-        
-          Storing associated_participants_ prior to writing the 
+
+          Storing associated_participants_ prior to writing the
           publication/subscription data. Changed add publication/
           subscription to have an invalid sequence number, so new
           sequence number can be used in set_header_fields.
