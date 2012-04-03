@@ -5,24 +5,24 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "InfoRepoDiscovery.h"
 #include "FailoverListener.h"
-#include "Service_Participant.h"
-#include "InfoRepoUtils.h"
-#include "RepoIdBuilder.h"
+
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/InfoRepoUtils.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/ConfigUtils.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include "DomainParticipantImpl.h"
-#include "BuiltInTopicUtils.h"
-#include "Marked_Default_Qos.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
 
-#include "transport/framework/TransportRegistry.h"
-#include "transport/framework/TransportExceptions.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
-#include "transport/tcp/TcpInst.h"
-#include "transport/tcp/TcpInst_rch.h"
+#include "dds/DCPS/transport/tcp/TcpInst.h"
+#include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #endif
 
 namespace OpenDDS {
@@ -225,6 +225,141 @@ InfoRepoDiscovery::bit_key_to_repo_id(DomainParticipantImpl* /*participant*/,
   return id;
 }
 
+namespace {
+  const ACE_TCHAR REPO_SECTION_NAME[] = ACE_TEXT("repository");
+}
+
+int
+InfoRepoDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
+{
+  const ACE_Configuration_Section_Key& root = cf.root_section();
+  ACE_Configuration_Section_Key repo_sect;
+
+  if (cf.open_section(root, REPO_SECTION_NAME, 0, repo_sect) != 0) {
+    if (DCPS_debug_level > 0) {
+      // This is not an error if the configuration file does not have
+      // any repository (sub)section. The code default configuration will be used.
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: InfoRepoDiscovery::Config::discovery_config ")
+                 ACE_TEXT("failed to open [%s] section.\n"),
+                 REPO_SECTION_NAME));
+    }
+
+    return 0;
+
+  } else {
+    // Ensure there are no properties in this section
+    ValueMap vm;
+    if (pullValues(cf, repo_sect, vm) > 0) {
+      // There are values inside [repo]
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
+                        ACE_TEXT("repo sections must have a subsection name\n")),
+                       -1);
+    }
+    // Process the subsections of this section (the individual repos)
+    KeyList keys;
+    if (processSections( cf, repo_sect, keys ) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
+                        ACE_TEXT("too many nesting layers in the [repo] section.\n")),
+                       -1);
+    }
+
+    // Loop through the [repo/*] sections
+    for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
+      std::string repo_name = (*it).first;
+
+      ValueMap values;
+      pullValues( cf, (*it).second, values );
+      Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
+      bool repoKeySpecified = false, bitIpSpecified = false,
+        bitPortSpecified = false;
+      std::string repoIor;
+      int bitPort = 0;
+      std::string bitIp;
+      for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
+        std::string name = (*it).first;
+        if (name == "RepositoryKey") {
+          repoKey = (*it).second;
+          repoKeySpecified = true;
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [repository/%C]: RepositoryKey == %C\n"),
+                       repo_name.c_str(), repoKey.c_str()));
+          }
+
+        } else if (name == "RepositoryIor") {
+          repoIor = (*it).second;
+
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [repository/%C]: RepositoryIor == %C\n"),
+                       repo_name.c_str(), repoIor.c_str()));
+          }
+        } else if (name == "DCPSBitTransportIPAddress") {
+          bitIp = (*it).second;
+          bitIpSpecified = true;
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportIPAddress == %C\n"),
+                       repo_name.c_str(), bitIp.c_str()));
+          }
+        } else if (name == "DCPSBitTransportPort") {
+          std::string value = (*it).second;
+          bitPort = ACE_OS::atoi(value.c_str());
+          bitPortSpecified = true;
+          if (convertToInteger(value, bitPort)) {
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Illegal integer value for DCPSBitTransportPort (%C) in [repository/%C] section.\n"),
+                              value.c_str(), repo_name.c_str()),
+                             -1);
+          }
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportPort == %d\n"),
+                       repo_name.c_str(), bitPort));
+          }
+        } else {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
+                            ACE_TEXT("Unexpected entry (%C) in [repository/%C] section.\n"),
+                            name.c_str(), repo_name.c_str()),
+                           -1);
+        }
+      }
+
+      if (values.find("RepositoryIor") == values.end()) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) InfoRepoDiscovery::Config::discovery_config ")
+                          ACE_TEXT("Repository section [repository/%C] section is missing RepositoryIor value.\n"),
+                          repo_name.c_str()),
+                         -1);
+      }
+
+      if (!repoKeySpecified) {
+        // If the RepositoryKey option was not specified, use the section
+        // name as the repo key
+        repoKey = repo_name;
+      }
+      InfoRepoDiscovery_rch discovery =
+        new InfoRepoDiscovery(repoKey, repoIor.c_str());
+      if (bitPortSpecified) discovery->bit_transport_port(bitPort);
+      if (bitIpSpecified) discovery->bit_transport_ip(bitIp);
+      TheServiceParticipant->add_discovery(
+        DCPS::static_rchandle_cast<Discovery>(discovery));
+    }
+  }
+
+  return 0;
+}
+
+InfoRepoDiscovery::StaticInitializer::StaticInitializer()
+{
+  TheServiceParticipant->register_discovery_type("repository", new Config);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

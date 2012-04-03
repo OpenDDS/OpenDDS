@@ -189,6 +189,9 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
 }
 #endif
 
+Discovery::Config::~Config()
+{
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

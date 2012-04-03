@@ -9,9 +9,11 @@
 #ifndef OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
 #define OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
 
-#include "Discovery.h"
+#include "dds/DCPS/Discovery.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
+
+#include "InfoRepoDiscovery_Export.h"
 
 #include <string>
 
@@ -33,7 +35,7 @@ class FailoverListener;
  * discovery.
  *
  */
-class OpenDDS_Dcps_Export InfoRepoDiscovery : public Discovery {
+class OpenDDS_InfoRepoDiscovery_Export InfoRepoDiscovery : public Discovery {
 public:
   InfoRepoDiscovery(const RepoKey& key, const std::string& ior);
   virtual ~InfoRepoDiscovery();
@@ -75,7 +77,20 @@ private:
 
   /// Listener to initiate failover with.
   FailoverListener*    failoverListener_;
+
+public:
+  class Config : public Discovery::Config {
+  public:
+    int discovery_config(ACE_Configuration_Heap& cf);
+  };
+
+  class OpenDDS_InfoRepoDiscovery_Export StaticInitializer {
+  public:
+    StaticInitializer();
+  };
 };
+
+static InfoRepoDiscovery::StaticInitializer initialize_inforepodisco;
 
 typedef RcHandle<InfoRepoDiscovery> InfoRepoDiscovery_rch;
 

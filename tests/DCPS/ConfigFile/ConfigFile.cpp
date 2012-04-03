@@ -17,6 +17,7 @@
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
 
 #ifdef ACE_AS_STATIC_LIBS

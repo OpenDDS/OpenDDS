@@ -15,7 +15,6 @@
 #include "GuidConverter.h"
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
-#include "InfoRepoDiscovery.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
@@ -121,6 +120,11 @@ Service_Participant::Service_Participant()
 
 Service_Participant::~Service_Participant()
 {
+  typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
+  for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
+    delete it->second;
+  }
+
   delete monitor_;
 }
 
@@ -418,13 +422,13 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_debug_level = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInfoRepo"))) != 0) {
-      InfoRepoDiscovery_rch discovery = this->set_repo_ior(currentArg, Discovery::DEFAULT_REPO);
+      this->set_repo_ior(currentArg, Discovery::DEFAULT_REPO);
       arg_shifter.consume_arg();
       got_info = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInfo"))) != 0) {
       // Deprecated, use -DCPSInfoRepo
-      InfoRepoDiscovery_rch discovery = this->set_repo_ior(currentArg, Discovery::DEFAULT_REPO);
+      this->set_repo_ior(currentArg, Discovery::DEFAULT_REPO);
       arg_shifter.consume_arg();
       got_info = true;
 
@@ -742,16 +746,16 @@ Service_Participant::initializeScheduling()
 }
 
 #ifdef DDS_HAS_WCHAR
-InfoRepoDiscovery_rch
+bool
 Service_Participant::set_repo_ior(const wchar_t* ior,
                                   Discovery::RepoKey key,
-                                  bool  attach_participant)
+                                  bool attach_participant)
 {
   return set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key, attach_participant);
 }
 #endif
 
-InfoRepoDiscovery_rch
+bool
 Service_Participant::set_repo_ior(const char* ior,
                                   Discovery::RepoKey key,
                                   bool attach_participant)
@@ -770,15 +774,28 @@ Service_Participant::set_repo_ior(const char* ior,
     key = Discovery::DEFAULT_REPO;
   }
 
-  // If we made it this far, the IOR is valid, so store the key/IOR
-  // mapping for informational purposes.
-  //this->keyIorMap_[ key] = ior;
-  InfoRepoDiscovery_rch discovery = new InfoRepoDiscovery(key, ior);
-  this->add_discovery(dynamic_rchandle_cast<Discovery, InfoRepoDiscovery>(discovery));
-  DCPSInfo_var repo = discovery->get_dcps_info();
+  const std::string repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
+  if (discovery_types_.count(repo_type)) {
+    ACE_Configuration_Heap cf;
+    ACE_Configuration_Section_Key sect_key;
+    ACE_TString section = REPO_SECTION_NAME;
+    section += ACE_TEXT('\\');
+    section += ACE_TEXT_CHAR_TO_TCHAR(key.c_str());
+    cf.open_section(cf.root_section(), section.c_str(), 1 /*create*/, sect_key);
+    cf.set_string_value(sect_key, ACE_TEXT("RepositoryIor"),
+                        ACE_TEXT_CHAR_TO_TCHAR(ior));
 
-  this->remap_domains(key, key, attach_participant);
-  return discovery;
+    discovery_types_[repo_type]->discovery_config(cf);
+
+    this->remap_domains(key, key, attach_participant);
+    return true;
+  }
+
+  ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior ")
+                    ACE_TEXT("ERROR - no discovery type registered for ")
+                    ACE_TEXT("InfoRepoDiscovery\n")),
+                   false);
 }
 
 void
@@ -1049,9 +1066,9 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         (repo == "-1")) {
       // Set the default repository IOR if it hasn't already happened
       // by this point.  This is why this can't be const.
-      InfoRepoDiscovery_rch discovery = this->set_repo_ior(DEFAULT_REPO_IOR, Discovery::DEFAULT_REPO);
+      bool ok = this->set_repo_ior(DEFAULT_REPO_IOR, Discovery::DEFAULT_REPO);
 
-      if (discovery == 0) {
+      if (!ok) {
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
@@ -1069,22 +1086,13 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         }
 
       }
-      return dynamic_rchandle_cast<Discovery, InfoRepoDiscovery>(discovery);
+      return this->discoveryMap_[Discovery::DEFAULT_REPO];
 
     } else if (repo == Discovery::DEFAULT_RTPS) {
 
-      if (rtps_discovery_config == 0) {
-        // See if we can dynamically load the RTPS transport and libraries
-        TheTransportRegistry->load_transport_lib("rtps_udp");
-      }
-
-      if (rtps_discovery_config != 0) {
-        // RTPS code is loaded, process options (should cause default RTPS
-        // config to be loaded).
-        ACE_Configuration_Heap cf;
-        cf.open();
-        rtps_discovery_config(cf);
-      }
+      ACE_Configuration_Heap cf;
+      cf.open();
+      load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
       // Try to find it again
       location = this->discoveryMap_.find(Discovery::DEFAULT_RTPS);
@@ -1219,6 +1227,13 @@ Service_Participant::liveliness_factor() const
   return liveliness_factor_;
 }
 
+void
+Service_Participant::register_discovery_type(const char* section_name,
+                                             Discovery::Config* cfg)
+{
+  discovery_types_[section_name] = cfg;
+}
+
 int
 Service_Participant::load_configuration()
 {
@@ -1252,22 +1267,22 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = load_rtps_discovery_configuration(this->cf_);
+  status = this->load_discovery_configuration(this->cf_, RTPS_SECTION_NAME);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_rtps_discovery_configuration () returned %d\n"),
+                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
                       status),
                      -1);
   }
 
-  status = this->load_repo_configuration(this->cf_);
+  status = this->load_discovery_configuration(this->cf_, REPO_SECTION_NAME);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_repo_configuration () returned %d\n"),
+                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
                       status),
                      -1);
   }
@@ -1343,7 +1358,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
       ACE_TString value;
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSInfoRepo"), value)
       if (!value.empty()) {
-        InfoRepoDiscovery_rch discovery = this->set_repo_ior(value.c_str(), Discovery::DEFAULT_REPO);
+        this->set_repo_ior(value.c_str(), Discovery::DEFAULT_REPO);
       }
     }
 
@@ -1591,150 +1606,33 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
 }
 
 int
-Service_Participant::load_repo_configuration(ACE_Configuration_Heap& cf)
+Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
+                                                  const ACE_TCHAR* section_name)
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
-  ACE_Configuration_Section_Key repo_sect;
+  ACE_Configuration_Section_Key sect;
+  if (cf.open_section(root, section_name, 0, sect) == 0) {
 
-  if (cf.open_section(root, REPO_SECTION_NAME, 0, repo_sect) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any repository (sub)section. The code default configuration will be used.
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_repo_configuration ")
-                 ACE_TEXT("failed to open [%s] section.\n"),
-                 REPO_SECTION_NAME));
+    const std::string sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
+    std::map<std::string, Discovery::Config*>::iterator iter =
+      discovery_types_.find(sect_name);
+
+    if (iter == discovery_types_.end()) {
+      // See if we can dynamically load the required libraries
+      TheTransportRegistry->load_transport_lib(sect_name);
+      iter = discovery_types_.find(sect_name);
     }
 
-    return 0;
-
-  } else {
-    // Ensure there are no properties in this section
-    ValueMap vm;
-    if (pullValues(cf, repo_sect, vm) > 0) {
-      // There are values inside [repo]
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                        ACE_TEXT("repo sections must have a subsection name\n")),
-                       -1);
-    }
-    // Process the subsections of this section (the individual repos)
-    KeyList keys;
-    if (processSections( cf, repo_sect, keys ) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                        ACE_TEXT("too many nesting layers in the [repo] section.\n")),
-                       -1);
-    }
-
-    // Loop through the [repo/*] sections
-    for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-      std::string repo_name = (*it).first;
-
-      ValueMap values;
-      pullValues( cf, (*it).second, values );
-      Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
-      bool repoKeySpecified = false, bitIpSpecified = false,
-        bitPortSpecified = false;
-      std::string repoIor;
-      int bitPort = 0;
-      std::string bitIp;
-      for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-        std::string name = (*it).first;
-        if (name == "RepositoryKey") {
-          repoKey = (*it).second;
-          repoKeySpecified = true;
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: RepositoryKey == %C\n"),
-                       repo_name.c_str(), repoKey.c_str()));
-          }
-
-        } else if (name == "RepositoryIor") {
-          repoIor = (*it).second;
-
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: RepositoryIor == %C\n"),
-                       repo_name.c_str(), repoIor.c_str()));
-          }
-        } else if (name == "DCPSBitTransportIPAddress") {
-          bitIp = (*it).second;
-          bitIpSpecified = true;
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportIPAddress == %C\n"),
-                       repo_name.c_str(), bitIp.c_str()));
-          }
-        } else if (name == "DCPSBitTransportPort") {
-          std::string value = (*it).second;
-          bitPort = ACE_OS::atoi(value.c_str());
-          bitPortSpecified = true;
-          if (convertToInteger(value, bitPort)) {
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                              ACE_TEXT("Illegal integer value for DCPSBitTransportPort (%C) in [repository/%C] section.\n"),
-                              value.c_str(), repo_name.c_str()),
-                             -1);
-          }
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [repository/%C]: DCPSBitTransportPort == %d\n"),
-                       repo_name.c_str(), bitPort));
-          }
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                            ACE_TEXT("Unexpected entry (%C) in [repository/%C] section.\n"),
-                            name.c_str(), repo_name.c_str()),
-                           -1);
-        }
-      }
-
-      if (values.find("RepositoryIor") == values.end()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration(): ")
-                          ACE_TEXT("Repository section [repository/%C] section is missing RepositoryIor value.\n"),
-                          repo_name.c_str()),
-                         -1);
-      }
-
-      if (!repoKeySpecified) {
-        // If the RepositoryKey option was not specified, use the section
-        // name as the repo key
-        repoKey = repo_name;
-      }
-      InfoRepoDiscovery_rch discovery = this->set_repo_ior(repoIor.c_str(), repoKey);
-      if (bitPortSpecified) discovery->bit_transport_port(bitPort);
-      if (bitIpSpecified) discovery->bit_transport_ip(bitIp);
-    }
-  }
-
-  return 0;
-}
-
-int
-Service_Participant::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
-{
-  const ACE_Configuration_Section_Key &root = cf.root_section();
-  ACE_Configuration_Section_Key rtps_sect;
-  if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
-    // There is an RTPS section to process
-
-    if (rtps_discovery_config == 0) {
-      // See if we can dynamically load the RTPS transport and libraries
-      TheTransportRegistry->load_transport_lib("rtps_udp");
-    }
-
-    if (rtps_discovery_config != 0) {
-      // RTPS code is loaded, process options
-      return rtps_discovery_config(cf);
+    if (iter != discovery_types_.end()) {
+      // discovery code is loaded, process options
+      return iter->second->discovery_config(cf);
     } else {
-      // No RTPS code can be loaded, report an error
+      // No discovery code can be loaded, report an error
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_rtps_discovery_configuration ")
-                        ACE_TEXT("Unable to load RTPS libraries\n")),
+                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
+                        ACE_TEXT("load_discovery_configuration ")
+                        ACE_TEXT("Unable to load libraries for %s\n"),
+                        section_name),
                        -1);
     }
   }
@@ -1818,8 +1716,6 @@ Service_Participant::domainRepoMap() const
 {
   return this->domainRepoMap_;
 }
-
-int (*rtps_discovery_config)(ACE_Configuration_Heap& cf) = 0;
 
 } // namespace DCPS
 } // namespace OpenDDS

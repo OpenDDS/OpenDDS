@@ -19,6 +19,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+class ACE_Configuration_Heap;
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -55,6 +57,12 @@ public:
                                     const DDS::BuiltinTopicKey_t& key) const = 0;
 
   RepoKey key() const { return this->key_; }
+
+  class OpenDDS_Dcps_Export Config {
+  public:
+    virtual ~Config();
+    virtual int discovery_config(ACE_Configuration_Heap& cf) = 0;
+  };
 
 protected:
 #ifndef DDS_HAS_MINIMUM_BIT

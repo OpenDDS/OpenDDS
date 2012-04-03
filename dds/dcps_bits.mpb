@@ -1,4 +1,4 @@
-// This .mpb represents the parts of the DdsDcps project that depend on whether
+// This .mpb represents the parts of the OpenDDS_Dcps project that depend on whether
 // or not the built_in_topics feature is enabled (which it is by default).
 
 feature (built_in_topics): dcps_ts_defaults, taoidldefaults {

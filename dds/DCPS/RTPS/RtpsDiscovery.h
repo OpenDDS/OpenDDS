@@ -107,18 +107,20 @@ private:
   bool sedp_multicast_;
   AddrVec spdp_send_addrs_;
 
-  static int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
-
 public:
-  class StaticInitializer {
+  class Config : public Discovery::Config {
   public:
-    StaticInitializer() {
-      OpenDDS::DCPS::rtps_discovery_config = RtpsDiscovery::load_rtps_discovery_configuration;
-    }
+    int discovery_config(ACE_Configuration_Heap& cf);
+  };
+
+  class OpenDDS_Rtps_Export StaticInitializer {
+  public:
+    StaticInitializer();
   };
 };
 
 static RtpsDiscovery::StaticInitializer initialize_rtps;
+
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscovery> RtpsDiscovery_rch;
 
 } // namespace RTPS

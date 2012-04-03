@@ -19,7 +19,6 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/InfoRepoDiscovery.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -216,17 +215,15 @@ public:
   ///
   void add_discovery(Discovery_rch discovery);
 
-  /// Load DCPSInfoRepo IORs.
-  // CORBA strings are narrow so ior is const char* not ACE_TCHAR
-  InfoRepoDiscovery_rch set_repo_ior(const char* ior,
-                                     Discovery::RepoKey key = Discovery::DEFAULT_REPO,
-                                     bool  attach_participant = true);
+  bool set_repo_ior(const char* ior,
+                    Discovery::RepoKey key = Discovery::DEFAULT_REPO,
+                    bool attach_participant = true);
 
 #ifdef DDS_HAS_WCHAR
   /// Convenience overload for wchar_t
-  InfoRepoDiscovery_rch  set_repo_ior(const wchar_t* ior,
-                                      Discovery::RepoKey key = Discovery::DEFAULT_REPO,
-                                      bool  attach_participant = true);
+  bool set_repo_ior(const wchar_t* ior,
+                    Discovery::RepoKey key = Discovery::DEFAULT_REPO,
+                    bool attach_participant = true);
 #endif
 
   /// Rebind a domain from one repository to another.
@@ -339,6 +336,8 @@ public:
   typedef std::map<DDS::DomainId_t, Discovery::RepoKey> DomainRepoMap;
   const DomainRepoMap& domainRepoMap() const;
 
+  void register_discovery_type(const char* section_name,
+                               Discovery::Config* cfg);
 private:
 
   /// Initalize default qos.
@@ -378,18 +377,13 @@ private:
   int load_domain_configuration(ACE_Configuration_Heap& cf);
 
   /**
-   * Load the repository configuration to the Service_Participant
+   * Load the discovery configuration to the Service_Participant
    * singleton.
    */
-  int load_repo_configuration(ACE_Configuration_Heap& cf);
+  int load_discovery_configuration(ACE_Configuration_Heap& cf,
+                                   const ACE_TCHAR* section_name);
 
-  /**
-   * Load the RTPS discovery configuration to the Service_Participant
-   * singleton.
-   */
-  int load_rtps_discovery_configuration(ACE_Configuration_Heap& cf);
-
-// public:
+  std::map<std::string, Discovery::Config*> discovery_types_;
 
   /// The orb object reference which can be provided by client or
   /// initialized by this sigleton.
@@ -605,8 +599,6 @@ void deactivate_remote_object(T obj)
     poa->reference_to_id(obj);
   poa->deactivate_object(oid.in());
 }
-
-OpenDDS_Dcps_Export extern int (*rtps_discovery_config)(ACE_Configuration_Heap& cf);
 
 } // namespace DCPS
 } // namespace OpenDDS

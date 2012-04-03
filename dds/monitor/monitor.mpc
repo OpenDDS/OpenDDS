@@ -1,4 +1,4 @@
-project : dcps, install {
+project(OpenDDS_monitor) : dcps, install {
   sharedname   = OpenDDS_monitor
   dynamicflags = MONITOR_BUILD_DLL
 
