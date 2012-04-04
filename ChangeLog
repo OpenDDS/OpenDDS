@@ -1,3 +1,12 @@
+Wed Apr  4 18:27:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+          For the new async_send option, only create one ACE_Asynch_Write_Dgram
+          object and make it a member of the MulticastSendStrategy class so
+          it can attempt to cancel I/O during transport shutdown.
+
 Wed Apr  4 15:42:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:

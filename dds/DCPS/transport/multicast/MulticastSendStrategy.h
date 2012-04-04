@@ -50,6 +50,11 @@ protected:
 
 private:
   MulticastDataLink* link_;
+
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
+  ACE_Asynch_Write_Dgram async_writer_;
+  bool async_init_;
+#endif
 };
 
 } // namespace DCPS
