@@ -17,7 +17,6 @@ use Cwd;
 use File::Path;
 use File::Find;
 
-my %infos = ();
 my %excludes = ();
 my $output = '$DDS_ROOT/coverage_report';
 my $gcov_tool = 'gcov';
@@ -25,8 +24,6 @@ my $verbose = 0;
 my $source_root = $DDS_ROOT;
 my $run_dir = $DDS_ROOT;
 my $limit;
-my $staging = "";
-my $staging_search;
 
 sub traverse {
     my $params = shift;
@@ -34,7 +31,7 @@ sub traverse {
     my $depth = shift;
 
     if (!defined($dir)) {
-      $dir = "$run_dir$staging";
+      $dir = "$run_dir";
     }
     if (!defined($depth)) {
       $depth = 1;
@@ -132,6 +129,18 @@ sub yesterday
     exit 0;
 }
 
+sub clean_path {
+    my $path = shift;
+    $path =~ s/\\+/\//g;
+    $path =~ s/\/+/\//g;
+    $path =~ s/\/\.\//\//g;
+    $path =~ s/\/[^\/]+\/\.\.\//\//g;
+    $path =~ s/\/\.$//g;
+    $path =~ s/\/$//g;
+    $path =~ s/^\.\///g;
+    return $path;
+}
+
 my %days = ();
 my $cleanup_only = 0;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
@@ -147,9 +156,6 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif (($arg eq "-gcov_tool") && (++$i <= $#ARGV)) {
         $gcov_tool = $ARGV[$i];
-    }
-    elsif (($arg eq "-s" || $arg eq "-staging") && (++$i <= $#ARGV)) {
-        $staging = "/$ARGV[$i]";
     }
     elsif (($arg eq "-x" || $arg eq "-exclude") && (++$i <= $#ARGV)) {
         $excludes{$ARGV[$i]} = 1;
@@ -192,26 +198,19 @@ if (keys(%days) > 0) {
     }
 }
 
+if (!defined($source_root) || $source_root eq "") {
+    $source_root = $run_dir;
+}
+elsif (!defined($run_dir) || $run_dir eq "") {
+    $run_dir = $source_root;
+}
+
 if ($cleanup_only) {
-    print "Coverage removing *.gcda\n" if $verbose;
+    print "Coverage: removing *.gcda\n" if $verbose;
     # traverse $run_dir and remove all *.gcda files
     traverse( { 'file_function' => \&removeFiles, 'extension' => 'gcda' });
 
     exit 1;
-}
-
-print "Collect Coverage Data\n";
-
-sub clean_path {
-    my $path = shift;
-    $path =~ s/\\+/\//g;
-    $path =~ s/\/+/\//g;
-    $path =~ s/\/\.\//\//g;
-    $path =~ s/\/[^\/]+\/\.\.\//\//g;
-    $path =~ s/\/\.$//g;
-    $path =~ s/\/$//g;
-    $path =~ s/^\.\///g;
-    return $path;
 }
 
 if (defined($limit)) {
@@ -219,19 +218,11 @@ if (defined($limit)) {
     clean_path($limit);
 }
 
-if (defined($staging)) {
-    clean_path($staging);
-    $staging_search = $staging;
-    $staging_search =~ s/\//\\\//g;
-    # add the staging subdirectory
-    $staging_search .= "\\/[^\\/]+\\/";
-}
-
-print "source_root=$source_root\n" if $verbose;
-print "run_dir=$run_dir\n" if $verbose;
-print "verbose=$verbose\n" if $verbose;
-print "output=$output\n" if $verbose;
-print "limit=$limit\n" if $verbose && defined($limit);
+print "  source_root=$source_root\n" if $verbose;
+print "  run_dir=$run_dir\n" if $verbose;
+print "  verbose=$verbose\n" if $verbose;
+print "  output=$output\n" if $verbose;
+print "  limit=$limit\n" if $verbose && defined($limit);
 
 print "Coverage: removing *.info\n" if $verbose;
 # traverse $run_dir and remove all *.info files
@@ -253,9 +244,7 @@ if (!open(NO_COV_FILE, ">", "$no_cov_filename")) {
 traverse({ 'dir_function' => \&findNoCoverage,
            'no_cov_fh' => \*NO_COV_FILE });
 close(NO_COV_FILE);
-# createInfo accounts for .*obj directories, so don't traverse
-$excludes{".obj"} = 1;
-$excludes{".shobj"} = 1;
+
 # use lcov to convert *.gcda files into a *.info file
 my $status = system("lcov --capture --gcov-tool $gcov_tool --base-directory $source_dir " .
                     " --directory $run_dir --output-file $run_dir/all_cov.info");
