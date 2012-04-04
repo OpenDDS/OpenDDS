@@ -16,9 +16,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/tcp/Tcp.h>
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 #include <ace/streams.h>
 #include "ace/High_Res_Timer.h"

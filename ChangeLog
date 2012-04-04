@@ -1,3 +1,71 @@
+Wed Apr  4 21:45:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticIncludes.h:
+
+          Allow dynamic loading of InfoRepoDiscovery in its own library.
+
+        * dds/DCPS/InfoRepoDiscovery:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          New library for InfoRepoDiscovery.
+
+        * MPC/config/dcpsexe.mpb:
+
+          Link the InfoRepoDiscovery library as well.  Needed for static builds.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Use a more general mechanism for loading new discovery libraries.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Re-use the code for dynamic transport library loading for
+          discovery libraries as well.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Use the new InfoRepoDiscovery library.
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits.mpb:
+        * dds/monitor/monitor.mpc:
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcps_inforepodiscovery.mpb:
+        * MPC/config/dcps_lem_stub.mpb:
+        * MPC/config/dcps_monitor.mpb:
+        * MPC/config/dcps_rtps.mpb:
+
+          Use a consistent project naming convention for all core libraries.
+
+        * DevGuideExamples/DCPS/*/Publisher.cpp:
+        * DevGuideExamples/DCPS/*/Subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * examples/DCPS/ishapes/main.cpp:
+        * performance-tests/Bench/src/testprocess.cpp:
+        * performance-tests/DCPS/*/publisher.cpp:
+        * performance-tests/DCPS/*/subscriber.cpp:
+        * tests/DCPS/*:
+
+          Replaced the #include of Tcp.h that was conditional on
+          ACE_AS_STATIC_LIBS with an #include of a new header, StaticIncludes.h,
+          where we can centrally manage what needs to get #included for a static
+          build.
+
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+
+          Removed these files.  They have been moved to InfoRepoDiscovery.
+
 Wed Apr  4 18:27:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastSendStrategy.h:

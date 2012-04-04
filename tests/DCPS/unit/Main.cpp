@@ -12,9 +12,7 @@
 #include "MyTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"
 
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 #include "tao/ORB_Core.h"
 #include "ace/Get_Opt.h"

@@ -10,8 +10,8 @@
 #define FAILOVERLISTENER_T_H
 
 #include "dds/DdsDcpsSubscriptionExtC.h"
-#include "Definitions.h"
-#include "Discovery.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Discovery.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

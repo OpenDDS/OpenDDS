@@ -12,9 +12,7 @@
 #include <model/Sync.h>
 #include <stdexcept>
 
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/tcp/Tcp.h>
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 using namespace examples::boilerplate;
 

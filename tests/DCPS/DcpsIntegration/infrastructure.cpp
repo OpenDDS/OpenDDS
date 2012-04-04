@@ -4,9 +4,7 @@
 #include  "dds/DCPS/Marked_Default_Qos.h"
 #include  "dds/DCPS/Qos_Helper.h"
 
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/Arg_Shifter.h"
 

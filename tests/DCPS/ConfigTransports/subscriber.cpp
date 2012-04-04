@@ -19,9 +19,7 @@
 
 #include "dds/DCPS/Service_Participant.h"
 
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 #include "../common/TestSupport.h"
 #include "../FooType4/FooDefTypeSupportImpl.h"

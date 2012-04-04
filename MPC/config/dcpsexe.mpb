@@ -1,5 +1,5 @@
 // -*- MPC -*-
 // $Id$
 
-project : taoexe, dcps {
+project : taoexe, dcps, dcps_inforepodiscovery {
 }

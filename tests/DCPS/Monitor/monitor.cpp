@@ -17,9 +17,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/tcp/Tcp.h>
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 #include "SPMDataReaderListener.h"
 #include "DPMDataReaderListener.h"

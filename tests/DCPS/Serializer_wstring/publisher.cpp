@@ -18,9 +18,7 @@
 #include <ace/OS_main.h>
 #include <ace/streams.h>
 
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/tcp/Tcp.h>
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 using namespace Messenger;
 

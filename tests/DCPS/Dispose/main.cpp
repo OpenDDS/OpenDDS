@@ -16,9 +16,7 @@
 
 #include "FooTypeTypeSupportImpl.h"
 
-#ifdef ACE_AS_STATIC_LIBS
-# include <dds/DCPS/transport/tcp/Tcp.h>
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 class DDS_TEST
 {

@@ -7,6 +7,11 @@
  */
 
 #include "DCPSInfoRepoServ.h"
+
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
+#endif
+
 #include "tao/ORB_Core.h"
 
 #include <iostream>

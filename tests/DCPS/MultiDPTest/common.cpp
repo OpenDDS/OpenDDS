@@ -4,9 +4,7 @@
 
 #include "common.h"
 
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 const char* type_name = "Foo";
 int num_datawriters = 2;

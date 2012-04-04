@@ -10,9 +10,7 @@
 #include <ace/OS_NS_string.h>
 #include <ace/OS_main.h>
 
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/tcp/Tcp.h>
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 #include "TestCase.h"
 

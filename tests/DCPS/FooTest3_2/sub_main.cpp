@@ -2,9 +2,7 @@
 #include "TestException.h"
 #include "ace/Log_Msg.h"
 
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])

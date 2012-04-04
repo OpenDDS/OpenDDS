@@ -3,5 +3,5 @@
 
 project {
   libs  += OpenDDS_monitor
-  after += monitor
+  after += OpenDDS_monitor
 }

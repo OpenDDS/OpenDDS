@@ -13,8 +13,8 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 
+#include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>

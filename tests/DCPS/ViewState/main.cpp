@@ -21,9 +21,7 @@
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/tcp/Tcp.h"
-#endif
+#include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/Arg_Shifter.h"
 

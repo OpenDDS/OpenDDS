@@ -150,10 +150,12 @@ RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
   return bit_subscriber._retn();
 }
 
-static const ACE_TCHAR RTPS_SECTION_NAME[] = ACE_TEXT("rtps_discovery");
+namespace {
+  const ACE_TCHAR RTPS_SECTION_NAME[] = ACE_TEXT("rtps_discovery");
+}
 
 int
-RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
+RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key rtps_sect;
@@ -165,7 +167,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
     if (DCPS::pullValues(cf, rtps_sect, vm) > 0) {
       // There are values inside [rtps_discovery]
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+                        ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                         ACE_TEXT("rtps_discovery sections must have a subsection name\n")),
                        -1);
     }
@@ -173,7 +175,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
     DCPS::KeyList keys;
     if (DCPS::processSections(cf, rtps_sect, keys) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+                        ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                         ACE_TEXT("too many nesting layers in the [rtps] section.\n")),
                        -1);
     }
@@ -200,7 +202,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_resend = DCPS::convertToInteger(value, resend);
           if (!has_resend) {
             ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
               ACE_TEXT("Invalid entry (%C) for ResendPeriod in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
@@ -210,7 +212,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_pb = DCPS::convertToInteger(value, pb);
           if (!has_pb) {
             ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
               ACE_TEXT("Invalid entry (%C) for PB in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
@@ -220,7 +222,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_dg = DCPS::convertToInteger(value, dg);
           if (!has_dg) {
             ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
               ACE_TEXT("Invalid entry (%C) for DG in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
@@ -230,7 +232,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_pg = DCPS::convertToInteger(value, pg);
           if (!has_pg) {
             ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
               ACE_TEXT("Invalid entry (%C) for PG in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
@@ -240,7 +242,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_d0 = DCPS::convertToInteger(value, d0);
           if (!has_d0) {
             ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
               ACE_TEXT("Invalid entry (%C) for D0 in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
@@ -250,7 +252,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_d1 = DCPS::convertToInteger(value, d1);
           if (!has_d1) {
             ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
               ACE_TEXT("Invalid entry (%C) for D1 in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
@@ -260,7 +262,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_dx = DCPS::convertToInteger(value, dx);
           if (!has_dx) {
             ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                ACE_TEXT("Invalid entry (%C) for DX in ")
                ACE_TEXT("[rtps_discovery/%C] section.\n"),
                value.c_str(), rtps_name.c_str()), -1);
@@ -271,7 +273,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           has_sm = DCPS::convertToInteger(value, smInt);
           if (!has_sm) {
             ACE_ERROR_RETURN((LM_ERROR,
-               ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
                ACE_TEXT("Invalid entry (%C) for SedpMulticast in ")
                ACE_TEXT("[rtps_discovery/%C] section.\n"),
                value.c_str(), rtps_name.c_str()), -1);
@@ -288,7 +290,7 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
           } while (i++ != std::string::npos); // skip past comma if there is one
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) RtpsDiscovery::load_rtps_discovery_configuration(): ")
+                            ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                             ACE_TEXT("Unexpected entry (%C) in [rtps_discovery/%C] section.\n"),
                             name.c_str(), rtps_name.c_str()),
                            -1);
@@ -320,6 +322,11 @@ RtpsDiscovery::load_rtps_discovery_configuration(ACE_Configuration_Heap& cf)
   }
 
   return 0;
+}
+
+RtpsDiscovery::StaticInitializer::StaticInitializer()
+{
+  TheServiceParticipant->register_discovery_type("rtps_discovery", new Config);
 }
 
 } // namespace DCPS
