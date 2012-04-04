@@ -20,6 +20,9 @@ MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
                           link->transport_priority(),
                           new NullSynchStrategy),
     link_(link)
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
+  , async_init_(false)
+#endif
 {
   // Multicast will send a SYN (TRANSPORT_CONTROL) before any reservations
   // are made on the DataLink, if the link is "release" it will be dropped.
@@ -51,11 +54,12 @@ ssize_t
 MulticastSendStrategy::async_send(const iovec iov[], int n)
 {
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
-  ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
-  ACE_Asynch_Write_Dgram wd;
-
-  if (-1 == wd.open(*this, socket.get_handle(), 0 /*completion_key*/, this->link_->get_proactor())) {
-    return -1;
+  if (!async_init_) {
+    if (-1 == async_writer_.open(*this, link_->socket().get_handle(), 0 /*completion_key*/,
+                                 link_->get_proactor())) {
+        return -1;
+    }
+    async_init_ = true;
   }
 
   ACE_Message_Block* mb = 0;
@@ -72,7 +76,8 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
   }
 
   size_t bytes_sent = 0;
-  ssize_t result = wd.send(mb, bytes_sent, 0 /*flags*/, this->link_->config()->group_address_);
+  ssize_t result = async_writer_.send(mb, bytes_sent, 0 /*flags*/,
+                                      this->link_->config()->group_address_);
 
   if (result < 0) {
     mb->release();
@@ -91,6 +96,11 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
 void
 MulticastSendStrategy::stop_i()
 {
+#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
+  if (async_init_) {
+    async_writer_.cancel();
+  }
+#endif
 }
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
