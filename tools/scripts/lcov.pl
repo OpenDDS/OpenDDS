@@ -257,10 +257,10 @@ close(NO_COV_FILE);
 $excludes{".obj"} = 1;
 $excludes{".shobj"} = 1;
 # use lcov to convert *.gcda files into a *.info file
-my $status = system("lcov --capture --gcov-tool $gcov_tool --base-directory $source_dir " . 
+my $status = system("lcov --capture --gcov-tool $gcov_tool --base-directory $source_dir " .
                     " --directory $run_dir --output-file $run_dir/all_cov.info");
 if (!$status && defined($limit)) {
-    $status = system("lcov --gcov-tool $gcov_tool --output-file $run_dir/dds_cov.info " . 
+    $status = system("lcov --gcov-tool $gcov_tool --output-file $run_dir/dds_cov.info " .
                      "--extract $run_dir/all_cov.info \"$limit\" ");
 }
 
