@@ -21,7 +21,6 @@ my %infos = ();
 my %excludes = ();
 my $output = '$DDS_ROOT/coverage_report';
 my $gcov_tool = 'gcov';
-my $info_groups = 0;
 my $verbose = 0;
 my $source_root = $DDS_ROOT;
 my $run_dir = $DDS_ROOT;
@@ -117,111 +116,6 @@ sub findNoCoverage
     return 1;
 }
 
-sub createInfo
-{
-    my $params = shift;
-    my $dir = shift;
-
-    print "find *.gcda files in $dir\n" if $verbose;
-    # try all these locations to find *.gcda files
-    my @obj_dirs = ( "$dir/.obj", "$dir/.shobj", "$dir" );
-    foreach my $obj_dir (@obj_dirs) {
-        unless (-d $obj_dir) {
-            next;
-        }
-
-        my $dh;
-        opendir($dh, $obj_dir);
-        # collect all *.gcda files
-        my @entries = sort grep { /\.gcda$/ } readdir($dh);
-        closedir($dh);
-        if (scalar(@entries) > 0) {
-            my $info = "$dir.info";
-            my $initial_info = $info;
-            if (defined($limit)) {
-                $initial_info .= ".tmp";
-            }
-            my $source_dir = $dir;
-            if ($staging ne "") {
-                $source_dir =~ s/$staging_search/\//;
-            }
-            my $status = system("lcov -c --gcov-tool $gcov_tool -b $source_dir -d $obj_dir -o $initial_info");
-            if ($status) {
-                print {$params->{no_cov_fh}} "$dir\n";
-            }
-            elsif (defined($limit)) {
-                $status = system("lcov --gcov-tool $gcov_tool -o $info -e $initial_info \"$limit\"");
-                unlink($initial_info);
-                # if lcov failed, or if there is no coverage
-                # in the code we care about, then remove the file
-                if ($status || -z $info) {
-                    if ($dir =~ /^$limit/) {
-                        print {$params->{no_cov_fh}} "$dir\n";
-                    }
-                    unlink($info);
-                    $status = 1;
-                }
-            }
-            $infos{"$info"} = 1 if $status == 0;
-
-            # don't need to keep looking for *.gcda files in child directories
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-sub combineInfos
-{
-    my @infoKeys = sort { $a cmp $b } keys(%infos);
-    my $size = scalar(@infoKeys);
-    print "combining $size info files\n" if $verbose;
-
-    my $index = 0;
-    my $group;
-    if ($info_groups != 0 && $info_groups < $size) {
-        my @groupedInfos = ();
-        while ($index < $size) {
-            my $addstr = "";
-            my $groupStart = $index;
-            if ($size - $groupStart < $info_groups) {
-                $info_groups = $size - $groupStart;
-            }
-            while (($index - $groupStart) < $info_groups) {
-                $addstr .= " -a $infoKeys[$index]";
-                $index += 1;
-            }
-            $group += 1;
-            my $covFile = "$run_dir/intermediate_cov" . $group . ".info";
-
-            print "\ncombining $info_groups info files $covFile <$addstr>\n if $verbose";
-            my $status = system("lcov -d $source_root $addstr -o $covFile");
-            if ($status == 0) {
-                push(@groupedInfos, $covFile);
-            }
-            else {
-                print STDERR "Failed to create intermediate info file=$covFile <$addstr>\n";
-            }
-        }
-        @infoKeys = ();
-        push(@infoKeys, @groupedInfos);
-    }
-
-    # combining either all info files or the intermediate files
-    my $addstr = "";
-    foreach my $info (@infoKeys) {
-        $addstr .= " -a $info";
-    }
-    my $covFile = "$run_dir/all_cov.info";
-    print "\ncreating $covFile <$addstr>\n" if $verbose;
-    my $status = system("lcov -d $source_root $addstr -o $covFile");
-    if ($status != 0) {
-        print STDERR "Failed to create $covFile <$addstr>\nWill not generate html\n";
-    }
-    return $status;
-}
-
 sub yesterday
 {
     my $day = shift;
@@ -253,9 +147,6 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     }
     elsif (($arg eq "-gcov_tool") && (++$i <= $#ARGV)) {
         $gcov_tool = $ARGV[$i];
-    }
-    elsif (($arg eq "-info_groups") && (++$i <= $#ARGV)) {
-        $info_groups = $ARGV[$i];
     }
     elsif (($arg eq "-s" || $arg eq "-staging") && (++$i <= $#ARGV)) {
         $staging = "/$ARGV[$i]";
@@ -361,13 +252,17 @@ if (!open(NO_COV_FILE, ">", "$no_cov_filename")) {
 }
 traverse({ 'dir_function' => \&findNoCoverage,
            'no_cov_fh' => \*NO_COV_FILE });
+close(NO_COV_FILE);
 # createInfo accounts for .*obj directories, so don't traverse
 $excludes{".obj"} = 1;
 $excludes{".shobj"} = 1;
 # use lcov to convert *.gcda files into a *.info file
-traverse({ 'dir_function' => \&createInfo,
-           'no_cov_fh' => \*NO_COV_FILE });
-close(NO_COV_FILE);
+my $status = system("lcov --capture --gcov-tool $gcov_tool --base-directory $source_dir " . 
+                    " --directory $run_dir --output-file $run_dir/all_cov.info");
+if (!$status && defined($limit)) {
+    $status = system("lcov --gcov-tool $gcov_tool --output-file $run_dir/dds_cov.info " . 
+                     "--extract $run_dir/all_cov.info \"$limit\" ");
+}
 
 if (!open(NO_COV_FILE, "<", "$no_cov_filename")) {
     print STDERR __FILE__, ": Cannot open $no_cov_filename for limiting coverage to root\n";
@@ -378,10 +273,9 @@ if (<NO_COV_FILE>) {
 }
 close(NO_COV_FILE);
 
-print "Coverage: combine all coverage data\n" if $verbose;
-my $status = 0;
-if (!combineInfos($run_dir)) {
+if (!$status) {
     if (-d $output) {
+        print "Coverage: removing old coverage at $output\n" if $verbose;
         rmtree($output, 0, 1);
     }
     my $prefix = "";
@@ -390,17 +284,9 @@ if (!combineInfos($run_dir)) {
         $prefix =~ s/\/[^\/]+\/\*$//;
         $prefix = "--prefix $prefix";
     }
-    my $command = "genhtml $prefix -o $output $run_dir/all_cov.info";
+    my $command = "genhtml $prefix --output-file $output $run_dir/dds_cov.info";
     print "Coverage: generating html <$command>\n" if $verbose;
     $status = system ($command) == 0;
-}
-
-if ($info_groups) {
-    print "Coverage: removing intermediate_cov*.info\n" if $verbose;
-    # traverse $run_dir and remove all intermediate_cov*.info files
-    traverse({ 'file_function' => \&removeFiles,
-               'file_pattern' => '.?intermediate_cov.*',
-               'extension' => 'info' });
 }
 
 exit $status;
