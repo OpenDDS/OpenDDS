@@ -792,25 +792,6 @@ Spdp::association_complete(const RepoId& localId, const RepoId& remoteId)
   sedp_.association_complete(localId, remoteId);
 }
 
-void
-Spdp::disassociate_participant(const RepoId& remoteId)
-{
-  sedp_.disassociate_participant(remoteId);
-}
-
-void
-Spdp::disassociate_publication(const RepoId& localId, const RepoId& remoteId)
-{
-  sedp_.disassociate_publication(localId, remoteId);
-}
-
-void
-Spdp::disassociate_subscription(const RepoId& localId, const RepoId& remoteId)
-{
-  sedp_.disassociate_subscription(localId, remoteId);
-}
-
-
 bool
 Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                          u_short participant_id)

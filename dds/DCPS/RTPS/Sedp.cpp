@@ -1840,25 +1840,6 @@ Sedp::association_complete(const RepoId& localId,
     }
   }
 }
-void
-Sedp::disassociate_participant(const RepoId& /*remoteId*/)
-{
-  // no-op: not called from DCPS
-}
-
-void
-Sedp::disassociate_publication(const RepoId& /*localId*/,
-                               const RepoId& /*remoteId*/)
-{
-  // no-op: not called from DCPS
-}
-
-void
-Sedp::disassociate_subscription(const RepoId& /*localId*/,
-                                const RepoId& /*remoteId*/)
-{
-  // no-op: not called from DCPS
-}
 
 Sedp::Endpoint::~Endpoint()
 {

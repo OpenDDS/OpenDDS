@@ -132,11 +132,6 @@ public:
   // Managing reader/writer associations
   void association_complete(const DCPS::RepoId& localId,
                             const DCPS::RepoId& remoteId);
-  void disassociate_participant(const DCPS::RepoId& remoteId);
-  void disassociate_publication(const DCPS::RepoId& localId,
-                                const DCPS::RepoId& remoteId);
-  void disassociate_subscription(const DCPS::RepoId& localId,
-                                 const DCPS::RepoId& remoteId);
 
   static const bool host_is_bigendian_;
 private:
