@@ -1,3 +1,15 @@
+Wed Apr  4 13:37:30 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        
+          Moved forwarding of dissassociate_* functions to Sedp where 
+          they were a no-op, to just be a no-op in RtpsInfo where
+          the DiscoveryInfo interface requires it.
+
 Mon Apr  2 18:00:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/ReceiveListenerSet.inl:

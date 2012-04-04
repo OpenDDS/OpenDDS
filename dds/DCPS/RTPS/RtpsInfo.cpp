@@ -319,7 +319,7 @@ RtpsInfo::disassociate_participant(DDS::DomainId_t domainId,
                                    const RepoId& localId,
                                    const RepoId& remoteId)
 {
-  get_part(domainId, localId)->disassociate_participant(remoteId);
+  // no-op: not called from DCPS
 }
 
 void
@@ -328,8 +328,7 @@ RtpsInfo::disassociate_subscription(DDS::DomainId_t domainId,
                                     const RepoId& localId,
                                     const RepoId& remoteId)
 {
-  get_part(domainId, participantId)->disassociate_subscription(localId,
-                                                               remoteId);
+  // no-op: not called from DCPS
 }
 
 void
@@ -338,8 +337,7 @@ RtpsInfo::disassociate_publication(DDS::DomainId_t domainId,
                                    const RepoId& localId,
                                    const RepoId& remoteId)
 {
-  get_part(domainId, participantId)->disassociate_publication(localId,
-                                                              remoteId);
+  // no-op: not called from DCPS
 }
 
 

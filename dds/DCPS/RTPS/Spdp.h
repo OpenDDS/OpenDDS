@@ -103,11 +103,6 @@ public:
   // Managing reader/writer associations
   void association_complete(const DCPS::RepoId& localId,
                             const DCPS::RepoId& remoteId);
-  void disassociate_participant(const DCPS::RepoId& remoteId);
-  void disassociate_publication(const DCPS::RepoId& localId,
-                                const DCPS::RepoId& remoteId);
-  void disassociate_subscription(const DCPS::RepoId& localId,
-                                 const DCPS::RepoId& remoteId);
 
   DCPS::RepoId bit_key_to_repo_id(const char* bit_topic_name,
                                   const DDS::BuiltinTopicKey_t& key);
