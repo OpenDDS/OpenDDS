@@ -775,8 +775,15 @@ Service_Participant::set_repo_ior(const char* ior,
   }
 
   const std::string repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
+  if (key == Discovery::DEFAULT_REPO && !discovery_types_.count(repo_type)) {
+    // Re-use a transport registry function to attempt a dynamic load of the
+    // library that implements the 'repo_type' (InfoRepoDiscovery)
+    TheTransportRegistry->load_transport_lib(repo_type);
+  }
+
   if (discovery_types_.count(repo_type)) {
     ACE_Configuration_Heap cf;
+    cf.open();
     ACE_Configuration_Section_Key sect_key;
     ACE_TString section = REPO_SECTION_NAME;
     section += ACE_TEXT('\\');

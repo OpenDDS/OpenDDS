@@ -90,9 +90,21 @@ public:
   };
 };
 
+typedef RcHandle<InfoRepoDiscovery> InfoRepoDiscovery_rch;
+
 static InfoRepoDiscovery::StaticInitializer initialize_inforepodisco;
 
-typedef RcHandle<InfoRepoDiscovery> InfoRepoDiscovery_rch;
+// Support loading this library using the ACE Service Configurator:
+// this is used by TransportRegistry (from Service_Participant).
+
+class OpenDDS_InfoRepoDiscovery_Export IRDiscoveryLoader
+  : public ACE_Service_Object {
+public:
+  virtual int init(int argc, ACE_TCHAR* argv[]);
+};
+
+ACE_STATIC_SVC_DECLARE_EXPORT(OpenDDS_InfoRepoDiscovery, IRDiscoveryLoader)
+ACE_FACTORY_DECLARE(OpenDDS_InfoRepoDiscovery, IRDiscoveryLoader)
 
 } // namespace DCPS
 } // namespace OpenDDS

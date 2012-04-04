@@ -361,5 +361,21 @@ InfoRepoDiscovery::StaticInitializer::StaticInitializer()
   TheServiceParticipant->register_discovery_type("repository", new Config);
 }
 
+int
+IRDiscoveryLoader::init(int, ACE_TCHAR*[])
+{
+  // no-op: since the library is loaded, InfoRepoDiscovery::StaticInitializer
+  // has already been constructed.
+}
+
+ACE_FACTORY_DEFINE(OpenDDS_InfoRepoDiscovery, IRDiscoveryLoader);
+ACE_STATIC_SVC_DEFINE(
+  IRDiscoveryLoader,
+  ACE_TEXT("OpenDDS_InfoRepoDiscovery"),
+  ACE_SVC_OBJ_T,
+  &ACE_SVC_NAME(IRDiscoveryLoader),
+  ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,
+  0)
+
 } // namespace DCPS
 } // namespace OpenDDS

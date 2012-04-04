@@ -66,7 +66,7 @@ OpenDDS::DCPS::TransportRegistry::TransportRegistry()
 
   // load_transport_lib() is used for discovery as well:
   lib_directive_map_["rtps_discovery"] = lib_directive_map_["rtps_udp"];
-  lib_directive_map_["repository"] = "dynamic OpenDDS_InfoRepoDiscovery Service_Object * OpenDDS_InfoRepoDiscovery:_make_InfoRepoDiscoveryLoader()";
+  lib_directive_map_["repository"] = "dynamic OpenDDS_InfoRepoDiscovery Service_Object * OpenDDS_InfoRepoDiscovery:_make_IRDiscoveryLoader()";
 }
 
 int
