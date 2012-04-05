@@ -315,27 +315,27 @@ RtpsInfo::association_complete(DDS::DomainId_t domainId,
 }
 
 void
-RtpsInfo::disassociate_participant(DDS::DomainId_t domainId,
-                                   const RepoId& localId,
-                                   const RepoId& remoteId)
+RtpsInfo::disassociate_participant(DDS::DomainId_t,
+                                   const RepoId&,
+                                   const RepoId&)
 {
   // no-op: not called from DCPS
 }
 
 void
-RtpsInfo::disassociate_subscription(DDS::DomainId_t domainId,
-                                    const RepoId& participantId,
-                                    const RepoId& localId,
-                                    const RepoId& remoteId)
+RtpsInfo::disassociate_subscription(DDS::DomainId_t,
+                                    const RepoId&,
+                                    const RepoId&,
+                                    const RepoId&)
 {
   // no-op: not called from DCPS
 }
 
 void
-RtpsInfo::disassociate_publication(DDS::DomainId_t domainId,
-                                   const RepoId& participantId,
-                                   const RepoId& localId,
-                                   const RepoId& remoteId)
+RtpsInfo::disassociate_publication(DDS::DomainId_t,
+                                   const RepoId&,
+                                   const RepoId&,
+                                   const RepoId&)
 {
   // no-op: not called from DCPS
 }
