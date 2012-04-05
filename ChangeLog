@@ -1,3 +1,30 @@
+Thu Apr  5 15:26:59 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Replaced DataLinkSetMap with the std::map that it used to
+          contain.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+
+          Removed unused check_header(const DataSampleHeader&).
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+
+          Removed these files.
+
+Thu Apr  5 15:25:59 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixed variable name.
+
 Thu Apr  5 13:54:18 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/UnitTests/UnitTests.mpc:
