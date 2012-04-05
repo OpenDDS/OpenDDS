@@ -1,3 +1,9 @@
+Thu Apr  5 13:54:18 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Added needed dependencies for InfoRepoDiscovery.
+
 Thu Apr  5 09:33:18 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/RTPS/RtpsInfo.cpp:
