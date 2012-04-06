@@ -41,10 +41,11 @@ namespace DCPS {
 class  TransportReceiveListener;
 class  TransportSendListener;
 class  TransportQueueElement;
-class  DataLinkSetMap;
 class  ReceivedDataSample;
 struct DataSampleListElement;
 class  ThreadPerConnectionSendTask;
+
+typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
 
 /**
  * This class manages the reservations based on the associations between datareader

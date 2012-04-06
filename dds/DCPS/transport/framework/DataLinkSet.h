@@ -23,7 +23,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TransportSendListener;
-class DataLinkSetMap;
 struct DataSampleListElement;
 
 class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX> {
@@ -32,16 +31,9 @@ public:
   DataLinkSet();
   virtual ~DataLinkSet();
 
-  // ciju: Called with lock held in DataLinkSetMap
   // Returns 0 for success, -1 for failure, and 1 for failure due
   // to duplicate entry (link is already a member of the set).
   int insert_link(DataLink* link);
-
-  // ciju: Called with lock held in DataLinkSetMap
-  /// This method is called to remove a set of DataLinks from this set
-  /// (ie, set subtraction: this set minus released_set).
-  /// Returns the num elems in the set after attempting the operation.
-  ssize_t remove_links(DataLinkSet* released_set);
 
   void remove_link(const DataLink_rch& link);
 
@@ -77,13 +69,6 @@ public:
 
   DataLinkSet* select_links(const RepoId* remoteIds,
                             const CORBA::ULong num_targets);
-
-  /// Find the datalink with association of remote/local ids. If the remote/local
-  /// pair is the only association in the link then the link will be removed
-  /// from the map.
-  DataLink* find_link(const RepoId remoteId,
-                      const RepoId localId,
-                      const bool   pub_side);
 
   bool empty();
 

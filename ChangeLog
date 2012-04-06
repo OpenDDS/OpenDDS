@@ -1,4 +1,8 @@
-Thu Apr  5 15:26:59 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+Fri Apr  6 13:11:11 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+        
+          Cleanup of script.
 
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.cpp:

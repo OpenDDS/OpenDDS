@@ -10,7 +10,6 @@
 #include "DataLink.h"
 #include "RepoIdSet.h"
 
-#include "DataLinkSetMap.h"
 #include "ReceivedDataSample.h"
 
 #include "TransportImpl.h"
@@ -494,7 +493,10 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
         ACE_TEXT("the link has no reservations.\n")), 5);
       this->release_reservations_i(remote_id, local_id);
       this->release_remote_i(remote_id);
-      released_locals.insert_link(local_id, this);
+      DataLinkSet_rch& rel_set = released_locals[local_id];
+      if (!rel_set.in())
+        rel_set = new DataLinkSet;
+      rel_set->insert_link(this);
       return;
     }
 
@@ -813,7 +815,10 @@ DataLink::release_remote_subscriber(RepoId subscriber_id, RepoId publisher_id,
       if ( ret == 1) {
         // This means that this release() operation has caused the
         // publisher_id to no longer be associated with *any* subscribers.
-        released_publishers.insert_link(publisher_id,this);
+        DataLinkSet_rch& rel_set = released_publishers[publisher_id];
+        if (!rel_set.in())
+          rel_set = new DataLinkSet;
+        rel_set->insert_link(this);
         {
           GuardType guard(this->released_local_lock_);
           released_local_pubs_.insert_id(publisher_id, subscriber_id);
@@ -854,7 +859,10 @@ DataLink::release_remote_publisher(RepoId publisher_id, RepoId subscriber_id,
     if (result == 1) {
       // This means that this release() operation has caused the
       // subscriber_id to no longer be associated with *any* publishers.
-      released_subscribers.insert_link(subscriber_id,this);
+      DataLinkSet_rch& rel_set = released_subscribers[subscriber_id];
+      if (!rel_set.in())
+        rel_set = new DataLinkSet;
+      rel_set->insert_link(this);
       {
         GuardType guard(this->released_local_lock_);
         released_local_subs_.insert_id(subscriber_id, publisher_id);

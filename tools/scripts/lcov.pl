@@ -246,7 +246,11 @@ traverse({ 'dir_function' => \&findNoCoverage,
 close(NO_COV_FILE);
 
 # use lcov to convert *.gcda files into a *.info file
-my $status = system("lcov --capture --gcov-tool $gcov_tool --base-directory $source_root " .
+my $base_dir = "";
+if ($source_root ne $run_dir) {
+    $base_dir = "--base-directory $source_root ";
+}
+my $status = system("lcov --capture --gcov-tool $gcov_tool $base_dir" .
                     " --directory $run_dir --output-file $run_dir/all_cov.info");
 if (!$status && defined($limit)) {
     $status = system("lcov --gcov-tool $gcov_tool --output-file $run_dir/dds_cov.info " .
@@ -273,7 +277,7 @@ if (!$status) {
         $prefix =~ s/\/[^\/]+\/\*$//;
         $prefix = "--prefix $prefix";
     }
-    my $command = "genhtml $prefix --output-file $output $run_dir/dds_cov.info";
+    my $command = "genhtml $prefix --output-directory $output $run_dir/dds_cov.info";
     print "Coverage: generating html <$command>\n" if $verbose;
     $status = system ($command) == 0;
 }

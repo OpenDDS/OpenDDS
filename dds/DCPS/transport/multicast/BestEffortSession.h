@@ -23,7 +23,6 @@ public:
                     MulticastPeer remote_peer);
 
   virtual bool check_header(const TransportHeader& header);
-  virtual bool check_header(const DataSampleHeader& header);
 
   virtual bool start(bool active);
 

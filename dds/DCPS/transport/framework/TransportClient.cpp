@@ -13,7 +13,6 @@
 #include "TransportRegistry.h"
 #include "TransportExceptions.h"
 #include "TransportReceiveListener.h"
-#include "DataLinkSetMap.h"
 
 #include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"

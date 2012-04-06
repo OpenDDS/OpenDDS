@@ -42,15 +42,6 @@ BestEffortSession::check_header(const TransportHeader& header)
 }
 
 bool
-BestEffortSession::check_header(const DataSampleHeader& /*header*/)
-{
-  // Assume header is valid; this does not prevent duplicate
-  // delivery of datagrams:
-  return true;
-}
-
-
-bool
 BestEffortSession::start(bool active)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
