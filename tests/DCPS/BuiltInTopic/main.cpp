@@ -24,7 +24,7 @@
 #include "tests/DCPS/common/TestSupport.h"
 
 #if !defined(DDS_HAS_MINIMUM_BIT)
-#include "dds/DCPS/transport/tcp/Tcp.h"
+#include "dds/DCPS/StaticIncludes.h"
 #endif
 
 #include "tao/ORB_Core.h"

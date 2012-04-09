@@ -11,12 +11,11 @@ project(Monitor*idl): dcps_test_lib {
 }
 
 
-project(Monitor*Publisher) : dcpsexe_with_tcp {
+project(Monitor*Publisher): dcpsexe_with_tcp, dcps_monitor {
 
   exename   = publisher
   after    += Monitor*idl
-  after    += monitor
-  libs     += OpenDDS_monitor Monitor*idl
+  libs     += Monitor*idl
 
   Idl_Files {
   }
@@ -27,12 +26,11 @@ project(Monitor*Publisher) : dcpsexe_with_tcp {
   }
 }
 
-project(Monitor*Subscriber) : dcpsexe_with_tcp {
+project(Monitor*Subscriber): dcpsexe_with_tcp, dcps_monitor {
 
   exename   = subscriber
   after    += Monitor*idl
-  after    += monitor
-  libs     += OpenDDS_monitor Monitor*idl
+  libs     += Monitor*idl
 
   Idl_Files {
   }
@@ -43,12 +41,11 @@ project(Monitor*Subscriber) : dcpsexe_with_tcp {
   }
 }
 
-project(Monitor*monitor) : dcpsexe_with_tcp {
+project(Monitor*monitor): dcpsexe_with_tcp, dcps_monitor {
 
   exename   = monitor
   after    += Monitor*idl
-  after    += monitor
-  libs     += OpenDDS_monitor Monitor*idl
+  libs     += Monitor*idl
 
   Idl_Files {
   }

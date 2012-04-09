@@ -19,7 +19,7 @@
 #include "dds/DCPS/Discovery.h"
 #include "dds/DCPS/Service_Participant.h"
 
-#include "dds/DCPS/transport/tcp/Tcp.h"
+#include "dds/DCPS/StaticIncludes.h"
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"

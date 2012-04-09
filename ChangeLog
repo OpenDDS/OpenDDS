@@ -1,7 +1,22 @@
+Mon Apr  9 17:59:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+
+          Corrected #includes needed for static builds.  These were not picked
+          up by the script that changed all of the others last week.
+
+        * tests/DCPS/Monitor/Messenger.mpc:
+
+          Fixed broken references to the monitoring library, caused by
+          this mpc file directly listing the project in 'libs' and 'after'
+          instead of using the provided mpb file.
+
 Fri Apr  6 13:11:11 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
-        
+
           Cleanup of script.
 
         * dds/DCPS/transport/framework/DataLink.h:

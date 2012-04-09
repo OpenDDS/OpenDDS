@@ -16,7 +16,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 
-#include "dds/DCPS/transport/tcp/Tcp.h"
+#include "dds/DCPS/StaticIncludes.h"
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
