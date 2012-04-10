@@ -214,7 +214,7 @@ if ($cleanup_only) {
 }
 
 if (defined($limit)) {
-    $limit = "$source_root/$limit/*";
+    $limit = "$source_root/$limit";
     clean_path($limit);
 }
 
@@ -247,32 +247,81 @@ close(NO_COV_FILE);
 
 my $original_dir;
 # use lcov to convert *.gcda files into a *.info file
-my $base_directory;
-my $operating_dir;
-if ($source_root ne $run_dir) {
-    $base_directory = "--base-directory $source_root ";
-    $operating_dir = $run_dir;
-}
-else {
+my $operating_dir = $run_dir;
+if ($source_root eq $run_dir) {
     $original_dir = getcwd();
     chdir($run_dir);
     $operating_dir = ".";
-    $base_directory = "";
 }
 
-my $output1 = "$operating_dir/final_cov.info";
+my $output1 = "$operating_dir/to_clean_cov.info";
 my $output2 = "";
 if (defined($limit)) {
     $output2 = $output1;
-    $output1 = "$operating_dir/int_cov.info";
+    $output1 = "$operating_dir/to_limit_cov.info";
 }
 
-my $status = system("lcov --capture --gcov-tool $gcov_tool $base_directory" .
-                    "--directory $operating_dir --output-file $output1");
+my $status = system("lcov --capture --gcov-tool $gcov_tool --base-directory $source_root/dds " .
+                    "--directory $operating_dir --output-file $output1 --list-full-path --ignore-errors gcov,source --follow");
 if (!$status && defined($limit)) {
     $status = system("lcov --gcov-tool $gcov_tool --output-file $output2 " .
-                     "--extract $output1 \"$limit\" ");
+                     "--list-full-path --ignore-errors gcov,source --follow --extract $output1 \"$limit/*\" ");
 }
+
+# try to clean up any file paths that lcov got confused on because of relative paths
+my $record = "";
+my $search_str;
+if (defined($limit)) {
+    $search_str = "$limit"
+}
+else {
+    $search_str = "$source_root"
+}
+clean_path($search_str);
+$search_str =~ s/\//\\\//g;
+$search_str =~ s/\./\\\./g;
+if (!open(CLEANED_INFO_FILE, ">", "$operating_dir/final_cov.info")) {
+    print STDERR __FILE__, ": Cannot write to $operating_dir/final_cov.info\n";
+    exit 1;
+}
+if (!open(TO_CLEAN_INFO_FILE, "<", "$operating_dir/to_clean_cov.info")) {
+    print STDERR __FILE__, ": Cannot read from $operating_dir/to_clean_cov.info\n";
+    exit 1;
+}
+while (<TO_CLEAN_INFO_FILE>) {
+    my $line = $_;
+    if ($line =~ /^\s*end_of_record\s*$/) {
+        $record .= "$line\n";
+        print CLEANED_INFO_FILE "$record\n";
+        $record = "";
+        next;
+    }
+    if ($line =~ /^\s*SF:$search_str\/(\S+)\s*$/) {
+        unless (-f "$search_str\/$1") {
+            my $rel_path = $1;
+            my $dir_ss = "";
+            while (1) {
+                $dir_ss .= "[^\/]\/";
+                if ($rel_path !~ /^($dir_ss)/) {
+                    last;
+                }
+                my $base = $1;
+                my $orig_line = $line;
+                if ($line =~ s/^(\s*SF:$search_str\/)$base$base/$1$base/) {
+                    print "cleaned up:\n  $orig_line\nbecomes:\n  $line\n" if $verbose;
+                    last;
+                }
+            }
+        }
+    }
+    $record .= "$line\n";
+}
+close(TO_CLEAN_INFO_FILE);
+if ($record ne "") {
+    print CLEANED_INFO_FILE "$record\n";
+}
+close(CLEANED_INFO_FILE);
+
 
 if (!open(NO_COV_FILE, "<", "$no_cov_filename")) {
     print STDERR __FILE__, ": Cannot open $no_cov_filename for limiting coverage to root\n";
@@ -291,7 +340,7 @@ if (!$status) {
     my $prefix = "";
     if (defined($limit)) {
         $prefix = $limit;
-        $prefix =~ s/\/[^\/]+\/\*$//;
+        $prefix =~ s/\/[^\/]+\/?$//;
         $prefix = "--prefix $prefix";
     }
     my $command = "genhtml $prefix --output-directory $output $operating_dir/final_cov.info";
