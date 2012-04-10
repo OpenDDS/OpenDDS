@@ -245,16 +245,33 @@ traverse({ 'dir_function' => \&findNoCoverage,
            'no_cov_fh' => \*NO_COV_FILE });
 close(NO_COV_FILE);
 
+my $original_dir;
 # use lcov to convert *.gcda files into a *.info file
-my $base_dir = "";
+my $base_directory;
+my $operating_dir;
 if ($source_root ne $run_dir) {
-    $base_dir = "--base-directory $source_root ";
+    $base_directory = "--base-directory $source_root ";
+    $operating_dir = $run_dir;
 }
-my $status = system("lcov --capture --gcov-tool $gcov_tool $base_dir" .
-                    " --directory $run_dir --output-file $run_dir/all_cov.info");
+else {
+    $original_dir = getcwd();
+    chdir($run_dir);
+    $operating_dir = ".";
+    $base_directory = "";
+}
+
+my $output1 = "$operating_dir/final_cov.info";
+my $output2 = "";
+if (defined($limit)) {
+    $output2 = $output1;
+    $output1 = "$operating_dir/int_cov.info";
+}
+
+my $status = system("lcov --capture --gcov-tool $gcov_tool $base_directory" .
+                    "--directory $operating_dir --output-file $output1");
 if (!$status && defined($limit)) {
-    $status = system("lcov --gcov-tool $gcov_tool --output-file $run_dir/dds_cov.info " .
-                     "--extract $run_dir/all_cov.info \"$limit\" ");
+    $status = system("lcov --gcov-tool $gcov_tool --output-file $output2 " .
+                     "--extract $output1 \"$limit\" ");
 }
 
 if (!open(NO_COV_FILE, "<", "$no_cov_filename")) {
@@ -277,9 +294,11 @@ if (!$status) {
         $prefix =~ s/\/[^\/]+\/\*$//;
         $prefix = "--prefix $prefix";
     }
-    my $command = "genhtml $prefix --output-directory $output $run_dir/dds_cov.info";
+    my $command = "genhtml $prefix --output-directory $output $operating_dir/dds_cov.info";
     print "Coverage: generating html <$command>\n" if $verbose;
     $status = system ($command) == 0;
 }
+
+chdir($original_dir) if (defined($original_dir));
 
 exit $status;

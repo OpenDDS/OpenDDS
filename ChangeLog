@@ -1,3 +1,9 @@
+Tue Apr 10 16:08:21 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixing script for nightly build.
+
 Mon Apr  9 17:59:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopic/main.cpp:
