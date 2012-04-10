@@ -294,7 +294,7 @@ if (!$status) {
         $prefix =~ s/\/[^\/]+\/\*$//;
         $prefix = "--prefix $prefix";
     }
-    my $command = "genhtml $prefix --output-directory $output $operating_dir/dds_cov.info";
+    my $command = "genhtml $prefix --output-directory $output $operating_dir/final_cov.info";
     print "Coverage: generating html <$command>\n" if $verbose;
     $status = system ($command) == 0;
 }

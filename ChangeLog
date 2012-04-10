@@ -1,3 +1,9 @@
+Tue Apr 10 17:13:37 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Missed changing info file name.
+
 Tue Apr 10 16:08:21 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
