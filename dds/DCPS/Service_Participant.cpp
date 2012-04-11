@@ -1087,7 +1087,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         // Found the default!
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                      ACE_TEXT("returning default repository for domain %d.\n"),
                      domain));
         }
@@ -1108,7 +1108,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         // Unable to load DEFAULT_RTPS
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                      ACE_TEXT("failed attempt to set default RTPS discovery for domain %d.\n"),
                      domain));
         }
@@ -1119,7 +1119,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         // Found the default!
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                      ACE_TEXT("returning default RTPS discovery for domain %d.\n"),
                      domain));
         }
@@ -1131,7 +1131,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
       // Non-default repositories _must_ be loaded by application.
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                   ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                    ACE_TEXT("repository for domain %d was not set.\n"),
                    domain));
       }
@@ -1142,7 +1142,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+               ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                ACE_TEXT("returning repository for domain %d, repo %C.\n"),
                domain, repo.c_str()));
   }

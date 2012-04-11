@@ -53,7 +53,7 @@ InfoRepoDiscovery::get_dcps_info()
 
       if (CORBA::is_nil(this->info_.in())) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::get_repository: ")
+                   ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::get_dcps_info: ")
                    ACE_TEXT("unable to narrow DCPSInfo (%C) for key %C.\n"),
                    this->ior_.c_str(),
                    this->key().c_str()));
@@ -61,7 +61,7 @@ InfoRepoDiscovery::get_dcps_info()
       }
 
     } catch (const CORBA::Exception& ex) {
-      ex._tao_print_exception("ERROR: InfoRepoDiscovery::get_repository: failed to resolve ior - ");
+      ex._tao_print_exception("ERROR: InfoRepoDiscovery::get_dcps_info: failed to resolve ior - ");
       return DCPSInfo::_nil();
     }
   }
