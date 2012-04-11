@@ -3061,7 +3061,7 @@ void DataReaderImpl::reschedule_deadline()
   }
 }
 
-ACE_Reactor*
+ACE_Reactor_Timer_Interface*
 DataReaderImpl::get_reactor()
 {
   return this->reactor_;

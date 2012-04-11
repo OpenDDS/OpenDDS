@@ -475,7 +475,7 @@ public:
   // Reset time interval for each instance.
   void reschedule_deadline();
 
-  ACE_Reactor* get_reactor();
+  ACE_Reactor_Timer_Interface* get_reactor();
 
   RepoId get_topic_id();
   RepoId get_dp_id();
@@ -705,7 +705,7 @@ private:
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
-  ACE_Reactor*                 reactor_;
+  ACE_Reactor_Timer_Interface* reactor_;
 
   /// The time interval for checking liveliness.
   /// TBD: Should this be initialized with

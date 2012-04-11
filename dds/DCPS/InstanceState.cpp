@@ -188,7 +188,7 @@ OpenDDS::DCPS::InstanceState::schedule_release()
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
     cancel_release();
 
-    ACE_Reactor* reactor = this->reader_->get_reactor();
+    ACE_Reactor_Timer_Interface* reactor = this->reader_->get_reactor();
 
     this->release_timer_id_ =
       reactor->schedule_timer(this, 0, duration_to_time_value(delay));
@@ -214,7 +214,7 @@ OpenDDS::DCPS::InstanceState::cancel_release()
   this->release_pending_ = false;
 
   if (this->release_timer_id_ != -1) {
-    ACE_Reactor* reactor = this->reader_->get_reactor();
+    ACE_Reactor_Timer_Interface* reactor = this->reader_->get_reactor();
     reactor->cancel_timer(this->release_timer_id_);
 
     this->release_timer_id_ = -1;

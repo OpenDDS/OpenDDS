@@ -581,7 +581,7 @@ DataLink::schedule_delayed_release()
   }
 
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-  ACE_Reactor* reactor = orb->orb_core()->reactor();
+  ACE_Reactor_Timer_Interface* reactor = orb->orb_core()->reactor();
   reactor->schedule_timer(this, 0, this->datalink_release_delay_);
   scheduled_ = true;
 }
@@ -591,7 +591,7 @@ DataLink::cancel_release()
 {
   if (scheduled_) {
     CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-    ACE_Reactor* reactor = orb->orb_core()->reactor();
+    ACE_Reactor_Timer_Interface* reactor = orb->orb_core()->reactor();
     return reactor->cancel_timer(this) > 0;
   }
   return false;

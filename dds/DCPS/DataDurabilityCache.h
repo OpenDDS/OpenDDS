@@ -243,7 +243,7 @@ private:
   ACE_SYNCH_MUTEX lock_;
 
   /// Reactor with which cleanup timers will be registered.
-  ACE_Reactor * reactor_;
+  ACE_Reactor_Timer_Interface* reactor_;
 
 };
 

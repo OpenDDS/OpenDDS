@@ -602,7 +602,7 @@ private:
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
-  ACE_Reactor*               reactor_;
+  ACE_Reactor_Timer_Interface* reactor_;
   /// The time interval for sending liveliness message.
   ACE_Time_Value             liveliness_check_interval_;
   /// Timestamp of last write/dispose/assert_liveliness.

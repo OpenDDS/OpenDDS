@@ -44,7 +44,7 @@ class Watchdog {
 public:
 
   /// Constructor
-  Watchdog(ACE_Reactor * reactor,
+  Watchdog(ACE_Reactor_Timer_Interface * reactor,
            ACE_Time_Value const & interval);
 
   /// Destructor
@@ -84,7 +84,7 @@ public:
 protected:
 
   // Reactor with which the timer will be registered.
-  ACE_Reactor * const reactor_;
+  ACE_Reactor_Timer_Interface* const reactor_;
 
   // Event handler that handles timeout.
   WatchdogTimer timer_;
