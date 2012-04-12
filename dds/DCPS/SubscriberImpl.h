@@ -11,7 +11,7 @@
 
 #include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "Definitions.h"
 #include "DataCollector_T.h"

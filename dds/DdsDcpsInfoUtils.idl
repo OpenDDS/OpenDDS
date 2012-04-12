@@ -39,6 +39,22 @@ module OpenDDS
       DDS::QosPolicyCountSeq policies;
     };
 
+    // Information returned from call to add_domain_participant()
+    struct AddDomainStatus {
+      RepoId  id;
+      boolean federated;
+    };
+
+    // Status returned by a topic operation
+    enum TopicStatus {
+      CREATED,
+      ENABLED,
+      FOUND,
+      NOT_FOUND,
+      REMOVED,
+      CONFLICTING_TYPENAME,
+      INTERNAL_ERROR
+    };
 
   }; // module DDS
 }; // module OpenDDS

@@ -10,7 +10,7 @@
 #define OPENDDS_DCPS_TOPIC_IMPL_H
 
 #include "dds/DdsDcpsTopicS.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "TopicDescriptionImpl.h"
 

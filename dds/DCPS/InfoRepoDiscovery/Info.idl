@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_DCPSINFO_IDL
 #define OPENDDS_DCPS_DCPSINFO_IDL
 
-#include "dds/DdsDcpsInfo.idl"
+#include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"

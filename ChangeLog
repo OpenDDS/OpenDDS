@@ -1,3 +1,36 @@
+Thu Apr 12 20:51:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DdsDcpsInfoUtils.idl:
+        * dds/DdsDcps.mpc:
+        
+          Moved remaining contents in DdsDcpsInfo.idl.
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/TopicImpl.h:
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+
+          Changed include to DdsDcpsInfoUtils.
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Fixed monitor to only store ior for InfoRepoDiscovery.
+
+        * dds/DdsDcpsInfo.idl:
+
+          Removed this file.
+
 Thu Apr 12 16:17:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DdsDcpsInfo.idl:
@@ -151,7 +184,7 @@ Thu Apr 12 16:17:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/RTPS/RtpsInfo.h:
         * dds/DCPS/RTPS/RtpsInfo.cpp:
 
-          Refactored this code into InfoRepoDiscovery and RtpsDiscovery and 
+          Refactored this code into InfoRepoDiscovery and RtpsDiscovery and
           removed these files.
 
 Wed Apr 11 17:44:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>

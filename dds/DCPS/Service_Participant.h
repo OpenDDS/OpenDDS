@@ -12,7 +12,7 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DdsDcpsInfrastructureS.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 #include "dds/DCPS/transport/framework/TransportConfig.h"

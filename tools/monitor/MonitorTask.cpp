@@ -69,7 +69,15 @@ Monitor::MonitorTask::MonitorTask(
          location = TheServiceParticipant->discoveryMap().begin();
          location != TheServiceParticipant->discoveryMap().end();
          ++location) {
-      std::string ior = location->second->get_stringified_dcps_info_ior();
+      OpenDDS::DCPS::InfoRepoDiscovery_rch irDisco =
+        OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::InfoRepoDiscovery>(disco);
+      std::string ior;
+      // only InfoRepoDiscovery has an ior
+      if (!irDisco.is_nil()) {
+        ior = location->second->get_stringified_dcps_info_ior();
+      } else {
+        ior = "";
+      }
 
       this->iorKeyMap_[ior] = location->first;
     }

@@ -19,7 +19,7 @@
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 

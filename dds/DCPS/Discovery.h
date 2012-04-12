@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DDS_DCPS_DISCOVERY_H
 #define OPENDDS_DDS_DCPS_DISCOVERY_H
 
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "RcObject_T.h"
 #include "RcHandle_T.h"
 

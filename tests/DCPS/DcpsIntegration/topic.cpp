@@ -1,4 +1,4 @@
-#include  "dds/DdsDcpsInfoC.h"
+#include  "dds/DdsDcpsInfoUtilsC.h"
 #include  "dds/DCPS/Service_Participant.h"
 #include  "DomainParticipantListener.h"
 #include  "dds/DCPS/Marked_Default_Qos.h"

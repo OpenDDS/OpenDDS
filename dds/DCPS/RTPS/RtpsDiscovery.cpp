@@ -17,7 +17,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 
 #include <cstdlib>
 

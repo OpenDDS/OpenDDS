@@ -10,7 +10,7 @@
 #define OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
 
 #include "dds/DCPS/Discovery.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 

@@ -44,7 +44,6 @@ project(OpenDDS_Dcps): taolib, portableserver, core, dcps_bits, coverage_optiona
     DdsDcpsTopic.idl
     DdsDcps.idl
     // OpenDDS specific below
-    DdsDcpsInfo.idl
     DdsDcpsSubscriptionExt.idl
     DdsDcpsDataReaderRemote.idl
     DdsDcpsDataWriterRemote.idl
