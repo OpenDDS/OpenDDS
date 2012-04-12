@@ -307,13 +307,13 @@ DataWriterImpl::add_association(const RepoId& yourId,
   } else {
     // In the current implementation, DataWriter is always active, so this
     // code will not be applicable.
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
     try {
-      repo->association_complete(this->domain_id_,
+      disco->association_complete(this->domain_id_,
         this->participant_servant_->get_id(),
         this->publication_id_, reader.readerId);
     } catch (const CORBA::Exception& e) {
-      e._tao_print_exception("ERROR: Exception from DCPSInfo::"
+      e._tao_print_exception("ERROR: Exception from Discovery::"
         "association_complete");
     }
   }
@@ -761,15 +761,15 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 
     } else {
       try {
-        DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         DDS::PublisherQos publisherQos;
         this->publisher_servant_->get_qos(publisherQos);
         CORBA::Boolean status
-        = repo->update_publication_qos(this->participant_servant_->get_domain_id(),
-                                       this->participant_servant_->get_id(),
-                                       this->publication_id_,
-                                       qos,
-                                       publisherQos);
+        = disco->update_publication_qos(this->participant_servant_->get_domain_id(),
+                                        this->participant_servant_->get_id(),
+                                        this->publication_id_,
+                                        qos,
+                                        publisherQos);
 
         if (status == 0) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -1484,15 +1484,15 @@ DataWriterImpl::enable()
     DDS::PublisherQos pub_qos;
     this->publisher_servant_->get_qos(pub_qos);
 
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
     this->publication_id_ =
-      repo->add_publication(this->domain_id_,
-                            this->participant_servant_->get_id(),
-                            this->topic_servant_->get_id(),
-                            this->dw_remote_objref_,
-                            this->qos_,
-                            trans_conf_info,
-                            pub_qos);
+      disco->add_publication(this->domain_id_,
+                             this->participant_servant_->get_id(),
+                             this->topic_servant_->get_id(),
+                             this->dw_remote_objref_,
+                             this->qos_,
+                             trans_conf_info,
+                             pub_qos);
 
     if (this->publication_id_ == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,

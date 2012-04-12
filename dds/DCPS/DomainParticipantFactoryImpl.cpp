@@ -54,9 +54,9 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  DCPSInfo_var repo = TheServiceParticipant->get_repository(domainId);
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domainId);
 
-  if (CORBA::is_nil(repo.in())) {
+  if (disco.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
@@ -69,8 +69,8 @@ DomainParticipantFactoryImpl::create_participant(
 
   try {
     AddDomainStatus value
-    = repo->add_domain_participant(domainId,
-                                   qos);
+    = disco->add_domain_participant(domainId,
+                                    qos);
     dp_id     = value.id;
     federated = value.federated;
 
@@ -250,9 +250,9 @@ DomainParticipantFactoryImpl::delete_participant(
   }//xxx now obj rc = 3
 
   try {
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id);
-    repo->remove_domain_participant(domain_id,
-                                    dp_id);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
+    disco->remove_domain_participant(domain_id,
+                                     dp_id);
 
   } catch (const CORBA::SystemException& sysex) {
     sysex._tao_print_exception(

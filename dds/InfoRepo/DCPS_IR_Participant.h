@@ -11,7 +11,7 @@
 
 #include  "inforepo_export.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
-#include /**/ "dds/DdsDcpsInfoS.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
 
 #include "dds/DCPS/RepoIdGenerator.h"
 #include "dds/DCPS/GuidUtils.h"

@@ -41,7 +41,7 @@ if ($DCPSREPO->Spawn () != 0) {
 }
 
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+    print STDERR "ERROR: waiting for Info Repo IOR file\n";
     $DCPSREPO->Kill ();
     exit 1;
 }

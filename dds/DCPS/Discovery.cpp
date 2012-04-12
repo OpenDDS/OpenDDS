@@ -20,20 +20,6 @@ namespace DCPS {
 const std::string Discovery::DEFAULT_REPO = "DEFAULT_REPO";
 const std::string Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";
 
-std::string Discovery::get_stringified_dcps_info_ior()
-{
-  // Get the actual reference and generate the stringified IOR
-  DCPSInfo_var repo = this->get_dcps_info();
-
-  if (CORBA::is_nil(repo)) {
-    return "";
-  }
-
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-  CORBA::String_var retval = orb->object_to_string(repo);
-  return std::string(retval.in());
-}
-
 #ifndef DDS_HAS_MINIMUM_BIT
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)

@@ -69,7 +69,7 @@ my $Publisher = PerlDDS::create_process ("pubsub", " $pub_opts $argv_opts");
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+    print STDERR "ERROR: waiting for Info Repo IOR file\n";
     $DCPSREPO->Kill ();
     exit 1;
 }

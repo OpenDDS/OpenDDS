@@ -9,7 +9,7 @@
 #ifndef OPENDDS_FEDERATOR_IDL
 #define OPENDDS_FEDERATOR_IDL
 
-#include "dds/DdsDcpsInfo.idl"
+#include "dds/DCPS/InfoRepoDiscovery/Info.idl"
 #include "dds/DdsDcpsGuid.idl"
 #include "tao/OctetSeq.pidl"
 

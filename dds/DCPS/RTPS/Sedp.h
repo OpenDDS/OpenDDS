@@ -12,7 +12,6 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsInfoC.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
@@ -274,7 +273,7 @@ private:
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 
   struct LocalEndpoint {
-    LocalEndpoint() : sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}
+    LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}
     DCPS::RepoId topic_id_;
     DCPS::TransportLocatorSeq trans_info_;
     RepoIdSet matched_endpoints_;

@@ -62,8 +62,8 @@ void TAO_DDS_DCPSDataWriter_i::remove_associations (
                    cnt,
                    std::string(converter).c_str()
                ));
+        received_.received(DiscReceivedCalls::REM_ASSOC);
       }
-    received_.received(DiscReceivedCalls::REM_ASSOC);
   }
 
 

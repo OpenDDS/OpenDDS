@@ -1,3 +1,159 @@
+Thu Apr 12 16:17:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+
+          Moved DCPSInfo into InfoRepoDiscovery.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+
+          Refactored DCPSInfo pure virtual interface into Discovery interface.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Added forwarding functions from discovery interface to DCPSInfo.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Refactored RtpsInfo interface into RtpsDiscovery.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Changes do to Discovery refactoring.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Added dependency on InfoRepoDiscovery.
+
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/Transient_Kludge.h:
+
+          Comment cleanup.
+
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+
+          Changes do to Discovery refactoring.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/DestinationOrder/run_test.pl:
+        * tests/DCPS/Dispose/run_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/GroupPresentation/run_test.pl:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/ManyTopicTest/run_test.pl:
+        * tests/DCPS/ManyTopicTest/run_test1.pl:
+        * tests/DCPS/ManyTopicTest/run_test2.pl:
+        * tests/DCPS/ManyTopicTest/run_test3.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopic/run_test.pl:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/Presentation/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/DCPS/ReadCondition/run_test.pl:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/StatusCondition/run_test.pl:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/Thrasher/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+
+          Logged message cleanup.
+
+        * dds/DCPS/InfoRepoUtils.h:
+        * dds/DCPS/InfoRepoUtils.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Refactored this code into InfoRepoDiscovery and RtpsDiscovery and 
+          removed these files.
+
 Wed Apr 11 17:44:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.h:

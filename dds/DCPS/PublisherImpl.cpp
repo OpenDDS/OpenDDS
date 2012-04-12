@@ -300,8 +300,8 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   dw_servant->unregister_all();
 
   try {
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
-    repo->remove_publication(
+    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+    disco->remove_publication(
       this->domain_id_,
       this->participant_->get_id(),
       publication_id);
@@ -443,9 +443,9 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
 
       while (iter != idToQosMap.end()) {
         try {
-          DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+          Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
           CORBA::Boolean status
-          = repo->update_publication_qos(
+          = disco->update_publication_qos(
               participant_->get_domain_id(),
               participant_->get_id(),
               iter->first,

@@ -65,10 +65,10 @@ TopicImpl::set_qos(const DDS::TopicQos & qos)
         dynamic_cast<DomainParticipantImpl*>(this->participant_);
 
       try {
-        DCPSInfo_var repo =
-          TheServiceParticipant->get_repository(part->get_domain_id());
+        Discovery_rch disco =
+          TheServiceParticipant->get_discovery(part->get_domain_id());
         CORBA::Boolean status =
-          repo->update_topic_qos(this->id_, part->get_domain_id(),
+          disco->update_topic_qos(this->id_, part->get_domain_id(),
                                  part->get_id(), qos_);
 
         if (status == 0) {

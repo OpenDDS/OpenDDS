@@ -18,6 +18,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/RepoIdConverter.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)

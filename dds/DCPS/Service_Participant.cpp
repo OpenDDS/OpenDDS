@@ -9,7 +9,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "Service_Participant.h"
-#include "InfoRepoUtils.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
 #include "GuidConverter.h"
@@ -928,8 +927,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
 
     if (attach_participant)
     {
-      DCPSInfo_var info = repoList[ index].first->get_dcps_info();
-      info->attach_participant(domain, repoList[ index].second);
+      repoList[ index].first->attach_participant(domain, repoList[ index].second);
     }
   }
 }
@@ -995,8 +993,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 
     try {
       // Check the availability of the current repository.
-      DCPSInfo_var info = current->second->get_dcps_info();
-      if (false == info->_is_a("Not_An_IDL_Type")) {
+      if (current->second->active()) {
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
@@ -1148,18 +1145,6 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   }
 
   return location->second;
-}
-
-DCPSInfo_ptr
-Service_Participant::get_repository(const DDS::DomainId_t domain)
-{
-  Discovery_rch discovery = this->get_discovery(domain);
-
-  if (discovery == 0) {
-    return OpenDDS::DCPS::DCPSInfo::_nil();
-  } else {
-    return discovery->get_dcps_info();
-  }
 }
 
 std::string

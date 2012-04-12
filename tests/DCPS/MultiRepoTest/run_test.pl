@@ -187,7 +187,7 @@ $Monitor = PerlDDS::create_process ("monitor", $monitor_parameters);
 print $DCPSREPO1->CommandLine(), "\n";
 $DCPSREPO1->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo1_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo 1 IOR file\n";
+    print STDERR "ERROR: waiting for Info Repo 1 IOR file\n";
     $DCPSREPO1->Kill ();
     exit 1;
 }
@@ -195,7 +195,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo1_ior, 30) == -1) {
 print $DCPSREPO2->CommandLine(), "\n";
 $DCPSREPO2->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo2_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo 2 IOR file\n";
+    print STDERR "ERROR: waiting for Info Repo 2 IOR file\n";
     $DCPSREPO2->Kill ();
     $DCPSREPO1->Kill ();
     exit 1;
@@ -204,7 +204,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo2_ior, 30) == -1) {
 print $DCPSREPO3->CommandLine(), "\n";
 $DCPSREPO3->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo3_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo 3 IOR file\n";
+    print STDERR "ERROR: waiting for Info Repo 3 IOR file\n";
     $DCPSREPO3->Kill ();
     $DCPSREPO2->Kill ();
     $DCPSREPO1->Kill ();

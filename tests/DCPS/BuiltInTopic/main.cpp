@@ -88,7 +88,7 @@ int init (int argc, ACE_TCHAR *argv[])
       //SHH create a separate particpant for the subscriber and publisher
 
       // Wait a while to give the transport thread time
-      // to read the built-in Topic data from the DCPSInfo
+      // to read the built-in Topic data from the discovery
       // TBD - find some way to avoid this.
     ACE_OS::sleep (2);
 
@@ -505,7 +505,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
 
   // Wait a while to give the transport thread time
-  // to read the built-in Topic data from the DCPSInfo
+  // to read the built-in Topic data from the discovery
   // TBD - find some way to avoid this.
   ACE_OS::sleep (5);
 

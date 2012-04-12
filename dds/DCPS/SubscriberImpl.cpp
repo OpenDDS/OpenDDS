@@ -360,10 +360,10 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   RepoId subscription_id  = dr_servant->get_subscription_id();
 
   try {
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
-    repo->remove_subscription(this->domain_id_,
-                              participant_->get_id(),
-                              subscription_id) ;
+    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+    disco->remove_subscription(this->domain_id_,
+                               participant_->get_id(),
+                               subscription_id);
 
   } catch (const CORBA::SystemException& sysex) {
     sysex._tao_print_exception(
@@ -619,13 +619,13 @@ SubscriberImpl::set_qos(
 
       while (iter != idToQosMap.end()) {
         try {
-          DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+          Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
           CORBA::Boolean status
-          = repo->update_subscription_qos(this->domain_id_,
-                                          participant_->get_id(),
-                                          iter->first,
-                                          iter->second,
-                                          this->qos_);
+          = disco->update_subscription_qos(this->domain_id_,
+                                           participant_->get_id(),
+                                           iter->first,
+                                           iter->second,
+                                           this->qos_);
 
           if (status == 0) {
             ACE_ERROR_RETURN((LM_ERROR,

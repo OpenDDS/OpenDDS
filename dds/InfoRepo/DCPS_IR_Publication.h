@@ -13,7 +13,7 @@
 #include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsPublicationC.h"
-#include /**/ "dds/DdsDcpsInfoC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include /**/ "dds/DdsDcpsDataWriterRemoteC.h"
 #include /**/ "ace/Unbounded_Set.h"
 

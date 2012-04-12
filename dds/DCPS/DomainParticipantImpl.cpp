@@ -417,14 +417,14 @@ DomainParticipantImpl::create_topic(
     RepoId topic_id;
 
     try {
-      DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-      TopicStatus status = repo->assert_topic(topic_id,
-                                              domain_id_,
-                                              dp_id_,
-                                              topic_name,
-                                              type_name,
-                                              topic_qos,
-                                              type_support->has_dcps_key());
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      TopicStatus status = disco->assert_topic(topic_id,
+                                               domain_id_,
+                                               dp_id_,
+                                               topic_name,
+                                               type_name,
+                                               topic_qos,
+                                               type_support->has_dcps_key());
 
       if (status == CREATED || status == FOUND) {
         DDS::Topic_ptr new_topic = create_topic_i(topic_id,
@@ -515,11 +515,11 @@ DomainParticipantImpl::delete_topic_i(
           0 == entry->client_refs_) {
         //TBD - mark the TopicImpl as deleted and make it
         //      reject calls to the TopicImpl.
-        DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         TopicStatus status
-        = repo->remove_topic(the_dp_servant->get_domain_id(),
-                             the_dp_servant->get_id(),
-                             the_topic_servant->get_id());
+        = disco->remove_topic(the_dp_servant->get_domain_id(),
+                              the_dp_servant->get_id(),
+                              the_topic_servant->get_id());
 
         if (status != REMOVED) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -600,12 +600,12 @@ DomainParticipantImpl::find_topic(
       CORBA::String_var type_name;
       DDS::TopicQos_var qos;
 
-      DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-      TopicStatus status = repo->find_topic(domain_id_,
-                                            topic_name,
-                                            type_name.out(),
-                                            qos.out(),
-                                            topic_id);
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      TopicStatus status = disco->find_topic(domain_id_,
+                                             topic_name,
+                                             type_name.out(),
+                                             qos.out(),
+                                             topic_id);
 
       if (status == FOUND) {
         DDS::Topic_ptr new_topic = create_topic_i(topic_id,
@@ -1029,11 +1029,11 @@ DomainParticipantImpl::set_qos(
       qos_ = qos;
 
       try {
-        DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         CORBA::Boolean status
-        = repo->update_domain_participant_qos(domain_id_,
-                                              dp_id_,
-                                              qos_);
+        = disco->update_domain_participant_qos(domain_id_,
+                                               dp_id_,
+                                               qos_);
 
         if (status == 0) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -1122,10 +1122,10 @@ DomainParticipantImpl::ignore_participant(
                  handle));
     }
 
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-    repo->ignore_domain_participant(domain_id_,
-                                    dp_id_,
-                                    ignoreId);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    disco->ignore_domain_participant(domain_id_,
+                                     dp_id_,
+                                     ignoreId);
 
     if (DCPS_debug_level >= 4) {
       GuidConverter converter(dp_id_);
@@ -1188,10 +1188,10 @@ DomainParticipantImpl::ignore_topic(
                  handle));
     }
 
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-    repo->ignore_topic(domain_id_,
-                       dp_id_,
-                       ignoreId);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    disco->ignore_topic(domain_id_,
+                        dp_id_,
+                        ignoreId);
 
   } catch (const CORBA::SystemException& sysex) {
     sysex._tao_print_exception(
@@ -1237,10 +1237,10 @@ DomainParticipantImpl::ignore_publication(
     }
 
     RepoId ignoreId = get_repoid(handle);
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-    repo->ignore_publication(domain_id_,
-                             dp_id_,
-                             ignoreId);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    disco->ignore_publication(domain_id_,
+                              dp_id_,
+                              ignoreId);
 
   } catch (const CORBA::SystemException& sysex) {
     sysex._tao_print_exception(
@@ -1287,10 +1287,10 @@ DomainParticipantImpl::ignore_subscription(
 
 
     RepoId ignoreId = get_repoid(handle);
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-    repo->ignore_subscription(domain_id_,
-                              dp_id_,
-                              ignoreId);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    disco->ignore_subscription(domain_id_,
+                               dp_id_,
+                               ignoreId);
 
   } catch (const CORBA::SystemException& sysex) {
     sysex._tao_print_exception(

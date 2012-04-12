@@ -480,13 +480,13 @@ DataReaderImpl::add_association(const RepoId& yourId,
   }
 
   if (!active) {
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
     try {
-      repo->association_complete(this->domain_id_,
-                                 this->participant_servant_->get_id(),
-                                 this->subscription_id_, writer.writerId);
+      disco->association_complete(this->domain_id_,
+                                  this->participant_servant_->get_id(),
+                                  this->subscription_id_, writer.writerId);
     } catch (const CORBA::Exception& e) {
-      e._tao_print_exception("ERROR: Exception from DCPSInfo::"
+      e._tao_print_exception("ERROR: Exception from Discovery::"
         "association_complete");
     }
   }
@@ -797,11 +797,11 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
 
     } else {
       try {
-        DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         DDS::SubscriberQos subscriberQos;
         this->subscriber_servant_->get_qos(subscriberQos);
         CORBA::Boolean status =
-            repo->update_subscription_qos(
+            disco->update_subscription_qos(
                 this->participant_servant_->get_domain_id(),
                 this->participant_servant_->get_id(),
                 this->subscription_id_,
@@ -1179,18 +1179,18 @@ DataReaderImpl::enable()
       DDS::SubscriberQos sub_qos;
       this->subscriber_servant_->get_qos(sub_qos);
 
-      DCPSInfo_var repo =
-        TheServiceParticipant->get_repository(this->domain_id_);
+      Discovery_rch disco =
+        TheServiceParticipant->get_discovery(this->domain_id_);
       this->subscription_id_ =
-        repo->add_subscription(this->domain_id_,
-                               this->participant_servant_->get_id(),
-                               this->topic_servant_->get_id(),
-                               this->dr_remote_objref_,
-                               this->qos_,
-                               trans_conf_info,
-                               sub_qos,
-                               filterExpression,
-                               exprParams);
+        disco->add_subscription(this->domain_id_,
+                                this->participant_servant_->get_id(),
+                                this->topic_servant_->get_id(),
+                                this->dr_remote_objref_,
+                                this->qos_,
+                                trans_conf_info,
+                                sub_qos,
+                                filterExpression,
+                                exprParams);
 
       if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
         ACE_ERROR((LM_ERROR,
@@ -3379,11 +3379,11 @@ void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
 {
   try {
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
-    repo->update_subscription_params(participant_servant_->get_domain_id(),
-                                     participant_servant_->get_id(),
-                                     subscription_id_,
-                                     params);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    disco->update_subscription_params(participant_servant_->get_domain_id(),
+                                      participant_servant_->get_id(),
+                                      subscription_id_,
+                                      params);
   } catch (const CORBA::Exception& ex) {
     if (DCPS_debug_level) {
       ex._tao_print_exception("ERROR: Exception in DataReaderImpl::"

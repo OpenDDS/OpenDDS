@@ -19,7 +19,7 @@
 #include "dds/DCPS/RepoIdGenerator.h"
 #include "UpdateManager.h"
 
-#include /**/ "dds/DdsDcpsInfoS.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
 #include /**/ "dds/DdsDcpsDataReaderRemoteC.h"
 #include /**/ "dds/DdsDcpsDataWriterRemoteC.h"
 

@@ -133,7 +133,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheServiceParticipant->discoveryMap();
     TEST_CHECK(discoveryMap.find(key) != discoveryMap.end());
     OpenDDS::DCPS::Discovery_rch discovery = discoveryMap.find(key)->second;
-    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
+    TEST_CHECK(static_rchandle_cast<OpenDDS::DCPS::InfoRepoDiscovery>(discovery)
+      ->get_stringified_dcps_info_ior() == ior);
   }
 
   {
@@ -150,10 +151,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheServiceParticipant->discoveryMap();
     TEST_CHECK(discoveryMap.find(key) != discoveryMap.end());
     OpenDDS::DCPS::Discovery_rch discovery = discoveryMap.find(key)->second;
-    TEST_CHECK(discovery->get_stringified_dcps_info_ior() == ior);
     OpenDDS::DCPS::InfoRepoDiscovery_rch ird =
       dynamic_rchandle_cast<OpenDDS::DCPS::InfoRepoDiscovery>(discovery);
     TEST_CHECK(!ird.is_nil());
+    TEST_CHECK(ird->get_stringified_dcps_info_ior() == ior);
     TEST_CHECK(ird->bit_transport_ip() == "1.2.3.4");
     TEST_CHECK(ird->bit_transport_port() == 4321);
   }
@@ -168,10 +169,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheServiceParticipant->domainRepoMap();
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
-
-    OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
-    TEST_CHECK(discovery != 0);
-    TEST_CHECK(discovery->get_stringified_dcps_info_ior() != ior);
   }
 
   {
@@ -186,7 +183,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
-    TEST_CHECK(discovery->get_stringified_dcps_info_ior() != ior);
     OpenDDS::RTPS::RtpsDiscovery_rch rd =
       dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
     TEST_CHECK(!rd.is_nil());

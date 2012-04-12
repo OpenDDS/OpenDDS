@@ -45,7 +45,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
                            "usage:  %s "
-                           "-k <DCPSInfo ior> "
+                           "-k <Info Repo ior> "
                            "\n",
                            argv [0]),
                           -1);

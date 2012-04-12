@@ -9,7 +9,6 @@
 #include "FailoverListener.h"
 
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/InfoRepoUtils.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
 
@@ -38,18 +37,49 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
 {
 }
 
+InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
+                                     const DCPSInfo_var& info)
+  : Discovery(key),
+    info_(info),
+    bit_transport_port_(0),
+    use_local_bit_config_(false),
+    failoverListener_(0)
+{
+}
+
 InfoRepoDiscovery::~InfoRepoDiscovery()
 {
   delete this->failoverListener_;
 }
 
-DCPSInfo_ptr
+namespace
+{
+  DCPSInfo_ptr get_repo(const char* ior, CORBA::ORB_ptr orb)
+  {
+    CORBA::Object_var o;
+    try {
+      o = orb->string_to_object(ior);
+    } catch (CORBA::INV_OBJREF&) {
+      // host:port format causes an exception; try again
+      // with corbaloc format
+      std::string second_try("corbaloc:iiop:");
+      second_try += ior;
+      second_try += "/DCPSInfoRepo";
+
+      o = orb->string_to_object(second_try.c_str());
+    }
+
+    return DCPSInfo::_narrow(o.in());
+  }
+}
+
+DCPSInfo_var
 InfoRepoDiscovery::get_dcps_info()
 {
   if (CORBA::is_nil(this->info_.in())) {
     CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
     try {
-      this->info_ = InfoRepoUtils::get_repo(this->ior_.c_str(), orb.in());
+      this->info_ = get_repo(this->ior_.c_str(), orb.in());
 
       if (CORBA::is_nil(this->info_.in())) {
         ACE_ERROR((LM_ERROR,
@@ -66,7 +96,7 @@ InfoRepoDiscovery::get_dcps_info()
     }
   }
 
-  return DCPSInfo::_duplicate(this->info_);
+  return this->info_;
 }
 
 std::string
@@ -223,6 +253,232 @@ InfoRepoDiscovery::bit_key_to_repo_id(DomainParticipantImpl* /*participant*/,
   builder.participantId(key.value[1]);
   builder.entityId(key.value[2]);
   return id;
+}
+
+bool
+InfoRepoDiscovery::active()
+{
+  return (!get_dcps_info()->_is_a("Not_An_IDL_Type"));
+}
+
+// Participant operations:
+
+bool
+InfoRepoDiscovery::attach_participant(DDS::DomainId_t domainId,
+                                      const RepoId& participantId)
+{
+  return get_dcps_info()->attach_participant(domainId, participantId);
+}
+
+DCPS::AddDomainStatus
+InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
+                                          const DDS::DomainParticipantQos& qos)
+{
+  return get_dcps_info()->add_domain_participant(domainId, qos);
+}
+
+void
+InfoRepoDiscovery::remove_domain_participant(DDS::DomainId_t domainId,
+                                             const RepoId& participantId)
+{
+  get_dcps_info()->remove_domain_participant(domainId, participantId);
+}
+
+void
+InfoRepoDiscovery::ignore_domain_participant(DDS::DomainId_t domainId,
+                                             const RepoId& myParticipantId,
+                                             const RepoId& ignoreId)
+{
+  get_dcps_info()->ignore_domain_participant(domainId, myParticipantId, ignoreId);
+}
+
+bool
+InfoRepoDiscovery::update_domain_participant_qos(DDS::DomainId_t domainId,
+                                                 const RepoId& participant,
+                                                 const DDS::DomainParticipantQos& qos)
+{
+  return get_dcps_info()->update_domain_participant_qos(domainId, participant, qos);
+}
+
+// Topic operations:
+
+DCPS::TopicStatus
+InfoRepoDiscovery::assert_topic(DCPS::RepoId_out topicId, DDS::DomainId_t domainId,
+                                const RepoId& participantId, const char* topicName,
+                                const char* dataTypeName, const DDS::TopicQos& qos,
+                                bool hasDcpsKey)
+{
+  return get_dcps_info()->assert_topic(topicId, domainId, participantId, topicName,
+    dataTypeName, qos, hasDcpsKey);
+}
+
+DCPS::TopicStatus
+InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId, const char* topicName,
+                              CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
+                              DCPS::RepoId_out topicId)
+{
+  return get_dcps_info()->find_topic(domainId, topicName, dataTypeName, qos, topicId);
+}
+
+DCPS::TopicStatus
+InfoRepoDiscovery::remove_topic(DDS::DomainId_t domainId, const RepoId& participantId,
+                                const RepoId& topicId)
+{
+  return get_dcps_info()->remove_topic(domainId, participantId, topicId);
+}
+
+void
+InfoRepoDiscovery::ignore_topic(DDS::DomainId_t domainId, const RepoId& myParticipantId,
+                                const RepoId& ignoreId)
+{
+  get_dcps_info()->ignore_topic(domainId, myParticipantId, ignoreId);
+}
+
+bool
+InfoRepoDiscovery::update_topic_qos(const RepoId& topicId, DDS::DomainId_t domainId,
+                                    const RepoId& participantId, const DDS::TopicQos& qos)
+{
+  return get_dcps_info()->update_topic_qos(topicId, domainId, participantId, qos);
+}
+
+
+// Publication operations:
+
+RepoId
+InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
+                                   const RepoId& participantId,
+                                   const RepoId& topicId,
+                                   DCPS::DataWriterRemote_ptr publication,
+                                   const DDS::DataWriterQos& qos,
+                                   const DCPS::TransportLocatorSeq& transInfo,
+                                   const DDS::PublisherQos& publisherQos)
+{
+  return get_dcps_info()->add_publication(domainId, participantId, topicId,
+    publication, qos, transInfo, publisherQos);
+}
+
+void
+InfoRepoDiscovery::remove_publication(DDS::DomainId_t domainId,
+                                      const RepoId& participantId,
+                                      const RepoId& publicationId)
+{
+  get_dcps_info()->remove_publication(domainId, participantId, publicationId);
+}
+
+void
+InfoRepoDiscovery::ignore_publication(DDS::DomainId_t domainId,
+                                      const RepoId& participantId,
+                                      const RepoId& ignoreId)
+{
+  get_dcps_info()->ignore_publication(domainId, participantId, ignoreId);
+}
+
+bool
+InfoRepoDiscovery::update_publication_qos(DDS::DomainId_t domainId,
+                                          const RepoId& participantId,
+                                          const RepoId& dwId,
+                                          const DDS::DataWriterQos& qos,
+                                          const DDS::PublisherQos& publisherQos)
+{
+  return get_dcps_info()->update_publication_qos(domainId, participantId, dwId, qos,
+    publisherQos);
+}
+
+
+// Subscription operations:
+
+RepoId
+InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
+                                    const RepoId& participantId,
+                                    const RepoId& topicId,
+                                    DCPS::DataReaderRemote_ptr subscription,
+                                    const DDS::DataReaderQos& qos,
+                                    const DCPS::TransportLocatorSeq& transInfo,
+                                    const DDS::SubscriberQos& subscriberQos,
+                                    const char* filterExpr,
+                                    const DDS::StringSeq& params)
+{
+  return get_dcps_info()->add_subscription(domainId, participantId, topicId, subscription,
+    qos, transInfo, subscriberQos, filterExpr, params);
+}
+
+void
+InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
+                                       const RepoId& participantId,
+                                       const RepoId& subscriptionId)
+{
+  get_dcps_info()->remove_subscription(domainId, participantId, subscriptionId);
+}
+
+void
+InfoRepoDiscovery::ignore_subscription(DDS::DomainId_t domainId,
+                                       const RepoId& participantId,
+                                       const RepoId& ignoreId)
+{
+  get_dcps_info()->ignore_subscription(domainId, participantId, ignoreId);
+}
+
+bool
+InfoRepoDiscovery::update_subscription_qos(DDS::DomainId_t domainId,
+                                           const RepoId& participantId,
+                                           const RepoId& drId,
+                                           const DDS::DataReaderQos& qos,
+                                           const DDS::SubscriberQos& subQos)
+{
+  return get_dcps_info()->update_subscription_qos(domainId, participantId, drId,
+    qos, subQos);
+}
+
+bool
+InfoRepoDiscovery::update_subscription_params(DDS::DomainId_t domainId,
+                                              const RepoId& participantId,
+                                              const RepoId& subId,
+                                              const DDS::StringSeq& params)
+
+{
+  return get_dcps_info()->update_subscription_params(domainId, participantId, subId,
+    params);
+}
+
+
+// Managing reader/writer associations:
+
+void
+InfoRepoDiscovery::association_complete(DDS::DomainId_t domainId,
+                                        const RepoId& participantId,
+                                        const RepoId& localId, const RepoId& remoteId)
+{
+  get_dcps_info()->association_complete(domainId, participantId, localId, remoteId);
+}
+
+void
+InfoRepoDiscovery::disassociate_participant(DDS::DomainId_t domainId,
+                                            const RepoId& localId,
+                                            const RepoId& remoteId)
+{
+  get_dcps_info()->disassociate_participant(domainId, localId, remoteId);
+}
+
+void
+InfoRepoDiscovery::disassociate_subscription(DDS::DomainId_t domainId,
+                                             const RepoId& participantId,
+                                             const RepoId& localId, const RepoId& remoteId)
+{
+  get_dcps_info()->disassociate_subscription(domainId, participantId, localId, remoteId);
+}
+
+void
+InfoRepoDiscovery::disassociate_publication(DDS::DomainId_t domainId,
+                                            const RepoId& participantId,
+                                            const RepoId& localId, const RepoId& remoteId)
+{
+  get_dcps_info()->disassociate_publication(domainId, participantId, localId, remoteId);
+}
+
+void
+InfoRepoDiscovery::shutdown()
+{
+  get_dcps_info()->shutdown();
 }
 
 namespace {

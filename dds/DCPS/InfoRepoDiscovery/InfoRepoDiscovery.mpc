@@ -1,6 +1,12 @@
 project(OpenDDS*): dcps, install {
   dynamicflags = OPENDDS_INFOREPODISCOVERY_BUILD_DLL
 
+  idlflags += -Wb,export_macro=OpenDDS_InfoRepoDiscovery_Export -Wb,export_include=InfoRepoDiscovery_Export.h
+
+  IDL_Files {
+    Info.idl
+  }
+
   specific {
     install_dir = dds/DCPS/InfoRepoDiscovery
   }
