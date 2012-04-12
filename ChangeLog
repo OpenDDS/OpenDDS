@@ -17,7 +17,6 @@ Thu Apr 12 20:51:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/SubscriberImpl.h:
         * dds/DCPS/TopicImpl.h:
         * examples/DCPS/DistributedContent/AbstractionLayer.h:
-        * tests/DCPS/BuiltInTopic/main.cpp:
         * tests/DCPS/DcpsIntegration/infrastructure.cpp:
         * tests/DCPS/DcpsIntegration/topic.cpp:
 
