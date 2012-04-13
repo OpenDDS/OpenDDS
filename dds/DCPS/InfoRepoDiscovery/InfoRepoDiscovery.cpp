@@ -12,6 +12,9 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
 
+#include "tao/ORB_Core.h"
+#include "ace/Reactor.h"
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -33,7 +36,8 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
     ior_(ior),
     bit_transport_port_(0),
     use_local_bit_config_(false),
-    failoverListener_(0)
+    failoverListener_(0),
+    orb_from_user_(false)
 {
 }
 
@@ -43,13 +47,34 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
     info_(info),
     bit_transport_port_(0),
     use_local_bit_config_(false),
-    failoverListener_(0)
+    failoverListener_(0),
+    orb_from_user_(false)
 {
 }
 
 InfoRepoDiscovery::~InfoRepoDiscovery()
 {
   delete this->failoverListener_;
+
+  if (!orb_from_user_ && orb_runner_) {
+    if (0 == orb_runner_->use_count_--) {
+      orb_runner_->shutdown();
+      delete orb_runner_;
+      orb_runner_ = 0;
+    }
+  }
+}
+
+bool
+InfoRepoDiscovery::set_ORB(CORBA::ORB_ptr orb)
+{
+  if (orb_.in() || !orb) {
+    return false;
+  }
+
+  orb_ = CORBA::ORB::_duplicate(orb);
+  orb_from_user_ = true;
+  return true;
 }
 
 namespace
@@ -77,9 +102,31 @@ DCPSInfo_var
 InfoRepoDiscovery::get_dcps_info()
 {
   if (CORBA::is_nil(this->info_.in())) {
-    CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
+
+    if (!orb_) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_orb_runner_, 0);
+      if (!orb_runner_) {
+        orb_runner_ = new OrbRunner;
+        ACE_ARGV* argv = TheServiceParticipant->ORB_argv();
+        int argc = argv->argc();
+        orb_runner_->orb_ =
+          CORBA::ORB_init(argc, argv->argv(), DEFAULT_ORB_NAME);
+        orb_runner_->use_count_ = 1;
+        orb_runner_->activate();
+
+        CORBA::Object_var rp =
+          orb_runner_->orb_->resolve_initial_references("RootPOA");
+        PortableServer::POA_var poa = PortableServer::POA::_narrow(rp);
+        PortableServer::POAManager_var poa_manager = poa->the_POAManager();
+        poa_manager->activate();
+      } else {
+        ++orb_runner_->use_count_;
+      }
+      orb_ = orb_runner_->orb_;
+    }
+
     try {
-      this->info_ = get_repo(this->ior_.c_str(), orb.in());
+      this->info_ = get_repo(this->ior_.c_str(), orb_);
 
       if (CORBA::is_nil(this->info_.in())) {
         ACE_ERROR((LM_ERROR,
@@ -611,6 +658,62 @@ InfoRepoDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 
   return 0;
 }
+
+void
+InfoRepoDiscovery::OrbRunner::shutdown()
+{
+  orb_->shutdown();
+  wait();
+}
+
+InfoRepoDiscovery::OrbRunner* InfoRepoDiscovery::orb_runner_;
+ACE_Thread_Mutex InfoRepoDiscovery::mtx_orb_runner_;
+
+int
+InfoRepoDiscovery::OrbRunner::svc()
+{
+  // this method was originally Service_Participant::svc()
+  bool done = false;
+
+  // Ignore all signals to avoid
+  //     ERROR: <something descriptive> Interrupted system call
+  // The main thread will handle signals.
+  sigset_t set;
+  ACE_OS::sigfillset(&set);
+  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
+  while (!done) {
+    try {
+      if (orb_->orb_core()->has_shutdown() == false) {
+        orb_->run();
+      }
+
+      done = true;
+
+    } catch (const CORBA::SystemException& sysex) {
+      sysex._tao_print_exception(
+        "ERROR: InfoRepoDiscovery::OrbRunner");
+
+    } catch (const CORBA::UserException& userex) {
+      userex._tao_print_exception(
+        "ERROR: InfoRepoDiscovery::OrbRunner");
+
+    } catch (const CORBA::Exception& ex) {
+      ex._tao_print_exception(
+        "ERROR: InfoRepoDiscovery::OrbRunner");
+    }
+
+    if (orb_->orb_core()->has_shutdown()) {
+      done = true;
+
+    } else {
+      orb_->orb_core()->reactor()->reset_reactor_event_loop();
+    }
+  }
+
+  return 0;
+}
+
 
 InfoRepoDiscovery::StaticInitializer::StaticInitializer()
 {

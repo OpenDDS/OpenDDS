@@ -25,6 +25,7 @@
 #include "ace/Task.h"
 #include "ace/Configuration.h"
 #include "ace/Time_Value.h"
+#include "ace/ARGV.h"
 
 #include <map>
 #include <memory>
@@ -47,23 +48,13 @@ const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
  * @brief Service entrypoint.
  *
  * This class is a singleton that allows DDS client applications to
- * configure OpenDDS.  This includes running the ORB to support
- * OpenDDS.
- *
- * @note The client will either create an ORB and call @c set_ORB()
- *       before calling @c get_domain_particpant_factory() and will
- *       run the ORB *or* it will not call @c set_ORB() first and
- *       @c get_domain_particpant_factory() will automatically
- *       create an ORB to be used by OpenDDS and will run that ORB
- *       in a thread it creates.
+ * configure OpenDDS.
  *
  * @note This class may read a configuration file that will
  *       configure Transports as well as DCPS (e.g. number of ORB
  *       threads).
  */
-class OpenDDS_Dcps_Export Service_Participant : public ACE_Task_Base {
-  static int zero_argc;
-
+class OpenDDS_Dcps_Export Service_Participant {
 public:
 
   /// Domain value for the default repository IOR.
@@ -76,38 +67,17 @@ public:
   ~Service_Participant();
 
   /// Return a singleton instance of this class.
-  static Service_Participant * instance();
+  static Service_Participant* instance();
 
-  /// Launch a thread to run the orb.
-  virtual int svc();
-
-  /**
-   * Client provides an ORB for the OpenDDS client to use.
-   *
-   * @note The user is responsible for running the ORB.
-   */
-  int set_ORB(CORBA::ORB_ptr orb);
-
-  /**
-   * Get the ORB used by OpenDDS.
-   *
-   * Only valid after @c set_ORB() or
-   * @c get_domain_participant_factory() called.
-   */
-  CORBA::ORB_ptr get_ORB() const;
-
-  /// Get the common reactor used for Discovery tasks.
+  /// Get the common timer interface.
   /// Inteneded for use by OpenDDS internals only.
-  ACE_Reactor* discovery_reactor() const;
+  ACE_Reactor_Timer_Interface* timer() const;
 
   /**
    * Initialize the DDS client environment and get the
    * @c DomainParticipantFactory.
    *
-   * This method consumes @c -DCPS* options and their arguments.
-   * Unless the client/application code calls other methods to
-   * define how the ORB is run, calling this method will
-   * initiallize the ORB and then run it in a separate thread.
+   * This method consumes @c -DCPS* and -ORB* options and their arguments.
    */
   DDS::DomainParticipantFactory_ptr get_domain_participant_factory(
     int &argc = zero_argc,
@@ -121,20 +91,10 @@ public:
   /**
    * Stop being a participant in the service.
    *
-   * Will shutdown the ORB unless it was given via @c set_ORB().
-   *
    * @note Required Precondition: all DomainParticipants have been
    *       deleted.
    */
   void shutdown();
-
-  /**
-   * Accessor of the poa that application used.
-   *
-   * @todo Currently this method return the rootpoa. We might
-   *       create our own poa.
-   */
-  PortableServer::POA_ptr the_poa();
 
   /// Accessor of the Discovery object for a given domain.
   Discovery_rch get_discovery(const DDS::DomainId_t domain);
@@ -335,6 +295,9 @@ public:
 
   void register_discovery_type(const char* section_name,
                                Discovery::Config* cfg);
+
+  ACE_ARGV* ORB_argv() { return &ORB_argv_; }
+
 private:
 
   /// Initalize default qos.
@@ -382,27 +345,15 @@ private:
 
   std::map<std::string, Discovery::Config*> discovery_types_;
 
-  /// The orb object reference which can be provided by client or
-  /// initialized by this sigleton.
-  CORBA::ORB_var orb_;
+  ACE_ARGV ORB_argv_;
 
-  /// @c true if set_ORB() was called.
-  int orb_from_user_;
+  ACE_Reactor* reactor_; //TODO: integrate with threadpool
+  struct ReactorTask : ACE_Task_Base {
+    int svc();
+  } reactor_task_;
 
-  /// The root poa object reference.
-  PortableServer::POA_var root_poa_;
-
-  /// The domain participant factory servant.
-  /**
-   * Allocate the factory on the heap to avoid the circular
-   * dependency since the
-   * OpenDDS::DCPS::DomainParticipantFactoryImpl constructor calls
-   * the OpenDDS::DCPS::Service_Participant singleton.
-   */
-  DomainParticipantFactoryImpl*        dp_factory_servant_;
-
-  /// The domain participant factory object reference.
-  DDS::DomainParticipantFactory_var  dp_factory_;
+  DomainParticipantFactoryImpl* dp_factory_servant_;
+  DDS::DomainParticipantFactory_var dp_factory_;
 
   /// The RepoKey to Discovery object mapping
   RepoKeyDiscoveryMap discoveryMap_;
@@ -540,6 +491,8 @@ private:
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;
+
+  static int zero_argc;
 };
 
 #   define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()
@@ -549,7 +502,7 @@ private:
 #   define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
 
 /// Get a servant pointer given an object reference.
-/// @throws PortableServer::POA::OjbectNotActive,
+/// @throws PortableServer::POA::ObjectNotActive
 ///         PortableServer::POA::WrongAdapter
 ///         PortableServer::POA::WongPolicy
 template <class T_impl, class T_ptr>
@@ -559,7 +512,13 @@ T_impl* remote_reference_to_servant(T_ptr p)
     return 0;
   }
 
-  PortableServer::POA_var poa = TheServiceParticipant->the_poa();
+  //TODO: this needs to change once DR/DW-Remote are refactored to the
+  //      InfoRepoDiscovery library
+  int zero_argc = 0;
+  CORBA::ORB_var orb = CORBA::ORB_init(zero_argc, 0, DEFAULT_ORB_NAME);
+  CORBA::Object_var obj =
+    orb->resolve_initial_references("RootPOA");
+  PortableServer::POA_var poa = PortableServer::POA::_narrow(obj.in());
 
   T_impl* the_servant =
     dynamic_cast<T_impl*>(poa->reference_to_servant(p));
@@ -571,18 +530,23 @@ T_impl* remote_reference_to_servant(T_ptr p)
   return the_servant;
 }
 
-/// Given a servant, return the emote object reference from the local POA.
+/// Given a servant, return the remote object reference from the local POA.
 /// @throws PortableServer::POA::ServantNotActive,
 ///         PortableServer::POA::WrongPolicy
 template <class T>
-typename T::_stub_ptr_type servant_to_remote_reference(
-  T *servant)
+typename T::_stub_ptr_type servant_to_remote_reference(T* servant)
 {
-  PortableServer::POA_var poa = TheServiceParticipant->the_poa();
+  //TODO: this needs to change once DR/DW-Remote are refactored to the
+  //      InfoRepoDiscovery library
+  int zero_argc = 0;
+  CORBA::ORB_var orb = CORBA::ORB_init(zero_argc, 0, DEFAULT_ORB_NAME);
+  CORBA::Object_var obj =
+    orb->resolve_initial_references("RootPOA");
+  PortableServer::POA_var poa = PortableServer::POA::_narrow(obj.in());
 
   PortableServer::ObjectId_var oid = poa->activate_object(servant);
 
-  CORBA::Object_var obj = poa->id_to_reference(oid.in());
+  obj = poa->id_to_reference(oid.in());
 
   typename T::_stub_ptr_type the_obj = T::_stub_type::_narrow(obj.in());
   return the_obj;
@@ -591,7 +555,13 @@ typename T::_stub_ptr_type servant_to_remote_reference(
 template <class T>
 void deactivate_remote_object(T obj)
 {
-  PortableServer::POA_var poa = TheServiceParticipant->the_poa();
+  //TODO: this needs to change once DR/DW-Remote are refactored to the
+  //      InfoRepoDiscovery library
+  int zero_argc = 0;
+  CORBA::ORB_var orb = CORBA::ORB_init(zero_argc, 0, DEFAULT_ORB_NAME);
+  CORBA::Object_var poa_obj =
+    orb->resolve_initial_references("RootPOA");
+  PortableServer::POA_var poa = PortableServer::POA::_narrow(poa_obj.in());
   PortableServer::ObjectId_var oid =
     poa->reference_to_id(obj);
   poa->deactivate_object(oid.in());

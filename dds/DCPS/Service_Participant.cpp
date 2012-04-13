@@ -22,6 +22,7 @@
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
+#include "ace/Select_Reactor.h"
 #include "ace/Configuration_Import_Export.h"
 #include "ace/Service_Config.h"
 #include "ace/Argv_Type_Converter.h"
@@ -81,8 +82,8 @@ static bool got_persistent_data_dir = false;
 static bool got_default_discovery = false;
 
 Service_Participant::Service_Participant()
-  : orb_(CORBA::ORB::_nil()),
-    orb_from_user_(0),
+  : ORB_argv_(false /*substitute_env_args*/),
+    reactor_(0),
     dp_factory_servant_(0),
     defaultDiscovery_(Discovery::DEFAULT_REPO),
     n_chunks_(DEFAULT_NUM_CHUNKS),
@@ -125,9 +126,10 @@ Service_Participant::~Service_Participant()
   }
 
   delete monitor_;
+  delete reactor_;
 }
 
-Service_Participant *
+Service_Participant*
 Service_Participant::instance()
 {
   // Hide the template instantiation to prevent multiple instances
@@ -137,94 +139,21 @@ Service_Participant::instance()
 }
 
 int
-Service_Participant::svc()
+Service_Participant::ReactorTask::svc()
 {
-  {
-    bool done = false;
-
-    // Ignore all signals to avoid
-    //     ERROR: <something descriptive> Interrupted system call
-    // The main thread will handle signals.
-    sigset_t set;
-    ACE_OS::sigfillset(&set);
-    ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
-
-    while (!done) {
-      try {
-        if (orb_->orb_core()->has_shutdown() == false) {
-          orb_->run();
-        }
-
-        done = true;
-
-      } catch (const CORBA::SystemException& sysex) {
-        sysex._tao_print_exception(
-          "ERROR: Service_Participant::svc");
-
-      } catch (const CORBA::UserException& userex) {
-        userex._tao_print_exception(
-          "ERROR: Service_Participant::svc");
-
-      } catch (const CORBA::Exception& ex) {
-        ex._tao_print_exception(
-          "ERROR: Service_Participant::svc");
-      }
-
-      if (orb_->orb_core()->has_shutdown()) {
-        done = true;
-
-      } else {
-        orb_->orb_core()->reactor()->reset_reactor_event_loop();
-      }
-    }
-  }
-
+  Service_Participant* sp = instance();
+  sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
+  sp->reactor_->run_reactor_event_loop();
   return 0;
 }
 
-int
-Service_Participant::set_ORB(CORBA::ORB_ptr orb)
+ACE_Reactor_Timer_Interface*
+Service_Participant::timer() const
 {
-  // The orb is already created by the
-  // get_domain_participant_factory() call.
-  ACE_ASSERT(CORBA::is_nil(orb_.in()));
-  // The provided orb should not be nil.
-  ACE_ASSERT(!CORBA::is_nil(orb));
-
-  orb_ = CORBA::ORB::_duplicate(orb);
-  orb_from_user_ = 1;
-  return 0;
-}
-
-CORBA::ORB_ptr
-Service_Participant::get_ORB() const
-{
-  // This method should be called after either set_ORB is called
-  // or get_domain_participant_factory is called.
-  ACE_ASSERT(!CORBA::is_nil(orb_.in()));
-
-  return CORBA::ORB::_duplicate(orb_.in());
-}
-
-ACE_Reactor*
-Service_Participant::discovery_reactor() const
-{
-  // In the initial implementation, the discovery_reactor() is the one used
-  // by TAO's ORB.  In the future this may be a separate reactor managed here.
-  CORBA::ORB_var orb = this->get_ORB();
-  return orb->orb_core()->reactor();
-}
-
-PortableServer::POA_ptr
-Service_Participant::the_poa()
-{
-  if (CORBA::is_nil(root_poa_.in())) {
-    CORBA::Object_var obj =
-      orb_->resolve_initial_references("RootPOA");
-    root_poa_ = PortableServer::POA::_narrow(obj.in());
-  }
-
-  return PortableServer::POA::_duplicate(root_poa_.in());
+  //TODO: when should this be initialized?
+  if (!reactor_)
+    const_cast<ACE_Reactor*>(reactor_) = new ACE_Reactor(new ACE_Select_Reactor, true);
+  return reactor_;
 }
 
 void
@@ -239,20 +168,8 @@ Service_Participant::shutdown()
     domainRepoMap_.clear();
     discoveryMap_.clear();
 
-    if (!CORBA::is_nil(orb_.in())) {
-      if (!orb_from_user_) {
-        orb_->shutdown(0);
-        this->wait();
-      }
-
-      if (!orb_from_user_) {
-        root_poa_->destroy(1, 1);
-        orb_->destroy();
-      }
-
-      root_poa_ = PortableServer::POA::_nil();
-      orb_ = CORBA::ORB::_nil();
-    }
+    reactor_->end_reactor_event_loop();
+    reactor_task_.wait();
 
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
@@ -286,121 +203,99 @@ Service_Participant::get_domain_participant_factory(int &argc,
                      DDS::DomainParticipantFactory::_nil());
 
     if (CORBA::is_nil(dp_factory_.in())) {
-      try {
-        if (CORBA::is_nil(orb_.in())) {
-          //TBD: allow user to specify the ORB id
-
-          // Use a unique ORB for the DDS Service
-          // to avoid conflicts with other CORBA code
-          orb_ = CORBA::ORB_init(argc, argv, DEFAULT_ORB_NAME);
-        }
-
-        if (parse_args(argc, argv) != 0) {
-          return DDS::DomainParticipantFactory::_nil();
-        }
-
-        ACE_ASSERT(!CORBA::is_nil(orb_.in()));
-
-        if (config_fname == ACE_TEXT("")) {
-          if (DCPS_debug_level) {
-            ACE_DEBUG((LM_NOTICE,
-                       ACE_TEXT("(%P|%t) NOTICE: not using file configuration - no configuration ")
-                       ACE_TEXT("file specified.\n")));
+      // This used to be a call to ORB_init().  Since the ORB is now managed
+      // by InfoRepoDiscovery, just save the -ORB* args for later use.
+      ORB_argv_.add(ACE_TEXT("unused_arg_0"));
+      ACE_Arg_Shifter shifter(argc, argv);
+      while (shifter.is_anything_left()) {
+        if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORB")) < 0) {
+          shifter.ignore_arg();
+        } else {
+          ORB_argv_.add(shifter.get_current());
+          shifter.consume_arg();
+          if (shifter.is_parameter_next()) {
+            ORB_argv_.add(shifter.get_current());
+            shifter.consume_arg();
           }
+        }
+      }
+
+      if (parse_args(argc, argv) != 0) {
+        return DDS::DomainParticipantFactory::_nil();
+      }
+
+      if (config_fname == ACE_TEXT("")) {
+        if (DCPS_debug_level) {
+          ACE_DEBUG((LM_NOTICE,
+                     ACE_TEXT("(%P|%t) NOTICE: not using file configuration - no configuration ")
+                     ACE_TEXT("file specified.\n")));
+        }
+
+      } else {
+        // Load configuration only if the configuration
+        // file exists.
+        FILE* in = ACE_OS::fopen(config_fname.c_str(),
+                                 ACE_TEXT("r"));
+
+        if (!in) {
+          ACE_DEBUG((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: not using file configuration - ")
+                     ACE_TEXT("can not open \"%s\" for reading. %p\n"),
+                     config_fname.c_str(), ACE_TEXT("fopen")));
 
         } else {
-          // Load configuration only if the configuration
-          // file exists.
-          FILE* in = ACE_OS::fopen(config_fname.c_str(),
-                                   ACE_TEXT("r"));
+          ACE_OS::fclose(in);
 
-          if (!in) {
-            ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) WARNING: not using file configuration - ")
-                       ACE_TEXT("can not open \"%s\" for reading. %p\n"),
-                       config_fname.c_str(), ACE_TEXT("fopen")));
-
-          } else {
-            ACE_OS::fclose(in);
-
-            if (this->load_configuration() != 0) {
-              ACE_ERROR((LM_ERROR,
-                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
-                         ACE_TEXT("load_configuration() failed.\n")));
-              return DDS::DomainParticipantFactory::_nil();
-            }
-          }
-        }
-
-        // Establish the default scheduling mechanism and
-        // priority here.  Sadly, the ORB is already
-        // initialized so we have no influence over its
-        // scheduling or thread priority(ies).
-
-        /// @TODO: Move ORB intitialization to after the
-        ///        configuration file is processed and the
-        ///        initial scheduling policy and priority are
-        ///        established.
-        this->initializeScheduling();
-
-        CORBA::Object_var poa_object =
-          orb_->resolve_initial_references("RootPOA");
-
-        root_poa_ = PortableServer::POA::_narrow(poa_object.in());
-
-        if (CORBA::is_nil(root_poa_.in())) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: ")
-                     ACE_TEXT("Service_Participant::get_domain_participant_factory, ")
-                     ACE_TEXT("nil RootPOA\n")));
-          return DDS::DomainParticipantFactory::_nil();
-        }
-
-        ACE_NEW_RETURN(dp_factory_servant_,
-                       DomainParticipantFactoryImpl(),
-                       DDS::DomainParticipantFactory::_nil());
-
-        dp_factory_ = dp_factory_servant_;
-
-        // Give ownership to poa.
-        //REMOVE SHH ???? dp_factory_servant_->_remove_ref ();
-
-        if (CORBA::is_nil(dp_factory_.in())) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: ")
-                     ACE_TEXT("Service_Participant::get_domain_participant_factory, ")
-                     ACE_TEXT("nil DomainParticipantFactory. \n")));
-          return DDS::DomainParticipantFactory::_nil();
-        }
-
-        if (!this->orb_from_user_) {
-          PortableServer::POAManager_var poa_manager =
-            root_poa_->the_POAManager();
-
-          poa_manager->activate();
-
-          if (activate(THR_NEW_LWP | THR_JOINABLE, 1) == -1) {
+          if (this->load_configuration() != 0) {
             ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                       ACE_TEXT("Failed to activate the orb task.")));
+                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
+                       ACE_TEXT("load_configuration() failed.\n")));
             return DDS::DomainParticipantFactory::_nil();
           }
         }
+      }
 
-        this->monitor_factory_ =
-          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
-        if (this->monitor_factory_ == 0) {
-          // Use the stubbed factory
-          this->monitor_factory_ =
-            ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
-        }
-        this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
+      // Establish the default scheduling mechanism and
+      // priority here.  Sadly, the ORB is already
+      // initialized so we have no influence over its
+      // scheduling or thread priority(ies).
 
-      } catch (const CORBA::Exception& ex) {
-        ex._tao_print_exception(
-          "ERROR: Service_Participant::get_domain_participant_factory");
+      /// @TODO: Move ORB intitialization to after the
+      ///        configuration file is processed and the
+      ///        initial scheduling policy and priority are
+      ///        established.
+      this->initializeScheduling();
+
+      ACE_NEW_RETURN(dp_factory_servant_,
+                     DomainParticipantFactoryImpl(),
+                     DDS::DomainParticipantFactory::_nil());
+
+      dp_factory_ = dp_factory_servant_;
+
+      if (CORBA::is_nil(dp_factory_.in())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("Service_Participant::get_domain_participant_factory, ")
+                   ACE_TEXT("nil DomainParticipantFactory. \n")));
         return DDS::DomainParticipantFactory::_nil();
       }
+
+      timer(); // initialize reactor
+      if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
+                   ACE_TEXT("Failed to activate the reactor task.")));
+        return DDS::DomainParticipantFactory::_nil();
+      }
+
+      this->monitor_factory_ =
+        ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
+      if (this->monitor_factory_ == 0) {
+        // Use the stubbed factory
+        this->monitor_factory_ =
+          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
+      }
+      this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
     }
   }
 

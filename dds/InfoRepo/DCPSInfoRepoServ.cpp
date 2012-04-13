@@ -14,8 +14,7 @@
 #include "ShutdownInterface.h"
 
 #include "dds/DCPS/Service_Participant.h"
-
-#include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 
 //If we need BIT support, pull in TCP so that static builds will have it.
 #if !defined(DDS_HAS_MINIMUM_BIT)
@@ -88,8 +87,6 @@ InfoRepo::finalize()
     return;
   }
 
-  // TODO: Do we need this?
-  // TheTransportRegistry->release();
   TheServiceParticipant->shutdown();
 
   if (!CORBA::is_nil(this->orb_)) {
@@ -255,8 +252,6 @@ InfoRepo::init()
   CORBA::String_var objref_str =
     orb_->object_to_string(info_repo);
 
-  TheServiceParticipant->set_ORB(this->orb_);
-
   // Initialize the DomainParticipantFactory
   DDS::DomainParticipantFactory_var dpf =
     TheParticipantFactoryWithArgs(cvt.get_argc(),
@@ -287,8 +282,17 @@ InfoRepo::init()
 
   // This needs to be done after initialization since we create the reference
   // to ourselves in the service here.
-  TheServiceParticipant->set_repo_ior(objref_str,
-                                      OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+  OpenDDS::DCPS::Service_Participant* serv_part = TheServiceParticipant;
+  serv_part->set_repo_ior(objref_str, OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+
+  OpenDDS::DCPS::Discovery_rch disc = serv_part->get_discovery(0 /*domainId*/);
+  OpenDDS::DCPS::InfoRepoDiscovery_rch ird =
+    OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::InfoRepoDiscovery>(disc);
+  if (!ird->set_ORB(orb_)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+               ACE_TEXT("Unable to set the ORB in InfoRepoDiscovery.\n")));
+    throw InitError("Unable to set the ORB in InfoRepoDiscovery.");
+  }
 
   // Initialize persistence _after_ initializing the participant factory
   // and intializing the transport.

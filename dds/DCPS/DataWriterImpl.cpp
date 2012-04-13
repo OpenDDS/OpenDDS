@@ -196,8 +196,7 @@ DataWriterImpl::init(
   dw_local_objref_   = DDS::DataWriter::_duplicate(dw_local);
   dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate(dw_remote);
 
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-  this->reactor_ = orb->orb_core()->reactor();
+  this->reactor_ = TheServiceParticipant->timer();
 
   initialized_ = true;
 }

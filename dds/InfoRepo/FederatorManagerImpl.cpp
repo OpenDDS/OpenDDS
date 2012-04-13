@@ -991,7 +991,7 @@ ManagerImpl::join_federation(
       // Obtain a reference to the remote repository.
       OpenDDS::DCPS::DCPSInfo_var remoteRepo = peer->repository();
 
-      CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
+      CORBA::ORB_var orb = remoteRepo->_get_orb();
       CORBA::String_var remoteRepoIor = orb->object_to_string(remoteRepo.in());
       if (OpenDDS::DCPS::DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,

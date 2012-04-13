@@ -53,11 +53,7 @@ public:
 
   void pause()
   {
-    // get the reactor and set the timer.
-    CORBA::ORB_var orb = TheServiceParticipant->get_ORB ();
-
-    ACE_Reactor* reactor ;
-    reactor = orb->orb_core()->reactor();
+    ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
     if (reactor->schedule_timer(this,
                                 0,

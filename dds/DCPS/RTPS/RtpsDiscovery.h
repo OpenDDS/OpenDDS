@@ -249,6 +249,8 @@ public:
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
 
+  ACE_Reactor* reactor();
+
 private:
   // Retrieve the Spdp representing the participant
   DCPS::RcHandle<Spdp> get_part(const DDS::DomainId_t domain_id,
@@ -258,6 +260,16 @@ private:
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   bool sedp_multicast_;
   AddrVec spdp_send_addrs_;
+
+  struct ReactorRunner : ACE_Task_Base {
+    ReactorRunner() : reactor_(0) {}
+    ~ReactorRunner();
+    int svc();
+    void end();
+
+    ACE_Reactor* reactor_;
+    ACE_Thread_Mutex mtx_;
+  } reactor_runner_;
 
   typedef std::map<DCPS::RepoId, DCPS::RcHandle<Spdp>, DCPS::GUID_tKeyLessThan> ParticipantMap;
   typedef std::map<DDS::DomainId_t, ParticipantMap> DomainParticipantMap;
