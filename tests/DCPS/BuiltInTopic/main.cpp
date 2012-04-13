@@ -462,14 +462,18 @@ void shutdown ()
        "shutdown: participant delete_contained_entities failed\n"));
   }
 
-  ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-
-  if (dpf->delete_participant (participant.in ())
+  if (participant_factory->delete_participant (participant.in ())
     != ::DDS::RETCODE_OK)
   {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: shutdown: "
       "participant  delete_participant failed\n"));
   }
+  datawriter = 0;
+  datareader = 0;
+  bit_subscriber = 0;
+  publisher = 0;
+  participant = 0;
+  participant_factory = 0;
 
   TheServiceParticipant->shutdown ();
 }
@@ -480,7 +484,6 @@ int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-
   parse_args (argc, argv);
 
   if (ignore_kind != DONT_IGNORE)
