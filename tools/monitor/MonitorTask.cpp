@@ -19,6 +19,7 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
