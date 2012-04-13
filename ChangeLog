@@ -1,3 +1,9 @@
+Fri Apr 13 11:43:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+
+          Missed changing include to DdsDcpsInfoUtilsC.h.
+
 Fri Apr 13 11:16:20 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
