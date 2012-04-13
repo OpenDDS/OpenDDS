@@ -24,6 +24,7 @@ bool qos_tests = false;
 bool use_rtps = false;
 bool failed = false;
 
+#ifndef DDS_HAS_MINIMUM_BIT
 class DDS_TEST
 {
 public:
@@ -34,6 +35,7 @@ public:
     rtpsDisc->set_part_bit_subscriber(domain, partId, bit_subscriber);
   }
 };
+#endif
 
 int parse_args(int argc, ACE_TCHAR *argv[])
 {

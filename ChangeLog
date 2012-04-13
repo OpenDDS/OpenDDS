@@ -1,8 +1,14 @@
+Fri Apr 13 11:16:20 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Fixing error for !DDS_HAS_MINIMUM_BIT.
+
 Thu Apr 12 20:51:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DdsDcpsInfoUtils.idl:
         * dds/DdsDcps.mpc:
-        
+
           Moved remaining contents in DdsDcpsInfo.idl.
 
         * dds/DCPS/DCPS_Utils.h:
