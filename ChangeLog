@@ -1,3 +1,9 @@
+Fri Apr 13 11:55:16 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Needed to change to call get_stringified_dcps_info_ior on irDisco.
+          
 Fri Apr 13 11:49:12 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/monitor/MonitorTask.cpp:

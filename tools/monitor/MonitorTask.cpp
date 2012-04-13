@@ -75,7 +75,7 @@ Monitor::MonitorTask::MonitorTask(
       std::string ior;
       // only InfoRepoDiscovery has an ior
       if (!irDisco.is_nil()) {
-        ior = location->second->get_stringified_dcps_info_ior();
+        ior = irDisco->get_stringified_dcps_info_ior();
       } else {
         ior = "";
       }
