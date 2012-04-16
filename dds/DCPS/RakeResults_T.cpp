@@ -22,13 +22,17 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
                                     DDS::SampleInfoSeq& info_seq,
                                     CORBA::Long max_samples,
                                     DDS::PresentationQosPolicy presentation,
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
                                     DDS::QueryCondition_ptr cond,
+#endif
                                     Operation_t oper)
   : reader_(reader)
   , received_data_(received_data)
   , info_seq_(info_seq)
   , max_samples_(max_samples)
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   , cond_(cond)
+#endif
   , oper_(oper)
   , do_sort_(false)
   , do_filter_(false)
@@ -88,7 +92,9 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
   if (do_sort_) {
     // N.B. Until a better heuristic is found, non-valid
     // samples are elided when sorting by QueryCondition.
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     if (cond_ && !sample->registered_data_) return false;
+#endif
 
     RakeData rd = {sample, instance, index_in_instance};
     sorted_.insert(rd);

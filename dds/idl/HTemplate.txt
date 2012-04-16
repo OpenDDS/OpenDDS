@@ -377,8 +377,10 @@ public:
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
+      ::DDS::InstanceStateMask instance_states
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      , ::DDS::QueryCondition_ptr a_condition
+#endif
       );
 
     ::DDS::ReturnCode_t take_i (
@@ -387,8 +389,10 @@ public:
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
+      ::DDS::InstanceStateMask instance_states
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      , ::DDS::QueryCondition_ptr a_condition
+#endif
       );
 
     DDS::ReturnCode_t read_instance_i (
@@ -398,8 +402,10 @@ public:
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
+      ::DDS::InstanceStateMask instance_states
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      , ::DDS::QueryCondition_ptr a_condition
+#endif
       );
 
     DDS::ReturnCode_t take_instance_i (
@@ -409,8 +415,10 @@ public:
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
+      ::DDS::InstanceStateMask instance_states
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      , ::DDS::QueryCondition_ptr a_condition
+#endif
       );
 
     DDS::ReturnCode_t read_next_instance_i (
@@ -420,8 +428,10 @@ public:
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
+      ::DDS::InstanceStateMask instance_states
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      , ::DDS::QueryCondition_ptr a_condition
+#endif
       );
 
     DDS::ReturnCode_t take_next_instance_i (
@@ -431,8 +441,10 @@ public:
       ::DDS::InstanceHandle_t a_handle,
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
-      ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
+      ::DDS::InstanceStateMask instance_states
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      , ::DDS::QueryCondition_ptr a_condition
+#endif
       );
 
     void store_instance_data(
