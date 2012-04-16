@@ -299,24 +299,16 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   // not just unregister but remove any pending writes/sends.
   dw_servant->unregister_all();
 
-  try {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->remove_publication(
-      this->domain_id_,
-      this->participant_->get_id(),
-      publication_id);
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in PublisherImpl::delete_datawriter");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in PublisherImpl::delete_datawriter");
-    return DDS::RETCODE_ERROR;
+  Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+  if (!disco->remove_publication(
+        this->domain_id_,
+        this->participant_->get_id(),
+        publication_id)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("PublisherImpl::delete_datawriter, ")
+                      ACE_TEXT("publication not removed from discovery.\n")),
+                     DDS::RETCODE_ERROR);
   }
 
   // Decrease ref count after the servant is removed from the maps.
@@ -442,34 +434,20 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
       DwIdToQosMap::iterator iter = idToQosMap.begin();
 
       while (iter != idToQosMap.end()) {
-        try {
-          Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-          CORBA::Boolean status
-          = disco->update_publication_qos(
-              participant_->get_domain_id(),
-              participant_->get_id(),
-              iter->first,
-              iter->second,
-              this->qos_);
+        Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+        const bool status
+        = disco->update_publication_qos(
+            participant_->get_domain_id(),
+            participant_->get_id(),
+            iter->first,
+            iter->second,
+            this->qos_);
 
-          if (status == 0) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
-                              ACE_TEXT("failed. \n")),
-                             DDS::RETCODE_ERROR);
-          }
-
-        } catch (const CORBA::SystemException& sysex) {
-          sysex._tao_print_exception(
-            "ERROR: System Exception"
-            " in PublisherImpl::set_qos");
-          return DDS::RETCODE_ERROR;
-
-        } catch (const CORBA::UserException& userex) {
-          userex._tao_print_exception(
-            "ERROR:  Exception"
-            " in PublisherImpl::set_qos");
-          return DDS::RETCODE_ERROR;
+        if (!status) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
+                            ACE_TEXT("failed. \n")),
+                           DDS::RETCODE_ERROR);
         }
 
         ++iter;

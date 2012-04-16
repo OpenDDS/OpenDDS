@@ -343,23 +343,25 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
-void
+bool
 RtpsDiscovery::remove_domain_participant(DDS::DomainId_t domain,
                                          const OpenDDS::DCPS::RepoId& participantId)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   participants_[domain].erase(participantId);
   if (participants_[domain].empty()) {
     participants_.erase(domain);
   }
+  return true;
 }
 
-void
+bool
 RtpsDiscovery::ignore_domain_participant(DDS::DomainId_t domain,
                                          const OpenDDS::DCPS::RepoId& myParticipantId,
                                          const OpenDDS::DCPS::RepoId& ignoreId)
 {
   get_part(domain, myParticipantId)->ignore_domain_participant(ignoreId);
+  return true;
 }
 
 bool
@@ -468,11 +470,12 @@ RtpsDiscovery::remove_topic(DDS::DomainId_t domainId,
   return stat;
 }
 
-void
+bool
 RtpsDiscovery::ignore_topic(DDS::DomainId_t domainId, const OpenDDS::DCPS::RepoId& myParticipantId,
                             const OpenDDS::DCPS::RepoId& ignoreId)
 {
   get_part(domainId, myParticipantId)->ignore_topic(ignoreId);
+  return true;
 }
 
 bool
@@ -506,20 +509,22 @@ RtpsDiscovery::add_publication(DDS::DomainId_t domainId,
     topicId, publication, qos, transInfo, publisherQos);
 }
 
-void
+bool
 RtpsDiscovery::remove_publication(DDS::DomainId_t domainId,
                                   const OpenDDS::DCPS::RepoId& participantId,
                                   const OpenDDS::DCPS::RepoId& publicationId)
 {
   get_part(domainId, participantId)->remove_publication(publicationId);
+  return true;
 }
 
-void
+bool
 RtpsDiscovery::ignore_publication(DDS::DomainId_t domainId,
                                   const OpenDDS::DCPS::RepoId& participantId,
                                   const OpenDDS::DCPS::RepoId& ignoreId)
 {
   get_part(domainId, participantId)->ignore_publication(ignoreId);
+  return true;
 }
 
 bool
@@ -551,20 +556,22 @@ RtpsDiscovery::add_subscription(DDS::DomainId_t domainId,
     topicId, subscription, qos, transInfo, subscriberQos, filterExpr, params);
 }
 
-void
+bool
 RtpsDiscovery::remove_subscription(DDS::DomainId_t domainId,
                                    const OpenDDS::DCPS::RepoId& participantId,
                                    const OpenDDS::DCPS::RepoId& subscriptionId)
 {
   get_part(domainId, participantId)->remove_subscription(subscriptionId);
+  return true;
 }
 
-void
+bool
 RtpsDiscovery::ignore_subscription(DDS::DomainId_t domainId,
                                    const OpenDDS::DCPS::RepoId& participantId,
                                    const OpenDDS::DCPS::RepoId& ignoreId)
 {
   get_part(domainId, participantId)->ignore_subscription(ignoreId);
+  return true;
 }
 
 bool
@@ -598,33 +605,6 @@ RtpsDiscovery::association_complete(DDS::DomainId_t domainId,
 {
   get_part(domainId, participantId)->association_complete(localId, remoteId);
 }
-
-void
-RtpsDiscovery::disassociate_participant(DDS::DomainId_t /*domainId*/,
-                                        const OpenDDS::DCPS::RepoId& /*localId*/,
-                                        const OpenDDS::DCPS::RepoId& /*remoteId*/)
-{
-  // no-op: not called from DCPS
-}
-
-void
-RtpsDiscovery::disassociate_subscription(DDS::DomainId_t /*domainId*/,
-                                         const OpenDDS::DCPS::RepoId& /*participantId*/,
-                                         const OpenDDS::DCPS::RepoId& /*localId*/,
-                                         const OpenDDS::DCPS::RepoId& /*remoteId*/)
-{
-  // no-op: not called from DCPS
-}
-
-void
-RtpsDiscovery::disassociate_publication(DDS::DomainId_t /*domainId*/,
-                                        const OpenDDS::DCPS::RepoId& /*participantId*/,
-                                        const OpenDDS::DCPS::RepoId& /*localId*/,
-                                        const OpenDDS::DCPS::RepoId& /*remoteId*/)
-{
-  // no-op: not called from DCPS
-}
-
 
 DCPS::RcHandle<Spdp>
 RtpsDiscovery::get_part(const DDS::DomainId_t domain_id,

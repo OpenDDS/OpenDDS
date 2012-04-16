@@ -359,23 +359,15 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
   RepoId subscription_id  = dr_servant->get_subscription_id();
 
-  try {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->remove_subscription(this->domain_id_,
-                               participant_->get_id(),
-                               subscription_id);
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in SubscriberImpl::delete_datareader");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in SubscriberImpl::delete_datareader");
-    return DDS::RETCODE_ERROR;
+  Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+  if (!disco->remove_subscription(this->domain_id_,
+                                  participant_->get_id(),
+                                  subscription_id)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("SubscriberImpl::delete_datareader: ")
+                      ACE_TEXT(" could not remove subscription from discovery.\n")),
+                     ::DDS::RETCODE_ERROR);
   }
 
   // Call remove association before unregistering the datareader from the transport,
@@ -618,33 +610,19 @@ SubscriberImpl::set_qos(
       DrIdToQosMap::iterator iter = idToQosMap.begin();
 
       while (iter != idToQosMap.end()) {
-        try {
-          Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-          CORBA::Boolean status
-          = disco->update_subscription_qos(this->domain_id_,
-                                           participant_->get_id(),
-                                           iter->first,
-                                           iter->second,
-                                           this->qos_);
+        Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+        const bool status
+        = disco->update_subscription_qos(this->domain_id_,
+                                         participant_->get_id(),
+                                         iter->first,
+                                         iter->second,
+                                         this->qos_);
 
-          if (status == 0) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
-                              ACE_TEXT("failed. \n")),
-                             DDS::RETCODE_ERROR);
-          }
-
-        } catch (const CORBA::SystemException& sysex) {
-          sysex._tao_print_exception(
-            "ERROR: System Exception"
-            " in SubscriberImpl::set_qos");
-          return DDS::RETCODE_ERROR;
-
-        } catch (const CORBA::UserException& userex) {
-          userex._tao_print_exception(
-            "ERROR:  Exception"
-            " in SubscriberImpl::set_qos");
-          return DDS::RETCODE_ERROR;
+        if (!status) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
+                            ACE_TEXT("failed. \n")),
+                           DDS::RETCODE_ERROR);
         }
 
         ++iter;

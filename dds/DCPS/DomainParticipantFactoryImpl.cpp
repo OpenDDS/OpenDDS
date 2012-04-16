@@ -64,30 +64,10 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  RepoId dp_id     = GUID_UNKNOWN;
-  bool   federated = false;
+  const AddDomainStatus value =
+    disco->add_domain_participant(domainId, qos);
 
-  try {
-    AddDomainStatus value
-    = disco->add_domain_participant(domainId,
-                                    qos);
-    dp_id     = value.id;
-    federated = value.federated;
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DomainParticipantFactoryImpl::create_participant");
-    return DDS::DomainParticipant::_nil();
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantFactoryImpl::create_participant");
-    return DDS::DomainParticipant::_nil();
-  }
-
-  if (dp_id == GUID_UNKNOWN) {
+  if (value.id == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
@@ -98,7 +78,8 @@ DomainParticipantFactoryImpl::create_participant(
   DomainParticipantImpl* dp;
 
   ACE_NEW_RETURN(dp,
-                 DomainParticipantImpl(this, domainId, dp_id, qos, a_listener, mask, federated),
+                 DomainParticipantImpl(this, domainId, value.id, qos, a_listener,
+                                       mask, value.federated),
                  DDS::DomainParticipant::_nil());
 
   DDS::DomainParticipant_ptr dp_obj(dp);
@@ -249,22 +230,13 @@ DomainParticipantFactoryImpl::delete_participant(
     } //xxx now obj rc = 4
   }//xxx now obj rc = 3
 
-  try {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
-    disco->remove_domain_participant(domain_id,
-                                     dp_id);
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DomainParticipantFactoryImpl::delete_participant");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantFactoryImpl::delete_participant");
-    return DDS::RETCODE_ERROR;
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
+  if (!disco->remove_domain_participant(domain_id,
+                                        dp_id)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("could not remove domain participant.\n")),
+                     DDS::RETCODE_ERROR);
   }
 
   return DDS::RETCODE_OK;

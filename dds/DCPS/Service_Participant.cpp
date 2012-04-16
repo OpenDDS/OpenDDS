@@ -991,35 +991,26 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       // original repository if it is restarted.
     }
 
-    try {
-      // Check the availability of the current repository.
-      if (current->second->active()) {
+    // Check the availability of the current repository.
+    if (current->second->active()) {
 
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-                     ACE_TEXT("replacing repository %C with %C.\n"),
-                     key.c_str(),
-                     current->first.c_str()));
-        }
-
-        // If we reach here, the validate_connection() call succeeded
-        // and the repository is reachable.
-        this->remap_domains(key, current->first);
-
-        // Now we are done.  This is the only non-failure exit from
-        // this method.
-        return;
-
-      } else if (DCPS_debug_level > 0) {
+      if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-                   ACE_TEXT("repository %C reference to %C unexpected _is_a return.\n"),
+                   ACE_TEXT("replacing repository %C with %C.\n"),
                    key.c_str(),
                    current->first.c_str()));
       }
 
-    } catch (const CORBA::Exception&) {
+      // If we reach here, the validate_connection() call succeeded
+      // and the repository is reachable.
+      this->remap_domains(key, current->first);
+
+      // Now we are done.  This is the only non-failure exit from
+      // this method.
+      return;
+
+    } else {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
                  ACE_TEXT("repository %C was not available to replace %C, ")
