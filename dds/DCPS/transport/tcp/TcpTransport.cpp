@@ -125,14 +125,9 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
       }
     }
 
-    // This means we may or may not find a suitable (and already connected) DataLink.
-    // Thus we need more checks.
-    else {
-      if (!con->is_connector() && !con->is_connected()) {
-        // The passive connecting side will wait for the connection establishment.
-      }
-
-    }
+    // else, This means we may or may not find a suitable (and already connected) DataLink.
+    // if con is not a connector and not connected, the passive connecting side will wait 
+    // for the connection establishment.
 
     if (DCPS_debug_level >= 5) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Found existing connection,"

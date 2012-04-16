@@ -1,3 +1,18 @@
+Mon Apr 16 16:13:07 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.inl:
+
+          Made functions const.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Removed useless if and changed comment.
+
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Added default initialization value (coverity error).
+
 Mon Apr 16 15:52:13 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/Discovery.h:
@@ -5,7 +20,7 @@ Mon Apr 16 15:52:13 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/RTPS/RtpsDiscovery.cpp:
 
           Removed dissociate_*** and shutdown functions from the Discovery
-          interface and changed some void functions to return a bool 
+          interface and changed some void functions to return a bool
           indicating if it was successful.
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:

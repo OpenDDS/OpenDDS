@@ -31,13 +31,13 @@ OpenDDS::DCPS::TcpConnection::remove_send_strategy()
 }
 
 ACE_INLINE bool
-OpenDDS::DCPS::TcpConnection::is_connector()
+OpenDDS::DCPS::TcpConnection::is_connector() const
 {
   return this->is_connector_;
 }
 
 ACE_INLINE bool
-OpenDDS::DCPS::TcpConnection::is_connected()
+OpenDDS::DCPS::TcpConnection::is_connected() const
 {
   return this->connected_.value();
 }
