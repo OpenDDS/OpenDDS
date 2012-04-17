@@ -61,8 +61,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Minimizing OpenDDS:',
     'built-in-topics!', 'Support Built-in Topics (yes)',
     'content-subscription!', 'Support Content-Subscription Profile (yes)',
-    'content-filtered-topic!', 'Support ContentFilteredTopic (yes)',
-    'query-condition!', 'Support Query Condition from Content-Subscription Profile (yes)',
+    'content-filtered-topic!', 'Support ContentFilteredTopic from Content-Subscription Profile (yes)',
+    'multi-topic!', 'Support MultiTopic from Content-Subscription Profile (yes)',
+    'query-condition!', 'Support QueryCondition from Content-Subscription Profile (yes)',
     'tests!', 'Build tests, examples, and performance tests (yes)',
    ],
   );
@@ -577,7 +578,7 @@ else {
 
 ## Run MPC (if needed)
 
-for my $feat ('built-in-topics', 'content-subscription', 'content-filtered-topic', 'query-condition') {
+for my $feat ('built-in-topics', 'content-subscription', 'content-filtered-topic', 'multi-topic', 'query-condition') {
   if (exists $opts{$feat} && !$opts{$feat}) {
     my $f = $feat;
     $f =~ s/-/_/g;

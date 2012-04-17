@@ -56,13 +56,16 @@ char *
   return reader_impl;
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 ::DDS::DataReader_ptr
 <%TYPE%>TypeSupportImpl::create_multitopic_datareader()
 {
   return new OpenDDS::DCPS::MultiTopicDataReader_T<<%TYPE%>,
     <%TYPE%>DataReaderImpl>;
 }
+#endif
+
+#if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
 
 const OpenDDS::DCPS::MetaStruct&
 <%TYPE%>TypeSupportImpl::getMetaStructForType()
@@ -245,7 +248,7 @@ DDS::ReturnCode_t
 
   // list of reader RepoIds that should not get data
   OpenDDS::DCPS::GUIDSeq_var filter_out;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (TheServiceParticipant->publisher_content_filter()) {
     for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
          end = reader_info_.end(); iter != end; ++iter) {
@@ -1625,7 +1628,7 @@ DDS::ReturnCode_t
   }
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
 bool
 <%TYPE%>DataReaderImpl::contains_sample_filtered(DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states,
@@ -1653,6 +1656,8 @@ bool
 
   return false;
 }
+
+#endif
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_generic(
@@ -1712,7 +1717,7 @@ DDS::ReturnCode_t
   return rc;
 }
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+//~ #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,
@@ -1722,7 +1727,7 @@ DDS::InstanceHandle_t
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                    DDS::HANDLE_NIL);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   DDS::TopicDescription_var descr = get_topicdescription();
   if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
     if (!mt->filter(sample)) {

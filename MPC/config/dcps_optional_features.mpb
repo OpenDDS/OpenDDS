@@ -18,3 +18,8 @@ feature (!content_filtered_topic) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
   dcps_ts_flags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
 }
+feature (!multi_topic) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_NO_MULTI_TOPIC
+  idlflags += -DOPENDDS_NO_MULTI_TOPIC
+  dcps_ts_flags += -DOPENDDS_NO_MULTI_TOPIC
+}

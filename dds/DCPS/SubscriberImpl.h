@@ -33,7 +33,7 @@ namespace DCPS {
 class DomainParticipantImpl;
 class Monitor;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 class MultiTopicImpl;
 #endif
 
@@ -118,7 +118,7 @@ public:
   DDS::ReturnCode_t reader_enabled(const char* topic_name,
                                    DataReaderImpl* reader);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
 #endif
 
@@ -176,7 +176,7 @@ private:
   DataReaderMap                datareader_map_;
   DataReaderSet                datareader_set_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   std::map<std::string, DDS::DataReader_var> multitopic_reader_map_;
 #endif
 

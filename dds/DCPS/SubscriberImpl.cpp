@@ -126,7 +126,12 @@ SubscriberImpl::create_datareader(
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   ContentFilteredTopicImpl* cft = 0;
+#endif
+#ifndef OPENDDS_NO_MULTI_TOPIC
   MultiTopicImpl* mt = 0;
+#endif
+
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) && !defined(OPENDDS_NO_MULTI_TOPIC)
   DDS::Topic_var related;
   if (!topic_servant) {
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
@@ -143,7 +148,7 @@ SubscriberImpl::create_datareader(
     this->get_default_datareader_qos(dr_qos);
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#ifndef OPENDDS_NO_MULTI_TOPIC
     if (mt) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -182,7 +187,7 @@ SubscriberImpl::create_datareader(
     return DDS::DataReader::_nil();
   }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#ifndef OPENDDS_NO_MULTI_TOPIC
   if (mt) {
     try {
       DDS::DataReader_var dr =
@@ -328,7 +333,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     if (it == datareader_map_.end()) {
       DDS::TopicDescription_var td = a_datareader->get_topicdescription();
       CORBA::String_var topic_name = td->get_name();
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
       std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
         multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
@@ -406,7 +411,7 @@ SubscriberImpl::delete_contained_entities()
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
     for (std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
            multitopic_reader_map_.begin();
          mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
@@ -456,7 +461,7 @@ SubscriberImpl::lookup_datareader(
   DataReaderMap::iterator it = datareader_map_.find(topic_name);
 
   if (it == datareader_map_.end()) {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
     std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
       multitopic_reader_map_.find(topic_name);
     if (mt_iter != multitopic_reader_map_.end()) {
@@ -553,7 +558,7 @@ SubscriberImpl::notify_datareaders()
     }
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   for (std::map<std::string, DDS::DataReader_var>::iterator it =
          multitopic_reader_map_.begin(); it != multitopic_reader_map_.end();
        ++it) {
@@ -880,7 +885,7 @@ SubscriberImpl::reader_enabled(const char* topic_name,
   return DDS::RETCODE_OK;
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 DDS::ReturnCode_t
 SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
 {

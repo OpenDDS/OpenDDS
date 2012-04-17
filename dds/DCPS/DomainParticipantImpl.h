@@ -178,6 +178,8 @@ public:
 
   #endif
 
+  #ifndef OPENDDS_NO_MULTI_TOPIC
+
   virtual DDS::MultiTopic_ptr create_multitopic(
     const char * name,
     const char * type_name,
@@ -186,10 +188,14 @@ public:
 
   virtual DDS::ReturnCode_t delete_multitopic(DDS::MultiTopic_ptr a_multitopic);
 
+  #endif
+
+  #if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+
   RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
   void deref_filter_eval(const char* filter);
 
-  //~ #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  #endif
 
   virtual DDS::ReturnCode_t delete_contained_entities();
 

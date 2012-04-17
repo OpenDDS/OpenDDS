@@ -1,5 +1,5 @@
 project: dcpsexe, dcps_tcp {
-  requires += content_subscription
+  requires += multi_topic
   TypeSupport_Files {
     MultiTopicTest.idl
   }

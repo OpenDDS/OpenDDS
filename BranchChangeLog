@@ -1,3 +1,27 @@
+Tue Apr 17 20:26:02 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * configure:
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
+
+	  Preliminary support for multi-topic feature guard.
+
 Tue Apr 17 17:30:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * BranchChangeLog:
@@ -23,7 +47,7 @@ Tue Apr 17 17:30:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.cpp:
 
-	  Preliminary support for content-filtered-topic feature guard.
+          Preliminary support for content-filtered-topic feature guard.
 
 Tue Apr 17 17:30:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
