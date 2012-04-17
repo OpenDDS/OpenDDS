@@ -54,10 +54,12 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
   DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states, const char* query_expression,
     const DDS::StringSeq& query_parameters);
+#endif
 
   DDS::ReturnCode_t delete_readcondition(DDS::ReadCondition_ptr a_condition);
 

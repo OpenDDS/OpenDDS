@@ -65,6 +65,7 @@ module DDS {
     };
 
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
     local interface QueryCondition : ReadCondition {
         string         get_query_expression();
         ReturnCode_t   get_query_parameters(
@@ -72,7 +73,7 @@ module DDS {
         ReturnCode_t   set_query_parameters(
             in StringSeq query_parameters);
     };
-
+#endif
 
     local interface DataReader : Entity {
     // ReturnCode_t read(
@@ -163,7 +164,7 @@ module DDS {
       in ViewStateMask view_states,
       in InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
     QueryCondition create_querycondition(
       in SampleStateMask sample_states,
       in ViewStateMask view_states,

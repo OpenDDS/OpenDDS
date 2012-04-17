@@ -732,7 +732,7 @@ DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
   return rc._retn();
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
 DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
   DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states,

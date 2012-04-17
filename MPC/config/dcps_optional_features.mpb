@@ -8,3 +8,8 @@ feature (!content_subscription) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   dcps_ts_flags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
+feature (!query_condition) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_NO_QUERY_CONDITION
+  idlflags += -DOPENDDS_NO_QUERY_CONDITION
+  dcps_ts_flags += -DOPENDDS_NO_QUERY_CONDITION
+}

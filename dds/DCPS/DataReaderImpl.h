@@ -301,7 +301,7 @@ public:
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
   virtual DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,

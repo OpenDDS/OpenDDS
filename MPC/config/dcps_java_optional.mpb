@@ -4,3 +4,6 @@ feature (!built_in_topics) : idl2jni {
 feature (!content_subscription) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
+feature (!query_condition) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION
+}

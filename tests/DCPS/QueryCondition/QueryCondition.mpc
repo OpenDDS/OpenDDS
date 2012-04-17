@@ -1,6 +1,6 @@
 project: dcpsexe_with_tcp {
   exename = QueryConditionTest
-  requires += content_subscription
+  requires += query_condition
   TypeSupport_Files {
     Messenger.idl
   }

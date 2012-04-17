@@ -681,7 +681,7 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
     , ::DDS::QueryCondition_ptr a_condition
 #endif
     )
@@ -710,7 +710,7 @@ DDS::ReturnCode_t
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
     results(this, received_data, info_seq, max_samples,
             this->subqos_.presentation,
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
             a_condition,
 #endif
             ::OpenDDS::DCPS::DDS_OPERATION_READ);
@@ -788,7 +788,7 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
     , ::DDS::QueryCondition_ptr a_condition
 #endif
     )
@@ -817,7 +817,7 @@ DDS::ReturnCode_t
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation,
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
              a_condition,
 #endif
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
@@ -893,7 +893,7 @@ DDS::ReturnCode_t
                 a_condition->get_sample_state_mask(),
                 a_condition->get_view_state_mask(),
                 a_condition->get_instance_state_mask()
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
                 , dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition)
 #endif
                 );
@@ -925,7 +925,7 @@ DDS::ReturnCode_t
                 a_condition->get_sample_state_mask(),
                 a_condition->get_view_state_mask(),
                 a_condition->get_instance_state_mask()
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
                 , dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition)
 #endif
                 );
@@ -1137,7 +1137,7 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
     , ::DDS::QueryCondition_ptr a_condition
 #endif
     )
@@ -1147,7 +1147,7 @@ DDS::ReturnCode_t
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation,
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
              a_condition,
 #endif
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
@@ -1219,7 +1219,7 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
     , ::DDS::QueryCondition_ptr a_condition
 #endif
     )
@@ -1229,7 +1229,7 @@ DDS::ReturnCode_t
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation,
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
              a_condition,
 #endif
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
@@ -1296,7 +1296,7 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
     , ::DDS::QueryCondition_ptr a_condition
 #endif
     )
@@ -1335,7 +1335,7 @@ DDS::ReturnCode_t
     DDS::ReturnCode_t const status =
       read_instance_i(received_data, info_seq, max_samples, handle,
                       sample_states, view_states, instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
                       , a_condition
 #endif
 );
@@ -1380,7 +1380,7 @@ DDS::ReturnCode_t
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
     , ::DDS::QueryCondition_ptr a_condition
 #endif
     )
@@ -1417,7 +1417,7 @@ DDS::ReturnCode_t
     DDS::ReturnCode_t const status =
       take_instance_i(received_data, info_seq, max_samples, handle,
                       sample_states, view_states, instance_states
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
                       , a_condition
 #endif
                       );
@@ -1456,7 +1456,7 @@ DDS::ReturnCode_t
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
   ::DDS::QueryCondition_ptr query_condition =
     dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition);
 #endif
@@ -1465,7 +1465,7 @@ DDS::ReturnCode_t
                               a_condition->get_sample_state_mask(),
                               a_condition->get_view_state_mask(),
                               a_condition->get_instance_state_mask()
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
                               , query_condition
 #endif
                               );
@@ -1495,7 +1495,7 @@ DDS::ReturnCode_t
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
   ::DDS::QueryCondition_ptr query_condition =
     dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition);
 #endif
@@ -1504,7 +1504,7 @@ DDS::ReturnCode_t
                               a_condition->get_sample_state_mask(),
                               a_condition->get_view_state_mask(),
                               a_condition->get_instance_state_mask()
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
                               , query_condition
 #endif
                               );
@@ -1648,7 +1648,7 @@ DDS::ReturnCode_t
 {
   <%SCOPED%><%SEQ%> data;
   DDS::ReturnCode_t rc = read_i(data, gen.info_, DDS::LENGTH_UNLIMITED,
-    sample_states, view_states, instance_states, NULL);
+    sample_states, view_states, instance_states);
   gen.samples_.reserve(data.length());
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     gen.samples_.push_back(&data[i]);
@@ -1672,7 +1672,7 @@ DDS::ReturnCode_t
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
-    instance_states, NULL);
+    instance_states);
   if (rc == DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);
@@ -1690,7 +1690,7 @@ DDS::ReturnCode_t
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
-    instance_states, NULL);
+    instance_states);
   if (rc == DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);

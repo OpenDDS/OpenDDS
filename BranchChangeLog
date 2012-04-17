@@ -1,0 +1,32 @@
+Tue Apr 17 12:19:43 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * ChangeLog:
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * bin/dcps_tests.lst:
+
+        * configure:
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+        * dds/DdsDcpsTypeSupportExt.idl:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/metaclass_generator.cpp:
+
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+
+          QueryExpression feature guard added.

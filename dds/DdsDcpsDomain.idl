@@ -63,7 +63,7 @@ module DDS
     TopicDescription lookup_topicdescription(in string name);
 
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
     ContentFilteredTopic create_contentfilteredtopic(
         in string name,
@@ -73,6 +73,10 @@ module DDS
 
     ReturnCode_t delete_contentfilteredtopic(
         in ContentFilteredTopic a_contentfilteredtopic);
+
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
 
     MultiTopic create_multitopic(
         in string name,
