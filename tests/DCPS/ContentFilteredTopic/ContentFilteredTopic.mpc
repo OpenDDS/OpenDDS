@@ -1,6 +1,6 @@
 project: dcpsexe_with_tcp, dcps_rtps_udp {
   exename = ContentFilteredTopicTest
-  requires += content_subscription
+  requires += content_filtered_topic
   TypeSupport_Files {
     Messenger.idl
   }

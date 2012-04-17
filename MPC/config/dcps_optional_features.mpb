@@ -13,3 +13,8 @@ feature (!query_condition) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_NO_QUERY_CONDITION
   dcps_ts_flags += -DOPENDDS_NO_QUERY_CONDITION
 }
+feature (!content_filtered_topic) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  idlflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
+  dcps_ts_flags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
+}

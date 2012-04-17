@@ -124,7 +124,7 @@ SubscriberImpl::create_datareader(
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   ContentFilteredTopicImpl* cft = 0;
   MultiTopicImpl* mt = 0;
   DDS::Topic_var related;
@@ -143,7 +143,7 @@ SubscriberImpl::create_datareader(
     this->get_default_datareader_qos(dr_qos);
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     if (mt) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -182,7 +182,7 @@ SubscriberImpl::create_datareader(
     return DDS::DataReader::_nil();
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (mt) {
     try {
       DDS::DataReader_var dr =
@@ -230,7 +230,7 @@ SubscriberImpl::create_datareader(
   DataReaderImpl* dr_servant =
     dynamic_cast<DataReaderImpl*>(dr_obj.in());
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (cft) {
     dr_servant->enable_filtering(cft);
   }

@@ -494,10 +494,13 @@ public:
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance) = 0;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+
   void enable_filtering(ContentFilteredTopicImpl* cft);
 
   DDS::ContentFilteredTopic_ptr get_cf_topic() const;
+
+#endif
 
   void update_subscription_params(const DDS::StringSeq& params) const;
 
@@ -526,7 +529,6 @@ public:
 
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
                                   DDS::InstanceStateKind state) = 0;
-#endif
 
   void begin_access();
   void end_access();
@@ -624,7 +626,7 @@ protected:
   bool is_exclusive_ownership_;
   OwnershipManager* owner_manager_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   DDS::ContentFilteredTopic_var content_filtered_topic_;
 #endif
 

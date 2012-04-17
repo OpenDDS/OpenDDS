@@ -1819,7 +1819,7 @@ void
     ser >> *data;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (!sample.header_.content_filter_) { // if this is true, the writer has already filtered
     using OpenDDS::DCPS::ContentFilteredTopicImpl;
     if (ContentFilteredTopicImpl* cft =

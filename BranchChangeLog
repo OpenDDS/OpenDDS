@@ -1,9 +1,59 @@
+Tue Apr 17 17:30:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * BranchChangeLog:
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * bin/dcps_tests.lst:
+
+        * configure:
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/idl/CPPTemplate.txt:
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+	  Preliminary support for content-filtered-topic feature guard.
+
+Tue Apr 17 17:30:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * bin/dcps_tests.lst:
+
+        * configure:
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/idl/CPPTemplate.txt:
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+
+        * tools/modeling/codegen/model/Delegate.cpp:
+
 Tue Apr 17 16:28:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
         * dds/idl/HTemplate.txt:
 
-	  Fix so builds properly when query-condition feature enabled.
+          Fix so builds properly when query-condition feature enabled.
 
 Tue Apr 17 12:19:43 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

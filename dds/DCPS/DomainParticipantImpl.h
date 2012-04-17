@@ -163,7 +163,9 @@ public:
     const char * name);
 
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  //~ #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+  #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
   virtual DDS::ContentFilteredTopic_ptr create_contentfilteredtopic(
     const char * name,
@@ -173,6 +175,8 @@ public:
 
   virtual DDS::ReturnCode_t delete_contentfilteredtopic(
     DDS::ContentFilteredTopic_ptr a_contentfilteredtopic);
+
+  #endif
 
   virtual DDS::MultiTopic_ptr create_multitopic(
     const char * name,
@@ -185,7 +189,7 @@ public:
   RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
   void deref_filter_eval(const char* filter);
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  //~ #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   virtual DDS::ReturnCode_t delete_contained_entities();
 

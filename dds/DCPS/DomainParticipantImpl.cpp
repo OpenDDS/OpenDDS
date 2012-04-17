@@ -680,7 +680,9 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
 }
 
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+//~ #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
 DDS::ContentFilteredTopic_ptr
 DomainParticipantImpl::create_contentfilteredtopic(
@@ -758,6 +760,10 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   return DDS::RETCODE_OK;
 }
 
+#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+
 DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   const char* name, const char* type_name,
   const char* subscription_expression,
@@ -820,6 +826,8 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   return DDS::RETCODE_OK;
 }
 
+#endif // OPENDDS_NO_MULTI_TOPIC
+
 RcHandle<FilterEvaluator>
 DomainParticipantImpl::get_filter_eval(const char* filter)
 {
@@ -846,7 +854,7 @@ DomainParticipantImpl::deref_filter_eval(const char* filter)
   }
 }
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+//~ #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()

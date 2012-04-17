@@ -7,3 +7,6 @@ feature (!content_subscription) : idl2jni {
 feature (!query_condition) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION
 }
+feature (!content_filtered_topic) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
+}

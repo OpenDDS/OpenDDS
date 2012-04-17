@@ -8,7 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "ContentFilteredTopicImpl.h"
 #include "DataReaderImpl.h"
 
@@ -111,4 +111,4 @@ ContentFilteredTopicImpl::remove_reader(DataReaderImpl& reader)
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC

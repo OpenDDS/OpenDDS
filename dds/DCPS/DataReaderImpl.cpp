@@ -137,7 +137,7 @@ DataReaderImpl::~DataReaderImpl()
     delete rd_allocator_;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (content_filtered_topic_.in()) {
     ContentFilteredTopicImpl* cft =
       dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
@@ -890,7 +890,7 @@ DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   DDS::ContentFilteredTopic_ptr cft = this->get_cf_topic();
   if (cft) {
     return cft; // get_cf_topic has already _duplicated()
@@ -1168,7 +1168,7 @@ DataReaderImpl::enable()
 
       CORBA::String_var filterExpression = "";
       DDS::StringSeq exprParams;
-  #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
       DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
       if (cft) {
         filterExpression = cft->get_filter_expression();
@@ -3360,7 +3360,8 @@ DataReaderImpl::set_subscriber_qos(
 }
 
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+//~ #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
@@ -3374,6 +3375,7 @@ DataReaderImpl::get_cf_topic() const
 {
   return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_);
 }
+#endif
 
 void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
@@ -3391,7 +3393,7 @@ DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
     }
   }
 }
-#endif
+//~ #endif
 
 void
 DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
