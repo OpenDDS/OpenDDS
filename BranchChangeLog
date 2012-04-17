@@ -1,3 +1,10 @@
+Tue Apr 17 16:28:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+	  Fix so builds properly when query-condition feature enabled.
+
 Tue Apr 17 12:19:43 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * ChangeLog:

@@ -670,7 +670,7 @@ DDS::ReturnCode_t
   }
 
   return read_i(received_data, info_seq, max_samples, sample_states,
-                view_states, instance_states);
+                view_states, instance_states, 0);
 }
 
 DDS::ReturnCode_t
@@ -680,11 +680,12 @@ DDS::ReturnCode_t
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
+    ::DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-    , ::DDS::QueryCondition_ptr a_condition
+    ::DDS::QueryCondition_ptr a_condition)
+#else
+    int ignore)
 #endif
-    )
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
@@ -777,7 +778,7 @@ DDS::ReturnCode_t
   }
 
   return take_i(received_data, info_seq, max_samples, sample_states,
-                view_states, instance_states);
+                view_states, instance_states, 0);
 }
 
 DDS::ReturnCode_t
@@ -787,11 +788,12 @@ DDS::ReturnCode_t
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
+    ::DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-    , ::DDS::QueryCondition_ptr a_condition
+    ::DDS::QueryCondition_ptr a_condition)
+#else
+    int ignore)
 #endif
-    )
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
@@ -892,11 +894,12 @@ DDS::ReturnCode_t
   return read_i(received_data, sample_info, max_samples,
                 a_condition->get_sample_state_mask(),
                 a_condition->get_view_state_mask(),
-                a_condition->get_instance_state_mask()
+                a_condition->get_instance_state_mask(),
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                , dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition)
+                dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition));
+#else
+                0);
 #endif
-                );
 }
 
 DDS::ReturnCode_t
@@ -924,9 +927,11 @@ DDS::ReturnCode_t
   return take_i(received_data, sample_info, max_samples,
                 a_condition->get_sample_state_mask(),
                 a_condition->get_view_state_mask(),
-                a_condition->get_instance_state_mask()
+                a_condition->get_instance_state_mask(),
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                , dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition)
+                dynamic_cast< ::DDS::QueryCondition_ptr >(a_condition)
+#else
+                0
 #endif
                 );
 }
@@ -1125,7 +1130,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
   return read_instance_i(received_data, info_seq, max_samples, a_handle,
-                         sample_states, view_states, instance_states);
+                         sample_states, view_states, instance_states, 0);
 }
 
 DDS::ReturnCode_t
@@ -1136,11 +1141,12 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
+    ::DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-    , ::DDS::QueryCondition_ptr a_condition
+    ::DDS::QueryCondition_ptr a_condition)
+#else
+    int ignore)
 #endif
-    )
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
@@ -1207,7 +1213,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
   return take_instance_i(received_data, info_seq, max_samples, a_handle,
-                         sample_states, view_states, instance_states);
+                         sample_states, view_states, instance_states, 0);
 }
 
 DDS::ReturnCode_t
@@ -1218,11 +1224,12 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
+    ::DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-    , ::DDS::QueryCondition_ptr a_condition
+    ::DDS::QueryCondition_ptr a_condition)
+#else
+    int ignore)
 #endif
-    )
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
@@ -1284,7 +1291,7 @@ DDS::ReturnCode_t
   }
 
   return read_next_instance_i(received_data, info_seq, max_samples, a_handle,
-                              sample_states, view_states, instance_states);
+                              sample_states, view_states, instance_states, 0);
 }
 
 DDS::ReturnCode_t
@@ -1295,11 +1302,12 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
+    ::DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-    , ::DDS::QueryCondition_ptr a_condition
+    ::DDS::QueryCondition_ptr a_condition)
+#else
+    int ignore)
 #endif
-    )
 {
   ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
@@ -1334,11 +1342,12 @@ DDS::ReturnCode_t
     handle = it->second;
     DDS::ReturnCode_t const status =
       read_instance_i(received_data, info_seq, max_samples, handle,
-                      sample_states, view_states, instance_states
+                      sample_states, view_states, instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                      , a_condition
+                      a_condition);
+#else
+                      0);
 #endif
-);
     if (status != ::DDS::RETCODE_NO_DATA)
     {
       post_read_or_take();
@@ -1368,7 +1377,7 @@ DDS::ReturnCode_t
   }
 
   return take_next_instance_i(received_data, info_seq, max_samples, a_handle,
-                              sample_states, view_states, instance_states);
+                              sample_states, view_states, instance_states, 0);
 }
 
 DDS::ReturnCode_t
@@ -1416,11 +1425,12 @@ DDS::ReturnCode_t
     handle = it->second;
     DDS::ReturnCode_t const status =
       take_instance_i(received_data, info_seq, max_samples, handle,
-                      sample_states, view_states, instance_states
+                      sample_states, view_states, instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                      , a_condition
+                      a_condition);
+#else
+                      0);
 #endif
-                      );
     if (status != ::DDS::RETCODE_NO_DATA)
     {
       total_samples();  // see if we are empty
@@ -1464,9 +1474,11 @@ DDS::ReturnCode_t
   return read_next_instance_i(received_data, info_seq, max_samples, a_handle,
                               a_condition->get_sample_state_mask(),
                               a_condition->get_view_state_mask(),
-                              a_condition->get_instance_state_mask()
+                              a_condition->get_instance_state_mask(),
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                              , query_condition
+                              query_condition
+#else
+                              0
 #endif
                               );
 }
@@ -1503,9 +1515,11 @@ DDS::ReturnCode_t
   return take_next_instance_i(received_data, info_seq, max_samples, a_handle,
                               a_condition->get_sample_state_mask(),
                               a_condition->get_view_state_mask(),
-                              a_condition->get_instance_state_mask()
+                              a_condition->get_instance_state_mask(),
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                              , query_condition
+                              query_condition
+#else
+                              0
 #endif
                               );
 }
@@ -1648,7 +1662,7 @@ DDS::ReturnCode_t
 {
   <%SCOPED%><%SEQ%> data;
   DDS::ReturnCode_t rc = read_i(data, gen.info_, DDS::LENGTH_UNLIMITED,
-    sample_states, view_states, instance_states);
+    sample_states, view_states, instance_states, 0);
   gen.samples_.reserve(data.length());
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     gen.samples_.push_back(&data[i]);
@@ -1672,7 +1686,7 @@ DDS::ReturnCode_t
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
-    instance_states);
+    instance_states, NULL);
   if (rc == DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);
@@ -1690,7 +1704,7 @@ DDS::ReturnCode_t
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
-    instance_states);
+    instance_states, NULL);
   if (rc == DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);
