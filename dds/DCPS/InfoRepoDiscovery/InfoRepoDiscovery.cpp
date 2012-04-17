@@ -347,7 +347,7 @@ InfoRepoDiscovery::assert_topic(DCPS::RepoId_out topicId, DDS::DomainId_t domain
       dataTypeName, qos, hasDcpsKey);
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::assert_topic: ");
-    return DCPS::TopicStatus::INTERNAL_ERROR;
+    return DCPS::INTERNAL_ERROR;
   }
 }
 
@@ -360,7 +360,7 @@ InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId, const char* topicName,
     return get_dcps_info()->find_topic(domainId, topicName, dataTypeName, qos, topicId);
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::find_topic: ");
-    return DCPS::TopicStatus::INTERNAL_ERROR;
+    return DCPS::INTERNAL_ERROR;
   }
 }
 
@@ -372,7 +372,7 @@ InfoRepoDiscovery::remove_topic(DDS::DomainId_t domainId, const RepoId& particip
     return get_dcps_info()->remove_topic(domainId, participantId, topicId);
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_topic: ");
-    return DCPS::TopicStatus::INTERNAL_ERROR;
+    return DCPS::INTERNAL_ERROR;
   }
 }
 

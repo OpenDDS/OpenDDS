@@ -1,3 +1,9 @@
+Tue Apr 17 16:15:22 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Fixing non-standard enum use.
+
 Mon Apr 16 16:13:07 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpConnection.h:
