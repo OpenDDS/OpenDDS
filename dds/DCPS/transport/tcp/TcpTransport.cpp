@@ -126,7 +126,7 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
     }
 
     // else, This means we may or may not find a suitable (and already connected) DataLink.
-    // if con is not a connector and not connected, the passive connecting side will wait 
+    // if con is not a connector and not connected, the passive connecting side will wait
     // for the connection establishment.
 
     if (DCPS_debug_level >= 5) {

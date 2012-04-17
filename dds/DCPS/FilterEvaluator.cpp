@@ -239,6 +239,8 @@ namespace {
         return !(left == right);
       case OPER_LIKE:
         return left.like(right);
+      default:
+        break;
       }
       return false; // not reached
     }

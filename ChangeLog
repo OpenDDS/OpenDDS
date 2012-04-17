@@ -1,3 +1,13 @@
+Tue Apr 17 16:21:15 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Fixed warning.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed fuzz error.
+
 Tue Apr 17 16:15:22 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
