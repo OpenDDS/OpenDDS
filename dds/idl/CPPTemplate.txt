@@ -687,7 +687,7 @@ DDS::ReturnCode_t
 #ifndef OPENDDS_NO_QUERY_CONDITION
     ::DDS::QueryCondition_ptr a_condition)
 #else
-    int ignore)
+    int /*ignored*/)
 #endif
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
@@ -795,7 +795,7 @@ DDS::ReturnCode_t
 #ifndef OPENDDS_NO_QUERY_CONDITION
     ::DDS::QueryCondition_ptr a_condition)
 #else
-    int ignore)
+    int /*ignored*/)
 #endif
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
@@ -1148,7 +1148,7 @@ DDS::ReturnCode_t
 #ifndef OPENDDS_NO_QUERY_CONDITION
     ::DDS::QueryCondition_ptr a_condition)
 #else
-    int ignore)
+    int /*ignored*/)
 #endif
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
@@ -1231,7 +1231,7 @@ DDS::ReturnCode_t
 #ifndef OPENDDS_NO_QUERY_CONDITION
     ::DDS::QueryCondition_ptr a_condition)
 #else
-    int ignore)
+    int /*ignored*/)
 #endif
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
@@ -1309,7 +1309,7 @@ DDS::ReturnCode_t
 #ifndef OPENDDS_NO_QUERY_CONDITION
     ::DDS::QueryCondition_ptr a_condition)
 #else
-    int ignore)
+    int /*ignored*/)
 #endif
 {
   ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
@@ -1391,11 +1391,12 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::SampleStateMask sample_states,
     ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states
+    ::DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-    , ::DDS::QueryCondition_ptr a_condition
+    ::DDS::QueryCondition_ptr a_condition)
+#else
+    int /*ignored*/)
 #endif
-    )
 {
  ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
@@ -1691,7 +1692,7 @@ DDS::ReturnCode_t
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
-    instance_states, NULL);
+    instance_states, 0);
   if (rc == DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);
@@ -1709,7 +1710,7 @@ DDS::ReturnCode_t
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
-    instance_states, NULL);
+    instance_states, 0);
   if (rc == DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);

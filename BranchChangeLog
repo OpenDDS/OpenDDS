@@ -1,3 +1,9 @@
+Wed Apr 18 14:25:40 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+	  Fixed based on building with no-query-condition.
+
 Tue Apr 17 20:26:02 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/dcps_java_optional.mpb:
@@ -20,7 +26,7 @@ Tue Apr 17 20:26:02 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
 
-	  Preliminary support for multi-topic feature guard.
+          Preliminary support for multi-topic feature guard.
 
 Tue Apr 17 17:30:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
