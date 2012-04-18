@@ -1,8 +1,14 @@
+Wed Apr 18 17:49:15 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_optional_features.mpb:
+
+	  Fix !content-subscription settings.
+
 Wed Apr 18 14:25:40 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
 
-	  Fixed based on building with no-query-condition.
+          Fixed based on building with no-query-condition.
 
 Tue Apr 17 20:26:02 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
