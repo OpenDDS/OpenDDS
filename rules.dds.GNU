@@ -35,7 +35,9 @@ endif
 # This is needed for features used in requires/avoids statements in .mpc files
 built_in_topics ?= 1
 tao_orbsvcs ?= 1
-content_subscription ?= 1
+query_condition ?= 1
+content_filtered_topic ?= 1
+multi_topic ?= 1
 exceptions ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow

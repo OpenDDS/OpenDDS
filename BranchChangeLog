@@ -1,8 +1,15 @@
+Wed Apr 18 20:04:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * rules.dds.GNU:
+
+	  Replace usage of content_subscription feature with
+	  Content Subscription Profile related features.
+
 Wed Apr 18 17:49:15 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/dcps_optional_features.mpb:
 
-	  Fix !content-subscription settings.
+          Fix !content-subscription settings.
 
 Wed Apr 18 14:25:40 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
