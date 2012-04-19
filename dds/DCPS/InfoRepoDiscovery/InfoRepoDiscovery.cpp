@@ -593,7 +593,7 @@ InfoRepoDiscovery::association_complete(DDS::DomainId_t domainId,
 void
 InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
 {
-  DataReaderMap::const_iterator drr = dataReaderMap_.find(subscriptionId);
+  DataReaderMap::iterator drr = dataReaderMap_.find(subscriptionId);
   if (drr == dataReaderMap_.end()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::removeDataReaderRemote: ")

@@ -1,3 +1,9 @@
+Thu Apr 19 18:54:16 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Fixed call to map::erase with const_iterator.
+
 Thu Apr 19 14:49:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataReaderCallbacks.h:
