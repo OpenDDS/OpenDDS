@@ -19,6 +19,7 @@
 
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataSampleList.h"
@@ -115,7 +116,7 @@ public:
 
   // Subscription
   DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
-                                DCPS::DataReaderRemote_ptr subscription,
+                                DCPS::DataReaderCallbacks* subscription,
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,
@@ -297,7 +298,7 @@ private:
       const LocalPublication& pub);
 
   struct LocalSubscription : LocalEndpoint {
-    DCPS::DataReaderRemote_ptr subscription_;
+    DCPS::DataReaderCallbacks* subscription_;
     DDS::DataReaderQos qos_;
     DDS::SubscriberQos subscriber_qos_;
     std::string filter_;

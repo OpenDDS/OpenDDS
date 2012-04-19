@@ -85,7 +85,7 @@ public:
 
   // Subscription
   DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
-                                DCPS::DataReaderRemote_ptr subscription,
+                                DCPS::DataReaderCallbacks* subscription,
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,

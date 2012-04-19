@@ -6,14 +6,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataReaderRemoteImpl.h"
-#include "DataReaderImpl.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-DataReaderRemoteImpl::DataReaderRemoteImpl(DataReaderImpl* parent) :
+DataReaderRemoteImpl::DataReaderRemoteImpl(DataReaderCallbacks* parent) :
     parent_(parent)
 {
 }
@@ -31,16 +30,27 @@ DataReaderRemoteImpl::detach_parent()
   this->parent_ = 0;
 }
 
+namespace
+{
+  DDS::DataReader_var getDataReader(DataReaderCallbacks* callbacks)
+  {
+    // the DataReaderCallbacks will always be a DataReader
+    DDS::DataReader_var var =
+      DDS::DataReader::_duplicate(dynamic_cast<DDS::DataReader*>(callbacks));
+    return var;
+  }
+}
+
 void
 DataReaderRemoteImpl::add_association(const RepoId& yourId,
                                       const WriterAssociation& writer,
                                       bool active)
 {
-  DataReaderImpl* parent = 0;
+  DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    drv = DDS::DataReader::_duplicate(this->parent_);
+    drv = getDataReader(this->parent_);
     parent = this->parent_;
   }
   if (parent) {
@@ -51,11 +61,11 @@ DataReaderRemoteImpl::add_association(const RepoId& yourId,
 void
 DataReaderRemoteImpl::association_complete(const RepoId& remote_id)
 {
-  DataReaderImpl* parent = 0;
+  DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    drv = DDS::DataReader::_duplicate(this->parent_);
+    drv = getDataReader(this->parent_);
     parent = this->parent_;
   }
   if (parent) {
@@ -67,11 +77,11 @@ void
 DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
                                           CORBA::Boolean notify_lost)
 {
-  DataReaderImpl* parent = 0;
+  DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    drv = DDS::DataReader::_duplicate(this->parent_);
+    drv = getDataReader(this->parent_);
     parent = this->parent_;
   }
   if (parent) {
@@ -83,11 +93,11 @@ void
 DataReaderRemoteImpl::update_incompatible_qos(
   const IncompatibleQosStatus& status)
 {
-  DataReaderImpl* parent = 0;
+  DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    drv = DDS::DataReader::_duplicate(this->parent_);
+    drv = getDataReader(this->parent_);
     parent = this->parent_;
   }
   if (parent) {

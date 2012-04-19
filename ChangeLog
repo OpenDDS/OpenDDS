@@ -1,3 +1,162 @@
+Thu Apr 19 14:49:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataReaderCallbacks.h:
+
+          Added interface for Discovery callbacks into the DataReader, to
+          refactor out dependencies on DataReaderRemote.  (Similar refactoring
+          for DataWriterRemote will be coming soon.)
+
+        * dds/DdsDcps.mpc:
+
+          Removed dds/DdsDcpsDataReaderRemote.idl.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+
+          Moved dds/DdsDcpsDataReaderRemote.idl into InfoRepoDiscovery.
+
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Moved non-InfoRepoDiscovery dependencies from dds/DdsDcpsDataReaderRemote.idl.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added inheritance from DataReaderCallbacks and removed all associations to
+          DataReaderRemote.
+
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+
+          Changed parent from DataReaderImpl to DataReaderCallbacks and moved
+          files into InfoRepoDiscovery.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Changed add_subscription to take a DataReaderCallbacks*.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Changed add_subscription to take a DataReaderCallbacks* and
+          storing the DataReaderCallbacks to communicate with local
+          subscriptions.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Changed add_subscription to take a DataReaderCallbacks* and creating
+          and storing the DataReaderRemote and breaking the DataReaderRemote's
+          association with the DataReaderCallbacks when remove_subscription is
+          called.
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Change from DataReaderImpl no longer having an association to
+          DataReaderRemote.
+
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Removed creation of the DataReaderRemote.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+
+          Changed includes and comments to new location for DataReaderRemote.idl.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Refactored test for DataReaderRemote changes.
+
+        * tests/DCPS/ConfigTransports/Puller.h:
+        * tests/DCPS/FooTest3_1/test_helper.h:
+        * tests/DCPS/FooTest3_1/test_helper.cpp:
+        * tests/DCPS/FooTest3_2/test_helper.h:
+        * tests/DCPS/FooTest3_2/test_helper.cpp:
+        * tests/DCPS/FooType/FooType.idl:
+        * tests/DCPS/unit/MyTypeSupport.idl:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Moved includes to new include path, or cleaned up unneeded
+          DataReaderRemote references.
+
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DdsDcpsDataReaderRemote.idl:
+
+          Removed these files.
+
+Tue Apr 17 19:23:28 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Discovery.h:
+
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsInfoUtils.idl:
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+
+        * tests/DCPS/ConfigTransports/Puller.h:
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DiscReceivedCalls.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+        * tests/DCPS/FooTest3_1/test_helper.h:
+        * tests/DCPS/FooTest3_1/test_helper.cpp:
+
+        * tests/DCPS/FooTest3_2/test_helper.h:
+        * tests/DCPS/FooTest3_2/test_helper.cpp:
+
+        * tests/DCPS/FooType/FooType.idl:
+
+        * tests/DCPS/unit/MyTypeSupport.idl:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+
+          Removed these files.
+
 Tue Apr 17 16:21:15 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/FilterEvaluator.cpp:

@@ -14,7 +14,6 @@
 #define MYTYPESUPPORTIMPL_H_
 
 #include "dds/DdsDcpsDataWriterRemoteC.h"
-#include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "MyTypeSupportS.h"

@@ -74,7 +74,7 @@ public:
   /// The notify_both_side parameter indicates if it needs call sub to remove
   /// association as well.
   /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
-  /// or DdsDcpsDataReaderRemote.idl.
+  /// or DataReaderRemote.idl.
   /// This method can mark the participant dead
   /// Returns 0 if successful
   int remove_associated_subscription(DCPS_IR_Subscription* sub,

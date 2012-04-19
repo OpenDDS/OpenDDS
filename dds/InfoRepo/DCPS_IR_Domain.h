@@ -73,7 +73,7 @@ public:
   /// Returns 0 if successful.
   /// The notify_lost parameter is passed to the remove_associations()
   /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
-  /// or DdsDcpsDataReaderRemote.idl.
+  /// or DataReaderRemote.idl.
   int remove_participant(const OpenDDS::DCPS::RepoId& particpantId,
                          CORBA::Boolean    notify_lost);
 

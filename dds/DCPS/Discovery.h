@@ -13,8 +13,9 @@
 #include "RcObject_T.h"
 #include "RcHandle_T.h"
 
-#include "dds/DdsDcpsDataReaderRemoteC.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
+#include "dds/DdsDcpsSubscriptionC.h"
 
 #include <string>
 
@@ -156,11 +157,16 @@ public:
 
   // Subscription operations:
 
+  /// add the passed in subscription into discovery.
+  /// Discovery does not participate in memory management
+  /// for the subscription pointer, so it requires that
+  /// the subscription pointer remain valid until
+  /// remove_subscription is called.
   virtual OpenDDS::DCPS::RepoId add_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderRemote_ptr subscription,
+    OpenDDS::DCPS::DataReaderCallbacks* subscription,
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,

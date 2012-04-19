@@ -9,7 +9,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "SubscriberImpl.h"
-#include "DataReaderRemoteImpl.h"
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
@@ -236,18 +235,6 @@ SubscriberImpl::create_datareader(
   }
 #endif
 
-  DataReaderRemoteImpl* reader_remote_impl = 0;
-  ACE_NEW_RETURN(reader_remote_impl,
-                 DataReaderRemoteImpl(dr_servant),
-                 DDS::DataReader::_nil());
-
-  //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
-  PortableServer::ServantBase_var reader_remote(reader_remote_impl);
-
-  //this is the client reference to the DataReaderRemoteImpl
-  OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
-    servant_to_remote_reference(reader_remote_impl);
-
   // Propagate the latency buffer data collection configuration.
   // @TODO: Determine whether we want to exclude the Builtin Topic
   //        readers from data gathering.
@@ -260,8 +247,7 @@ SubscriberImpl::create_datareader(
                    mask,
                    participant_,
                    this,
-                   dr_obj.in(),
-                   dr_remote_obj.in());
+                   dr_obj.in());
 
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1)) {

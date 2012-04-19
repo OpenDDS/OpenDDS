@@ -144,7 +144,7 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderRemote_ptr subscription,
+    OpenDDS::DCPS::DataReaderCallbacks* subscription,
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,

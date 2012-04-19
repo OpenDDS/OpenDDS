@@ -24,7 +24,6 @@
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
-#include "DataReaderRemoteImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
@@ -168,13 +167,6 @@ DataReaderImpl::cleanup()
 
   dr_local_objref_ = DDS::DataReader::_nil();
 
-  if (dr_remote_objref_) { // it will be null for multitopic
-    DataReaderRemoteImpl* drr =
-      remote_reference_to_servant<DataReaderRemoteImpl>(dr_remote_objref_.in());
-    drr->detach_parent();
-    deactivate_remote_object(dr_remote_objref_.in());
-    dr_remote_objref_ = DataReaderRemote::_nil();
-  }
 }
 
 void DataReaderImpl::init(
@@ -184,8 +176,7 @@ void DataReaderImpl::init(
   const DDS::StatusMask &     mask,
   DomainParticipantImpl*        participant,
   SubscriberImpl*               subscriber,
-  DDS::DataReader_ptr         dr_objref,
-  OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref)
+  DDS::DataReader_ptr         dr_objref)
 {
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
@@ -229,8 +220,6 @@ void DataReaderImpl::init(
   // will exist as long as it does.
   subscriber_servant_ = subscriber;
   dr_local_objref_    = DDS::DataReader::_duplicate(dr_objref);
-  dr_remote_objref_   =
-    OpenDDS::DCPS::DataReaderRemote::_duplicate(dr_remote_objref);
 
   if (this->subscriber_servant_->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_WARNING,
@@ -1172,7 +1161,7 @@ DataReaderImpl::enable()
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
                               this->topic_servant_->get_id(),
-                              this->dr_remote_objref_,
+                              this,
                               this->qos_,
                               trans_conf_info,
                               sub_qos,

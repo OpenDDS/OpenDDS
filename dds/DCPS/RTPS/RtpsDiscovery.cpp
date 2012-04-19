@@ -84,7 +84,7 @@ namespace {
     DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(dr.in());
 
     dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/,
-              participant_i, sub, dr, 0 /*remote*/);
+              participant_i, sub, dr);
     dri->disable_transport();
     dri->enable();
   }
@@ -545,7 +545,7 @@ OpenDDS::DCPS::RepoId
 RtpsDiscovery::add_subscription(DDS::DomainId_t domainId,
                                 const OpenDDS::DCPS::RepoId& participantId,
                                 const OpenDDS::DCPS::RepoId& topicId,
-                                DCPS::DataReaderRemote_ptr subscription,
+                                DCPS::DataReaderCallbacks* subscription,
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,

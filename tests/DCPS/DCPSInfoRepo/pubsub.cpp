@@ -199,11 +199,10 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   OpenDDS::DCPS::RepoId subPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId subTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId subId = OpenDDS::DCPS::GUID_UNKNOWN;
-  TAO_DDS_DCPSDataReader_i* drImpl = new TAO_DDS_DCPSDataReader_i;
-  PortableServer::ServantBase_var safe_servant2 = drImpl;
+  TAO_DDS_DCPSDataReader_i drImpl;
 #ifndef DDS_HAS_MINIMUM_BIT
   if (use_rtps)
-    drImpl->disco_ = disc.in();
+    drImpl.disco_ = disc.in();
 #endif
   OpenDDS::DCPS::DataReaderRemote_var dr;
 
@@ -253,22 +252,12 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
       failed = true;
     }
 
-  drImpl->domainId_ = domain;
-  drImpl->participantId_ = subPartId;
+  drImpl.domainId_ = domain;
+  drImpl.participantId_ = subPartId;
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("adding matching subscription\n")));
   // Add subscription
-  oid = poa->activate_object( drImpl );
-  obj = poa->id_to_reference( oid.in() );
-  dr = OpenDDS::DCPS::DataReaderRemote::_narrow(obj.in());
-  if (CORBA::is_nil (dr.in ()))
-    {
-      ACE_ERROR_RETURN ((LM_DEBUG,
-                         "Nil OpenDDS::DCPS::DataReaderRemote reference\n"),
-                        false);
-    }
-
   ::DDS::DataReaderQos_var drQos = new ::DDS::DataReaderQos;
   *drQos = TheServiceParticipant->initial_DataReaderQos();
   drQos->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
@@ -278,7 +267,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   subId = disc->add_subscription(domain,
                                  subPartId,
                                  subTopicId,
-                                 dr.in(),
+                                 &drImpl,
                                  drQos.in(),
                                  tii,
                                  subQos.in(),
@@ -293,7 +282,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   expected.push_back(DiscReceivedCalls::ADD_ASSOC);
 
   unsigned int max_delay = 10;
-  if (!drImpl->received().expect(orb, max_delay, expected))
+  if (!drImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }
@@ -360,7 +349,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
       failed = true;
     }
 
-  if (!drImpl->received().expect(orb, max_delay, expected))
+  if (!drImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }

@@ -6,8 +6,10 @@
  * See: http://www.opendds.org/license.html
  */
 #include "InfoRepoDiscovery.h"
-#include "FailoverListener.h"
 
+#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
+#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h"
+#include "dds/DCPS/InfoRepoDiscovery/FailoverListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
@@ -473,20 +475,39 @@ RepoId
 InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const RepoId& participantId,
                                     const RepoId& topicId,
-                                    DCPS::DataReaderRemote_ptr subscription,
+                                    DCPS::DataReaderCallbacks* subscription,
                                     const DDS::DataReaderQos& qos,
                                     const DCPS::TransportLocatorSeq& transInfo,
                                     const DDS::SubscriberQos& subscriberQos,
                                     const char* filterExpr,
                                     const DDS::StringSeq& params)
 {
+  RepoId subId;
   try {
-    return get_dcps_info()->add_subscription(domainId, participantId, topicId,
-      subscription, qos, transInfo, subscriberQos, filterExpr, params);
+    DCPS::DataReaderRemoteImpl* reader_remote_impl = 0;
+    ACE_NEW_RETURN(reader_remote_impl,
+                   DataReaderRemoteImpl(subscription),
+                   DCPS::GUID_UNKNOWN);
+
+    //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
+    PortableServer::ServantBase_var reader_remote(reader_remote_impl);
+
+    //this is the client reference to the DataReaderRemoteImpl
+    OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
+      servant_to_remote_reference(reader_remote_impl);
+
+    subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
+      dr_remote_obj, qos, transInfo, subscriberQos, filterExpr, params);
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+    // take ownership of the client allocated above
+    dataReaderMap_[subId] = dr_remote_obj;
+    
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_subscription: ");
-    return DCPS::GUID_UNKNOWN;
+    subId = DCPS::GUID_UNKNOWN;
   }
+  return subId;
 }
 
 bool
@@ -494,13 +515,18 @@ InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
                                        const RepoId& participantId,
                                        const RepoId& subscriptionId)
 {
+  bool removed = false;
   try {
     get_dcps_info()->remove_subscription(domainId, participantId, subscriptionId);
-    return true;
+    removed = true;
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_subscription: ");
-    return false;
   }
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
+  removeDataReaderRemote(subscriptionId);
+
+  return removed;
 }
 
 bool
@@ -562,6 +588,25 @@ InfoRepoDiscovery::association_complete(DDS::DomainId_t domainId,
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::association_complete: ");
   }
+}
+
+void
+InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
+{
+  DataReaderMap::const_iterator drr = dataReaderMap_.find(subscriptionId);
+  if (drr == dataReaderMap_.end()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::removeDataReaderRemote: ")
+               ACE_TEXT(" could not find DataReader for subscriptionId.\n")));
+    return;
+  }
+
+  DataReaderRemoteImpl* impl =
+    remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in());
+  impl->detach_parent();
+  deactivate_remote_object(drr->second.in());
+
+  dataReaderMap_.erase(drr);
 }
 
 namespace {

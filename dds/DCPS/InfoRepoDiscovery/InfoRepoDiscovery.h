@@ -11,12 +11,17 @@
 
 #include "dds/DCPS/Discovery.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 
 #include "InfoRepoDiscovery_Export.h"
 
+#include "ace/Thread_Mutex.h"
+
 #include <string>
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -159,7 +164,7 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderRemote_ptr subscription,
+    OpenDDS::DCPS::DataReaderCallbacks* subscription,
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
@@ -201,6 +206,8 @@ public:
 private:
   TransportConfig_rch bit_config();
 
+  void removeDataReaderRemote(const RepoId& subscriptionId);
+
   std::string    ior_;
   DCPSInfo_var   info_;
 
@@ -215,6 +222,12 @@ private:
 
   /// Listener to initiate failover with.
   FailoverListener*    failoverListener_;
+
+  typedef std::map<RepoId, DataReaderRemote_var, DCPS::GUID_tKeyLessThan> DataReaderMap;
+
+  DataReaderMap dataReaderMap_;
+
+  mutable ACE_Thread_Mutex lock_;
 
 public:
   class Config : public Discovery::Config {

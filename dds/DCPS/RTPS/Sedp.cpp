@@ -28,7 +28,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DdsDcpsDataReaderRemoteC.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -911,7 +911,7 @@ Sedp::update_publication_qos(const RepoId& publicationId,
 
 RepoId
 Sedp::add_subscription(const RepoId& topicId,
-                       DCPS::DataReaderRemote_ptr subscription,
+                       DCPS::DataReaderCallbacks* subscription,
                        const DDS::DataReaderQos& qos,
                        const DCPS::TransportLocatorSeq& transInfo,
                        const DDS::SubscriberQos& subscriberQos,
@@ -1356,14 +1356,14 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 // helper for match(), below
 struct DcpsUpcalls : ACE_Task_Base {
-  DcpsUpcalls(const DCPS::DataReaderRemote_var& drr,
+  DcpsUpcalls(DCPS::DataReaderCallbacks* drr,
               const RepoId& reader,
               const DCPS::WriterAssociation& wa,
               bool active,
               const DCPS::DataWriterRemote_var& dwr);
   int svc();
   void writer_done();
-  const DCPS::DataReaderRemote_var& drr_;
+  DCPS::DataReaderCallbacks* const drr_;
   const RepoId& reader_;
   const DCPS::WriterAssociation& wa_;
   bool active_;
@@ -1605,12 +1605,12 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
   // Copy entries from local publication and local subscription maps
   // prior to releasing lock
   DCPS::DataWriterRemote_var dwr;
-  DCPS::DataReaderRemote_var drr;
+  DCPS::DataReaderCallbacks* drr = 0;
   if (writer_local) {
     dwr = DCPS::DataWriterRemote::_duplicate(lpi->second.publication_);
   }
   if (reader_local) {
-    drr = DCPS::DataReaderRemote::_duplicate(lsi->second.subscription_);
+    drr = lsi->second.subscription_;
   }
 
   DCPS::IncompatibleQosStatus
@@ -1752,7 +1752,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
   }
 }
 
-DcpsUpcalls::DcpsUpcalls(const DCPS::DataReaderRemote_var& drr,
+DcpsUpcalls::DcpsUpcalls(DCPS::DataReaderCallbacks* drr,
                          const RepoId& reader,
                          const DCPS::WriterAssociation& wa,
                          bool active,

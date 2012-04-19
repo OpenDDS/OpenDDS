@@ -8,9 +8,6 @@ namespace OpenDDS
     class DataWriterRemote;
     typedef DataWriterRemote* DataWriterRemote_ptr;
     class DataWriterImpl;
-    class DataReaderRemote;
-    typedef DataReaderRemote* DataReaderRemote_ptr;
-    class DataReaderImpl;
   }
 }
 
@@ -22,9 +19,6 @@ class DDS_TEST
 public:
   static OpenDDS::DCPS::DataWriterRemote_ptr
   getRemoteInterface(const OpenDDS::DCPS::DataWriterImpl &impl);
-
-  static OpenDDS::DCPS::DataReaderRemote_ptr
-  getRemoteInterface(const OpenDDS::DCPS::DataReaderImpl &impl);
 };
 
 #endif
