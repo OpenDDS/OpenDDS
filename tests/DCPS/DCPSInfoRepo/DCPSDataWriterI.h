@@ -25,7 +25,7 @@
 #ifndef DCPSDATAWRITERI_H_
 #define DCPSDATAWRITERI_H_
 
-#include "dds/DdsDcpsDataWriterRemoteS.h"
+#include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DCPS/Definitions.h"
 
 #include <vector>
@@ -38,7 +38,7 @@
 
 //Class TAO_DDS_DCPSDataWriter_i
 class TAO_DDS_DCPSDataWriter_i
-  : public virtual POA_OpenDDS::DCPS::DataWriterRemote
+  : public OpenDDS::DCPS::DataWriterCallbacks
 {
 public:
   //Constructor

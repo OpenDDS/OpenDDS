@@ -712,7 +712,7 @@ Spdp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
 
 RepoId
 Spdp::add_publication(const RepoId& topicId,
-                      DCPS::DataWriterRemote_ptr publication,
+                      DCPS::DataWriterCallbacks* publication,
                       const DDS::DataWriterQos& qos,
                       const DCPS::TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos)

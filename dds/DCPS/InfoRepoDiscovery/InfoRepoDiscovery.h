@@ -135,7 +135,7 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataWriterRemote_ptr publication,
+    OpenDDS::DCPS::DataWriterCallbacks* publication,
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos);
@@ -208,6 +208,8 @@ private:
 
   void removeDataReaderRemote(const RepoId& subscriptionId);
 
+  void removeDataWriterRemote(const RepoId& publicationId);
+
   std::string    ior_;
   DCPSInfo_var   info_;
 
@@ -226,6 +228,10 @@ private:
   typedef std::map<RepoId, DataReaderRemote_var, DCPS::GUID_tKeyLessThan> DataReaderMap;
 
   DataReaderMap dataReaderMap_;
+
+  typedef std::map<RepoId, DataWriterRemote_var, DCPS::GUID_tKeyLessThan> DataWriterMap;
+
+  DataWriterMap dataWriterMap_;
 
   mutable ACE_Thread_Mutex lock_;
 

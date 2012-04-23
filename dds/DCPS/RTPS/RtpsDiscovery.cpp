@@ -500,7 +500,7 @@ OpenDDS::DCPS::RepoId
 RtpsDiscovery::add_publication(DDS::DomainId_t domainId,
                                const OpenDDS::DCPS::RepoId& participantId,
                                const OpenDDS::DCPS::RepoId& topicId,
-                               DCPS::DataWriterRemote_ptr publication,
+                               DCPS::DataWriterCallbacks* publication,
                                const DDS::DataWriterQos& qos,
                                const DCPS::TransportLocatorSeq& transInfo,
                                const DDS::PublisherQos& publisherQos)

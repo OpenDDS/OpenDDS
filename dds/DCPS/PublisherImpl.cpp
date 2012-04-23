@@ -9,7 +9,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PublisherImpl.h"
 #include "DataWriterImpl.h"
-#include "DataWriterRemoteImpl.h"
 #include "DomainParticipantImpl.h"
 #include "DataWriterImpl.h"
 #include "Service_Participant.h"
@@ -161,19 +160,6 @@ PublisherImpl::create_datawriter(
   DataWriterImpl* dw_servant =
     dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
-  DataWriterRemoteImpl* writer_remote_impl = 0;
-  ACE_NEW_RETURN(writer_remote_impl,
-                 DataWriterRemoteImpl(dw_servant),
-                 DDS::DataWriter::_nil());
-
-  //this is taking ownership of the DataWriterRemoteImpl (server side)
-  //allocated above
-  PortableServer::ServantBase_var writer_remote(writer_remote_impl);
-
-  //this is the client reference to the DataWriterRemoteImpl
-  OpenDDS::DCPS::DataWriterRemote_var dw_remote_obj =
-    servant_to_remote_reference(writer_remote_impl);
-
   dw_servant->init(a_topic,
                    topic_servant,
                    dw_qos,
@@ -181,8 +167,7 @@ PublisherImpl::create_datawriter(
                    mask,
                    participant_,
                    this,
-                   dw_obj.in(),
-                   dw_remote_obj.in());
+                   dw_obj.in());
 
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1) {

@@ -83,9 +83,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   OpenDDS::DCPS::RepoId pubPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubId = OpenDDS::DCPS::GUID_UNKNOWN;
-  TAO_DDS_DCPSDataWriter_i* dwImpl = new TAO_DDS_DCPSDataWriter_i;
-  PortableServer::ServantBase_var safe_servant = dwImpl;
-  OpenDDS::DCPS::DataWriterRemote_var dw;
+  TAO_DDS_DCPSDataWriter_i dwImpl;
 
   ::DDS::DomainParticipantQos_var partQos = new ::DDS::DomainParticipantQos;
   *partQos = TheServiceParticipant->initial_DomainParticipantQos();
@@ -126,17 +124,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
     }
 
   // Add publication
-  PortableServer::ObjectId_var oid = poa->activate_object( dwImpl );
-  CORBA::Object_var obj = poa->id_to_reference( oid.in() );
-  dw = OpenDDS::DCPS::DataWriterRemote::_narrow(obj.in());
-  if (CORBA::is_nil (dw.in ()))
-    {
-      ACE_ERROR_RETURN ((LM_DEBUG,
-                         "Nil OpenDDS::DCPS::DataWriterRemote reference\n"),
-                        false);
-    }
-
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -154,7 +142,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   pubId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                dw.in(),
+                                &dwImpl,
                                 dwQos.in(),
                                 tii,
                                 pQos.in());
@@ -164,7 +152,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_publication failed!\n") ));
     }
 
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -191,7 +179,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
                  ACE_TEXT("CONFLICTING_TYPENAME and returned %d"), topicStatus));
     }
 
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -204,7 +192,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   if (use_rtps)
     drImpl.disco_ = disc.in();
 #endif
-  OpenDDS::DCPS::DataReaderRemote_var dr;
 
   value = disc->add_domain_participant(domain, partQos.in());
   subPartId = value.id;
@@ -247,7 +234,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Topic creation returned existing topic")));
     }
 
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -289,7 +276,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
 
   if (use_rtps)
     expected.push_back(DiscReceivedCalls::ASSOC_COMPLETE);
-  if (!dwImpl->received().expect(orb, max_delay, expected))
+  if (!dwImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }
@@ -300,22 +287,10 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
 
   // incompatible QOS
   OpenDDS::DCPS::RepoId pubIncQosId = OpenDDS::DCPS::GUID_UNKNOWN;
-  TAO_DDS_DCPSDataWriter_i* dwIncQosImpl = new TAO_DDS_DCPSDataWriter_i;
-  PortableServer::ServantBase_var safe_servant3 = dwIncQosImpl;
-  OpenDDS::DCPS::DataWriterRemote_var dwIncQos;
+  TAO_DDS_DCPSDataWriter_i dwIncQosImpl;
 
   // Add publication
-  oid = poa->activate_object( dwIncQosImpl );
-  obj = poa->id_to_reference( oid.in() );
-  dwIncQos = OpenDDS::DCPS::DataWriterRemote::_narrow(obj.in());
-  if (CORBA::is_nil (dwIncQos.in ()))
-    {
-      ACE_ERROR_RETURN ((LM_DEBUG,
-                         "Nil OpenDDS::DCPS::DataWriterRemote reference\n"),
-                        false);
-    }
-
-  if (!dwIncQosImpl->received().expectNothing())
+  if (!dwIncQosImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -331,7 +306,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   pubIncQosId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                dwIncQos.in(),
+                                &dwIncQosImpl,
                                 dwIncQosQos.in(),
                                 tii,
                                 pQos.in());
@@ -344,7 +319,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServe
   expected.clear();
   expected.push_back(DiscReceivedCalls::UPDATE_INCOMP_QOS);
 
-  if (!dwIncQosImpl->received().expect(orb, max_delay, expected))
+  if (!dwIncQosImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }

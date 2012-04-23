@@ -105,7 +105,7 @@ public:
 
   // Publication
   DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
-                               DCPS::DataWriterRemote_ptr publication,
+                               DCPS::DataWriterCallbacks* publication,
                                const DDS::DataWriterQos& qos,
                                const DCPS::TransportLocatorSeq& transInfo,
                                const DDS::PublisherQos& publisherQos);
@@ -283,7 +283,7 @@ private:
   };
 
   struct LocalPublication : LocalEndpoint {
-    DCPS::DataWriterRemote_ptr publication_;
+    DCPS::DataWriterCallbacks* publication_;
     DDS::DataWriterQos qos_;
     DDS::PublisherQos publisher_qos_;
   };

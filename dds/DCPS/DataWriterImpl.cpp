@@ -20,7 +20,6 @@
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
 #include "CoherentChangeControl.h"
-#include "DataWriterRemoteImpl.h"
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
@@ -138,12 +137,6 @@ DataWriterImpl::cleanup()
   topic_servant_ = 0;
 
   dw_local_objref_ = DDS::DataWriter::_nil();
-
-  DataWriterRemoteImpl* dwr =
-    remote_reference_to_servant<DataWriterRemoteImpl>(dw_remote_objref_.in());
-  dwr->detach_parent();
-  deactivate_remote_object(dw_remote_objref_.in());
-  dw_remote_objref_ = DataWriterRemote::_nil();
 }
 
 void
@@ -155,8 +148,7 @@ DataWriterImpl::init(
   const DDS::StatusMask &              mask,
   OpenDDS::DCPS::DomainParticipantImpl * participant_servant,
   OpenDDS::DCPS::PublisherImpl *         publisher_servant,
-  DDS::DataWriter_ptr                  dw_local,
-  OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
+  DDS::DataWriter_ptr                  dw_local)
 {
   DBG_ENTRY_LVL("DataWriterImpl","init",6);
   topic_objref_ = DDS::Topic::_duplicate(topic);
@@ -194,7 +186,6 @@ DataWriterImpl::init(
   // exist as long as it does.
   publisher_servant_ = publisher_servant;
   dw_local_objref_   = DDS::DataWriter::_duplicate(dw_local);
-  dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate(dw_remote);
 
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
   this->reactor_ = orb->orb_core()->reactor();
@@ -1478,7 +1469,7 @@ DataWriterImpl::enable()
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
                            this->topic_servant_->get_id(),
-                           this->dw_remote_objref_,
+                           this,
                            this->qos_,
                            trans_conf_info,
                            pub_qos);

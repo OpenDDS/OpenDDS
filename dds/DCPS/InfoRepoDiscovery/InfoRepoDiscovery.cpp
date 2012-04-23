@@ -9,6 +9,8 @@
 
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h"
+#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
+#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h"
 #include "dds/DCPS/InfoRepoDiscovery/FailoverListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdBuilder.h"
@@ -410,18 +412,38 @@ RepoId
 InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const RepoId& participantId,
                                    const RepoId& topicId,
-                                   DCPS::DataWriterRemote_ptr publication,
+                                   DCPS::DataWriterCallbacks* publication,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
                                    const DDS::PublisherQos& publisherQos)
 {
+  RepoId pubId;
   try {
-    return get_dcps_info()->add_publication(domainId, participantId, topicId,
-      publication, qos, transInfo, publisherQos);
+    DCPS::DataWriterRemoteImpl* writer_remote_impl = 0;
+    ACE_NEW_RETURN(writer_remote_impl,
+                   DataWriterRemoteImpl(publication),
+                   DCPS::GUID_UNKNOWN);
+
+    //this is taking ownership of the DataWriterRemoteImpl (server side) allocated above
+    PortableServer::ServantBase_var writer_remote(writer_remote_impl);
+
+    //this is the client reference to the DataWriterRemoteImpl
+    OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
+      servant_to_remote_reference(writer_remote_impl);
+
+    pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
+      dr_remote_obj, qos, transInfo, publisherQos);
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+    // take ownership of the client allocated above
+    dataWriterMap_[pubId] = dr_remote_obj;
+
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_publication: ");
-    return DCPS::GUID_UNKNOWN;
+    pubId = DCPS::GUID_UNKNOWN;
   }
+
+  return pubId;
 }
 
 bool
@@ -502,7 +524,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above
     dataReaderMap_[subId] = dr_remote_obj;
-    
+
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_subscription: ");
     subId = DCPS::GUID_UNKNOWN;
@@ -607,6 +629,25 @@ InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
   deactivate_remote_object(drr->second.in());
 
   dataReaderMap_.erase(drr);
+}
+
+void
+InfoRepoDiscovery::removeDataWriterRemote(const RepoId& publicationId)
+{
+  DataWriterMap::iterator dwr = dataWriterMap_.find(publicationId);
+  if (dwr == dataWriterMap_.end()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::removeDataWriterRemote: ")
+               ACE_TEXT(" could not find DataWriter for publicationId.\n")));
+    return;
+  }
+
+  DataWriterRemoteImpl* impl =
+    remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in());
+  impl->detach_parent();
+  deactivate_remote_object(dwr->second.in());
+
+  dataWriterMap_.erase(dwr);
 }
 
 namespace {

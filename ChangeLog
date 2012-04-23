@@ -1,3 +1,115 @@
+Mon Apr 23 21:23:34 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataWriterCallbacks.h:
+
+          Added interface for Discovery callbacks into the DataWriter, to
+          refactor out dependencies on DataWriterRemote.
+
+        * dds/DdsDcps.mpc:
+
+          Removed dds/DdsDcpsDataWriterRemote.idl.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl:
+
+          Moved dds/DdsDcpsDataWriterRemote.idl into InfoRepoDiscovery.
+
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Moved non-InfoRepoDiscovery dependencies from dds/DdsDcpsDataWriterRemote.idl.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added inheritance from DataWriterCallbacks and removed all associations to
+          DataWriterRemote.
+
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+
+          Changed parent from DataWriterImpl to DataWriterCallbacks and moved
+          files into InfoRepoDiscovery.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Changed add_publication to take a DataWriterCallbacks*.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Changed add_publication to take a DataWriterCallbacks* and
+          storing the DataWriterCallbacks to communicate with local
+          publications.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Changed add_publication to take a DataWriterCallbacks* and creating
+          and storing the DataWriterRemote and breaking the DataWriterRemote's
+          association with the DataWriterCallbacks when remove_publication is
+          called.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Removed creation of the DataWriterRemote.
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.h:
+
+          Cleaned up DataReaderRemote changes.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Changed templated SupportImpl::init to not have
+          DataReaderRemote.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Refactored test for DataWriterRemote changes.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+
+          Changes from refactored location for
+          DataWriterRemote.
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/monitor/monitor.idl:
+        * tests/DCPS/ConfigTransports/Factory.h:
+        * tests/DCPS/ConfigTransports/Options.h:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooType/FooType.idl:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Changes from refactoring DataWriterRemote.
+
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * tests/DCPS/FooTest3_1/test_helper.h:
+        * tests/DCPS/FooTest3_1/test_helper.cpp:
+        * tests/DCPS/FooTest3_2/test_helper.h:
+        * tests/DCPS/FooTest3_2/test_helper.cpp:
+
+          Removed these files.
+
 Thu Apr 19 18:54:16 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:

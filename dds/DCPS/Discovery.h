@@ -14,7 +14,7 @@
 #include "RcHandle_T.h"
 
 #include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DdsDcpsDataWriterRemoteC.h"
+#include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 
 #include <string>
@@ -128,11 +128,16 @@ public:
 
   // Publication operations:
 
+  /// add the passed in publication into discovery.
+  /// Discovery does not participate in memory management
+  /// for the publication pointer, so it requires that
+  /// the publication pointer remain valid until
+  /// remove_publication is called.
   virtual OpenDDS::DCPS::RepoId add_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataWriterRemote_ptr publication,
+    OpenDDS::DCPS::DataWriterCallbacks* publication,
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos) = 0;

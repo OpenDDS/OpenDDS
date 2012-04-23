@@ -15,7 +15,6 @@
 #include "TransportReceiveListener.h"
 
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsDataWriterRemoteC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataSampleList.h"

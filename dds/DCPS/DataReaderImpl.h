@@ -395,7 +395,7 @@ public:
 
   virtual bool check_transport_qos(const TransportInst& inst);
 
-  virtual RepoId get_subscription_id() const;
+  RepoId get_subscription_id() const;
 
   DDS::DataReader_ptr get_dr_obj_ref();
 
@@ -438,7 +438,7 @@ public:
 
   void liveliness_lost();
 
-  virtual void remove_all_associations();
+  void remove_all_associations();
 
   void notify_subscription_disconnected(const WriterIdSeq& pubids);
   void notify_subscription_reconnected(const WriterIdSeq& pubids);

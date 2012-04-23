@@ -10,9 +10,9 @@
 #define OPENDDS_DCPS_DATAWRITER_H
 
 #include "dds/DdsDcpsPublicationS.h"
-#include "dds/DdsDcpsDataWriterRemoteS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
+#include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "WriteDataContainer.h"
@@ -75,6 +75,7 @@ struct AssociationData;
 */
 class OpenDDS_Dcps_Export DataWriterImpl
   : public virtual DDS::DataWriter,
+    public virtual DataWriterCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportSendListener,
@@ -172,19 +173,19 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-  void add_association(const RepoId& yourId,
-                       const ReaderAssociation& reader,
-                       bool active);
+  virtual void add_association(const RepoId& yourId,
+                               const ReaderAssociation& reader,
+                               bool active);
 
-  void association_complete(const RepoId& remote_id);
+  virtual void association_complete(const RepoId& remote_id);
 
-  void remove_associations(const ReaderIdSeq & readers,
-                           bool callback);
+  virtual void remove_associations(const ReaderIdSeq & readers,
+                                   bool callback);
 
-  void update_incompatible_qos(const IncompatibleQosStatus& status);
+  virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  void update_subscription_params(const RepoId& readerId,
-                                  const DDS::StringSeq& params);
+  virtual void update_subscription_params(const RepoId& readerId,
+                                          const DDS::StringSeq& params);
 
   /**
    * cleanup the DataWriter.
@@ -202,8 +203,7 @@ public:
     const DDS::StatusMask &               mask,
     OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
     OpenDDS::DCPS::PublisherImpl*         publisher_servant,
-    DDS::DataWriter_ptr                   dw_local,
-    OpenDDS::DCPS::DataWriterRemote_ptr   dw_remote);
+    DDS::DataWriter_ptr                   dw_local);
 
   /**
    * Delegate to the WriteDataContainer to register and tell
@@ -523,7 +523,7 @@ private:
 
   void association_complete_i(const RepoId& remote_id);
 
-  friend class ::DDS_TEST; // allows tests to get at dw_remote_objref_
+  friend class ::DDS_TEST; // allows tests to get at privates
 
   /// The name of associated topic.
   CORBA::String_var               topic_name_;
@@ -547,8 +547,6 @@ private:
   PublisherImpl*                  publisher_servant_;
   /// the object reference of the local datawriter
   DDS::DataWriter_var             dw_local_objref_;
-  /// The object reference of the remote datawriter.
-  OpenDDS::DCPS::DataWriterRemote_var dw_remote_objref_;
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.

@@ -63,7 +63,18 @@ module OpenDDS
       ::DDS::DataWriterQos writerQos;
     };
 
+    struct ReaderAssociation {
+      TransportLocatorSeq readerTransInfo;
+      RepoId readerId;
+      ::DDS::SubscriberQos subQos;
+      ::DDS::DataReaderQos readerQos;
+      string filterExpression;
+      ::DDS::StringSeq exprParams;
+    };
+
     typedef sequence<RepoId> WriterIdSeq;
+
+    typedef sequence<RepoId> ReaderIdSeq;
 
   }; // module DDS
 }; // module OpenDDS

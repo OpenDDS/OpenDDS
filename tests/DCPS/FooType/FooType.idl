@@ -1,7 +1,6 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsDataWriterRemote.idl"
 #include "dds/DdsDcpsTypeSupportExt.idl"
 
 

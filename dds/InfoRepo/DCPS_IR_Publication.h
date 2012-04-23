@@ -14,7 +14,7 @@
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsPublicationC.h"
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
-#include /**/ "dds/DdsDcpsDataWriterRemoteC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
 #include /**/ "ace/Unbounded_Set.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -73,7 +73,7 @@ public:
   /// The notify_lost parameter is passed to the remove_associations()
   /// The notify_both_side parameter indicates if it needs call sub to remove
   /// association as well.
-  /// See the comments of remove_associations() in DdsDcpsDataWriterRemote.idl
+  /// See the comments of remove_associations() in DataWriterRemote.idl
   /// or DataReaderRemote.idl.
   /// This method can mark the participant dead
   /// Returns 0 if successful

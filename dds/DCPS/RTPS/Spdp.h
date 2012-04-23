@@ -73,7 +73,7 @@ public:
 
   // Publication
   DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
-                               DCPS::DataWriterRemote_ptr publication,
+                               DCPS::DataWriterCallbacks* publication,
                                const DDS::DataWriterQos& qos,
                                const DCPS::TransportLocatorSeq& transInfo,
                                const DDS::PublisherQos& publisherQos);

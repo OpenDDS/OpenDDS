@@ -4,7 +4,6 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsPublicationC.h"
-#include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
 
 class Options;
