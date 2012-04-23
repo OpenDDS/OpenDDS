@@ -23,3 +23,13 @@ feature (!multi_topic) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_NO_MULTI_TOPIC
   dcps_ts_flags += -DOPENDDS_NO_MULTI_TOPIC
 }
+feature (!ownership_profile) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_NO_OWNERSHIP_PROFILE
+  idlflags += -DOPENDDS_NO_OWNERSHIP_PROFILE
+  dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_PROFILE
+}
+feature (!ownership) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_NO_OWNERSHIP_PROFILE
+  idlflags += -DOPENDDS_NO_OWNERSHIP_PROFILE
+  dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_PROFILE
+}

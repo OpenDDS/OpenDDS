@@ -163,8 +163,10 @@ namespace {
           TheServiceParticipant->initial_UserDataQosPolicy();
       writer_data.ddsPublicationData.ownership =
           TheServiceParticipant->initial_OwnershipQosPolicy();
+#ifndef OPENDDS_NO_OWNERSHIP
       writer_data.ddsPublicationData.ownership_strength =
           TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+#endif
       writer_data.ddsPublicationData.destination_order =
           TheServiceParticipant->initial_DestinationOrderQosPolicy();
       writer_data.ddsPublicationData.presentation =
@@ -284,7 +286,9 @@ namespace {
 
       }
       result.ddsPublicationData.ownership.kind = ownership;
+#ifndef OPENDDS_NO_OWNERSHIP
       result.ddsPublicationData.ownership_strength.value = ownership_strength;
+#endif
       result.ddsPublicationData.destination_order.kind = destination_order;
       result.ddsPublicationData.presentation.access_scope = presentation;
       result.ddsPublicationData.presentation.coherent_access = coherent;
@@ -1662,6 +1666,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         29);
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
+#ifndef OPENDDS_NO_OWNERSHIP
     TEST_ASSERT(is_present(param_list, PID_OWNERSHIP_STRENGTH));
     Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
     TEST_ASSERT(param.ownership_strength().value == 29);
@@ -1693,6 +1698,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(defaultQos.value ==
                 writer_data_out.ddsPublicationData.ownership_strength.value);
   }
+#endif
   { // Should encode writer destination order
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -3381,7 +3387,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!is_present(param_list, PID_LIFESPAN));
     TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP));
+#ifndef OPENDDS_NO_OWNERSHIP
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP_STRENGTH));
+#endif
     TEST_ASSERT(!is_present(param_list, PID_DESTINATION_ORDER));
     TEST_ASSERT(!is_present(param_list, PID_PRESENTATION));
     TEST_ASSERT(!is_present(param_list, PID_PARTITION));

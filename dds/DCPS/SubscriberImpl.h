@@ -140,8 +140,10 @@ public:
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);
 
+#ifndef OPENDDS_NO_OWNERSHIP
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
+#endif
 
   void coherent_change_received(RepoId& publisher_id,
                                 DataReaderImpl* reader,

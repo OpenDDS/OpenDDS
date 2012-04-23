@@ -60,7 +60,9 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* TRANSPORTPRIORITY_KEYNAME                   = ACE_TEXT("TransportPriority");
   const ACE_TCHAR* LIFESPANDURATION_KEYNAME                    = ACE_TEXT("LifespanDuration");
   const ACE_TCHAR* OWNERSHIPKIND_KEYNAME                       = ACE_TEXT("OwnershipKind");
+#ifndef OPENDDS_NO_OWNERSHIP
   const ACE_TCHAR* OWNERSHIPSTRENGTH_KEYNAME                   = ACE_TEXT("OwnershipStrength");
+#endif
   const ACE_TCHAR* PRESENTATION_KEYNAME                        = ACE_TEXT("Presentation");
   const ACE_TCHAR* PRESENTATIONCOHERENT_KEYNAME                = ACE_TEXT("PresentationCoherent");
   const ACE_TCHAR* PRESENTATIONORDERED_KEYNAME                 = ACE_TEXT("PresentationOrdered");
@@ -998,8 +1000,10 @@ Config::loadTopic(
     if( valueString == ACE_TEXT("SHARED")) {
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
 
+#ifndef OPENDDS_NO_OWNERSHIP
     } else if( valueString == ACE_TEXT("EXCLUSIVE")) {
       profile->qos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
+#endif
 
     } else {
       ACE_DEBUG((LM_WARNING,
@@ -1791,9 +1795,11 @@ Config::loadWriter(
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
       profile->mask |= SetOwnershipKindQos;
 
+#ifndef OPENDDS_NO_OWNERSHIP
     } else if( valueString == ACE_TEXT("EXCLUSIVE")) {
       profile->qos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
       profile->mask |= SetOwnershipKindQos;
+#endif
 
     } else {
       ACE_DEBUG((LM_WARNING,
@@ -1806,6 +1812,7 @@ Config::loadWriter(
     }
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP
   // OwnershipStrength                   = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPSTRENGTH_KEYNAME, valueString);
@@ -1822,6 +1829,7 @@ Config::loadWriter(
       ));
     }
   }
+#endif
 
   // WriterDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
   valueString.clear();

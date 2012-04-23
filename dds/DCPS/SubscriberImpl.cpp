@@ -938,6 +938,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
+#ifndef OPENDDS_NO_OWNERSHIP
 void
 SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)
@@ -955,6 +956,7 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
     }
   }
 }
+#endif
 
 
 void

@@ -360,7 +360,9 @@ void test_bit_publication ()
       TEST_CHECK (the_pub_data.liveliness == dw_qos.liveliness);
       //TEST_CHECK (the_pub_data.lifespan == dw_qos.lifespan);
       TEST_CHECK (the_pub_data.user_data == dw_qos.user_data);
+#ifndef OPENDDS_NO_OWNERSHIP
       TEST_CHECK (the_pub_data.ownership_strength == dw_qos.ownership_strength);
+#endif
       //the_pub_data.presentation
       //the_pub_data.partition
       //the_pub_data.topic_data

@@ -38,6 +38,7 @@ tao_orbsvcs ?= 1
 query_condition ?= 1
 content_filtered_topic ?= 1
 multi_topic ?= 1
+ownership ?= 1
 exceptions ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow

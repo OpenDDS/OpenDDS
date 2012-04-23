@@ -106,9 +106,11 @@ PublicationProfile::copyToWriterQos( ::DDS::DataWriterQos& qos)
     qos.ownership.kind = this->writerQos.ownership.kind;
   }
 #endif /* VERSION_1_2 */
+#ifndef OPENDDS_NO_OWNERSHIP
   if( this->writerQosMask & SetOwnershipStrengthQos) {
     qos.ownership_strength.value = this->writerQos.ownership_strength.value;
   }
+#endif
   if( this->writerQosMask & SetWriterDataLifecycleQos) {
     qos.writer_data_lifecycle.autodispose_unregistered_instances
       = this->writerQos.writer_data_lifecycle.autodispose_unregistered_instances;

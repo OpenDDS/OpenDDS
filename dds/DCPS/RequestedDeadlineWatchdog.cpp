@@ -95,9 +95,11 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
           this->reader_impl_->listener_for(
             DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
+#ifndef OPENDDS_NO_OWNERSHIP
         if (instance->instance_state_.is_exclusive()) {
           reader_impl_->owner_manager_->remove_writers (instance->instance_handle_);
         }
+#endif
 
         if (listener != 0) {
           // Copy before releasing the lock.

@@ -1833,6 +1833,8 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
   }
 }
 
+#ifndef OPENDDS_NO_OWNERSHIP
+
 OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
@@ -1875,6 +1877,8 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
     it->svt_->update_ownership_strength(pub_id, ownership_strength);
   }
 }
+
+#endif // OPENDDS_NO_OWNERSHIP
 
 DomainParticipantImpl::RepoIdSequence::RepoIdSequence(RepoId& base) :
   base_(base),

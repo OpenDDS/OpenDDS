@@ -487,8 +487,10 @@ public:
   typedef std::vector<WriterStatePair> WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
+#ifndef OPENDDS_NO_OWNERSHIP
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
+#endif
 
   virtual void delete_instance_map (void* map) = 0;
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -623,8 +625,11 @@ protected:
   DomainParticipantImpl*       participant_servant_;
   TopicImpl*                   topic_servant_;
 
+#ifndef OPENDDS_NO_OWNERSHIP
   bool is_exclusive_ownership_;
+
   OwnershipManager* owner_manager_;
+#endif
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   DDS::ContentFilteredTopic_var content_filtered_topic_;

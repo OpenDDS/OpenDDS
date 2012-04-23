@@ -513,7 +513,9 @@ RtpsSampleHeader::populate_inline_qos(
   PROCESS_INLINE_QOS(deadline, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(latency_budget, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(ownership, default_dw_qos, qos_data.dw_qos);
+#ifndef OPENDDS_NO_OWNERSHIP
   PROCESS_INLINE_QOS(ownership_strength, default_dw_qos, qos_data.dw_qos);
+#endif
   PROCESS_INLINE_QOS(liveliness, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(reliability, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(transport_priority, default_dw_qos, qos_data.dw_qos);

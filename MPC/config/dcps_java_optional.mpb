@@ -15,3 +15,9 @@ feature (!content_filtered_topic) : idl2jni {
 feature (!multi_topic) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_MULTI_TOPIC
 }
+feature (!ownership_profile) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP
+}
+feature (!ownership) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP
+}

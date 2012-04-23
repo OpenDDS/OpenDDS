@@ -52,8 +52,12 @@ DataReaderImpl::DataReaderImpl()
     reverse_sample_lock_(sample_lock_),
     participant_servant_(0),
     topic_servant_(0),
+#ifndef OPENDDS_NO_OWNERSHIP
     is_exclusive_ownership_ (false),
+#endif
+#ifndef OPENDDS_NO_OWNERSHIP
     owner_manager_ (0),
+#endif
     coherent_(false),
     subqos_ (TheServiceParticipant->initial_SubscriberQos()),
     topic_desc_(0),
@@ -205,7 +209,10 @@ void DataReaderImpl::init(
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+
+#ifndef OPENDDS_NO_OWNERSHIP
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
+#endif
 
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
 
@@ -219,9 +226,11 @@ void DataReaderImpl::init(
   // parent, we will exist as long as it does
   participant_servant_ = participant;
 
+#ifndef OPENDDS_NO_OWNERSHIP
   if (is_exclusive_ownership_) {
     owner_manager_ = participant_servant_->ownership_manager ();
   }
+#endif
 
   domain_id_ = participant_servant_->get_domain_id();
 
@@ -788,6 +797,14 @@ DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
 DDS::ReturnCode_t DataReaderImpl::set_qos(
   const DDS::DataReaderQos & qos)
 {
+#ifdef OPENDDS_NO_OWNERSHIP
+  if (qos.ownership_strength != TheServiceParticipant->initial_OwnershipStrengthQosPolicy()) {
+    return DDS::RETCODE_NOT_SUPPORTED;
+  }
+  if (qos.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS) {
+    return DDS::RETCODE_NOT_SUPPORTED;
+  }
+#endif
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -1574,13 +1591,17 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // the instance may be deleted during dispose and can
       // not be accessed.
       this->lookup_instance (sample, instance);
+#ifndef OPENDDS_NO_OWNERSHIP
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
              && (instance != 0 )
              && (this->owner_manager_->is_owner (instance->instance_handle_,
                                                 sample.header_.publication_id_)))) {
+#endif
         this->watchdog_->cancel_timer(instance);
+#ifndef OPENDDS_NO_OWNERSHIP
       }
+#endif
     }
     instance = 0;
     this->dispose(sample, instance);
@@ -1598,12 +1619,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
 
       this->lookup_instance (sample, instance);
+#ifndef OPENDDS_NO_OWNERSHIP
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
              && (instance != 0 )
              && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+#endif
         this->watchdog_->cancel_timer(instance);
+#ifndef OPENDDS_NO_OWNERSHIP
       }
+#endif
     }
     instance = 0;
     this->unregister(sample, instance);
@@ -1620,6 +1645,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // the instance may be deleted during dispose and can
       // not be accessed.
       this->lookup_instance (sample, instance);
+#ifndef OPENDDS_NO_OWNERSHIP
       if (! this->is_exclusive_ownership_
           || (this->is_exclusive_ownership_
              && (instance != 0 )
@@ -1628,8 +1654,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           || (this->is_exclusive_ownership_
              && (instance != 0 )
              && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+#endif
         this->watchdog_->cancel_timer(instance);
+#ifndef OPENDDS_NO_OWNERSHIP
       }
+#endif
     }
     instance = 0;
     this->dispose(sample, instance);
@@ -1988,9 +2017,11 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
 void
 DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 {
+#ifndef OPENDDS_NO_OWNERSHIP
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writers (handle);
   }
+#endif
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
   SubscriptionInstance* instance = this->get_handle_instance(handle);
@@ -2313,10 +2344,12 @@ DataReaderImpl::writer_removed(WriterInfo& info)
                std::string(writer_converter).c_str()));
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writer (info.writer_id_);
     info.clear_owner_evaluated ();
   }
+#endif
 
   bool liveliness_changed = false;
 
@@ -2427,10 +2460,12 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
                info.get_state_str().c_str()));
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writer (info.writer_id_);
     info.clear_owner_evaluated ();
   }
+#endif
 
   // caller should already have the samples_lock_ !!!
   bool liveliness_changed = false;
@@ -2885,6 +2920,7 @@ bool
 DataReaderImpl::filter_instance(SubscriptionInstance* instance,
                                 const PublicationId& pubid)
 {
+#ifndef OPENDDS_NO_OWNERSHIP
   if (this->is_exclusive_ownership_) {
 
     WriterMapType::iterator iter = writers_.find(pubid);
@@ -2947,6 +2983,7 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
       return true;
     }
   }
+#endif
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
@@ -3104,6 +3141,7 @@ DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
   }
 }
 
+#ifndef OPENDDS_NO_OWNERSHIP
 void
 DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)
@@ -3133,7 +3171,7 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
       }
   }
 }
-
+#endif
 
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {

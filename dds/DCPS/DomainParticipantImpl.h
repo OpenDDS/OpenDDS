@@ -319,9 +319,12 @@ public:
   */
   void get_topic_ids(TopicIdVec& topics);
 
+#ifndef OPENDDS_NO_OWNERSHIP
+
   /** Accessor for ownership manager.
   */
   OwnershipManager* ownership_manager();
+
 
   /**
   * Called upon receiving new BIT publication data to
@@ -329,6 +332,8 @@ public:
   */
   void update_ownership_strength(const PublicationId& pub_id,
                                  const CORBA::Long& ownership_strength);
+
+#endif
 
   bool federated() const { return this->federated_; }
 
@@ -415,7 +420,9 @@ private:
 
   Monitor* monitor_;
 
+#ifndef OPENDDS_NO_OWNERSHIP
   OwnershipManager owner_man_;
+#endif
 
   /// Publisher ID generator.
   RepoIdSequence   pub_id_gen_;

@@ -51,6 +51,14 @@ TopicImpl::~TopicImpl()
 DDS::ReturnCode_t
 TopicImpl::set_qos(const DDS::TopicQos & qos)
 {
+#ifdef OPENDDS_NO_OWNERSHIP
+  if (qos.ownership_strength != TheServiceParticipant->initial_OwnershipStrengthQosPolicy()) {
+    return DDS::RETCODE_NOT_SUPPORTED;
+  }
+  if (qos.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS) {
+    return DDS::RETCODE_NOT_SUPPORTED;
+  }
+#endif
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;

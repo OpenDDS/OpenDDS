@@ -568,7 +568,9 @@ Service_Participant::initialize()
   initial_LatencyBudgetQosPolicy_.duration.nanosec = DDS::DURATION_ZERO_NSEC;
 
   initial_OwnershipQosPolicy_.kind = DDS::SHARED_OWNERSHIP_QOS;
+#ifndef OPENDDS_NO_OWNERSHIP
   initial_OwnershipStrengthQosPolicy_.value = 0;
+#endif
 
   initial_LivelinessQosPolicy_.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
   initial_LivelinessQosPolicy_.lease_duration.sec = DDS::DURATION_INFINITE_SEC;
@@ -633,7 +635,9 @@ Service_Participant::initialize()
   initial_DataWriterQos_.lifespan = initial_LifespanQosPolicy_;
   initial_DataWriterQos_.user_data = initial_UserDataQosPolicy_;
   initial_DataWriterQos_.ownership = initial_OwnershipQosPolicy_;
+#ifndef OPENDDS_NO_OWNERSHIP
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
+#endif
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;

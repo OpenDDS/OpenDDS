@@ -139,7 +139,9 @@ public:
 
   static bool valid(const DDS::OwnershipQosPolicy& qos);
 
+#ifndef OPENDDS_NO_OWNERSHIP
   static bool valid(const DDS::OwnershipStrengthQosPolicy& qos);
+#endif
 
   static bool valid(const DDS::LivelinessQosPolicy& qos);
 
@@ -208,8 +210,10 @@ public:
   static bool changeable(const DDS::OwnershipQosPolicy& qos1,
                          const DDS::OwnershipQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_OWNERSHIP
   static bool changeable(const DDS::OwnershipStrengthQosPolicy& qos1,
                          const DDS::OwnershipStrengthQosPolicy& qos2);
+#endif
 
   static bool changeable(const DDS::LivelinessQosPolicy& qos1,
                          const DDS::LivelinessQosPolicy& qos2);
@@ -355,9 +359,11 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::OwnershipQosPolicy& qos1,
                   const DDS::OwnershipQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_OWNERSHIP
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::LivelinessQosPolicy& qos1,
@@ -471,9 +477,11 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::OwnershipQosPolicy& qos1,
                   const DDS::OwnershipQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_OWNERSHIP
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::LivelinessQosPolicy& qos1,

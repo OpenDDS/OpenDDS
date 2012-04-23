@@ -1,8 +1,52 @@
+Mon Apr 23 18:59:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * bin/dcps_tests.lst:
+        * configure:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * performance-tests/Bench/src/EntityProfiles.cpp:
+        * performance-tests/Bench/src/Options.cpp:
+        * rules.dds.GNU:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/EntityProfiles.cpp:
+
+	  Support for the ownership feature guard. The ownership feature
+	  is the subset of the DDS Ownership profile concerned with
+	  Ownership and OwnershipStrength policies.
+
 Wed Apr 18 21:35:13 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DdsDcps.mpc:
 
-	  Fix so that IDL macros are used when compiling DdsDcpsInfrastructure.idl.
+          Fix so that IDL macros are used when compiling DdsDcpsInfrastructure.idl.
 
 Wed Apr 18 20:04:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

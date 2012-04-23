@@ -1916,6 +1916,7 @@ void
     // if the instance map for the type exists, then find the
     // handle of the instance. If the instance is not registered
     //
+#ifndef OPENDDS_NO_OWNERSHIP
     InstanceMap* inst = 0;
     bool new_handle = true;
     if (this->is_exclusive_ownership_) {
@@ -1938,6 +1939,7 @@ void
         }
       }
     }
+#endif
 
     just_registered = true;
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
@@ -1962,6 +1964,7 @@ void
       return;
     }
 
+#ifndef OPENDDS_NO_OWNERSHIP
     if (this->is_exclusive_ownership_) {
       if (inst == 0) {
         inst = new InstanceMap ();
@@ -1993,6 +1996,7 @@ void
         return;
       }
     }
+#endif
 
     std::pair<InstanceMap::iterator, bool> bpair =
       instance_map_.insert(InstanceMap::value_type(*instance_data,
@@ -2112,9 +2116,11 @@ void
       instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
     }
 
+#ifndef OPENDDS_NO_OWNERSHIP
     if (this->is_exclusive_ownership_ && is_unregister_msg) {
       this->owner_manager_->unregister_reader (this->topic_servant_->type_name(),this);
     }
+#endif
 
     if (! event_notify)
     {
