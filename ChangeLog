@@ -1,3 +1,9 @@
+Tue Apr 24 02:31:09 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Removed unused parameter.
+
 Mon Apr 23 21:23:34 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataWriterCallbacks.h:

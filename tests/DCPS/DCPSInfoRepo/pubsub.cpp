@@ -73,7 +73,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb, PortableServer::POA_var poa)
+bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("pubsub test\n")));
@@ -396,7 +396,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::DCPS_debug_level = 4;
       OpenDDS::DCPS::Transport_debug_level = 4;
 */
-      if (!pubsub(disc, orb, poa))
+      if (!pubsub(disc, orb))
         {
           return 1;
         }
