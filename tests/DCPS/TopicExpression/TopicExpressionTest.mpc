@@ -1,4 +1,3 @@
 project: dcps {
   exename = *
-  requires += content_subscription
 }

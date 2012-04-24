@@ -1,3 +1,18 @@
+Tue Apr 24 19:27:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/FilterExpression/ContentSubscription.mpb:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+
+        * tests/DCPS/MetaStruct/ContentSubscription.mpb:
+        * tests/DCPS/MetaStruct/MetaStructTest.mpc:
+
+        * tests/DCPS/TopicExpression/ContentSubscription.mpb:
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+
+	  Attempt to account for FilterEvaluator only being built if
+	  either content-filtered-topic, multi-topic, or query-condition
+	  is built.
+
 Mon Apr 23 18:59:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/dcps_java_optional.mpb:
@@ -38,9 +53,9 @@ Mon Apr 23 18:59:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/codegen/model/Config.cpp:
         * tools/modeling/codegen/model/EntityProfiles.cpp:
 
-	  Support for the ownership feature guard. The ownership feature
-	  is the subset of the DDS Ownership profile concerned with
-	  Ownership and OwnershipStrength policies.
+          Support for the ownership feature guard. The ownership feature
+          is the subset of the DDS Ownership profile concerned with
+          Ownership and OwnershipStrength policies.
 
 Wed Apr 18 21:35:13 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
