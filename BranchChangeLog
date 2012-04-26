@@ -1,3 +1,9 @@
+Thu Apr 26 14:32:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Added missing configuration for MultiTopic test.
+
 Tue Apr 24 19:27:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/FilterExpression/ContentSubscription.mpb:
@@ -9,9 +15,9 @@ Tue Apr 24 19:27:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * tests/DCPS/TopicExpression/ContentSubscription.mpb:
         * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
 
-	  Attempt to account for FilterEvaluator only being built if
-	  either content-filtered-topic, multi-topic, or query-condition
-	  is built.
+          Attempt to account for FilterEvaluator only being built if
+          either content-filtered-topic, multi-topic, or query-condition
+          is built.
 
 Mon Apr 23 18:59:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
