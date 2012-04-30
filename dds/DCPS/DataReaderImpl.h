@@ -63,11 +63,13 @@ class FilterEvaluator;
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
 enum Coherent_State {
   NOT_COMPLETED_YET,
   COMPLETED,
   REJECTED
 };
+#endif
 
 enum MarshalingType {
   FULL_MARSHALING,
@@ -126,9 +128,11 @@ public:
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   Coherent_State coherent_change_received ();
   void reset_coherent_info ();
   void set_group_info (const CoherentChangeControl& info);
+#endif
 
   void clear_owner_evaluated ();
   void set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag);
@@ -170,11 +174,13 @@ private:
   OwnerEvaluateFlag owner_evaluated_;
 
   /// Data to support GROUP access scope.
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   bool group_coherent_;
   RepoId publisher_id_;
   DisjointSequence coherent_sample_sequence_;
   WriterCoherentSample  writer_coherent_samples_;
   GroupCoherentSamples  group_coherent_samples_;
+#endif
 
 };
 
@@ -532,6 +538,7 @@ public:
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
                                   DDS::InstanceStateKind state) = 0;
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   void begin_access();
   void end_access();
   void get_ordered_data(GroupRakeData& data,
@@ -549,6 +556,7 @@ public:
 
   void reset_coherent_info (const PublicationId& writer_id,
                             const RepoId& publisher_id);
+#endif
 
   // Called upon subscriber qos change to update the local cache.
   void set_subscriber_qos(const DDS::SubscriberQos & qos);
@@ -657,8 +665,10 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
+#endif
 
   const RepoId& get_repo_id() const { return this->subscription_id_; }
 

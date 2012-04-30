@@ -21,3 +21,6 @@ feature (!ownership_profile) : idl2jni {
 feature (!ownership) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_OWNERSHIP
 }
+feature (!object_model_profile) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_PRESENTATION_QOS
+}

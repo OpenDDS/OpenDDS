@@ -24,11 +24,13 @@ public:
 
   virtual void add(ReceivedDataElement* data_sample);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   virtual void accept_coherent(PublicationId& writer,
                                RepoId& publisher);
 
   virtual void reject_coherent(PublicationId& writer,
                                RepoId& publisher);
+#endif
 
 protected:
   ReceivedDataElementList& rcvd_samples_;

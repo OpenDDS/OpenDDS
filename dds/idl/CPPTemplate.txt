@@ -697,6 +697,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
     && ! this->coherent_) {
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -710,6 +711,7 @@ DDS::ReturnCode_t
   if (group_coherent_ordered && this->coherent_) {
     max_samples = 1;
   }
+#endif
 
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
     results(this, received_data, info_seq, max_samples,
@@ -719,7 +721,9 @@ DDS::ReturnCode_t
 #endif
             ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   if (! group_coherent_ordered) {
+#endif
     for (InstanceMap::iterator it = instance_map_.begin(),
           the_end = instance_map_.end(); it != the_end; ++it)
     {
@@ -734,18 +738,24 @@ DDS::ReturnCode_t
         for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
             item != 0; item = item->next_data_sample_)
         {
-          if (item->sample_state_ & sample_states && !item->coherent_change_)
+          if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+              && !item->coherent_change_
+#endif
+          )
           {
             results.insert_sample(item, inst, ++i);
           }
         }
       }
     }
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   }
   else {
     OpenDDS::DCPS::RakeData item = this->group_coherent_ordered_data_.get_data();
     results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
   }
+#endif
 
   results.copy_to_user();
 
@@ -805,6 +815,7 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
     && ! this->coherent_) {
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -818,6 +829,7 @@ DDS::ReturnCode_t
   if (group_coherent_ordered && this->coherent_) {
     max_samples = 1;
   }
+#endif
 
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
      results(this, received_data, info_seq, max_samples,
@@ -827,7 +839,9 @@ DDS::ReturnCode_t
 #endif
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   if (! group_coherent_ordered) {
+#endif
 
     for (InstanceMap::iterator it = instance_map_.begin(),
           the_end = instance_map_.end(); it != the_end; ++it)
@@ -843,18 +857,24 @@ DDS::ReturnCode_t
         for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
             item != 0; item = item->next_data_sample_)
         {
-          if (item->sample_state_ & sample_states && !item->coherent_change_)
+          if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+              && !item->coherent_change_
+#endif
+             )
           {
             results.insert_sample(item, inst, ++i);
           }
         }
       }
     }
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   }
   else {
     OpenDDS::DCPS::RakeData item = this->group_coherent_ordered_data_.get_data();
     results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
   }
+#endif
 
   results.copy_to_user();
 
@@ -969,7 +989,9 @@ DDS::ReturnCode_t
            item != 0;
            item = item->next_data_sample_)
       {
+#ifndef OPENDDS_NO_PRESENTATION_QOS
         if (item->coherent_change_) continue;
+#endif
 
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
         {
@@ -1042,11 +1064,13 @@ DDS::ReturnCode_t
       OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
       while (item)
       {
+#ifndef OPENDDS_NO_PRESENTATION_QOS
         if (item->coherent_change_)
         {
             item = item->next_data_sample_;
             continue;
         }
+#endif
         if (item->sample_state_ & ::DDS::NOT_READ_SAMPLE_STATE)
         {
           if (item->registered_data_ != 0)
@@ -1171,7 +1195,11 @@ DDS::ReturnCode_t
     for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
          item; item = item->next_data_sample_)
     {
-      if (item->sample_state_ & sample_states && !item->coherent_change_)
+      if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+          && !item->coherent_change_
+#endif
+         )
       {
         results.insert_sample(item, inst, ++i);
       }
@@ -1253,7 +1281,11 @@ DDS::ReturnCode_t
     for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
          item; item = item->next_data_sample_)
     {
-      if (item->sample_state_ & sample_states && !item->coherent_change_)
+      if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+          && !item->coherent_change_
+#endif
+         )
       {
         results.insert_sample(item, inst, ++i);
       }
@@ -1646,7 +1678,11 @@ bool
         (inst.instance_state_.instance_state() & instance_states)) {
       for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
            item = item->next_data_sample_) {
-        if (item->sample_state_ & sample_states && !item->coherent_change_) {
+        if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+            && !item->coherent_change_
+#endif
+           ) {
           if (evaluator.eval(*static_cast< ::<%SCOPED%>* >(item->registered_data_), params)) {
             return true;
           }
@@ -2176,7 +2212,9 @@ void
       dec_ref_data_element(head_ptr);
     }
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
     if (! ptr->coherent_change_) {
+#endif
       OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
 
       sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
@@ -2212,7 +2250,9 @@ void
           notify_status_condition();
         }
       }
+#ifndef OPENDDS_NO_PRESENTATION_QOS
     }
+#endif
   }
   else
   {

@@ -14,7 +14,10 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , coherent_change_(0)
   , historic_sample_(0)
   , lifespan_duration_(0)
+// TODO: Remove
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   , group_coherent_(0)
+#endif
   , content_filter_(0)
   , sequence_repair_(0)
   , more_fragments_(0)
@@ -44,7 +47,10 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , coherent_change_(0)
   , historic_sample_(0)
   , lifespan_duration_(0)
+// TODO: Remove
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   , group_coherent_(0)
+#endif
   , content_filter_(0)
   , sequence_repair_(0)
   , more_fragments_(0)

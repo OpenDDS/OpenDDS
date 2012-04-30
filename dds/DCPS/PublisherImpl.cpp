@@ -570,6 +570,8 @@ PublisherImpl::resume_publications()
   return DDS::RETCODE_OK;
 }
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
 DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
 {
@@ -686,6 +688,8 @@ PublisherImpl::end_coherent_changes()
 
   return DDS::RETCODE_OK;
 }
+
+#endif // OPENDDS_NO_PRESENTATION_QOS
 
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(

@@ -6,6 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -63,3 +65,5 @@ CoherentChangeControl::reset()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#endif // OPENDDS_NO_PRESENTATION_QOS

@@ -6,6 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "CoherentChangeControl.h"
 #include "Serializer.h"
@@ -118,3 +120,5 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#endif // OPENDDS_NO_PRESENTATION_QOS

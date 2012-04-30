@@ -1,8 +1,46 @@
+Mon Apr 30 20:15:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * configure:
+
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/CoherentChangeControl.inl:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/DdsDcpsPublication.idl:
+
+        * dds/idl/CPPTemplate.txt:
+
+        * rules.dds.GNU:
+
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+
+        * tests/DCPS/Presentation/Presentation.mpc:
+
+	  Feature guard for object model profile but includes complete Presentation
+	  Qos Policy and not just for access scope of GROUP.
+
 Thu Apr 26 14:32:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Added missing configuration for MultiTopic test.
+          Added missing configuration for MultiTopic test.
 
 Tue Apr 24 19:27:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

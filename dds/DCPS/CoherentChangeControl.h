@@ -9,6 +9,8 @@
 #ifndef OPENDDS_DCPS_COHERENT_CHANGE_CONTROL_H
 #define OPENDDS_DCPS_COHERENT_CHANGE_CONTROL_H
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "Serializer.h"
@@ -72,5 +74,7 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::CoherentChangeC
 #if defined(__ACE_INLINE__)
 #include "CoherentChangeControl.inl"
 #endif /* __ACE_INLINE__ */
+
+#endif
 
 #endif  /* OPENDDS_DCPS_COHERENT_CHANGE_CONTROL_H */

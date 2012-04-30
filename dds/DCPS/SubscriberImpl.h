@@ -88,9 +88,13 @@ public:
 
   virtual DDS::SubscriberListener_ptr get_listener();
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
   virtual DDS::ReturnCode_t begin_access();
 
   virtual DDS::ReturnCode_t end_access();
+
+#endif
 
   virtual DDS::DomainParticipant_ptr get_participant();
 
@@ -145,9 +149,11 @@ public:
                                   const CORBA::Long& ownership_strength);
 #endif
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   void coherent_change_received(RepoId& publisher_id,
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);
+#endif
 
   virtual EntityImpl* parent() const;
 

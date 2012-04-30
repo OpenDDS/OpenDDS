@@ -33,3 +33,8 @@ feature (!ownership) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_NO_OWNERSHIP_PROFILE
   dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_PROFILE
 }
+feature (!object_model_profile) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_NO_PRESENTATION_QOS
+  idlflags += -DOPENDDS_NO_PRESENTATION_QOS
+  dcps_ts_flags += -DOPENDDS_NO_PRESENTATION_QOS
+}

@@ -178,7 +178,10 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   this->coherent_change_    = byte & mask_flag(COHERENT_CHANGE_FLAG);
   this->historic_sample_    = byte & mask_flag(HISTORIC_SAMPLE_FLAG);
   this->lifespan_duration_  = byte & mask_flag(LIFESPAN_DURATION_FLAG);
+  // TODO: Remove
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   this->group_coherent_     = byte & mask_flag(GROUP_COHERENT_FLAG);
+#endif
   this->content_filter_     = byte & mask_flag(CONTENT_FILTER_FLAG);
   this->sequence_repair_    = byte & mask_flag(SEQUENCE_REPAIR_FLAG);
   this->more_fragments_     = byte & mask_flag(MORE_FRAGMENTS_FLAG);
@@ -233,11 +236,13 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   if (!reader.good_bit()) return;
   gen_find_size(this->publication_id_, this->marshaled_size_, padding);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
     if (!reader.good_bit()) return;
     gen_find_size(this->publisher_id_, this->marshaled_size_, padding);
   }
+#endif
 
   if (this->content_filter_) {
     reader >> this->content_filter_entries_;
@@ -259,7 +264,10 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
                          | (value.coherent_change_    << COHERENT_CHANGE_FLAG)
                          | (value.historic_sample_    << HISTORIC_SAMPLE_FLAG)
                          | (value.lifespan_duration_  << LIFESPAN_DURATION_FLAG)
+    // TODO: Remove
+#ifndef OPENDDS_NO_PRESENTATION_QOS
                          | (value.group_coherent_     << GROUP_COHERENT_FLAG)
+#endif
                          | (value.content_filter_     << CONTENT_FILTER_FLAG)
                          | (value.sequence_repair_    << SEQUENCE_REPAIR_FLAG)
                          | (value.more_fragments_     << MORE_FRAGMENTS_FLAG)
@@ -283,9 +291,11 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 
   writer << value.publication_id_;
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   if (value.group_coherent_) {
     writer << value.publisher_id_;
   }
+#endif
 
   // content_filter_entries_ is deliberately not marshaled here.
   // It's variable sized, so it won't fit into our pre-allocated data block.
@@ -501,7 +511,9 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.coherent_change_ == 1) str << "Coherent, ";
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
+#ifndef OPENDDS_NO_PRESENTATION_QOS
     if (value.group_coherent_ == 1) str << "Group-Coherent, ";
+#endif
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
     if (value.sequence_repair_ == 1) str << "Sequence Repair, ";
     if (value.more_fragments_ == 1) str << "More Fragments, ";
@@ -520,9 +532,11 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     }
 
     str << "Publication: " << GuidConverter(value.publication_id_);
+#ifndef OPENDDS_NO_PRESENTATION_QOS
     if (value.group_coherent_) {
       str << ", Publisher: " << GuidConverter(value.publisher_id_);
     }
+#endif
 
     if (value.content_filter_) {
       const CORBA::ULong len = value.content_filter_entries_.length();

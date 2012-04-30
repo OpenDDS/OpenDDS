@@ -1312,6 +1312,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         writer->ack_sequence_.insert(resetRange);
       }
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
       if (header.coherent_change_) {
         if (writer->coherent_samples_ == 0) {
           writer->coherent_sample_sequence_.reset();
@@ -1321,6 +1322,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
           writer->coherent_sample_sequence_.insert(header.sequence_);
         }
       }
+#endif
     }
   }
 }
@@ -1390,7 +1392,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     if (filtered) break; // sample filtered from instance
     bool accepted = true;
+#ifndef OPENDDS_NO_PRESENTATION_QOS
     bool verify_coherent = false;
+#endif
     WriterInfo* writer = 0;
 
     if (header.publication_id_.entityId.entityKind
@@ -1403,11 +1407,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       if (where != this->writers_.end()) {
         if (header.coherent_change_) {
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
           // Received coherent change
           where->second->group_coherent_ = header.group_coherent_;
           where->second->publisher_id_ = header.publisher_id_;
           ++where->second->coherent_samples_;
           verify_coherent = true;
+#endif
           writer = where->second;
         }
 
@@ -1435,9 +1441,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
     }
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
     if (verify_coherent) {
       accepted = this->verify_coherent_changes_completion (writer);
     }
+#endif
 
     if (this->watchdog_.get()) {
       instance->last_sample_tv_ = instance->cur_sample_tv_;
@@ -1518,6 +1526,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
   break;
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   case END_COHERENT_CHANGES: {
     CoherentChangeControl control;
 
@@ -1566,6 +1575,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
   }
   break;
+#endif // OPENDDS_NO_PRESENTATION_QOS
 
   case DATAWRITER_LIVELINESS: {
     this->writer_activity(sample.header_);
@@ -1844,7 +1854,11 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
         (inst.instance_state_.instance_state() & instance_states)) {
       for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
            item = item->next_data_sample_) {
-        if (item->sample_state_ & sample_states && !item->coherent_change_) {
+        if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+	    && !item->coherent_change_
+#endif
+           ) {
           return true;
         }
       }
@@ -2049,7 +2063,9 @@ OpenDDS::DCPS::WriterInfo::WriterInfo()
     writer_id_(GUID_UNKNOWN),
     handle_(DDS::HANDLE_NIL)
 {
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   this->reset_coherent_info();
+#endif
 }
 
 OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
@@ -2063,7 +2079,9 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
     writer_qos_(writer_qos),
     handle_(DDS::HANDLE_NIL)
 {
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   this->reset_coherent_info();
+#endif
 
   if (DCPS_debug_level >= 5) {
     GuidConverter writer_converter(writer_id);
@@ -2240,6 +2258,7 @@ OpenDDS::DCPS::WriterInfo::ack_sequence() const
 }
 
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
 Coherent_State
 OpenDDS::DCPS::WriterInfo::coherent_change_received()
 {
@@ -2291,6 +2310,7 @@ OpenDDS::DCPS::WriterInfo::set_group_info(const CoherentChangeControl& info)
   this->group_coherent_samples_ = info.group_coherent_samples_;
 }
 
+#endif // OPENDDS_NO_PRESENTATION_QOS
 
 OpenDDS::DCPS::WriterStats::WriterStats(
   int amount,
@@ -3173,6 +3193,7 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
 }
 #endif
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
   if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
@@ -3389,6 +3410,7 @@ void DataReaderImpl::get_ordered_data (GroupRakeData& data,
   }
 }
 
+#endif // OPENDDS_NO_PRESENTATION_QOS
 
 void
 DataReaderImpl::set_subscriber_qos(

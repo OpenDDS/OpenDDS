@@ -320,6 +320,8 @@ public:
 
   virtual bool check_transport_qos(const TransportInst& inst);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
   /// Are coherent changes pending?
   bool coherent_changes_pending();
 
@@ -328,6 +330,8 @@ public:
 
   /// Ends a coherent change set; should only be called once.
   void end_coherent_changes(const GroupCoherentSamples& group_samples);
+
+#endif
 
   /**
    * Accessor of the associated topic name.

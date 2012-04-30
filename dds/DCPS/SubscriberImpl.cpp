@@ -496,6 +496,7 @@ SubscriberImpl::get_datareaders(
                    this->si_lock_,
                    DDS::RETCODE_ERROR);
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   // If access_scope is GROUP and ordered_access is true then return readers as
   // list which may contain same readers multiple times. Otherwise return readers
   // as set.
@@ -519,6 +520,7 @@ SubscriberImpl::get_datareaders(
       return DDS::RETCODE_OK ;
     }
   }
+#endif
 
   // Return set of datareaders.
   int count(0) ;
@@ -689,6 +691,8 @@ SubscriberImpl::get_listener()
   return DDS::SubscriberListener::_duplicate(listener_.in());
 }
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
 DDS::ReturnCode_t
 SubscriberImpl::begin_access()
 {
@@ -761,6 +765,8 @@ SubscriberImpl::end_access()
 
   return DDS::RETCODE_OK;
 }
+
+#endif // OPENDDS_NO_PRESENTATION_QOS
 
 DDS::DomainParticipant_ptr
 SubscriberImpl::get_participant()
@@ -959,6 +965,7 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
 #endif
 
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
 void
 SubscriberImpl::coherent_change_received (RepoId& publisher_id,
                                           DataReaderImpl* reader,
@@ -1001,6 +1008,7 @@ SubscriberImpl::coherent_change_received (RepoId& publisher_id,
     }
   }
 }
+#endif
 
 EntityImpl*
 SubscriberImpl::parent() const

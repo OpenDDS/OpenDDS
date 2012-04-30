@@ -90,7 +90,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// LIFESPAN duration fields.
   bool lifespan_duration_ : 1;
 
+  // TODO: Remove
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   bool group_coherent_ : 1;
+#endif
 
   /// The publishing side has applied content filtering, and the optional
   /// content_filter_entries_ field is present in the marshaled header.

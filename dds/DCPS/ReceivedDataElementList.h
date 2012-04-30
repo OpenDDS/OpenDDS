@@ -35,9 +35,11 @@ public:
     : pub_(header.publication_id_),
       registered_data_(received_data),
       sample_state_(DDS::NOT_READ_SAMPLE_STATE),
+#ifndef OPENDDS_NO_PRESENTATION_QOS
       coherent_change_(header.coherent_change_),
       group_coherent_(header.group_coherent_),
       publisher_id_ (header.publisher_id_),
+#endif
       disposed_generation_count_(0),
       no_writers_generation_count_(0),
       zero_copy_cnt_(0),
@@ -80,6 +82,7 @@ public:
   /// Reception time stamp for this data sample
   DDS::Time_t destination_timestamp_;
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   /// Sample belongs to an active coherent change set
   bool coherent_change_;
 
@@ -88,6 +91,7 @@ public:
 
   /// Publisher id represent group identifier.
   RepoId publisher_id_;
+#endif
 
   /// The data sample's instance's disposed_generation_count_
   /// at the time the sample was received
