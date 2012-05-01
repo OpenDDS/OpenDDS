@@ -5,7 +5,7 @@
 project: dcpsexe_with_tcp {
   exename   = test
 
-  requires += presentation_qos
+  requires += object_model_profile
   
   after    += DcpsFooType
   libs     += DcpsFooType
