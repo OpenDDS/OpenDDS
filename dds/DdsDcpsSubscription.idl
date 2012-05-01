@@ -256,9 +256,13 @@ module DDS {
 
     SubscriberListener get_listener();
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
+
     ReturnCode_t begin_access();
 
     ReturnCode_t end_access();
+
+#endif
 
     DomainParticipant get_participant();
 

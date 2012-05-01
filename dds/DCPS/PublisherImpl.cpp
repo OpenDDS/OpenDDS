@@ -40,7 +40,9 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     listener_mask_(mask),
     listener_(DDS::PublisherListener::_duplicate(a_listener)),
     fast_listener_(0),
+#ifndef OPENDDS_NO_PRESENTATION_QOS
     change_depth_(0),
+#endif
     domain_id_(participant->get_domain_id()),
     participant_(participant),
     suspend_depth_count_(0),

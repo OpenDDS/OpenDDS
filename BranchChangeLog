@@ -1,3 +1,15 @@
+Tue May  1 18:33:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DdsDcpsSubscription.idl:
+
+          Include presentation in DataSampleHeader for compatibility
+	  purposes.
+	  Some fixes based on running tests based on a build from scratch.
+
 Mon Apr 30 20:15:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/dcps_java_optional.mpb:
@@ -33,8 +45,8 @@ Mon Apr 30 20:15:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/Presentation/Presentation.mpc:
 
-	  Feature guard for object model profile but includes complete Presentation
-	  Qos Policy and not just for access scope of GROUP.
+          Feature guard for object model profile but includes complete Presentation
+          Qos Policy and not just for access scope of GROUP.
 
 Thu Apr 26 14:32:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

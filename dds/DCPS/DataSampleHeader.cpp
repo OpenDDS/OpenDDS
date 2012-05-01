@@ -178,10 +178,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   this->coherent_change_    = byte & mask_flag(COHERENT_CHANGE_FLAG);
   this->historic_sample_    = byte & mask_flag(HISTORIC_SAMPLE_FLAG);
   this->lifespan_duration_  = byte & mask_flag(LIFESPAN_DURATION_FLAG);
-  // TODO: Remove
-#ifndef OPENDDS_NO_PRESENTATION_QOS
   this->group_coherent_     = byte & mask_flag(GROUP_COHERENT_FLAG);
-#endif
   this->content_filter_     = byte & mask_flag(CONTENT_FILTER_FLAG);
   this->sequence_repair_    = byte & mask_flag(SEQUENCE_REPAIR_FLAG);
   this->more_fragments_     = byte & mask_flag(MORE_FRAGMENTS_FLAG);
@@ -264,10 +261,7 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
                          | (value.coherent_change_    << COHERENT_CHANGE_FLAG)
                          | (value.historic_sample_    << HISTORIC_SAMPLE_FLAG)
                          | (value.lifespan_duration_  << LIFESPAN_DURATION_FLAG)
-    // TODO: Remove
-#ifndef OPENDDS_NO_PRESENTATION_QOS
                          | (value.group_coherent_     << GROUP_COHERENT_FLAG)
-#endif
                          | (value.content_filter_     << CONTENT_FILTER_FLAG)
                          | (value.sequence_repair_    << SEQUENCE_REPAIR_FLAG)
                          | (value.more_fragments_     << MORE_FRAGMENTS_FLAG)
