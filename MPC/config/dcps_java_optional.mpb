@@ -24,3 +24,6 @@ feature (!ownership) : idl2jni {
 feature (!object_model_profile) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_PRESENTATION_QOS
 }
+feature (!persistence_profile) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_PERSISTENCE_PROFILE
+}

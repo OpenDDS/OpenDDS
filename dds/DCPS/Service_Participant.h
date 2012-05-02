@@ -36,7 +36,9 @@
 namespace OpenDDS {
 namespace DCPS {
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
+#endif
 class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
@@ -327,10 +329,12 @@ public:
     bit_enabled_ = b;
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
   /// DurabilityQosPolicy and sample list depth.
   DataDurabilityCache * get_data_durability_cache(
     DDS::DurabilityQosPolicy const & durability);
+#endif
 
   /// For internal OpenDDS Use (needed for monitor code)
   typedef std::map<Discovery::RepoKey, Discovery_rch> RepoKeyDiscoveryMap;
@@ -532,6 +536,8 @@ private:
   /// Allow the publishing side to do content filtering?
   bool publisher_content_filter_;
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+
   /// The @c TRANSIENT data durability cache.
   std::auto_ptr<DataDurabilityCache> transient_data_cache_;
 
@@ -540,6 +546,8 @@ private:
 
   /// The @c PERSISTENT data durability directory.
   ACE_CString persistent_data_dir_;
+
+#endif
 
   /// Number of seconds to wait on pending samples to be sent
   /// or dropped.

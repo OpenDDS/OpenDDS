@@ -1400,10 +1400,12 @@ DataWriterImpl::enable()
   // enable the type specific part of this DataWriter
   this->enable_specific();
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
   DataDurabilityCache* const durability_cache =
     TheServiceParticipant->get_data_durability_cache(qos_.durability);
+#endif
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
@@ -1415,8 +1417,10 @@ DataWriterImpl::enable()
                                            domain_id_,
                                            get_topic_name(),
                                            get_type_name(),
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
                                            durability_cache,
                                            qos_.durability_service,
+#endif
                                            this->watchdog_);
 
   // +1 because we might allocate one before releasing another
@@ -1539,6 +1543,7 @@ DataWriterImpl::enable()
     this->monitor_->report();
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Move cached data from the durability cache to the unsent data
   // queue.
   if (durability_cache != 0) {
@@ -1554,6 +1559,7 @@ DataWriterImpl::enable()
                  ACE_TEXT("unable to retrieve durable data\n")));
     }
   }
+#endif
 
   return writer_enabled_result;
 }
@@ -2448,11 +2454,13 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   return true;
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 bool
 DataWriterImpl::persist_data()
 {
   return this->data_container_->persist_data();
 }
+#endif
 
 void
 DataWriterImpl::reschedule_deadline()

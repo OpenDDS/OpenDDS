@@ -28,7 +28,9 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataWriterImpl;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
+#endif
 
 typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
 
@@ -122,10 +124,12 @@ public:
     char const *     topic_name,
     /// Type name.
     char const *     type_name,
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     /// The data durability cache for unsent data.
     DataDurabilityCache * durability_cache,
     /// DURABILITY_SERVICE QoS specific to the DataWriter.
     DDS::DurabilityServiceQosPolicy const & durability_service,
+#endif
     std::auto_ptr<OfferedDeadlineWatchdog> & watchdog);
 
   /**
@@ -283,10 +287,12 @@ public:
   PublicationInstance* get_handle_instance(
     DDS::InstanceHandle_t handle);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /**
    * Copy sent data to data DURABILITY cache.
    */
   bool persist_data();
+#endif
 
   // Reset time interval for each instance.
   void reschedule_deadline();
@@ -433,6 +439,8 @@ private:
   /// Type name.
   char const * const type_name_;
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+
   /// Pointer to the data durability cache.
   /**
    * This a pointer to the data durability cache owned by the
@@ -443,6 +451,8 @@ private:
 
   /// DURABILITY_SERVICE QoS specific to the DataWriter.
   DDS::DurabilityServiceQosPolicy const & durability_service_;
+
+#endif
 
   std::auto_ptr<OfferedDeadlineWatchdog> & watchdog_;
 };

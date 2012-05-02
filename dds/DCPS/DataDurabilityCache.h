@@ -9,6 +9,8 @@
 #ifndef OPENDDS_DATA_DURABILITY_CACHE_H
 #define OPENDDS_DATA_DURABILITY_CACHE_H
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -249,5 +251,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#endif  /* OPENDDS_NO_PERSISTENCE_PROFILE */
 
 #endif  /* OPENDDS_DATA_DURABILITY_CACHE_H */

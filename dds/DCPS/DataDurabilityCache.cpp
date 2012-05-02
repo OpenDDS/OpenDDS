@@ -6,6 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataDurabilityCache.h"
 #include "Service_Participant.h"
@@ -875,3 +877,5 @@ OpenDDS::DCPS::DataDurabilityCache::make_allocator(
   // TODO: clean up all the ACE_Allocator-related code
   return std::auto_ptr<ACE_Allocator> (new ACE_New_Allocator);
 }
+
+#endif // OPENDDS_NO_PERSISTENCE_PROFILE

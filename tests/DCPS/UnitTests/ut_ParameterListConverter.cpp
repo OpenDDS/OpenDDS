@@ -147,8 +147,10 @@ namespace {
       DiscoveredWriterData writer_data;
       writer_data.ddsPublicationData.durability =
           TheServiceParticipant->initial_DurabilityQosPolicy();
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       writer_data.ddsPublicationData.durability_service =
           TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+#endif
       writer_data.ddsPublicationData.deadline =
           TheServiceParticipant->initial_DeadlineQosPolicy();
       writer_data.ddsPublicationData.latency_budget =
@@ -259,6 +261,7 @@ namespace {
         result.ddsPublicationData.type_name  = type_name;
       }
       result.ddsPublicationData.durability.kind = durability;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       result.ddsPublicationData.durability_service.service_cleanup_delay.sec = svc_del_sec;
       result.ddsPublicationData.durability_service.service_cleanup_delay.nanosec = svc_del_nsec;
       result.ddsPublicationData.durability_service.history_kind = hist;
@@ -266,6 +269,16 @@ namespace {
       result.ddsPublicationData.durability_service.max_samples = max_samples;
       result.ddsPublicationData.durability_service.max_instances = max_instances;
       result.ddsPublicationData.durability_service.max_samples_per_instance = max_samples_per_instance;
+#else
+      ACE_UNUSED_ARG(svc_del_sec);
+      ACE_UNUSED_ARG(svc_del_nsec);
+      ACE_UNUSED_ARG(hist);
+      ACE_UNUSED_ARG(hist_depth);
+      ACE_UNUSED_ARG(max_samples);
+      ACE_UNUSED_ARG(max_instances);
+      ACE_UNUSED_ARG(max_samples_per_instance);
+
+#endif
       result.ddsPublicationData.deadline.period.sec = deadline_sec;
       result.ddsPublicationData.deadline.period.nanosec = deadline_nsec;
       result.ddsPublicationData.latency_budget.duration.sec = lb_sec;
@@ -1264,6 +1277,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.durability.kind);
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   { // Should encode writer durabiltiy service
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL,
@@ -1334,6 +1348,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(defaultQos.max_instances == ds_out.max_instances);
     TEST_ASSERT(defaultQos.max_samples_per_instance == ds_out.max_samples_per_instance);
   }
+#endif
 
   { // Should encode writer deadline
     DiscoveredWriterData writer_data = Factory::writer_data(

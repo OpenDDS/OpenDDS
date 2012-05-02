@@ -40,6 +40,7 @@ content_filtered_topic ?= 1
 multi_topic ?= 1
 ownership ?= 1
 object_model_profile ?= 1
+persistence_profile ?= 1
 exceptions ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow

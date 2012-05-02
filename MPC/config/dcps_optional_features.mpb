@@ -38,3 +38,8 @@ feature (!object_model_profile) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_NO_PRESENTATION_QOS
   dcps_ts_flags += -DOPENDDS_NO_PRESENTATION_QOS
 }
+feature (!persistence_profile) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_NO_PERSISTENCE_PROFILE
+  idlflags += -DOPENDDS_NO_PERSISTENCE_PROFILE
+  dcps_ts_flags += -DOPENDDS_NO_PERSISTENCE_PROFILE
+}

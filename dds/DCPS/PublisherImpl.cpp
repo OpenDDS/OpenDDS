@@ -222,6 +222,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     }
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so
   // configured. This needs be called before unregister_instances
   // because unregister_instances may cause instance dispose.
@@ -231,6 +232,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
                ACE_TEXT("PublisherImpl::delete_datawriter, ")
                ACE_TEXT("failed to make data durable.\n")));
   }
+#endif
 
   // Unregister all registered instances prior to deletion.
   DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
@@ -801,7 +803,9 @@ PublisherImpl::copy_from_topic_qos(DDS::DataWriterQos & a_datawriter_qos,
     // Some members in the DataWriterQos are not contained
     // in the TopicQos. The caller needs initialize them.
     a_datawriter_qos.durability = a_topic_qos.durability;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     a_datawriter_qos.durability_service = a_topic_qos.durability_service;
+#endif
     a_datawriter_qos.deadline = a_topic_qos.deadline;
     a_datawriter_qos.latency_budget = a_topic_qos.latency_budget;
     a_datawriter_qos.liveliness = a_topic_qos.liveliness;

@@ -4,6 +4,7 @@ project(DDS*idl): dcps_test_lib {
                    -Wb,stub_export_macro=TransientDurability_Export
   dcps_ts_flags += -Wb,export_macro=TransientDurability_Export
   dynamicflags  += TRANSIENTDURABILITY_BUILD_DLL
+  requires      += persistence_profile
 
   TypeSupport_Files {
     Messenger.idl

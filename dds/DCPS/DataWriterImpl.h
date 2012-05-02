@@ -428,9 +428,11 @@ public:
                              const DDS::Time_t& source_timestamp,
                              bool content_filter);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Make sent data available beyond the lifetime of this
   /// @c DataWriter.
   bool persist_data();
+#endif
 
   // Reset time interval for each instance.
   void reschedule_deadline();

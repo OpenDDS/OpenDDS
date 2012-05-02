@@ -129,7 +129,9 @@ public:
 
   static bool valid(const DDS::DurabilityQosPolicy& qos);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   static bool valid(const DDS::DurabilityServiceQosPolicy& qos);
+#endif
 
   static bool valid(const DDS::PresentationQosPolicy& qos);
 
@@ -195,8 +197,10 @@ public:
   static bool changeable(const DDS::DurabilityQosPolicy& qos1,
                          const DDS::DurabilityQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   static bool changeable(const DDS::DurabilityServiceQosPolicy& qos1,
                          const DDS::DurabilityServiceQosPolicy& qos2);
+#endif
 
   static bool changeable(const DDS::PresentationQosPolicy& qos1,
                          const DDS::PresentationQosPolicy& qos2);
@@ -339,9 +343,11 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::DurabilityQosPolicy& qos1,
                   const DDS::DurabilityQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::DurabilityServiceQosPolicy& qos1,
                   const DDS::DurabilityServiceQosPolicy& qos2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::PresentationQosPolicy& qos1,
@@ -457,9 +463,11 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::DurabilityQosPolicy& qos1,
                   const DDS::DurabilityQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::DurabilityServiceQosPolicy& qos1,
                   const DDS::DurabilityServiceQosPolicy& qos2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::PresentationQosPolicy& qos1,

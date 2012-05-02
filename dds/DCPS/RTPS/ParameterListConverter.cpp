@@ -182,11 +182,13 @@ namespace {
         TheServiceParticipant->initial_DurabilityQosPolicy();
     return qos != def_qos;
   }
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   bool not_default(const DDS::DurabilityServiceQosPolicy& qos) {
     DDS::DurabilityServiceQosPolicy def_qos =
         TheServiceParticipant->initial_DurabilityServiceQosPolicy();
     return qos != def_qos;
   }
+#endif
   bool not_default(const DDS::LifespanQosPolicy& qos) {
     DDS::LifespanQosPolicy def_qos =
         TheServiceParticipant->initial_LifespanQosPolicy();
@@ -383,12 +385,14 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   if (not_default(writer_data.ddsPublicationData.durability_service))
   {
     Parameter param;
     param.durability_service(writer_data.ddsPublicationData.durability_service);
     add_param(param_list, param);
   }
+#endif
 
   if (not_default(writer_data.ddsPublicationData.deadline))
   {

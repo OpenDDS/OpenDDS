@@ -195,6 +195,7 @@ operator== (const DDS::DurabilityQosPolicy& qos1,
     qos1.kind == qos2.kind;
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 operator== (DDS::DurabilityServiceQosPolicy const & qos1,
@@ -208,6 +209,7 @@ operator== (DDS::DurabilityServiceQosPolicy const & qos1,
     && qos1.max_instances == qos2.max_instances
     && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
 }
+#endif
 
 ACE_INLINE
 bool operator == (const DDS::PresentationQosPolicy& qos1,
@@ -361,7 +363,9 @@ bool operator == (const DDS::TopicQos& qos1,
   return
     qos1.topic_data == qos2.topic_data
     && qos1.durability == qos2.durability
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && qos1.durability_service == qos2.durability_service
+#endif
     && qos1.deadline == qos2.deadline
     && qos1.latency_budget == qos2.latency_budget
     && qos1.liveliness == qos2.liveliness
@@ -380,7 +384,9 @@ bool operator == (const DDS::DataWriterQos& qos1,
 {
   return
     qos1.durability == qos2.durability
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && qos1.durability_service == qos2.durability_service
+#endif
     && qos1.deadline == qos2.deadline
     && qos1.latency_budget == qos2.latency_budget
     && qos1.liveliness == qos2.liveliness
@@ -488,6 +494,7 @@ operator != (const DDS::DurabilityQosPolicy& qos1,
   return !(qos1 == qos2);
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 operator != (DDS::DurabilityServiceQosPolicy const & qos1,
@@ -495,6 +502,7 @@ operator != (DDS::DurabilityServiceQosPolicy const & qos1,
 {
   return !(qos1 == qos2);
 }
+#endif
 
 ACE_INLINE
 bool operator != (const DDS::PresentationQosPolicy& qos1,
@@ -822,6 +830,8 @@ Qos_Helper::consistent(DDS::TopicQos const & qos)
 {
   // Leverage existing validation functions for related QoS
   // policies.
+
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   DDS::HistoryQosPolicy const ds_history = {
     qos.durability_service.history_kind,
     qos.durability_service.history_depth
@@ -836,6 +846,10 @@ Qos_Helper::consistent(DDS::TopicQos const & qos)
   return
     consistent(qos.resource_limits, qos.history)
     && consistent(ds_resource_limits, ds_history);
+#else
+  ACE_UNUSED_ARG(qos);
+  return true;
+#endif
 }
 
 ACE_INLINE
@@ -844,6 +858,8 @@ Qos_Helper::consistent(DDS::DataWriterQos const & qos)
 {
   // Leverage existing validation functions for related QoS
   // policies.
+
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   DDS::HistoryQosPolicy const ds_history = {
     qos.durability_service.history_kind,
     qos.durability_service.history_depth
@@ -858,6 +874,10 @@ Qos_Helper::consistent(DDS::DataWriterQos const & qos)
   return
     consistent(qos.resource_limits, qos.history)
     && consistent(ds_resource_limits, ds_history);
+#else
+  ACE_UNUSED_ARG(qos);
+  return true;
+#endif
 }
 
 ACE_INLINE
@@ -1050,6 +1070,7 @@ Qos_Helper::valid(const DDS::ResourceLimitsQosPolicy& qos)
         || qos.max_samples_per_instance > 0);
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 Qos_Helper::valid(DDS::DurabilityServiceQosPolicy const & qos)
@@ -1072,6 +1093,7 @@ Qos_Helper::valid(DDS::DurabilityServiceQosPolicy const & qos)
     && valid(history)
     && valid(resource_limits);
 }
+#endif
 
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::EntityFactoryQosPolicy& /*qos*/)
@@ -1103,7 +1125,9 @@ bool Qos_Helper::valid(const DDS::TopicQos& qos)
   return
     valid(qos.topic_data)
     && valid(qos.durability)
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && valid(qos.durability_service)
+#endif
     && valid(qos.deadline)
     && valid(qos.latency_budget)
     && valid(qos.liveliness)
@@ -1120,7 +1144,9 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
 {
   return
     valid(qos.durability)
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && valid(qos.durability_service)
+#endif
     && valid(qos.deadline)
     && valid(qos.latency_budget)
     && valid(qos.liveliness)
@@ -1230,6 +1256,7 @@ bool Qos_Helper::changeable(const DDS::DurabilityQosPolicy& qos1,
   return qos1 == qos2;
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 Qos_Helper::changeable(DDS::DurabilityServiceQosPolicy const & qos1,
@@ -1237,6 +1264,7 @@ Qos_Helper::changeable(DDS::DurabilityServiceQosPolicy const & qos1,
 {
   return qos1 == qos2;
 }
+#endif
 
 ACE_INLINE
 bool Qos_Helper::changeable(const DDS::PresentationQosPolicy& qos1,
@@ -1380,7 +1408,9 @@ bool Qos_Helper::changeable(const DDS::TopicQos& qos1,
   return
     changeable(qos1.topic_data, qos2.topic_data)
     && changeable(qos1.durability, qos2.durability)
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && changeable(qos1.durability_service, qos2.durability_service)
+#endif
     && changeable(qos1.deadline, qos2.deadline)
     && changeable(qos1.latency_budget, qos2.latency_budget)
     && changeable(qos1.liveliness, qos2.liveliness)
@@ -1398,7 +1428,9 @@ bool Qos_Helper::changeable(const DDS::DataWriterQos& qos1,
 {
   return
     changeable(qos1.durability, qos2.durability)
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && changeable(qos1.durability_service, qos2.durability_service)
+#endif
     && changeable(qos1.deadline, qos2.deadline)
     && changeable(qos1.latency_budget, qos2.latency_budget)
     && changeable(qos1.liveliness, qos2.liveliness)

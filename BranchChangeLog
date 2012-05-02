@@ -1,3 +1,35 @@
+Wed May  2 21:23:37 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * configure:
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+        * rules.dds.GNU:
+
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+	  Support for Persistence Profile feature guard.
+
 Tue May  1 18:33:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:
@@ -7,8 +39,8 @@ Tue May  1 18:33:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DdsDcpsSubscription.idl:
 
           Include presentation in DataSampleHeader for compatibility
-	  purposes.
-	  Some fixes based on running tests based on a build from scratch.
+          purposes.
+          Some fixes based on running tests based on a build from scratch.
 
 Mon Apr 30 20:15:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
