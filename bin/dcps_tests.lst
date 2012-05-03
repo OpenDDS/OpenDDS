@@ -168,8 +168,8 @@ tests/DCPS/CompatibilityTest/run_test.pl rtps_disc_tcp: !DCPS_MIN RTPS !NO_BUILT
 tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN
-tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN
-tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN
+tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN !NO_PERSISTENCE_PROFILE
+tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN !NO_PERSISTENCE_PROFILE
 tests/DCPS/SetQosDeadline/run_test.pl: !DCPS_MIN
 tests/DCPS/SetQosDeadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/SetQosPartition/run_test.pl: !DCPS_MIN
