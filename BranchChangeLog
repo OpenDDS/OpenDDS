@@ -1,3 +1,30 @@
+Tue May  8 20:03:16 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/OpenDDS_Shmem.mpc:
+        * dds/DCPS/transport/shmem/Shmem.h:
+        * dds/DCPS/transport/shmem/Shmem.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.inl:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink_rch.h:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst_rch.h:
+        * dds/DCPS/transport/shmem/ShmemLoader.h:
+        * dds/DCPS/transport/shmem/ShmemLoader.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy_rch.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy_rch.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/shmem/Shmem_Export.h:
+        * dds/DCPS/transport/shmem/shmem.rc:
+
+          Added files for a new Shared Memory transport library.
+
 Tue May  8 17:35:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * BranchChangeLog:
