@@ -33,15 +33,15 @@ ShmemReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 {
   switch (sample.header_.message_id_) {
   case SAMPLE_ACK:
-    this->link_->ack_received(sample);
+    link_->ack_received(sample);
     break;
 
   case TRANSPORT_CONTROL:
-    this->link_->control_received(sample);
+    link_->control_received(sample);
     break;
 
   default:
-    this->link_->data_received(sample);
+    link_->data_received(sample);
   }
 }
 

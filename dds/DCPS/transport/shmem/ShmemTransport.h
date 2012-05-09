@@ -16,7 +16,15 @@
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
+#include "ace/Local_Memory_Pool.h"
+#include "ace/Malloc_T.h"
+#include "ace/Pagefile_Memory_Pool.h"
+#include "ace/PI_Malloc.h"
+#include "ace/Process_Mutex.h"
+#include "ace/Shared_Memory_Pool.h"
+
 #include <map>
+#include <string>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -27,8 +35,22 @@ class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
 public:
   explicit ShmemTransport(const TransportInst_rch& inst);
 
-  void passive_connection(const ACE_TString& remote_address,
+  void passive_connection(const std::string& remote_address,
                           ACE_Message_Block* data);
+
+#ifdef ACE_WIN32
+  typedef ACE_Pagefile_Memory_Pool Pool; // default size is 16 MB
+  typedef HANDLE SharedSemaphore;
+#elif !defined ACE_LACKS_SYSV_SHMEM
+  typedef ACE_Shared_Memory_Pool Pool;   // default size is 768 KB?
+  typedef sem_t SharedSemaphore;
+#else
+  typedef ACE_Local_Memory_Pool Pool;    // no shared memory support
+  typedef int SharedSemaphore;
+#endif
+
+  typedef ACE_Malloc_T<Pool, ACE_Process_Mutex,
+                       ACE_PI_Control_Block> Allocator;
 
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
@@ -58,7 +80,11 @@ protected:
   virtual std::string transport_type() const { return "shmem"; }
 
 private:
-  ShmemDataLink* make_datalink(const ACE_TString& remote_address, bool active);
+  ShmemDataLink* make_datalink(const std::string& remote_address, bool active);
+
+  std::pair<std::string, std::string> blob_to_key(const TransportBLOB& blob);
+
+  void read_from_links() {} // callback from ReadTask
 
   RcHandle<ShmemInst> config_i_;
 
@@ -70,7 +96,7 @@ private:
 
   /// Map of fully associated DataLinks for this transport.  Protected
   // by links_lock_.
-  typedef std::map<ACE_TString, ShmemDataLink_rch> ShmemDataLinkMap;
+  typedef std::map<std::string, ShmemDataLink_rch> ShmemDataLinkMap;
   ShmemDataLinkMap links_;
 
   /// This protects the pending_connections_ data member.
@@ -79,7 +105,24 @@ private:
   /// Locked by connections_lock_.  Tracks expected connections
   /// that we have learned about in accept_datalink() but have
   /// not yet performed the handshake.
-  std::multimap<ConnectionEvent*, ACE_TString> pending_connections_;
+  std::multimap<ConnectionEvent*, std::string> pending_connections_;
+
+  std::set<std::string> pending_link_keys_;
+
+  Allocator* alloc_;
+
+  struct ReadTask : ACE_Task_Base {
+    ReadTask(ShmemTransport* outer, ACE_sema_t semaphore);
+    int svc();
+    void stop();
+
+    ShmemTransport* outer_;
+    ACE_sema_t semaphore_;
+    bool stopped_;
+
+  }* read_task_;
+
+  std::string hostname_, poolname_;
 };
 
 } // namespace DCPS

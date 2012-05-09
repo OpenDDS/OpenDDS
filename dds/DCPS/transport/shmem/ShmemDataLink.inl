@@ -33,7 +33,7 @@ ShmemDataLink::config()
   return this->config_;
 }
 
-ACE_INLINE ACE_TString
+ACE_INLINE std::string
 ShmemDataLink::remote_address()
 {
   return this->remote_address_;

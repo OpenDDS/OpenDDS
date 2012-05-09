@@ -18,6 +18,8 @@
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 
+#include <string>
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -37,11 +39,11 @@ public:
 
   ShmemInst* config();
 
-  bool open(const ACE_TString& remote_address);
+  bool open(const std::string& remote_address);
 
   void control_received(ReceivedDataSample& sample);
 
-  ACE_TString remote_address();
+  std::string remote_address();
 
 protected:
   ShmemInst* config_;
@@ -52,7 +54,7 @@ protected:
   virtual void stop_i();
 
 private:
-  ACE_TString remote_address_;
+  std::string remote_address_;
 };
 
 } // namespace DCPS

@@ -1,3 +1,14 @@
+Wed May  9 16:39:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.inl:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Started implementing transport setup and datalink management.
+
 Tue May  8 20:03:16 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/OpenDDS_Shmem.mpc:
