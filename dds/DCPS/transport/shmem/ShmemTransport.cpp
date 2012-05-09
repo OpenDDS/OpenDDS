@@ -18,6 +18,7 @@
 #include "ace/Reverse_Lock_T.h"
 
 #include <sstream>
+#include <cstring>
 
 namespace OpenDDS {
 namespace DCPS {
