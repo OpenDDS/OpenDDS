@@ -11,6 +11,7 @@
 #include "UdpInst.h"
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
@@ -23,9 +24,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 UdpDataLink::UdpDataLink(UdpTransport* transport,
-                         bool active)
+                         CORBA::Long   priority,
+                         bool          active)
   : DataLink(transport,
-             0, // priority
+             priority,
              false, // is_loopback,
              active),// is_active
     active_(active),
@@ -121,7 +123,13 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   }
 
   if (this->active_) {
+    // Set the DiffServ codepoint according to the priority value.
+    DirectPriorityMapper mapper(this->transport_priority());
+    this->set_dscp_codepoint(mapper.codepoint(), this->socket_);
+
+
     // For the active side, send the blob and wait for a 1 byte ack.
+
 
     TransportLocator info;
     this->impl()->connection_info_i(info);
