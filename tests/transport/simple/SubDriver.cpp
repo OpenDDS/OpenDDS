@@ -9,21 +9,24 @@
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
+
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 #include <ace/Arg_Shifter.h>
+#include <ace/OS_NS_sys_stat.h>
 
-#include "dds/DCPS/transport/framework/EntryExit.h"
-
+#include <fstream>
 
 SubDriver::SubDriver()
   : pub_id_(OpenDDS::DCPS::GuidBuilder::create())
   , sub_id_(OpenDDS::DCPS::GuidBuilder::create())
   , reader_(sub_id_)
   , num_msgs_(1)
+  , shmem_(false)
 {
   DBG_ENTRY("SubDriver","SubDriver");
 }
@@ -59,6 +62,7 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
   // -p <pub_id:pub_host:pub_port>
   // -s <sub_id:sub_port>
   // -n <num_messages>
+  // -m                use shared memory
   //
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
@@ -129,6 +133,10 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 
       got_n = true;
     }
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-m")) == 0) {
+      this->shmem_ = true;
+      arg_shifter.consume_arg();
+    }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -165,20 +173,29 @@ SubDriver::init()
 {
   DBG_ENTRY("SubDriver","init");
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   Create a new TcpInst object.\n"));
+  OpenDDS::DCPS::TransportInst_rch inst;
 
-  OpenDDS::DCPS::TransportInst_rch inst =
-    TheTransportRegistry->create_inst("tcp1", "tcp");
+  if (shmem_) {
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   Create a new ShmemInst object.\n"));
 
-  OpenDDS::DCPS::TcpInst_rch tcp_inst =
-    OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
+    inst = TheTransportRegistry->create_inst("shmem1", "shmem");
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Set the tcp_inst->local_address_ to our (local) sub_addr_.\n"));
+  } else {
 
-  tcp_inst->local_address_ = this->sub_addr_;
-  tcp_inst->local_address_str_ =
-    ACE_TEXT_ALWAYS_CHAR(this->sub_addr_str_.c_str());
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   Create a new TcpInst object.\n"));
+
+    inst = TheTransportRegistry->create_inst("tcp1", "tcp");
+
+    OpenDDS::DCPS::TcpInst_rch tcp_inst =
+      OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
+
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+               "Set the tcp_inst->local_address_ to our (local) sub_addr_.\n"));
+
+    tcp_inst->local_address_ = this->sub_addr_;
+    tcp_inst->local_address_str_ =
+      ACE_TEXT_ALWAYS_CHAR(this->sub_addr_str_.c_str());
+  }
 
   OpenDDS::DCPS::TransportConfig_rch cfg =
     TheTransportRegistry->create_config("cfg");
@@ -196,25 +213,6 @@ SubDriver::run()
 {
   DBG_ENTRY_LVL("SubDriver", "run", 6);
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   Create the 'publications'.\n"));
-
-  // Set up the publication.
-  OpenDDS::DCPS::AssociationData publication;
-  publication.remote_id_ = this->pub_id_;
-  publication.remote_reliable_ = true;
-  publication.remote_data_.length(1);
-  publication.remote_data_[0].transport_type = "tcp";
-
-  OpenDDS::DCPS::NetworkAddress network_order_address(
-    ACE_TEXT_ALWAYS_CHAR(this->pub_addr_str_.c_str()));
-
-  ACE_OutputCDR cdr;
-  cdr << network_order_address;
-  CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
-
-  publication.remote_data_[0].data =
-    OpenDDS::DCPS::TransportBLOB(len, len, (CORBA::Octet*)(cdr.buffer()));
-
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimpleSubscriber object.\n"));
 
@@ -224,6 +222,48 @@ SubDriver::run()
   FILE * file = ACE_OS::fopen ("subready.txt", ACE_TEXT("w"));
   ACE_OS::fprintf (file, "Ready\n");
   ACE_OS::fclose (file);
+
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   Create the 'publications'.\n"));
+
+  // Set up the publication.
+  OpenDDS::DCPS::AssociationData publication;
+  publication.remote_id_ = this->pub_id_;
+  publication.remote_reliable_ = true;
+  publication.remote_data_.length(1);
+
+  if (shmem_) {
+    publication.remote_data_[0].transport_type = "shmem";
+
+    std::ofstream ofs("sub-pid.txt");
+    ofs << ACE_OS::getpid() << std::endl;
+    ofs.close();
+
+    for (ACE_stat filestat; -1 == ACE_OS::stat("pub-pid.txt", &filestat);
+         ACE_OS::sleep(1)) {/*empty loop*/}
+
+    std::ifstream ifs("pub-pid.txt");
+    std::string pid;
+    getline(ifs, pid);
+    std::string str = OpenDDS::DCPS::get_fully_qualified_hostname() +
+                      '\0' + "OpenDDS-" + pid + "-shmem1";
+
+    publication.remote_data_[0].data.length(static_cast<CORBA::ULong>(str.size()));
+    std::memcpy(publication.remote_data_[0].data.get_buffer(),
+                str.c_str(), str.size());
+
+  } else { // tcp
+    publication.remote_data_[0].transport_type = "tcp";
+
+    OpenDDS::DCPS::NetworkAddress network_order_address(
+      ACE_TEXT_ALWAYS_CHAR(this->pub_addr_str_.c_str()));
+
+    ACE_OutputCDR cdr;
+    cdr << network_order_address;
+    CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+
+    publication.remote_data_[0].data =
+      OpenDDS::DCPS::TransportBLOB(len, len, (CORBA::Octet*)(cdr.buffer()));
+  }
 
   this->reader_.init(publication, this->num_msgs_);
 
@@ -240,6 +280,10 @@ SubDriver::run()
   }
 
   this->reader_.print_time();
+
+  if (shmem_) {
+    ACE_OS::unlink("sub-pid.txt");
+  }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "The SimpleSubscriber object has received what it expected.  "

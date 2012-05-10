@@ -15,7 +15,6 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include "ace/Log_Msg.h"
-#include "ace/Reverse_Lock_T.h"
 
 #include <sstream>
 #include <cstring>
@@ -34,7 +33,7 @@ ShmemTransport::ShmemTransport(const TransportInst_rch& inst)
 }
 
 ShmemDataLink*
-ShmemTransport::make_datalink(const std::string& remote_address, bool active)
+ShmemTransport::make_datalink(const std::string& remote_address)
 {
   ShmemDataLink_rch link;
   ACE_NEW_RETURN(link, ShmemDataLink(this), 0);
@@ -91,11 +90,8 @@ ShmemTransport::find_datalink_i(const RepoId& /*local_id*/,
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) ShmemTransport::find_datalink_i ")
               ACE_TEXT("link found, waiting for start.\n")), 2);
-    {
-      ACE_Reverse_Lock<LockType> rev(links_lock_);
-      ACE_GUARD_RETURN(ACE_Reverse_Lock<LockType>, rev_guard, rev, 0);
-      link->wait_for_start();
-    }
+    guard.release();
+    link->wait_for_start();
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) ShmemTransport::find_datalink_i ")
               ACE_TEXT("done waiting for start.\n")), 2);
@@ -116,18 +112,23 @@ ShmemTransport::connect_datalink_i(const RepoId& /*local_id*/,
     return 0;
   }
 
-  ShmemDataLink_rch link = make_datalink(key.second, true /*active*/);
+  return add_datalink(key.second);
+}
+
+DataLink*
+ShmemTransport::add_datalink(const std::string& remote_address)
+{
+  ShmemDataLink_rch link = make_datalink(remote_address);
   {
     GuardType guard(links_lock_);
     std::pair<ShmemDataLinkMap::iterator, bool> result =
-      links_.insert(ShmemDataLinkMap::value_type(key.second, link));
+      links_.insert(ShmemDataLinkMap::value_type(remote_address, link));
     if (!result.second) { // another thread inserted before us
       link = result.first->second;
       guard.release();
       link->wait_for_start();
     }
   }
-
   return link._retn();
 }
 
@@ -137,46 +138,23 @@ ShmemTransport::accept_datalink(ConnectionEvent& ce)
   const std::string ttype = "shmem";
   const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
 
-  std::vector<std::string> keys;
-  GuardType guard(connections_lock_);
-
   for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
     if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
       const std::pair<std::string, std::string> key =
         blob_to_key(ce.remote_association_.remote_data_[idx].data);
       if (key.first == hostname_) {
-        keys.push_back(key.second);
+        return add_datalink(key.second);
       }
     }
   }
 
-  for (size_t i = 0; i < keys.size(); ++i) {
-    if (pending_link_keys_.find(keys[i]) != pending_link_keys_.end()) {
-      // Handshake already seen
-      pending_link_keys_.erase(keys[i]);
-      VDBG((LM_DEBUG, "(%P|%t) ShmemTransport::accept_datalink completing\n"));
-      //TODO: implement this part, return non-0
-      return 0;
-    } else {
-      // Add to pending and wait for handshake
-      pending_connections_.insert(
-        std::pair<ConnectionEvent* const, std::string>(&ce, keys[i]));
-      VDBG((LM_DEBUG, "(%P|%t) ShmemTransport::accept_datalink pending\n"));
-    }
-  }
-
-  // Let TransportClient::associate() wait for the handshake
   return 0;
 }
 
 void
-ShmemTransport::stop_accepting(ConnectionEvent& ce)
+ShmemTransport::stop_accepting(ConnectionEvent& /*ce*/)
 {
-  GuardType guard(connections_lock_);
-  typedef std::multimap<ConnectionEvent*, std::string>::iterator iter_t;
-  std::pair<iter_t, iter_t> range = pending_connections_.equal_range(&ce);
-  pending_connections_.erase(range.first, range.second);
-  VDBG((LM_DEBUG, "(%P|%t) ShmemTransport::stop_accepting\n"));
+  // no-op: accept_datalink() completes or fails immediately
 }
 
 bool
@@ -204,11 +182,13 @@ ShmemTransport::configure_i(TransportInst* config)
   pool << "OpenDDS-" << ACE_OS::getpid() << '-' << config->name();
   poolname_ = pool.str();
 
-  alloc_ = new Allocator(ACE_TEXT_CHAR_TO_TCHAR(poolname_.c_str()));
+  alloc_ =
+    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(poolname_.c_str()));
 
-  SharedSemaphore* pSem =
-    reinterpret_cast<SharedSemaphore*>(alloc_->malloc(sizeof(SharedSemaphore)));
+  void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
+  ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
   alloc_->bind("Semaphore", pSem);
+
   bool ok;
 # ifdef ACE_WIN32
   *pSem = ::CreateSemaphoreW(0 /*default security*/,
@@ -252,7 +232,7 @@ ShmemTransport::shutdown_i()
 
   void* mem;
   alloc_->find("Semaphore", mem);
-  SharedSemaphore* pSem = reinterpret_cast<SharedSemaphore*>(mem);
+  ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #ifdef ACE_WIN32
   ::CloseHandle(*pSem);
 #else
@@ -317,52 +297,6 @@ ShmemTransport::release_datalink(DataLink* link)
   }
 }
 
-void
-ShmemTransport::passive_connection(const std::string& remote_address,
-                                   ACE_Message_Block* data)
-{
-  // Use the addr to find this connection in pending connections_ and
-  // to locate the ConnectionEvent
-  ConnectionEvent* evt = 0;
-  {
-    GuardType guard(connections_lock_);
-    typedef std::multimap<ConnectionEvent*, std::string>::iterator iter_t;
-    for (iter_t iter = pending_connections_.begin();
-         iter != pending_connections_.end(); ++iter) {
-      if (iter->second == remote_address) {
-        evt = iter->first;
-        break;
-      }
-    }
-
-    // Send an ack so that the active side can return from
-    // connect_datalink_i().
-    //TODO
-
-    if (evt != 0) { // found in pending_connections_
-      // remove other entries for this ConnectionEvent in pending_connections_
-      std::pair<iter_t, iter_t> range = pending_connections_.equal_range(evt);
-      pending_connections_.erase(range.first, range.second);
-
-      VDBG((LM_DEBUG, "(%P|%t) ShmemTransport::passive_connection completing\n"));
-      // Signal TransportClient::associate() via the ConnectionEvent
-      // to let it know that we found a good connection.
-//      evt->complete(static_rchandle_cast<DataLink>(this->server_link_));
-
-      // Add an entry to server_link_keys_ so we can find the
-      // "connection" for that key.
-//      this->server_link_keys_.insert(key);
-    } else {
-
-      // Add an entry to pending_server_link_keys_ so we can finish
-      // associating in accept_datalink().
-//      this->pending_server_link_keys_.insert(key);
-
-      VDBG((LM_DEBUG, "(%P|%t) ShmemTransport::passive_connection pending\n"));
-    }
-  }
-}
-
 ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)
   : outer_(outer)
   , semaphore_(semaphore)
@@ -390,6 +324,16 @@ ShmemTransport::ReadTask::stop()
   stopped_ = true;
   ACE_OS::sema_post(&semaphore_);
   wait();
+}
+
+void
+ShmemTransport::read_from_links()
+{
+  GuardType guard(links_lock_);
+  typedef ShmemDataLinkMap::iterator iter_t;
+  for (iter_t it = links_.begin(); it != links_.end(); ++it) {
+    it->second->read();
+  }
 }
 
 } // namespace DCPS

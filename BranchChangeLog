@@ -1,3 +1,44 @@
+Thu May 10 15:55:51 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+
+          Provide a way to extract the length_ field from the serialized
+          form of the TransportHeader.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added a start_i() which works a lot like the existing stop_i().
+          The DataLink is not yet ready during the SendStrategy constructor.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Shared memory is now a "known" transport type for dynamic loading.
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.inl:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Initial implementation to the point where we can actually send
+          and receive data over shared memory.  Lots of details, error checking,
+          logging, configuration, the pseudo-multicast stuff, etc. still TODO.
+
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/run_test.pl:
+
+          Adapt the test so it can be run with shared memory when the perl
+          script is run with the 1st argument of "shmem".
+
 Wed May  9 16:39:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/ShmemDataLink.h:

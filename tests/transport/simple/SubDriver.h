@@ -36,6 +36,7 @@ class SubDriver
     SimpleDataReader reader_;
 
     int num_msgs_;
+    bool shmem_;
 };
 
 #endif

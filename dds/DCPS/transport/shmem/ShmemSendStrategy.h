@@ -13,16 +13,22 @@
 
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
+#include "ace/OS_NS_Thread.h"
+
+#include <string>
+
 namespace OpenDDS {
 namespace DCPS {
 
 class ShmemDataLink;
+struct ShmemData;
 
 class OpenDDS_Shmem_Export ShmemSendStrategy
   : public TransportSendStrategy {
 public:
   explicit ShmemSendStrategy(ShmemDataLink* link);
 
+  virtual void start_i();
   virtual void stop_i();
 
 protected:
@@ -30,6 +36,9 @@ protected:
 
 private:
   ShmemDataLink* link_;
+  std::string bound_name_;
+  ACE_sema_t peer_semaphore_;
+  ShmemData* current_data_;
 };
 
 } // namespace DCPS

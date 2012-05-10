@@ -11,7 +11,6 @@
 
 #include "Shmem_Export.h"
 
-
 #include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
 
@@ -22,11 +21,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ShmemDataLink;
+struct ShmemData;
 
 class OpenDDS_Shmem_Export ShmemReceiveStrategy
   : public TransportReceiveStrategy<> {
 public:
   explicit ShmemReceiveStrategy(ShmemDataLink* link);
+
+  void read();
 
 protected:
   virtual ssize_t receive_bytes(iovec iov[],
@@ -40,16 +42,11 @@ protected:
   virtual int start_i();
   virtual void stop_i();
 
-  virtual bool check_header(const TransportHeader& header);
-
-  virtual bool check_header(const DataSampleHeader& header)
-  {
-    return TransportReceiveStrategy<>::check_header(header);
-  }
-
 private:
   ShmemDataLink* link_;
   SequenceNumber expected_;
+  std::string bound_name_;
+  ShmemData* current_data_;
 };
 
 } // namespace DCPS

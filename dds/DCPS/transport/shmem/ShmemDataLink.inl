@@ -34,9 +34,9 @@ ShmemDataLink::config()
 }
 
 ACE_INLINE std::string
-ShmemDataLink::remote_address()
+ShmemDataLink::peer_address()
 {
-  return this->remote_address_;
+  return this->peer_address_;
 }
 
 } // namespace DCPS

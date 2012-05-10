@@ -12,6 +12,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include <cstdlib>
+
 #ifndef __ACE_INLINE__
 # include "ShmemDataLink.inl"
 #endif  /* __ACE_INLINE__ */
@@ -21,20 +23,29 @@ namespace DCPS {
 
 ShmemDataLink::ShmemDataLink(ShmemTransport* transport)
   : DataLink(transport,
-             0, // priority
+             0,     // priority
              false, // is_loopback,
              false) // is_active
   , config_(0)
+  , peer_alloc_(0)
 {
 }
 
 bool
-ShmemDataLink::open(const std::string& remote_address)
+ShmemDataLink::open(const std::string& peer_address)
 {
-  this->remote_address_ = remote_address;
-//  this->is_loopback_ = this->remote_address_ == this->config_->local_address_;
+  peer_address_ = peer_address;
 
-  //TODO: initiate handshaking for active side only
+  peer_alloc_ = new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str()));
+
+  if (-1 == peer_alloc_->find("Semaphore")) {
+    stop_i();
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ShmemDataLink::open: ")
+                      ACE_TEXT("peer's shared memory area not found (%C)\n"),
+                      peer_address.c_str()),
+                     false);
+  }
 
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
             static_rchandle_cast<TransportStrategy>(recv_strategy_))
@@ -50,22 +61,37 @@ ShmemDataLink::open(const std::string& remote_address)
 }
 
 void
-ShmemDataLink::control_received(ReceivedDataSample& sample)
+ShmemDataLink::control_received(ReceivedDataSample& /*sample*/)
 {
-  TransportImpl_rch ti = impl();
-  RcHandle<ShmemTransport> ut = static_rchandle_cast<ShmemTransport>(ti);
-  //TODO: this is wrong:
-  // At this time, the TRANSPORT_CONTROL messages in Shmem are only used for
-  // the connection handshaking, so receiving one is an indication of the
-  // passive_connection event.  In the future the submessage_id_ could be used
-  // to allow different types of messages here.
-  ut->passive_connection(remote_address_, sample.sample_);
 }
 
 void
 ShmemDataLink::stop_i()
 {
+  if (peer_alloc_) {
+    peer_alloc_->release(0 /*don't close*/);
+  }
+  delete peer_alloc_;
+  peer_alloc_ = 0;
   //TODO
+}
+
+ShmemAllocator*
+ShmemDataLink::local_allocator()
+{
+  return static_rchandle_cast<ShmemTransport>(impl())->alloc();
+}
+
+std::string
+ShmemDataLink::local_address()
+{
+  return static_rchandle_cast<ShmemTransport>(impl())->address();
+}
+
+pid_t
+ShmemDataLink::peer_pid()
+{
+  return std::atoi(peer_address_.c_str() + peer_address_.find('-') + 1);
 }
 
 } // namespace DCPS

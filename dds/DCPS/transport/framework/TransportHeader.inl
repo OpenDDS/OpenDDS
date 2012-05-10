@@ -11,8 +11,11 @@
 
 #include <algorithm>
 
+namespace OpenDDS {
+namespace DCPS {
+
 ACE_INLINE
-OpenDDS::DCPS::TransportHeader::TransportHeader()
+TransportHeader::TransportHeader()
   : byte_order_(ACE_CDR_BYTE_ORDER),
     first_fragment_(false),
     last_fragment_(false),
@@ -27,21 +30,20 @@ OpenDDS::DCPS::TransportHeader::TransportHeader()
 }
 
 ACE_INLINE
-OpenDDS::DCPS::TransportHeader::TransportHeader(
-  const OpenDDS::DCPS::TransportHeader::no_init_t&)
+TransportHeader::TransportHeader(const TransportHeader::no_init_t&)
 {
 }
 
 ACE_INLINE
-OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block& buffer)
+TransportHeader::TransportHeader(ACE_Message_Block& buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
   this->init(&buffer);
 }
 
 ACE_INLINE
-OpenDDS::DCPS::TransportHeader&
-OpenDDS::DCPS::TransportHeader::operator=(ACE_Message_Block& buffer)
+TransportHeader&
+TransportHeader::operator=(ACE_Message_Block& buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","operator=",6);
   this->init(&buffer);
@@ -50,7 +52,7 @@ OpenDDS::DCPS::TransportHeader::operator=(ACE_Message_Block& buffer)
 
 ACE_INLINE
 size_t
-OpenDDS::DCPS::TransportHeader::max_marshaled_size()
+TransportHeader::max_marshaled_size()
 {
   // Representation takes no extra space for encoding.
   TransportHeader hdr(no_init);
@@ -64,7 +66,7 @@ OpenDDS::DCPS::TransportHeader::max_marshaled_size()
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportHeader::swap_bytes() const
+TransportHeader::swap_bytes() const
 {
   DBG_ENTRY_LVL("TransportHeader","swap_bytes",6);
 
@@ -73,7 +75,7 @@ OpenDDS::DCPS::TransportHeader::swap_bytes() const
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::TransportHeader::valid() const
+TransportHeader::valid() const
 {
   DBG_ENTRY_LVL("TransportHeader","valid",6);
 
@@ -84,7 +86,7 @@ OpenDDS::DCPS::TransportHeader::valid() const
 
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
+TransportHeader::init(ACE_Message_Block* buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","init",6);
 
@@ -107,4 +109,19 @@ OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
   reader >> this->sequence_;
 
   reader >> this->source_;
+}
+
+/*static*/
+ACE_INLINE
+ACE_UINT32
+TransportHeader::get_length(const char* marshaled_header)
+{
+  static const TransportHeader hdr(no_init);
+  static const unsigned int OFFSET = sizeof(hdr.protocol_) +
+                                     1 /*flags*/ +
+                                     sizeof(hdr.reserved_);
+  return *reinterpret_cast<const ACE_UINT32*>(marshaled_header + OFFSET);
+}
+
+}
 }

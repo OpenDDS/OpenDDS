@@ -18,6 +18,13 @@
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 
+#include "ace/Local_Memory_Pool.h"
+#include "ace/Malloc_T.h"
+#include "ace/Pagefile_Memory_Pool.h"
+#include "ace/PI_Malloc.h"
+#include "ace/Process_Mutex.h"
+#include "ace/Shared_Memory_Pool.h"
+
 #include <string>
 
 namespace OpenDDS {
@@ -26,6 +33,32 @@ namespace DCPS {
 class ShmemInst;
 class ShmemTransport;
 class ReceivedDataSample;
+
+#ifdef ACE_WIN32
+  typedef ACE_Pagefile_Memory_Pool ShmemPool; // default size is 16 MB
+  typedef HANDLE ShmemSharedSemaphore;
+#elif !defined ACE_LACKS_SYSV_SHMEM
+  typedef ACE_Shared_Memory_Pool ShmemPool;   // default size is 768 KB?
+  typedef sem_t ShmemSharedSemaphore;
+#else
+  typedef ACE_Local_Memory_Pool ShmemPool;    // no shared memory support
+  typedef int ShmemSharedSemaphore;
+#endif
+
+typedef ACE_Malloc_T<ShmemPool, ACE_Process_Mutex, ACE_PI_Control_Block>
+  ShmemAllocator;
+
+struct ShmemData {
+  int status_;
+  char transport_header_[24]; // <-- this must change if TransportHeader changes
+  ACE_Based_Pointer_Basic<char> payload_;
+};
+
+enum { // values for ShmemData::status_
+  SHMEM_DATA_FREE = 0,
+  SHMEM_DATA_IN_USE = 1,
+  SHMEM_DATA_END_OF_ALLOC = -1
+};
 
 class OpenDDS_Shmem_Export ShmemDataLink
   : public DataLink {
@@ -39,11 +72,18 @@ public:
 
   ShmemInst* config();
 
-  bool open(const std::string& remote_address);
+  bool open(const std::string& peer_address);
 
   void control_received(ReceivedDataSample& sample);
 
-  std::string remote_address();
+  std::string local_address();
+  std::string peer_address();
+  pid_t peer_pid();
+
+  ShmemAllocator* local_allocator();
+  ShmemAllocator* peer_allocator() { return peer_alloc_; }
+
+  void read() { recv_strategy_->read(); }
 
 protected:
   ShmemInst* config_;
@@ -54,7 +94,8 @@ protected:
   virtual void stop_i();
 
 private:
-  std::string remote_address_;
+  std::string peer_address_;
+  ShmemAllocator* peer_alloc_;
 };
 
 } // namespace DCPS

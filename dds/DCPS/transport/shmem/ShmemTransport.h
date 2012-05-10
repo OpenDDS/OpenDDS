@@ -16,13 +16,6 @@
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
-#include "ace/Local_Memory_Pool.h"
-#include "ace/Malloc_T.h"
-#include "ace/Pagefile_Memory_Pool.h"
-#include "ace/PI_Malloc.h"
-#include "ace/Process_Mutex.h"
-#include "ace/Shared_Memory_Pool.h"
-
 #include <map>
 #include <string>
 
@@ -35,22 +28,9 @@ class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
 public:
   explicit ShmemTransport(const TransportInst_rch& inst);
 
-  void passive_connection(const std::string& remote_address,
-                          ACE_Message_Block* data);
-
-#ifdef ACE_WIN32
-  typedef ACE_Pagefile_Memory_Pool Pool; // default size is 16 MB
-  typedef HANDLE SharedSemaphore;
-#elif !defined ACE_LACKS_SYSV_SHMEM
-  typedef ACE_Shared_Memory_Pool Pool;   // default size is 768 KB?
-  typedef sem_t SharedSemaphore;
-#else
-  typedef ACE_Local_Memory_Pool Pool;    // no shared memory support
-  typedef int SharedSemaphore;
-#endif
-
-  typedef ACE_Malloc_T<Pool, ACE_Process_Mutex,
-                       ACE_PI_Control_Block> Allocator;
+  // used by our DataLink:
+  ShmemAllocator* alloc() { return alloc_; }
+  std::string address() { return poolname_; }
 
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
@@ -80,11 +60,16 @@ protected:
   virtual std::string transport_type() const { return "shmem"; }
 
 private:
-  ShmemDataLink* make_datalink(const std::string& remote_address, bool active);
+
+  /// Create a new link (using make_datalink) and add it to the map
+  DataLink* add_datalink(const std::string& remote_address);
+
+  /// Create the DataLink object and start it
+  ShmemDataLink* make_datalink(const std::string& remote_address);
 
   std::pair<std::string, std::string> blob_to_key(const TransportBLOB& blob);
 
-  void read_from_links() {} // callback from ReadTask
+  void read_from_links(); // callback from ReadTask
 
   RcHandle<ShmemInst> config_i_;
 
@@ -95,21 +80,11 @@ private:
   LockType links_lock_;
 
   /// Map of fully associated DataLinks for this transport.  Protected
-  // by links_lock_.
+  /// by links_lock_.
   typedef std::map<std::string, ShmemDataLink_rch> ShmemDataLinkMap;
   ShmemDataLinkMap links_;
 
-  /// This protects the pending_connections_ data member.
-  LockType connections_lock_;
-
-  /// Locked by connections_lock_.  Tracks expected connections
-  /// that we have learned about in accept_datalink() but have
-  /// not yet performed the handshake.
-  std::multimap<ConnectionEvent*, std::string> pending_connections_;
-
-  std::set<std::string> pending_link_keys_;
-
-  Allocator* alloc_;
+  ShmemAllocator* alloc_;
 
   struct ReadTask : ACE_Task_Base {
     ReadTask(ShmemTransport* outer, ACE_sema_t semaphore);

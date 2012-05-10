@@ -886,6 +886,12 @@ TransportSendStrategy::start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
+  {
+    GuardType guard(this->lock_);
+
+    this->start_i();
+  }
+
   size_t header_chunks(1);
 
   // If a secondary send buffer is bound, sent headers should
