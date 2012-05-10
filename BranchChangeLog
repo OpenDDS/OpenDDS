@@ -1,3 +1,11 @@
+Thu May 10 16:49:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+
+          Fixed a buffer management bug.  Added comments describing a case
+          that's not handled yet.
+
 Thu May 10 15:55:51 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportHeader.h:

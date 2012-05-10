@@ -94,7 +94,8 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
       start = current_data_;
     } else if (start == current_data_) {
       return -1; // no space available
-    } else if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
+    } 
+    if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
       current_data_ = reinterpret_cast<ShmemData*>(mem) - 1; // incremented by the for loop
     }
   }

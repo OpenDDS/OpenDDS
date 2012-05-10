@@ -47,7 +47,8 @@ ShmemReceiveStrategy::read()
       start = current_data_;
     } else if (start == current_data_) {
       return; // none found => don't call handle_dds_input()
-    } else if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
+    }
+    if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
       current_data_ = reinterpret_cast<ShmemData*>(mem) - 1; // incremented by the for loop
     }
   }
@@ -94,10 +95,18 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
       remaining -= chunk;
     }
 
-    alloc->free(current_data_->payload_); // this will eventually be refcounted
-    current_data_->status_ = SHMEM_DATA_FREE;
+    // TODO: At this point 'remaining' could be positive, which means the
+    // caller's buffers were not large enough to hold the data.  To support
+    // this case we need to keep some state to track the partial read.  We
+    // must also signal the semaphore (in the ShmemTransport) so that
+    // handle_dds_input() is called again.
 
-    return theader + size;
+    if (!remaining) {
+      alloc->free(current_data_->payload_); // this will eventually be refcounted
+      current_data_->status_ = SHMEM_DATA_FREE;
+    }
+
+    return theader + (size - remaining);
   }
 
   return 0;
