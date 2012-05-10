@@ -336,5 +336,11 @@ ShmemTransport::read_from_links()
   }
 }
 
+void
+ShmemTransport::signal_semaphore()
+{
+  ACE_OS::sema_post(&read_task_->semaphore_);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

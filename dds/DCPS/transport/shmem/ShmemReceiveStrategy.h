@@ -44,9 +44,10 @@ protected:
 
 private:
   ShmemDataLink* link_;
-  SequenceNumber expected_;
   std::string bound_name_;
   ShmemData* current_data_;
+  size_t partial_recv_remaining_;
+  const char* partial_recv_ptr_;
 };
 
 } // namespace DCPS

@@ -1,3 +1,15 @@
+Thu May 10 18:42:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Allow for partial receives (when the caller's buffers aren't large
+          enough to hold the transport header and its payload).
+
 Thu May 10 16:49:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:

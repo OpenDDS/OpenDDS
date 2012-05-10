@@ -31,6 +31,7 @@ public:
   // used by our DataLink:
   ShmemAllocator* alloc() { return alloc_; }
   std::string address() { return poolname_; }
+  void signal_semaphore();
 
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,

@@ -88,6 +88,12 @@ ShmemDataLink::local_address()
   return static_rchandle_cast<ShmemTransport>(impl())->address();
 }
 
+void
+ShmemDataLink::signal_semaphore()
+{
+  return static_rchandle_cast<ShmemTransport>(impl())->signal_semaphore();
+}
+
 pid_t
 ShmemDataLink::peer_pid()
 {

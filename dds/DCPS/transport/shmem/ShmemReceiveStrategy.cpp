@@ -18,8 +18,8 @@ namespace DCPS {
 
 ShmemReceiveStrategy::ShmemReceiveStrategy(ShmemDataLink* link)
   : link_(link)
-  , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , current_data_(0)
+  , partial_recv_remaining_(0)
 {
 }
 
@@ -34,6 +34,11 @@ ShmemReceiveStrategy::read()
   void* mem;
   if (-1 == alloc->find(bound_name_.c_str(), mem)) {
     handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TRecvStrateg.
+    return;
+  }
+
+  if (partial_recv_remaining_) {
+    handle_dds_input(ACE_INVALID_HANDLE);
     return;
   }
 
@@ -69,47 +74,62 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   // check that the writer's shared memory is still available
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem;
-  if (-1 == alloc->find(bound_name_.c_str(), mem)) {
+  if (-1 == alloc->find(bound_name_.c_str(), mem)
+      || current_data_->status_ != SHMEM_DATA_IN_USE) {
     return 0; // close "connection"
   }
 
-  if (current_data_->status_ == SHMEM_DATA_IN_USE) {
-    std::memcpy(iov[0].iov_base, current_data_->transport_header_,
-                sizeof(current_data_->transport_header_));
+  ssize_t total = 0;
 
-    const u_long theader = sizeof(current_data_->transport_header_);
-    const ACE_UINT32 size =
-      TransportHeader::get_length(current_data_->transport_header_);
-    u_long remaining = size,
-      space = iov[0].iov_len - theader,
-      chunk = std::min(space, remaining);
+  const char* src_iter;
+  char* dst_iter = 0;
+  int i = 0; // current iovec index in iov[]
+  size_t remaining;
 
-    std::memcpy((char*)iov[0].iov_base + theader, current_data_->payload_,
-                chunk);
-    remaining -= chunk;
+  if (partial_recv_remaining_) {
+    remaining = partial_recv_remaining_;
+    src_iter = partial_recv_ptr_;
+    // iov_base is void* on POSIX but char* on Win32, we'll have to cast:
+    dst_iter = (char*)iov[0].iov_base;
 
-    char* iter = current_data_->payload_ + chunk;
-    for (int i = 1; i < n && remaining; ++i) {
-      chunk = std::min(iov[i].iov_len, u_long(size));
-      std::memcpy(iov[i].iov_base, iter, chunk);
-      remaining -= chunk;
+  } else {
+    remaining = TransportHeader::get_length(current_data_->transport_header_);
+    const size_t hdr_sz = sizeof(current_data_->transport_header_);
+    //TODO: assuming iov[0] has room for the transport header
+    std::memcpy(iov[0].iov_base, current_data_->transport_header_, hdr_sz);
+    total += hdr_sz;
+    src_iter = current_data_->payload_;
+    if (hdr_sz < iov[0].iov_len) {
+      dst_iter = (char*)iov[0].iov_base + hdr_sz;
+    } else if (n > 1) {
+      dst_iter = (char*)iov[1].iov_base;
+      i = 1;
     }
-
-    // TODO: At this point 'remaining' could be positive, which means the
-    // caller's buffers were not large enough to hold the data.  To support
-    // this case we need to keep some state to track the partial read.  We
-    // must also signal the semaphore (in the ShmemTransport) so that
-    // handle_dds_input() is called again.
-
-    if (!remaining) {
-      alloc->free(current_data_->payload_); // this will eventually be refcounted
-      current_data_->status_ = SHMEM_DATA_FREE;
-    }
-
-    return theader + (size - remaining);
   }
 
-  return 0;
+  for (; i < n && remaining; ++i) {
+    const size_t space = (i == 0) ? iov[i].iov_len - total : iov[i].iov_len,
+      chunk = std::min(space, remaining);
+    std::memcpy(dst_iter, src_iter, chunk);
+    if (i < n - 1) {
+      dst_iter = (char*)iov[i + 1].iov_base;
+    }
+    remaining -= chunk;
+    total += chunk;
+    src_iter += chunk;
+  }
+
+  if (remaining) {
+    partial_recv_remaining_ = remaining;
+    partial_recv_ptr_ = src_iter;
+    link_->signal_semaphore();
+
+  } else {
+    alloc->free(current_data_->payload_); // this will eventually be refcounted
+    current_data_->status_ = SHMEM_DATA_FREE;
+  }
+
+  return total;
 }
 
 void

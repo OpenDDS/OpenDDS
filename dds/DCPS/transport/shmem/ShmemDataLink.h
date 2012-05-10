@@ -84,6 +84,7 @@ public:
   ShmemAllocator* peer_allocator() { return peer_alloc_; }
 
   void read() { recv_strategy_->read(); }
+  void signal_semaphore();
 
 protected:
   ShmemInst* config_;
