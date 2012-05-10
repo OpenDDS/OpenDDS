@@ -11,6 +11,8 @@
 
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 
+#include <cstring>
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -81,7 +83,8 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
       space = iov[0].iov_len - theader,
       chunk = std::min(space, remaining);
 
-    std::memcpy(iov[0].iov_base + theader, current_data_->payload_, chunk);
+    std::memcpy((char*)iov[0].iov_base + theader, current_data_->payload_,
+                chunk);
     remaining -= chunk;
 
     char* iter = current_data_->payload_ + chunk;
@@ -102,7 +105,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
 
 void
 ShmemReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
-                                     const ACE_INET_Addr& remote_address)
+                                     const ACE_INET_Addr& /*remote_address*/)
 {
   switch (sample.header_.message_id_) {
   case SAMPLE_ACK:

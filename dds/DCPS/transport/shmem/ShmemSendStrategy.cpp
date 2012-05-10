@@ -32,7 +32,7 @@ ShmemSendStrategy::start_i()
 {
   bound_name_ = "Write-" + link_->local_address();
   ShmemAllocator* alloc = link_->local_allocator();
-  const int n_bytes = 4096, //TODO: configurable
+  const unsigned int n_bytes = 4096, //TODO: configurable
     n_elems = n_bytes / sizeof(ShmemData),
     extra = n_bytes % sizeof(ShmemData);
   void* mem = alloc->calloc(n_bytes);

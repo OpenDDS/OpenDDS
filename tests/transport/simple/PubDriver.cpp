@@ -17,6 +17,7 @@
 #include <ace/OS_NS_sys_stat.h>
 
 #include <fstream>
+#include <cstring>
 
 PubDriver::PubDriver()
   : pub_id_(OpenDDS::DCPS::GuidBuilder::create())
