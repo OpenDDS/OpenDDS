@@ -100,33 +100,33 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   }
 };
 
-inline OpenDDS_Dcps_Export size_t
+inline size_t
 gen_max_marshaled_size(const GUID_t&)
 {
   return 16;
 }
 
-inline OpenDDS_Dcps_Export bool
+inline bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
   GUID_tKeyLessThan lessThan;
   return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
 }
 
-inline OpenDDS_Dcps_Export bool
+inline bool
 operator!=(const GUID_t& lhs, const GUID_t& rhs)
 {
   return !(lhs == rhs);
 }
 
-inline OpenDDS_Dcps_Export bool
+inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
   return !GUID_tKeyLessThan::entity_less(lhs, rhs)
     && !GUID_tKeyLessThan::entity_less(rhs, lhs);
 }
 
-inline OpenDDS_Dcps_Export bool
+inline bool
 operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
 {
   return !(lhs == rhs);

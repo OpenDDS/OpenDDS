@@ -679,6 +679,7 @@ Service_Participant::initializeScheduling()
     int ace_scheduler = ACE_SCHED_OTHER;
     this->scheduler_  = THR_SCHED_DEFAULT;
 
+#ifdef ACE_WIN32
     if (this->schedulerString_ == ACE_TEXT("SCHED_RR")) {
       this->scheduler_ = THR_SCHED_RR;
       ace_scheduler    = ACE_SCHED_RR;
@@ -701,7 +702,6 @@ Service_Participant::initializeScheduling()
     //
     // Attempt to set the scheduling policy.
     //
-#ifdef ACE_WIN32
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE: Service_Participant::initializeScheduling() - ")
                ACE_TEXT("scheduling is not implemented on Win32.\n")));
