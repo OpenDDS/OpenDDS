@@ -10,6 +10,7 @@
 
 #include /**/ "DCPSInfo_i.h"
 
+#include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"

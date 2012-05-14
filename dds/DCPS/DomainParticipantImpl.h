@@ -19,7 +19,7 @@
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -274,7 +274,7 @@ public:
   /// local operations.
 
   /**
-  *  Return the id given by the DCPSInfo repositoy.
+  *  Return the id given by discovery.
   */
   RepoId get_id();
 
@@ -375,7 +375,7 @@ private:
   DDS::StatusMask                      listener_mask_;
   /// The id of the domain that creates this participant.
   DDS::DomainId_t                      domain_id_;
-  /// This participant id given by DCPSInfo repository.
+  /// This participant id given by discovery.
   RepoId                               dp_id_;
 
   /// Whether this DomainParticipant is attached to a federated

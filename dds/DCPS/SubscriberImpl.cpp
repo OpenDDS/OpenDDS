@@ -9,7 +9,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "SubscriberImpl.h"
-#include "DataReaderRemoteImpl.h"
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
@@ -241,18 +240,6 @@ SubscriberImpl::create_datareader(
   }
 #endif
 
-  DataReaderRemoteImpl* reader_remote_impl = 0;
-  ACE_NEW_RETURN(reader_remote_impl,
-                 DataReaderRemoteImpl(dr_servant),
-                 DDS::DataReader::_nil());
-
-  //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
-  PortableServer::ServantBase_var reader_remote(reader_remote_impl);
-
-  //this is the client reference to the DataReaderRemoteImpl
-  OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
-    servant_to_remote_reference(reader_remote_impl);
-
   // Propagate the latency buffer data collection configuration.
   // @TODO: Determine whether we want to exclude the Builtin Topic
   //        readers from data gathering.
@@ -265,8 +252,7 @@ SubscriberImpl::create_datareader(
                    mask,
                    participant_,
                    this,
-                   dr_obj.in(),
-                   dr_remote_obj.in());
+                   dr_obj.in());
 
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1)) {
@@ -364,23 +350,15 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
   RepoId subscription_id  = dr_servant->get_subscription_id();
 
-  try {
-    DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
-    repo->remove_subscription(this->domain_id_,
-                              participant_->get_id(),
-                              subscription_id) ;
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in SubscriberImpl::delete_datareader");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in SubscriberImpl::delete_datareader");
-    return DDS::RETCODE_ERROR;
+  Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+  if (!disco->remove_subscription(this->domain_id_,
+                                  participant_->get_id(),
+                                  subscription_id)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("SubscriberImpl::delete_datareader: ")
+                      ACE_TEXT(" could not remove subscription from discovery.\n")),
+                     ::DDS::RETCODE_ERROR);
   }
 
   // Call remove association before unregistering the datareader from the transport,
@@ -625,33 +603,19 @@ SubscriberImpl::set_qos(
       DrIdToQosMap::iterator iter = idToQosMap.begin();
 
       while (iter != idToQosMap.end()) {
-        try {
-          DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
-          CORBA::Boolean status
-          = repo->update_subscription_qos(this->domain_id_,
-                                          participant_->get_id(),
-                                          iter->first,
-                                          iter->second,
-                                          this->qos_);
+        Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+        const bool status
+        = disco->update_subscription_qos(this->domain_id_,
+                                         participant_->get_id(),
+                                         iter->first,
+                                         iter->second,
+                                         this->qos_);
 
-          if (status == 0) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
-                              ACE_TEXT("failed. \n")),
-                             DDS::RETCODE_ERROR);
-          }
-
-        } catch (const CORBA::SystemException& sysex) {
-          sysex._tao_print_exception(
-            "ERROR: System Exception"
-            " in SubscriberImpl::set_qos");
-          return DDS::RETCODE_ERROR;
-
-        } catch (const CORBA::UserException& userex) {
-          userex._tao_print_exception(
-            "ERROR:  Exception"
-            " in SubscriberImpl::set_qos");
-          return DDS::RETCODE_ERROR;
+        if (!status) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) SubscriberImpl::set_qos, ")
+                            ACE_TEXT("failed. \n")),
+                           DDS::RETCODE_ERROR);
         }
 
         ++iter;

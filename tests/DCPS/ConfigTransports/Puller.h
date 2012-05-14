@@ -12,7 +12,6 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsDataReaderRemoteC.h"
 
 class Factory;
 

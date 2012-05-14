@@ -72,28 +72,17 @@ TopicImpl::set_qos(const DDS::TopicQos & qos)
       DomainParticipantImpl* part =
         dynamic_cast<DomainParticipantImpl*>(this->participant_);
 
-      try {
-        DCPSInfo_var repo =
-          TheServiceParticipant->get_repository(part->get_domain_id());
-        CORBA::Boolean status =
-          repo->update_topic_qos(this->id_, part->get_domain_id(),
-                                 part->get_id(), qos_);
+      Discovery_rch disco =
+        TheServiceParticipant->get_discovery(part->get_domain_id());
+      const bool status =
+        disco->update_topic_qos(this->id_, part->get_domain_id(),
+                               part->get_id(), qos_);
 
-        if (status == 0) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
-                            ACE_TEXT("failed on compatiblity check. \n")),
-                           DDS::RETCODE_ERROR);
-        }
-
-      } catch (const CORBA::SystemException& sysex) {
-        sysex._tao_print_exception("ERROR: System Exception in "
-                                   "TopicImpl::set_qos");
-        return DDS::RETCODE_ERROR;
-
-      } catch (const CORBA::UserException& userex) {
-        userex._tao_print_exception("ERROR: Exception in TopicImpl::set_qos");
-        return DDS::RETCODE_ERROR;
+      if (!status) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
+                          ACE_TEXT("failed on compatiblity check. \n")),
+                         DDS::RETCODE_ERROR);
       }
     }
 

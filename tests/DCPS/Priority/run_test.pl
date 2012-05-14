@@ -127,6 +127,7 @@ my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $subArgs .= "-DCPSGlobalTransportConfig $transportType ";
 $subArgs .= "-c " . (2 * $samples) . " ";
+$subArgs .= "-t $transportType ";
 $SUB = PerlDDS::create_process ( "subscriber", $subArgs);
 
 my $pubArgs = "$appOpts ";
@@ -134,6 +135,7 @@ $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $pubArgs .= "-DCPSGlobalTransportConfig $transportType ";
 $pubArgs .= "-c $samples ";
 $pubArgs .= "-p " . $priority . " ";
+$pubArgs .= "-t $transportType ";
 $PUB = PerlDDS::create_process ( "publisher", $pubArgs);
 
 # Be verbose.

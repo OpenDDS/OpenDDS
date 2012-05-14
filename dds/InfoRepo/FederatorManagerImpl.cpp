@@ -10,6 +10,7 @@
 #include "FederatorManagerImpl.h"
 #include "DCPSInfo_i.h"
 #include "DefaultValues.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -877,9 +878,15 @@ ManagerImpl::repository()
                ACE_TEXT("(%P|%t) ManagerImpl::repository()\n")));
   }
 
-  OpenDDS::DCPS::DCPSInfo_var repo
-  = TheServiceParticipant->get_repository(
+  OpenDDS::DCPS::Discovery_rch disco
+  = TheServiceParticipant->get_discovery(
       this->config_.federationDomain());
+  OpenDDS::DCPS::DCPSInfo_var repo;
+  if (!disco.is_nil()) {
+    OpenDDS::DCPS::InfoRepoDiscovery_rch irDisco =
+      DCPS::static_rchandle_cast<DCPS::InfoRepoDiscovery>(disco);
+    repo = irDisco->get_dcps_info();
+  }
 
   if (CORBA::is_nil(repo.in())) {
     return OpenDDS::DCPS::DCPSInfo::_duplicate(this->localRepo_.in());

@@ -104,7 +104,7 @@ print "Spawning first DCPSInfoRepo.\n";
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+    print STDERR "ERROR: waiting for Info Repo IOR file\n";
     $DCPSREPO->Kill ();
     exit 1;
 }
@@ -138,7 +138,7 @@ unlink $dcpsrepo_ior;
 print "Spawning second DCPSInfoRepo.\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+    print STDERR "ERROR: waiting for Info Repo IOR file\n";
     $DCPSREPO->Kill ();
     exit 1;
 }

@@ -12,7 +12,7 @@
 #include  "inforepo_export.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsTopicC.h"
-#include /**/ "dds/DdsDcpsInfoC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include /**/ "ace/Unbounded_Set.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

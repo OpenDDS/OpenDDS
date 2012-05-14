@@ -12,7 +12,7 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DdsDcpsInfrastructureS.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 #include "dds/DCPS/transport/framework/TransportConfig.h"
@@ -137,9 +137,6 @@ public:
    *       create our own poa.
    */
   PortableServer::POA_ptr the_poa();
-
-  /// Accessor of the DCPSInfo object reference.
-  DCPSInfo_ptr get_repository(const DDS::DomainId_t domain);
 
   /// Accessor of the Discovery object for a given domain.
   Discovery_rch get_discovery(const DDS::DomainId_t domain);
@@ -353,7 +350,7 @@ private:
   void initializeScheduling();
 
   /**
-   * Parse the command line for user options. e.g. "-DCPSInfo <iorfile>".
+   * Parse the command line for user options. e.g. "-DCPSInfoRepo <iorfile>".
    * It consumes -DCPS* options and their arguments
    */
   int parse_args(int &argc, ACE_TCHAR *argv[]);

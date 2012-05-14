@@ -14,18 +14,6 @@
 #include <set>
 #include <sstream>
 
-namespace { // Anonymous namespace for file scope.
-
-  /// Comparison operation for repository set.
-  class RepoOrder {
-    public: bool operator()(
-                   const ::OpenDDS::DCPS::DCPSInfo_var& left,
-                   const ::OpenDDS::DCPS::DCPSInfo_var& right
-                 ) { return left.in() < right.in(); }
-  };
-
-} // End of anonymous namespace.
-
 /**
  * @brief Construct a test system from the command line.
  */

@@ -25,13 +25,13 @@
 #ifndef DCPSDATAREADERI_H_
 #define DCPSDATAREADERI_H_
 
-#include "dds/DdsDcpsDataReaderRemoteS.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/Definitions.h"
 
 #include "DiscReceivedCalls.h"
 
 #ifndef DDS_HAS_MINIMUM_BIT
-#include "dds/DCPS/RTPS/RtpsInfo.h"
+#include "dds/DCPS/Discovery.h"
 #endif
 
 #include <vector>
@@ -42,7 +42,7 @@
 
 //Class TAO_DDS_DCPSDataReader_i
 class TAO_DDS_DCPSDataReader_i
-  : public virtual POA_OpenDDS::DCPS::DataReaderRemote
+  : public OpenDDS::DCPS::DataReaderCallbacks
 {
 public:
   enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS };
@@ -79,7 +79,7 @@ public:
       return received_;
     }
 #ifndef DDS_HAS_MINIMUM_BIT
-  OpenDDS::RTPS::RtpsInfo* info_;
+  OpenDDS::DCPS::Discovery* disco_;
 #endif
   DDS::DomainId_t domainId_;
   ::OpenDDS::DCPS::RepoId participantId_;

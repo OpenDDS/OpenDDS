@@ -13,8 +13,8 @@
 #include /**/ "UpdateDataTypes.h"
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include /**/ "dds/DdsDcpsSubscriptionC.h"
-#include /**/ "dds/DdsDcpsInfoC.h"
-#include /**/ "dds/DdsDcpsDataReaderRemoteC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include /**/ "ace/Unbounded_Set.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

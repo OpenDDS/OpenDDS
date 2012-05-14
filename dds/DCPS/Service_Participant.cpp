@@ -9,7 +9,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "Service_Participant.h"
-#include "InfoRepoUtils.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
 #include "GuidConverter.h"
@@ -692,6 +691,7 @@ Service_Participant::initializeScheduling()
     int ace_scheduler = ACE_SCHED_OTHER;
     this->scheduler_  = THR_SCHED_DEFAULT;
 
+#ifdef ACE_WIN32
     if (this->schedulerString_ == ACE_TEXT("SCHED_RR")) {
       this->scheduler_ = THR_SCHED_RR;
       ace_scheduler    = ACE_SCHED_RR;
@@ -714,7 +714,6 @@ Service_Participant::initializeScheduling()
     //
     // Attempt to set the scheduling policy.
     //
-#ifdef ACE_WIN32
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE: Service_Participant::initializeScheduling() - ")
                ACE_TEXT("scheduling is not implemented on Win32.\n")));
@@ -940,8 +939,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
 
     if (attach_participant)
     {
-      DCPSInfo_var info = repoList[ index].first->get_dcps_info();
-      info->attach_participant(domain, repoList[ index].second);
+      repoList[ index].first->attach_participant(domain, repoList[ index].second);
     }
   }
 }
@@ -1005,36 +1003,26 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       // original repository if it is restarted.
     }
 
-    try {
-      // Check the availability of the current repository.
-      DCPSInfo_var info = current->second->get_dcps_info();
-      if (false == info->_is_a("Not_An_IDL_Type")) {
+    // Check the availability of the current repository.
+    if (current->second->active()) {
 
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-                     ACE_TEXT("replacing repository %C with %C.\n"),
-                     key.c_str(),
-                     current->first.c_str()));
-        }
-
-        // If we reach here, the validate_connection() call succeeded
-        // and the repository is reachable.
-        this->remap_domains(key, current->first);
-
-        // Now we are done.  This is the only non-failure exit from
-        // this method.
-        return;
-
-      } else if (DCPS_debug_level > 0) {
+      if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-                   ACE_TEXT("repository %C reference to %C unexpected _is_a return.\n"),
+                   ACE_TEXT("replacing repository %C with %C.\n"),
                    key.c_str(),
                    current->first.c_str()));
       }
 
-    } catch (const CORBA::Exception&) {
+      // If we reach here, the validate_connection() call succeeded
+      // and the repository is reachable.
+      this->remap_domains(key, current->first);
+
+      // Now we are done.  This is the only non-failure exit from
+      // this method.
+      return;
+
+    } else {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
                  ACE_TEXT("repository %C was not available to replace %C, ")
@@ -1099,7 +1087,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         // Found the default!
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                      ACE_TEXT("returning default repository for domain %d.\n"),
                      domain));
         }
@@ -1120,7 +1108,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         // Unable to load DEFAULT_RTPS
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                      ACE_TEXT("failed attempt to set default RTPS discovery for domain %d.\n"),
                      domain));
         }
@@ -1131,7 +1119,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
         // Found the default!
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                      ACE_TEXT("returning default RTPS discovery for domain %d.\n"),
                      domain));
         }
@@ -1143,7 +1131,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
       // Non-default repositories _must_ be loaded by application.
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+                   ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                    ACE_TEXT("repository for domain %d was not set.\n"),
                    domain));
       }
@@ -1154,24 +1142,12 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) Service_Participant::get_repository: ")
+               ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
                ACE_TEXT("returning repository for domain %d, repo %C.\n"),
                domain, repo.c_str()));
   }
 
   return location->second;
-}
-
-DCPSInfo_ptr
-Service_Participant::get_repository(const DDS::DomainId_t domain)
-{
-  Discovery_rch discovery = this->get_discovery(domain);
-
-  if (discovery == 0) {
-    return OpenDDS::DCPS::DCPSInfo::_nil();
-  } else {
-    return discovery->get_dcps_info();
-  }
 }
 
 std::string

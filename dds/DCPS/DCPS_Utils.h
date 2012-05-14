@@ -12,8 +12,7 @@
 #include "dcps_export.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsPublicationC.h"
-#include "dds/DdsDcpsInfoC.h"
-#include "dds/DdsDcpsDataWriterRemoteC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

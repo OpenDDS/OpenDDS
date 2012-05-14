@@ -2,14 +2,14 @@
 #include "DCPSDataReaderI.h"
 #include "DCPSSubscriberI.h"
 
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/MonitorFactory.h"
 
 #ifndef DDS_HAS_MINIMUM_BIT
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
-#include "dds/DCPS/RTPS/RtpsInfo.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -17,13 +17,25 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
 const ACE_TCHAR* ior = ACE_TEXT("file://dcps_ir.ior");
 bool qos_tests = false;
 bool use_rtps = false;
 bool failed = false;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+class DDS_TEST
+{
+public:
+  static void set_part_bit_subscriber(OpenDDS::DCPS::Discovery_rch disc, DDS::DomainId_t domain,
+    OpenDDS::DCPS::RepoId partId, const DDS::Subscriber_var& bit_subscriber)
+  {
+    OpenDDS::RTPS::RtpsDiscovery* rtpsDisc = dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
+    rtpsDisc->set_part_bit_subscriber(domain, partId, bit_subscriber);
+  }
+};
+#endif
 
 int parse_args(int argc, ACE_TCHAR *argv[])
 {
@@ -61,29 +73,21 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer::POA_var poa)
+bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
-  OpenDDS::RTPS::RtpsInfo* rtpsInfo = 0;
-  PortableServer::ServantBase_var rtpsInfoVar;
-  if (use_rtps) {
-    rtpsInfoVar = poa->reference_to_servant(info.in());
-    rtpsInfo = dynamic_cast<OpenDDS::RTPS::RtpsInfo*>(rtpsInfoVar.in());
-  }
-#endif
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("pubsub test\n")));
 
   CORBA::Long domain = 9;
 
   OpenDDS::DCPS::RepoId pubPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubId = OpenDDS::DCPS::GUID_UNKNOWN;
-  TAO_DDS_DCPSDataWriter_i* dwImpl = new TAO_DDS_DCPSDataWriter_i;
-  PortableServer::ServantBase_var safe_servant = dwImpl;
-  OpenDDS::DCPS::DataWriterRemote_var dw;
+  TAO_DDS_DCPSDataWriter_i dwImpl;
 
   ::DDS::DomainParticipantQos_var partQos = new ::DDS::DomainParticipantQos;
   *partQos = TheServiceParticipant->initial_DomainParticipantQos();
-  OpenDDS::DCPS::AddDomainStatus value = info->add_domain_participant(domain, partQos.in());
+  OpenDDS::DCPS::AddDomainStatus value = disc->add_domain_participant(domain, partQos.in());
   pubPartId = value.id;
   if (OpenDDS::DCPS::GUID_UNKNOWN == pubPartId)
     {
@@ -96,7 +100,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   DDS::Subscriber_var sub2;
   if (use_rtps) {
     sub = new TAO_DDS_DCPSSubscriber_i;
-    rtpsInfo->init_bit(pubPartId, domain, sub);
+    DDS_TEST::set_part_bit_subscriber(disc, domain, pubPartId, sub);
   }
 #endif
 
@@ -105,7 +109,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   const char* dname = "MYdataname";
   ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
   *topicQos = TheServiceParticipant->initial_TopicQos();
-  OpenDDS::DCPS::TopicStatus topicStatus = info->assert_topic(pubTopicId,
+  OpenDDS::DCPS::TopicStatus topicStatus = disc->assert_topic(pubTopicId,
                                                        domain,
                                                        pubPartId,
                                                        tname,
@@ -120,17 +124,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
     }
 
   // Add publication
-  PortableServer::ObjectId_var oid = poa->activate_object( dwImpl );
-  CORBA::Object_var obj = poa->id_to_reference( oid.in() );
-  dw = OpenDDS::DCPS::DataWriterRemote::_narrow(obj.in());
-  if (CORBA::is_nil (dw.in ()))
-    {
-      ACE_ERROR_RETURN ((LM_DEBUG,
-                         "Nil OpenDDS::DCPS::DataWriterRemote reference\n"),
-                        false);
-    }
-
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -145,10 +139,10 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
 
   ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
-  pubId = info->add_publication(domain,
+  pubId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                dw.in(),
+                                &dwImpl,
                                 dwQos.in(),
                                 tii,
                                 pQos.in());
@@ -158,7 +152,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_publication failed!\n") ));
     }
 
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -169,7 +163,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   const char* dnameIncompatible = "MYnewdataname";
   ::DDS::TopicQos_var topicQosIncompatible = new ::DDS::TopicQos;
   *topicQosIncompatible = TheServiceParticipant->initial_TopicQos();
-  topicStatus = info->assert_topic(topicId2,
+  topicStatus = disc->assert_topic(topicId2,
                                    domain,
                                    pubPartId,
                                    tnameIncompatible,
@@ -185,7 +179,7 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
                  ACE_TEXT("CONFLICTING_TYPENAME and returned %d"), topicStatus));
     }
 
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
@@ -193,14 +187,13 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   OpenDDS::DCPS::RepoId subPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId subTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId subId = OpenDDS::DCPS::GUID_UNKNOWN;
-  TAO_DDS_DCPSDataReader_i* drImpl = new TAO_DDS_DCPSDataReader_i;
-  PortableServer::ServantBase_var safe_servant2 = drImpl;
+  TAO_DDS_DCPSDataReader_i drImpl;
 #ifndef DDS_HAS_MINIMUM_BIT
-  drImpl->info_ = rtpsInfo;
+  if (use_rtps)
+    drImpl.disco_ = disc.in();
 #endif
-  OpenDDS::DCPS::DataReaderRemote_var dr;
 
-  value = info->add_domain_participant(domain, partQos.in());
+  value = disc->add_domain_participant(domain, partQos.in());
   subPartId = value.id;
   if( OpenDDS::DCPS::GUID_UNKNOWN == subPartId)
     {
@@ -216,13 +209,13 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
 #ifndef DDS_HAS_MINIMUM_BIT
   if (use_rtps) {
     sub2 = new TAO_DDS_DCPSSubscriber_i;
-    rtpsInfo->init_bit(subPartId, domain, sub2);
+    DDS_TEST::set_part_bit_subscriber(disc, domain, subPartId, sub2);
   }
 #endif
 
   topicQos = new ::DDS::TopicQos;
   *topicQos = TheServiceParticipant->initial_TopicQos();
-  topicStatus = info->assert_topic(subTopicId,
+  topicStatus = disc->assert_topic(subTopicId,
                                    domain,
                                    subPartId,
                                    tname,
@@ -241,35 +234,27 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Topic creation returned existing topic")));
     }
 
-  if (!dwImpl->received().expectNothing())
+  if (!dwImpl.received().expectNothing())
     {
       failed = true;
     }
 
-  drImpl->domainId_ = domain;
-  drImpl->participantId_ = subPartId;
+  drImpl.domainId_ = domain;
+  drImpl.participantId_ = subPartId;
 
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("adding matching subscription\n")));
   // Add subscription
-  oid = poa->activate_object( drImpl );
-  obj = poa->id_to_reference( oid.in() );
-  dr = OpenDDS::DCPS::DataReaderRemote::_narrow(obj.in());
-  if (CORBA::is_nil (dr.in ()))
-    {
-      ACE_ERROR_RETURN ((LM_DEBUG,
-                         "Nil OpenDDS::DCPS::DataReaderRemote reference\n"),
-                        false);
-    }
-
   ::DDS::DataReaderQos_var drQos = new ::DDS::DataReaderQos;
   *drQos = TheServiceParticipant->initial_DataReaderQos();
   drQos->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
 
   ::DDS::SubscriberQos_var subQos = new ::DDS::SubscriberQos;
   *subQos = TheServiceParticipant->initial_SubscriberQos();
-  subId = info->add_subscription(domain,
+  subId = disc->add_subscription(domain,
                                  subPartId,
                                  subTopicId,
-                                 dr.in(),
+                                 &drImpl,
                                  drQos.in(),
                                  tii,
                                  subQos.in(),
@@ -284,14 +269,14 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   expected.push_back(DiscReceivedCalls::ADD_ASSOC);
 
   unsigned int max_delay = 10;
-  if (!drImpl->received().expect(orb, max_delay, expected))
+  if (!drImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }
 
   if (use_rtps)
     expected.push_back(DiscReceivedCalls::ASSOC_COMPLETE);
-  if (!dwImpl->received().expect(orb, max_delay, expected))
+  if (!dwImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }
@@ -302,36 +287,26 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
 
   // incompatible QOS
   OpenDDS::DCPS::RepoId pubIncQosId = OpenDDS::DCPS::GUID_UNKNOWN;
-  TAO_DDS_DCPSDataWriter_i* dwIncQosImpl = new TAO_DDS_DCPSDataWriter_i;
-  PortableServer::ServantBase_var safe_servant3 = dwIncQosImpl;
-  OpenDDS::DCPS::DataWriterRemote_var dwIncQos;
+  TAO_DDS_DCPSDataWriter_i dwIncQosImpl;
 
   // Add publication
-  oid = poa->activate_object( dwIncQosImpl );
-  obj = poa->id_to_reference( oid.in() );
-  dwIncQos = OpenDDS::DCPS::DataWriterRemote::_narrow(obj.in());
-  if (CORBA::is_nil (dwIncQos.in ()))
-    {
-      ACE_ERROR_RETURN ((LM_DEBUG,
-                         "Nil OpenDDS::DCPS::DataWriterRemote reference\n"),
-                        false);
-    }
-
-  if (!dwIncQosImpl->received().expectNothing())
+  if (!dwIncQosImpl.received().expectNothing())
     {
       failed = true;
     }
 
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("adding incompatible publication\n")));
   ::DDS::DataWriterQos_var dwIncQosQos = new ::DDS::DataWriterQos;
   *dwIncQosQos = TheServiceParticipant->initial_DataWriterQos();
   dwIncQosQos->reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
 
   pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
-  pubIncQosId = info->add_publication(domain,
+  pubIncQosId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                dwIncQos.in(),
+                                &dwIncQosImpl,
                                 dwIncQosQos.in(),
                                 tii,
                                 pQos.in());
@@ -344,27 +319,26 @@ bool pubsub(OpenDDS::DCPS::DCPSInfo_var info, CORBA::ORB_var orb, PortableServer
   expected.clear();
   expected.push_back(DiscReceivedCalls::UPDATE_INCOMP_QOS);
 
-  if (!dwIncQosImpl->received().expect(orb, max_delay, expected))
+  if (!dwIncQosImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }
 
-  if (!drImpl->received().expect(orb, max_delay, expected))
+  if (!drImpl.received().expect(orb, max_delay, expected))
     {
       failed = true;
     }
 
-  info->remove_publication(domain, pubPartId, pubIncQosId);
-  info->remove_subscription(domain, subPartId, subId);
-  info->remove_publication(domain, pubPartId, pubId);
-  info->remove_topic(domain, pubPartId, pubTopicId);
-  info->remove_topic(domain, subPartId, subTopicId);
-  info->remove_domain_participant(domain, subPartId);
-  info->remove_domain_participant(domain, pubPartId);
+  disc->remove_publication(domain, pubPartId, pubIncQosId);
+  disc->remove_subscription(domain, subPartId, subId);
+  disc->remove_publication(domain, pubPartId, pubId);
+  disc->remove_topic(domain, pubPartId, pubTopicId);
+  disc->remove_topic(domain, subPartId, subTopicId);
+  disc->remove_domain_participant(domain, subPartId);
+  disc->remove_domain_participant(domain, pubPartId);
 
   return true;
 }
-
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -388,29 +362,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       PortableServer::POAManager_var mgr = poa->the_POAManager();
       mgr->activate();
 
-      OpenDDS::DCPS::DCPSInfo_var info;
+      OpenDDS::DCPS::Discovery_rch disc;
 #ifndef DDS_HAS_MINIMUM_BIT
-      OpenDDS::RTPS::RtpsDiscovery_rch disc;
 
       if (use_rtps) {
-        disc = new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery");
-        disc->resend_period(ACE_Time_Value(1));
-        disc->sedp_multicast(false);
-        info = disc->get_dcps_info();
-
+        OpenDDS::RTPS::RtpsDiscovery* rtpsDisc = new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery");
+        disc = rtpsDisc;
+        rtpsDisc->resend_period(ACE_Time_Value(1));
+        rtpsDisc->sedp_multicast(false);
       } else {
 #endif
         CORBA::Object_var tmp =
           orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
-        info = OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
+        OpenDDS::DCPS::DCPSInfo_var info =
+          OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
+        disc = new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info);
 #ifndef DDS_HAS_MINIMUM_BIT
       }
 #endif
 
-      if (CORBA::is_nil (info.in ()))
+      if (disc.is_nil())
         {
           ACE_ERROR_RETURN ((LM_DEBUG,
-                             "Nil OpenDDS::DCPS::DCPSInfo reference <%s>\n",
+                             "Nil OpenDDS::DCPS::Discovery reference <%s>\n",
                              ior),
                             1);
         }
@@ -422,7 +396,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::DCPS_debug_level = 4;
       OpenDDS::DCPS::Transport_debug_level = 4;
 */
-      if (!pubsub(info, orb, poa))
+      if (!pubsub(disc, orb))
         {
           return 1;
         }

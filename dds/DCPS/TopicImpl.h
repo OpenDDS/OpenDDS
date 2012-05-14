@@ -10,7 +10,7 @@
 #define OPENDDS_DCPS_TOPIC_IMPL_H
 
 #include "dds/DdsDcpsTopicS.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "TopicDescriptionImpl.h"
 
@@ -67,7 +67,7 @@ public:
 
   /** This method is not defined in the IDL and is defined for
   *  internal use.
-  *  Return the id given by the DCPSInfo repositoy.
+  *  Return the id given by discovery.
   */
   RepoId get_id() const;
 
@@ -99,7 +99,7 @@ private:
   /// The topic listener servant.
   DDS::TopicListener*          fast_listener_;
 
-  /// The id given by DCPSInfo/repository.
+  /// The id given by discovery.
   RepoId                       id_;
 
   /// The number of DataReaders and DataWriters using this Topic.

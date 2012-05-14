@@ -6,37 +6,21 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPSINFO_IDL
-#define OPENDDS_DCPSINFO_IDL
+#ifndef OPENDDS_DCPS_DCPSINFO_IDL
+#define OPENDDS_DCPS_DCPSINFO_IDL
 
+#include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
 #include "dds/DdsDcpsInfoUtils.idl"
 
-#include "dds/DdsDcpsDataWriterRemote.idl"
-#include "dds/DdsDcpsDataReaderRemote.idl"
+#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl"
+#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl"
 
 module OpenDDS {
   module DCPS {
-
-    // Information returned from call to add_domain_participant()
-    struct AddDomainStatus {
-      RepoId  id;
-      boolean federated;
-    };
-
-    // Status returned by a topic operation
-    enum TopicStatus {
-      CREATED,
-      ENABLED,
-      FOUND,
-      NOT_FOUND,
-      REMOVED,
-      CONFLICTING_TYPENAME,
-      INTERNAL_ERROR
-    };
 
     // thrown when operation receives an
     // invalid domain id
@@ -295,4 +279,4 @@ module OpenDDS {
   }; // module DDS
 }; // module OpenDDS
 
-#endif /* OPENDDS_DCPSINFO_IDL */
+#endif /* OPENDDS_DCPS_DCPSINFO_IDL */

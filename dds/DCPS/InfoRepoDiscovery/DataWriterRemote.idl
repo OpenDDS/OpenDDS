@@ -16,17 +16,6 @@
 module OpenDDS {
   module DCPS {
 
-    struct ReaderAssociation {
-      TransportLocatorSeq readerTransInfo;
-      RepoId readerId;
-      ::DDS::SubscriberQos subQos;
-      ::DDS::DataReaderQos readerQos;
-      string filterExpression;
-      ::DDS::StringSeq exprParams;
-    };
-
-    typedef sequence<RepoId> ReaderIdSeq;
-
     // This interface contains OpenDDS-specific operations
     // related to a DDS::DataWriter servant.
     // It is split out so the DDS::DataWriter interface can be local.

@@ -2,7 +2,7 @@
 #define ABSTRACTIONLAYER_H_
 
 #include "FileInfoC.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>

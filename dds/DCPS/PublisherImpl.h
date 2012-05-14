@@ -10,8 +10,7 @@
 #define OPENDDS_DCPS_PUBLISHER_IMPL_H
 
 #include "dds/DdsDcpsPublicationS.h"
-#include "dds/DdsDcpsDataWriterRemoteC.h"
-#include "dds/DdsDcpsInfoC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "DataWriterImpl.h"
 #include "DataSampleList.h"

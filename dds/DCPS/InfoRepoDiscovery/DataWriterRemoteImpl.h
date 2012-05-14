@@ -9,8 +9,8 @@
 #ifndef OPENDDS_DCPS_DATAWRITERREMOTE_H
 #define OPENDDS_DCPS_DATAWRITERREMOTE_H
 
-#include "dds/DdsDcpsDataWriterRemoteS.h"
-#include "Definitions.h"
+#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteS.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/Thread_Mutex.h"
 
@@ -21,7 +21,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class DataWriterImpl;
+class DataWriterCallbacks;
 
 /**
 * @class DataWriterRemoteImpl
@@ -29,10 +29,10 @@ class DataWriterImpl;
 * @brief Implements the OpenDDS::DCPS::DataWriterRemote interface.
 *
 */
-class OpenDDS_Dcps_Export DataWriterRemoteImpl
+class DataWriterRemoteImpl
   : public virtual POA_OpenDDS::DCPS::DataWriterRemote {
 public:
-  explicit DataWriterRemoteImpl(DataWriterImpl* parent);
+  explicit DataWriterRemoteImpl(DataWriterCallbacks* parent);
 
   virtual ~DataWriterRemoteImpl();
 
@@ -53,7 +53,7 @@ public:
   void detach_parent();
 
 private:
-  DataWriterImpl* parent_;
+  DataWriterCallbacks* parent_;
   ACE_Thread_Mutex mutex_;
 };
 

@@ -25,7 +25,7 @@ namespace DCPS {
 *
 * This class provides the methods to set/get transient kludge
 * enable flag.
-* Only the DCPSInfo repository should set/enable the kludge!!!
+* Only the repository should set/enable the kludge!!!
 */
 class OpenDDS_Dcps_Export Transient_Kludge {
 public:

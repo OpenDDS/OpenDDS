@@ -13,7 +13,7 @@
 #include "ace/Reactor.h"
 #include "ace/Time_Value.h"
 
-OpenDDS::DCPS::Watchdog::Watchdog(ACE_Reactor * reactor,
+OpenDDS::DCPS::Watchdog::Watchdog(ACE_Reactor_Timer_Interface* reactor,
                                   ACE_Time_Value const & interval)
   : reactor_(reactor)
   , timer_(this)

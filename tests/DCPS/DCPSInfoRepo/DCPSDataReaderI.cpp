@@ -8,7 +8,7 @@
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
 #ifndef DDS_HAS_MINIMUM_BIT
-: info_(0)
+: disco_(0)
 #endif
   {
   }
@@ -43,9 +43,9 @@ void TAO_DDS_DCPSDataReader_i::add_association (
     received_.received(DiscReceivedCalls::ADD_ASSOC);
 
 #ifndef DDS_HAS_MINIMUM_BIT
-    if (info_)
+    if (disco_)
       {
-        info_->association_complete(domainId_, participantId_, yourId, writer.writerId);
+        disco_->association_complete(domainId_, participantId_, yourId, writer.writerId);
       }
 #endif
   }
@@ -74,9 +74,9 @@ void TAO_DDS_DCPSDataReader_i::remove_associations (
           cnt,
           std::string(converter).c_str()
         ));
+        received_.received(DiscReceivedCalls::REM_ASSOC);
       }
 
-    received_.received(DiscReceivedCalls::REM_ASSOC);
   }
 
 void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
