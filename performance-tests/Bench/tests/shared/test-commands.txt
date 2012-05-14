@@ -1,0 +1,56 @@
+
+NOTE: This is a shared memory transport comparison test, so all testing
+      will be done on a single host.
+
+--- build
+
+  export BENCHBASE=$DDS_ROOT/performance-tests/Bench
+  export TESTBASE=$BENCHBASE/tests/shared
+
+  make -C $BENCHBASE
+
+--- Use RTPS discovery, so no repository necessary ---
+
+--- Test Execution ---
+  export TESTCMD="$BENCHBASE/bin/run_test -S -h iiop://localhost:2809 -P -i $BENCHBASE/tests/shared/transport.ini"
+
+  --- Fan in tests
+
+  ---
+  --- reliable transports
+  ---
+
+  --- 1 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1.ini,$TESTBASE/p1.ini
+
+  --- 2 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini
+
+  --- 4 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini
+
+  --- 8 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini
+
+  --- 16 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini,$TESTBASE/p1.ini
+
+  ---
+  --- best effort transports
+  ---
+
+  --- 1 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1be.ini,$TESTBASE/p1be.ini
+
+  --- 2 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini
+
+  --- 4 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini
+
+  --- 8 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini
+
+  --- 16 pub --> 1 sub
+  $TESTCMD -s $TESTBASE/s1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini,$TESTBASE/p1be.ini
+
