@@ -1752,8 +1752,6 @@ DDS::ReturnCode_t
   return rc;
 }
 
-//~ #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
 DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,
   DDS::ViewStateKind view)
