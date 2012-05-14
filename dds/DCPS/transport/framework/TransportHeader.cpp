@@ -47,5 +47,16 @@ bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
   return writer.good_bit();
 }
 
+/*static*/
+ACE_UINT32
+TransportHeader::get_length(const char* marshaled_header)
+{
+  static const TransportHeader hdr(no_init);
+  static const unsigned int OFFSET = sizeof(hdr.protocol_) +
+                                     1 /*flags*/ +
+                                     sizeof(hdr.reserved_);
+  return *reinterpret_cast<const ACE_UINT32*>(marshaled_header + OFFSET);
+}
+
 }
 }

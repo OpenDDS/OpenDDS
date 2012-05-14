@@ -1,3 +1,19 @@
+Mon May 14 14:23:57 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * BranchChangeLog:
+
+          Added support for vim.
+
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          de-in-lined static get_length() method to resolve gcc
+          visibility on unload issue.
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Corrected some documentation.
+
 Thu May 10 18:42:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/ShmemDataLink.h:
@@ -103,6 +119,7 @@ Tue May  8 17:35:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
           Created branch "SharedMemory".
 
+vim: filetype=changelog
 Local Variables:
 mode: change-log
 add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
