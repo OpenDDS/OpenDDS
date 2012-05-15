@@ -1,3 +1,9 @@
+Tue May 15 22:30:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Find test executables ending in .exe on Win32.
+
 Mon May 14 15:20:25 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/reduce-shared-data.pl:

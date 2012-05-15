@@ -302,7 +302,8 @@ sub WaitForUserInput {
 sub findCommand {
   my $command = shift;
   foreach my $location (@PATH) {
-    return "$location/$command" if -x "$location/$command";
+    return "$location/$command" if -x "$location/$command"
+                                || ($^O eq 'MSWin32' && -x "$location/$command.exe");
   }
   die "Unable to locate command: $command for execution.";
 }
