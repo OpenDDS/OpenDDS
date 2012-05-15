@@ -162,9 +162,6 @@ public:
   virtual DDS::TopicDescription_ptr lookup_topicdescription(
     const char * name);
 
-
-  //~ #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
   #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
   virtual DDS::ContentFilteredTopic_ptr create_contentfilteredtopic(

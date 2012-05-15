@@ -644,9 +644,6 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   }
 }
 
-
-//~ #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
 DDS::ContentFilteredTopic_ptr
@@ -818,8 +815,6 @@ DomainParticipantImpl::deref_filter_eval(const char* filter)
     }
   }
 }
-
-//~ #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()

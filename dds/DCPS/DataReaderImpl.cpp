@@ -3401,7 +3401,6 @@ DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
                                     subscription_id_,
                                     params);
 }
-//~ #endif
 
 void
 DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)

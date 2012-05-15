@@ -1,9 +1,17 @@
+Tue May 15 12:52:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+	  Remove commented out preprocessor statements.
+
 Tue May 15 12:37:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Fix after merge from trunk so that will build with
-	  content-filtered-topic disabled.
+          Fix after merge from trunk so that will build with
+          content-filtered-topic disabled.
 
 Mon May 14 22:28:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
