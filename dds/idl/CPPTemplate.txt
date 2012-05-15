@@ -65,7 +65,7 @@ char *
 }
 #endif
 
-#if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 const OpenDDS::DCPS::MetaStruct&
 <%TYPE%>TypeSupportImpl::getMetaStructForType()
@@ -1659,7 +1659,7 @@ DDS::ReturnCode_t
   }
 }
 
-#if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 bool
 <%TYPE%>DataReaderImpl::contains_sample_filtered(DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states,
@@ -1691,8 +1691,6 @@ bool
 
   return false;
 }
-
-#endif
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_generic(
@@ -1751,6 +1749,8 @@ DDS::ReturnCode_t
   info = infoseq[last];
   return rc;
 }
+
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,

@@ -30,7 +30,7 @@ public:
   virtual ::DDS::DataReader_ptr create_multitopic_datareader();
 #endif
 
-#if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
 
@@ -315,7 +315,7 @@ public:
 
   virtual void delete_instance_map (void* map);
 
-#if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                 DDS::ViewStateMask view_states,
                                 DDS::InstanceStateMask instance_states,
