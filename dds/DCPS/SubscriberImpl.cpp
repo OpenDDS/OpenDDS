@@ -130,18 +130,22 @@ SubscriberImpl::create_datareader(
   MultiTopicImpl* mt = 0;
 #endif
 
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) && !defined(OPENDDS_NO_MULTI_TOPIC)
-  DDS::Topic_var related;
   if (!topic_servant) {
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
     if (cft) {
+      DDS::Topic_var related;
       related = cft->get_related_topic();
       topic_servant = dynamic_cast<TopicImpl*>(related.in());
-    } else {
+    }
+    else
+#endif
+    {
+#ifndef OPENDDS_NO_MULTI_TOPIC
       mt = dynamic_cast<MultiTopicImpl*>(a_topic_desc);
+#endif
     }
   }
-#endif
 
   if (qos == DATAREADER_QOS_DEFAULT) {
     this->get_default_datareader_qos(dr_qos);

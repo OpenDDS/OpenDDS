@@ -1,10 +1,17 @@
+Tue May 15 15:58:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+	  Fix content subscription related feature guards
+	  causing ContentFilteredTopic test to segment fault.
+
 Tue May 15 12:52:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DomainParticipantImpl.h:
         * dds/DCPS/DomainParticipantImpl.cpp:
 
-	  Remove commented out preprocessor statements.
+          Remove commented out preprocessor statements.
 
 Tue May 15 12:37:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
