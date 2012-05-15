@@ -1161,7 +1161,7 @@ DataReaderImpl::enable()
 
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
     if (cft) {
       filterExpression = cft->get_filter_expression();
@@ -3376,8 +3376,6 @@ DataReaderImpl::set_subscriber_qos(
   this->subqos_ = qos;
 }
 
-
-//~ #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)

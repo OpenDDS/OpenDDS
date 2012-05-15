@@ -1,9 +1,16 @@
+Tue May 15 12:37:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Fix after merge from trunk so that will build with
+	  content-filtered-topic disabled.
+
 Mon May 14 22:28:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
 
-	  Removed commented out preprocessor statement that should not
-	  be there.
+          Removed commented out preprocessor statement that should not
+          be there.
 
 Wed May  2 21:23:37 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
