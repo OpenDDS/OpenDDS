@@ -1,9 +1,15 @@
+Tue May 15 16:59:23 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Prepend all compliance profile feature guards with DDS_
+
 Tue May 15 15:58:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/SubscriberImpl.cpp:
 
-	  Fix content subscription related feature guards
-	  causing ContentFilteredTopic test to segment fault.
+          Fix content subscription related feature guards
+          causing ContentFilteredTopic test to segment fault.
 
 Tue May 15 12:52:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
