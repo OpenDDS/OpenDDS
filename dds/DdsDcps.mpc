@@ -54,7 +54,7 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, dds4ccm_opendd
   }
 }
 
-project (OpenDDS_Dcps_lem_gen) : ciaoidldefaults {
+project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
   custom_only = 1
   requires   += dds4ccm_opendds
   after      += OpenDDS_Dcps_idl_gen
@@ -62,7 +62,6 @@ project (OpenDDS_Dcps_lem_gen) : ciaoidldefaults {
                 -Wb,stub_export_macro=DDSDCPS_LEM_STUB_Export \
                 -Wb,stub_export_include=DdsDcps_lem_stub_export.h \
                 -SS -I$(DDS_ROOT)
-
 
   IDL_Files {
      idlflags += -Gxhst

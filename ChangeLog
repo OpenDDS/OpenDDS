@@ -1,3 +1,9 @@
+Wed May 16 17:27:58 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+        * dds/DdsDcps.mpc:
+          Fixed mpc problems when CIAO is not available
+
 Wed May 16 09:17:43 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * dds/DCPS/Service_Participant.cpp:
