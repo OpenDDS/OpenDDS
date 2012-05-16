@@ -13,7 +13,6 @@
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 
 #include <cstring>
-#include <algorithm>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -34,7 +33,7 @@ ShmemSendStrategy::start_i()
   bound_name_ = "Write-" + link_->peer_address();
   ShmemAllocator* alloc = link_->local_allocator();
 
-  const unsigned int n_bytes = link_->config()->datalink_control_size_,
+  const size_t n_bytes = link_->config()->datalink_control_size_,
     n_elems = n_bytes / sizeof(ShmemData),
     extra = n_bytes % sizeof(ShmemData);
 
@@ -79,8 +78,8 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
     return -1;
   }
   // see TransportHeader::valid(), but this is for the marshaled form
-  if (!std::equal(&TransportHeader::DCPS_PROTOCOL[0],
-                  &TransportHeader::DCPS_PROTOCOL[sizeof(TransportHeader::DCPS_PROTOCOL)], static_cast<unsigned char*>(iov[0].iov_base))) {
+  if (std::memcmp(&TransportHeader::DCPS_PROTOCOL[0], iov[0].iov_base,
+                  sizeof(TransportHeader::DCPS_PROTOCOL)) != 0) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ "
               "expecting iov[0] to contain the transport header\n", link_), 0);
     return -1;

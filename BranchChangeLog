@@ -1,3 +1,10 @@
+Wed May 16 18:41:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+
+          Use std::memcmp() since iovec::iov_base has different types on
+          different platforms.  memcmp() uses void* so any type works.
+
 Wed May 16 17:40:37 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:
