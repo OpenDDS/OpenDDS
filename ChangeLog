@@ -1,3 +1,9 @@
+Wed May 16 23:26:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/run_test.pl:
+
+          Fixed typo.
+
 Wed May 16 23:17:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * Merged the branch "SharedMemory", which includes a new shared-memory

@@ -39,7 +39,7 @@ elsif ($ARGV[0] eq 'diff_trans') {
 elsif ($ARGV[0] eq 'rtps') {
   $parameters .= ' -rs -rp';
 }
-elsif ($ARGV[0] eq 'shemem') {
+elsif ($ARGV[0] eq 'shmem') {
   $parameters .= ' -ss -sp';
 }
 
