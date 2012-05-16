@@ -1,3 +1,8 @@
+Wed May 16 09:17:43 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Changed the default recovery method back to REPO.
+
 Wed May 16 06:38:56 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * dds/DCPS/Service_Participant.cpp:
