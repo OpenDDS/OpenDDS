@@ -18,6 +18,8 @@ namespace DCPS {
 
 ShmemInst::ShmemInst(const std::string& name)
   : TransportInst("shmem", name)
+  , pool_size_(16 * 1024 * 1024)
+  , datalink_control_size_(4 * 1024)
 {
 }
 
@@ -32,7 +34,10 @@ ShmemInst::load(ACE_Configuration_Heap& cf,
                 ACE_Configuration_Section_Key& sect)
 {
   TransportInst::load(cf, sect);
-  //TODO: load specific config params
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_size"),
+                   datalink_control_size_, size_t)
   return 0;
 }
 
@@ -40,7 +45,9 @@ void
 ShmemInst::dump(std::ostream& os)
 {
   TransportInst::dump(os);
-  //TODO: dump specific config params
+  os << formatNameForDump("pool_size") << pool_size_ << "\n"
+     << formatNameForDump("datalink_control_size") << datalink_control_size_
+     << std::endl;
 }
 
 } // namespace DCPS

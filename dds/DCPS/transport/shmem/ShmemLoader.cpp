@@ -39,7 +39,7 @@ ShmemLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   TransportRegistry* registry = TheTransportRegistry;
   registry->register_type(new ShmemType);
 
-  //TODO: default inst?
+  //FUTURE: when we're ready, add a ShmemInst to the default config, like so:
   /*
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX + "0200_SHMEM",

@@ -28,7 +28,7 @@ class OpenDDS_Shmem_Export ShmemSendStrategy
 public:
   explicit ShmemSendStrategy(ShmemDataLink* link);
 
-  virtual void start_i();
+  virtual bool start_i();
   virtual void stop_i();
 
 protected:

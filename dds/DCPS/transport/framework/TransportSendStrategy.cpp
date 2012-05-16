@@ -889,7 +889,9 @@ TransportSendStrategy::start()
   {
     GuardType guard(this->lock_);
 
-    this->start_i();
+    if (!this->start_i()) {
+      return -1;
+    }
   }
 
   size_t header_chunks(1);

@@ -1,3 +1,26 @@
+Wed May 16 17:40:37 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          start_i() now returns a bool so failures can be reported to the fwk.
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemLoader.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed remaining known issues with the new transport.
+          Major algorithmic change is that the writer now cleans up the data --
+          so the reader doesn't need to clean it up, just update the status_.
+          Added debug logging and error handling/logging.
+          Added configuration parameters.
+
 Tue May 15 22:30:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:

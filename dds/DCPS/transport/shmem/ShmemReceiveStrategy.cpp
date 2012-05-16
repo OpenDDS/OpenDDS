@@ -26,19 +26,24 @@ ShmemReceiveStrategy::ShmemReceiveStrategy(ShmemDataLink* link)
 void
 ShmemReceiveStrategy::read()
 {
+  if (partial_recv_remaining_) {
+    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
+          "resuming partial recv\n", link_));
+    handle_dds_input(ACE_INVALID_HANDLE);
+    return;
+  }
+
   if (bound_name_.empty()) {
-    bound_name_ = "Write-" + link_->peer_address();
+    bound_name_ = "Write-" + link_->local_address();
   }
 
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem;
   if (-1 == alloc->find(bound_name_.c_str(), mem)) {
+    VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::read link %@ "
+              "peer allocator not found, receive_bytes will close link\n",
+              link_), 1);
     handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TRecvStrateg.
-    return;
-  }
-
-  if (partial_recv_remaining_) {
-    handle_dds_input(ACE_INVALID_HANDLE);
     return;
   }
 
@@ -46,8 +51,8 @@ ShmemReceiveStrategy::read()
     current_data_ = reinterpret_cast<ShmemData*>(mem);
   }
 
-  for (ShmemData* start = 0; current_data_->status_ == SHMEM_DATA_FREE;
-       ++current_data_) {
+  for (ShmemData* start = 0; current_data_->status_ == SHMEM_DATA_FREE ||
+         current_data_->status_ == SHMEM_DATA_RECV_DONE; ++current_data_) {
     if (!start) {
       start = current_data_;
     } else if (start == current_data_) {
@@ -58,6 +63,9 @@ ShmemReceiveStrategy::read()
     }
   }
 
+  VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
+        "reading at control block #%d\n",
+        link_, current_data_ - reinterpret_cast<ShmemData*>(mem)));
   // If we get this far, current_data_ points to the first SHMEM_DATA_IN_USE.
   // handle_dds_input() will call our receive_bytes() to get the data.
   handle_dds_input(ACE_INVALID_HANDLE);
@@ -69,13 +77,18 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
                                     ACE_INET_Addr& /*remote_address*/,
                                     ACE_HANDLE /*fd*/)
 {
-  ACE_DEBUG((LM_DEBUG, "ShmemReceiveStrategy::receive_bytes\n"));
+  VDBG((LM_DEBUG,
+        "(%P|%t) ShmemReceiveStrategy::receive_bytes link %@\n", link_));
 
   // check that the writer's shared memory is still available
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem;
   if (-1 == alloc->find(bound_name_.c_str(), mem)
       || current_data_->status_ != SHMEM_DATA_IN_USE) {
+    VDBG_LVL((LM_INFO,
+              "(%P|%t) ShmemReceiveStrategy::receive_bytes link %@ closing\n",
+              link_), 1);
+    gracefully_disconnected_ = true; // do not attempt reconnect via relink()
     return 0; // close "connection"
   }
 
@@ -95,11 +108,19 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   } else {
     remaining = TransportHeader::get_length(current_data_->transport_header_);
     const size_t hdr_sz = sizeof(current_data_->transport_header_);
-    //TODO: assuming iov[0] has room for the transport header
+    // BUFFER_LOW_WATER in the framework ensures a large enough buffer
+    if (iov[0].iov_len < hdr_sz) {
+      VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy for link %@ "
+                "receive buffer of length %d is too small\n",
+                link_, iov[0].iov_len), 0);
+      errno = ENOBUFS;
+      return -1;
+    }
+
     std::memcpy(iov[0].iov_base, current_data_->transport_header_, hdr_sz);
     total += hdr_sz;
     src_iter = current_data_->payload_;
-    if (hdr_sz < iov[0].iov_len) {
+    if (iov[0].iov_len > hdr_sz) {
       dst_iter = (char*)iov[0].iov_base + hdr_sz;
     } else if (n > 1) {
       dst_iter = (char*)iov[1].iov_base;
@@ -122,11 +143,16 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   if (remaining) {
     partial_recv_remaining_ = remaining;
     partial_recv_ptr_ = src_iter;
+    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy for link %@ "
+          "receive was partial\n", link_));
     link_->signal_semaphore();
 
   } else {
-    alloc->free(current_data_->payload_); // this will eventually be refcounted
-    current_data_->status_ = SHMEM_DATA_FREE;
+    partial_recv_remaining_ = 0;
+    partial_recv_ptr_ = 0;
+    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy for link %@ "
+          "receive done\n", link_));
+    current_data_->status_ = SHMEM_DATA_RECV_DONE;
   }
 
   return total;

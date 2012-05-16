@@ -75,8 +75,8 @@ ShmemTransport::find_datalink_i(const RepoId& /*local_id*/,
                                 const RepoId& /*remote_id*/,
                                 const TransportBLOB& remote_data,
                                 bool /*remote_reliable*/,
-                                const ConnectionAttribs& attribs,
-                                bool active)
+                                const ConnectionAttribs& /*attribs*/,
+                                bool /*active*/)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote_data);
   if (key.first != hostname_) {
@@ -105,7 +105,7 @@ ShmemTransport::connect_datalink_i(const RepoId& /*local_id*/,
                                    const RepoId& /*remote_id*/,
                                    const TransportBLOB& remote_data,
                                    bool /*remote_reliable*/,
-                                   const ConnectionAttribs& attribs)
+                                   const ConnectionAttribs& /*attribs*/)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote_data);
   if (key.first != hostname_) {
@@ -182,10 +182,27 @@ ShmemTransport::configure_i(TransportInst* config)
   pool << "OpenDDS-" << ACE_OS::getpid() << '-' << config->name();
   poolname_ = pool.str();
 
+  ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
+#ifdef ACE_WIN32
+  alloc_opts.max_size_ = config_i_->pool_size_;
+#elif !defined ACE_LACKS_SYSV_SHMEM
+  alloc_opts.segment_size_ = config_i_->pool_size_;
+  alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
+  alloc_opts.max_segments_ = 1;
+#endif
+
   alloc_ =
-    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(poolname_.c_str()));
+    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(poolname_.c_str()),
+                       0 /*lock_name is optional*/, &alloc_opts);
 
   void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
+  if (mem == 0) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("ShmemTrasport::configure_i: failed to allocate")
+                      ACE_TEXT(" space for semaphore in shared memory!\n")),
+                     false);
+  }
+
   ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
   alloc_->bind("Semaphore", pSem);
 
@@ -210,6 +227,9 @@ ShmemTransport::configure_i(TransportInst* config)
   }
 
   read_task_ = new ReadTask(this, ace_sema);
+
+  VDBG_LVL((LM_INFO, "(%P|%t) ShmemTransport %@ configured with address %C\n",
+            this, poolname_.c_str()), 1);
 
   return true;
 #endif
@@ -273,13 +293,6 @@ ShmemTransport::blob_to_key(const TransportBLOB& blob)
   const std::string pool(c_str + host_len + 1, blob.length() - host_len - 1);
   return make_pair(host, pool);
 }
-
-//
-//ACE_INET_Addr
-//ShmemTransport::get_connection_addr(const TransportBLOB& data) const
-//{
-//  return local_address;
-//}
 
 void
 ShmemTransport::release_datalink(DataLink* link)

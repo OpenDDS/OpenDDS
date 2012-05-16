@@ -35,13 +35,13 @@ class ShmemTransport;
 class ReceivedDataSample;
 
 #ifdef ACE_WIN32
-  typedef ACE_Pagefile_Memory_Pool ShmemPool; // default size is 16 MB
+  typedef ACE_Pagefile_Memory_Pool ShmemPool;
   typedef HANDLE ShmemSharedSemaphore;
 #elif !defined ACE_LACKS_SYSV_SHMEM
-  typedef ACE_Shared_Memory_Pool ShmemPool;   // default size is 768 KB?
+  typedef ACE_Shared_Memory_Pool ShmemPool;
   typedef sem_t ShmemSharedSemaphore;
-#else
-  typedef ACE_Local_Memory_Pool ShmemPool;    // no shared memory support
+#else // no shared memory support (will yield a runtime error if used)
+  typedef ACE_Local_Memory_Pool ShmemPool;
   typedef int ShmemSharedSemaphore;
 #endif
 
@@ -57,6 +57,7 @@ struct ShmemData {
 enum { // values for ShmemData::status_
   SHMEM_DATA_FREE = 0,
   SHMEM_DATA_IN_USE = 1,
+  SHMEM_DATA_RECV_DONE = 2,
   SHMEM_DATA_END_OF_ALLOC = -1
 };
 

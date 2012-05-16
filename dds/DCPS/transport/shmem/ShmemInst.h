@@ -25,6 +25,15 @@ public:
 
   virtual void dump(std::ostream& os);
 
+  /// Size (in bytes) of the single shared-memory pool allocated by this
+  /// transport instance.  Defaults to 16 megabytes.
+  size_t pool_size_;
+
+  /// Size (in bytes) of the control area allocated for each data link.
+  /// This allocation comes out of the shared-memory pool defined by pool_size_.
+  /// Defaults to 4 kilobytes.
+  size_t datalink_control_size_;
+
   bool is_reliable() const { return true; }
 
 private:

@@ -36,7 +36,8 @@ ShmemDataLink::open(const std::string& peer_address)
 {
   peer_address_ = peer_address;
 
-  peer_alloc_ = new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str()));
+  peer_alloc_ =
+    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str()));
 
   if (-1 == peer_alloc_->find("Semaphore")) {
     stop_i();
@@ -57,6 +58,9 @@ ShmemDataLink::open(const std::string& peer_address)
                      false);
   }
 
+  VDBG_LVL((LM_INFO, "(%P|%t) ShmemDataLink link %@ open to peer %C\n",
+            this, peer_address_.c_str()), 1);
+
   return true;
 }
 
@@ -73,7 +77,6 @@ ShmemDataLink::stop_i()
   }
   delete peer_alloc_;
   peer_alloc_ = 0;
-  //TODO
 }
 
 ShmemAllocator*

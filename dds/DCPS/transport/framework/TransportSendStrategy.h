@@ -120,7 +120,7 @@ public:
   virtual void stop_i() = 0;
 
   /// Let the subclass start.
-  virtual void start_i() {}
+  virtual bool start_i() { return true; }
 
   void link_released(bool flag);
 
