@@ -80,11 +80,15 @@ static bool got_pending_timeout = false;
 static bool got_persistent_data_dir = false;
 static bool got_default_discovery = false;
 
+#if !defined (DDS_DEFAULT_DISCOVERY_METHOD)
+# define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_RTPS
+#endif
+
 Service_Participant::Service_Participant()
   : orb_(CORBA::ORB::_nil()),
     orb_from_user_(0),
     dp_factory_servant_(0),
-    defaultDiscovery_(Discovery::DEFAULT_REPO),
+    defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
     liveliness_factor_(80),
@@ -1087,7 +1091,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
       ACE_Configuration_Heap cf;
       cf.open();
-      load_discovery_configuration(cf, RTPS_SECTION_NAME);
+      this->load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
       // Try to find it again
       location = this->discoveryMap_.find(Discovery::DEFAULT_RTPS);
@@ -1598,15 +1602,15 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 
     const std::string sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
     std::map<std::string, Discovery::Config*>::iterator iter =
-      discovery_types_.find(sect_name);
+      this->discovery_types_.find(sect_name);
 
-    if (iter == discovery_types_.end()) {
+    if (iter == this->discovery_types_.end()) {
       // See if we can dynamically load the required libraries
       TheTransportRegistry->load_transport_lib(sect_name);
-      iter = discovery_types_.find(sect_name);
+      iter = this->discovery_types_.find(sect_name);
     }
 
-    if (iter != discovery_types_.end()) {
+    if (iter != this->discovery_types_.end()) {
       // discovery code is loaded, process options
       return iter->second->discovery_config(cf);
     } else {

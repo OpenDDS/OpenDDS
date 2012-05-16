@@ -1,3 +1,16 @@
+Wed May 16 06:38:56 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+        * dds/DdsDcps.mpc:
+
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/be_util.cpp:
+
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+          Prepared DDS to be supported by dds4ccm
+
 Sun May 13 18:37:35 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/GuidUtils.h:

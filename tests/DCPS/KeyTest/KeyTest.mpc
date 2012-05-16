@@ -25,11 +25,11 @@ project(DDS*idl): dcps_test_lib {
 }
 
 
-project(DDS*IsBounded) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+project(DDS*IsBounded) : dcpsexe_with_tcp, dcps_rtps, dcps_udp, dcps_multicast {
 
   exename   = IsBounded
-  after    += DDS*idl rtps
-  libs     += DDS*idl OpenDDS_Rtps
+  after    += DDS*idl
+  libs     += DDS*idl
 
   Idl_Files {
   }
@@ -40,11 +40,11 @@ project(DDS*IsBounded) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
 }
 
 
-project(DDS*KeyMarshaling) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+project(DDS*KeyMarshaling) : dcpsexe_with_tcp, dcps_rtps, dcps_udp, dcps_multicast {
 
   exename   = KeyMarshaling
-  after    += DDS*idl rtps
-  libs     += DDS*idl OpenDDS_Rtps
+  after    += DDS*idl
+  libs     += DDS*idl
 
   Idl_Files {
   }
@@ -55,10 +55,8 @@ project(DDS*KeyMarshaling) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
 }
 
 
-project(*MD5): dcpsexe {
+project(*MD5): dcps_rtpsexe {
   exename   = *
-  after    += rtps
-  libs     += OpenDDS_Rtps
 
   Idl_Files {
   }
