@@ -1,0 +1,203 @@
+Wed May 16 21:54:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r5539 through r5569.
+
+Wed May 16 20:57:07 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_shmem.mpb:
+
+          Added mpb file for SharedMemory transport library.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/all.ini:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/all.ini:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/shmem.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/shmem.ini:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/SharedTransport/shmem.ini:
+
+          Added shared memory config to these tests.
+
+Wed May 16 18:41:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+
+          Use std::memcmp() since iovec::iov_base has different types on
+          different platforms.  memcmp() uses void* so any type works.
+
+Wed May 16 17:40:37 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          start_i() now returns a bool so failures can be reported to the fwk.
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemLoader.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed remaining known issues with the new transport.
+          Major algorithmic change is that the writer now cleans up the data --
+          so the reader doesn't need to clean it up, just update the status_.
+          Added debug logging and error handling/logging.
+          Added configuration parameters.
+
+Tue May 15 22:30:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Find test executables ending in .exe on Win32.
+
+Mon May 14 15:20:25 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/reduce-shared-data.pl:
+
+          Naive data reduction as a placeholder for now.
+
+        * performance-tests/Bench/tests/shared:
+
+          Tests for all transports running on the same host.
+
+Mon May 14 14:23:57 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * BranchChangeLog:
+
+          Added support for vim.
+
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          de-in-lined static get_length() method to resolve gcc
+          visibility on unload issue.
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Corrected some documentation.
+
+Thu May 10 18:42:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Allow for partial receives (when the caller's buffers aren't large
+          enough to hold the transport header and its payload).
+
+Thu May 10 16:49:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+
+          Fixed a buffer management bug.  Added comments describing a case
+          that's not handled yet.
+
+Thu May 10 15:55:51 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+
+          Provide a way to extract the length_ field from the serialized
+          form of the TransportHeader.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added a start_i() which works a lot like the existing stop_i().
+          The DataLink is not yet ready during the SendStrategy constructor.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Shared memory is now a "known" transport type for dynamic loading.
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.inl:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Initial implementation to the point where we can actually send
+          and receive data over shared memory.  Lots of details, error checking,
+          logging, configuration, the pseudo-multicast stuff, etc. still TODO.
+
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/run_test.pl:
+
+          Adapt the test so it can be run with shared memory when the perl
+          script is run with the 1st argument of "shmem".
+
+Wed May  9 16:39:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.inl:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Started implementing transport setup and datalink management.
+
+Tue May  8 20:03:16 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/OpenDDS_Shmem.mpc:
+        * dds/DCPS/transport/shmem/Shmem.h:
+        * dds/DCPS/transport/shmem/Shmem.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.inl:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink_rch.h:
+        * dds/DCPS/transport/shmem/ShmemInst.h:
+        * dds/DCPS/transport/shmem/ShmemInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemInst_rch.h:
+        * dds/DCPS/transport/shmem/ShmemLoader.h:
+        * dds/DCPS/transport/shmem/ShmemLoader.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy_rch.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.h:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy_rch.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/shmem/Shmem_Export.h:
+        * dds/DCPS/transport/shmem/shmem.rc:
+
+          Added files for a new Shared Memory transport library.
+
+Tue May  8 17:35:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * BranchChangeLog:
+
+          Created branch "SharedMemory".
+
+vim: filetype=changelog
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

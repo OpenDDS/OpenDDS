@@ -1,3 +1,10 @@
+Wed May 16 23:17:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "SharedMemory", which includes a new shared-memory
+          transport type.  See the NEWS file for an overview.
+          For details of changes introduced on the branch,
+          see docs/history/ChangeLog-SharedMemory.
+
 Wed May 16 22:18:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcps.mpc:

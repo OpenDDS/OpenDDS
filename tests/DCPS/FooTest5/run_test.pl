@@ -23,6 +23,7 @@ my $use_take = 0;
 my $use_udp = 0;
 my $use_multicast = 0;
 my $use_rtps_transport = 0;
+my $use_shmem = 0;
 my $num_readers = 1;
 my $max_samples_per_instance = 1000;
 my $sequence_length = 10;
@@ -53,6 +54,12 @@ if ($ARGV[$arg_idx] eq 'multicast') {
 
 if ($ARGV[$arg_idx] eq 'rtps') {
   $use_rtps_transport = 1;
+  ++$arg_idx;
+  $write_interval_ms = 50;
+}
+
+if ($ARGV[$arg_idx] eq 'shmem') {
+  $use_shmem = 1;
   ++$arg_idx;
   $write_interval_ms = 50;
 }
@@ -119,13 +126,13 @@ my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
 print $DCPSREPO->CommandLine(), "\n";
 
 my $sub_parameters = "-DCPSConfigFile all.ini -u $use_udp -c $use_multicast"
-    . " -p $use_rtps_transport -r $num_readers -t $use_take"
+    . " -p $use_rtps_transport -s $use_shmem -r $num_readers -t $use_take"
     . " -m $num_instances_per_writer -i $num_samples_per_instance"
     . " -w $num_writers -z $sequence_length"
     . " -k $no_key -y $read_interval_ms -f $mixed_trans";
 
 my $pub_parameters = "-DCPSConfigFile all.ini -u $use_udp -c $use_multicast "
-    . " -p $use_rtps_transport -w $num_writers "
+    . " -p $use_rtps_transport -s $use_shmem -w $num_writers "
     . " -m $num_instances_per_writer -i $num_samples_per_instance "
     . " -n $max_samples_per_instance -z $sequence_length"
     . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"

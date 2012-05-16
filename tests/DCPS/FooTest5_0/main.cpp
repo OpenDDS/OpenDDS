@@ -44,6 +44,8 @@ int sub_using_udp = 0;
 int pub_using_udp = 0;
 int sub_using_rtps = 0;
 int pub_using_rtps = 0;
+int sub_using_shmem = 0;
+int pub_using_shmem = 0;
 
 
 int wait_for_data (::DDS::Subscriber_ptr sub,
@@ -89,6 +91,8 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -up                         Publisher using UDP transport
     //  -rs                         Subscriber using RTPS transport
     //  -rp                         Publisher using RTPS transport
+    //  -ss                         Subscriber using Shared Memory transport
+    //  -sp                         Publisher using Shared Memory transport
 
     const ACE_TCHAR *currentArg = 0;
 
@@ -144,6 +148,18 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     {
       ACE_DEBUG((LM_DEBUG, "Publisher Using RTPS transport.\n"));
       pub_using_rtps = 1;
+      arg_shifter.consume_arg();
+    }
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-ss")) == 0)
+    {
+      ACE_DEBUG((LM_DEBUG, "Subscriber Using Shared Memory transport.\n"));
+      sub_using_shmem = 1;
+      arg_shifter.consume_arg();
+    }
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-sp")) == 0)
+    {
+      ACE_DEBUG((LM_DEBUG, "Publisher Using Shared Memory transport.\n"));
+      pub_using_shmem = 1;
       arg_shifter.consume_arg();
     }
     else
@@ -260,6 +276,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
         TheTransportRegistry->bind_config("udp", sub.in());
       } else if (sub_using_rtps) {
         TheTransportRegistry->bind_config("rtps", sub.in());
+      } else if (sub_using_shmem) {
+        TheTransportRegistry->bind_config("shmem", sub.in());
       } else {
         TheTransportRegistry->bind_config("tcp", sub.in());
       }
@@ -269,6 +287,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
         TheTransportRegistry->bind_config("udp", pub.in());
       } else if (pub_using_rtps) {
         TheTransportRegistry->bind_config("rtps", pub.in());
+      } else if (pub_using_shmem) {
+        TheTransportRegistry->bind_config("shmem", pub.in());
       } else {
         TheTransportRegistry->bind_config("tcp", pub.in());
       }
