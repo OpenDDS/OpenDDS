@@ -33,7 +33,8 @@ class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
 public:
   UdpDataLink(UdpTransport* transport,
-              bool active);
+              CORBA::Long   priority,
+              bool          active);
 
   void configure(UdpInst* config,
                  TransportReactorTask* reactor_task);

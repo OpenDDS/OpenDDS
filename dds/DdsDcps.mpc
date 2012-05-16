@@ -1,60 +1,50 @@
 // $Id$
 
-project(OpenDDS_Dcps): taolib, portableserver, core, dcps_bits, coverage_optional, dcps_optional_features, dds4ccm_opendds, dcps_ts_defaults, dds_macros, dds_suppress_any_support, install {
-
-  sharedname   = OpenDDS_Dcps
-  dynamicflags = OPENDDS_DCPS_BUILD_DLL
-  libout       = $(DDS_ROOT)/lib
-  includes    += $(DDS_ROOT)
-  pch_header   = DCPS/DdsDcps_pch.h
-  pch_source   = DCPS/DdsDcps_pch.cpp
-  macros      += NOMINMAX         //don't #define min and max in Win32 headers
-
-
-  //The following is only to make the PCH work, client projects should not have
-  //this as an include path.
-  includes += $(DDS_ROOT)/dds
-
-  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
-  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
-
-  Source_Files {
-    DCPS
-    DCPS/transport/framework
-  }
-
-  Header_Files {
-    Version.h
-    DCPS
-    DCPS/transport/framework
-    DCPS/yard
-  }
-
-  Template_Files {
-    DCPS
-    DCPS/transport/framework
+project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, dds4ccm_opendds, \
+                               dcps_ts_defaults, dds_suppress_any_support, install {
+  custom_only = 1
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
+              -Wb,export_macro=OpenDDS_Dcps_Export \
+              -Wb,export_include=dds/DCPS/dcps_export.h \
+              -I$(DDS_ROOT)
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
+                   -Wb,export_macro=OpenDDS_Dcps_Export \
+                   -Wb,export_include=dds/DCPS/dcps_export.h
+  IDL_Files {
+    idlflags -= -Glem
+    DdsDcpsInfoUtils.idl
+    DdsDcpsGuid.idl
   }
 
   IDL_Files {
-    // DDS specification defined
+    DdsDcps.idl
     DdsDcpsInfrastructure.idl
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
     DdsDcpsTopic.idl
-    DdsDcps.idl
-    // OpenDDS specific below
     DdsDcpsSubscriptionExt.idl
-    DdsDcpsInfoUtils.idl
     DdsDcpsTypeSupportExt.idl
-    DdsDcpsSubscriptionExt.idl
-    DdsDcpsGuid.idl
   }
 
   TypeSupport_Files {
     dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
     gendir = CorbaSeq
-    CorbaSeq/*Seq.idl
+    CorbaSeq/BooleanSeq.idl
+    CorbaSeq/CharSeq.idl
+    CorbaSeq/DoubleSeq.idl
+    CorbaSeq/FloatSeq.idl
+    CorbaSeq/LongDoubleSeq.idl
+    CorbaSeq/LongLongSeq.idl
+    CorbaSeq/LongSeq.idl
+    CorbaSeq/OctetSeq.idl
+    CorbaSeq/ShortSeq.idl
+    CorbaSeq/StringSeq.idl
+    CorbaSeq/ULongLongSeq.idl
+    CorbaSeq/ULongSeq.idl
+    CorbaSeq/UShortSeq.idl
+    CorbaSeq/WCharSeq.idl
+    CorbaSeq/WStringSeq.idl
   }
 
   TypeSupport_Files {
@@ -62,38 +52,16 @@ project(OpenDDS_Dcps): taolib, portableserver, core, dcps_bits, coverage_optiona
     DdsDcpsGuid.idl
     DdsDcpsInfoUtils.idl
   }
-
-  InstallData_Files {
-    gendir = .
-    ../MPC
-    ../AUTHORS
-    ../README
-    ../VERSION
-    ../LICENSE
-    ../NEWS
-    ../rules.dds.GNU
-  }
-
-  InstallData_Files {
-    gendir = bin
-    ../bin/PerlDDS
-  }
-
-  verbatim(gnuace, postinstall) {
-"	echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(INSTALL_PREFIX)/share/dds/dds-devel.sh"
-"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
-"	ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
-  }
 }
 
-project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
+project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_features {
   custom_only = 1
-  requires += dds4ccm_opendds
-  after += OpenDDS_Dcps
-  idlflags -= -St
-  idlflags += -I$(CIAO_ROOT)/connectors \
-              -Wb,stub_export_macro=DDSDCPS_LEM_STUB_Export \
-              -Wb,stub_export_include=DdsDcps_lem_stub_export.h -SS -I$(DDS_ROOT)
+  requires   += dds4ccm_opendds
+  after      += OpenDDS_Dcps_idl_gen
+  idlflags   += -I$(CIAO_ROOT)/connectors \
+                -Wb,stub_export_macro=DDSDCPS_LEM_STUB_Export \
+                -Wb,stub_export_include=DdsDcps_lem_stub_export.h \
+                -SS -I$(DDS_ROOT)
 
   IDL_Files {
      idlflags += -Gxhst
@@ -101,6 +69,7 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
   }
 
   IDL_Files {
+    // DDS specification defined
     DdsDcpsE.idl
     DdsDcpsInfrastructureE.idl
     DdsDcpsPublicationE.idl
@@ -117,9 +86,9 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
   }
 }
 
-project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype {
+project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dcps_optional_features {
   requires += dds4ccm_opendds
-  after += OpenDDS_Dcps DdsDcps_lem_gen
+  after += OpenDDS_Dcps_lem_gen
   includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)
   sharedname = OpenDDS_Dcps_lem_stub
   dynamicflags += DDSDCPS_LEM_STUB_BUILD_DLL
@@ -150,3 +119,150 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype {
   }
 }
 
+
+project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macros, install, dcps_optional_features {
+  after       += OpenDDS_Dcps_lem_gen OpenDDS_Dcps_idl_gen
+  sharedname   = OpenDDS_Dcps
+  dynamicflags = OPENDDS_DCPS_BUILD_DLL
+  libout       = $(DDS_ROOT)/lib
+  includes    += $(DDS_ROOT)
+  pch_header   = DCPS/DdsDcps_pch.h
+  pch_source   = DCPS/DdsDcps_pch.cpp
+  macros      += NOMINMAX         //don't #define min and max in Win32 headers
+
+
+  //The following is only to make the PCH work, client projects should not have
+  //this as an include path.
+  includes += $(DDS_ROOT)/dds
+
+  Source_Files {
+    DCPS
+    DCPS/transport/framework
+
+    DdsDcpsC.cpp
+    DdsDcpsDomainC.cpp
+    DdsDcpsGuidC.cpp
+    DdsDcpsInfoUtilsC.cpp
+    DdsDcpsInfrastructureC.cpp
+    DdsDcpsInfrastructureTypeSupportC.cpp
+    DdsDcpsPublicationC.cpp
+    DdsDcpsSubscriptionC.cpp
+    DdsDcpsSubscriptionExtC.cpp
+    DdsDcpsTopicC.cpp
+    DdsDcpsTypeSupportExtC.cpp
+
+    DdsDcpsGuidTypeSupportImpl.cpp
+    DdsDcpsInfoUtilsTypeSupportImpl.cpp
+    DdsDcpsInfrastructureTypeSupportImpl.cpp
+
+    DdsDcpsS.cpp
+    DdsDcpsDomainS.cpp
+    DdsDcpsGuidS.cpp
+    DdsDcpsInfoUtilsS.cpp
+    DdsDcpsInfrastructureS.cpp
+    DdsDcpsInfrastructureTypeSupportS.cpp
+    DdsDcpsPublicationS.cpp
+    DdsDcpsSubscriptionS.cpp
+    DdsDcpsSubscriptionExtS.cpp
+    DdsDcpsTopicS.cpp
+    DdsDcpsTypeSupportExtS.cpp
+
+
+    CorbaSeq/BooleanSeqTypeSupportImpl.cpp
+    CorbaSeq/CharSeqTypeSupportImpl.cpp
+    CorbaSeq/DoubleSeqTypeSupportImpl.cpp
+    CorbaSeq/FloatSeqTypeSupportImpl.cpp
+    CorbaSeq/LongDoubleSeqTypeSupportImpl.cpp
+    CorbaSeq/LongLongSeqTypeSupportImpl.cpp
+    CorbaSeq/LongSeqTypeSupportImpl.cpp
+    CorbaSeq/OctetSeqTypeSupportImpl.cpp
+    CorbaSeq/ShortSeqTypeSupportImpl.cpp
+    CorbaSeq/StringSeqTypeSupportImpl.cpp
+    CorbaSeq/ULongLongSeqTypeSupportImpl.cpp
+    CorbaSeq/ULongSeqTypeSupportImpl.cpp
+    CorbaSeq/UShortSeqTypeSupportImpl.cpp
+    CorbaSeq/WCharSeqTypeSupportImpl.cpp
+    CorbaSeq/WStringSeqTypeSupportImpl.cpp
+  }
+
+  Header_Files {
+    Version.h
+    DCPS
+    DCPS/transport/framework
+    DCPS/yard
+
+    DdsDcpsC.h
+    DdsDcpsDomainC.h
+    DdsDcpsGuidC.h
+    DdsDcpsInfoUtilsC.h
+    DdsDcpsInfrastructureC.h
+    DdsDcpsInfrastructureTypeSupportC.h
+    DdsDcpsPublicationC.h
+    DdsDcpsSubscriptionC.h
+    DdsDcpsSubscriptionExtC.h
+    DdsDcpsTopicC.h
+    DdsDcpsTypeSupportExtC.h
+
+    DdsDcpsGuidTypeSupportImpl.h
+    DdsDcpsInfoUtilsTypeSupportImpl.h
+    DdsDcpsInfrastructureTypeSupportImpl.h
+
+    DdsDcpsS.h
+    DdsDcpsDomainS.h
+    DdsDcpsGuidS.h
+    DdsDcpsInfoUtilsS.h
+    DdsDcpsInfrastructureS.h
+    DdsDcpsInfrastructureTypeSupportS.h
+    DdsDcpsPublicationS.h
+    DdsDcpsSubscriptionS.h
+    DdsDcpsSubscriptionExtS.h
+    DdsDcpsTopicS.h
+    DdsDcpsTypeSupportExtS.h
+
+    CorbaSeq/BooleanSeqTypeSupportImpl.h
+    CorbaSeq/CharSeqTypeSupportImpl.h
+    CorbaSeq/DoubleSeqTypeSupportImpl.h
+    CorbaSeq/FloatSeqTypeSupportImpl.h
+    CorbaSeq/LongDoubleSeqTypeSupportImpl.h
+    CorbaSeq/LongLongSeqTypeSupportImpl.h
+    CorbaSeq/LongSeqTypeSupportImpl.h
+    CorbaSeq/OctetSeqTypeSupportImpl.h
+    CorbaSeq/ShortSeqTypeSupportImpl.h
+    CorbaSeq/StringSeqTypeSupportImpl.h
+    CorbaSeq/ULongLongSeqTypeSupportImpl.h
+    CorbaSeq/ULongSeqTypeSupportImpl.h
+    CorbaSeq/UShortSeqTypeSupportImpl.h
+    CorbaSeq/WCharSeqTypeSupportImpl.h
+    CorbaSeq/WStringSeqTypeSupportImpl.h
+  }
+
+  Template_Files {
+    DCPS
+    DCPS/transport/framework
+  }
+
+  IDL_Files {
+  }
+
+  InstallData_Files {
+    gendir = .
+    ../MPC
+    ../AUTHORS
+    ../README
+    ../VERSION
+    ../LICENSE
+    ../NEWS
+    ../rules.dds.GNU
+  }
+
+  InstallData_Files {
+    gendir = bin
+    ../bin/PerlDDS
+  }
+
+  verbatim(gnuace, postinstall) {
+" echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(INSTALL_PREFIX)/share/dds/dds-devel.sh"
+" @$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
+" ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
+  }
+}

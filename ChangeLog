@@ -1,3 +1,69 @@
+Wed May 16 18:56:06 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Fixed compile issues when CIAO is not available
+
+Wed May 16 17:27:58 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+        * dds/DdsDcps.mpc:
+          Fixed mpc problems when CIAO is not available
+
+Wed May 16 09:17:43 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Changed the default recovery method back to REPO.
+
+Wed May 16 06:38:56 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Default to RTPS and fixed some minor
+          logging issues.
+
+        * dds/DdsDcps.mpc:
+          Created lem generation. Devided idl files
+          into the ones that need the lem-generation and
+          the ones that don't.
+
+        * dds/idl/IDLTemplate.txt:
+          Generating sequences as typedef instead of
+          native, taking the TAO (ACE) version into
+          account.
+
+        * dds/idl/be_produce.cpp:
+          Generating include guards for IDL as well.
+
+        * dds/idl/be_util.cpp:
+          Removed opendds_sequence_suffix since it isn't
+          used anymore.
+
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+          Due to changes in ddsdcps.mpc.
+
+Sun May 13 18:37:35 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/GuidUtils.h:
+          Inline methods shouldn't be exported, resolves MinGW warnings on
+          windows
+
+        * dds/DCPS/Service_Participant.cpp:
+          Fixed windows MinGW warning
+
+Wed May  9 20:16:05 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Add support for setting the diffserv codepoint when
+          Transport Priority QoS is used with the udp transport.
+
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+
+          Modify this test so that the UDP configuration actually works.
+
 Tue Apr 24 02:31:09 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
