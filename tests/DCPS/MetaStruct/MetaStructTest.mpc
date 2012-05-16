@@ -1,4 +1,4 @@
-project: dcps {
+project: dcps, content_subscription_core {
   TypeSupport_Files {
     MetaStructTest.idl
   }

@@ -187,12 +187,12 @@ public:
 
   #endif
 
-  #if !defined(OPENDDS_NO_QUERY_CONDITION) || !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
   void deref_filter_eval(const char* filter);
 
-  #endif
+#endif
 
   virtual DDS::ReturnCode_t delete_contained_entities();
 
@@ -385,7 +385,7 @@ private:
   SubscriberSet  subscribers_;
   /// Collection of topics.
   TopicMap       topics_;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif

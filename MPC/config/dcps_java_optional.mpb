@@ -5,6 +5,7 @@ feature (!content_subscription) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION
   idl2jniflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
   idl2jniflags += -DOPENDDS_NO_MULTI_TOPIC
+  idl2jniflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
 feature (!query_condition) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION

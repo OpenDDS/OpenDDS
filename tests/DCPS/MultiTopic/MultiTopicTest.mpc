@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_tcp {
+project: dcpsexe, dcps_tcp, content_subscription {
   requires += multi_topic
   TypeSupport_Files {
     MultiTopicTest.idl

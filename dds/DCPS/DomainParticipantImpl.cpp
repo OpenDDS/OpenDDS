@@ -353,7 +353,7 @@ DomainParticipantImpl::create_topic(
                      this->topics_protector_,
                      DDS::Topic::_nil());
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
     if (topic_descrs_.count(topic_name)) {
       if (DCPS_debug_level > 3) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -631,7 +631,7 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, name, entry) == -1) {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
     TopicDescriptionMap::iterator iter = topic_descrs_.find(name);
     if (iter != topic_descrs_.end()) {
       return DDS::TopicDescription::_duplicate(iter->second);
@@ -790,6 +790,8 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
 
 #endif // OPENDDS_NO_MULTI_TOPIC
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
 RcHandle<FilterEvaluator>
 DomainParticipantImpl::get_filter_eval(const char* filter)
 {
@@ -815,6 +817,8 @@ DomainParticipantImpl::deref_filter_eval(const char* filter)
     }
   }
 }
+
+#endif
 
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()

@@ -502,6 +502,8 @@ public:
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance) = 0;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
   void enable_filtering(ContentFilteredTopicImpl* cft);
@@ -538,7 +540,8 @@ public:
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
                                   DDS::InstanceStateKind state) = 0;
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#endif
+
   void begin_access();
   void end_access();
   void get_ordered_data(GroupRakeData& data,
@@ -556,7 +559,6 @@ public:
 
   void reset_coherent_info (const PublicationId& writer_id,
                             const RepoId& publisher_id);
-#endif
 
   // Called upon subscriber qos change to update the local cache.
   void set_subscriber_qos(const DDS::SubscriberQos & qos);

@@ -18,6 +18,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
   exename = publisher
   after  += DDS*idl
   libs   += DDS*idl
+  requires += persistence_profile
 
   Idl_Files {
   }
@@ -33,6 +34,7 @@ project(DDS*Subscriber) : dcpsexe_with_tcp {
   exename = subscriber
   after  += DDS*idl
   libs   += DDS*idl
+  requires += persistence_profile
 
   Idl_Files {
   }

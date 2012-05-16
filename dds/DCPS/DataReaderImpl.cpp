@@ -3376,6 +3376,8 @@ DataReaderImpl::set_subscriber_qos(
   this->subqos_ = qos;
 }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
@@ -3401,6 +3403,7 @@ DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
                                     subscription_id_,
                                     params);
 }
+#endif
 
 void
 DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
