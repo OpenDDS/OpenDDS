@@ -1,21 +1,27 @@
+Wed May 16 21:22:51 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+
+	  Removed uneeded feature guard.
+
 Wed May 16 19:33:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/content_subscription.mpb:
 
           A base file to use by content subscription related
-	  applications.
+          applications.
 
         * MPC/config/content_subscription_core.mpb:
 
-	  Base file to use for testing core content subscription
-	  components.
+          Base file to use for testing core content subscription
+          components.
 
-	* MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_java_optional.mpb:
         * MPC/config/dcps_optional_features.mpb:
 
-	  For content_subscription feature, if not enabled
-	  include macro to indicate such. Trims down
-	  preprocessor conditions.
+          For content_subscription feature, if not enabled
+          include macro to indicate such. Trims down
+          preprocessor conditions.
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -24,8 +30,8 @@ Wed May 16 19:33:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/TopicDescriptionImpl.h:
         * dds/DCPS/TopicExpressionGrammar.h:
 
-	  Fixes to support proper building when content_subscription
-	  feature is disabled.
+          Fixes to support proper building when content_subscription
+          feature is disabled.
 
         * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
         * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
@@ -34,15 +40,15 @@ Wed May 16 19:33:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
         * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
 
-	  Inherit from content_subscription so won't get built
-	  if content_subscription feature is disabled.
+          Inherit from content_subscription so won't get built
+          if content_subscription feature is disabled.
 
         * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
         * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
         * tests/DCPS/TransientDurability/TransientDurability.mpc:
 
-	  Add missing require statement for projects beyond
-	  the first one.
+          Add missing require statement for projects beyond
+          the first one.
 
         * tests/DCPS/FilterExpression/ContentSubscription.mpb:
         * tests/DCPS/MetaStruct/ContentSubscription.mpb:
