@@ -54,7 +54,7 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, dds4ccm_opendd
   }
 }
 
-project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
+project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_features {
   custom_only = 1
   requires   += dds4ccm_opendds
   after      += OpenDDS_Dcps_idl_gen
@@ -86,7 +86,7 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
   }
 }
 
-project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype {
+project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dcps_optional_features {
   requires += dds4ccm_opendds
   after += OpenDDS_Dcps_lem_gen
   includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)
@@ -120,12 +120,12 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype {
 }
 
 
-project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macros, install {
+project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macros, install, dcps_optional_features {
   after       += OpenDDS_Dcps_lem_gen OpenDDS_Dcps_idl_gen
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
-  includes    += $(DDS_ROOT) $(CIAO_ROOT)
+  includes    += $(DDS_ROOT)
   pch_header   = DCPS/DdsDcps_pch.h
   pch_source   = DCPS/DdsDcps_pch.cpp
   macros      += NOMINMAX         //don't #define min and max in Win32 headers
