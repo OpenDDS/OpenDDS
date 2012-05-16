@@ -28,6 +28,11 @@ if ($ARGV[$arg_idx] eq 'multicast') {
   $arg_idx = $arg_idx + 1;
 }
 
+if ($ARGV[$arg_idx] eq 'shmem') {
+  $transport = "shmem.ini";
+  $arg_idx = $arg_idx + 1;
+}
+
 if ($ARGV[$arg_idx] eq 'rtps_disc_tcp') {
   $transport = "rtps_disc_tcp.ini";
   $arg_idx = $arg_idx + 1;

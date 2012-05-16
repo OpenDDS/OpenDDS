@@ -86,10 +86,14 @@ elsif ($ARGV[$arg] eq 'rtps_unicast') {
     $pub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
     $sub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
 }
+elsif ($ARGV[$arg] eq 'shmem') {
+    $pub_opts .= " -DCPSConfigFile shmem.ini";
+    $sub_opts .= " -DCPSConfigFile shmem.ini";
+}
 elsif ($ARGV[$arg] eq 'all') {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
-                        nobits stack
+                        nobits stack shmem
                         rtps rtps_disc rtps_unicast rtps_disc_tcp/);
     push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
     for my $test (@tests) {

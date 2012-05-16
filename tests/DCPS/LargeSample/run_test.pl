@@ -35,6 +35,11 @@ elsif ($ARGV[0] eq 'multicast_async') {
     $pub_opts .= "-DCPSBit 0 -DCPSConfigFile pub_multicast_async.ini";
     $sub_opts .= "-DCPSBit 0 -DCPSConfigFile sub_multicast.ini";
 }
+elsif ($ARGV[0] eq 'shmem') {
+    $repo_bit_opt = '-NOBITS';
+    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile shmem.ini";
+    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile shmem.ini";
+}
 elsif ($ARGV[0] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= ' -DCPSBit 0 -DCPSConfigFile tcp.ini';

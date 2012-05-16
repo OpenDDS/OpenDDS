@@ -39,6 +39,10 @@ elsif ($ARGV[0] eq 'diff_trans') {
 elsif ($ARGV[0] eq 'rtps') {
   $parameters .= ' -rs -rp';
 }
+elsif ($ARGV[0] eq 'shemem') {
+  $parameters .= ' -ss -sp';
+}
+
 my $FooTest5 = PerlDDS::create_process('main', $parameters);
 
 print $DCPSREPO->CommandLine(), "\n";
