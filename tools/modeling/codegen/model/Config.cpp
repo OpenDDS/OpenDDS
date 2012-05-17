@@ -60,9 +60,7 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* TRANSPORTPRIORITY_KEYNAME                   = ACE_TEXT("TransportPriority");
   const ACE_TCHAR* LIFESPANDURATION_KEYNAME                    = ACE_TEXT("LifespanDuration");
   const ACE_TCHAR* OWNERSHIPKIND_KEYNAME                       = ACE_TEXT("OwnershipKind");
-#ifndef OPENDDS_NO_OWNERSHIP
   const ACE_TCHAR* OWNERSHIPSTRENGTH_KEYNAME                   = ACE_TEXT("OwnershipStrength");
-#endif
   const ACE_TCHAR* PRESENTATION_KEYNAME                        = ACE_TEXT("Presentation");
   const ACE_TCHAR* PRESENTATIONCOHERENT_KEYNAME                = ACE_TEXT("PresentationCoherent");
   const ACE_TCHAR* PRESENTATIONORDERED_KEYNAME                 = ACE_TEXT("PresentationOrdered");

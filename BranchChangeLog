@@ -1,9 +1,18 @@
+Thu May 17 15:39:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/codegen/model/Config.cpp:
+
+	  Removed feature guard for string definition since
+	  for modeling code use minimal guarding just so it
+	  will compile since footprint reduction is not a
+	  goal for code that generates code.
+
 Thu May 17 15:04:38 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * docs/design/CONTENT_SUBSCRIPTION:
 
-	  Mentioned the new feature guards related to
-	  content subscription.
+          Mentioned the new feature guards related to
+          content subscription.
 
 Thu May 17 13:01:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
