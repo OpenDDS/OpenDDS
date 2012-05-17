@@ -52,7 +52,7 @@ ShmemSendStrategy::start_i()
   ShmemAllocator* peer = link_->peer_allocator();
   peer->find("Semaphore", mem);
   ShmemSharedSemaphore* sem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
-#ifdef ACE_WIN32
+#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
   HANDLE srcProc = ::OpenProcess(PROCESS_DUP_HANDLE, false /*bInheritHandle*/,
                                  link_->peer_pid());
   ::DuplicateHandle(srcProc, *sem, GetCurrentProcess(), &peer_semaphore_,
@@ -169,7 +169,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
 void
 ShmemSendStrategy::stop_i()
 {
-#ifdef ACE_WIN32
+#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
   ::CloseHandle(peer_semaphore_);
 #endif
 }

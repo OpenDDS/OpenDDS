@@ -160,7 +160,7 @@ ShmemTransport::stop_accepting(ConnectionEvent& /*ce*/)
 bool
 ShmemTransport::configure_i(TransportInst* config)
 {
-#if !defined ACE_WIN32 && defined ACE_LACKS_SYSV_SHMEM
+#if (!defined ACE_WIN32 && defined ACE_LACKS_SYSV_SHMEM) || defined ACE_HAS_WINCE
   ACE_UNUSED_ARG(config);
   ACE_ERROR_RETURN((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: ")
