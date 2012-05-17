@@ -36,12 +36,17 @@ class ReceivedDataSample;
 
 #ifdef ACE_WIN32
   typedef ACE_Pagefile_Memory_Pool ShmemPool;
-  typedef HANDLE ShmemSharedSemaphore;
 #elif !defined ACE_LACKS_SYSV_SHMEM
   typedef ACE_Shared_Memory_Pool ShmemPool;
-  typedef sem_t ShmemSharedSemaphore;
 #else // no shared memory support (will yield a runtime error if used)
   typedef ACE_Local_Memory_Pool ShmemPool;
+#endif
+
+#ifdef ACE_WIN32
+  typedef HANDLE ShmemSharedSemaphore;
+#elif defined ACE_HAS_POSIX_SEM
+  typedef sem_t ShmemSharedSemaphore;
+#else
   typedef int ShmemSharedSemaphore;
 #endif
 

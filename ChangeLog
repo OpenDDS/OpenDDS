@@ -1,3 +1,10 @@
+Thu May 17 15:13:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          Allow for non-Win32 platforms that are ACE_LACKS_SYSV_SHMEM
+          and ACE_HAS_POSIX_SEM (VxWorks).
+
 Thu May 17 15:02:31 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
