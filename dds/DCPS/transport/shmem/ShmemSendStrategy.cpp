@@ -60,9 +60,11 @@ ShmemSendStrategy::start_i()
                     false /*bInheritHandle*/,
                     DUPLICATE_SAME_ACCESS /*dwOptions*/);
   ::CloseHandle(srcProc);
-#else
+#elif defined ACE_HAS_POSIX_SEM
   peer_semaphore_.sema_ = sem;
   peer_semaphore_.name_ = 0;
+#else
+  ACE_UNUSED_ARG(sem);
 #endif
   return true;
 }
@@ -110,7 +112,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
     iter += iov[i].iov_len;
   }
 
-  void* mem;
+  void* mem = 0;
   alloc->find(bound_name_.c_str(), mem);
 
   for (ShmemData* iter = reinterpret_cast<ShmemData*>(mem);
@@ -139,7 +141,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
       VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ out of "
                 "space for control\n", link_), 0);
       return -1;
-    } 
+    }
     if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
       current_data_ = reinterpret_cast<ShmemData*>(mem) - 1; // incremented by the for loop
     }
@@ -154,7 +156,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
     current_data_->payload_ = payload;
     current_data_->status_ = SHMEM_DATA_IN_USE;
   } else {
-    VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ " 
+    VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ "
               "failed to find space for control\n", link_), 0);
     return -1;
   }

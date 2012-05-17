@@ -255,8 +255,10 @@ ShmemTransport::shutdown_i()
   ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #ifdef ACE_WIN32
   ::CloseHandle(*pSem);
-#else
+#elif defined ACE_HAS_POSIX_SEM
   ::sem_destroy(pSem);
+#else
+  ACE_UNUSED_ARG(pSem);
 #endif
 
   alloc_->release(1 /*close*/);
