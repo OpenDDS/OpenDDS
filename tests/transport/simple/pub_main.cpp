@@ -5,6 +5,7 @@
 #include "ace/OS_NS_strings.h"
 
 #include "dds/DCPS/transport/tcp/Tcp.h"
+#include "dds/DCPS/transport/shmem/Shmem.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 

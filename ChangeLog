@@ -1,3 +1,115 @@
+Thu May 17 16:02:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/LargeSample.mpc:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/transport/simple/DDS_transport_simple.mpc:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+
+          Allow tests that used shared memory to link to static lib.
+
+Thu May 17 15:41:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed compile errors on WinCE.
+
+Thu May 17 15:13:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          Allow for non-Win32 platforms that are ACE_LACKS_SYSV_SHMEM
+          and ACE_HAS_POSIX_SEM (VxWorks).
+
+Thu May 17 15:02:31 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed compile errors on non-Win32 platforms that do not have
+          support for POSIX semaphores (tested with Android, may also
+          fix VxWorks).
+
+Thu May 17 07:57:52 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * NEWS:
+          Add DDS4CCM with OpenDDS
+
+Thu May 17 07:45:24 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits_source.mpb:
+          Fixed problem when built_in_topics feature is disabled
+
+Wed May 16 23:26:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/run_test.pl:
+
+          Fixed typo.
+
+Wed May 16 23:17:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "SharedMemory", which includes a new shared-memory
+          transport type.  See the NEWS file for an overview.
+          For details of changes introduced on the branch,
+          see docs/history/ChangeLog-SharedMemory.
+
+Wed May 16 22:18:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          Tabs are significant in the portion of the mpc file that's copied
+          verbatim into the generated GNU makefile.
+
+Wed May 16 18:56:06 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Fixed compile issues when CIAO is not available
+
+Wed May 16 17:27:58 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+        * dds/DdsDcps.mpc:
+          Fixed mpc problems when CIAO is not available
+
+Wed May 16 09:17:43 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Changed the default recovery method back to REPO.
+
+Wed May 16 06:38:56 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Default to RTPS and fixed some minor
+          logging issues.
+
+        * dds/DdsDcps.mpc:
+          Created lem generation. Devided idl files
+          into the ones that need the lem-generation and
+          the ones that don't.
+
+        * dds/idl/IDLTemplate.txt:
+          Generating sequences as typedef instead of
+          native, taking the TAO (ACE) version into
+          account.
+
+        * dds/idl/be_produce.cpp:
+          Generating include guards for IDL as well.
+
+        * dds/idl/be_util.cpp:
+          Removed opendds_sequence_suffix since it isn't
+          used anymore.
+
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+          Due to changes in ddsdcps.mpc.
+
 Sun May 13 18:37:35 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/GuidUtils.h:

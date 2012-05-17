@@ -212,6 +212,8 @@ void postprocess(const char* fn, ostringstream& content,
     }
 
   } else if (which == BE_GlobalData::STREAM_IDL) {
+    macrofied = to_macro(fn);
+    out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
     out << "#include \"" << be_global->filename() << "\"\n\n";
   }
 
@@ -220,7 +222,7 @@ void postprocess(const char* fn, ostringstream& content,
   out << content.str();
 
   //  if .h add #endif
-  if (which == BE_GlobalData::STREAM_H) {
+  if (which == BE_GlobalData::STREAM_H || which == BE_GlobalData::STREAM_IDL) {
     out << "#endif /* " << macrofied << " */\n";
   }
 

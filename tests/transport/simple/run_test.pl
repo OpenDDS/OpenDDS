@@ -19,6 +19,12 @@ my $testTime = 60;
 my $n_samples = 0;
 my $sample_size = 0; # only goes to pub
 my $quiet = 0;
+my $shared_memory = 0;
+
+if ($ARGV[0] eq 'shmem') {
+  $shared_memory = 1;
+  shift;
+}
 
 if ($ARGV[0] eq 'n') {
   $n_samples = 400;
@@ -43,7 +49,7 @@ my $subscriberId = 2;
 my $subscriberHost = "localhost";
 my $subscriberPort = PerlACE::random_port();
 my $subreadyfile = "subready.txt";
-unlink $subreadyfile;
+unlink $subreadyfile, 'sub-pid.txt', 'pub-pid.txt';
 
 #
 # Subscriber command and arguments.
@@ -58,6 +64,11 @@ my $subscriberArgs = "-p $publisherId:$publisherHost:$publisherPort "
 my $publisherCmd  = "simple_publisher";
 my $publisherArgs = "-p $publisherId:$publisherHost:$publisherPort "
                   . "-s $subscriberId:$subscriberHost:$subscriberPort";
+
+if ($shared_memory) {
+  $subscriberArgs .= ' -m';
+  $publisherArgs  .= ' -m';
+}
 
 my $debug = '-DCPSDebugLevel 10 -DCPSTransportDebugLevel 10';
 #$subscriberArgs .= " $debug";
@@ -102,6 +113,6 @@ $publisher->Spawn();
 die "*** ERROR: Subscriber timed out - $!" if $subscriber->WaitKill($testTime);
 die "*** ERROR: Publisher timed out - $!"  if $publisher->WaitKill($testTime);
 
-unlink $subreadyfile;
+unlink $subreadyfile, 'sub-pid.txt', 'pub-pid.txt';
 
 exit 0;

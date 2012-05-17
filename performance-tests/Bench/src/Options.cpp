@@ -1120,7 +1120,7 @@ Options::loadPublication(
    *   WriterDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
    *   # Test execution parameters
    *   Topic             = <string> # One of topic <name>
-   *   TransportIndex    = <number> # Index into transport configurations
+   *   TransportConfig   = <string> # Name of transport config
    *   MessageSource     = <string> # One of subscription <name>
    *   MessageRateType   = <string> # One of FIXED, UNIFORM, GAUSSIAN
    *   MessageRate       = <number> # Samples per second, Poisson arrival times
@@ -2257,7 +2257,7 @@ Options::loadSubscription(
    *   ReaderDataLifecycle           = <number>
    *   # Test execution parameters
    *   Topic                         = <string> # One of topic <name>
-   *   TransportIndex                = <number> # Index into transport configurations
+   *   TransportConfig               = <string> # Name of transport config
    *   DataCollectionFile            = <string> # Filename for collected data
    *   DataCollectionBound           = <number>
    *   DataCollectionRetention       = <string> # One of ALL, OLDEST, NEWEST

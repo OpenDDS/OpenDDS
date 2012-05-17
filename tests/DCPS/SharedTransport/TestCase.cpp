@@ -16,6 +16,7 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
+#include <dds/DCPS/transport/shmem/Shmem.h>
 #endif
 
 #include "TestCase.h"
