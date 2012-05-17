@@ -542,6 +542,7 @@ public:
 
 #endif
 
+#ifndef OPENDDS_NO_PRESENTATION_QOS
   void begin_access();
   void end_access();
   void get_ordered_data(GroupRakeData& data,
@@ -559,6 +560,7 @@ public:
 
   void reset_coherent_info (const PublicationId& writer_id,
                             const RepoId& publisher_id);
+#endif
 
   // Called upon subscriber qos change to update the local cache.
   void set_subscriber_qos(const DDS::SubscriberQos & qos);
