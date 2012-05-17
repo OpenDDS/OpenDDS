@@ -53,9 +53,11 @@ public:
   virtual ::DDS::DataReader_ptr create_datareader (
     );
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   virtual ::DDS::DataReader_ptr create_multitopic_datareader();
+#endif
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
 
