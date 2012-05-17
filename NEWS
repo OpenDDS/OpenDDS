@@ -11,6 +11,9 @@ Version 3.2 of OpenDDS.
 
 - Fixed bugs in udp and multicast transports, including reassembly of fragments.
 
+- Made several changes in order to support CIAO 1.1.2 with DDS4CCM. From
+  this version DDS4CCM has support for OpenDDS as DDS vendor. Check the CIAO
+  release notes for details on what has been ported
 
 ========================================================================
 

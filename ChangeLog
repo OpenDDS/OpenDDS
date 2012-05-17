@@ -1,3 +1,8 @@
+Thu May 17 07:57:52 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * NEWS:
+          Add DDS4CCM with OpenDDS
+
 Thu May 17 07:45:24 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
