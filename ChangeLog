@@ -1,3 +1,9 @@
+Thu May 17 07:45:24 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits_source.mpb:
+          Fixed problem when built_in_topics feature is disabled
+
 Wed May 16 23:26:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5_0/run_test.pl:

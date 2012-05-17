@@ -120,7 +120,7 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dcps_optional_feature
 }
 
 
-project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macros, install, dcps_optional_features {
+project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source {
   after       += OpenDDS_Dcps_lem_gen OpenDDS_Dcps_idl_gen
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -144,7 +144,6 @@ project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macr
     DdsDcpsGuidC.cpp
     DdsDcpsInfoUtilsC.cpp
     DdsDcpsInfrastructureC.cpp
-    DdsDcpsInfrastructureTypeSupportC.cpp
     DdsDcpsPublicationC.cpp
     DdsDcpsSubscriptionC.cpp
     DdsDcpsSubscriptionExtC.cpp
@@ -160,7 +159,6 @@ project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macr
     DdsDcpsGuidS.cpp
     DdsDcpsInfoUtilsS.cpp
     DdsDcpsInfrastructureS.cpp
-    DdsDcpsInfrastructureTypeSupportS.cpp
     DdsDcpsPublicationS.cpp
     DdsDcpsSubscriptionS.cpp
     DdsDcpsSubscriptionExtS.cpp
