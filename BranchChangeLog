@@ -1,8 +1,14 @@
+Thu May 17 13:01:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+
+	  Make dependent on multi_topic feature.
+
 Thu May 17 12:42:23 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Avoid nesting feature guards.
+          Avoid nesting feature guards.
 
 Thu May 17 12:31:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
