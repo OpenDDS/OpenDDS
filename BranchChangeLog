@@ -1,10 +1,24 @@
+Fri May 18 17:47:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+	  Define macro OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE in
+	  Definitions.h instead of through MPC. This allows
+	  proper build behavior when content_filter_topic,
+	  multi_topic, and query_condtion features are all
+	  disabled.
+
 Fri May 18 12:54:34 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Exclude all GroupPresentation tests from being run
-	  if object_model_profile feature disabled, not just
-	  first test.
+          Exclude all GroupPresentation tests from being run
+          if object_model_profile feature disabled, not just
+          first test.
 
 Fri May 18 12:37:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
