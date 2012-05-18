@@ -1,3 +1,10 @@
+Fri May 18 21:10:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          List the *TypeSupportImpl.cpp files as needed for the 'idl_stubs'
+          target.  This is used by the script that measures static footprint.
+
 Fri May 18 17:38:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/dds_generator.h:

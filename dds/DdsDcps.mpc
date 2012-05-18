@@ -52,6 +52,10 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, dds4ccm_opendd
     DdsDcpsGuid.idl
     DdsDcpsInfoUtils.idl
   }
+
+  verbatim(gnuace, bottom, 1) {
+    idl_stubs: DdsDcpsGuidTypeSupportImpl.cpp DdsDcpsInfoUtilsTypeSupportImpl.cpp CorbaSeq/BooleanSeqTypeSupportImpl.cpp CorbaSeq/CharSeqTypeSupportImpl.cpp CorbaSeq/DoubleSeqTypeSupportImpl.cpp CorbaSeq/FloatSeqTypeSupportImpl.cpp CorbaSeq/LongDoubleSeqTypeSupportImpl.cpp CorbaSeq/LongLongSeqTypeSupportImpl.cpp CorbaSeq/LongSeqTypeSupportImpl.cpp CorbaSeq/OctetSeqTypeSupportImpl.cpp CorbaSeq/ShortSeqTypeSupportImpl.cpp CorbaSeq/StringSeqTypeSupportImpl.cpp CorbaSeq/ULongLongSeqTypeSupportImpl.cpp CorbaSeq/ULongSeqTypeSupportImpl.cpp CorbaSeq/UShortSeqTypeSupportImpl.cpp CorbaSeq/WCharSeqTypeSupportImpl.cpp CorbaSeq/WStringSeqTypeSupportImpl.cpp
+  }
 }
 
 project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_features {
