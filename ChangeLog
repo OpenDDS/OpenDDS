@@ -1,3 +1,11 @@
+Fri May 18 15:50:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed compiler and coverity warnings.
+
 Thu May 17 16:02:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/LargeSample/LargeSample.mpc:

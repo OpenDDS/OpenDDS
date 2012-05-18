@@ -216,7 +216,11 @@ ShmemTransport::configure_i(TransportInst* config)
   ok = (*pSem != 0);
 # else
   ok = (0 == ::sem_init(pSem, 1 /*process shared*/, 0 /*initial count*/));
-  ACE_sema_t ace_sema = {pSem, 0 /*no name*/};
+  ACE_sema_t ace_sema = {pSem, 0 /*no name*/
+#  if !defined (ACE_HAS_POSIX_SEM_TIMEOUT) && !defined (ACE_DISABLE_POSIX_SEM_TIMEOUT_EMULATION)
+                         , PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER
+#  endif
+  };
 # endif
   if (!ok) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -250,7 +254,7 @@ ShmemTransport::shutdown_i()
   delete read_task_;
   read_task_ = 0;
 
-  void* mem;
+  void* mem = 0;
   alloc_->find("Semaphore", mem);
   ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #ifdef ACE_WIN32
