@@ -1,9 +1,17 @@
+Fri May 18 12:54:34 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Exclude all GroupPresentation tests from being run
+	  if object_model_profile feature disabled, not just
+	  first test.
+
 Fri May 18 12:37:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Exclude TopicExpression test from being built if
-	  multi_topic feature is disabled.
+          Exclude TopicExpression test from being run if
+          multi_topic feature is disabled.
 
 Thu May 17 15:39:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
