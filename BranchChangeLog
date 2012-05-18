@@ -1,11 +1,18 @@
+Fri May 18 12:37:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Exclude TopicExpression test from being built if
+	  multi_topic feature is disabled.
+
 Thu May 17 15:39:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/codegen/model/Config.cpp:
 
-	  Removed feature guard for string definition since
-	  for modeling code use minimal guarding just so it
-	  will compile since footprint reduction is not a
-	  goal for code that generates code.
+          Removed feature guard for string definition since
+          for modeling code use minimal guarding just so it
+          will compile since footprint reduction is not a
+          goal for code that generates code.
 
 Thu May 17 15:04:38 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
