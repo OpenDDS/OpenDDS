@@ -1,3 +1,18 @@
+Fri May 18 21:02:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+	  Define macros to check that Qos policy
+	  is allowed if a feature has been disabled
+	  from the build.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+	  Use macros in FeatureDisabledQosCheck.h instead
+	  of duplicating code.
+
 Fri May 18 17:47:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/dcps_java_optional.mpb:
@@ -6,11 +21,11 @@ Fri May 18 17:47:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/Definitions.h:
         * dds/DCPS/FilterEvaluator.cpp:
 
-	  Define macro OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE in
-	  Definitions.h instead of through MPC. This allows
-	  proper build behavior when content_filter_topic,
-	  multi_topic, and query_condtion features are all
-	  disabled.
+          Define macro OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE in
+          Definitions.h instead of through MPC. This allows
+          proper build behavior when content_filter_topic,
+          multi_topic, and query_condtion features are all
+          disabled.
 
 Fri May 18 12:54:34 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
