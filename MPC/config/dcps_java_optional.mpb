@@ -16,10 +16,11 @@ feature (!multi_topic) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_MULTI_TOPIC
 }
 feature (!ownership_profile) : idl2jni {
-  idl2jniflags += -DOPENDDS_NO_OWNERSHIP
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_PROFILE
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 }
-feature (!ownership) : idl2jni {
-  idl2jniflags += -DOPENDDS_NO_OWNERSHIP
+feature (!ownership_kind_exclusive) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 }
 feature (!object_model_profile) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_PRESENTATION_QOS

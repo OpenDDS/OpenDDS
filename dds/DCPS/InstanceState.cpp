@@ -34,7 +34,7 @@ OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
     reader_(reader),
     handle_(handle),
     owner_(GUID_UNKNOWN),
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     exclusive_(reader->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS),
 #endif
     registered_ (false)
@@ -110,14 +110,14 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
   // If disposed by owner then the owner is not re-elected, it can
   // resume if the writer sends message again.
   if (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     if (! this->exclusive_
       || this->reader_->owner_manager_->is_owner (this->handle_, writer_id)) {
 #endif
       this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
       schedule_release();
       return true;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     }
 #endif
   }
@@ -129,7 +129,7 @@ bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
   writers_.erase(writer_id);
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->exclusive_) {
     // If unregistered by owner then the ownership should be transferred to another
     // writer.

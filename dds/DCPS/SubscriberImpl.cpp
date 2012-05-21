@@ -912,7 +912,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 void
 SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)

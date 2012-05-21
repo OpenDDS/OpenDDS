@@ -65,7 +65,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'multi-topic!', 'Support MultiTopic from Content-Subscription Profile (yes)',
     'query-condition!', 'Support QueryCondition from Content-Subscription Profile (yes)',
     'ownership-profile!', 'Support Ownership Profile (yes)',
-    'ownership!', 'Support Ownership kind = EXCLUSIVE and OwnershipStrength QoS policy from the Ownership Profile (yes)',
+    'ownership-kind-exclusive!', 'Support Ownership kind = EXCLUSIVE and OwnershipStrength QoS policy from the Ownership Profile (yes)',
     'object-model-profile!', 'Support Object Model Profile (yes)',
     'persistence-profile!', 'Support Persistence Profile (yes)',
     'tests!', 'Build tests, examples, and performance tests (yes)',
@@ -584,7 +584,7 @@ else {
 
 for my $feat ('built-in-topics',
   'content-subscription', 'content-filtered-topic', 'multi-topic', 'query-condition',
-  'ownership-profile', 'ownership',
+  'ownership-profile', 'ownership-kind-exclusive',
   'object-model-profile',
   'persistence-profile') {
   if (exists $opts{$feat} && !$opts{$feat}) {

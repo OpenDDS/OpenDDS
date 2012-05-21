@@ -22,8 +22,8 @@
 #define OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos)
 #endif
 
-#ifdef OPENDDS_NO_OWNERSHIP
-#define OPENDDS_NO_OWNERSHIP_COMPATIBILITY_CHECK(qos) \
+#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos) \
   if (qos.ownership_strength != \
       TheServiceParticipant->initial_OwnershipStrengthQosPolicy()) { \
     ACE_ERROR_RETURN((LM_ERROR, \
@@ -40,7 +40,7 @@
                      DDS::RETCODE_NOT_SUPPORTED) \
   }
 #else
-#define OPENDDS_NO_OWNERSHIP_COMPATIBILITY_CHECK(qos)
+#define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos)
 #endif
 
 #endif

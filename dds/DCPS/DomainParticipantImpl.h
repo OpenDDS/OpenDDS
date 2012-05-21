@@ -316,7 +316,7 @@ public:
   */
   void get_topic_ids(TopicIdVec& topics);
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
   /** Accessor for ownership manager.
   */
@@ -417,7 +417,7 @@ private:
 
   Monitor* monitor_;
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManager owner_man_;
 #endif
 

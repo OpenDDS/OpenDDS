@@ -135,13 +135,13 @@ public:
       qos_data.dw_qos.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
       qos_data.dw_qos.deadline.period.sec = 10;
       qos_data.dw_qos.latency_budget.duration.sec = 11;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       qos_data.dw_qos.ownership.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
     case PARTIAL_MOD_QOS:
       qos_data.pub_qos.partition.name.length(1);
       qos_data.pub_qos.partition.name[0] = "Hello";
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       qos_data.dw_qos.ownership_strength.value = 12;
 #endif
       qos_data.dw_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;

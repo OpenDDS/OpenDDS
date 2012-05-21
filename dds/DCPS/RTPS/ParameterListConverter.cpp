@@ -220,7 +220,7 @@ namespace {
         TheServiceParticipant->initial_OwnershipQosPolicy();
     return qos != def_qos;
   }
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool not_default(const DDS::OwnershipStrengthQosPolicy& qos) {
     DDS::OwnershipStrengthQosPolicy def_qos =
         TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
@@ -451,7 +451,7 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (not_default(writer_data.ddsPublicationData.ownership_strength))
   {
     Parameter param;
@@ -849,7 +849,7 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_UserDataQosPolicy();
   writer_data.ddsPublicationData.ownership =
       TheServiceParticipant->initial_OwnershipQosPolicy();
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   writer_data.ddsPublicationData.ownership_strength =
       TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
 #endif
@@ -920,7 +920,7 @@ int from_param_list(const ParameterList& param_list,
       case PID_OWNERSHIP:
         writer_data.ddsPublicationData.ownership = param.ownership();
         break;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       case PID_OWNERSHIP_STRENGTH:
         writer_data.ddsPublicationData.ownership_strength = param.ownership_strength();
         break;

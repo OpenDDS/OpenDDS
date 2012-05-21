@@ -52,7 +52,7 @@ void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           TheServiceParticipant->get_discovery(partipant_->get_domain_id());
         PublicationId pub_id =
           disc->bit_key_to_repo_id(partipant_, BUILT_IN_PUBLICATION_TOPIC, data.key);
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         CORBA::Long ownership_strength = data.ownership_strength.value;
         this->partipant_->update_ownership_strength(pub_id, ownership_strength);
         GuidConverter writer_converter(pub_id);

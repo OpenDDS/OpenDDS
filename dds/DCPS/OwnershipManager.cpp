@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "OwnershipManager.h"
@@ -438,4 +438,4 @@ OwnershipManager::remove_owner (const ::DDS::InstanceHandle_t& instance_handle)
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif // OPENDDS_NO_OWNERSHIP
+#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE

@@ -234,7 +234,7 @@ module OpenDDS {
     const ParameterId_t PID_HISTORY = 0x0040;
     const ParameterId_t PID_RESOURCE_LIMITS = 0x0041;
     const ParameterId_t PID_OWNERSHIP = 0x001f;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     const ParameterId_t PID_OWNERSHIP_STRENGTH = 0x0006;
 #endif
     const ParameterId_t PID_PRESENTATION = 0x0021;
@@ -328,7 +328,7 @@ module OpenDDS {
         DDS::ResourceLimitsQosPolicy resource_limits;
       case PID_OWNERSHIP:
         DDS::OwnershipQosPolicy ownership;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       case PID_OWNERSHIP_STRENGTH:
         DDS::OwnershipStrengthQosPolicy ownership_strength;
 #endif

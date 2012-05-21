@@ -1948,7 +1948,7 @@ void
     // if the instance map for the type exists, then find the
     // handle of the instance. If the instance is not registered
     //
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     InstanceMap* inst = 0;
     bool new_handle = true;
     if (this->is_exclusive_ownership_) {
@@ -1996,7 +1996,7 @@ void
       return;
     }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     if (this->is_exclusive_ownership_) {
       if (inst == 0) {
         inst = new InstanceMap ();
@@ -2148,7 +2148,7 @@ void
       instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
     }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     if (this->is_exclusive_ownership_ && is_unregister_msg) {
       this->owner_manager_->unregister_reader (this->topic_servant_->type_name(),this);
     }

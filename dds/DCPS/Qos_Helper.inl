@@ -242,7 +242,7 @@ bool operator == (const DDS::OwnershipQosPolicy& qos1,
   return qos1.kind == qos2.kind;
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool operator == (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2)
@@ -398,7 +398,7 @@ bool operator == (const DDS::DataWriterQos& qos1,
     && qos1.lifespan == qos2.lifespan
     && qos1.user_data == qos2.user_data
     && qos1.ownership == qos2.ownership
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     && qos1.ownership_strength == qos2.ownership_strength
 #endif
     && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle;
@@ -532,7 +532,7 @@ bool operator != (const DDS::OwnershipQosPolicy& qos1,
   return !(qos1 == qos2);
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool operator != (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2)
@@ -990,13 +990,13 @@ bool Qos_Helper::valid(const DDS::OwnershipQosPolicy& qos)
 {
   return
     qos.kind == DDS::SHARED_OWNERSHIP_QOS
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     || qos.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS
 #endif
     ;
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::OwnershipStrengthQosPolicy& /*qos*/)
 {
@@ -1157,7 +1157,7 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
     && valid(qos.lifespan)
     && valid(qos.user_data)
     && valid(qos.ownership)
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     && valid(qos.ownership_strength)
 #endif
     && valid(qos.writer_data_lifecycle);
@@ -1307,7 +1307,7 @@ bool Qos_Helper::changeable(const DDS::OwnershipQosPolicy& qos1,
 }
 // ---------------------------------------------------------------
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool Qos_Helper::changeable(
   const DDS::OwnershipStrengthQosPolicy& /* qos1 */,
@@ -1441,7 +1441,7 @@ bool Qos_Helper::changeable(const DDS::DataWriterQos& qos1,
     && changeable(qos1.lifespan, qos2.lifespan)
     && changeable(qos1.user_data, qos2.user_data)
     && changeable(qos1.ownership, qos2.ownership)
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     && changeable(qos1.ownership_strength, qos2.ownership_strength)
 #endif
     && changeable(qos1.writer_data_lifecycle, qos2.writer_data_lifecycle);

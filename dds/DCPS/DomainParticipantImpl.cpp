@@ -1748,7 +1748,7 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
 OwnershipManager*
 DomainParticipantImpl::ownership_manager()
@@ -1793,7 +1793,7 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
   }
 }
 
-#endif // OPENDDS_NO_OWNERSHIP
+#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
 DomainParticipantImpl::RepoIdSequence::RepoIdSequence(RepoId& base) :
   base_(base),

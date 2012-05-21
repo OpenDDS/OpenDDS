@@ -1261,7 +1261,7 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
         data.lifespan = writerQos->lifespan;
         data.user_data = writerQos->user_data;
         data.ownership = writerQos->ownership;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         data.ownership_strength = writerQos->ownership_strength;
 #endif
         data.destination_order = writerQos->destination_order;

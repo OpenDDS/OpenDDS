@@ -1,10 +1,10 @@
 
-project(DDS*idl): dcps_test_lib {
+project(DDS*idl): dcps_test_lib, ownership_profile {
   idlflags      += -Wb,stub_export_include=Ownership_export.h \
                    -Wb,stub_export_macro=Ownership_Export
   dcps_ts_flags += -Wb,export_macro=Ownership_Export
   dynamicflags  += OWNERSHIP_BUILD_DLL
-  requires      += ownership
+  requires      += ownership_kind_exclusive
 
   TypeSupport_Files {
     Messenger.idl

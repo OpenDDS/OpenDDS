@@ -1,17 +1,66 @@
+Mon May 21 18:04:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * MPC/config/ownership_profile.mpb:
+        * bin/dcps_tests.lst:
+        * configure:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * performance-tests/Bench/src/EntityProfiles.cpp:
+        * performance-tests/Bench/src/Options.cpp:
+        * rules.dds.GNU:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/EntityProfiles.cpp:
+
+	  Rename feature/macro ownership/OPENDDS_NO_OWNERSHIP to more descriptive
+	  ownership_kind_exclusive/OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE.
+	  Introduce macro feature/macro ownership_profile/OPENDDS_NO_OWNERSHIP_PROFILE
+	  although currently ownership_profile is equivalent ownership_kind_exclusive
+	  since support for exclusion of building of code to support HISTORY depth
+	  > 1 is not in place.
+
 Fri May 18 21:02:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/FeatureDisabledQosCheck.h:
 
-	  Define macros to check that Qos policy
-	  is allowed if a feature has been disabled
-	  from the build.
+          Define macros to check that Qos policy
+          is allowed if a feature has been disabled
+          from the build.
 
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/TopicImpl.cpp:
 
-	  Use macros in FeatureDisabledQosCheck.h instead
-	  of duplicating code.
+          Use macros in FeatureDisabledQosCheck.h instead
+          of duplicating code.
 
 Fri May 18 17:47:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

@@ -742,7 +742,7 @@ DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 {
 
-  OPENDDS_NO_OWNERSHIP_COMPATIBILITY_CHECK(qos);
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos);
   OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {

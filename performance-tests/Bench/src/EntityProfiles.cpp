@@ -106,7 +106,7 @@ PublicationProfile::copyToWriterQos( ::DDS::DataWriterQos& qos)
     qos.ownership.kind = this->writerQos.ownership.kind;
   }
 #endif /* VERSION_1_2 */
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if( this->writerQosMask & SetOwnershipStrengthQos) {
     qos.ownership_strength.value = this->writerQos.ownership_strength.value;
   }

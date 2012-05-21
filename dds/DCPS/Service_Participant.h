@@ -153,7 +153,7 @@ public:
   DDS::DeadlineQosPolicy            initial_DeadlineQosPolicy() const;
   DDS::LatencyBudgetQosPolicy       initial_LatencyBudgetQosPolicy() const;
   DDS::OwnershipQosPolicy           initial_OwnershipQosPolicy() const;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   DDS::OwnershipStrengthQosPolicy   initial_OwnershipStrengthQosPolicy() const;
 #endif
   DDS::LivelinessQosPolicy          initial_LivelinessQosPolicy() const;
@@ -434,7 +434,7 @@ private:
   DDS::DeadlineQosPolicy              initial_DeadlineQosPolicy_;
   DDS::LatencyBudgetQosPolicy         initial_LatencyBudgetQosPolicy_;
   DDS::OwnershipQosPolicy             initial_OwnershipQosPolicy_;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   DDS::OwnershipStrengthQosPolicy     initial_OwnershipStrengthQosPolicy_;
 #endif
   DDS::LivelinessQosPolicy            initial_LivelinessQosPolicy_;

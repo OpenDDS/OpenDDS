@@ -1040,7 +1040,7 @@ Options::loadTopic(
     if( valueString == ACE_TEXT("SHARED")) {
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     } else if( valueString == ACE_TEXT("EXCLUSIVE")) {
       profile->qos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
@@ -1799,7 +1799,7 @@ Options::loadPublication(
   }
 #endif /* VERSION_1_2 */
 
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   // OwnershipStrength                   = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPSTRENGTH_KEYNAME, valueString);

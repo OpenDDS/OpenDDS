@@ -165,7 +165,7 @@ namespace {
           TheServiceParticipant->initial_UserDataQosPolicy();
       writer_data.ddsPublicationData.ownership =
           TheServiceParticipant->initial_OwnershipQosPolicy();
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       writer_data.ddsPublicationData.ownership_strength =
           TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
 #endif
@@ -299,7 +299,7 @@ namespace {
 
       }
       result.ddsPublicationData.ownership.kind = ownership;
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       result.ddsPublicationData.ownership_strength.value = ownership_strength;
 #endif
       result.ddsPublicationData.destination_order.kind = destination_order;
@@ -1681,7 +1681,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         29);
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     TEST_ASSERT(is_present(param_list, PID_OWNERSHIP_STRENGTH));
     Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
     TEST_ASSERT(param.ownership_strength().value == 29);
@@ -3402,7 +3402,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!is_present(param_list, PID_LIFESPAN));
     TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP));
-#ifndef OPENDDS_NO_OWNERSHIP
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP_STRENGTH));
 #endif
     TEST_ASSERT(!is_present(param_list, PID_DESTINATION_ORDER));
