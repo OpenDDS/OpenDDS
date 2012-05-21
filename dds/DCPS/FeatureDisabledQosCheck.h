@@ -36,7 +36,7 @@
     ACE_ERROR_RETURN((LM_ERROR, \
                       ACE_TEXT("(%P|%t) ERROR: ") \
                       ACE_TEXT("Feature ownership_profile disabled, ") \
-                      ACE_TEXT("therefore ownership kind must be exclusive. \n")), \
+                      ACE_TEXT("therefore ownership kind must be SHARED. \n")), \
                      DDS::RETCODE_NOT_SUPPORTED) \
   }
 #else

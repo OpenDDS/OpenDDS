@@ -1,3 +1,9 @@
+Mon May 21 20:18:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+	  Fixed misleading error message.
+
 Mon May 21 19:39:13 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -5,8 +11,8 @@ Mon May 21 19:39:13 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/FeatureDisabledQosCheck.h:
         * dds/DCPS/TopicImpl.cpp:
 
-	  Fixed ownership macro incorrectly named
-	  as a object model macro.
+          Fixed ownership macro incorrectly named
+          as a object model macro.
 
 Mon May 21 18:04:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
