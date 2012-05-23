@@ -1,8 +1,15 @@
+Wed May 23 15:55:26 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+	  Fixed incorrect macro names and incorrect features
+	  mentioned in error messages.
+
 Mon May 21 20:18:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/FeatureDisabledQosCheck.h:
 
-	  Fixed misleading error message.
+          Fixed misleading error message.
 
 Mon May 21 19:39:13 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
