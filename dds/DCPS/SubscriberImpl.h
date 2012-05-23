@@ -88,7 +88,7 @@ public:
 
   virtual DDS::SubscriberListener_ptr get_listener();
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   virtual DDS::ReturnCode_t begin_access();
 
@@ -149,7 +149,7 @@ public:
                                   const CORBA::Long& ownership_strength);
 #endif
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void coherent_change_received(RepoId& publisher_id,
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);

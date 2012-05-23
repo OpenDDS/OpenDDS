@@ -20,7 +20,7 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
 #include "AssociationData.h"
@@ -1918,7 +1918,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   header_data.group_coherent_ =
     this->publisher_servant_->qos_.presentation.access_scope
     == DDS::GROUP_PRESENTATION_QOS;
@@ -2050,7 +2050,7 @@ DataWriterImpl::check_transport_qos(const TransportInst&)
   return true;
 }
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 bool
 DataWriterImpl::coherent_changes_pending()
@@ -2119,7 +2119,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   this->coherent_samples_ = 0;
 }
 
-#endif // OPENDDS_NO_PRESENTATION_QOS
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 void
 DataWriterImpl::data_dropped(const DataSampleListElement* element,

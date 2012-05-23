@@ -36,9 +36,9 @@ feature (!ownership_kind_exclusive) : taoidldefaults, dcps_ts_defaults {
   dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_PROFILE
 }
 feature (!object_model_profile) : taoidldefaults, dcps_ts_defaults {
-  macros   += OPENDDS_NO_PRESENTATION_QOS
-  idlflags += -DOPENDDS_NO_PRESENTATION_QOS
-  dcps_ts_flags += -DOPENDDS_NO_PRESENTATION_QOS
+  macros   += OPENDDS_NO_OBJECT_MODEL_PROFILE
+  idlflags += -DOPENDDS_NO_OBJECT_MODEL_PROFILE
+  dcps_ts_flags += -DOPENDDS_NO_OBJECT_MODEL_PROFILE
 }
 feature (!persistence_profile) : taoidldefaults, dcps_ts_defaults {
   macros   += OPENDDS_NO_PERSISTENCE_PROFILE

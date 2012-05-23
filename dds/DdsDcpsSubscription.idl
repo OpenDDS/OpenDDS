@@ -256,7 +256,7 @@ module DDS {
 
     SubscriberListener get_listener();
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
     ReturnCode_t begin_access();
 

@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 namespace OpenDDS {
 namespace DCPS {
@@ -66,4 +66,4 @@ CoherentChangeControl::reset()
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif // OPENDDS_NO_PRESENTATION_QOS
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE

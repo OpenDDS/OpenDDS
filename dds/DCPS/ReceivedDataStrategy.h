@@ -24,7 +24,7 @@ public:
 
   virtual void add(ReceivedDataElement* data_sample);
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   virtual void accept_coherent(PublicationId& writer,
                                RepoId& publisher);
 

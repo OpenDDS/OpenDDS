@@ -63,7 +63,7 @@ class FilterEvaluator;
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 enum Coherent_State {
   NOT_COMPLETED_YET,
   COMPLETED,
@@ -128,7 +128,7 @@ public:
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();
   void reset_coherent_info ();
   void set_group_info (const CoherentChangeControl& info);
@@ -174,7 +174,7 @@ private:
   OwnerEvaluateFlag owner_evaluated_;
 
   /// Data to support GROUP access scope.
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool group_coherent_;
   RepoId publisher_id_;
   DisjointSequence coherent_sample_sequence_;
@@ -542,7 +542,7 @@ public:
 
 #endif
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void begin_access();
   void end_access();
   void get_ordered_data(GroupRakeData& data,
@@ -669,7 +669,7 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
 #endif

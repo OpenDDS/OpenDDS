@@ -233,7 +233,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   if (!reader.good_bit()) return;
   gen_find_size(this->publication_id_, this->marshaled_size_, padding);
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
     if (!reader.good_bit()) return;
@@ -285,7 +285,7 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 
   writer << value.publication_id_;
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (value.group_coherent_) {
     writer << value.publisher_id_;
   }
@@ -505,7 +505,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.coherent_change_ == 1) str << "Coherent, ";
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_ == 1) str << "Group-Coherent, ";
 #endif
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
@@ -526,7 +526,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     }
 
     str << "Publication: " << GuidConverter(value.publication_id_);
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
       str << ", Publisher: " << GuidConverter(value.publisher_id_);
     }

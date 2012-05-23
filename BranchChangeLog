@@ -1,9 +1,35 @@
+Wed May 23 16:02:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/CoherentChangeControl.inl:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/idl/CPPTemplate.txt:
+
+	  Rename poorly named macro OPENDDS_NO_PRESENTATION_QOS to
+	  OPENDDS_NO_OBJECT_MODEL_PROFILE.
+
 Wed May 23 15:55:26 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/FeatureDisabledQosCheck.h:
 
-	  Fixed incorrect macro names and incorrect features
-	  mentioned in error messages.
+          Fixed incorrect macro names and incorrect features
+          mentioned in error messages.
 
 Mon May 21 20:18:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

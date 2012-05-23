@@ -23,7 +23,7 @@ feature (!ownership_kind_exclusive) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 }
 feature (!object_model_profile) : idl2jni {
-  idl2jniflags += -DOPENDDS_NO_PRESENTATION_QOS
+  idl2jniflags += -DOPENDDS_NO_OBJECT_MODEL_PROFILE
 }
 feature (!persistence_profile) : idl2jni {
   idl2jniflags += -DOPENDDS_NO_PERSISTENCE_PROFILE

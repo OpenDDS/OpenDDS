@@ -320,7 +320,7 @@ public:
 
   virtual bool check_transport_qos(const TransportInst& inst);
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   /// Are coherent changes pending?
   bool coherent_changes_pending();

@@ -35,7 +35,7 @@ public:
     : pub_(header.publication_id_),
       registered_data_(received_data),
       sample_state_(DDS::NOT_READ_SAMPLE_STATE),
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       coherent_change_(header.coherent_change_),
       group_coherent_(header.group_coherent_),
       publisher_id_ (header.publisher_id_),
@@ -82,7 +82,7 @@ public:
   /// Reception time stamp for this data sample
   DDS::Time_t destination_timestamp_;
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   /// Sample belongs to an active coherent change set
   bool coherent_change_;
 

@@ -13,7 +13,7 @@
 #include "ReceivedDataStrategy.h"
 #include "GuidUtils.h"
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 namespace {
 
@@ -78,7 +78,7 @@ private:
 
 } // namespace
 
-#endif // OPENDDS_NO_PRESENTATION_QOS
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 namespace OpenDDS {
 namespace DCPS {
@@ -97,7 +97,7 @@ ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
   this->rcvd_samples_.add(data_sample);
 }
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
 ReceivedDataStrategy::accept_coherent(PublicationId& writer,
                                       RepoId& publisher)

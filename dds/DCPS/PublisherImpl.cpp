@@ -39,7 +39,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     listener_mask_(mask),
     listener_(DDS::PublisherListener::_duplicate(a_listener)),
     fast_listener_(0),
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     change_depth_(0),
 #endif
     domain_id_(participant->get_domain_id()),
@@ -537,7 +537,7 @@ PublisherImpl::resume_publications()
   return DDS::RETCODE_OK;
 }
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
@@ -656,7 +656,7 @@ PublisherImpl::end_coherent_changes()
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_PRESENTATION_QOS
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(

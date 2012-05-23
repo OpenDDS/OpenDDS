@@ -1266,7 +1266,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         writer->ack_sequence_.insert(resetRange);
       }
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       if (header.coherent_change_) {
         if (writer->coherent_samples_ == 0) {
           writer->coherent_sample_sequence_.reset();
@@ -1346,7 +1346,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     if (filtered) break; // sample filtered from instance
     bool accepted = true;
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     bool verify_coherent = false;
 #endif
     WriterInfo* writer = 0;
@@ -1361,7 +1361,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       if (where != this->writers_.end()) {
         if (header.coherent_change_) {
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
           // Received coherent change
           where->second->group_coherent_ = header.group_coherent_;
           where->second->publisher_id_ = header.publisher_id_;
@@ -1395,7 +1395,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
     }
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (verify_coherent) {
       accepted = this->verify_coherent_changes_completion (writer);
     }
@@ -1480,7 +1480,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
   break;
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   case END_COHERENT_CHANGES: {
     CoherentChangeControl control;
 
@@ -1529,7 +1529,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
   }
   break;
-#endif // OPENDDS_NO_PRESENTATION_QOS
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   case DATAWRITER_LIVELINESS: {
     this->writer_activity(sample.header_);
@@ -1809,7 +1809,7 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
       for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
            item = item->next_data_sample_) {
         if (item->sample_state_ & sample_states
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 	    && !item->coherent_change_
 #endif
            ) {
@@ -2017,7 +2017,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo()
     writer_id_(GUID_UNKNOWN),
     handle_(DDS::HANDLE_NIL)
 {
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   this->reset_coherent_info();
 #endif
 }
@@ -2033,7 +2033,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
     writer_qos_(writer_qos),
     handle_(DDS::HANDLE_NIL)
 {
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   this->reset_coherent_info();
 #endif
 
@@ -2212,7 +2212,7 @@ OpenDDS::DCPS::WriterInfo::ack_sequence() const
 }
 
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 Coherent_State
 OpenDDS::DCPS::WriterInfo::coherent_change_received()
 {
@@ -2264,7 +2264,7 @@ OpenDDS::DCPS::WriterInfo::set_group_info(const CoherentChangeControl& info)
   this->group_coherent_samples_ = info.group_coherent_samples_;
 }
 
-#endif // OPENDDS_NO_PRESENTATION_QOS
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 OpenDDS::DCPS::WriterStats::WriterStats(
   int amount,
@@ -3147,7 +3147,7 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
 }
 #endif
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
   if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
@@ -3364,7 +3364,7 @@ void DataReaderImpl::get_ordered_data (GroupRakeData& data,
   }
 }
 
-#endif // OPENDDS_NO_PRESENTATION_QOS
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 void
 DataReaderImpl::set_subscriber_qos(

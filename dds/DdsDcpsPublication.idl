@@ -146,7 +146,7 @@ module DDS {
 
     ReturnCode_t resume_publications();
 
-#ifndef OPENDDS_NO_PRESENTATION_QOS
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
     ReturnCode_t begin_coherent_changes();
 
