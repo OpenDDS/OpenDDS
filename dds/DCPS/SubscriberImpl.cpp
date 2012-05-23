@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "SubscriberImpl.h"
+#include "FeatureDisabledQosCheck.h"
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
@@ -565,6 +566,9 @@ DDS::ReturnCode_t
 SubscriberImpl::set_qos(
   const DDS::SubscriberQos & qos)
 {
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos);
+
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;

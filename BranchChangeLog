@@ -1,3 +1,12 @@
+Wed May 23 17:57:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+	  Runtime check for valid policy settings if
+	  object_model_profile feature is disabled.
+
 Wed May 23 16:02:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/dcps_java_optional.mpb:
@@ -21,8 +30,8 @@ Wed May 23 16:02:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DdsDcpsSubscription.idl:
         * dds/idl/CPPTemplate.txt:
 
-	  Rename poorly named macro OPENDDS_NO_PRESENTATION_QOS to
-	  OPENDDS_NO_OBJECT_MODEL_PROFILE.
+          Rename poorly named macro OPENDDS_NO_PRESENTATION_QOS to
+          OPENDDS_NO_OBJECT_MODEL_PROFILE.
 
 Wed May 23 15:55:26 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

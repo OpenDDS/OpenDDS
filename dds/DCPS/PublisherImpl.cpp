@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PublisherImpl.h"
+#include "FeatureDisabledQosCheck.h"
 #include "DataWriterImpl.h"
 #include "DomainParticipantImpl.h"
 #include "DataWriterImpl.h"
@@ -381,6 +382,9 @@ PublisherImpl::delete_contained_entities()
 DDS::ReturnCode_t
 PublisherImpl::set_qos(const DDS::PublisherQos & qos)
 {
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos);
+
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;
