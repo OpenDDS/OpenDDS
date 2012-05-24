@@ -1,3 +1,11 @@
+Thu May 24 18:05:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+          Trying to get this test running with rtps, committing my changes
+          until now
+
 Thu May 24 12:39:03 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/Service_Participant.h:
