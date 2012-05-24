@@ -19,7 +19,7 @@ Fri May 18 17:38:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
           Leave out the name of the parameter for gen_is_bounded_size().
           This removes the necessity for ACE_UNUSED_ARG, which may be seen as
-          a read of unitialized data by Coverity.
+          a read of uninitialized data by Coverity.
 
 Fri May 18 15:50:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
