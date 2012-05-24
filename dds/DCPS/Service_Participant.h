@@ -97,7 +97,7 @@ public:
   CORBA::ORB_ptr get_ORB() const;
 
   /// Get the common reactor used for Discovery tasks.
-  /// Inteneded for use by OpenDDS internals only.
+  /// Intended for use by OpenDDS internals only.
   ACE_Reactor* discovery_reactor() const;
 
   /**
@@ -107,7 +107,7 @@ public:
    * This method consumes @c -DCPS* options and their arguments.
    * Unless the client/application code calls other methods to
    * define how the ORB is run, calling this method will
-   * initiallize the ORB and then run it in a separate thread.
+   * initialize the ORB and then run it in a separate thread.
    */
   DDS::DomainParticipantFactory_ptr get_domain_participant_factory(
     int &argc = zero_argc,

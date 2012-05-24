@@ -1,3 +1,10 @@
+Thu May 24 12:39:03 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * examples/DCPS/ishapes/main.cpp:
+          Fixed typos
+
 Fri May 18 21:10:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcps.mpc:

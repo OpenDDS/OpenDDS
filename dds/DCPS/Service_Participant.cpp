@@ -341,7 +341,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
         // initialized so we have no influence over its
         // scheduling or thread priority(ies).
 
-        /// @TODO: Move ORB intitialization to after the
+        /// @TODO: Move ORB initialization to after the
         ///        configuration file is processed and the
         ///        initial scheduling policy and priority are
         ///        established.
