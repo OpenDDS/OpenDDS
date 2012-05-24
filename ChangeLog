@@ -1,3 +1,8 @@
+Thu May 24 18:19:45 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/Deadline/rtps_disc.ini:
+          Added ini file which I forgot
+
 Thu May 24 18:05:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * tests/DCPS/Deadline/Deadline.mpc:
