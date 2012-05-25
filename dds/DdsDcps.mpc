@@ -1,7 +1,8 @@
 // $Id$
 
 project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, dds4ccm_opendds, \
-                               dcps_ts_defaults, dds_suppress_any_support, install {
+                               dcps_ts_defaults, dds_suppress_any_support, install, \
+                               gen_ostream {
   custom_only = 1
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
               -Wb,export_macro=OpenDDS_Dcps_Export \
@@ -90,7 +91,8 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_
   }
 }
 
-project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dcps_optional_features {
+project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
+                                  dcps_optional_features, gen_ostream {
   requires += dds4ccm_opendds
   after += OpenDDS_Dcps_lem_gen
   includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)

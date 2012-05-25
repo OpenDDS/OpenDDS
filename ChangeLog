@@ -1,3 +1,11 @@
+Fri May 25 09:47:52 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Use gen_ostream as base project. With this feature the tao_idl
+          generates ostream insertion operators which can be used to stream
+          any idl defined type into an ostream. Going to use this in dds4ccm
+          to log the full qos we set to OpenDDS
+
 Fri May 25 07:11:11 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * tests/DCPS/CompatibilityTest/run_test.pl:
