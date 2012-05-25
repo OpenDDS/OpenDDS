@@ -1,8 +1,14 @@
+Fri May 25 11:42:58 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Removed invalid condition for FilterEvaluation test.
+
 Fri May 25 11:36:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * MPC/config/dcps_optional_features.mpb:
 
-	  Fixed name of ownership kind exclusive feature macro.
+          Fixed name of ownership kind exclusive feature macro.
 
 Wed May 23 17:57:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
