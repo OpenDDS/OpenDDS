@@ -115,6 +115,8 @@ if (!$is_rtps_disc) {
   }
 }
 
+run_compatibility_tests("false", "transient", "topic", "infinite", "best_effort", "transient_local", "topic", "infinite", "reliable");
+
 run_compatibility_tests("true", "transient_local", "automatic", "5", "reliable", "transient_local", "automatic", "5", "reliable");
 run_compatibility_tests("true", "transient_local", "automatic", "6", "reliable", "volatile", "automatic", "7", "best_effort");
 run_compatibility_tests("true", "transient_local", "automatic", "5", "reliable", "volatile", "automatic", "infinite", "best_effort");
@@ -127,7 +129,6 @@ run_compatibility_tests("false", "transient_local", "automatic", "5", "best_effo
 run_compatibility_tests("false", "volatile", "automatic", "5", "reliable", "transient_local", "automatic", "5", "reliable");
 # there are more to test later, but they are currently treated as invalid
 # since there are not supported in the code
-
 
 if (!$is_rtps_disc) {
   my $ir = $DCPSREPO->TerminateWaitKill(5);

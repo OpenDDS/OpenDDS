@@ -1,3 +1,11 @@
+Fri May 25 07:11:11 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+          Added another set of incompatible QoS settings to test
+
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+          Fixed typo
+
 Thu May 24 18:29:43 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/dcps_tests.lst:
