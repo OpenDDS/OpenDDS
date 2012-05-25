@@ -1,11 +1,17 @@
+Fri May 25 11:36:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_optional_features.mpb:
+
+	  Fixed name of ownership kind exclusive feature macro.
+
 Wed May 23 17:57:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/FeatureDisabledQosCheck.h:
         * dds/DCPS/PublisherImpl.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
 
-	  Runtime check for valid policy settings if
-	  object_model_profile feature is disabled.
+          Runtime check for valid policy settings if
+          object_model_profile feature is disabled.
 
 Wed May 23 16:02:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

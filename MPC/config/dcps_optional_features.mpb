@@ -26,14 +26,14 @@ feature (!multi_topic) : taoidldefaults, dcps_ts_defaults {
 feature (!ownership_profile) : taoidldefaults, dcps_ts_defaults {
 // Currently there is no support for exclusion of code dealing with HISTORY depth > 1
 // therefore ownership_profile is the same as ownership_kind_exclusive.
-  macros   += OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_PROFILE OPENDDS_NO_OWNERSHIP_PROFILE
-  idlflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_PROFILE -DOPENDDS_NO_OWNERSHIP_PROFILE
-  dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_PROFILE -DOPENDDS_NO_OWNERSHIP_PROFILE
+  macros   += OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE OPENDDS_NO_OWNERSHIP_PROFILE
+  idlflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE -DOPENDDS_NO_OWNERSHIP_PROFILE
+  dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE -DOPENDDS_NO_OWNERSHIP_PROFILE
 }
 feature (!ownership_kind_exclusive) : taoidldefaults, dcps_ts_defaults {
-  macros   += OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_PROFILE
-  idlflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_PROFILE
-  dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_PROFILE
+  macros   += OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  idlflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  dcps_ts_flags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 }
 feature (!object_model_profile) : taoidldefaults, dcps_ts_defaults {
   macros   += OPENDDS_NO_OBJECT_MODEL_PROFILE
