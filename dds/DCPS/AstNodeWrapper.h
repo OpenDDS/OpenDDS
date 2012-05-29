@@ -8,6 +8,8 @@
 #ifndef OPENDDS_DCPS_ASTNODEWRAPPER_H
 #define OPENDDS_DCPS_ASTNODEWRAPPER_H
 
+#include "dds/DCPS/Definitions.h"
+
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "yard/yard_parser.hpp"

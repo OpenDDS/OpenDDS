@@ -15,6 +15,7 @@
 
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/Definitions.h"
 #include "MyTypeSupportS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
