@@ -1,11 +1,19 @@
+Tue May 29 19:57:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+	  Force #include of Definitions.h to ensure
+	  OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE is
+	  defined before being used.
+
 Tue May 29 14:59:17 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/idl/metaclass_generator.cpp:
 
-	  Make content subscription guard use
-	  OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE as originally
-	  done instead of computing from 3 content subscription
-	  macros.
+          Make content subscription guard use
+          OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE as originally
+          done instead of computing from 3 content subscription
+          macros.
 
 Tue May 29 14:27:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

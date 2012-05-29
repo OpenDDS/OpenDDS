@@ -195,6 +195,7 @@ void postprocess(const char* fn, ostringstream& content,
   if (which == BE_GlobalData::STREAM_H) {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
+    out << "#include \"dds/DCPS/Definitions.h\"\n";
     string taoheader = be_global->header_name_.c_str();
     taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
     out << "#include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
