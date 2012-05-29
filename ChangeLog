@@ -1,3 +1,8 @@
+Tue May 29 11:57:12 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Qos_Helper.h:
+          Fixed typo
+
 Tue May 29 09:25:29 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * MPC/config/dds4ccm_opendds.mpb:
