@@ -24,14 +24,6 @@
 
 #ifdef  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 #define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos) \
-  if (qos.ownership_strength != \
-      TheServiceParticipant->initial_OwnershipStrengthQosPolicy()) { \
-    ACE_ERROR_RETURN((LM_ERROR, \
-                      ACE_TEXT("(%P|%t) ERROR: ") \
-                      ACE_TEXT("Feature ownership_kind_exclusive disabled, ") \
-                      ACE_TEXT("therefore ownership strength must be the default. \n")), \
-                     DDS::RETCODE_UNSUPPORTED); \
-  } \
   if (qos.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS) { \
     ACE_ERROR_RETURN((LM_ERROR, \
                       ACE_TEXT("(%P|%t) ERROR: ") \
@@ -39,8 +31,17 @@
                       ACE_TEXT("therefore ownership kind must be SHARED. \n")), \
                      DDS::RETCODE_UNSUPPORTED); \
   }
+#define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos) \
+  if (qos.ownership_strength.value != 0) { \
+    ACE_ERROR_RETURN((LM_ERROR, \
+                      ACE_TEXT("(%P|%t) ERROR: ") \
+                      ACE_TEXT("Feature ownership_kind_exclusive disabled, ") \
+                      ACE_TEXT("therefore ownership strength must be the default. \n")), \
+                     DDS::RETCODE_UNSUPPORTED); \
+  }
 #else
 #define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos)
+#define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos)
 #endif
 
 #ifdef  OPENDDS_NO_OBJECT_MODEL_PROFILE

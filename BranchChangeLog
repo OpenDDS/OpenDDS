@@ -1,10 +1,19 @@
+Tue May 29 20:07:51 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+	  Account for DataReader and Topic not
+	  having ownership strength policy.
+
 Tue May 29 19:57:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/idl/be_produce.cpp:
 
-	  Force #include of Definitions.h to ensure
-	  OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE is
-	  defined before being used.
+          Force #include of Definitions.h to ensure
+          OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE is
+          defined before being used.
 
 Tue May 29 14:59:17 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

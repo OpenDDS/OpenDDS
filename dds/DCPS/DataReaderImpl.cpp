@@ -2957,6 +2957,8 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
       return true;
     }
   }
+#else
+  ACE_UNUSED_ARG(pubid);
 #endif
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
