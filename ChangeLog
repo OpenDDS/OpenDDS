@@ -1,3 +1,18 @@
+Tue May 29 09:20:58 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * bin/dcps_tests.lst:
+
+        * tests/DCPS/RegisterInstance:
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/RegisterInstance/rtps_disc.ini:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+          Added new test. This explicitly test the register_instance
+          method on the DataWriter. It also tests whether an instance
+          is implicitly created when a sample with an unknown instance
+          is written to DDS.
+
 Fri May 25 09:47:52 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
