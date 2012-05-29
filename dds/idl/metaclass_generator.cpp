@@ -17,9 +17,8 @@ namespace {
   struct ContentSubscriptionGuard {
     ContentSubscriptionGuard()
     {
-      std::string guard = "#if !defined (OPENDDS_NO_QUERY_CONDITION) || !defined (OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined (OPENDDS_NO_MULTI_TOPIC)\n";
-      be_global->header_ << guard;
-      be_global->impl_ << guard;
+      be_global->header_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
+      be_global->impl_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
     }
     ~ContentSubscriptionGuard()
     {
