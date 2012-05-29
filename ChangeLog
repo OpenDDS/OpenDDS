@@ -1,3 +1,8 @@
+Tue May 29 09:25:29 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Added missing after
+
 Tue May 29 09:20:58 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * bin/dcps_tests.lst:
