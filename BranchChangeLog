@@ -1,3 +1,10 @@
+Wed May 30 17:25:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Exclude tests that use persistence_profile feature
+	  from running when the feature is disabled.
+
 Wed May 30 16:01:50 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -7,8 +14,8 @@ Wed May 30 16:01:50 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/Qos_Helper.inl:
         * dds/DCPS/TopicImpl.cpp:
 
-	  Add runtime checks when persistence_profile feature
-	  is disabled.
+          Add runtime checks when persistence_profile feature
+          is disabled.
 
 Wed May 30 14:09:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
