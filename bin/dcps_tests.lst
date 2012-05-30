@@ -18,13 +18,13 @@ tests/DCPS/unit/run_test.pl:
 tests/DCPS/DestinationOrder/run_test.pl: !DCPS_MIN
 tests/DCPS/DestinationOrder/run_test.pl source: !DCPS_MIN
 tests/DCPS/Dispose/run_test.pl: !DCPS_MIN
-tests/DCPS/FooTest3_0/run_test.pl:
-tests/DCPS/FooTest3_0/run_test.pl unregister: !DCPS_MIN
-tests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN
-tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN
-tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN
-tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN
-tests/DCPS/FooTest3_0/run_test.pl liveliness: !DCPS_MIN
+tests/DCPS/FooTest3_0/run_test.pl: !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl unregister: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl liveliness: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_1/run_test.pl:
 tests/DCPS/FooTest3_1/run_test.pl mi: !DCPS_MIN
 tests/DCPS/FooTest3_1/run_test.pl mw: !DCPS_MIN
@@ -50,11 +50,11 @@ tests/DCPS/DcpsIntegration/run_test-topic.pl: !DCPS_MIN
 tests/DCPS/DcpsIntegration/run_test-topic.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/DcpsIntegration/run_test-topic.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 
-tests/DCPS/FooTest4/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest4/run_test.pl mi: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest4/run_test.pl mr: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest4/run_test.pl mri: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest4/run_test.pl mrit: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/FooTest4/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest4/run_test.pl mi: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest4/run_test.pl mr: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest4/run_test.pl mri: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest4/run_test.pl mrit: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !DDS_NO_OBJECT_MODEL_PROFILE
 
 tests/DCPS/FooTest4_0/run_test.pl:
 

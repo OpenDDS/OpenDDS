@@ -1,8 +1,15 @@
+Wed May 30 14:09:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Exclude FooTest3_0 and FooTest4 when object_model_profile
+	  feature is disabled.
+
 Wed May 30 13:58:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Exclude FooTest4 when ownership_profile feature is disabled.
+          Exclude FooTest4 when ownership_profile feature is disabled.
 
 Tue May 29 20:07:51 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
