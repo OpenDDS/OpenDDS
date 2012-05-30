@@ -1,3 +1,8 @@
+Wed May 30 07:01:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Added needed after for dds4ccm
+
 Tue May 29 13:56:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportRegistry.cpp:
