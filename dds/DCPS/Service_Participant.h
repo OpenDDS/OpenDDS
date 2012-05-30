@@ -337,7 +337,7 @@ public:
                                Discovery::Config* cfg);
 private:
 
-  /// Initalize default qos.
+  /// Initialize default qos.
   void initialize();
 
   /// Initialize the thread scheduling and initial priority.
@@ -383,7 +383,7 @@ private:
   std::map<std::string, Discovery::Config*> discovery_types_;
 
   /// The orb object reference which can be provided by client or
-  /// initialized by this sigleton.
+  /// initialized by this singleton.
   CORBA::ORB_var orb_;
 
   /// @c true if set_ORB() was called.

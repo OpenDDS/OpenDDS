@@ -1,3 +1,9 @@
+Wed May 30 12:52:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/Service_Participant.h:
+          Doxygen fixes
+
 Wed May 30 07:01:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
