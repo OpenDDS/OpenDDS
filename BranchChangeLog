@@ -1,11 +1,17 @@
+Wed May 30 13:58:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+	  Exclude FooTest4 when ownership_profile feature is disabled.
+
 Tue May 29 20:07:51 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/FeatureDisabledQosCheck.h:
 
-	  Account for DataReader and Topic not
-	  having ownership strength policy.
+          Account for DataReader and Topic not
+          having ownership strength policy.
 
 Tue May 29 19:57:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
