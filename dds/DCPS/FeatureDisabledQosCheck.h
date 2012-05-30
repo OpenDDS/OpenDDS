@@ -9,6 +9,8 @@
 #ifndef OPENDDS_DCPS_FEATURE_DISABLED_QOS_CHECK_H
 #define OPENDDS_DCPS_FEATURE_DISABLED_QOS_CHECK_H
 
+#include "dds/DCPS/Qos_Helper.h"
+
 #ifdef  OPENDDS_NO_OWNERSHIP_PROFILE
 #define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos) \
   if (qos.history.depth > 1) { \
@@ -63,6 +65,35 @@
   }
 #else  
 #define OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos)    
+#endif
+
+#ifdef OPENDDS_NO_PERSISTENCE_PROFILE
+
+#define OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos) \
+  if (qos.durability_service != TheServiceParticipant->initial_DurabilityServiceQosPolicy()) { \
+    ACE_ERROR_RETURN((LM_ERROR, \
+                      ACE_TEXT("(%P|%t) ERROR: ") \
+                      ACE_TEXT("Feature persistence_profile disabled, ") \
+                      ACE_TEXT("therefore durability service must be the default. \n")), \
+                     DDS::RETCODE_UNSUPPORTED); \
+  }
+
+#define OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT(qos) \
+  if (qos.durability.kind == ::DDS::TRANSIENT_DURABILITY_QOS || \
+      qos.durability.kind == ::DDS::PERSISTENT_DURABILITY_QOS) { \
+    ACE_ERROR_RETURN((LM_ERROR, \
+                      ACE_TEXT("(%P|%t) ERROR: ") \
+                      ACE_TEXT("Feature persistence_profile disabled, ") \
+                      ACE_TEXT("therefore durability kind must not ") \
+                      ACE_TEXT("be TRANSIENT_DURABILITY_QOS or PERSISTENT_DURABILITY_QOS. \n")), \
+                     DDS::RETCODE_UNSUPPORTED); \
+  }
+  
+#else
+
+#define OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos)
+#define OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT(qos)
+
 #endif
 
 #endif

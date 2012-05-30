@@ -785,6 +785,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
 
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos);
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT(qos);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)

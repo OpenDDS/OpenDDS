@@ -195,7 +195,6 @@ operator== (const DDS::DurabilityQosPolicy& qos1,
     qos1.kind == qos2.kind;
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 operator== (DDS::DurabilityServiceQosPolicy const & qos1,
@@ -209,7 +208,6 @@ operator== (DDS::DurabilityServiceQosPolicy const & qos1,
     && qos1.max_instances == qos2.max_instances
     && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
 }
-#endif
 
 ACE_INLINE
 bool operator == (const DDS::PresentationQosPolicy& qos1,
@@ -363,9 +361,7 @@ bool operator == (const DDS::TopicQos& qos1,
   return
     qos1.topic_data == qos2.topic_data
     && qos1.durability == qos2.durability
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && qos1.durability_service == qos2.durability_service
-#endif
     && qos1.deadline == qos2.deadline
     && qos1.latency_budget == qos2.latency_budget
     && qos1.liveliness == qos2.liveliness
@@ -384,9 +380,7 @@ bool operator == (const DDS::DataWriterQos& qos1,
 {
   return
     qos1.durability == qos2.durability
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     && qos1.durability_service == qos2.durability_service
-#endif
     && qos1.deadline == qos2.deadline
     && qos1.latency_budget == qos2.latency_budget
     && qos1.liveliness == qos2.liveliness
@@ -494,7 +488,6 @@ operator != (const DDS::DurabilityQosPolicy& qos1,
   return !(qos1 == qos2);
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 operator != (DDS::DurabilityServiceQosPolicy const & qos1,
@@ -502,7 +495,6 @@ operator != (DDS::DurabilityServiceQosPolicy const & qos1,
 {
   return !(qos1 == qos2);
 }
-#endif
 
 ACE_INLINE
 bool operator != (const DDS::PresentationQosPolicy& qos1,

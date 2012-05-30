@@ -1,9 +1,21 @@
+Wed May 30 16:01:50 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/TopicImpl.cpp:
+
+	  Add runtime checks when persistence_profile feature
+	  is disabled.
+
 Wed May 30 14:09:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Exclude FooTest3_0 and FooTest4 when object_model_profile
-	  feature is disabled.
+          Exclude FooTest3_0 and FooTest4 when object_model_profile
+          feature is disabled.
 
 Wed May 30 13:58:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

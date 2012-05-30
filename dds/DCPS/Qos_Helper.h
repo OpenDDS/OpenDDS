@@ -343,11 +343,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::DurabilityQosPolicy& qos1,
                   const DDS::DurabilityQosPolicy& qos2);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::DurabilityServiceQosPolicy& qos1,
                   const DDS::DurabilityServiceQosPolicy& qos2);
-#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::PresentationQosPolicy& qos1,
@@ -463,11 +461,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::DurabilityQosPolicy& qos1,
                   const DDS::DurabilityQosPolicy& qos2);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::DurabilityServiceQosPolicy& qos1,
                   const DDS::DurabilityServiceQosPolicy& qos2);
-#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::PresentationQosPolicy& qos1,
