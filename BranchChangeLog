@@ -1,8 +1,21 @@
+Wed May 30 19:46:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+	  Pass error return value to feature compatibility
+	  check macros in anticipation of using the macros
+	  in functions that return a non-return code type.
+
 Wed May 30 18:57:08 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
 
-	  Fix improperly placed feature guards.
+          Fix improperly placed feature guards.
 
 Wed May 30 17:25:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
