@@ -277,7 +277,6 @@ namespace {
       ACE_UNUSED_ARG(max_samples);
       ACE_UNUSED_ARG(max_instances);
       ACE_UNUSED_ARG(max_samples_per_instance);
-
 #endif
       result.ddsPublicationData.deadline.period.sec = deadline_sec;
       result.ddsPublicationData.deadline.period.nanosec = deadline_nsec;
@@ -301,6 +300,8 @@ namespace {
       result.ddsPublicationData.ownership.kind = ownership;
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       result.ddsPublicationData.ownership_strength.value = ownership_strength;
+#else
+      ACE_UNUSED_ARG(ownership_strength);
 #endif
       result.ddsPublicationData.destination_order.kind = destination_order;
       result.ddsPublicationData.presentation.access_scope = presentation;
@@ -1685,7 +1686,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_OWNERSHIP_STRENGTH));
     Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
     TEST_ASSERT(param.ownership_strength().value == 29);
+#endif
   }
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   { // Should decode writer ownership strength
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,

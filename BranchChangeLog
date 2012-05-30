@@ -1,9 +1,15 @@
+Wed May 30 18:57:08 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+	  Fix improperly placed feature guards.
+
 Wed May 30 17:25:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-	  Exclude tests that use persistence_profile feature
-	  from running when the feature is disabled.
+          Exclude tests that use persistence_profile feature
+          from running when the feature is disabled.
 
 Wed May 30 16:01:50 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
