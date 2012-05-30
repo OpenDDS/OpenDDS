@@ -1,3 +1,10 @@
+Wed May 30 21:19:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+	  Fix so that non-int value can be passed to compatibility
+	  check macros.
+
 Wed May 30 19:46:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -7,9 +14,9 @@ Wed May 30 19:46:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/SubscriberImpl.cpp:
         * dds/DCPS/TopicImpl.cpp:
 
-	  Pass error return value to feature compatibility
-	  check macros in anticipation of using the macros
-	  in functions that return a non-return code type.
+          Pass error return value to feature compatibility
+          check macros in anticipation of using the macros
+          in functions that return a non-return code type.
 
 Wed May 30 18:57:08 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
