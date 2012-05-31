@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
@@ -107,6 +108,8 @@ DomainParticipantImpl::create_publisher(
   } else {
     pub_qos = qos;
   }
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Publisher::_nil());
 
   if (!Qos_Helper::valid(pub_qos)) {
     ACE_ERROR((LM_ERROR,
@@ -209,6 +212,8 @@ DomainParticipantImpl::create_subscriber(
   } else {
     sub_qos = qos;
   }
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Subscriber::_nil());
 
   if (!Qos_Helper::valid(sub_qos)) {
     ACE_ERROR((LM_ERROR,
@@ -328,6 +333,11 @@ DomainParticipantImpl::create_topic(
   } else {
     topic_qos = qos;
   }
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
 
   if (!Qos_Helper::valid(topic_qos)) {
     ACE_ERROR((LM_ERROR,

@@ -1,12 +1,25 @@
+Thu May 31 18:30:07 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+	  For Publisher, Subscriber, and DomainParticipant
+	  create_* commands that take a Qos, invoke
+	  feature compatibility macros to ensure
+	  at runtime that a policy value isn't being passed
+	  if the feature that uses the value is disabled.
+
 Thu May 31 17:35:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/CoherentChangeControl.cpp:
         * dds/DCPS/DataDurabilityCache.cpp:
         * dds/DCPS/OwnershipManager.cpp:
 
-	  Visual C++ ignores preprocessor directives that
-	  occur before pre-compiled header includes, so
-	  move directives after include of PCHs.
+          Visual C++ ignores preprocessor directives that
+          occur before pre-compiled header includes, so
+          move directives after include of PCHs.
 
 Wed May 30 21:19:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
