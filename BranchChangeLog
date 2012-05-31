@@ -1,3 +1,16 @@
+Thu May 31 19:55:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/Deadline/rtps_disc.ini:
+
+        * tests/DCPS/RegisterInstance:
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/RegisterInstance/rtps_disc.ini:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+
+          Merged from trunk r5587 through r5630.
+
 Thu May 31 19:46:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * .:
@@ -32,7 +45,7 @@ Thu May 31 19:46:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
         * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
 
-	  Merged from trunk r5587 through r5630.
+          Merged from trunk r5587 through r5630.
 
 Thu May 31 18:30:07 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
