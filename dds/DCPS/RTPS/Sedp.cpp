@@ -88,7 +88,6 @@ bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
     dest.user_data = src.user_data;
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 #ifdef OPENDDS_GCC33
   if (OpenDDS::DCPS::operator!=(dest.ownership_strength,
                                 src.ownership_strength)) {
@@ -98,7 +97,6 @@ bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
     changed = true;
     dest.ownership_strength = src.ownership_strength;
   }
-#endif
 
 #ifdef OPENDDS_GCC33
   if (OpenDDS::DCPS::operator!=(dest.partition, src.partition)) {
@@ -1548,9 +1546,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     tempDwQos.lifespan = bit.lifespan;
     tempDwQos.user_data = bit.user_data;
     tempDwQos.ownership = bit.ownership;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     tempDwQos.ownership_strength = bit.ownership_strength;
-#endif
     tempDwQos.writer_data_lifecycle =
       TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
     dwQos = &tempDwQos;
@@ -2155,9 +2151,7 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.lifespan = pub.qos_.lifespan;
   dwd.ddsPublicationData.user_data = pub.qos_.user_data;
   dwd.ddsPublicationData.ownership = pub.qos_.ownership;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   dwd.ddsPublicationData.ownership_strength = pub.qos_.ownership_strength;
-#endif
   dwd.ddsPublicationData.destination_order = pub.qos_.destination_order;
   dwd.ddsPublicationData.presentation = pub.publisher_qos_.presentation;
   dwd.ddsPublicationData.partition = pub.publisher_qos_.partition;

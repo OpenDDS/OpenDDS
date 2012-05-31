@@ -1,3 +1,10 @@
+Thu May 31 21:02:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+	  Remove compliance profile feature guards.
+
 Thu May 31 19:55:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/Deadline/rtps_disc.ini:
