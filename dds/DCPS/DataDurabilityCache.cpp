@@ -6,9 +6,10 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataDurabilityCache.h"
 #include "Service_Participant.h"
 #include "DataSampleList.h"

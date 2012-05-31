@@ -1,9 +1,19 @@
+Thu May 31 17:35:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+
+	  Visual C++ ignores preprocessor directives that
+	  occur before pre-compiled header includes, so
+	  move directives after include of PCHs.
+
 Wed May 30 21:19:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/FeatureDisabledQosCheck.h:
 
-	  Fix so that non-int value can be passed to compatibility
-	  check macros.
+          Fix so that non-int value can be passed to compatibility
+          check macros.
 
 Wed May 30 19:46:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

@@ -6,9 +6,10 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "CoherentChangeControl.h"
 #include "Serializer.h"
 #include "GuidConverter.h"
