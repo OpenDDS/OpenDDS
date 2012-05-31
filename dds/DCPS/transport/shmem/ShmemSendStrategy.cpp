@@ -25,6 +25,10 @@ ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link)
   , link_(link)
   , current_data_(0)
 {
+#ifdef ACE_HAS_POSIX_SEM
+  peer_semaphore_.name_ = 0;
+  peer_semaphore_.sema_ = 0;
+#endif
 }
 
 bool

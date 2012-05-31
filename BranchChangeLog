@@ -1,3 +1,39 @@
+Thu May 31 19:46:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * .:
+        * ChangeLog:
+        * MPC/config/dds4ccm_opendds.mpb:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DdsDcps.mpc:
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * examples/DCPS/ishapes:
+        * examples/DCPS/ishapes/main.cpp:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/rtps_disc.ini:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/RegisterInstance:
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+        * tests/DCPS/RegisterInstance/rtps_disc.ini:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+        * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
+        * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
+
+	  Merged from trunk r5587 through r5630.
+
 Thu May 31 18:30:07 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -5,11 +41,11 @@ Thu May 31 18:30:07 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/PublisherImpl.cpp:
         * dds/DCPS/SubscriberImpl.cpp:
 
-	  For Publisher, Subscriber, and DomainParticipant
-	  create_* commands that take a Qos, invoke
-	  feature compatibility macros to ensure
-	  at runtime that a policy value isn't being passed
-	  if the feature that uses the value is disabled.
+          For Publisher, Subscriber, and DomainParticipant
+          create_* commands that take a Qos, invoke
+          feature compatibility macros to ensure
+          at runtime that a policy value isn't being passed
+          if the feature that uses the value is disabled.
 
 Thu May 31 17:35:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

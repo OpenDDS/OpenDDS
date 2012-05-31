@@ -51,7 +51,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs(argc, argv);
       DDS::DomainParticipant_var participant =
-        dpf->create_participant(411,
+        dpf->create_participant(11,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);

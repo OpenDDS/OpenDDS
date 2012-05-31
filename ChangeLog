@@ -1,3 +1,121 @@
+Thu May 31 12:46:29 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Fixed compile issues on windows.
+          DdsDcps_lem_stub depends on ccm_lem_stub when
+          dds4ccm_opendds is enabled.
+
+Wed May 30 12:52:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/Service_Participant.h:
+          Doxygen fixes
+
+Wed May 30 07:01:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Added needed after for dds4ccm
+
+Tue May 29 13:56:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Use proper ACE Logging formatting characters (%C vs %s).
+
+Tue May 29 11:57:12 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Qos_Helper.h:
+          Fixed typo
+
+Tue May 29 09:25:29 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Added missing after
+
+Tue May 29 09:20:58 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * bin/dcps_tests.lst:
+
+        * tests/DCPS/RegisterInstance:
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/RegisterInstance/rtps_disc.ini:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+          Added new test. This explicitly test the register_instance
+          method on the DataWriter. It also tests whether an instance
+          is implicitly created when a sample with an unknown instance
+          is written to DDS.
+
+Fri May 25 09:47:52 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Use gen_ostream as base project. With this feature the tao_idl
+          generates ostream insertion operators which can be used to stream
+          any idl defined type into an ostream. Going to use this in dds4ccm
+          to log the full qos we set to OpenDDS
+
+Fri May 25 07:11:11 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+          Added another set of incompatible QoS settings to test
+
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+          Fixed typo
+
+Thu May 24 18:29:43 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Added Deadline test with rtps_disc
+
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+          Updated domain id in order to run with rtps
+
+Thu May 24 18:19:45 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/Deadline/rtps_disc.ini:
+          Added ini file which I forgot
+
+Thu May 24 18:05:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+          Trying to get this test running with rtps, committing my changes
+          until now
+
+Thu May 24 12:39:03 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * examples/DCPS/ishapes/main.cpp:
+          Fixed typos
+
+Fri May 18 21:10:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          List the *TypeSupportImpl.cpp files as needed for the 'idl_stubs'
+          target.  This is used by the script that measures static footprint.
+
+Fri May 18 17:38:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Leave out the name of the parameter for gen_is_bounded_size().
+          This removes the necessity for ACE_UNUSED_ARG, which may be seen as
+          a read of uninitialized data by Coverity.
+
+Fri May 18 15:50:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed compiler and coverity warnings.
+
 Thu May 17 16:02:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/LargeSample/LargeSample.mpc:

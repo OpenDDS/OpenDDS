@@ -176,6 +176,7 @@ tests/DCPS/CompatibilityTest/run_test.pl rtps_disc: !DCPS_MIN RTPS !NO_BUILT_IN_
 tests/DCPS/CompatibilityTest/run_test.pl rtps_disc_tcp: !DCPS_MIN RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN
+tests/DCPS/Deadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN
 tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
 tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
@@ -188,6 +189,7 @@ tests/DCPS/StringKey/run_test.pl: !DCPS_MIN
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
 tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
+tests/DCPS/RegisterInstance/run_test.pl: !DCPS_MIN
 
 tests/DCPS/FilterExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN !DDS_NO_QUERY_CONDITION !DDS_NO_CONTENT_SUBSCRIPTION

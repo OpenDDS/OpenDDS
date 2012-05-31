@@ -83,12 +83,12 @@ bool non_negative_duration(DDS::Duration_t const & t);
  * Other than these supported qos, any qos that is different from the
  * initial value is invalid.
  *
- * @note Since in the first implemenation of DSS in TAO a limited
+ * @note Since in the first implementation of DSS in TAO a limited
  *       number of QoS values are allowed to be modified, the
  *       consistency test on QoS settings have not been
  *       implemented to check future "valid" QoS values.
  *
- * @note None of the supported QoS in the first implemenation are
+ * @note None of the supported QoS in the first implementation are
  *       changeable. The changed value will be checked per the QoS
  *       table in the DDS specification.
  */

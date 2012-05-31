@@ -99,7 +99,7 @@ public:
   CORBA::ORB_ptr get_ORB() const;
 
   /// Get the common reactor used for Discovery tasks.
-  /// Inteneded for use by OpenDDS internals only.
+  /// Intended for use by OpenDDS internals only.
   ACE_Reactor* discovery_reactor() const;
 
   /**
@@ -109,7 +109,7 @@ public:
    * This method consumes @c -DCPS* options and their arguments.
    * Unless the client/application code calls other methods to
    * define how the ORB is run, calling this method will
-   * initiallize the ORB and then run it in a separate thread.
+   * initialize the ORB and then run it in a separate thread.
    */
   DDS::DomainParticipantFactory_ptr get_domain_participant_factory(
     int &argc = zero_argc,
@@ -343,7 +343,7 @@ public:
                                Discovery::Config* cfg);
 private:
 
-  /// Initalize default qos.
+  /// Initialize default qos.
   void initialize();
 
   /// Initialize the thread scheduling and initial priority.
@@ -389,7 +389,7 @@ private:
   std::map<std::string, Discovery::Config*> discovery_types_;
 
   /// The orb object reference which can be provided by client or
-  /// initialized by this sigleton.
+  /// initialized by this singleton.
   CORBA::ORB_var orb_;
 
   /// @c true if set_ORB() was called.

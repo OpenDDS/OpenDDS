@@ -20,6 +20,7 @@ ShmemReceiveStrategy::ShmemReceiveStrategy(ShmemDataLink* link)
   : link_(link)
   , current_data_(0)
   , partial_recv_remaining_(0)
+  , partial_recv_ptr_(0)
 {
 }
 
@@ -38,7 +39,7 @@ ShmemReceiveStrategy::read()
   }
 
   ShmemAllocator* alloc = link_->peer_allocator();
-  void* mem;
+  void* mem = 0;
   if (-1 == alloc->find(bound_name_.c_str(), mem)) {
     VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::read link %@ "
               "peer allocator not found, receive_bytes will close link\n",
@@ -109,7 +110,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
     remaining = TransportHeader::get_length(current_data_->transport_header_);
     const size_t hdr_sz = sizeof(current_data_->transport_header_);
     // BUFFER_LOW_WATER in the framework ensures a large enough buffer
-    if (iov[0].iov_len < hdr_sz) {
+    if (iov[0].iov_len <= hdr_sz) {
       VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy for link %@ "
                 "receive buffer of length %d is too small\n",
                 link_, iov[0].iov_len), 0);
