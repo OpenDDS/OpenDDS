@@ -1,6 +1,5 @@
 // $Id$
 
-feature(dds4ccm_opendds) : ciaoidldefaults, taobaseidldefaults {
-  after += CCM_stub_idl
+feature(dds4ccm_opendds) : ccm_lem_stub, ciaoidldefaults, taobaseidldefaults {
   idlflags += -Glem -Gsv
 }
