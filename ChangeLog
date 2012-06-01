@@ -1,3 +1,8 @@
+Fri Jun  1 06:57:08 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+          Cleaned up includes.
+
 Thu May 31 12:46:29 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * MPC/config/dds4ccm_opendds.mpb:
