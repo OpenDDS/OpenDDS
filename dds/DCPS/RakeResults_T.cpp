@@ -22,18 +22,22 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
                                     DDS::SampleInfoSeq& info_seq,
                                     CORBA::Long max_samples,
                                     DDS::PresentationQosPolicy presentation,
+#ifndef OPENDDS_NO_QUERY_CONDITION
                                     DDS::QueryCondition_ptr cond,
+#endif
                                     Operation_t oper)
   : reader_(reader)
   , received_data_(received_data)
   , info_seq_(info_seq)
   , max_samples_(max_samples)
+#ifndef OPENDDS_NO_QUERY_CONDITION
   , cond_(cond)
+#endif
   , oper_(oper)
   , do_sort_(false)
   , do_filter_(false)
 {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
 
   if (cond_) {
     const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
@@ -63,7 +67,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
     // PRESENTATION ordered access (TOPIC)
     this->do_sort_ = presentation.ordered_access == true &&
                      presentation.access_scope == DDS::TOPIC_PRESENTATION_QOS;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
   }
 
 #endif
@@ -74,7 +78,7 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
                                            SubscriptionInstance* instance,
                                            size_t index_in_instance)
 {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
 
   if (do_filter_) {
     const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
@@ -88,7 +92,9 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
   if (do_sort_) {
     // N.B. Until a better heuristic is found, non-valid
     // samples are elided when sorting by QueryCondition.
+#ifndef OPENDDS_NO_QUERY_CONDITION
     if (cond_ && !sample->registered_data_) return false;
+#endif
 
     RakeData rd = {sample, instance, index_in_instance};
     sorted_.insert(rd);

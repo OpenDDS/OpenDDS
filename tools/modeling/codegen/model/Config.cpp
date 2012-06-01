@@ -998,8 +998,10 @@ Config::loadTopic(
     if( valueString == ACE_TEXT("SHARED")) {
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     } else if( valueString == ACE_TEXT("EXCLUSIVE")) {
       profile->qos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
+#endif
 
     } else {
       ACE_DEBUG((LM_WARNING,
@@ -1791,9 +1793,11 @@ Config::loadWriter(
       profile->qos.ownership.kind = ::DDS::SHARED_OWNERSHIP_QOS;
       profile->mask |= SetOwnershipKindQos;
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     } else if( valueString == ACE_TEXT("EXCLUSIVE")) {
       profile->qos.ownership.kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
       profile->mask |= SetOwnershipKindQos;
+#endif
 
     } else {
       ACE_DEBUG((LM_WARNING,
@@ -1806,6 +1810,7 @@ Config::loadWriter(
     }
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   // OwnershipStrength                   = <number>
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPSTRENGTH_KEYNAME, valueString);
@@ -1822,6 +1827,7 @@ Config::loadWriter(
       ));
     }
   }
+#endif
 
   // WriterDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
   valueString.clear();

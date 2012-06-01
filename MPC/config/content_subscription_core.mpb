@@ -1,0 +1,22 @@
+// For testing of a core content subscription component that
+// features query_condition, content_filtered_topic, multi_topic
+// depend on.
+
+// These feature rules ensures that at least once of these features
+// is enabled causing the core components to be built.
+
+feature(!multi_topic, !query_condition) {
+  requires += content_filtered_topic
+}
+
+feature(!multi_topic, !content_filtered_topic) {
+  requires += query_condition
+}
+
+feature(!query_condition, !content_filtered_topic) {
+  requires += multi_topic
+}
+
+feature(!content_subscription) {
+  requires += content_subscription
+}

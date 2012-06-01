@@ -147,8 +147,10 @@ namespace {
       DiscoveredWriterData writer_data;
       writer_data.ddsPublicationData.durability =
           TheServiceParticipant->initial_DurabilityQosPolicy();
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       writer_data.ddsPublicationData.durability_service =
           TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+#endif
       writer_data.ddsPublicationData.deadline =
           TheServiceParticipant->initial_DeadlineQosPolicy();
       writer_data.ddsPublicationData.latency_budget =
@@ -163,8 +165,10 @@ namespace {
           TheServiceParticipant->initial_UserDataQosPolicy();
       writer_data.ddsPublicationData.ownership =
           TheServiceParticipant->initial_OwnershipQosPolicy();
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       writer_data.ddsPublicationData.ownership_strength =
           TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+#endif
       writer_data.ddsPublicationData.destination_order =
           TheServiceParticipant->initial_DestinationOrderQosPolicy();
       writer_data.ddsPublicationData.presentation =
@@ -257,6 +261,7 @@ namespace {
         result.ddsPublicationData.type_name  = type_name;
       }
       result.ddsPublicationData.durability.kind = durability;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       result.ddsPublicationData.durability_service.service_cleanup_delay.sec = svc_del_sec;
       result.ddsPublicationData.durability_service.service_cleanup_delay.nanosec = svc_del_nsec;
       result.ddsPublicationData.durability_service.history_kind = hist;
@@ -264,6 +269,15 @@ namespace {
       result.ddsPublicationData.durability_service.max_samples = max_samples;
       result.ddsPublicationData.durability_service.max_instances = max_instances;
       result.ddsPublicationData.durability_service.max_samples_per_instance = max_samples_per_instance;
+#else
+      ACE_UNUSED_ARG(svc_del_sec);
+      ACE_UNUSED_ARG(svc_del_nsec);
+      ACE_UNUSED_ARG(hist);
+      ACE_UNUSED_ARG(hist_depth);
+      ACE_UNUSED_ARG(max_samples);
+      ACE_UNUSED_ARG(max_instances);
+      ACE_UNUSED_ARG(max_samples_per_instance);
+#endif
       result.ddsPublicationData.deadline.period.sec = deadline_sec;
       result.ddsPublicationData.deadline.period.nanosec = deadline_nsec;
       result.ddsPublicationData.latency_budget.duration.sec = lb_sec;
@@ -284,7 +298,11 @@ namespace {
 
       }
       result.ddsPublicationData.ownership.kind = ownership;
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       result.ddsPublicationData.ownership_strength.value = ownership_strength;
+#else
+      ACE_UNUSED_ARG(ownership_strength);
+#endif
       result.ddsPublicationData.destination_order.kind = destination_order;
       result.ddsPublicationData.presentation.access_scope = presentation;
       result.ddsPublicationData.presentation.coherent_access = coherent;
@@ -1260,6 +1278,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                 writer_data_out.ddsPublicationData.durability.kind);
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   { // Should encode writer durabiltiy service
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL,
@@ -1330,6 +1349,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(defaultQos.max_instances == ds_out.max_instances);
     TEST_ASSERT(defaultQos.max_samples_per_instance == ds_out.max_samples_per_instance);
   }
+#endif
 
   { // Should encode writer deadline
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -1662,10 +1682,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
         29);
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     TEST_ASSERT(is_present(param_list, PID_OWNERSHIP_STRENGTH));
     Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
     TEST_ASSERT(param.ownership_strength().value == 29);
+#endif
   }
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   { // Should decode writer ownership strength
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -1693,6 +1716,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(defaultQos.value ==
                 writer_data_out.ddsPublicationData.ownership_strength.value);
   }
+#endif
   { // Should encode writer destination order
     DiscoveredWriterData writer_data = Factory::writer_data(
         NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
@@ -3381,7 +3405,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(!is_present(param_list, PID_LIFESPAN));
     TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP));
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     TEST_ASSERT(!is_present(param_list, PID_OWNERSHIP_STRENGTH));
+#endif
     TEST_ASSERT(!is_present(param_list, PID_DESTINATION_ORDER));
     TEST_ASSERT(!is_present(param_list, PID_PRESENTATION));
     TEST_ASSERT(!is_present(param_list, PID_PARTITION));

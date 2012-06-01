@@ -8,6 +8,8 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "dds/DCPS/Definitions.h"
+
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "FilterEvaluator.h"

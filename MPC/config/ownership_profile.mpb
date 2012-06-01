@@ -1,0 +1,4 @@
+// Do not build if ownership_profile feature is disabled.
+feature(!ownership_profile) {
+  requires += ownership_profile
+}

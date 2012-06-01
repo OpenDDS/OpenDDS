@@ -129,7 +129,9 @@ public:
 
   static bool valid(const DDS::DurabilityQosPolicy& qos);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   static bool valid(const DDS::DurabilityServiceQosPolicy& qos);
+#endif
 
   static bool valid(const DDS::PresentationQosPolicy& qos);
 
@@ -139,7 +141,9 @@ public:
 
   static bool valid(const DDS::OwnershipQosPolicy& qos);
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   static bool valid(const DDS::OwnershipStrengthQosPolicy& qos);
+#endif
 
   static bool valid(const DDS::LivelinessQosPolicy& qos);
 
@@ -193,8 +197,10 @@ public:
   static bool changeable(const DDS::DurabilityQosPolicy& qos1,
                          const DDS::DurabilityQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   static bool changeable(const DDS::DurabilityServiceQosPolicy& qos1,
                          const DDS::DurabilityServiceQosPolicy& qos2);
+#endif
 
   static bool changeable(const DDS::PresentationQosPolicy& qos1,
                          const DDS::PresentationQosPolicy& qos2);
@@ -208,8 +214,10 @@ public:
   static bool changeable(const DDS::OwnershipQosPolicy& qos1,
                          const DDS::OwnershipQosPolicy& qos2);
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   static bool changeable(const DDS::OwnershipStrengthQosPolicy& qos1,
                          const DDS::OwnershipStrengthQosPolicy& qos2);
+#endif
 
   static bool changeable(const DDS::LivelinessQosPolicy& qos1,
                          const DDS::LivelinessQosPolicy& qos2);

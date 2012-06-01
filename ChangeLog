@@ -1,3 +1,12 @@
+Fri Jun  1 19:24:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged from branch "compliance_profile_feature_guards",
+	  which allows features described in the Compliance
+	  section of the DDS spec to be excluded from compiler
+	  output. For details see the branch-specific change
+	  log at
+	  docs/history/ChangeLog-compliance_profile_feature_guards
+
 Fri Jun  1 06:57:08 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * tests/DCPS/RegisterInstance/register_instance.cpp:

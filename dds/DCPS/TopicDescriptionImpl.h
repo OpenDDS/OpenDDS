@@ -58,14 +58,12 @@ public:
   */
   OpenDDS::DCPS::TypeSupport_ptr get_type_support();
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
 
-  /// only used for ContentFilteredTopic and MultiTopic
   bool has_reader() const {
     return reader_count_ > 0;
   }
 
-  /// only used for ContentFilteredTopic and MultiTopic
   void update_reader_count(bool increment) {
     if (increment) ++reader_count_;
     else --reader_count_;
@@ -85,7 +83,7 @@ protected:
   /// The type_support for this topic.
   OpenDDS::DCPS::TypeSupport_ptr type_support_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> reader_count_;
 #endif
 };

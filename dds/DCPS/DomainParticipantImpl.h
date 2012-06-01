@@ -162,8 +162,7 @@ public:
   virtual DDS::TopicDescription_ptr lookup_topicdescription(
     const char * name);
 
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
   virtual DDS::ContentFilteredTopic_ptr create_contentfilteredtopic(
     const char * name,
@@ -174,6 +173,10 @@ public:
   virtual DDS::ReturnCode_t delete_contentfilteredtopic(
     DDS::ContentFilteredTopic_ptr a_contentfilteredtopic);
 
+  #endif
+
+  #ifndef OPENDDS_NO_MULTI_TOPIC
+
   virtual DDS::MultiTopic_ptr create_multitopic(
     const char * name,
     const char * type_name,
@@ -182,10 +185,14 @@ public:
 
   virtual DDS::ReturnCode_t delete_multitopic(DDS::MultiTopic_ptr a_multitopic);
 
+  #endif
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
   RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
   void deref_filter_eval(const char* filter);
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
 
   virtual DDS::ReturnCode_t delete_contained_entities();
 
@@ -309,9 +316,12 @@ public:
   */
   void get_topic_ids(TopicIdVec& topics);
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+
   /** Accessor for ownership manager.
   */
   OwnershipManager* ownership_manager();
+
 
   /**
   * Called upon receiving new BIT publication data to
@@ -319,6 +329,8 @@ public:
   */
   void update_ownership_strength(const PublicationId& pub_id,
                                  const CORBA::Long& ownership_strength);
+
+#endif
 
   bool federated() const { return this->federated_; }
 
@@ -373,7 +385,7 @@ private:
   SubscriberSet  subscribers_;
   /// Collection of topics.
   TopicMap       topics_;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
@@ -405,7 +417,9 @@ private:
 
   Monitor* monitor_;
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManager owner_man_;
+#endif
 
   /// Publisher ID generator.
   RepoIdSequence   pub_id_gen_;

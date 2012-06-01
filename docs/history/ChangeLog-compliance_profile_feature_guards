@@ -1,0 +1,713 @@
+Fri Jun  1 15:01:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+	  Fix so that Sedp.cpp will compile if ownership_profile
+	  feature is disabled.
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+	  Add dependency on ownership_profile for all
+	  projects, not just the first.
+
+Thu May 31 21:02:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Remove compliance profile feature guards.
+
+Thu May 31 19:46:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+          Merged from trunk r5587 through r5630.
+
+Thu May 31 18:30:07 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          For Publisher, Subscriber, and DomainParticipant
+          create_* commands that take a Qos, invoke
+          feature compatibility macros to ensure
+          at runtime that a policy value isn't being passed
+          if the feature that uses the value is disabled.
+
+Thu May 31 17:35:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Visual C++ ignores preprocessor directives that
+          occur before pre-compiled header includes, so
+          move directives after include of PCHs.
+
+Wed May 30 21:19:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+          Fix so that non-int value can be passed to compatibility
+          check macros.
+
+Wed May 30 19:46:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Pass error return value to feature compatibility
+          check macros in anticipation of using the macros
+          in functions that return a non-return code type.
+
+Wed May 30 18:57:08 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Fix improperly placed feature guards.
+
+Wed May 30 17:25:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude tests that use persistence_profile feature
+          from running when the feature is disabled.
+
+Wed May 30 16:01:50 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Add runtime checks when persistence_profile feature
+          is disabled.
+
+Wed May 30 14:09:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude FooTest3_0 and FooTest4 when object_model_profile
+          feature is disabled.
+
+Wed May 30 13:58:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude FooTest4 when ownership_profile feature is disabled.
+
+Tue May 29 20:07:51 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+          Account for DataReader and Topic not
+          having ownership strength policy.
+
+Tue May 29 19:57:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Force #include of Definitions.h to ensure
+          OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE is
+          defined before being used.
+
+Tue May 29 14:59:17 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Make content subscription guard use
+          OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE as originally
+          done instead of computing from 3 content subscription
+          macros.
+
+Tue May 29 14:27:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/AstNodeWrapper.h:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterExpressionGrammar.h:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          When checking if macro OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+          is defined, beforehand include Definitions.h where the macro
+          is conditionally set. (This commit is limited to code
+          not generated by the IDL compiler generated.)
+
+Fri May 25 11:42:58 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed invalid condition for FilterEvaluation test.
+
+Fri May 25 11:36:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_optional_features.mpb:
+
+          Fixed name of ownership kind exclusive feature macro.
+
+Wed May 23 17:57:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Runtime check for valid policy settings if
+          object_model_profile feature is disabled.
+
+Wed May 23 16:02:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/CoherentChangeControl.inl:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/idl/CPPTemplate.txt:
+
+          Rename poorly named macro OPENDDS_NO_PRESENTATION_QOS to
+          OPENDDS_NO_OBJECT_MODEL_PROFILE.
+
+Wed May 23 15:55:26 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+          Fixed incorrect macro names and incorrect features
+          mentioned in error messages.
+
+Mon May 21 20:18:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+          Fixed misleading error message.
+
+Mon May 21 19:39:13 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Fixed ownership macro incorrectly named
+          as a object model macro.
+
+Mon May 21 18:04:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * MPC/config/ownership_profile.mpb:
+        * bin/dcps_tests.lst:
+        * configure:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * performance-tests/Bench/src/EntityProfiles.cpp:
+        * performance-tests/Bench/src/Options.cpp:
+        * rules.dds.GNU:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/EntityProfiles.cpp:
+
+          Rename feature/macro ownership/OPENDDS_NO_OWNERSHIP to more descriptive
+          ownership_kind_exclusive/OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE.
+          Introduce macro feature/macro ownership_profile/OPENDDS_NO_OWNERSHIP_PROFILE
+          although currently ownership_profile is equivalent ownership_kind_exclusive
+          since support for exclusion of building of code to support HISTORY depth
+          > 1 is not in place.
+
+Fri May 18 21:02:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+          Define macros to check that Qos policy
+          is allowed if a feature has been disabled
+          from the build.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Use macros in FeatureDisabledQosCheck.h instead
+          of duplicating code.
+
+Fri May 18 17:47:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Define macro OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE in
+          Definitions.h instead of through MPC. This allows
+          proper build behavior when content_filter_topic,
+          multi_topic, and query_condtion features are all
+          disabled.
+
+Fri May 18 12:54:34 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude all GroupPresentation tests from being run
+          if object_model_profile feature disabled, not just
+          first test.
+
+Fri May 18 12:37:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Exclude TopicExpression test from being run if
+          multi_topic feature is disabled.
+
+Thu May 17 15:39:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/codegen/model/Config.cpp:
+
+          Removed feature guard for string definition since
+          for modeling code use minimal guarding just so it
+          will compile since footprint reduction is not a
+          goal for code that generates code.
+
+Thu May 17 15:04:38 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * docs/design/CONTENT_SUBSCRIPTION:
+
+          Mentioned the new feature guards related to
+          content subscription.
+
+Thu May 17 13:01:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+
+          Make dependent on multi_topic feature.
+
+Thu May 17 12:42:23 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Avoid nesting feature guards.
+
+Thu May 17 12:31:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Add feature guard accidently removed after merging
+          from trunk.
+
+Thu May 17 11:42:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Place multi-topic guard around multi-topic code.
+
+Wed May 16 21:22:51 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+
+          Removed uneeded feature guard.
+
+Wed May 16 19:33:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/content_subscription.mpb:
+
+          A base file to use by content subscription related
+          applications.
+
+        * MPC/config/content_subscription_core.mpb:
+
+          Base file to use for testing core content subscription
+          components.
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+          For content_subscription feature, if not enabled
+          include macro to indicate such. Trims down
+          preprocessor conditions.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicExpressionGrammar.h:
+
+          Fixes to support proper building when content_subscription
+          feature is disabled.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+        * tests/DCPS/MetaStruct/MetaStructTest.mpc:
+        * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+
+          Inherit from content_subscription so won't get built
+          if content_subscription feature is disabled.
+
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+
+          Add missing require statement for projects beyond
+          the first one.
+
+        * tests/DCPS/FilterExpression/ContentSubscription.mpb:
+        * tests/DCPS/MetaStruct/ContentSubscription.mpb:
+        * tests/DCPS/TopicExpression/ContentSubscription.mpb:
+
+          Removed these files.
+
+Tue May 15 16:59:23 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Prepend all compliance profile feature guards with DDS_
+
+Tue May 15 15:58:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fix content subscription related feature guards
+          causing ContentFilteredTopic test to segment fault.
+
+Tue May 15 12:52:09 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Remove commented out preprocessor statements.
+
+Tue May 15 12:37:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fix after merge from trunk so that will build with
+          content-filtered-topic disabled.
+
+Mon May 14 22:28:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Removed commented out preprocessor statement that should not
+          be there.
+
+Wed May  2 21:23:37 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * configure:
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+        * rules.dds.GNU:
+
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Support for Persistence Profile feature guard.
+
+Tue May  1 18:33:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DdsDcpsSubscription.idl:
+
+          Include presentation in DataSampleHeader for compatibility
+          purposes.
+          Some fixes based on running tests based on a build from scratch.
+
+Mon Apr 30 20:15:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * configure:
+
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/CoherentChangeControl.inl:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/DdsDcpsPublication.idl:
+
+        * dds/idl/CPPTemplate.txt:
+
+        * rules.dds.GNU:
+
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+
+        * tests/DCPS/Presentation/Presentation.mpc:
+
+          Feature guard for object model profile but includes complete Presentation
+          Qos Policy and not just for access scope of GROUP.
+
+Thu Apr 26 14:32:00 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added missing configuration for MultiTopic test.
+
+Tue Apr 24 19:27:22 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/FilterExpression/ContentSubscription.mpb:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+
+        * tests/DCPS/MetaStruct/ContentSubscription.mpb:
+        * tests/DCPS/MetaStruct/MetaStructTest.mpc:
+
+        * tests/DCPS/TopicExpression/ContentSubscription.mpb:
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+
+          Attempt to account for FilterEvaluator only being built if
+          either content-filtered-topic, multi-topic, or query-condition
+          is built.
+
+Mon Apr 23 18:59:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * bin/dcps_tests.lst:
+        * configure:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * performance-tests/Bench/src/EntityProfiles.cpp:
+        * performance-tests/Bench/src/Options.cpp:
+        * rules.dds.GNU:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/EntityProfiles.cpp:
+
+          Support for the ownership feature guard. The ownership feature
+          is the subset of the DDS Ownership profile concerned with
+          Ownership and OwnershipStrength policies.
+
+Wed Apr 18 21:35:13 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          Fix so that IDL macros are used when compiling DdsDcpsInfrastructure.idl.
+
+Wed Apr 18 20:04:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * rules.dds.GNU:
+
+          Replace usage of content_subscription feature with
+          Content Subscription Profile related features.
+
+Wed Apr 18 17:49:15 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_optional_features.mpb:
+
+          Fix !content-subscription settings.
+
+Wed Apr 18 14:25:40 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Fixed based on building with no-query-condition.
+
+Tue Apr 17 20:26:02 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * configure:
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
+
+          Preliminary support for multi-topic feature guard.
+
+Tue Apr 17 17:30:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * BranchChangeLog:
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * bin/dcps_tests.lst:
+
+        * configure:
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/idl/CPPTemplate.txt:
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+          Preliminary support for content-filtered-topic feature guard.
+
+Tue Apr 17 16:28:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Fix so builds properly when query-condition feature enabled.
+
+Tue Apr 17 12:19:43 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * ChangeLog:
+
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+
+        * bin/dcps_tests.lst:
+
+        * configure:
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+        * dds/DdsDcpsTypeSupportExt.idl:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/metaclass_generator.cpp:
+
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+
+          QueryExpression feature guard added.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -4,6 +4,7 @@ project(DDS*idl): dcps_test_lib {
                    -Wb,stub_export_macro=TransientDurability_Export
   dcps_ts_flags += -Wb,export_macro=TransientDurability_Export
   dynamicflags  += TRANSIENTDURABILITY_BUILD_DLL
+  requires      += persistence_profile
 
   TypeSupport_Files {
     Messenger.idl
@@ -17,6 +18,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
   exename = publisher
   after  += DDS*idl
   libs   += DDS*idl
+  requires += persistence_profile
 
   Idl_Files {
   }
@@ -32,6 +34,7 @@ project(DDS*Subscriber) : dcpsexe_with_tcp {
   exename = subscriber
   after  += DDS*idl
   libs   += DDS*idl
+  requires += persistence_profile
 
   Idl_Files {
   }

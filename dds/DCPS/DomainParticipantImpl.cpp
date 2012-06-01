@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
@@ -107,6 +108,8 @@ DomainParticipantImpl::create_publisher(
   } else {
     pub_qos = qos;
   }
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Publisher::_nil());
 
   if (!Qos_Helper::valid(pub_qos)) {
     ACE_ERROR((LM_ERROR,
@@ -209,6 +212,8 @@ DomainParticipantImpl::create_subscriber(
   } else {
     sub_qos = qos;
   }
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Subscriber::_nil());
 
   if (!Qos_Helper::valid(sub_qos)) {
     ACE_ERROR((LM_ERROR,
@@ -329,6 +334,11 @@ DomainParticipantImpl::create_topic(
     topic_qos = qos;
   }
 
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::Topic::_nil());
+
   if (!Qos_Helper::valid(topic_qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -353,7 +363,7 @@ DomainParticipantImpl::create_topic(
                      this->topics_protector_,
                      DDS::Topic::_nil());
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
     if (topic_descrs_.count(topic_name)) {
       if (DCPS_debug_level > 3) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -631,7 +641,7 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, name, entry) == -1) {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
     TopicDescriptionMap::iterator iter = topic_descrs_.find(name);
     if (iter != topic_descrs_.end()) {
       return DDS::TopicDescription::_duplicate(iter->second);
@@ -644,8 +654,7 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   }
 }
 
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
 DDS::ContentFilteredTopic_ptr
 DomainParticipantImpl::create_contentfilteredtopic(
@@ -723,6 +732,10 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   return DDS::RETCODE_OK;
 }
 
+#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+
 DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   const char* name, const char* type_name,
   const char* subscription_expression,
@@ -785,6 +798,10 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   return DDS::RETCODE_OK;
 }
 
+#endif // OPENDDS_NO_MULTI_TOPIC
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
 RcHandle<FilterEvaluator>
 DomainParticipantImpl::get_filter_eval(const char* filter)
 {
@@ -811,7 +828,7 @@ DomainParticipantImpl::deref_filter_eval(const char* filter)
   }
 }
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
 
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()
@@ -1741,6 +1758,8 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
   }
 }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+
 OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
@@ -1783,6 +1802,8 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
     it->svt_->update_ownership_strength(pub_id, ownership_strength);
   }
 }
+
+#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
 DomainParticipantImpl::RepoIdSequence::RepoIdSequence(RepoId& base) :
   base_(base),

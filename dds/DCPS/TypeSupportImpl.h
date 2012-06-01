@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_TYPESUPPORTIMPL_H
 
 #include "dcps_export.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

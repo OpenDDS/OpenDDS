@@ -63,11 +63,13 @@ class FilterEvaluator;
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 enum Coherent_State {
   NOT_COMPLETED_YET,
   COMPLETED,
   REJECTED
 };
+#endif
 
 enum MarshalingType {
   FULL_MARSHALING,
@@ -126,9 +128,11 @@ public:
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();
   void reset_coherent_info ();
   void set_group_info (const CoherentChangeControl& info);
+#endif
 
   void clear_owner_evaluated ();
   void set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag);
@@ -170,11 +174,13 @@ private:
   OwnerEvaluateFlag owner_evaluated_;
 
   /// Data to support GROUP access scope.
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool group_coherent_;
   RepoId publisher_id_;
   DisjointSequence coherent_sample_sequence_;
   WriterCoherentSample  writer_coherent_samples_;
   GroupCoherentSamples  group_coherent_samples_;
+#endif
 
 };
 
@@ -301,7 +307,7 @@ public:
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
   virtual DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -487,17 +493,24 @@ public:
   typedef std::vector<WriterStatePair> WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
+#endif
 
   virtual void delete_instance_map (void* map) = 0;
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance) = 0;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+
   void enable_filtering(ContentFilteredTopicImpl* cft);
 
   DDS::ContentFilteredTopic_ptr get_cf_topic() const;
+
+#endif
 
   void update_subscription_params(const DDS::StringSeq& params) const;
 
@@ -526,8 +539,10 @@ public:
 
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
                                   DDS::InstanceStateKind state) = 0;
+
 #endif
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void begin_access();
   void end_access();
   void get_ordered_data(GroupRakeData& data,
@@ -545,6 +560,7 @@ public:
 
   void reset_coherent_info (const PublicationId& writer_id,
                             const RepoId& publisher_id);
+#endif
 
   // Called upon subscriber qos change to update the local cache.
   void set_subscriber_qos(const DDS::SubscriberQos & qos);
@@ -621,10 +637,13 @@ protected:
   DomainParticipantImpl*       participant_servant_;
   TopicImpl*                   topic_servant_;
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
-  OwnershipManager* owner_manager_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  OwnershipManager* owner_manager_;
+#endif
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   DDS::ContentFilteredTopic_var content_filtered_topic_;
 #endif
 
@@ -650,8 +669,10 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
+#endif
 
   const RepoId& get_repo_id() const { return this->subscription_id_; }
 

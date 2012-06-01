@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "SubscriberImpl.h"
+#include "FeatureDisabledQosCheck.h"
 #include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
@@ -123,26 +124,35 @@ SubscriberImpl::create_datareader(
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   ContentFilteredTopicImpl* cft = 0;
+#endif
+#ifndef OPENDDS_NO_MULTI_TOPIC
   MultiTopicImpl* mt = 0;
-  DDS::Topic_var related;
+#endif
+
   if (!topic_servant) {
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
     if (cft) {
+      DDS::Topic_var related;
       related = cft->get_related_topic();
       topic_servant = dynamic_cast<TopicImpl*>(related.in());
-    } else {
+    }
+    else
+#endif
+    {
+#ifndef OPENDDS_NO_MULTI_TOPIC
       mt = dynamic_cast<MultiTopicImpl*>(a_topic_desc);
+#endif
     }
   }
-#endif
 
   if (qos == DATAREADER_QOS_DEFAULT) {
     this->get_default_datareader_qos(dr_qos);
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
     if (mt) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -165,6 +175,10 @@ SubscriberImpl::create_datareader(
     dr_qos = qos;
   }
 
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
+
   if (!Qos_Helper::valid(dr_qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -181,7 +195,7 @@ SubscriberImpl::create_datareader(
     return DDS::DataReader::_nil();
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   if (mt) {
     try {
       DDS::DataReader_var dr =
@@ -229,7 +243,7 @@ SubscriberImpl::create_datareader(
   DataReaderImpl* dr_servant =
     dynamic_cast<DataReaderImpl*>(dr_obj.in());
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (cft) {
     dr_servant->enable_filtering(cft);
   }
@@ -314,7 +328,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     if (it == datareader_map_.end()) {
       DDS::TopicDescription_var td = a_datareader->get_topicdescription();
       CORBA::String_var topic_name = td->get_name();
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
       std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
         multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
@@ -384,7 +398,7 @@ SubscriberImpl::delete_contained_entities()
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
     for (std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
            multitopic_reader_map_.begin();
          mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
@@ -434,7 +448,7 @@ SubscriberImpl::lookup_datareader(
   DataReaderMap::iterator it = datareader_map_.find(topic_name);
 
   if (it == datareader_map_.end()) {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
     std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
       multitopic_reader_map_.find(topic_name);
     if (mt_iter != multitopic_reader_map_.end()) {
@@ -469,6 +483,7 @@ SubscriberImpl::get_datareaders(
                    this->si_lock_,
                    DDS::RETCODE_ERROR);
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   // If access_scope is GROUP and ordered_access is true then return readers as
   // list which may contain same readers multiple times. Otherwise return readers
   // as set.
@@ -492,6 +507,7 @@ SubscriberImpl::get_datareaders(
       return DDS::RETCODE_OK ;
     }
   }
+#endif
 
   // Return set of datareaders.
   int count(0) ;
@@ -531,7 +547,7 @@ SubscriberImpl::notify_datareaders()
     }
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   for (std::map<std::string, DDS::DataReader_var>::iterator it =
          multitopic_reader_map_.begin(); it != multitopic_reader_map_.end();
        ++it) {
@@ -554,6 +570,9 @@ DDS::ReturnCode_t
 SubscriberImpl::set_qos(
   const DDS::SubscriberQos & qos)
 {
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -648,6 +667,8 @@ SubscriberImpl::get_listener()
   return DDS::SubscriberListener::_duplicate(listener_.in());
 }
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+
 DDS::ReturnCode_t
 SubscriberImpl::begin_access()
 {
@@ -720,6 +741,8 @@ SubscriberImpl::end_access()
 
   return DDS::RETCODE_OK;
 }
+
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 DDS::DomainParticipant_ptr
 SubscriberImpl::get_participant()
@@ -844,7 +867,7 @@ SubscriberImpl::reader_enabled(const char* topic_name,
   return DDS::RETCODE_OK;
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 DDS::ReturnCode_t
 SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
 {
@@ -897,6 +920,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 void
 SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)
@@ -914,8 +938,10 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
     }
   }
 }
+#endif
 
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
 SubscriberImpl::coherent_change_received (RepoId& publisher_id,
                                           DataReaderImpl* reader,
@@ -958,6 +984,7 @@ SubscriberImpl::coherent_change_received (RepoId& publisher_id,
     }
   }
 }
+#endif
 
 EntityImpl*
 SubscriberImpl::parent() const

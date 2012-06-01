@@ -233,11 +233,13 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   if (!reader.good_bit()) return;
   gen_find_size(this->publication_id_, this->marshaled_size_, padding);
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
     if (!reader.good_bit()) return;
     gen_find_size(this->publisher_id_, this->marshaled_size_, padding);
   }
+#endif
 
   if (this->content_filter_) {
     reader >> this->content_filter_entries_;
@@ -283,9 +285,11 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 
   writer << value.publication_id_;
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (value.group_coherent_) {
     writer << value.publisher_id_;
   }
+#endif
 
   // content_filter_entries_ is deliberately not marshaled here.
   // It's variable sized, so it won't fit into our pre-allocated data block.
@@ -501,7 +505,9 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.coherent_change_ == 1) str << "Coherent, ";
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_ == 1) str << "Group-Coherent, ";
+#endif
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
     if (value.sequence_repair_ == 1) str << "Sequence Repair, ";
     if (value.more_fragments_ == 1) str << "More Fragments, ";
@@ -520,9 +526,11 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     }
 
     str << "Publication: " << GuidConverter(value.publication_id_);
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
       str << ", Publisher: " << GuidConverter(value.publisher_id_);
     }
+#endif
 
     if (value.content_filter_) {
       const CORBA::ULong len = value.content_filter_entries_.length();

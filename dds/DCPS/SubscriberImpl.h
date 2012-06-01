@@ -33,7 +33,7 @@ namespace DCPS {
 class DomainParticipantImpl;
 class Monitor;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 class MultiTopicImpl;
 #endif
 
@@ -88,9 +88,13 @@ public:
 
   virtual DDS::SubscriberListener_ptr get_listener();
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+
   virtual DDS::ReturnCode_t begin_access();
 
   virtual DDS::ReturnCode_t end_access();
+
+#endif
 
   virtual DDS::DomainParticipant_ptr get_participant();
 
@@ -118,7 +122,7 @@ public:
   DDS::ReturnCode_t reader_enabled(const char* topic_name,
                                    DataReaderImpl* reader);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
 #endif
 
@@ -140,12 +144,16 @@ public:
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
+#endif
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void coherent_change_received(RepoId& publisher_id,
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);
+#endif
 
   virtual EntityImpl* parent() const;
 
@@ -176,7 +184,7 @@ private:
   DataReaderMap                datareader_map_;
   DataReaderSet                datareader_set_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   std::map<std::string, DDS::DataReader_var> multitopic_reader_map_;
 #endif
 

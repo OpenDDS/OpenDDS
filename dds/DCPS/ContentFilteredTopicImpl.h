@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_CONTENTFILTEREDTOPICIMPL_H
 #define OPENDDS_DCPS_CONTENTFILTEREDTOPICIMPL_H
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/FilterEvaluator.h"
@@ -68,6 +68,6 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
 #endif

@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_QUERYCONDITIONIMPL_H
 #define OPENDDS_DCPS_QUERYCONDITIONIMPL_H
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
 
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/ReadConditionImpl.h"
@@ -71,6 +71,6 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // OPENDDS_NO_QUERY_CONDITION
 
 #endif

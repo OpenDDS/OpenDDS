@@ -46,7 +46,12 @@ Notes for Maintainers
 ---------------------
 
 All of the code (including idl and generated code) for content-subscription is
-guarded by the preprocessor: #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+guarded by the preprocessor. For ContentFilteredTopic code, macro
+OPENDDS_NO_CONTENT_FILTERED_TOPIC is used. For MultiTopic code, macro
+OPENDDS_NO_MULTI_TOPIC is used. For QueryCondition code, macro
+OPENDDS_NO_QUERY_CONDITION is used. For code that ContentFilteredTopic, MultiTopic,
+QueryCondition all depend on, macro OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+is used.
 This also makes it easy to search for content-subscription code.
 Any additions for content-subscription which may significantly impact the
 footprint (static or dynamic), or execution time through the data-handling paths

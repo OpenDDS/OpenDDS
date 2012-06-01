@@ -20,6 +20,7 @@
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/Reverse_Lock_T.h"
 

@@ -26,9 +26,11 @@ public:
 
   virtual ::DDS::DataReader_ptr create_datareader ();
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
   virtual ::DDS::DataReader_ptr create_multitopic_datareader();
+#endif
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
 
@@ -337,7 +339,7 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
 
   DDS::InstanceHandle_t store_synthetic_data(const <%SCOPED%>& sample,
                                              DDS::ViewStateKind view);
@@ -377,8 +379,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
-      );
+#ifndef OPENDDS_NO_QUERY_CONDITION
+      ::DDS::QueryCondition_ptr a_condition);
+#else
+      int ignored);
+#endif
 
     ::DDS::ReturnCode_t take_i (
       ::<%SCOPED%><%SEQ%> & received_data,
@@ -387,8 +392,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
-      );
+#ifndef OPENDDS_NO_QUERY_CONDITION
+      ::DDS::QueryCondition_ptr a_condition);
+#else
+      int ignored);
+#endif
 
     DDS::ReturnCode_t read_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
@@ -398,8 +406,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
-      );
+#ifndef OPENDDS_NO_QUERY_CONDITION
+      ::DDS::QueryCondition_ptr a_condition);
+#else
+      int ignored);
+#endif
 
     DDS::ReturnCode_t take_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
@@ -409,8 +420,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
-      );
+#ifndef OPENDDS_NO_QUERY_CONDITION
+      ::DDS::QueryCondition_ptr a_condition);
+#else
+      int ignored);
+#endif
 
     DDS::ReturnCode_t read_next_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
@@ -420,8 +434,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
-      );
+#ifndef OPENDDS_NO_QUERY_CONDITION
+      ::DDS::QueryCondition_ptr a_condition);
+#else
+      int ignored);
+#endif
 
     DDS::ReturnCode_t take_next_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
@@ -431,8 +448,11 @@ public:
       ::DDS::SampleStateMask sample_states,
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states,
-      ::DDS::QueryCondition_ptr a_condition
-      );
+#ifndef OPENDDS_NO_QUERY_CONDITION
+      ::DDS::QueryCondition_ptr a_condition);
+#else
+      int ignored);
+#endif
 
     void store_instance_data(
          ::<%SCOPED%> *instance_data,

@@ -45,7 +45,7 @@ module DDS {
     };
 
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
     local interface ContentFilteredTopic : TopicDescription {
         string get_filter_expression();
@@ -54,6 +54,10 @@ module DDS {
             in StringSeq expression_parameters);
         Topic get_related_topic();
     };
+
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
 
     local interface MultiTopic : TopicDescription {
         string get_subscription_expression();

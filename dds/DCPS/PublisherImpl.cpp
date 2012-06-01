@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PublisherImpl.h"
+#include "FeatureDisabledQosCheck.h"
 #include "DataWriterImpl.h"
 #include "DomainParticipantImpl.h"
 #include "DataWriterImpl.h"
@@ -39,7 +40,9 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     listener_mask_(mask),
     listener_(DDS::PublisherListener::_duplicate(a_listener)),
     fast_listener_(0),
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     change_depth_(0),
+#endif
     domain_id_(participant->get_domain_id()),
     participant_(participant),
     suspend_depth_count_(0),
@@ -124,6 +127,12 @@ PublisherImpl::create_datawriter(
     dw_qos = qos;
   }
 
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+
   if (!Qos_Helper::valid(dw_qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -205,6 +214,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     }
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so
   // configured. This needs be called before unregister_instances
   // because unregister_instances may cause instance dispose.
@@ -214,6 +224,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
                ACE_TEXT("PublisherImpl::delete_datawriter, ")
                ACE_TEXT("failed to make data durable.\n")));
   }
+#endif
 
   // Unregister all registered instances prior to deletion.
   DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
@@ -377,6 +388,9 @@ PublisherImpl::delete_contained_entities()
 DDS::ReturnCode_t
 PublisherImpl::set_qos(const DDS::PublisherQos & qos)
 {
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -533,6 +547,8 @@ PublisherImpl::resume_publications()
   return DDS::RETCODE_OK;
 }
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+
 DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
 {
@@ -650,6 +666,8 @@ PublisherImpl::end_coherent_changes()
   return DDS::RETCODE_OK;
 }
 
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(
   const DDS::Duration_t& max_wait)
@@ -758,7 +776,9 @@ PublisherImpl::copy_from_topic_qos(DDS::DataWriterQos & a_datawriter_qos,
     // Some members in the DataWriterQos are not contained
     // in the TopicQos. The caller needs initialize them.
     a_datawriter_qos.durability = a_topic_qos.durability;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     a_datawriter_qos.durability_service = a_topic_qos.durability_service;
+#endif
     a_datawriter_qos.deadline = a_topic_qos.deadline;
     a_datawriter_qos.latency_budget = a_topic_qos.latency_budget;
     a_datawriter_qos.liveliness = a_topic_qos.liveliness;

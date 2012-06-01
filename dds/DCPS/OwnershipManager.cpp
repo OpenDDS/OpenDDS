@@ -7,6 +7,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+
 #include "OwnershipManager.h"
 #include "GuidConverter.h"
 #include "Util.h"
@@ -435,3 +438,5 @@ OwnershipManager::remove_owner (const ::DDS::InstanceHandle_t& instance_handle)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
