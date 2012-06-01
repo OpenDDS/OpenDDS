@@ -240,14 +240,12 @@ bool operator == (const DDS::OwnershipQosPolicy& qos1,
   return qos1.kind == qos2.kind;
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool operator == (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2)
 {
   return qos1.value == qos2.value;
 }
-#endif
 
 ACE_INLINE
 bool operator == (const DDS::LivelinessQosPolicy& qos1,
@@ -524,14 +522,12 @@ bool operator != (const DDS::OwnershipQosPolicy& qos1,
   return !(qos1 == qos2);
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool operator != (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2)
 {
   return !(qos1 == qos2);
 }
-#endif
 
 ACE_INLINE
 bool operator != (const DDS::LivelinessQosPolicy& qos1,

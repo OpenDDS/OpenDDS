@@ -1,9 +1,22 @@
+Fri Jun  1 15:01:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+	  Fix so that Sedp.cpp will compile if ownership_profile
+	  feature is disabled.
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+	  Add dependency on ownership_profile for all
+	  projects, not just the first.
+
 Thu May 31 21:02:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
 
-	  Remove compliance profile feature guards.
+          Remove compliance profile feature guards.
 
 Thu May 31 19:55:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

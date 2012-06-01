@@ -363,11 +363,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::OwnershipQosPolicy& qos1,
                   const DDS::OwnershipQosPolicy& qos2);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2);
-#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator == (const DDS::LivelinessQosPolicy& qos1,
@@ -481,11 +479,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::OwnershipQosPolicy& qos1,
                   const DDS::OwnershipQosPolicy& qos2);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2);
-#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator != (const DDS::LivelinessQosPolicy& qos1,

@@ -9,16 +9,13 @@ project(DDS*idl): dcps_test_lib, ownership_profile {
   TypeSupport_Files {
     Messenger.idl
   }
-
-
 }
 
-
-project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
-
+project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, ownership_profile {
   exename   = publisher
   after    += DDS*idl
-  libs   += DDS*idl
+  libs     += DDS*idl
+  requires += ownership_kind_exclusive
 
   Idl_Files {
   }
@@ -29,11 +26,11 @@ project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
-
+project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, ownership_profile {
   exename   = subscriber
   after    += DDS*idl
   libs   += DDS*idl
+  requires += ownership_kind_exclusive
 
   Idl_Files {
   }
