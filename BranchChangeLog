@@ -18,52 +18,7 @@ Thu May 31 21:02:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
           Remove compliance profile feature guards.
 
-Thu May 31 19:55:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
-
-        * tests/DCPS/Deadline/rtps_disc.ini:
-
-        * tests/DCPS/RegisterInstance:
-
-        * tests/DCPS/RegisterInstance/register_instance.mpc:
-        * tests/DCPS/RegisterInstance/register_instance.cpp:
-        * tests/DCPS/RegisterInstance/rtps_disc.ini:
-        * tests/DCPS/RegisterInstance/run_test.pl:
-
-          Merged from trunk r5587 through r5630.
-
 Thu May 31 19:46:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
-
-        * .:
-        * ChangeLog:
-        * MPC/config/dds4ccm_opendds.mpb:
-        * bin/dcps_tests.lst:
-        * dds/DCPS/DomainParticipantFactoryImpl.h:
-        * dds/DCPS/Qos_Helper.h:
-        * dds/DCPS/Service_Participant.h:
-        * dds/DCPS/Service_Participant.cpp:
-        * dds/DCPS/transport/framework/TransportRegistry.cpp:
-        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
-        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
-        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
-        * dds/DdsDcps.mpc:
-        * dds/idl/dds_generator.h:
-        * dds/idl/marshal_generator.cpp:
-        * examples/DCPS/ishapes:
-        * examples/DCPS/ishapes/main.cpp:
-        * tests/DCPS/CompatibilityTest/run_test.pl:
-        * tests/DCPS/CompatibilityTest/subscriber.cpp:
-        * tests/DCPS/Deadline/Deadline.mpc:
-        * tests/DCPS/Deadline/publisher.cpp:
-        * tests/DCPS/Deadline/rtps_disc.ini:
-        * tests/DCPS/Deadline/run_test.pl:
-        * tests/DCPS/Deadline/subscriber.cpp:
-        * tests/DCPS/RegisterInstance:
-        * tests/DCPS/RegisterInstance/register_instance.cpp:
-        * tests/DCPS/RegisterInstance/register_instance.mpc:
-        * tests/DCPS/RegisterInstance/rtps_disc.ini:
-        * tests/DCPS/RegisterInstance/run_test.pl:
-        * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
-        * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
 
           Merged from trunk r5587 through r5630.
 
@@ -711,29 +666,6 @@ Tue Apr 17 17:30:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
           Preliminary support for content-filtered-topic feature guard.
 
-Tue Apr 17 17:30:19 UTC 2012  Byron Harris  <harrisb@ociweb.com>
-
-        * MPC/config/dcps_java_optional.mpb:
-        * MPC/config/dcps_optional_features.mpb:
-
-        * bin/dcps_tests.lst:
-
-        * configure:
-
-        * dds/DCPS/ContentFilteredTopicImpl.h:
-        * dds/DCPS/ContentFilteredTopicImpl.cpp:
-        * dds/DCPS/DataReaderImpl.h:
-        * dds/DCPS/DataReaderImpl.cpp:
-        * dds/DCPS/DomainParticipantImpl.h:
-        * dds/DCPS/DomainParticipantImpl.cpp:
-        * dds/DCPS/SubscriberImpl.cpp:
-
-        * dds/idl/CPPTemplate.txt:
-
-        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
-
-        * tools/modeling/codegen/model/Delegate.cpp:
-
 Tue Apr 17 16:28:33 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
@@ -773,3 +705,9 @@ Tue Apr 17 12:19:43 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * tests/DCPS/QueryCondition/QueryCondition.mpc:
 
           QueryExpression feature guard added.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
