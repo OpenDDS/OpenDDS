@@ -1,3 +1,8 @@
+Sun Jun  3 19:01:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
+          Fixed search path
+
 Sun Jun  3 18:37:26 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * MPC/config/dcps_qos_xml_handler.mpb:

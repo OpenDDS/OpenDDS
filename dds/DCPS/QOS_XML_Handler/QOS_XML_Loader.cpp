@@ -107,8 +107,8 @@ namespace DCPS {
       }
 
     this->xml_file_.add_search_path (
-      ACE_TEXT("CIAO_ROOT"),
-      ACE_TEXT("/connectors/dds4ccm/docs/schema/"));
+      ACE_TEXT("DDS_ROOT"),
+      ACE_TEXT("/docs/schema/"));
 
     return this->xml_file_.init (filename.c_str ());
   }
