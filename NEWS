@@ -15,6 +15,9 @@ Version 3.2 of OpenDDS.
   this version DDS4CCM has support for OpenDDS as DDS vendor. Check the CIAO
   release notes for details on what has been ported
 
+- Added new QOS_XML library with which QoS settings can be done through an XML
+  file. Used at this moment by the CIAO DDS4CCM implementation.
+
 
 ========================================================================
 

@@ -1,3 +1,8 @@
+Sun Jun  3 19:21:33 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * NEWS:
+          Document new qos xml library
+
 Sun Jun  3 19:11:15 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/dcps_tests.lst:
