@@ -1,11 +1,65 @@
+Sun Jun  3 18:37:26 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dcps_qos_xml_handler.mpb:
+        * MPC/config/dcps_qos_xml_handler_base.mpb:
+        * dds/DCPS/QOS_XML_Handler:
+        * dds/DCPS/QOS_XML_Handler/DataReaderQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/DataReaderQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/DataWriterQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/DataWriterQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/ParticipantQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/ParticipantQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/PublisherQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/PublisherQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_Common.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_Common.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataReader_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataReader_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataWriter_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataWriter_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwDrTp_Base_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwDrTp_Base_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwTp_Base_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwTp_Base_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_PubSub_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_PubSub_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_Topic_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_Topic_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
+        * dds/DCPS/QOS_XML_Handler/SubscriberQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/SubscriberQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/TopicQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/TopicQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/XML_File_Intf.h:
+        * dds/DCPS/QOS_XML_Handler/XML_File_Intf.cpp:
+        * dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h:
+        * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+        * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+        * docs/schema:
+        * docs/schema/dds_qos.xsd:
+        * docs/schema/xsc-banner.h:
+        * docs/schema/xsc-banner.cpp:
+        * tests/DCPS/QoS_XML:
+        * tests/DCPS/QoS_XML/dump:
+        * tests/DCPS/QoS_XML/dump/qos.xml:
+        * tests/DCPS/QoS_XML/dump/qos_dump.cpp:
+        * tests/DCPS/QoS_XML/dump/qos_dump.mpc:
+        * tests/DCPS/QoS_XML/dump/run_test.pl:
+          Added new library coming from CIAO DDS4CCM. It parses the dds4ccm
+          specification definedd QoS XML files and makes these available
+          as IDL defined types. It currently only is enabled when
+          dds4ccm_opendds has been enabled
+
 Fri Jun  1 19:24:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * Merged from branch "compliance_profile_feature_guards",
-	  which allows features described in the Compliance
-	  section of the DDS spec to be excluded from compiler
-	  output. For details see the branch-specific change
-	  log at
-	  docs/history/ChangeLog-compliance_profile_feature_guards
+          which allows features described in the Compliance
+          section of the DDS spec to be excluded from compiler
+          output. For details see the branch-specific change
+          log at
+          docs/history/ChangeLog-compliance_profile_feature_guards
 
 Fri Jun  1 06:57:08 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
