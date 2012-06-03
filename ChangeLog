@@ -1,3 +1,8 @@
+Sun Jun  3 19:11:15 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Added QoS_XML/dump
+
 Sun Jun  3 19:01:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
