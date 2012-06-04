@@ -1,3 +1,8 @@
+Mon Jun  4 07:29:47 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+          Fixed link issues.
+
 Sun Jun  3 19:21:33 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * NEWS:
