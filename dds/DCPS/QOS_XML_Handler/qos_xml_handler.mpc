@@ -26,7 +26,7 @@ project (OpenDDS_XML_QOS_XSC_Generation) : install, xscdefaults {
 
 
 project (OpenDDS_QOS_XML_XSC_Handler) : install, acelib, xerces, anytypecode, \
-                                ace_xml_utils, gen_ostream, dcps {
+                                optional_ace_xml_utils, gen_ostream, dcps {
   sharedname = OpenDDS_QOS_XML_XSC_Handler
   after += OpenDDS_XML_QOS_XSC_Generation
   dynamicflags += XML_QOS_HANDLER_BUILD_DLL

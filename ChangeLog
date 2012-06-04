@@ -1,3 +1,13 @@
+Mon Jun  4 14:42:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_qos_xml_handler.mpb:
+        * MPC/config/dcps_qos_xml_handler_base.mpb:
+        * dds/DCPS/QOS_XML_Handler/optional_ace_xml_utils.mpb:
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+
+          New ace base project "ace_xml_utils" can't be included when
+          dds4ccm_opendds=0 because we may be building with an older ACE.
+
 Mon Jun  4 11:43:04 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
@@ -73,9 +83,9 @@ Sun Jun  3 18:37:26 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
         * tests/DCPS/QoS_XML/dump/qos_dump.mpc:
         * tests/DCPS/QoS_XML/dump/run_test.pl:
           Added new library coming from CIAO DDS4CCM. It parses the dds4ccm
-          specification definedd QoS XML files and makes these available
+          specification defined QoS XML files and makes these available
           as IDL defined types. It currently only is enabled when
-          dds4ccm_opendds has been enabled
+          dds4ccm_opendds has been enabled.
 
 Fri Jun  1 19:24:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
@@ -83,8 +93,7 @@ Fri Jun  1 19:24:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
           which allows features described in the Compliance
           section of the DDS spec to be excluded from compiler
           output. For details see the branch-specific change
-          log at
-          docs/history/ChangeLog-compliance_profile_feature_guards
+          log at docs/history/ChangeLog-compliance_profile_feature_guards
 
 Fri Jun  1 06:57:08 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 

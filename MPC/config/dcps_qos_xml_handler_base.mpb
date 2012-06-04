@@ -1,7 +1,7 @@
 // -*- MPC -*-
 // $Id$
 
-project : ace_xml_utils, dynamicany, typecodefactory, dcps {
+feature(dds4ccm_opendds): ace_xml_utils, dynamicany, typecodefactory, dcps {
   after += OpenDDS_QOS_XML_XSC_Handler
   libs  += OpenDDS_QOS_XML_XSC_Handler
   macros   += XML_USE_PTHREADS
