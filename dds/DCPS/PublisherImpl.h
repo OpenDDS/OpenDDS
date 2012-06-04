@@ -92,9 +92,13 @@ public:
 
   virtual DDS::ReturnCode_t resume_publications();
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+
   virtual DDS::ReturnCode_t begin_coherent_changes();
 
   virtual DDS::ReturnCode_t end_coherent_changes();
+
+#endif
 
   virtual DDS::ReturnCode_t wait_for_acknowledgments(
     const DDS::Duration_t& max_wait);
@@ -175,8 +179,10 @@ private:
   /// This map is used to support datawriter lookup by datawriter
   /// repository id.
   PublicationMap               publication_map_;
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   /// The number of times begin_coherent_changes as been called.
   std::size_t                  change_depth_;
+#endif
   /// Domain in which we are contained.
   DDS::DomainId_t              domain_id_;
   /// The DomainParticipant servant that owns this Publisher.

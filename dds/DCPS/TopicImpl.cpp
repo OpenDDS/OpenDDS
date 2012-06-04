@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TopicImpl.h"
 #include "Qos_Helper.h"
+#include "FeatureDisabledQosCheck.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
@@ -51,6 +52,12 @@ TopicImpl::~TopicImpl()
 DDS::ReturnCode_t
 TopicImpl::set_qos(const DDS::TopicQos & qos)
 {
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;

@@ -104,9 +104,11 @@ WriterProfile::copyToWriterQos(::DDS::DataWriterQos& dds_qos)
   if( this->mask & SetOwnershipKindQos) {
     dds_qos.ownership.kind = this->qos.ownership.kind;
   }
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if( this->mask & SetOwnershipStrengthQos) {
     dds_qos.ownership_strength.value = this->qos.ownership_strength.value;
   }
+#endif
   if( this->mask & SetWriterDataLifecycleQos) {
     dds_qos.writer_data_lifecycle.autodispose_unregistered_instances
       = this->qos.writer_data_lifecycle.autodispose_unregistered_instances;

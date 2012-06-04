@@ -13,6 +13,8 @@
 #include "ReceivedDataStrategy.h"
 #include "GuidUtils.h"
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+
 namespace {
 
 class CoherentFilter : public OpenDDS::DCPS::ReceivedDataFilter {
@@ -41,7 +43,6 @@ private:
   OpenDDS::DCPS::RepoId& publisher_;
   bool group_coherent_;
 };
-
 
 class AcceptCoherent : public OpenDDS::DCPS::ReceivedDataOperation {
 public:
@@ -77,6 +78,8 @@ private:
 
 } // namespace
 
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -94,6 +97,7 @@ ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
   this->rcvd_samples_.add(data_sample);
 }
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
 ReceivedDataStrategy::accept_coherent(PublicationId& writer,
                                       RepoId& publisher)
@@ -110,6 +114,7 @@ ReceivedDataStrategy::reject_coherent(PublicationId& writer,
   CoherentFilter filter = CoherentFilter(writer, publisher);
   this->rcvd_samples_.remove(filter, true);
 }
+#endif
 
 ReceptionDataStrategy::ReceptionDataStrategy(
   ReceivedDataElementList& rcvd_samples)

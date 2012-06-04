@@ -22,6 +22,7 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "EntryExit.h"
 #include "tao/ORB_Core.h"

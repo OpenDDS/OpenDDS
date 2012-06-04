@@ -38,7 +38,9 @@ public:
               DDS::SampleInfoSeq& info_seq,
               CORBA::Long max_samples,
               DDS::PresentationQosPolicy presentation,
+#ifndef OPENDDS_NO_QUERY_CONDITION
               DDS::QueryCondition_ptr cond,
+#endif
               Operation_t oper);
 
   /// Returns false if the sample will definitely not be part of the
@@ -61,7 +63,9 @@ private:
   SampleSeq& received_data_;
   DDS::SampleInfoSeq& info_seq_;
   CORBA::ULong max_samples_;
+#ifndef OPENDDS_NO_QUERY_CONDITION
   DDS::QueryCondition_ptr cond_;
+#endif
   Operation_t oper_;
 
   class SortedSetCmp {

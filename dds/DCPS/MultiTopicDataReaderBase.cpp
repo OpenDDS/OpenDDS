@@ -7,7 +7,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 
 #include "MultiTopicDataReaderBase.h"
 #include "SubscriberImpl.h"
@@ -294,6 +294,7 @@ DDS::ReadCondition_ptr MultiTopicDataReaderBase::create_readcondition(
     instance_states);
 }
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
 DDS::QueryCondition_ptr MultiTopicDataReaderBase::create_querycondition(
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states, const char* query_expression,
@@ -302,6 +303,7 @@ DDS::QueryCondition_ptr MultiTopicDataReaderBase::create_querycondition(
   return resulting_reader_->create_querycondition(sample_states, view_states,
     instance_states, query_expression, query_parameters);
 }
+#endif
 
 DDS::ReturnCode_t MultiTopicDataReaderBase::delete_readcondition(
   DDS::ReadCondition_ptr a_condition)

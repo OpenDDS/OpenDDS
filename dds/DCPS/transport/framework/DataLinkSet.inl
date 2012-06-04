@@ -12,6 +12,7 @@
 #include "SendResponseListener.h"
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/Definitions.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"

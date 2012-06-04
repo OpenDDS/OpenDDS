@@ -9,6 +9,8 @@
 #ifndef OPENDDS_DCPS_OWNERSHIP_MANAGER_H
 #define OPENDDS_DCPS_OWNERSHIP_MANAGER_H
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+
 //#include "EntityImpl.h"
 #include "Definitions.h"
 #include "GuidUtils.h"
@@ -169,5 +171,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#endif /* OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE */
 
 #endif /* OPENDDS_DCPS_OWNERSHIP_MANAGER_H  */

@@ -12,7 +12,9 @@
 #include "DataSampleHeader.h"
 #include "DataSampleList.h"
 #include "DataWriterImpl.h"
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 #include "DataDurabilityCache.h"
+#endif
 #include "PublicationInstance.h"
 #include "Util.h"
 #include "Qos_Helper.h"
@@ -74,8 +76,10 @@ WriteDataContainer::WriteDataContainer(
   DDS::DomainId_t domain_id,
   char const * topic_name,
   char const * type_name,
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   DataDurabilityCache* durability_cache,
   DDS::DurabilityServiceQosPolicy const & durability_service,
+#endif
   std::auto_ptr<OfferedDeadlineWatchdog>& watchdog)
   : writer_(writer),
     depth_(depth),
@@ -94,8 +98,10 @@ WriteDataContainer::WriteDataContainer(
     domain_id_(domain_id),
     topic_name_(topic_name),
     type_name_(type_name),
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     durability_cache_(durability_cache),
     durability_service_(durability_service),
+#endif
     watchdog_(watchdog)
 {
 
@@ -1014,6 +1020,7 @@ WriteDataContainer::copy_and_append(DataSampleList& list,
   }
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 bool
 WriteDataContainer::persist_data()
 {
@@ -1036,7 +1043,8 @@ WriteDataContainer::persist_data()
                                       this->topic_name_,
                                       this->type_name_,
                                       this->sent_data_,
-                                      this->durability_service_);
+                                      this->durability_service_
+                                     );
 
     result = inserted;
 
@@ -1053,6 +1061,7 @@ WriteDataContainer::persist_data()
 
   return result;
 }
+#endif
 
 void WriteDataContainer::reschedule_deadline()
 {

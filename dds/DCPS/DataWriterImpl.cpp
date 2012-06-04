@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataWriterImpl.h"
+#include "FeatureDisabledQosCheck.h"
 #include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
 #include "Service_Participant.h"
@@ -19,7 +20,9 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
+#endif
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
@@ -737,6 +740,13 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 {
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -1361,10 +1371,12 @@ DataWriterImpl::enable()
   // enable the type specific part of this DataWriter
   this->enable_specific();
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
   DataDurabilityCache* const durability_cache =
     TheServiceParticipant->get_data_durability_cache(qos_.durability);
+#endif
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
@@ -1376,8 +1388,10 @@ DataWriterImpl::enable()
                                            domain_id_,
                                            get_topic_name(),
                                            get_type_name(),
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
                                            durability_cache,
                                            qos_.durability_service,
+#endif
                                            this->watchdog_);
 
   // +1 because we might allocate one before releasing another
@@ -1489,6 +1503,7 @@ DataWriterImpl::enable()
     this->monitor_->report();
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Move cached data from the durability cache to the unsent data
   // queue.
   if (durability_cache != 0) {
@@ -1504,6 +1519,7 @@ DataWriterImpl::enable()
                  ACE_TEXT("unable to retrieve durable data\n")));
     }
   }
+#endif
 
   return writer_enabled_result;
 }
@@ -1904,9 +1920,11 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   header_data.group_coherent_ =
     this->publisher_servant_->qos_.presentation.access_scope
     == DDS::GROUP_PRESENTATION_QOS;
+#endif
   header_data.content_filter_ = content_filter;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
@@ -2034,6 +2052,8 @@ DataWriterImpl::check_transport_qos(const TransportInst&)
   return true;
 }
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+
 bool
 DataWriterImpl::coherent_changes_pending()
 {
@@ -2100,6 +2120,8 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   this->coherent_ = false;
   this->coherent_samples_ = 0;
 }
+
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 void
 DataWriterImpl::data_dropped(const DataSampleListElement* element,
@@ -2392,11 +2414,13 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   return true;
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 bool
 DataWriterImpl::persist_data()
 {
   return this->data_container_->persist_data();
 }
+#endif
 
 void
 DataWriterImpl::reschedule_deadline()

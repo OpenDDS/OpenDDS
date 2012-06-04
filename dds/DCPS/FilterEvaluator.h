@@ -9,6 +9,8 @@
 #ifndef OPENDDS_DCPS_FILTER_EVALUATOR_H
 #define OPENDDS_DCPS_FILTER_EVALUATOR_H
 
+#include "dds/DCPS/Definitions.h"
+
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "dds/DdsDcpsInfrastructureC.h"

@@ -47,6 +47,13 @@
 #define OPENDDS_GCC33_TEMPLATE_DEPENDENT template
 #endif
 
+// If features content_filtered_topic, multi_topic, and query_condition
+// are all disabled, define a macro to indicate common code these
+// three features depend on should not be built.
+#if defined(OPENDDS_NO_QUERY_CONDITION) && defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) && defined(OPENDDS_NO_MULTI_TOPIC)
+#define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
+
 namespace OpenDDS {
 namespace DCPS {
 

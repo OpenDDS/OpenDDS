@@ -182,11 +182,13 @@ namespace {
         TheServiceParticipant->initial_DurabilityQosPolicy();
     return qos != def_qos;
   }
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   bool not_default(const DDS::DurabilityServiceQosPolicy& qos) {
     DDS::DurabilityServiceQosPolicy def_qos =
         TheServiceParticipant->initial_DurabilityServiceQosPolicy();
     return qos != def_qos;
   }
+#endif
   bool not_default(const DDS::LifespanQosPolicy& qos) {
     DDS::LifespanQosPolicy def_qos =
         TheServiceParticipant->initial_LifespanQosPolicy();
@@ -218,11 +220,13 @@ namespace {
         TheServiceParticipant->initial_OwnershipQosPolicy();
     return qos != def_qos;
   }
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool not_default(const DDS::OwnershipStrengthQosPolicy& qos) {
     DDS::OwnershipStrengthQosPolicy def_qos =
         TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
     return qos != def_qos;
   }
+#endif
   bool not_default(const DDS::DestinationOrderQosPolicy& qos) {
     DDS::DestinationOrderQosPolicy def_qos =
         TheServiceParticipant->initial_DestinationOrderQosPolicy();
@@ -381,12 +385,14 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   if (not_default(writer_data.ddsPublicationData.durability_service))
   {
     Parameter param;
     param.durability_service(writer_data.ddsPublicationData.durability_service);
     add_param(param_list, param);
   }
+#endif
 
   if (not_default(writer_data.ddsPublicationData.deadline))
   {
@@ -445,12 +451,14 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (not_default(writer_data.ddsPublicationData.ownership_strength))
   {
     Parameter param;
     param.ownership_strength(writer_data.ddsPublicationData.ownership_strength);
     add_param(param_list, param);
   }
+#endif
 
   if (not_default(writer_data.ddsPublicationData.destination_order))
   {
@@ -841,8 +849,10 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_UserDataQosPolicy();
   writer_data.ddsPublicationData.ownership =
       TheServiceParticipant->initial_OwnershipQosPolicy();
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   writer_data.ddsPublicationData.ownership_strength =
       TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+#endif
   writer_data.ddsPublicationData.destination_order =
       TheServiceParticipant->initial_DestinationOrderQosPolicy();
   writer_data.ddsPublicationData.presentation =
@@ -910,9 +920,11 @@ int from_param_list(const ParameterList& param_list,
       case PID_OWNERSHIP:
         writer_data.ddsPublicationData.ownership = param.ownership();
         break;
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       case PID_OWNERSHIP_STRENGTH:
         writer_data.ddsPublicationData.ownership_strength = param.ownership_strength();
         break;
+#endif
       case PID_DESTINATION_ORDER:
         writer_data.ddsPublicationData.destination_order = param.destination_order();
         break;

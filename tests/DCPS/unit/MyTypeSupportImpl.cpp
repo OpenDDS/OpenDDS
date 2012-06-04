@@ -70,13 +70,15 @@ MyTypeSupportImpl::get_type_name (
     return reader_impl;
   }
 
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 ::DDS::DataReader_ptr
 MyTypeSupportImpl::create_multitopic_datareader()
 {
   return NULL;
 }
+#endif
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 const OpenDDS::DCPS::MetaStruct&
 MyTypeSupportImpl::getMetaStructForType()

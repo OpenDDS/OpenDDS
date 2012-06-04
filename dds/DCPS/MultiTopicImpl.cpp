@@ -8,7 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_MULTI_TOPIC
 #include "MultiTopicImpl.h"
 #include "Registered_Data_Types.h"
 #include "DomainParticipantImpl.h"
@@ -99,4 +99,4 @@ MultiTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // OPENDDS_NO_MULTI_TOPIC

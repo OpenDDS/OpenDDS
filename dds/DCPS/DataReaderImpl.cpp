@@ -14,6 +14,7 @@
 #include "DomainParticipantImpl.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
+#include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
 #include "TopicImpl.h"
 #include "Serializer.h"
@@ -51,8 +52,12 @@ DataReaderImpl::DataReaderImpl()
     reverse_sample_lock_(sample_lock_),
     participant_servant_(0),
     topic_servant_(0),
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     is_exclusive_ownership_ (false),
+#endif
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     owner_manager_ (0),
+#endif
     coherent_(false),
     subqos_ (TheServiceParticipant->initial_SubscriberQos()),
     topic_desc_(0),
@@ -135,7 +140,7 @@ DataReaderImpl::~DataReaderImpl()
     delete rd_allocator_;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (content_filtered_topic_.in()) {
     ContentFilteredTopicImpl* cft =
       dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
@@ -195,7 +200,10 @@ void DataReaderImpl::init(
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
+#endif
 
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
 
@@ -209,9 +217,11 @@ void DataReaderImpl::init(
   // parent, we will exist as long as it does
   participant_servant_ = participant;
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (is_exclusive_ownership_) {
     owner_manager_ = participant_servant_->ownership_manager ();
   }
+#endif
 
   domain_id_ = participant_servant_->get_domain_id();
 
@@ -715,7 +725,7 @@ DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
   return rc._retn();
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_QUERY_CONDITION
 DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
   DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states,
@@ -771,6 +781,11 @@ DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
 DDS::ReturnCode_t DataReaderImpl::set_qos(
   const DDS::DataReaderQos & qos)
 {
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -858,7 +873,7 @@ DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   DDS::ContentFilteredTopic_ptr cft = this->get_cf_topic();
   if (cft) {
     return cft; // get_cf_topic has already _duplicated()
@@ -1143,7 +1158,7 @@ DataReaderImpl::enable()
 
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
     if (cft) {
       filterExpression = cft->get_filter_expression();
@@ -1251,6 +1266,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         writer->ack_sequence_.insert(resetRange);
       }
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       if (header.coherent_change_) {
         if (writer->coherent_samples_ == 0) {
           writer->coherent_sample_sequence_.reset();
@@ -1260,6 +1276,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
           writer->coherent_sample_sequence_.insert(header.sequence_);
         }
       }
+#endif
     }
   }
 }
@@ -1329,7 +1346,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     if (filtered) break; // sample filtered from instance
     bool accepted = true;
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     bool verify_coherent = false;
+#endif
     WriterInfo* writer = 0;
 
     if (header.publication_id_.entityId.entityKind
@@ -1342,11 +1361,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       if (where != this->writers_.end()) {
         if (header.coherent_change_) {
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
           // Received coherent change
           where->second->group_coherent_ = header.group_coherent_;
           where->second->publisher_id_ = header.publisher_id_;
           ++where->second->coherent_samples_;
           verify_coherent = true;
+#endif
           writer = where->second;
         }
 
@@ -1374,9 +1395,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
     }
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (verify_coherent) {
       accepted = this->verify_coherent_changes_completion (writer);
     }
+#endif
 
     if (this->watchdog_.get()) {
       instance->last_sample_tv_ = instance->cur_sample_tv_;
@@ -1457,6 +1480,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
   break;
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   case END_COHERENT_CHANGES: {
     CoherentChangeControl control;
 
@@ -1505,6 +1529,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
   }
   break;
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   case DATAWRITER_LIVELINESS: {
     this->writer_activity(sample.header_);
@@ -1530,13 +1555,17 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // the instance may be deleted during dispose and can
       // not be accessed.
       this->lookup_instance (sample, instance);
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
              && (instance != 0 )
              && (this->owner_manager_->is_owner (instance->instance_handle_,
                                                 sample.header_.publication_id_)))) {
+#endif
         this->watchdog_->cancel_timer(instance);
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
+#endif
     }
     instance = 0;
     this->dispose(sample, instance);
@@ -1554,12 +1583,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
 
       this->lookup_instance (sample, instance);
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
              && (instance != 0 )
              && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+#endif
         this->watchdog_->cancel_timer(instance);
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
+#endif
     }
     instance = 0;
     this->unregister(sample, instance);
@@ -1576,6 +1609,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // the instance may be deleted during dispose and can
       // not be accessed.
       this->lookup_instance (sample, instance);
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
           || (this->is_exclusive_ownership_
              && (instance != 0 )
@@ -1584,8 +1618,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           || (this->is_exclusive_ownership_
              && (instance != 0 )
              && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+#endif
         this->watchdog_->cancel_timer(instance);
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
+#endif
     }
     instance = 0;
     this->dispose(sample, instance);
@@ -1771,7 +1808,11 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
         (inst.instance_state_.instance_state() & instance_states)) {
       for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
            item = item->next_data_sample_) {
-        if (item->sample_state_ & sample_states && !item->coherent_change_) {
+        if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+            && !item->coherent_change_
+#endif
+           ) {
           return true;
         }
       }
@@ -1944,9 +1985,11 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
 void
 DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 {
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writers (handle);
   }
+#endif
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
   SubscriptionInstance* instance = this->get_handle_instance(handle);
@@ -1974,7 +2017,9 @@ OpenDDS::DCPS::WriterInfo::WriterInfo()
     writer_id_(GUID_UNKNOWN),
     handle_(DDS::HANDLE_NIL)
 {
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   this->reset_coherent_info();
+#endif
 }
 
 OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
@@ -1988,7 +2033,9 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
     writer_qos_(writer_qos),
     handle_(DDS::HANDLE_NIL)
 {
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   this->reset_coherent_info();
+#endif
 
   if (DCPS_debug_level >= 5) {
     GuidConverter writer_converter(writer_id);
@@ -2165,6 +2212,7 @@ OpenDDS::DCPS::WriterInfo::ack_sequence() const
 }
 
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 Coherent_State
 OpenDDS::DCPS::WriterInfo::coherent_change_received()
 {
@@ -2216,6 +2264,7 @@ OpenDDS::DCPS::WriterInfo::set_group_info(const CoherentChangeControl& info)
   this->group_coherent_samples_ = info.group_coherent_samples_;
 }
 
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 OpenDDS::DCPS::WriterStats::WriterStats(
   int amount,
@@ -2269,10 +2318,12 @@ DataReaderImpl::writer_removed(WriterInfo& info)
                std::string(writer_converter).c_str()));
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writer (info.writer_id_);
     info.clear_owner_evaluated ();
   }
+#endif
 
   bool liveliness_changed = false;
 
@@ -2383,10 +2434,12 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
                info.get_state_str().c_str()));
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writer (info.writer_id_);
     info.clear_owner_evaluated ();
   }
+#endif
 
   // caller should already have the samples_lock_ !!!
   bool liveliness_changed = false;
@@ -2841,6 +2894,7 @@ bool
 DataReaderImpl::filter_instance(SubscriptionInstance* instance,
                                 const PublicationId& pubid)
 {
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
 
     WriterMapType::iterator iter = writers_.find(pubid);
@@ -2903,6 +2957,9 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
       return true;
     }
   }
+#else
+  ACE_UNUSED_ARG(pubid);
+#endif
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
@@ -3060,6 +3117,7 @@ DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
   }
 }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 void
 DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)
@@ -3089,8 +3147,9 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
       }
   }
 }
+#endif
 
-
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
   if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
@@ -3307,6 +3366,7 @@ void DataReaderImpl::get_ordered_data (GroupRakeData& data,
   }
 }
 
+#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 void
 DataReaderImpl::set_subscriber_qos(
@@ -3315,8 +3375,7 @@ DataReaderImpl::set_subscriber_qos(
   this->subqos_ = qos;
 }
 
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
@@ -3330,6 +3389,9 @@ DataReaderImpl::get_cf_topic() const
 {
   return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_);
 }
+#endif
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const

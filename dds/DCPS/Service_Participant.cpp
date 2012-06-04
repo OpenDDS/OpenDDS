@@ -78,7 +78,9 @@ static bool got_bit_flag = false;
 static bool got_publisher_content_filter = false;
 static bool got_transport_debug_level = false;
 static bool got_pending_timeout = false;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 static bool got_persistent_data_dir = false;
+#endif
 static bool got_default_discovery = false;
 
 #if !defined (DDS_DEFAULT_DISCOVERY_METHOD)
@@ -114,9 +116,11 @@ Service_Participant::Service_Participant()
     priority_min_(0),
     priority_max_(0),
     publisher_content_filter_(true),
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     transient_data_cache_(),
     persistent_data_cache_(),
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
+#endif
     pending_timeout_(ACE_Time_Value::zero)
 {
   initialize();
@@ -179,8 +183,10 @@ Service_Participant::shutdown()
 
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     transient_data_cache_.reset();
     persistent_data_cache_.reset();
+#endif
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
     return;
@@ -385,10 +391,12 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_transport_debug_level = true;
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPersistentDataDir"))) != 0) {
       this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       arg_shifter.consume_arg();
       got_persistent_data_dir = true;
+#endif
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
       this->pending_timeout_ = ACE_OS::atoi(currentArg);
@@ -468,7 +476,9 @@ Service_Participant::initialize()
   initial_LatencyBudgetQosPolicy_.duration.nanosec = DDS::DURATION_ZERO_NSEC;
 
   initial_OwnershipQosPolicy_.kind = DDS::SHARED_OWNERSHIP_QOS;
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   initial_OwnershipStrengthQosPolicy_.value = 0;
+#endif
 
   initial_LivelinessQosPolicy_.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
   initial_LivelinessQosPolicy_.lease_duration.sec = DDS::DURATION_INFINITE_SEC;
@@ -533,7 +543,9 @@ Service_Participant::initialize()
   initial_DataWriterQos_.lifespan = initial_LifespanQosPolicy_;
   initial_DataWriterQos_.user_data = initial_UserDataQosPolicy_;
   initial_DataWriterQos_.ownership = initial_OwnershipQosPolicy_;
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
+#endif
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;
@@ -1313,6 +1325,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSTransportDebugLevel"), OpenDDS::DCPS::Transport_debug_level, int)
     }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     if (got_persistent_data_dir) {
       ACE_DEBUG((LM_NOTICE,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSPersistentDataDir value from command option (overrides value if it's in config file).\n")));
@@ -1321,6 +1334,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSPersistentDataDir"), value)
       this->persistent_data_dir_ = ACE_TEXT_ALWAYS_CHAR(value.c_str());
     }
+#endif
 
     if (got_pending_timeout) {
       ACE_DEBUG((LM_NOTICE,
@@ -1523,6 +1537,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   return 0;
 }
 
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 DataDurabilityCache *
 Service_Participant::get_data_durability_cache(
   DDS::DurabilityQosPolicy const & durability)
@@ -1579,6 +1594,7 @@ Service_Participant::get_data_durability_cache(
 
   return cache;
 }
+#endif
 
 void
 Service_Participant::add_discovery(Discovery_rch discovery)
