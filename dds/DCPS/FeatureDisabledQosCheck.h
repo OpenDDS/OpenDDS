@@ -63,8 +63,8 @@
               ACE_TEXT("this means presentation access scope cannot be TOPIC. \n"))); \
     return error_rtn_value; \
   }
-#else  
-#define OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value)    
+#else
+#define OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value)
 #endif
 
 #ifdef OPENDDS_NO_PERSISTENCE_PROFILE
@@ -88,7 +88,7 @@
               ACE_TEXT("be TRANSIENT_DURABILITY_QOS or PERSISTENT_DURABILITY_QOS. \n"))); \
     return error_rtn_value; \
   }
-  
+
 #else
 
 #define OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, error_rtn_value)

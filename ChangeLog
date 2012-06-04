@@ -1,3 +1,13 @@
+Mon Jun  4 15:16:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Replaced tab with spaces.
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+	  Removed trailing whitespace.
+
 Mon Jun  4 14:42:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_qos_xml_handler.mpb:

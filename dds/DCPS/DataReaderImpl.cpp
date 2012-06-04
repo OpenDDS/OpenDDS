@@ -1811,7 +1811,7 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
            item = item->next_data_sample_) {
         if (item->sample_state_ & sample_states
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-	    && !item->coherent_change_
+            && !item->coherent_change_
 #endif
            ) {
           return true;
