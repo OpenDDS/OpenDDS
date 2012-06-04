@@ -1,3 +1,8 @@
+Mon Jun  4 11:43:04 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Added missing after of ciao session
+
 Mon Jun  4 07:29:47 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * tests/DCPS/RegisterInstance/register_instance.mpc:
