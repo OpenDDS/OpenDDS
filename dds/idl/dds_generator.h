@@ -131,7 +131,7 @@ struct Function {
   void addArg(const char* name, const std::string& type)
   {
     std::string sig = (has_arg_ ? ", " : "") + type + (name[0] ? " " : "")
-      + name;
+      + (name[0] ? name : "");
     be_global->header_ << sig;
     be_global->impl_ << sig;
     if (name[0]) {

@@ -13,8 +13,9 @@
 #include "RcObject_T.h"
 #include "RcHandle_T.h"
 
-#include "dds/DdsDcpsDataReaderRemoteC.h"
-#include "dds/DdsDcpsDataWriterRemoteC.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
+#include "dds/DCPS/DataWriterCallbacks.h"
+#include "dds/DdsDcpsSubscriptionC.h"
 
 #include <string>
 
@@ -75,11 +76,11 @@ public:
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos) = 0;
 
-  virtual void remove_domain_participant(
+  virtual bool remove_domain_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId) = 0;
 
-  virtual void ignore_domain_participant(
+  virtual bool ignore_domain_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId) = 0;
@@ -113,7 +114,7 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId) = 0;
 
-  virtual void ignore_topic(
+  virtual bool ignore_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId) = 0;
@@ -127,21 +128,26 @@ public:
 
   // Publication operations:
 
+  /// add the passed in publication into discovery.
+  /// Discovery does not participate in memory management
+  /// for the publication pointer, so it requires that
+  /// the publication pointer remain valid until
+  /// remove_publication is called.
   virtual OpenDDS::DCPS::RepoId add_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataWriterRemote_ptr publication,
+    OpenDDS::DCPS::DataWriterCallbacks* publication,
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos) = 0;
 
-  virtual void remove_publication(
+  virtual bool remove_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& publicationId) = 0;
 
-  virtual void ignore_publication(
+  virtual bool ignore_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId) = 0;
@@ -156,23 +162,28 @@ public:
 
   // Subscription operations:
 
+  /// add the passed in subscription into discovery.
+  /// Discovery does not participate in memory management
+  /// for the subscription pointer, so it requires that
+  /// the subscription pointer remain valid until
+  /// remove_subscription is called.
   virtual OpenDDS::DCPS::RepoId add_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderRemote_ptr subscription,
+    OpenDDS::DCPS::DataReaderCallbacks* subscription,
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
     const char* filterExpression,
     const DDS::StringSeq& exprParams) = 0;
 
-  virtual void remove_subscription(
+  virtual bool remove_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& subscriptionId) = 0;
 
-  virtual void ignore_subscription(
+  virtual bool ignore_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId) = 0;
@@ -198,26 +209,6 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& localId,
     const OpenDDS::DCPS::RepoId& remoteId) = 0;
-
-  virtual void disassociate_participant(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId) = 0;
-
-  virtual void disassociate_subscription(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId) = 0;
-
-  virtual void disassociate_publication(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId) = 0;
-
-
-  virtual void shutdown() = 0;
 
 protected:
 #ifndef DDS_HAS_MINIMUM_BIT

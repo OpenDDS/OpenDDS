@@ -1172,7 +1172,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     bool is_bounded_struct = true;
     {
       Function is_bounded("gen_is_bounded_size", "bool");
-      is_bounded.addArg("stru", "const " + cxx + "&");
+      is_bounded.addArg("", "const " + cxx + "&");
       is_bounded.endArgs();
       for (size_t i = 0; i < fields.size(); ++i) {
         if (!is_bounded_type(fields[i]->field_type())) {
@@ -1210,7 +1210,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     bool bounded_key = true;
     {
       Function is_bounded("gen_is_bounded_size", "bool");
-      is_bounded.addArg("stru", "KeyOnly<const " + cxx + ">");
+      is_bounded.addArg("", "KeyOnly<const " + cxx + ">");
       is_bounded.endArgs();
 
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);

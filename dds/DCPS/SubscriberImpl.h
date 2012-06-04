@@ -10,7 +10,7 @@
 #define OPENDDS_DCPS_SUBSCRIBER_H
 
 #include "dds/DdsDcpsSubscriptionExtS.h"
-#include "dds/DdsDcpsDataReaderRemoteC.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "Definitions.h"

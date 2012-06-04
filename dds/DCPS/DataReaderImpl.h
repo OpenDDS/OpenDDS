@@ -15,8 +15,8 @@
 #include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsDataReaderRemoteC.h"
 #include "Definitions.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
@@ -218,6 +218,7 @@ private:
 */
 class OpenDDS_Dcps_Export DataReaderImpl
   : public virtual LocalObject<DataReaderEx>,
+    public virtual DataReaderCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportReceiveListener,
@@ -239,15 +240,15 @@ public:
 
   virtual DDS::InstanceHandle_t get_instance_handle();
 
-  void add_association(const RepoId& yourId,
-                       const WriterAssociation& writer,
-                       bool active);
+  virtual void add_association(const RepoId& yourId,
+                               const WriterAssociation& writer,
+                               bool active);
 
-  void association_complete(const RepoId& remote_id);
+  virtual void association_complete(const RepoId& remote_id);
 
-  void remove_associations(const WriterIdSeq& writers, bool callback);
+  virtual void remove_associations(const WriterIdSeq& writers, bool callback);
 
-  void update_incompatible_qos(const IncompatibleQosStatus& status);
+  virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
   /**
   * This is used to retrieve the listener for a certain status change.
@@ -293,8 +294,7 @@ public:
     const DDS::StatusMask &     mask,
     DomainParticipantImpl*        participant,
     SubscriberImpl*               subscriber,
-    DDS::DataReader_ptr         dr_objref,
-    OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref);
+    DDS::DataReader_ptr         dr_objref);
 
   virtual DDS::ReadCondition_ptr create_readcondition(
     DDS::SampleStateMask sample_states,
@@ -662,7 +662,7 @@ private:
   friend class WriterInfo;
   friend class InstanceState;
 
-  friend class ::DDS_TEST; //allows tests to get at dr_remote_objref_
+  friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var    topic_desc_;
   DDS::StatusMask              listener_mask_;
@@ -670,7 +670,6 @@ private:
   DDS::DataReaderListener*     fast_listener_;
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
-  DataReaderRemote_var         dr_remote_objref_;
   DDS::DataReader_var          dr_local_objref_;
   RepoId                       subscription_id_;
 

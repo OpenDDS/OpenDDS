@@ -5,6 +5,8 @@ project(OpenDDS*): dcps, install {
 
   IDL_Files {
     Info.idl
+    DataReaderRemote.idl
+    DataWriterRemote.idl
   }
 
   specific {

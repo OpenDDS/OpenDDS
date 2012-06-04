@@ -38,6 +38,7 @@ class PubDriver
 
     int num_msgs_;
     int msg_size_;
+    bool shmem_;
 };
 
 #endif

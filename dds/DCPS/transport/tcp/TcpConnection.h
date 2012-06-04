@@ -86,10 +86,10 @@ public:
   /// Return true if the object represents the connector side, otherwise
   /// it's the acceptor side. The acceptor/connector role is not changed
   /// when re-establishing the connection.
-  bool is_connector();
+  bool is_connector() const;
 
   /// Return true if connection is connected.
-  bool is_connected();
+  bool is_connected() const;
 
   void transfer(TcpConnection* connection);
 

@@ -367,8 +367,7 @@ void
       const ::DDS::StatusMask &              mask,
       OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
       OpenDDS::DCPS::PublisherImpl*          publisher_servant,
-      ::DDS::DataWriter_ptr                  dw_objref,
-      ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
+      ::DDS::DataWriter_ptr                  dw_objref
     )
 {
   OpenDDS::DCPS::DataWriterImpl::init (topic,
@@ -378,8 +377,7 @@ void
                                        mask,
                                        participant_servant,
                                        publisher_servant,
-                                       dw_objref,
-                                       dw_remote_objref);
+                                       dw_objref);
 
   ::<%SCOPED%> data;
   if (OpenDDS::DCPS::gen_is_bounded_size(data)) {

@@ -29,10 +29,12 @@ UdpTransport::UdpTransport(const TransportInst_rch& inst)
 }
 
 UdpDataLink*
-UdpTransport::make_datalink(const ACE_INET_Addr& remote_address, bool active)
+UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
+                            CORBA::Long          priority,
+                            bool                 active)
 {
   UdpDataLink_rch link;
-  ACE_NEW_RETURN(link, UdpDataLink(this, active), 0);
+  ACE_NEW_RETURN(link, UdpDataLink(this, priority, active), 0);
 
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -115,7 +117,9 @@ UdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
   PriorityKey key = this->blob_to_key(remote_data, attribs.priority_, active);
 
   // Create new DataLink for logical connection:
-  UdpDataLink_rch link = make_datalink(remote_address, active);
+  UdpDataLink_rch link = make_datalink(remote_address,
+                                       attribs.priority_,
+                                       active);
   GuardType guard(this->client_links_lock_);
   this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
 
@@ -192,7 +196,9 @@ UdpTransport::configure_i(TransportInst* config)
   // in the TcpTransport implementation.  This establishes a socket as an
   // endpoint that we can advertise to peers via connection_info_i().
 
-  this->server_link_ = make_datalink(ACE_INET_Addr(), false);
+  this->server_link_ = make_datalink(ACE_INET_Addr(),
+                                     0,   // priority = 0
+                                     false);
 
   return true;
 }

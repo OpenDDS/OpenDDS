@@ -63,6 +63,7 @@ OpenDDS::DCPS::TransportRegistry::TransportRegistry()
   lib_directive_map_["udp"]       = "dynamic OpenDDS_Udp Service_Object * OpenDDS_Udp:_make_UdpLoader()";
   lib_directive_map_["multicast"] = "dynamic OpenDDS_Multicast Service_Object * OpenDDS_Multicast:_make_MulticastLoader()";
   lib_directive_map_["rtps_udp"]  = "dynamic OpenDDS_Rtps_Udp Service_Object * OpenDDS_Rtps_Udp:_make_RtpsUdpLoader()";
+  lib_directive_map_["shmem"]     = "dynamic OpenDDS_Shmem Service_Object * OpenDDS_Shmem:_make_ShmemLoader()";
 
   // load_transport_lib() is used for discovery as well:
   lib_directive_map_["rtps_discovery"] = lib_directive_map_["rtps_udp"];
@@ -133,7 +134,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("missing transport_type in [transport/%s] section.\n"),
+                                ACE_TEXT("missing transport_type in [transport/%C] section.\n"),
                                 transport_id.c_str()),
                                -1);
             }
@@ -145,7 +146,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
             if (inst == 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("Unable to create transport instance in [transport/%s] section.\n"),
+                                ACE_TEXT("Unable to create transport instance in [transport/%C] section.\n"),
                                 transport_id.c_str()),
                                -1);
             }
@@ -154,7 +155,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("missing transport_type in [transport/%s] section.\n"),
+                              ACE_TEXT("missing transport_type in [transport/%C] section.\n"),
                               transport_id.c_str()),
                              -1);
           }
@@ -199,7 +200,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
           if (config == 0) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("Unable to create transport config in [config/%s] section.\n"),
+                              ACE_TEXT("Unable to create transport config in [config/%C] section.\n"),
                               config_id.c_str()),
                              -1);
           }
@@ -227,7 +228,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
               } else if ((value != "0") && (value != "false")) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                  ACE_TEXT("Illegal value for swap_bytes (%s) in [config/%s] section.\n"),
+                                  ACE_TEXT("Illegal value for swap_bytes (%C) in [config/%C] section.\n"),
                                   value.c_str(), config_id.c_str()),
                                  -1);
               }
@@ -237,14 +238,14 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                                     config->passive_connect_duration_)) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%s) in [config/%s] section.\n"),
+                                  ACE_TEXT("Illegal integer value for passive_connect_duration (%s) in [config/%C] section.\n"),
                                   value.c_str(), config_id.c_str()),
                                  -1);
               }
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                                ACE_TEXT("Unexpected entry (%s) in [config/%s] section.\n"),
+                                ACE_TEXT("Unexpected entry (%C) in [config/%C] section.\n"),
                                 name.c_str(), config_id.c_str()),
                                -1);
             }
@@ -252,7 +253,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
           if (configInfo.second.size() == 0) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                              ACE_TEXT("No transport instances listed in [config/%s] section.\n"),
+                              ACE_TEXT("No transport instances listed in [config/%C] section.\n"),
                               config_id.c_str()),
                              -1);
           }
@@ -277,7 +278,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
       if (inst == 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
-                          ACE_TEXT("The inst (%s) in [config/%s] section is undefined.\n"),
+                          ACE_TEXT("The inst (%C) in [config/%C] section is undefined.\n"),
                           insts[j].c_str(), config->name().c_str()),
                          -1);
       }

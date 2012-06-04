@@ -19,6 +19,7 @@
 
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataSampleList.h"
@@ -104,7 +105,7 @@ public:
 
   // Publication
   DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
-                               DCPS::DataWriterRemote_ptr publication,
+                               DCPS::DataWriterCallbacks* publication,
                                const DDS::DataWriterQos& qos,
                                const DCPS::TransportLocatorSeq& transInfo,
                                const DDS::PublisherQos& publisherQos);
@@ -115,7 +116,7 @@ public:
 
   // Subscription
   DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
-                                DCPS::DataReaderRemote_ptr subscription,
+                                DCPS::DataReaderCallbacks* subscription,
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,
@@ -282,7 +283,7 @@ private:
   };
 
   struct LocalPublication : LocalEndpoint {
-    DCPS::DataWriterRemote_ptr publication_;
+    DCPS::DataWriterCallbacks* publication_;
     DDS::DataWriterQos qos_;
     DDS::PublisherQos publisher_qos_;
   };
@@ -297,7 +298,7 @@ private:
       const LocalPublication& pub);
 
   struct LocalSubscription : LocalEndpoint {
-    DCPS::DataReaderRemote_ptr subscription_;
+    DCPS::DataReaderCallbacks* subscription_;
     DDS::DataReaderQos qos_;
     DDS::SubscriberQos subscriber_qos_;
     std::string filter_;

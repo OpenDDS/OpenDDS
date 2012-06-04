@@ -6,12 +6,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAREADERREMOTE_H
-#define OPENDDS_DCPS_DATAREADERREMOTE_H
+#ifndef OPENDDS_DCPS_DATAREADERREMOTEIMPL_H
+#define OPENDDS_DCPS_DATAREADERREMOTEIMPL_H
 
-#include "dcps_export.h"
-#include "DdsDcpsDataReaderRemoteS.h"
-#include "Definitions.h"
+#include "InfoRepoDiscovery_Export.h"
+#include "DataReaderRemoteS.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/Thread_Mutex.h"
 
@@ -22,7 +22,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class DataReaderImpl;
+class DataReaderCallbacks;
 
 /**
 * @class DataReaderRemoteImpl
@@ -31,11 +31,11 @@ class DataReaderImpl;
 *        is used to add and remove associations.
 *
 */
-class OpenDDS_Dcps_Export DataReaderRemoteImpl
+class DataReaderRemoteImpl
   : public virtual POA_OpenDDS::DCPS::DataReaderRemote {
 public:
 
-  explicit DataReaderRemoteImpl(DataReaderImpl* parent);
+  explicit DataReaderRemoteImpl(DataReaderCallbacks* parent);
 
   virtual ~DataReaderRemoteImpl();
 
@@ -53,11 +53,11 @@ public:
   void detach_parent();
 
 private:
-  DataReaderImpl* parent_;
+  DataReaderCallbacks* parent_;
   ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* OPENDDS_DCPS_DATAREADERREMOTE_H  */
+#endif /* OPENDDS_DCPS_DATAREADERREMOTEIMPL_H  */

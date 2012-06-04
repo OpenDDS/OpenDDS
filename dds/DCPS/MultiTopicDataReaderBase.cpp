@@ -48,7 +48,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   DDS::DomainParticipant_var participant = parent->get_participant();
   resulting_impl->init(multitopic, dr_qos, a_listener, mask,
     dynamic_cast<DomainParticipantImpl*>(participant.in()), parent,
-    resulting_reader_, 0 /*no remote object*/);
+    resulting_reader_);
 
   init_typed(resulting_reader_);
   listener_ = new Listener(this);

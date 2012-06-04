@@ -1,3 +1,23 @@
+Version 3.2 of OpenDDS.
+
+- Added a new transport type: Shared Memory
+  Use "shmem" as the short name (in place of "tcp", "udp", "multicast", etc.).
+  See dds/DCPS/transport/shmem/ShmemInst.h for configurable parameters.
+
+- Refactored InfoRepo-based discovery into its own library.
+
+- The udp transport now supports setting IP DSCP (DiffServ CodePoint) based on
+  the writer's TRANSPORT_PRIORITY QoS value.
+
+- Fixed bugs in udp and multicast transports, including reassembly of fragments.
+
+- Made several changes in order to support CIAO 1.1.2 with DDS4CCM. From
+  this version DDS4CCM has support for OpenDDS as DDS vendor. Check the CIAO
+  release notes for details on what has been ported
+
+
+========================================================================
+
 Version 3.1 of OpenDDS.
 
 - This release includes the initial implementation of DDS Interoperability

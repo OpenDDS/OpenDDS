@@ -20,8 +20,8 @@
 #include "UpdateManager.h"
 
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
-#include /**/ "dds/DdsDcpsDataReaderRemoteC.h"
-#include /**/ "dds/DdsDcpsDataWriterRemoteC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
 
 #include "tao/ORB_Core.h"
 

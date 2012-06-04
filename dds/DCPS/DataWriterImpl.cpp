@@ -20,7 +20,6 @@
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
 #include "CoherentChangeControl.h"
-#include "DataWriterRemoteImpl.h"
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
@@ -138,12 +137,6 @@ DataWriterImpl::cleanup()
   topic_servant_ = 0;
 
   dw_local_objref_ = DDS::DataWriter::_nil();
-
-  DataWriterRemoteImpl* dwr =
-    remote_reference_to_servant<DataWriterRemoteImpl>(dw_remote_objref_.in());
-  dwr->detach_parent();
-  deactivate_remote_object(dw_remote_objref_.in());
-  dw_remote_objref_ = DataWriterRemote::_nil();
 }
 
 void
@@ -155,8 +148,7 @@ DataWriterImpl::init(
   const DDS::StatusMask &              mask,
   OpenDDS::DCPS::DomainParticipantImpl * participant_servant,
   OpenDDS::DCPS::PublisherImpl *         publisher_servant,
-  DDS::DataWriter_ptr                  dw_local,
-  OpenDDS::DCPS::DataWriterRemote_ptr    dw_remote)
+  DDS::DataWriter_ptr                  dw_local)
 {
   DBG_ENTRY_LVL("DataWriterImpl","init",6);
   topic_objref_ = DDS::Topic::_duplicate(topic);
@@ -194,7 +186,6 @@ DataWriterImpl::init(
   // exist as long as it does.
   publisher_servant_ = publisher_servant;
   dw_local_objref_   = DDS::DataWriter::_duplicate(dw_local);
-  dw_remote_objref_  = OpenDDS::DCPS::DataWriterRemote::_duplicate(dw_remote);
 
   this->reactor_ = TheServiceParticipant->timer();
 
@@ -307,14 +298,9 @@ DataWriterImpl::add_association(const RepoId& yourId,
     // In the current implementation, DataWriter is always active, so this
     // code will not be applicable.
     Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    try {
-      disco->association_complete(this->domain_id_,
-        this->participant_servant_->get_id(),
-        this->publication_id_, reader.readerId);
-    } catch (const CORBA::Exception& e) {
-      e._tao_print_exception("ERROR: Exception from Discovery::"
-        "association_complete");
-    }
+    disco->association_complete(this->domain_id_,
+      this->participant_servant_->get_id(),
+      this->publication_id_, reader.readerId);
   }
 }
 
@@ -759,35 +745,21 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
-      try {
-        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-        DDS::PublisherQos publisherQos;
-        this->publisher_servant_->get_qos(publisherQos);
-        CORBA::Boolean status
-        = disco->update_publication_qos(this->participant_servant_->get_domain_id(),
-                                        this->participant_servant_->get_id(),
-                                        this->publication_id_,
-                                        qos,
-                                        publisherQos);
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      DDS::PublisherQos publisherQos;
+      this->publisher_servant_->get_qos(publisherQos);
+      const bool status
+      = disco->update_publication_qos(this->participant_servant_->get_domain_id(),
+                                      this->participant_servant_->get_id(),
+                                      this->publication_id_,
+                                      qos,
+                                      publisherQos);
 
-        if (status == 0) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                            ACE_TEXT("qos not updated. \n")),
-                           DDS::RETCODE_ERROR);
-        }
-
-      } catch (const CORBA::SystemException& sysex) {
-        sysex._tao_print_exception(
-          "ERROR: System Exception"
-          " in DataWriterImpl::set_qos");
-        return DDS::RETCODE_ERROR;
-
-      } catch (const CORBA::UserException& userex) {
-        userex._tao_print_exception(
-          "ERROR:  Exception"
-          " in DataWriterImpl::set_qos");
-        return DDS::RETCODE_ERROR;
+      if (!status) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
+                          ACE_TEXT("qos not updated. \n")),
+                         DDS::RETCODE_ERROR);
       }
     }
 
@@ -1478,48 +1450,37 @@ DataWriterImpl::enable()
     this->enable_transport(reliable,
                            this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
-    const TransportLocatorSeq& trans_conf_info = connection_info();
-
-    DDS::PublisherQos pub_qos;
-    this->publisher_servant_->get_qos(pub_qos);
-
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    this->publication_id_ =
-      disco->add_publication(this->domain_id_,
-                             this->participant_servant_->get_id(),
-                             this->topic_servant_->get_id(),
-                             this->dw_remote_objref_,
-                             this->qos_,
-                             trans_conf_info,
-                             pub_qos);
-
-    if (this->publication_id_ == GUID_UNKNOWN) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
-                 ACE_TEXT("add_publication returned invalid id. \n")));
-      return DDS::RETCODE_ERROR;
-    }
-
-    this->data_container_->publication_id_ = this->publication_id_;
-
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
                ACE_TEXT("Transport Exception.\n")));
     return DDS::RETCODE_ERROR;
 
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DataWriterImpl::enable");
-    return DDS::RETCODE_ERROR;
+  }
 
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR:  Exception"
-      " in DataWriterImpl::enable");
+  const TransportLocatorSeq& trans_conf_info = connection_info();
+
+  DDS::PublisherQos pub_qos;
+  this->publisher_servant_->get_qos(pub_qos);
+
+  Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+  this->publication_id_ =
+    disco->add_publication(this->domain_id_,
+                           this->participant_servant_->get_id(),
+                           this->topic_servant_->get_id(),
+                           this,
+                           this->qos_,
+                           trans_conf_info,
+                           pub_qos);
+
+  if (this->publication_id_ == GUID_UNKNOWN) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+               ACE_TEXT("add_publication returned invalid id. \n")));
     return DDS::RETCODE_ERROR;
   }
+
+  this->data_container_->publication_id_ = this->publication_id_;
 
   const DDS::ReturnCode_t writer_enabled_result =
     publisher_servant_->writer_enabled(topic_name_.in(), this);

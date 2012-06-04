@@ -1,7 +1,6 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsGuid.idl"
-#include "dds/DdsDcpsDataWriterRemote.idl"
 #include <tao/ULongSeq.pidl>
 
 module OpenDDS {

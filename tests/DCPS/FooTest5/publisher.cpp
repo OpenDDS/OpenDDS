@@ -18,6 +18,7 @@
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#include "dds/DCPS/transport/shmem/Shmem.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -48,6 +49,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -u using udp flag           defaults to 0 - using TCP
     //  -c using multicast flag     defaults to 0 - using TCP
     //  -p using rtps transport flag     defaults to 0 - using TCP
+    //  -s using shared memory flag      defaults to 0 - using TCP
     //  -z length of float sequence in data type   defaults to 10
     //  -y write operation interval                defaults to 0
     //  -b blocking timeout in milliseconds        defaults to 0
@@ -108,6 +110,15 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       if (using_rtps_transport == 1)
       {
         ACE_DEBUG((LM_DEBUG, "Publisher Using RTPS transport.\n"));
+      }
+      arg_shifter.consume_arg();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
+    {
+      using_shmem = ACE_OS::atoi(currentArg);
+      if (using_shmem == 1)
+      {
+        ACE_DEBUG((LM_DEBUG, "Publisher Using Shmem transport.\n"));
       }
       arg_shifter.consume_arg();
     }
@@ -172,7 +183,8 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 create_publisher (::DDS::DomainParticipant_ptr participant,
                   int                          attach_to_udp,
                   int                          attach_to_multicast,
-                  int                          attach_to_rtps)
+                  int                          attach_to_rtps,
+                  int                          attach_to_shmem)
 {
   ::DDS::Publisher_var pub;
 
@@ -205,6 +217,11 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to RTPS\n")));
           TheTransportRegistry->bind_config("rtps", pub);
+        }
+      else if (attach_to_shmem)
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to shmem\n")));
+          TheTransportRegistry->bind_config("shmem", pub);
         }
       else
         {
@@ -332,7 +349,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Create the default publisher
       ::DDS::Publisher_var pub =
         create_publisher(participant, attach_to_udp, attach_to_multicast,
-                         using_rtps_transport);
+                         using_rtps_transport, using_shmem);
 
       if (CORBA::is_nil (pub.in ()))
         {
@@ -346,7 +363,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           // Create another publisher for a difference transport.
           pub1 = create_publisher(participant, !attach_to_udp,
-                                  attach_to_multicast, false /*rtps*/);
+                                  attach_to_multicast, false /*rtps*/, false);
 
           if (CORBA::is_nil (pub1.in ()))
             {

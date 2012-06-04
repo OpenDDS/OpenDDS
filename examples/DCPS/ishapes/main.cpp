@@ -102,7 +102,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         std::cout << "Partition[0]: " << partition << std::endl;
       }
       else {
-        std::cout << "Ignoring unkown param: " << argv[curr] << std::endl;
+        std::cout << "Ignoring unknown param: " << argv[curr] << std::endl;
       }
     }
 

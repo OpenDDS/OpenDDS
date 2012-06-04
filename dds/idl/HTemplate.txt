@@ -118,8 +118,7 @@ public:
         const ::DDS::StatusMask &              mask,
         OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
         OpenDDS::DCPS::PublisherImpl*          publisher_servant,
-        ::DDS::DataWriter_ptr                  dw_objref,
-        ::OpenDDS::DCPS::DataWriterRemote_ptr  dw_remote_objref
+        ::DDS::DataWriter_ptr                  dw_objref
       );
 
   /**

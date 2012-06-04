@@ -322,8 +322,13 @@ Publisher::run()
   // Make sure that the data has arriven.
   ::DDS::Duration_t shutdownDelay = {15, 0}; // Wait up to a total of 15
                                              // seconds to finish the test.
-  writer0->wait_for_acknowledgments(shutdownDelay);
-  writer1->wait_for_acknowledgments(shutdownDelay);
+  if (this->options_.transportType() != Options::UDP) {
+    writer0->wait_for_acknowledgments(shutdownDelay);
+    writer1->wait_for_acknowledgments(shutdownDelay);
+  } else {
+    // Wait for acks won't work with UDP...
+    ACE_OS::sleep(15);
+  }
 }
 
 } // End of namespace Test

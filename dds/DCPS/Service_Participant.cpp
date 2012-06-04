@@ -81,11 +81,15 @@ static bool got_pending_timeout = false;
 static bool got_persistent_data_dir = false;
 static bool got_default_discovery = false;
 
+#if !defined (DDS_DEFAULT_DISCOVERY_METHOD)
+# define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_REPO
+#endif
+
 Service_Participant::Service_Participant()
   : ORB_argv_(false /*substitute_env_args*/),
     reactor_(0),
     dp_factory_servant_(0),
-    defaultDiscovery_(Discovery::DEFAULT_REPO),
+    defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
     liveliness_factor_(80),
@@ -151,8 +155,10 @@ ACE_Reactor_Timer_Interface*
 Service_Participant::timer() const
 {
   //TODO: when should this be initialized?
-  if (!reactor_)
-    const_cast<ACE_Reactor*>(reactor_) = new ACE_Reactor(new ACE_Select_Reactor, true);
+  if (!reactor_) {
+    Service_Participant *sp = const_cast<Service_Participant*>(this);
+    sp->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+  }
   return reactor_;
 }
 
@@ -574,6 +580,7 @@ Service_Participant::initializeScheduling()
     int ace_scheduler = ACE_SCHED_OTHER;
     this->scheduler_  = THR_SCHED_DEFAULT;
 
+#ifdef ACE_WIN32
     if (this->schedulerString_ == ACE_TEXT("SCHED_RR")) {
       this->scheduler_ = THR_SCHED_RR;
       ace_scheduler    = ACE_SCHED_RR;
@@ -596,7 +603,6 @@ Service_Participant::initializeScheduling()
     //
     // Attempt to set the scheduling policy.
     //
-#ifdef ACE_WIN32
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE: Service_Participant::initializeScheduling() - ")
                ACE_TEXT("scheduling is not implemented on Win32.\n")));
@@ -886,35 +892,26 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       // original repository if it is restarted.
     }
 
-    try {
-      // Check the availability of the current repository.
-      if (current->second->active()) {
+    // Check the availability of the current repository.
+    if (current->second->active()) {
 
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-                     ACE_TEXT("replacing repository %C with %C.\n"),
-                     key.c_str(),
-                     current->first.c_str()));
-        }
-
-        // If we reach here, the validate_connection() call succeeded
-        // and the repository is reachable.
-        this->remap_domains(key, current->first);
-
-        // Now we are done.  This is the only non-failure exit from
-        // this method.
-        return;
-
-      } else if (DCPS_debug_level > 0) {
+      if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-                   ACE_TEXT("repository %C reference to %C unexpected _is_a return.\n"),
+                   ACE_TEXT("replacing repository %C with %C.\n"),
                    key.c_str(),
                    current->first.c_str()));
       }
 
-    } catch (const CORBA::Exception&) {
+      // If we reach here, the validate_connection() call succeeded
+      // and the repository is reachable.
+      this->remap_domains(key, current->first);
+
+      // Now we are done.  This is the only non-failure exit from
+      // this method.
+      return;
+
+    } else {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
                  ACE_TEXT("repository %C was not available to replace %C, ")
@@ -991,7 +988,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
       ACE_Configuration_Heap cf;
       cf.open();
-      load_discovery_configuration(cf, RTPS_SECTION_NAME);
+      this->load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
       // Try to find it again
       location = this->discoveryMap_.find(Discovery::DEFAULT_RTPS);
@@ -1502,15 +1499,15 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 
     const std::string sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
     std::map<std::string, Discovery::Config*>::iterator iter =
-      discovery_types_.find(sect_name);
+      this->discovery_types_.find(sect_name);
 
-    if (iter == discovery_types_.end()) {
+    if (iter == this->discovery_types_.end()) {
       // See if we can dynamically load the required libraries
       TheTransportRegistry->load_transport_lib(sect_name);
-      iter = discovery_types_.find(sect_name);
+      iter = this->discovery_types_.find(sect_name);
     }
 
-    if (iter != discovery_types_.end()) {
+    if (iter != this->discovery_types_.end()) {
       // discovery code is loaded, process options
       return iter->second->discovery_config(cf);
     } else {

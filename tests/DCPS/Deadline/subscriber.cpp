@@ -19,6 +19,10 @@
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include <ace/streams.h>
 #include <ace/Time_Value.h>
@@ -54,7 +58,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
       participant =
-        dpf->create_participant(411,
+        dpf->create_participant(11,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);

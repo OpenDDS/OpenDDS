@@ -60,7 +60,9 @@ protected:
   virtual std::string transport_type() const { return "udp"; }
 
 private:
-  UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address, bool active);
+  UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address,
+                             CORBA::Long          priority,
+                             bool                 active);
 
   RcHandle<UdpInst> config_i_;
 

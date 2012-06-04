@@ -416,45 +416,31 @@ DomainParticipantImpl::create_topic(
 
     RepoId topic_id;
 
-    try {
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      TopicStatus status = disco->assert_topic(topic_id,
-                                               domain_id_,
-                                               dp_id_,
-                                               topic_name,
-                                               type_name,
-                                               topic_qos,
-                                               type_support->has_dcps_key());
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    TopicStatus status = disco->assert_topic(topic_id,
+                                             domain_id_,
+                                             dp_id_,
+                                             topic_name,
+                                             type_name,
+                                             topic_qos,
+                                             type_support->has_dcps_key());
 
-      if (status == CREATED || status == FOUND) {
-        DDS::Topic_ptr new_topic = create_topic_i(topic_id,
-                                                  topic_name,
-                                                  type_name,
-                                                  topic_qos,
-                                                  a_listener,
-                                                  mask);
-        if (this->monitor_) {
-          this->monitor_->report();
-        }
-        return new_topic;
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
-                   ACE_TEXT("assert_topic failed.\n")));
-        return DDS::Topic::_nil();
+    if (status == CREATED || status == FOUND) {
+      DDS::Topic_ptr new_topic = create_topic_i(topic_id,
+                                                topic_name,
+                                                type_name,
+                                                topic_qos,
+                                                a_listener,
+                                                mask);
+      if (this->monitor_) {
+        this->monitor_->report();
       }
+      return new_topic;
 
-    } catch (const CORBA::SystemException& sysex) {
-      sysex._tao_print_exception(
-        "ERROR: System Exception"
-        " in DomainParticipantImpl::create_topic");
-      return DDS::Topic::_nil();
-
-    } catch (const CORBA::UserException& userex) {
-      userex._tao_print_exception(
-        "ERROR: User Exception"
-        "in DomainParticipantImpl::create_topic");
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
+                 ACE_TEXT("assert_topic failed.\n")));
       return DDS::Topic::_nil();
     }
   }
@@ -543,18 +529,6 @@ DomainParticipantImpl::delete_topic_i(
       }
     }
 
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DomainParticipantImpl::delete_topic_i");
-    ret = DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantImpl::delete_topic_i");
-    ret = DDS::RETCODE_ERROR;
-
   } catch (...) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
@@ -572,77 +546,68 @@ DomainParticipantImpl::find_topic(
   const char * topic_name,
   const DDS::Duration_t & timeout)
 {
-  try {
-    ACE_Time_Value timeout_tv
-    = ACE_OS::gettimeofday() + ACE_Time_Value(timeout.sec, timeout.nanosec/1000);
+  ACE_Time_Value timeout_tv
+  = ACE_OS::gettimeofday() + ACE_Time_Value(timeout.sec, timeout.nanosec/1000);
 
-    int first_time = 1;
+  int first_time = 1;
 
-    while (first_time || ACE_OS::gettimeofday() < timeout_tv) {
-      if (first_time) {
-        first_time = 0;
-      }
+  while (first_time || ACE_OS::gettimeofday() < timeout_tv) {
+    if (first_time) {
+      first_time = 0;
+    }
 
-      TopicMap::mapped_type* entry = 0;
-      {
-        ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                         tao_mon,
-                         this->topics_protector_,
-                         DDS::Topic::_nil());
+    TopicMap::mapped_type* entry = 0;
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       tao_mon,
+                       this->topics_protector_,
+                       DDS::Topic::_nil());
 
-        if (Util::find(topics_, topic_name, entry) == 0) {
-          entry->client_refs_ ++;
-          return DDS::Topic::_duplicate(entry->pair_.obj_.in());
-        }
-      }
-
-      RepoId topic_id;
-      CORBA::String_var type_name;
-      DDS::TopicQos_var qos;
-
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      TopicStatus status = disco->find_topic(domain_id_,
-                                             topic_name,
-                                             type_name.out(),
-                                             qos.out(),
-                                             topic_id);
-
-      if (status == FOUND) {
-        DDS::Topic_ptr new_topic = create_topic_i(topic_id,
-                                                    topic_name,
-                                                    type_name,
-                                                    qos,
-                                                    DDS::TopicListener::_nil(),
-                                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-        return new_topic;
-
-      } else {
-        ACE_Time_Value now = ACE_OS::gettimeofday();
-
-        if (now < timeout_tv) {
-          ACE_Time_Value remaining = timeout_tv - now;
-
-          if (remaining.sec() >= 1) {
-            ACE_OS::sleep(1);
-
-          } else {
-            ACE_OS::sleep(remaining);
-          }
-        }
+      if (Util::find(topics_, topic_name, entry) == 0) {
+        entry->client_refs_ ++;
+        return DDS::Topic::_duplicate(entry->pair_.obj_.in());
       }
     }
 
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DomainParticipantImpl::find_topic");
-    return DDS::Topic::_nil();
+    RepoId topic_id;
+    CORBA::String_var type_name;
+    DDS::TopicQos_var qos;
 
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantImpl::find_topic");
-    return DDS::Topic::_nil();
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    TopicStatus status = disco->find_topic(domain_id_,
+                                           topic_name,
+                                           type_name.out(),
+                                           qos.out(),
+                                           topic_id);
+
+    if (status == FOUND) {
+      DDS::Topic_ptr new_topic = create_topic_i(topic_id,
+                                                  topic_name,
+                                                  type_name,
+                                                  qos,
+                                                  DDS::TopicListener::_nil(),
+                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      return new_topic;
+
+    } else if (status == INTERNAL_ERROR) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::find_topic - ")
+                 ACE_TEXT("topic not found, discovery returned INTERNAL_ERROR!\n")));
+      return DDS::Topic::_nil();
+    } else {
+      ACE_Time_Value now = ACE_OS::gettimeofday();
+
+      if (now < timeout_tv) {
+        ACE_Time_Value remaining = timeout_tv - now;
+
+        if (remaining.sec() >= 1) {
+          ACE_OS::sleep(1);
+
+        } else {
+          ACE_OS::sleep(remaining);
+        }
+      }
+    }
   }
 
   if (DCPS_debug_level >= 1) {
@@ -1028,31 +993,17 @@ DomainParticipantImpl::set_qos(
     } else {
       qos_ = qos;
 
-      try {
-        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-        CORBA::Boolean status
-        = disco->update_domain_participant_qos(domain_id_,
-                                               dp_id_,
-                                               qos_);
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      const bool status =
+        disco->update_domain_participant_qos(domain_id_,
+                                             dp_id_,
+                                             qos_);
 
-        if (status == 0) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) DomainParticipantImpl::set_qos, ")
-                            ACE_TEXT("failed on compatiblity check. \n")),
-                           DDS::RETCODE_ERROR);
-        }
-
-      } catch (const CORBA::SystemException& sysex) {
-        sysex._tao_print_exception(
-          "ERROR: System Exception"
-          " in DomainParticipantImpl::set_qos");
-        return DDS::RETCODE_ERROR;
-
-      } catch (const CORBA::UserException& userex) {
-        userex._tao_print_exception(
-          "ERROR:  Exception"
-          " in DomainParticipantImpl::set_qos");
-        return DDS::RETCODE_ERROR;
+      if (!status) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) DomainParticipantImpl::set_qos, ")
+                          ACE_TEXT("failed on compatiblity check. \n")),
+                         DDS::RETCODE_ERROR);
       }
     }
 
@@ -1112,40 +1063,33 @@ DomainParticipantImpl::ignore_participant(
     return DDS::RETCODE_OK;
   }
 
-  try {
-    if (DCPS_debug_level >= 4) {
-      GuidConverter converter(dp_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
-                 ACE_TEXT("%C ignoring handle %x.\n"),
-                 std::string(converter).c_str(),
-                 handle));
-    }
+  if (DCPS_debug_level >= 4) {
+    GuidConverter converter(dp_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
+               ACE_TEXT("%C ignoring handle %x.\n"),
+               std::string(converter).c_str(),
+               handle));
+  }
 
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->ignore_domain_participant(domain_id_,
-                                     dp_id_,
-                                     ignoreId);
-
-    if (DCPS_debug_level >= 4) {
-      GuidConverter converter(dp_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
-                 ACE_TEXT("%C repo call returned.\n"),
-                 std::string(converter).c_str()));
-    }
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DomainParticipantImpl::ignore_participant");
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  if (!disco->ignore_domain_participant(domain_id_,
+                                        dp_id_,
+                                        ignoreId)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_participant, ")
+                      ACE_TEXT(" Could not ignore domain participant.\n")),
+                     DDS::RETCODE_NOT_ENABLED);
     return DDS::RETCODE_ERROR;
+  }
 
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantImpl::ignore_participant");
-    return DDS::RETCODE_ERROR;
+
+  if (DCPS_debug_level >= 4) {
+    GuidConverter converter(dp_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
+               ACE_TEXT("%C repo call returned.\n"),
+               std::string(converter).c_str()));
   }
 
   return DDS::RETCODE_OK;
@@ -1178,32 +1122,22 @@ DomainParticipantImpl::ignore_topic(
     return DDS::RETCODE_OK;
   }
 
-  try {
-    if (DCPS_debug_level >= 4) {
-      GuidConverter converter(dp_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_topic: ")
-                 ACE_TEXT("%C ignoring handle %x.\n"),
-                 std::string(converter).c_str(),
-                 handle));
-    }
+  if (DCPS_debug_level >= 4) {
+    GuidConverter converter(dp_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_topic: ")
+               ACE_TEXT("%C ignoring handle %x.\n"),
+               std::string(converter).c_str(),
+               handle));
+  }
 
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->ignore_topic(domain_id_,
-                        dp_id_,
-                        ignoreId);
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "System Exception"
-      " in DomainParticipantImpl::ignore_topic");
-    return DDS::RETCODE_OK;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantImpl::ignore_topic");
-    return DDS::RETCODE_OK;
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  if (!disco->ignore_topic(domain_id_,
+                           dp_id_,
+                           ignoreId)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_topic, ")
+               ACE_TEXT(" Could not ignore topic.\n")));
   }
 
   return DDS::RETCODE_OK;
@@ -1226,33 +1160,24 @@ DomainParticipantImpl::ignore_publication(
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  try {
-    if (DCPS_debug_level >= 4) {
-      GuidConverter converter(dp_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_publication: ")
-                 ACE_TEXT("%C ignoring handle %x.\n"),
-                 std::string(converter).c_str(),
-                 handle));
-    }
+  if (DCPS_debug_level >= 4) {
+    GuidConverter converter(dp_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_publication: ")
+               ACE_TEXT("%C ignoring handle %x.\n"),
+               std::string(converter).c_str(),
+               handle));
+  }
 
-    RepoId ignoreId = get_repoid(handle);
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->ignore_publication(domain_id_,
-                              dp_id_,
-                              ignoreId);
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DomainParticipantImpl::ignore_publication");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantImpl::ignore_publication");
-    return DDS::RETCODE_ERROR;
+  RepoId ignoreId = get_repoid(handle);
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  if (!disco->ignore_publication(domain_id_,
+                                 dp_id_,
+                                 ignoreId)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_publication, ")
+                      ACE_TEXT(" could not ignore publication in discovery. \n")),
+                     DDS::RETCODE_ERROR);
   }
 
   return DDS::RETCODE_OK;
@@ -1275,34 +1200,25 @@ DomainParticipantImpl::ignore_subscription(
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  try {
-    if (DCPS_debug_level >= 4) {
-      GuidConverter converter(dp_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_subscription: ")
-                 ACE_TEXT("%C ignoring handle %d.\n"),
-                 std::string(converter).c_str(),
-                 handle));
-    }
+  if (DCPS_debug_level >= 4) {
+    GuidConverter converter(dp_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_subscription: ")
+               ACE_TEXT("%C ignoring handle %d.\n"),
+               std::string(converter).c_str(),
+               handle));
+  }
 
 
-    RepoId ignoreId = get_repoid(handle);
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->ignore_subscription(domain_id_,
-                               dp_id_,
-                               ignoreId);
-
-  } catch (const CORBA::SystemException& sysex) {
-    sysex._tao_print_exception(
-      "ERROR: System Exception"
-      " in DomainParticipantImpl::ignore_subscription");
-    return DDS::RETCODE_ERROR;
-
-  } catch (const CORBA::UserException& userex) {
-    userex._tao_print_exception(
-      "ERROR: User Exception"
-      " in DomainParticipantImpl::ignore_subscription");
-    return DDS::RETCODE_ERROR;
+  RepoId ignoreId = get_repoid(handle);
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  if (!disco->ignore_subscription(domain_id_,
+                                  dp_id_,
+                                  ignoreId)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_subscription, ")
+                      ACE_TEXT(" could not ignore subscription in discovery. \n")),
+                     DDS::RETCODE_ERROR);
   }
 
   return DDS::RETCODE_OK;

@@ -1,4 +1,3 @@
-#include "test_helper.h" //must be the 1st include
 #include "PubDriver.h"
 #include "Writer.h"
 #include "TestException.h"

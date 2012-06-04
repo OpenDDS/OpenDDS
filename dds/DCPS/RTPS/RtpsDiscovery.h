@@ -59,11 +59,11 @@ public:
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos);
 
-  virtual void remove_domain_participant(
+  virtual bool remove_domain_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId);
 
-  virtual void ignore_domain_participant(
+  virtual bool ignore_domain_participant(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId);
@@ -97,7 +97,7 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId);
 
-  virtual void ignore_topic(
+  virtual bool ignore_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId);
@@ -115,17 +115,17 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataWriterRemote_ptr publication,
+    OpenDDS::DCPS::DataWriterCallbacks* publication,
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos);
 
-  virtual void remove_publication(
+  virtual bool remove_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& publicationId);
 
-  virtual void ignore_publication(
+  virtual bool ignore_publication(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId);
@@ -144,19 +144,19 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderRemote_ptr subscription,
+    OpenDDS::DCPS::DataReaderCallbacks* subscription,
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
     const char* filterExpression,
     const DDS::StringSeq& exprParams);
 
-  virtual void remove_subscription(
+  virtual bool remove_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& subscriptionId);
 
-  virtual void ignore_subscription(
+  virtual bool ignore_subscription(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& myParticipantId,
     const OpenDDS::DCPS::RepoId& ignoreId);
@@ -182,26 +182,6 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& localId,
     const OpenDDS::DCPS::RepoId& remoteId);
-
-  virtual void disassociate_participant(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId);
-
-  virtual void disassociate_subscription(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId);
-
-  virtual void disassociate_publication(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId);
-
-
-  virtual void shutdown() {} // no-op for RTPS
 
   // configuration parameters:
 

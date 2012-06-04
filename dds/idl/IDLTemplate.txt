@@ -1,7 +1,12 @@
 #pragma DCPS_SUPPORT_ZERO_COPY_READ
 #pragma DCPS_GEN_ZERO_COPY_READ
-//typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
+
+#if (__TAO_IDL >= 0x060101)
+#pragma DCPS_DATA_SEQUENCE_TYPE "<%SCOPED%><%SEQ%>"
+typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
+#else
 native <%TYPE%><%SEQ%>;
+#endif
 
 /** Support topic registration for <%TYPE%> data type.
  *

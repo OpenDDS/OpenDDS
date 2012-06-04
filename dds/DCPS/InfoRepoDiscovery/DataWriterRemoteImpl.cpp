@@ -6,14 +6,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataWriterRemoteImpl.h"
-#include "DataWriterImpl.h"
+#include "dds/DCPS/DataWriterCallbacks.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-DataWriterRemoteImpl::DataWriterRemoteImpl(DataWriterImpl* parent)
+DataWriterRemoteImpl::DataWriterRemoteImpl(DataWriterCallbacks* parent)
   : parent_(parent)
 {
 }
@@ -31,16 +30,27 @@ DataWriterRemoteImpl::detach_parent()
   this->parent_ = 0;
 }
 
+namespace
+{
+  DDS::DataWriter_var getDataWriter(DataWriterCallbacks* callbacks)
+  {
+    // the DataWriterCallbacks will always be a DataWriter
+    DDS::DataWriter_var var =
+      DDS::DataWriter::_duplicate(dynamic_cast<DDS::DataWriter*>(callbacks));
+    return var;
+  }
+}
+
 void
 DataWriterRemoteImpl::add_association(const RepoId& yourId,
                                       const ReaderAssociation& reader,
                                       bool active)
 {
-  DataWriterImpl* parent = 0;
+  DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    dwv = getDataWriter(this->parent_);
     parent = this->parent_;
   }
   if (parent) {
@@ -51,11 +61,11 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
 void
 DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
 {
-  DataWriterImpl* parent = 0;
+  DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    dwv = getDataWriter(this->parent_);
     parent = this->parent_;
   }
   if (parent) {
@@ -67,11 +77,11 @@ void
 DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
 {
-  DataWriterImpl* parent = 0;
+  DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    dwv = getDataWriter(this->parent_);
     parent = this->parent_;
   }
   if (parent) {
@@ -83,11 +93,11 @@ void
 DataWriterRemoteImpl::update_incompatible_qos(
   const IncompatibleQosStatus& status)
 {
-  DataWriterImpl* parent = 0;
+  DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    dwv = getDataWriter(this->parent_);
     parent = this->parent_;
   }
   if (parent) {
@@ -99,11 +109,11 @@ void
 DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
                                                  const DDS::StringSeq& params)
 {
-  DataWriterImpl* parent = 0;
+  DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    dwv = getDataWriter(this->parent_);
     parent = this->parent_;
   }
   if (parent) {

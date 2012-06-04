@@ -119,6 +119,9 @@ public:
   /// Let the subclass stop.
   virtual void stop_i() = 0;
 
+  /// Let the subclass start.
+  virtual bool start_i() { return true; }
+
   void link_released(bool flag);
 
   bool isDirectMode();

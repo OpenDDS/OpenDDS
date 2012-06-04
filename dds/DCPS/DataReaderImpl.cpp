@@ -24,7 +24,6 @@
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
-#include "DataReaderRemoteImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
@@ -167,13 +166,6 @@ DataReaderImpl::cleanup()
 
   dr_local_objref_ = DDS::DataReader::_nil();
 
-  if (dr_remote_objref_) { // it will be null for multitopic
-    DataReaderRemoteImpl* drr =
-      remote_reference_to_servant<DataReaderRemoteImpl>(dr_remote_objref_.in());
-    drr->detach_parent();
-    deactivate_remote_object(dr_remote_objref_.in());
-    dr_remote_objref_ = DataReaderRemote::_nil();
-  }
 }
 
 void DataReaderImpl::init(
@@ -183,8 +175,7 @@ void DataReaderImpl::init(
   const DDS::StatusMask &     mask,
   DomainParticipantImpl*        participant,
   SubscriberImpl*               subscriber,
-  DDS::DataReader_ptr         dr_objref,
-  OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref)
+  DDS::DataReader_ptr         dr_objref)
 {
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
@@ -228,8 +219,6 @@ void DataReaderImpl::init(
   // will exist as long as it does.
   subscriber_servant_ = subscriber;
   dr_local_objref_    = DDS::DataReader::_duplicate(dr_objref);
-  dr_remote_objref_   =
-    OpenDDS::DCPS::DataReaderRemote::_duplicate(dr_remote_objref);
 
   if (this->subscriber_servant_->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_WARNING,
@@ -480,14 +469,9 @@ DataReaderImpl::add_association(const RepoId& yourId,
 
   if (!active) {
     Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    try {
-      disco->association_complete(this->domain_id_,
-                                  this->participant_servant_->get_id(),
-                                  this->subscription_id_, writer.writerId);
-    } catch (const CORBA::Exception& e) {
-      e._tao_print_exception("ERROR: Exception from Discovery::"
-        "association_complete");
-    }
+    disco->association_complete(this->domain_id_,
+                                this->participant_servant_->get_id(),
+                                this->subscription_id_, writer.writerId);
   }
 
   if (this->monitor_) {
@@ -795,36 +779,21 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
-      try {
-        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-        DDS::SubscriberQos subscriberQos;
-        this->subscriber_servant_->get_qos(subscriberQos);
-        CORBA::Boolean status =
-            disco->update_subscription_qos(
-                this->participant_servant_->get_domain_id(),
-                this->participant_servant_->get_id(),
-                this->subscription_id_,
-                qos,
-                subscriberQos);
-        if (status == 0) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
-                            ACE_TEXT("qos not updated. \n")),
-                            DDS::RETCODE_ERROR);
-        }
-
-
-      } catch (const CORBA::SystemException& sysex) {
-        sysex._tao_print_exception(
-          "ERROR: System Exception"
-          " in DataReaderImpl::set_qos");
-        return DDS::RETCODE_ERROR;
-
-      } catch (const CORBA::UserException& userex) {
-        userex._tao_print_exception(
-          "ERROR:  Exception"
-          " in DataReaderImpl::set_qos");
-        return DDS::RETCODE_ERROR;
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      DDS::SubscriberQos subscriberQos;
+      this->subscriber_servant_->get_qos(subscriberQos);
+      const bool status =
+          disco->update_subscription_qos(
+              this->participant_servant_->get_domain_id(),
+              this->participant_servant_->get_id(),
+              this->subscription_id_,
+              qos,
+              subscriberQos);
+      if (!status) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
+                          ACE_TEXT("qos not updated. \n")),
+                          DDS::RETCODE_ERROR);
       }
     }
 
@@ -1162,58 +1131,46 @@ DataReaderImpl::enable()
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
                              this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
-
-      const TransportLocatorSeq& trans_conf_info = this->connection_info();
-
-      CORBA::String_var filterExpression = "";
-      DDS::StringSeq exprParams;
-  #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-      DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
-      if (cft) {
-        filterExpression = cft->get_filter_expression();
-        cft->get_expression_parameters(exprParams);
-      }
-  #endif
-
-      DDS::SubscriberQos sub_qos;
-      this->subscriber_servant_->get_qos(sub_qos);
-
-      Discovery_rch disco =
-        TheServiceParticipant->get_discovery(this->domain_id_);
-      this->subscription_id_ =
-        disco->add_subscription(this->domain_id_,
-                                this->participant_servant_->get_id(),
-                                this->topic_servant_->get_id(),
-                                this->dr_remote_objref_,
-                                this->qos_,
-                                trans_conf_info,
-                                sub_qos,
-                                filterExpression,
-                                exprParams);
-
-      if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
-                   ACE_TEXT("add_subscription returned invalid id.\n")));
-        return DDS::RETCODE_ERROR;
-      }
-
     } catch (const Transport::Exception&) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
                    ACE_TEXT("Transport Exception.\n")));
         return DDS::RETCODE_ERROR;
 
-    } catch (const CORBA::SystemException& sysex) {
-      sysex._tao_print_exception(
-        "ERROR: System Exception"
-        " in DataReaderImpl::enable");
-      return DDS::RETCODE_ERROR;
+    }
 
-    } catch (const CORBA::UserException& userex) {
-      userex._tao_print_exception(
-        "ERROR: User Exception"
-        " in DataReaderImpl::enable");
+    const TransportLocatorSeq& trans_conf_info = this->connection_info();
+
+    CORBA::String_var filterExpression = "";
+    DDS::StringSeq exprParams;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
+    if (cft) {
+      filterExpression = cft->get_filter_expression();
+      cft->get_expression_parameters(exprParams);
+    }
+#endif
+
+    DDS::SubscriberQos sub_qos;
+    this->subscriber_servant_->get_qos(sub_qos);
+
+    Discovery_rch disco =
+      TheServiceParticipant->get_discovery(this->domain_id_);
+    this->subscription_id_ =
+      disco->add_subscription(this->domain_id_,
+                              this->participant_servant_->get_id(),
+                              this->topic_servant_->get_id(),
+                              this,
+                              this->qos_,
+                              trans_conf_info,
+                              sub_qos,
+                              filterExpression,
+                              exprParams);
+
+    if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+                 ACE_TEXT("add_subscription returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
   }
@@ -3377,18 +3334,11 @@ DataReaderImpl::get_cf_topic() const
 void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
 {
-  try {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->update_subscription_params(participant_servant_->get_domain_id(),
-                                      participant_servant_->get_id(),
-                                      subscription_id_,
-                                      params);
-  } catch (const CORBA::Exception& ex) {
-    if (DCPS_debug_level) {
-      ex._tao_print_exception("ERROR: Exception in DataReaderImpl::"
-        "update_subscription_params");
-    }
-  }
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  disco->update_subscription_params(participant_servant_->get_domain_id(),
+                                    participant_servant_->get_id(),
+                                    subscription_id_,
+                                    params);
 }
 #endif
 

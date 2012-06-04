@@ -56,6 +56,26 @@ module OpenDDS
       INTERNAL_ERROR
     };
 
+    struct WriterAssociation {
+      TransportLocatorSeq writerTransInfo;
+      RepoId writerId;
+      ::DDS::PublisherQos pubQos;
+      ::DDS::DataWriterQos writerQos;
+    };
+
+    struct ReaderAssociation {
+      TransportLocatorSeq readerTransInfo;
+      RepoId readerId;
+      ::DDS::SubscriberQos subQos;
+      ::DDS::DataReaderQos readerQos;
+      string filterExpression;
+      ::DDS::StringSeq exprParams;
+    };
+
+    typedef sequence<RepoId> WriterIdSeq;
+
+    typedef sequence<RepoId> ReaderIdSeq;
+
   }; // module DDS
 }; // module OpenDDS
 

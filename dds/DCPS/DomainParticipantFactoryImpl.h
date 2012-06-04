@@ -80,7 +80,7 @@ public:
   virtual DDS::ReturnCode_t get_qos(
     DDS::DomainParticipantFactoryQos & qos);
 
-  // Expose the participants for reading.
+  /// Expose the participants for reading.
   const DPMap& participants() const;
 
 private:
@@ -93,9 +93,9 @@ private:
   /// The collection of domain participants.
   DPMap                       participants_;
 
-  // Protect the participant collection.
-  // Use recursive mutex to allow nested acquisition and
-  // release of a mutex that occurs in the same thread.
+  /// Protect the participant collection.
+  /// Use recursive mutex to allow nested acquisition and
+  /// release of a mutex that occurs in the same thread.
   ACE_Recursive_Thread_Mutex  participants_protector_;
 };
 

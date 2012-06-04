@@ -713,7 +713,7 @@ Spdp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
 
 RepoId
 Spdp::add_publication(const RepoId& topicId,
-                      DCPS::DataWriterRemote_ptr publication,
+                      DCPS::DataWriterCallbacks* publication,
                       const DDS::DataWriterQos& qos,
                       const DCPS::TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos)
@@ -745,7 +745,7 @@ Spdp::update_publication_qos(const RepoId& publicationId,
 
 RepoId
 Spdp::add_subscription(const RepoId& topicId,
-                       DCPS::DataReaderRemote_ptr subscription,
+                       DCPS::DataReaderCallbacks* subscription,
                        const DDS::DataReaderQos& qos,
                        const DCPS::TransportLocatorSeq& transInfo,
                        const DDS::SubscriberQos& subscriberQos,

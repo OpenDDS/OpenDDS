@@ -73,7 +73,7 @@ public:
 
   // Publication
   DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
-                               DCPS::DataWriterRemote_ptr publication,
+                               DCPS::DataWriterCallbacks* publication,
                                const DDS::DataWriterQos& qos,
                                const DCPS::TransportLocatorSeq& transInfo,
                                const DDS::PublisherQos& publisherQos);
@@ -85,7 +85,7 @@ public:
 
   // Subscription
   DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
-                                DCPS::DataReaderRemote_ptr subscription,
+                                DCPS::DataReaderCallbacks* subscription,
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,

@@ -205,7 +205,7 @@ namespace {
   class Comparison : public FilterEvaluator::EvalNode {
   public:
     enum Operator {OPER_EQ, OPER_LT, OPER_GT, OPER_LTEQ, OPER_GTEQ, OPER_NEQ,
-      OPER_LIKE};
+      OPER_LIKE, OPER_INVALID};
 
     explicit Comparison(AstNode* cmpNode)
     {
@@ -239,6 +239,8 @@ namespace {
         return !(left == right);
       case OPER_LIKE:
         return left.like(right);
+      default:
+        break;
       }
       return false; // not reached
     }
@@ -260,6 +262,8 @@ namespace {
         oper_type_ = OPER_NEQ;
       } else if (node->TypeMatches<OP_LIKE>()) {
         oper_type_ = OPER_LIKE;
+      } else {
+        oper_type_ = OPER_INVALID;
       }
     }
 

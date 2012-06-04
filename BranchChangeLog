@@ -1,0 +1,11 @@
+Mon Jun  4 16:33:14 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+	* Merged r5511 through r5636 from trunk. Note there are still
+	  compile errors because Service_Participant no longer has
+	  member functions set_ORB() and the_POA().
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

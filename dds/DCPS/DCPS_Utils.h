@@ -13,7 +13,6 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsDataWriterRemoteC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

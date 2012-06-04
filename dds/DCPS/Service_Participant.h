@@ -70,7 +70,7 @@ public:
   static Service_Participant* instance();
 
   /// Get the common timer interface.
-  /// Inteneded for use by OpenDDS internals only.
+  /// Intended for use by OpenDDS internals only.
   ACE_Reactor_Timer_Interface* timer() const;
 
   /**
@@ -300,7 +300,7 @@ public:
 
 private:
 
-  /// Initalize default qos.
+  /// Initialize default qos.
   void initialize();
 
   /// Initialize the thread scheduling and initial priority.

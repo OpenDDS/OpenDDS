@@ -30,6 +30,7 @@ int history_depth = 1;
 int using_udp = 0;
 int using_multicast = 0;
 int using_rtps_transport = 0;
+int using_shmem = 0;
 int sequence_length = 10;
 int no_key = 0;
 InstanceDataMap results;
