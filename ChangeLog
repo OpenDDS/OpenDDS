@@ -1,9 +1,14 @@
+Tue Jun  5 09:49:08 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+          Fixed header filename
+
 Mon Jun  4 20:26:18 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/Ownership/Ownership.mpc:
 
-	  Removed inheritance of ownership_profile and
-	  replaced with a requires.
+          Removed inheritance of ownership_profile and
+          replaced with a requires.
 
         * MPC/config/ownership_profile.mpb:
 
