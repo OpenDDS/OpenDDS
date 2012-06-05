@@ -1,20 +1,27 @@
+Tue Jun  5 16:04:37 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+	  Avoid use of raw pointer introduced in previous
+	  commit.
+
 Tue Jun  5 15:16:40 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/ConfigFile/ConfigFile.cpp:
 
-	  Removed uneeded code that was causing compile error.
+          Removed uneeded code that was causing compile error.
 
         * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
 
-	  Moved setting of ORB from ServiceParticipant to
-	  InfoRepoDiscovery.
+          Moved setting of ORB from ServiceParticipant to
+          InfoRepoDiscovery.
 
         * tests/DCPS/unit/Main.cpp:
         * tests/DCPS/unit/README:
         * tests/DCPS/unit/run_test.pl:
 
-	  Removed option to have client set the ORB, which
-	  wasn't being used.
+          Removed option to have client set the ORB, which
+          wasn't being used.
 
 Mon Jun  4 18:05:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
