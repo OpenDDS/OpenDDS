@@ -24,19 +24,12 @@ unlink $debugFile;
 
 $iorfile = "repo.ior";
 unlink $iorfile;
-$client_orb = 0;
-
-if ($ARGV[0] eq "-client_orb") {
- $client_orb = 1;
-}
-
 
 $REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
                               , "$debugOpts -o $iorfile");
 
 $CL = PerlDDS::create_process ("DdsDcps_UnitTest",
-                              "$debugOpts -DCPSInfoRepo file://$iorfile " .
-                              "-c $client_orb ");
+                              "$debugOpts -DCPSInfoRepo file://$iorfile ");
 
 print $REPO->CommandLine() . "\n";
 $REPO->Spawn ();
