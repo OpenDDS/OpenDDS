@@ -123,6 +123,17 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
     DdsDcpsTopicEC.h
     DdsDcpsTypeSupportExtEC.h
   }
+
+  Inline_Files {
+    DdsDcpsDomainEC.inl
+    DdsDcpsEC.inl
+    DdsDcpsInfrastructureEC.inl
+    DdsDcpsPublicationEC.inl
+    DdsDcpsSubscriptionEC.inl
+    DdsDcpsSubscriptionExtEC.inl
+    DdsDcpsTopicEC.inl
+    DdsDcpsTypeSupportExtEC.inl
+  }
 }
 
 
@@ -170,7 +181,6 @@ project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macr
     DdsDcpsSubscriptionExtS.cpp
     DdsDcpsTopicS.cpp
     DdsDcpsTypeSupportExtS.cpp
-
 
     CorbaSeq/BooleanSeqTypeSupportImpl.cpp
     CorbaSeq/CharSeqTypeSupportImpl.cpp
@@ -238,6 +248,20 @@ project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macr
     CorbaSeq/UShortSeqTypeSupportImpl.h
     CorbaSeq/WCharSeqTypeSupportImpl.h
     CorbaSeq/WStringSeqTypeSupportImpl.h
+  }
+
+  Inline_Files {
+    DdsDcpsC.inl
+    DdsDcpsDomainC.inl
+    DdsDcpsGuidC.inl
+    DdsDcpsInfoUtilsC.inl
+    DdsDcpsInfrastructureC.inl
+    DdsDcpsInfrastructureTypeSupportC.inl
+    DdsDcpsPublicationC.inl
+    DdsDcpsSubscriptionC.inl
+    DdsDcpsSubscriptionExtC.inl
+    DdsDcpsTopicC.inl
+    DdsDcpsTypeSupportExtC.inl
   }
 
   Template_Files {

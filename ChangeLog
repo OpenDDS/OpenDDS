@@ -1,3 +1,8 @@
+Tue Jun  5 11:48:13 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          List inline files
+
 Tue Jun  5 10:38:04 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * tests/DCPS/RegisterInstance/register_instance.mpc:
