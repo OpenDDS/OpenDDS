@@ -1,3 +1,8 @@
+Tue Jun  5 10:38:04 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+          Fixed final link issues.
+
 Tue Jun  5 09:49:08 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:

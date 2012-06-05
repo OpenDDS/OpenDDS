@@ -1,4 +1,4 @@
-project(*topic): dcpsexe_with_udp, dcps_rtps {
+project(*topic): dcpsexe_with_udp, dcps_rtps_udp {
   exename   = register_instance_test
   libs     += DcpsFooType
   libpaths += ../FooType
