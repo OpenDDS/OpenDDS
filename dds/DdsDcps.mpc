@@ -94,6 +94,7 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_
 
 project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dds4ccm_opendds, \
                                   dcps_optional_features, gen_ostream, install {
+  requires   += dds4ccm_opendds
   after += OpenDDS_Dcps_lem_gen CCM_stub_idl CCM_session_idl
   includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)
   sharedname = OpenDDS_Dcps_lem_stub

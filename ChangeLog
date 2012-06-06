@@ -1,3 +1,8 @@
+Wed Jun  6 17:06:39 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Restored requires dds4ccm
+
 Wed Jun  6 08:09:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * MPC/config/dds4ccm_opendds.mpb:
