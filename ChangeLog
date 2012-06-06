@@ -1,3 +1,8 @@
+Wed Jun  6 05:44:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Add DdsDcps_lem_stub_export.h as header file
+
 Tue Jun  5 18:18:21 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:

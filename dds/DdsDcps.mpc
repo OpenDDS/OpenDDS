@@ -122,6 +122,7 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
     DdsDcpsSubscriptionExtEC.h
     DdsDcpsTopicEC.h
     DdsDcpsTypeSupportExtEC.h
+    DdsDcps_lem_stub_export.h
   }
 
   Inline_Files {
