@@ -1,11 +1,19 @@
+Wed Jun  6 21:43:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Handle -ORBLogFile and -ORBVerboseLogging internally
+	  instead of passing off to ORB_init() so that these
+	  options can be used if an ORB isn't being used.
+
 Tue Jun  5 19:19:03 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
         * dds/DCPS/Service_Participant.h:
 
-	  Moved function templates remote_reference_to_servant(),
-	  servant_to_remote_reference(), deactivate_remote_object()
-	  from Service_Participant.h to InfoRepoDiscovery.cpp.
+          Moved function templates remote_reference_to_servant(),
+          servant_to_remote_reference(), deactivate_remote_object()
+          from Service_Participant.h to InfoRepoDiscovery.cpp.
 
 Tue Jun  5 16:04:37 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 

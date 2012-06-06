@@ -31,10 +31,55 @@
 
 #include <vector>
 #include <sstream>
+#include <fstream>
 
 #if !defined (__ACE_INLINE__)
 #include "Service_Participant.inl"
 #endif /* __ACE_INLINE__ */
+
+namespace {
+
+void set_log_file_name(const std::string &fname)
+{
+  std::ofstream* output_stream = new std::ofstream();
+
+  output_stream->open (fname.c_str(),
+                       ios::out | ios::app);
+
+  if (!output_stream->bad ()) {
+    ACE_LOG_MSG->msg_ostream (output_stream, 1);
+  }
+
+  ACE_LOG_MSG->clr_flags (ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
+  ACE_LOG_MSG->set_flags (ACE_Log_Msg::OSTREAM);
+}
+
+void set_log_verbose(unsigned long verbose_logging)
+{
+  // Code copied from TAO_ORB_Core::init() in
+  // TAO version 1.6a_p13.
+
+  typedef void (ACE_Log_Msg::*PTMF)(u_long);
+  PTMF flagop = &ACE_Log_Msg::set_flags;
+  u_long value;
+
+  switch (verbose_logging)
+    {
+    case 0:
+      flagop = &ACE_Log_Msg::clr_flags;
+      value = ACE_Log_Msg::VERBOSE | ACE_Log_Msg::VERBOSE_LITE;
+      break;
+    case 1:
+      value = ACE_Log_Msg::VERBOSE_LITE; break;
+    default:
+      value = ACE_Log_Msg::VERBOSE; break;
+    }
+
+  (ACE_LOG_MSG->*flagop)(value);
+
+}
+
+}
 
 namespace OpenDDS {
 namespace DCPS {
@@ -82,10 +127,11 @@ static bool got_pending_timeout = false;
 static bool got_persistent_data_dir = false;
 #endif
 static bool got_default_discovery = false;
-
 #if !defined (DDS_DEFAULT_DISCOVERY_METHOD)
 # define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_REPO
 #endif
+static bool got_log_fname = false;
+static bool got_log_verbose = false;
 
 Service_Participant::Service_Participant()
   : ORB_argv_(false /*substitute_env_args*/),
@@ -217,10 +263,17 @@ Service_Participant::get_domain_participant_factory(int &argc,
     if (CORBA::is_nil(dp_factory_.in())) {
       // This used to be a call to ORB_init().  Since the ORB is now managed
       // by InfoRepoDiscovery, just save the -ORB* args for later use.
+      // The exceptions are -ORBLogFile and -ORBVerboseLogging, which
+      // are processed by the service participant. This allows log control
+      // even if an ORB is not being used.
       ORB_argv_.add(ACE_TEXT("unused_arg_0"));
       ACE_Arg_Shifter shifter(argc, argv);
       while (shifter.is_anything_left()) {
-        if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORB")) < 0) {
+        if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORBLogFile")) == 0) {
+          shifter.ignore_arg();
+        } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORBVerboseLogging")) == 0) {
+          shifter.ignore_arg();
+        } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORB")) < 0) {
           shifter.ignore_arg();
         } else {
           ORB_argv_.add(shifter.get_current());
@@ -428,6 +481,16 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationLivelinessDuration"))) != 0) {
       this->federation_liveliness_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
+      set_log_file_name(currentArg);
+      arg_shifter.consume_arg();
+      got_log_fname = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ORBVerboseLogging"))) != 0) {
+      set_log_verbose(ACE_OS::atoi(currentArg));
+      arg_shifter.consume_arg();
+      got_log_verbose = true;
 
     } else {
       arg_shifter.ignore_arg();
@@ -1365,6 +1428,31 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
     } else {
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultDiscovery"),
         this->defaultDiscovery_);
+    }
+
+    ACE_Configuration::VALUETYPE type;
+    if (got_log_fname) {
+      if (cf.find_value(sect, ACE_TEXT("ORBLogFile"), type) != -1) {
+        ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: using ORBLogFile value ")
+                   ACE_TEXT("from command option, overriding config file\n")));
+      }
+    } else {
+      std::string log_fname;
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("ORBLogFile"), log_fname);
+      set_log_file_name(log_fname);
+    }
+
+    if (got_log_verbose) {
+      if (cf.find_value(sect, ACE_TEXT("ORBVerboseLogging"), type) != -1) {
+        ACE_DEBUG((LM_NOTICE,
+                   ACE_TEXT("(%P|%t) NOTICE: using ORBVerboseLogging value ")
+                   ACE_TEXT("from command option, overriding config file\n")));
+      } else {
+        unsigned long verbose_logging;
+        GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ORBVerboseLogging"), verbose_logging, unsigned long);
+        set_log_verbose(verbose_logging);
+      }
     }
 
     // These are not handled on the command line.
