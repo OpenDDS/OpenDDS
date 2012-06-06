@@ -67,6 +67,7 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_
                 -Wb,stub_export_macro=DDSDCPS_LEM_STUB_Export \
                 -Wb,stub_export_include=DdsDcps_lem_stub_export.h \
                 -SS -I$(DDS_ROOT)
+  idlflags   -= -Glem -Gsv
 
   IDL_Files {
      idlflags += -Gxhst
@@ -91,9 +92,8 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_
   }
 }
 
-project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
+project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dds4ccm_opendds, \
                                   dcps_optional_features, gen_ostream, install {
-  requires += dds4ccm_opendds
   after += OpenDDS_Dcps_lem_gen CCM_stub_idl CCM_session_idl
   includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)
   sharedname = OpenDDS_Dcps_lem_stub
@@ -111,6 +111,16 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
     DdsDcpsSubscriptionExtEC.cpp
     DdsDcpsTopicEC.cpp
     DdsDcpsTypeSupportExtEC.cpp
+    DdsDcpsDomain_svnt.cpp
+    DdsDcpsInfoUtils_svnt.cpp
+    DdsDcpsPublication_svnt.cpp
+    DdsDcpsSubscription_svnt.cpp
+    DdsDcpsTopic_svnt.cpp
+    DdsDcpsGuid_svnt.cpp
+    DdsDcpsInfrastructure_svnt.cpp
+    DdsDcpsSubscriptionExt_svnt.cpp
+    DdsDcps_svnt.cpp
+    DdsDcpsTypeSupportExt_svnt.cpp
   }
 
   Header_Files {
@@ -123,6 +133,35 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
     DdsDcpsTopicEC.h
     DdsDcpsTypeSupportExtEC.h
     DdsDcps_lem_stub_export.h
+    DdsDcpsDomainES.h
+    DdsDcpsInfrastructureES.h
+    DdsDcpsSubscriptionES.h
+    DdsDcpsTopicES.h
+    DdsDcpsES.h
+    DdsDcpsPublicationES.h
+    DdsDcpsSubscriptionExtES.h
+    DdsDcpsTypeSupportExtES.h
+    DdsDcpsDomain_svnt.h
+    DdsDcpsInfoUtils_svnt.h
+    DdsDcpsPublication_svnt.h
+    DdsDcpsSubscription_svnt.h
+    DdsDcpsTopic_svnt.h
+    DdsDcpsGuid_svnt.h
+    DdsDcpsInfrastructure_svnt.h
+    DdsDcpsSubscriptionExt_svnt.h
+    DdsDcps_svnt.h
+    DdsDcpsTypeSupportExt_svnt.h
+    DdsDcpsDomain_svnt_T.h
+    DdsDcpsInfoUtils_svnt_T.h
+    DdsDcpsPublication_svnt_T.h
+    DdsDcpsSubscription_svnt_T.h
+    DdsDcpsTopic_svnt_T.h
+    DdsDcpsGuid_svnt_T.h
+    DdsDcpsInfrastructure_svnt_T.h
+    DdsDcpsSubscriptionExt_svnt_T.h
+    DdsDcps_svnt_T.h
+    DdsDcpsTypeSupportExt_svnt_T.h
+
   }
 
   Inline_Files {
@@ -134,6 +173,19 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
     DdsDcpsSubscriptionExtEC.inl
     DdsDcpsTopicEC.inl
     DdsDcpsTypeSupportExtEC.inl
+  }
+
+  Template_Files {
+    DdsDcpsDomain_svnt_T.cpp
+    DdsDcpsInfrastructure_svnt_T.cpp
+    DdsDcpsSubscription_svnt_T.cpp
+    DdsDcpsTypeSupportExt_svnt_T.cpp
+    DdsDcpsGuid_svnt_T.cpp
+    DdsDcpsPublication_svnt_T.cpp
+    DdsDcps_svnt_T.cpp
+    DdsDcpsInfoUtils_svnt_T.cpp
+    DdsDcpsSubscriptionExt_svnt_T.cpp
+    DdsDcpsTopic_svnt_T.cpp
   }
 }
 

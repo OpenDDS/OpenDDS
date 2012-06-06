@@ -1,3 +1,9 @@
+Wed Jun  6 08:09:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+        * dds/DdsDcps.mpc:
+          More install fixes for dds4ccm
+
 Wed Jun  6 05:44:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
