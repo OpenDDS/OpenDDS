@@ -270,7 +270,6 @@ Service_Participant::shutdown()
 #endif
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
-    return;
   }
 }
 

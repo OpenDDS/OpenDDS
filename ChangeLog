@@ -1,3 +1,14 @@
+Wed Jun  6 19:23:47 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Added additional idl flags to disable some files to be generated
+
+        * dds/DCPS/Service_Participant.cpp:
+          Removed noop return
+
+        * dds/DdsDcps.mpc:
+          Removed files that aren't generated anymore
+
 Wed Jun  6 17:06:39 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
