@@ -135,7 +135,7 @@ static bool got_log_verbose = false;
 
 Service_Participant::Service_Participant()
   : ORB_argv_(false /*substitute_env_args*/),
-    reactor_(0),
+    reactor_(new ACE_Reactor(new ACE_Select_Reactor, true)),
     dp_factory_servant_(0),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
@@ -204,11 +204,6 @@ Service_Participant::ReactorTask::svc()
 ACE_Reactor_Timer_Interface*
 Service_Participant::timer() const
 {
-  //TODO: when should this be initialized?
-  if (!reactor_) {
-    Service_Participant *sp = const_cast<Service_Participant*>(this);
-    sp->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
-  }
   return reactor_;
 }
 
@@ -345,7 +340,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
         return DDS::DomainParticipantFactory::_nil();
       }
 
-      timer(); // initialize reactor
       if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")

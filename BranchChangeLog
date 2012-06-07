@@ -1,10 +1,17 @@
+Thu Jun  7 20:34:01 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Moved initialization of reactor_ from
+	  timer() to ctor.
+
 Wed Jun  6 21:43:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Handle -ORBLogFile and -ORBVerboseLogging internally
-	  instead of passing off to ORB_init() so that these
-	  options can be used if an ORB isn't being used.
+          Handle -ORBLogFile and -ORBVerboseLogging internally
+          instead of passing off to ORB_init() so that these
+          options can be used if an ORB isn't being used.
 
 Tue Jun  5 19:19:03 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
