@@ -1,3 +1,14 @@
+Thu Jun  7 06:57:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DomainParticipantId:
+        * tests/DCPS/DomainParticipantId/DomainParticipantId.mpc:
+        * tests/DCPS/DomainParticipantId/dp.cpp:
+        * tests/DCPS/DomainParticipantId/rtps_disc.ini:
+        * tests/DCPS/DomainParticipantId/run_test.pl:
+          Added new test, domain participant id's should be unique to our
+          idea
+
 Wed Jun  6 19:23:47 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * MPC/config/dds4ccm_opendds.mpb:

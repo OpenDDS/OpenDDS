@@ -1,0 +1,13 @@
+// $Id$
+
+project(DDS*DomainParticipantId) : dcpsexe_with_tcp, dcps_rtps_udp {
+  exename = dp
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    dp.cpp
+  }
+}
+
