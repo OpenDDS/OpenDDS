@@ -430,10 +430,10 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
     }
 
-    DDS::DataWriterListener* listener =
+    DDS::DataWriterListener_var listener =
       listener_for(::DDS::PUBLICATION_MATCHED_STATUS);
 
-    if (listener != 0) {
+    if (!CORBA::is_nil(listener.in())) {
       listener->on_publication_matched(dw_local_objref_.in(),
                                        publication_match_status_);
 
@@ -605,10 +605,10 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
 
         set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
 
-        DDS::DataWriterListener* listener =
+        DDS::DataWriterListener_var listener =
          this->listener_for(::DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-        if (listener != 0) {
+        if (!CORBA::is_nil(listener.in())) {
           listener->on_publication_matched(
             this->dw_local_objref_.in(),
             this->publication_match_status_);
@@ -680,7 +680,7 @@ void DataWriterImpl::remove_all_associations()
 void
 DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
-  DDS::DataWriterListener* listener =
+  DDS::DataWriterListener_var listener =
     listener_for(::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -703,7 +703,7 @@ DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   offered_incompatible_qos_status_.last_policy_id = status.last_policy_id;
   offered_incompatible_qos_status_.policies = status.policies;
 
-  if (listener != 0) {
+  if (!CORBA::is_nil(listener.in())) {
     listener->on_offered_incompatible_qos(dw_local_objref_.in(),
                                           offered_incompatible_qos_status_);
 
@@ -2143,17 +2143,17 @@ DataWriterImpl::control_dropped(ACE_Message_Block* sample,
   sample->release();
 }
 
-DDS::DataWriterListener*
+DDS::DataWriterListener_ptr
 DataWriterImpl::listener_for(::DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
-  if (fast_listener_ == 0 || (listener_mask_ & kind) == 0) {
+  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
     return publisher_servant_->listener_for(kind);
 
   } else {
-    return fast_listener_;
+    return listener_.in();
   }
 }
 
@@ -2210,10 +2210,10 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
     ++ this->liveliness_lost_status_.total_count;
     ++ this->liveliness_lost_status_.total_count_change;
 
-    DDS::DataWriterListener* listener =
+    DDS::DataWriterListener_var listener =
       listener_for(::DDS::LIVELINESS_LOST_STATUS);
 
-    if (listener != 0) {
+    if (!CORBA::is_nil(listener.in())) {
       listener->on_liveliness_lost(this->dw_local_objref_.in(),
                                    this->liveliness_lost_status_);
     }

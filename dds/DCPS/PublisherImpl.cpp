@@ -864,17 +864,17 @@ PublisherImpl::writer_enabled(const char* topic_name,
 }
 
 
-DDS::PublisherListener*
+DDS::PublisherListener_ptr
 PublisherImpl::listener_for(DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
-  if (fast_listener_ == 0 || (listener_mask_ & kind) == 0) {
+  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
     return participant_->listener_for(kind);
 
   } else {
-    return fast_listener_;
+    return DDS::PublisherListener::_duplicate(listener_.in());
   }
 }
 

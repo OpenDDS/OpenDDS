@@ -1,3 +1,20 @@
+Thu Jun  7 19:21:57 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/idl/CPPTemplate.txt:
+          Converted internal listener usage to use refernce counted var.
+
 Thu Jun  7 06:57:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/dcps_tests.lst:

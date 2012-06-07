@@ -126,7 +126,7 @@ public:
   DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
 #endif
 
-  DDS::SubscriberListener* listener_for(DDS::StatusKind kind);
+  DDS::SubscriberListener_ptr listener_for(DDS::StatusKind kind);
 
   /// @name Raw Latency Statistics Configuration Interfaces
   /// @{

@@ -91,7 +91,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
         this->reader_impl_->set_status_changed_flag(
           DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
 
-        DDS::DataReaderListener * const listener =
+        DDS::DataReaderListener_var listener =
           this->reader_impl_->listener_for(
             DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
@@ -101,7 +101,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
         }
 #endif
 
-        if (listener != 0) {
+        if (!CORBA::is_nil(listener.in())) {
           // Copy before releasing the lock.
           DDS::RequestedDeadlineMissedStatus const status = this->status_;
 
