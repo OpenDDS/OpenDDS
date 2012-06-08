@@ -245,8 +245,6 @@ int run_test(int argc, ACE_TCHAR *argv[])
                            1);
       }
 
-
-
       // Create the subscriber
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,

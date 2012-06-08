@@ -1,3 +1,23 @@
+Fri Jun  8 09:15:16 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TopicReuse/Messenger.idl:
+        * tests/DCPS/TopicReuse/Messenger_export.h:
+        * tests/DCPS/TopicReuse/TopicReuse.mpc:
+        * tests/DCPS/TopicReuse/rtps_disc.ini:
+        * tests/DCPS/TopicReuse/run_test.pl:
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          New test that deletes the topic while still being used by the
+          datawriter
+
+        * tests/DCPS/DomainParticipantId/dp.cpp:
+          Updated test to allow same handles for domain id's
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+          Layout changes
+
 Thu Jun  7 19:21:57 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

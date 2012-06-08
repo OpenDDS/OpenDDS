@@ -39,8 +39,6 @@ using namespace ::OpenDDS::DCPS;
 
 int ignore_before_association = 0;
 
-
-
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
 void
