@@ -38,16 +38,12 @@ namespace {
 ///         PortableServer::POA::WrongAdapter
 ///         PortableServer::POA::WongPolicy
 template <class T_impl, class T_ptr>
-T_impl* remote_reference_to_servant(T_ptr p)
+T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
 {
   if (CORBA::is_nil(p)) {
     return 0;
   }
 
-  //TODO: this needs to change once DR/DW-Remote are refactored to the
-  //      InfoRepoDiscovery library
-  int zero_argc = 0;
-  CORBA::ORB_var orb = CORBA::ORB_init(zero_argc, 0, OpenDDS::DCPS::DEFAULT_ORB_NAME);
   CORBA::Object_var obj =
     orb->resolve_initial_references("RootPOA");
   PortableServer::POA_var poa = PortableServer::POA::_narrow(obj.in());
@@ -66,12 +62,8 @@ T_impl* remote_reference_to_servant(T_ptr p)
 /// @throws PortableServer::POA::ServantNotActive,
 ///         PortableServer::POA::WrongPolicy
 template <class T>
-typename T::_stub_ptr_type servant_to_remote_reference(T* servant)
+typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_ptr orb)
 {
-  //TODO: this needs to change once DR/DW-Remote are refactored to the
-  //      InfoRepoDiscovery library
-  int zero_argc = 0;
-  CORBA::ORB_var orb = CORBA::ORB_init(zero_argc, 0, OpenDDS::DCPS::DEFAULT_ORB_NAME);
   CORBA::Object_var obj =
     orb->resolve_initial_references("RootPOA");
   PortableServer::POA_var poa = PortableServer::POA::_narrow(obj.in());
@@ -85,12 +77,8 @@ typename T::_stub_ptr_type servant_to_remote_reference(T* servant)
 }
 
 template <class T>
-void deactivate_remote_object(T obj)
+void deactivate_remote_object(T obj, CORBA::ORB_ptr orb)
 {
-  //TODO: this needs to change once DR/DW-Remote are refactored to the
-  //      InfoRepoDiscovery library
-  int zero_argc = 0;
-  CORBA::ORB_var orb = CORBA::ORB_init(zero_argc, 0, OpenDDS::DCPS::DEFAULT_ORB_NAME);
   CORBA::Object_var poa_obj =
     orb->resolve_initial_references("RootPOA");
   PortableServer::POA_var poa = PortableServer::POA::_narrow(poa_obj.in());
@@ -546,7 +534,7 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
 
     //this is the client reference to the DataWriterRemoteImpl
     OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
-      servant_to_remote_reference(writer_remote_impl);
+      servant_to_remote_reference(writer_remote_impl, orb_);
 
     pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
       dr_remote_obj, qos, transInfo, publisherQos);
@@ -633,7 +621,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
 
     //this is the client reference to the DataReaderRemoteImpl
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
-      servant_to_remote_reference(reader_remote_impl);
+      servant_to_remote_reference(reader_remote_impl, orb_);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
       dr_remote_obj, qos, transInfo, subscriberQos, filterExpr, params);
@@ -741,9 +729,9 @@ InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
   }
 
   DataReaderRemoteImpl* impl =
-    remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in());
+    remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
   impl->detach_parent();
-  deactivate_remote_object(drr->second.in());
+  deactivate_remote_object(drr->second.in(), orb_);
 
   dataReaderMap_.erase(drr);
 }
@@ -760,9 +748,9 @@ InfoRepoDiscovery::removeDataWriterRemote(const RepoId& publicationId)
   }
 
   DataWriterRemoteImpl* impl =
-    remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in());
+    remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
   impl->detach_parent();
-  deactivate_remote_object(dwr->second.in());
+  deactivate_remote_object(dwr->second.in(), orb_);
 
   dataWriterMap_.erase(dwr);
 }

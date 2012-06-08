@@ -1,9 +1,16 @@
+Fri Jun  8 14:48:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+	  Don't create an ORB in internal remote object functions.
+	  Instead pass IRD's ORB.
+
 Thu Jun  7 20:34:01 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Moved initialization of reactor_ from
-	  timer() to ctor.
+          Moved initialization of reactor_ from
+          timer() to ctor.
 
 Wed Jun  6 21:43:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
