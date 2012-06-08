@@ -1943,7 +1943,7 @@ void
   if (it == instance_map_.end())
   {
     // first find the instance mapin the participant instance map.
-    // if the instance map for the type is not refistered, then
+    // if the instance map for the type is not registered, then
     // create the instance map.
     // if the instance map for the type exists, then find the
     // handle of the instance. If the instance is not registered
@@ -2089,7 +2089,7 @@ void
         // is NOT_READ then none are read.
         // TBD - in future we will reads may not read in order so
         //       just looking at the head will not be enough.
-        ::DDS::DataReaderListener* listener
+        ::DDS::DataReaderListener_var listener
             = listener_for (::DDS::SAMPLE_REJECTED_STATUS);
 
         set_status_changed_flag (::DDS::SAMPLE_REJECTED_STATUS, true);
@@ -2101,7 +2101,7 @@ void
         sample_rejected_status_.last_instance_handle = handle;
 
         ::DDS::DataReader_var dr = get_dr_obj_ref();
-        if (listener != 0)
+        if (!CORBA::is_nil(listener.in()))
         {
           ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
@@ -2186,7 +2186,7 @@ void
 
       if (head_ptr->sample_state_ == ::DDS::NOT_READ_SAMPLE_STATE)
       {
-        ::DDS::DataReaderListener* listener
+        ::DDS::DataReaderListener_var listener
             = listener_for (::DDS::SAMPLE_LOST_STATUS);
 
         ++sample_lost_status_.total_count;
@@ -2195,7 +2195,7 @@ void
         set_status_changed_flag(::DDS::SAMPLE_LOST_STATUS, true);
 
         ::DDS::DataReader_var dr = get_dr_obj_ref();
-        if (listener)
+        if (!CORBA::is_nil(listener.in()))
         {
           ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
@@ -2216,9 +2216,9 @@ void
       sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
       set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
 
-      ::DDS::SubscriberListener* sub_listener =
+      ::DDS::SubscriberListener_var sub_listener =
           sub->listener_for(::DDS::DATA_ON_READERS_STATUS);
-      if (sub_listener != 0 && !this->coherent_)
+      if (!CORBA::is_nil(sub_listener.in()) && !this->coherent_)
       {
         ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
@@ -2229,11 +2229,11 @@ void
       {
         sub->notify_status_condition();
 
-        ::DDS::DataReaderListener* listener =
+        ::DDS::DataReaderListener_var listener =
           listener_for (::DDS::DATA_AVAILABLE_STATUS);
 
         ::DDS::DataReader_var dr = get_dr_obj_ref();
-        if (listener != 0)
+        if (!CORBA::is_nil(listener.in()))
         {
           ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 

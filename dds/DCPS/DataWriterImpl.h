@@ -386,7 +386,7 @@ public:
    * Otherwise, the query for the listener is propagated up to the
    * factory/publisher.
    */
-  DDS::DataWriterListener* listener_for(DDS::StatusKind kind);
+  DDS::DataWriterListener_ptr listener_for(DDS::StatusKind kind);
 
   /// Handle the assert liveliness timeout.
   virtual int handle_timeout(const ACE_Time_Value &tv,

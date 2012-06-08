@@ -1733,14 +1733,14 @@ DomainParticipantImpl::set_object_reference(const DDS::DomainParticipant_ptr& dp
   participant_objref_ = DDS::DomainParticipant::_duplicate(dp);
 }
 
-DDS::DomainParticipantListener*
+DDS::DomainParticipantListener_ptr
 DomainParticipantImpl::listener_for(DDS::StatusKind kind)
 {
-  if (fast_listener_ == 0 || (listener_mask_ & kind) == 0) {
+  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
     return 0;
 
   } else {
-    return fast_listener_;
+    return DDS::DomainParticipantListener::_duplicate(listener_.in());
   }
 }
 

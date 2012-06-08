@@ -59,7 +59,7 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, dds4ccm_opendd
   }
 }
 
-project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_features {
+project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_features, install {
   custom_only = 1
   requires   += dds4ccm_opendds
   after      += OpenDDS_Dcps_idl_gen
@@ -67,6 +67,7 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_
                 -Wb,stub_export_macro=DDSDCPS_LEM_STUB_Export \
                 -Wb,stub_export_include=DdsDcps_lem_stub_export.h \
                 -SS -I$(DDS_ROOT)
+  idlflags   -= -Glem -Gsv
 
   IDL_Files {
      idlflags += -Gxhst
@@ -91,9 +92,9 @@ project (OpenDDS_Dcps_lem_gen) : dds4ccm_opendds, taoidldefaults, dcps_optional_
   }
 }
 
-project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
-                                  dcps_optional_features, gen_ostream {
-  requires += dds4ccm_opendds
+project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dds4ccm_opendds, \
+                                  dcps_optional_features, gen_ostream, install {
+  requires   += dds4ccm_opendds
   after += OpenDDS_Dcps_lem_gen CCM_stub_idl CCM_session_idl
   includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)
   sharedname = OpenDDS_Dcps_lem_stub
@@ -122,6 +123,36 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, \
     DdsDcpsSubscriptionExtEC.h
     DdsDcpsTopicEC.h
     DdsDcpsTypeSupportExtEC.h
+    DdsDcps_lem_stub_export.h
+    DdsDcpsDomainES.h
+    DdsDcpsInfrastructureES.h
+    DdsDcpsSubscriptionES.h
+    DdsDcpsTopicES.h
+    DdsDcpsES.h
+    DdsDcpsPublicationES.h
+    DdsDcpsSubscriptionExtES.h
+    DdsDcpsTypeSupportExtES.h
+    DdsDcpsDomain_svnt.h
+    DdsDcpsInfoUtils_svnt.h
+    DdsDcpsPublication_svnt.h
+    DdsDcpsSubscription_svnt.h
+    DdsDcpsTopic_svnt.h
+    DdsDcpsGuid_svnt.h
+    DdsDcpsInfrastructure_svnt.h
+    DdsDcpsSubscriptionExt_svnt.h
+    DdsDcps_svnt.h
+    DdsDcpsTypeSupportExt_svnt.h
+  }
+
+  Inline_Files {
+    DdsDcpsDomainEC.inl
+    DdsDcpsEC.inl
+    DdsDcpsInfrastructureEC.inl
+    DdsDcpsPublicationEC.inl
+    DdsDcpsSubscriptionEC.inl
+    DdsDcpsSubscriptionExtEC.inl
+    DdsDcpsTopicEC.inl
+    DdsDcpsTypeSupportExtEC.inl
   }
 }
 
@@ -170,7 +201,6 @@ project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macr
     DdsDcpsSubscriptionExtS.cpp
     DdsDcpsTopicS.cpp
     DdsDcpsTypeSupportExtS.cpp
-
 
     CorbaSeq/BooleanSeqTypeSupportImpl.cpp
     CorbaSeq/CharSeqTypeSupportImpl.cpp
@@ -238,6 +268,20 @@ project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macr
     CorbaSeq/UShortSeqTypeSupportImpl.h
     CorbaSeq/WCharSeqTypeSupportImpl.h
     CorbaSeq/WStringSeqTypeSupportImpl.h
+  }
+
+  Inline_Files {
+    DdsDcpsC.inl
+    DdsDcpsDomainC.inl
+    DdsDcpsGuidC.inl
+    DdsDcpsInfoUtilsC.inl
+    DdsDcpsInfrastructureC.inl
+    DdsDcpsInfrastructureTypeSupportC.inl
+    DdsDcpsPublicationC.inl
+    DdsDcpsSubscriptionC.inl
+    DdsDcpsSubscriptionExtC.inl
+    DdsDcpsTopicC.inl
+    DdsDcpsTypeSupportExtC.inl
   }
 
   Template_Files {

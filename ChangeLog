@@ -1,12 +1,129 @@
+Fri Jun  8 17:03:06 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Added missing duplicate for internal listener usage.
+
+Fri Jun  8 09:29:05 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          Added find_topic, this would require us to call delete_topic
+          twice
+
+Fri Jun  8 09:15:16 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TopicReuse/Messenger.idl:
+        * tests/DCPS/TopicReuse/Messenger_export.h:
+        * tests/DCPS/TopicReuse/TopicReuse.mpc:
+        * tests/DCPS/TopicReuse/rtps_disc.ini:
+        * tests/DCPS/TopicReuse/run_test.pl:
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          New test that deletes the topic while still being used by the
+          datawriter
+
+        * tests/DCPS/DomainParticipantId/dp.cpp:
+          Updated test to allow same handles for domain id's
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+          Layout changes
+
+Thu Jun  7 19:21:57 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/idl/CPPTemplate.txt:
+          Converted internal listener usage to use refernce counted var.
+
+Thu Jun  7 06:57:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DomainParticipantId:
+        * tests/DCPS/DomainParticipantId/DomainParticipantId.mpc:
+        * tests/DCPS/DomainParticipantId/dp.cpp:
+        * tests/DCPS/DomainParticipantId/rtps_disc.ini:
+        * tests/DCPS/DomainParticipantId/run_test.pl:
+          Added new test, domain participant id's should be unique to our
+          idea
+
+Wed Jun  6 19:23:47 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Added additional idl flags to disable some files to be generated
+
+        * dds/DCPS/Service_Participant.cpp:
+          Removed noop return
+
+        * dds/DdsDcps.mpc:
+          Removed files that aren't generated anymore
+
+Wed Jun  6 17:06:39 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Restored requires dds4ccm
+
+Wed Jun  6 08:09:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+        * dds/DdsDcps.mpc:
+          More install fixes for dds4ccm
+
+Wed Jun  6 05:44:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Add DdsDcps_lem_stub_export.h as header file
+
+Tue Jun  5 18:18:21 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          More install fixes
+
+Tue Jun  5 11:48:13 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          List inline files
+
+Tue Jun  5 10:38:04 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+          Fixed final link issues.
+
+Tue Jun  5 09:49:08 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+          Fixed header filename
+
+Mon Jun  4 20:26:18 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+          Removed inheritance of ownership_profile and
+          replaced with a requires.
+
+        * MPC/config/ownership_profile.mpb:
+
+          Removed this file.
+
 Mon Jun  4 15:16:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-	  Replaced tab with spaces.
+          Replaced tab with spaces.
 
         * dds/DCPS/FeatureDisabledQosCheck.h:
 
-	  Removed trailing whitespace.
+          Removed trailing whitespace.
 
 Mon Jun  4 14:42:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 

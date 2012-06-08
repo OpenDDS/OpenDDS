@@ -1,5 +1,5 @@
 // $Id$
 
-feature(dds4ccm_opendds) : ccm_lem_stub, ciaoidldefaults, taobaseidldefaults {
-  idlflags += -Glem -Gsv
+feature(dds4ccm_opendds) : ccm_lem_stub, ciaoidldefaults, taobaseidldefaults, ccm_lw, ccm_noevent, ccm_direct_collocation {
+  idlflags += -Glem -Gsv -Ssvntt -Ssvntc
 }

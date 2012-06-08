@@ -307,7 +307,7 @@ public:
   * kind is in the listener mask then the listener is returned.
   * Otherwise, return nil.
   */
-  DDS::DomainParticipantListener* listener_for(DDS::StatusKind kind);
+  DDS::DomainParticipantListener_ptr listener_for(DDS::StatusKind kind);
 
   typedef std::vector<RepoId> TopicIdVec;
   /**

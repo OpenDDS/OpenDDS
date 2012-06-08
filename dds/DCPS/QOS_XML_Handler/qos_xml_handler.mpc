@@ -48,7 +48,7 @@ project (OpenDDS_QOS_XML_XSC_Handler) : install, acelib, xerces, anytypecode, \
   }
 
   Header_Files {
-    XML_QOS_XSC_Handler_Export.h
+    XML_QOS_Handler_Export.h
     dds_qos.hpp
     QOS_Common.h
     DataWriterQos_Handler.h

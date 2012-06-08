@@ -84,11 +84,11 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(void const * act, bool timer_cal
         this->writer_impl_->set_status_changed_flag(
           DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
 
-        DDS::DataWriterListener * const listener =
+        DDS::DataWriterListener_var listener =
           this->writer_impl_->listener_for(
             DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
-        if (listener != 0) {
+        if (! CORBA::is_nil(listener.in())) {
           // Copy before releasing the lock.
           DDS::OfferedDeadlineMissedStatus const status = this->status_;
 
