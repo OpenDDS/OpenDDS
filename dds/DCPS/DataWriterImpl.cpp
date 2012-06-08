@@ -2153,7 +2153,7 @@ DataWriterImpl::listener_for(::DDS::StatusKind kind)
     return publisher_servant_->listener_for(kind);
 
   } else {
-    return listener_.in();
+    return DDS::DataWriterListener::_duplicate(listener_.in());
   }
 }
 

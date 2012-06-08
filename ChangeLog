@@ -1,3 +1,8 @@
+Fri Jun  8 17:03:06 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Added missing duplicate for internal listener usage.
+
 Fri Jun  8 09:29:05 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * tests/DCPS/TopicReuse/tpreuse.cpp:
