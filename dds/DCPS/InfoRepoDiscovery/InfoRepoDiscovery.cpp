@@ -119,7 +119,7 @@ InfoRepoDiscovery::~InfoRepoDiscovery()
   delete this->failoverListener_;
 
   if (!orb_from_user_ && orb_runner_) {
-    if (0 == orb_runner_->use_count_--) {
+    if (0 == --orb_runner_->use_count_) {
       orb_runner_->shutdown();
       delete orb_runner_;
       orb_runner_ = 0;

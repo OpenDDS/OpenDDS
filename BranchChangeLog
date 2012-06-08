@@ -1,9 +1,16 @@
+Fri Jun  8 19:29:36 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+	  Fix decrement operation in dtor so ORB will shut down
+	  properly.
+
 Fri Jun  8 14:48:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
 
-	  Don't create an ORB in internal remote object functions.
-	  Instead pass IRD's ORB.
+          Don't create an ORB in internal remote object functions.
+          Instead pass IRD's ORB.
 
 Thu Jun  7 20:34:01 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
