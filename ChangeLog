@@ -1,3 +1,9 @@
+Fri Jun  8 09:29:05 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          Added find_topic, this would require us to call delete_topic
+          twice
+
 Fri Jun  8 09:15:16 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/dcps_tests.lst:

@@ -42,6 +42,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                     participant->get_instance_handle ()));
       }
 
+      DDS::DomainParticipant_var participant2 =
+        dpf->create_participant(11,
+                                PARTICIPANT_QOS_DEFAULT,
+                                DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil (participant2.in ())) {
+        cerr << "create_participant2 failed." << endl;
+        return 1;
+      }
+      else
+      {
+        ACE_DEBUG ((LM_DEBUG, "Created participant 2 with instance handle %d\n",
+                    participant2->get_instance_handle ()));
+      }
+
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =
         new Messenger::MessageTypeSupportImpl();
@@ -96,8 +111,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                         -1);
       }
 
-      DDS::ReturnCode_t retcode = participant->delete_topic (topic.in ());
+      DDS::ReturnCode_t retcode = participant2->delete_topic (topic.in ());
       if (retcode != DDS::RETCODE_PRECONDITION_NOT_MET) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: should not be able to delete topic, not part of this participant!\n")),
+                        -1);
+      }
+
+      DDS::ReturnCode_t retcode5 = participant->delete_topic (topic.in ());
+      if (retcode5 != DDS::RETCODE_PRECONDITION_NOT_MET) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: should not be able to delete topic, still referenced by datawriter!\n")),
@@ -112,6 +135,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                         -1);
       }
 
+      DDS::Duration_t timeout;
+      timeout.sec = 0;
+      timeout.nanosec = 0;
+      // Doing a find_topic will require us to call delete topic twice, see
+      // 7.1.2.2.1.11 from the dds spec
+      DDS::Topic_var topic2 = participant->find_topic ("Movie Discussion List", timeout);
+      if (CORBA::is_nil (topic2.in ())) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: Not able to find topic\n")),
+                        -1);
+      }
+
       DDS::ReturnCode_t retcode4 = participant->delete_topic (topic.in ());
       if (retcode4 != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -120,7 +156,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                         -1);
       }
 
+      DDS::ReturnCode_t retcode6 = participant->delete_topic (topic2.in ());
+      if (retcode6 != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: should be able to delete topic\n")),
+                        -1);
+      }
+
       dpf->delete_participant(participant.in ());
+      dpf->delete_participant(participant2.in ());
       TheServiceParticipant->shutdown ();
   }
   catch (CORBA::Exception& e)
