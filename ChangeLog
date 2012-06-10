@@ -1,3 +1,19 @@
+Sun Jun 10 17:42:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Added new test
+
+        * tests/DCPS/DpShutdown:
+        * tests/DCPS/DpShutdown/DpShutdown.mpc:
+        * tests/DCPS/DpShutdown/Messenger.idl:
+        * tests/DCPS/DpShutdown/Messenger_export.h:
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+        * tests/DCPS/DpShutdown/run_test.pl:
+          New test that tests the fact that we can't remove a domain participant
+          when it still contains entities. Also shutdown the service participant
+          when it still has a domain participant registered, this triggers
+          frequently an assert.
+
 Fri Jun  8 17:03:06 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

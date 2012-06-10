@@ -42,6 +42,7 @@ tests/DCPS/LivelinessTest/run_test.pl take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl udp: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DomainParticipantId/run_test.pl: RTPS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
+tests/DCPS/DpShutdown/run_test.pl: RTPS
 tests/DCPS/Serializer/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN
