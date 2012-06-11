@@ -24,8 +24,7 @@ opaque value:
       ignore_participant(InstanceHandle_t)
       ignore_topic(InstanceHandle_t)
       ignore_publication(InstanceHandle_t)
-      ignore_subscription(
-      InstanceHandle_t)
+      ignore_subscription(InstanceHandle_t)
       get_discovered_participant_data(..., InstanceHandle_t)
       get_discovered_topic_data(..., InstanceHandle_t)
       contains_entity(InstanceHandle_t)

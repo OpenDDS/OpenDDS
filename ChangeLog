@@ -1,10 +1,16 @@
+Mon Jun 11 15:16:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/design/INSTANCE_HANDLES:
+
+          Formatting change only.
+
 Mon Jun 11 13:37:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * Merged from branch "temp_orb_refactor" which moves the ORB management
-	  from the Service_Participant to the InfoRepoDiscovery. For client code
-	  that does not use the InfoRepoDiscovery for discovery,
-	  this can remove an unneeded dependency on ORB code.
-	  For details see the branch-specific change log at
+          from the Service_Participant to the InfoRepoDiscovery. For client code
+          that does not use the InfoRepoDiscovery for discovery,
+          this can remove an unneeded dependency on ORB code.
+          For details see the branch-specific change log at
           docs/history/ChangeLog-ORB_refactor.
 
 Sun Jun 10 17:42:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
@@ -157,7 +163,7 @@ Mon Jun  4 14:42:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
         * dds/DCPS/QOS_XML_Handler/optional_ace_xml_utils.mpb:
         * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
 
-          New ace base project "ace_xml_utils" can't be included when
+          New ACE base project "ace_xml_utils" can't be included when
           dds4ccm_opendds=0 because we may be building with an older ACE.
 
 Mon Jun  4 11:43:04 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
