@@ -420,8 +420,7 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
     }
   }
 
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-  this->reactor_ = orb->orb_core()->reactor();
+  this->reactor_ = TheServiceParticipant->timer();
 }
 
 OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache()

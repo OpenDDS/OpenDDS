@@ -1,3 +1,10 @@
+Mon Jun 11 13:37:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged from branch "temp_orb_refactor" which moves the ORB management
+	  from the Service_Participant to the InfoRepoDiscovery. For client code
+	  that does not use the InfoRepoDiscovery for discovery,
+	  this can remove an unneeded dependency on ORB code.
+
 Sun Jun 10 17:42:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/dcps_tests.lst:

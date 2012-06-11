@@ -16,6 +16,8 @@
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 
+#include "ace/Task.h"
+
 #include "InfoRepoDiscovery_Export.h"
 
 #include "ace/Thread_Mutex.h"
@@ -48,7 +50,7 @@ public:
 
   virtual ~InfoRepoDiscovery();
 
-  virtual std::string get_stringified_dcps_info_ior();
+  std::string get_stringified_dcps_info_ior();
   DCPSInfo_var get_dcps_info();
 
   virtual bool active();
@@ -64,6 +66,11 @@ public:
     bit_transport_ip_ = ip;
     use_local_bit_config_ = true;
   }
+
+  /// User provides an ORB for OpenDDS to use.
+  /// @note The user is responsible for running the ORB.
+  /// @Returns true if the operation succeeds
+  bool set_ORB(CORBA::ORB_ptr orb);
 
   virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant);
 
@@ -224,6 +231,24 @@ private:
 
   /// Listener to initiate failover with.
   FailoverListener*    failoverListener_;
+
+  CORBA::ORB_var orb_;
+  bool orb_from_user_;
+
+  struct OrbRunner : ACE_Task_Base {
+    OrbRunner() {}
+    int svc();
+    void shutdown();
+
+    CORBA::ORB_var orb_;
+    ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> use_count_;
+  private:
+    OrbRunner(const OrbRunner&);
+    OrbRunner& operator=(const OrbRunner&);
+  };
+
+  static OrbRunner* orb_runner_;
+  static ACE_Thread_Mutex mtx_orb_runner_;
 
   typedef std::map<RepoId, DataReaderRemote_var, DCPS::GUID_tKeyLessThan> DataReaderMap;
 

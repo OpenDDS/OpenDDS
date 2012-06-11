@@ -19,6 +19,9 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+#include "ace/Reactor.h"
+#include "ace/Select_Reactor.h"
+
 #include <cstdlib>
 
 namespace {
@@ -52,6 +55,8 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
 
 RtpsDiscovery::~RtpsDiscovery()
 {
+  reactor_runner_.end();
+
 }
 
 OpenDDS::DCPS::RepoId
@@ -314,6 +319,41 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 
   return 0;
 }
+
+ACE_Reactor*
+RtpsDiscovery::reactor()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, reactor_runner_.mtx_, 0);
+  if (!reactor_runner_.reactor_) {
+    reactor_runner_.reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+    reactor_runner_.activate();
+  }
+  return reactor_runner_.reactor_;
+}
+
+int
+RtpsDiscovery::ReactorRunner::svc()
+{
+  reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
+  reactor_->run_reactor_event_loop();
+  return 0;
+}
+
+void
+RtpsDiscovery::ReactorRunner::end()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
+  if (reactor_) {
+    reactor_->end_reactor_event_loop();
+    wait();
+  }
+}
+
+RtpsDiscovery::ReactorRunner::~ReactorRunner()
+{
+  delete reactor_;
+}
+
 
 // Participant operations:
 

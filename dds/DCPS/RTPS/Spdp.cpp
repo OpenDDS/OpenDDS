@@ -317,7 +317,7 @@ Spdp::part_bit()
 ACE_Reactor*
 Spdp::reactor() const
 {
-  return TheServiceParticipant->discovery_reactor();
+  return disco_->reactor();
 }
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
@@ -384,19 +384,19 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
 void
 Spdp::SpdpTransport::open()
 {
-  if (outer_->reactor()->register_handler(unicast_socket_.get_handle(),
-        this, ACE_Event_Handler::READ_MASK) != 0) {
+  ACE_Reactor* reactor = outer_->reactor();
+  if (reactor->register_handler(unicast_socket_.get_handle(),
+                                this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast input handler");
   }
 
-  if (outer_->reactor()->register_handler(multicast_socket_.get_handle(),
-        this, ACE_Event_Handler::READ_MASK) != 0) {
+  if (reactor->register_handler(multicast_socket_.get_handle(),
+                                this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register multicast input handler");
   }
 
   const ACE_Time_Value per = outer_->disco_->resend_period();
-  if (-1 == outer_->reactor()->schedule_timer(this, 0,
-                                              ACE_Time_Value(0), per)) {
+  if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), per)) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }
 }
@@ -458,11 +458,12 @@ Spdp::SpdpTransport::dispose_unregister()
 void
 Spdp::SpdpTransport::close()
 {
-  outer_->reactor()->cancel_timer(this);
+  ACE_Reactor* reactor = outer_->reactor();
+  reactor->cancel_timer(this);
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
-  outer_->reactor()->remove_handler(multicast_socket_.get_handle(), mask);
-  outer_->reactor()->remove_handler(unicast_socket_.get_handle(), mask);
+  reactor->remove_handler(multicast_socket_.get_handle(), mask);
+  reactor->remove_handler(unicast_socket_.get_handle(), mask);
 }
 
 void

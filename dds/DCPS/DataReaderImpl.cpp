@@ -82,8 +82,7 @@ DataReaderImpl::DataReaderImpl()
     periodic_monitor_(0),
     transport_disabled_(false)
 {
-  CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
-  reactor_ = orb->orb_core()->reactor();
+  reactor_ = TheServiceParticipant->timer();
 
   liveliness_changed_status_.alive_count = 0;
   liveliness_changed_status_.not_alive_count = 0;

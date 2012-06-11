@@ -15,7 +15,6 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "tao/ORB_Core.h"
-#include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
@@ -26,7 +25,6 @@ const char* MY_TOPIC    = "foo";
 const char* OTHER_TOPIC = "other";
 const char* MY_TYPE     = "foo";
 
-int client_orb = 0;
 const ACE_Time_Value find_topic_timeout(5, 0);
 CORBA::ORB_var orb;
 PortableServer::POA_var poa;
@@ -92,40 +90,6 @@ public:
 private:
   CORBA::ORB_var orb_;
 };
-
-void
-usage (const ACE_TCHAR * cmd)
-{
-  ACE_DEBUG ((LM_INFO,
-              ACE_TEXT ("Usage:\n")
-              ACE_TEXT ("  %s\n")
-              ACE_TEXT ("    -c <client set_orb flag>\n")
-              ACE_TEXT ("\n"),
-              cmd));
-}
-
-void
-parse_args (int argc,
-            ACE_TCHAR *argv[])
-{
-  ACE_Arg_Shifter arg_shifter (argc, argv);
-
-  while (arg_shifter.is_anything_left ())
-  {
-    const ACE_TCHAR *currentArg = 0;
-
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
-    {
-      client_orb = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else
-    {
-      arg_shifter.ignore_arg ();
-    }
-  }
-}
-
 
 int run_domain_test ()
 {
@@ -697,46 +661,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
-      parse_args (argc, argv);
-
-      if (client_orb)
-        {
-          ACE_Argv_Type_Converter conv (argc, argv);
-          // Client creates the orb.
-          orb = CORBA::ORB_init (conv.get_argc (),
-                                 conv.get_ASCII_argv (),
-                                 OpenDDS::DCPS::DEFAULT_ORB_NAME);
-
-          TheServiceParticipant->set_ORB(orb.in());
-
-          // Client runs the orb.
-          CORBA::Object_var obj =
-            orb->resolve_initial_references ("RootPOA");
-
-          poa = PortableServer::POA::_narrow (obj.in ());
-
-          PortableServer::POAManager_var poa_manager =
-            poa->the_POAManager ();
-
-          poa_manager->activate ();
-
-          orb_task = new ORB_Task (orb.in ());
-          if (orb_task->activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
-            {
-              ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT ("OPENDDS_DCPS_Service_Participant::get_domain_participant_factory, ")
-                          ACE_TEXT ("Failed to activate the orb task.")));
-              return 1;
-            }
-
-          dpf = TheParticipantFactory;
-       }
-      else
-        {
-          dpf = TheParticipantFactoryWithArgs(argc, argv);
-          poa = TheServiceParticipant->the_poa();
-        }
-
+      dpf = TheParticipantFactoryWithArgs(argc, argv);
 
       int ret = run_domain_test ();
       TEST_CHECK (ret == 0);
@@ -755,18 +680,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         run_next_instance_sample_test (i);
       }
 
-      if (client_orb)
-        {
-          orb->shutdown (0);
-          orb_task->wait ();
-        }
-
       TheServiceParticipant->shutdown ();
-
-      if (client_orb)
-        {
-          orb->destroy ();
-        }
 
     }
   catch (const CORBA::Exception& ex)
