@@ -4,6 +4,8 @@ Mon Jun 11 13:37:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 	  from the Service_Participant to the InfoRepoDiscovery. For client code
 	  that does not use the InfoRepoDiscovery for discovery,
 	  this can remove an unneeded dependency on ORB code.
+	  For details see the branch-specific change log at
+          docs/history/ChangeLog-ORB_refactor.
 
 Sun Jun 10 17:42:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
