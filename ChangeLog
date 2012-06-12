@@ -1,3 +1,8 @@
+Tue Jun 12 18:48:15 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+          Fixed compile errors when DDS_HAS_MINIMUM_BIT has been defined
+
 Tue Jun 12 18:41:28 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
