@@ -1,0 +1,4 @@
+# $Id$
+
+This test verifies that the sample rejection support in OpenDDS is
+functioning properly. 

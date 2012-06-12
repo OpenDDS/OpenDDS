@@ -1942,6 +1942,38 @@ void
 
   if (it == instance_map_.end())
   {
+    if ((this->qos_.resource_limits.max_instances != ::DDS::LENGTH_UNLIMITED) &&
+       ((::CORBA::Long) instances_.size() >= this->qos_.resource_limits.max_instances))
+    {
+
+        ::DDS::DataReaderListener_var listener
+            = listener_for (::DDS::SAMPLE_REJECTED_STATUS);
+
+        set_status_changed_flag (::DDS::SAMPLE_REJECTED_STATUS, true);
+
+        sample_rejected_status_.last_reason =
+          ::DDS::REJECTED_BY_INSTANCES_LIMIT;
+        ++sample_rejected_status_.total_count;
+        ++sample_rejected_status_.total_count_change;
+        sample_rejected_status_.last_instance_handle = handle;
+
+        ::DDS::DataReader_var dr = get_dr_obj_ref();
+        if (!CORBA::is_nil(listener.in()))
+        {
+          ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+          listener->on_sample_rejected(dr.in (),
+                                       sample_rejected_status_);
+        }  // do we want to do something if listener is nil???
+        notify_status_condition();
+
+        ACE_DES_FREE (instance_data,
+                      data_allocator_->free,
+                      <%TYPE%> );
+
+        return;
+    }
+
     // first find the instance mapin the participant instance map.
     // if the instance map for the type is not registered, then
     // create the instance map.
@@ -2068,8 +2100,6 @@ void
       }
     }
 
-    // TBD - we also need to reject for > RESOURCE_LIMITS.max_samples
-    //       and RESOURCE_LIMITS.max_instances.
     if ((this->qos_.resource_limits.max_samples_per_instance !=
           ::DDS::LENGTH_UNLIMITED) &&
        (instance_ptr->rcvd_samples_.size_ >=
@@ -2123,6 +2153,68 @@ void
            instance_ptr->rcvd_samples_.head_;
          instance_ptr->rcvd_samples_.remove(item);
          dec_ref_data_element(item);
+      }
+    }
+    else if (this->qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED) 
+    {
+      long total_samples = 0;
+      for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
+           iter != instances_.end();
+           ++iter) {
+        OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
+
+        total_samples += ptr->rcvd_samples_.size_;
+      }
+
+      if(total_samples >= this->qos_.resource_limits.max_samples)
+      {
+        // According to spec 1.2, Samples that contain no data do not
+        // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
+        // so do not remove the oldest sample when unregister/dispose
+        // message arrives.
+
+         if  (! is_dispose_msg  && ! is_unregister_msg
+            && instance_ptr->rcvd_samples_.head_->sample_state_
+            == ::DDS::NOT_READ_SAMPLE_STATE)
+         {
+           // for now the implemented QoS means that if the head sample
+           // is NOT_READ then none are read.
+           // TBD - in future we will reads may not read in order so
+           //       just looking at the head will not be enough.
+           ::DDS::DataReaderListener_var listener
+               = listener_for (::DDS::SAMPLE_REJECTED_STATUS);
+
+           set_status_changed_flag (::DDS::SAMPLE_REJECTED_STATUS, true);
+
+           sample_rejected_status_.last_reason =
+              ::DDS::REJECTED_BY_SAMPLES_LIMIT;
+           ++sample_rejected_status_.total_count;
+           ++sample_rejected_status_.total_count_change;
+           sample_rejected_status_.last_instance_handle = handle;
+           ::DDS::DataReader_var dr = get_dr_obj_ref();
+           if (!CORBA::is_nil(listener.in()))
+           {
+             ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+             listener->on_sample_rejected(dr.in (),
+                                          sample_rejected_status_);
+           }  // do we want to do something if listener is nil???
+           notify_status_condition();
+
+           ACE_DES_FREE (instance_data,
+                         data_allocator_->free,
+                         <%TYPE%> );
+
+           return;
+         }
+         else if (! is_dispose_msg  && ! is_unregister_msg)
+         {
+           // Discard the oldest previously-read sample
+           OpenDDS::DCPS::ReceivedDataElement *item =
+             instance_ptr->rcvd_samples_.head_;
+           instance_ptr->rcvd_samples_.remove(item);
+           dec_ref_data_element(item);
+        }
       }
     }
 

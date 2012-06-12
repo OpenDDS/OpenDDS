@@ -1,3 +1,28 @@
+Tue Jun 12 17:41:48 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Added rejection checking and notification for data readers.
+
+        * tests/DCPS/Rejects:
+        * tests/DCPS/Rejects/DataReaderListener.cpp:
+        * tests/DCPS/Rejects/DataReaderListener.h:
+        * tests/DCPS/Rejects/Messenger.idl:
+        * tests/DCPS/Rejects/pub.ini:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/README:
+        * tests/DCPS/Rejects/Rejects.mpc:
+        * tests/DCPS/Rejects/Rejects_export.h:
+        * tests/DCPS/Rejects/rtps_disc.ini:
+        * tests/DCPS/Rejects/run_test.pl:
+        * tests/DCPS/Rejects/sub.ini:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Rejects/Writer.cpp:
+        * tests/DCPS/Rejects/Writer.h:
+
+          Added test that checks for rejections due to exceeding max_samples
+          max_instances, and max_samples_per_instance.
+
 Tue Jun 12 15:21:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
