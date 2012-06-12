@@ -32,11 +32,14 @@ namespace DCPS {
         if (file_name == 0)
           {
             ACE_OS::free (buf);
-            ACE_ERROR ((LM_ERROR,
-                          "get_xml_file_name <%C> - "
-                          "Error: malformed qos_profile. Expected format: "
-                          "<xml_file_base_name>#<profile_name>\n",
-                          qos_profile));
+            if (DCPS_debug_level > 5)
+              {
+                ACE_ERROR ((LM_ERROR,
+                              "get_xml_file_name <%C> - "
+                              "Error: malformed qos_profile. Expected format: "
+                              "<xml_file_base_name>#<profile_name>\n",
+                              qos_profile));
+              }
             return "";
           }
 
@@ -67,11 +70,14 @@ namespace DCPS {
         if (lib_name == 0 || prof_name == 0 || tok.next () != 0)
           {
             ACE_OS::free (buf);
-            ACE_ERROR ((LM_ERROR,
-                          "get_profile_name <%C> - "
-                          "Error: malformed qos_profile. Expected format: "
-                          "<xml_file_base_name>#<profile_name>\n",
-                          qos_profile));
+            if (DCPS_debug_level > 5)
+              {
+                ACE_ERROR ((LM_ERROR,
+                              "get_profile_name <%C> - "
+                              "Error: malformed qos_profile. Expected format: "
+                              "<xml_file_base_name>#<profile_name>\n",
+                              qos_profile));
+              }
             return "";
           }
 
@@ -89,9 +95,12 @@ namespace DCPS {
   {
     if (!qos_profile)
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::init - ")
-          ACE_TEXT ("Passed an empty qos_profile, returning.\n")));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::init - ")
+              ACE_TEXT ("Passed an empty qos_profile, returning.\n")));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -99,10 +108,13 @@ namespace DCPS {
 
     if (filename.empty ())
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::init - ")
-          ACE_TEXT ("Unable to extract a file name from <%C>, returning.\n"),
-          qos_profile));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::init - ")
+              ACE_TEXT ("Unable to extract a file name from <%C>, returning.\n"),
+              qos_profile));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -136,10 +148,13 @@ namespace DCPS {
 
     if (profile_name.empty ())
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_datawriter_qos - ")
-          ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
-          qos_profile));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_datawriter_qos - ")
+              ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
+              qos_profile));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -153,9 +168,12 @@ namespace DCPS {
       }
     catch (...)
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_datawriter_qos - ")
-          ACE_TEXT ("Caught unexpected exception.\n")));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_datawriter_qos - ")
+              ACE_TEXT ("Caught unexpected exception.\n")));
+          }
         retcode = DDS::RETCODE_ERROR;
       }
     return retcode;
@@ -184,10 +202,13 @@ namespace DCPS {
 
     if (profile_name.empty ())
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_datareader_qos - ")
-          ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
-          qos_profile));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_datareader_qos - ")
+              ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
+              qos_profile));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -201,9 +222,12 @@ namespace DCPS {
       }
     catch (...)
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_datareader_qos - ")
-          ACE_TEXT ("Caught unexpected exception.\n")));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_datareader_qos - ")
+              ACE_TEXT ("Caught unexpected exception.\n")));
+          }
         retcode = ::DDS::RETCODE_ERROR;
       }
     return retcode;
@@ -231,10 +255,13 @@ namespace DCPS {
 
     if (profile_name.empty ())
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_publisher_qos - ")
-          ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
-          qos_profile));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_publisher_qos - ")
+              ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
+              qos_profile));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -247,9 +274,12 @@ namespace DCPS {
       }
     catch (...)
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_publisher_qos - ")
-          ACE_TEXT ("Caught unexpected exception.\n")));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_publisher_qos - ")
+              ACE_TEXT ("Caught unexpected exception.\n")));
+          }
         retcode = DDS::RETCODE_ERROR;
       }
     return retcode;
@@ -277,10 +307,13 @@ namespace DCPS {
 
     if (profile_name.empty ())
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_subscriber_qos - ")
-          ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
-          qos_profile));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_subscriber_qos - ")
+              ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
+              qos_profile));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -293,9 +326,12 @@ namespace DCPS {
       }
     catch (...)
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_subscriber_qos - ")
-          ACE_TEXT ("Caught unexpected exception.\n")));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_subscriber_qos - ")
+              ACE_TEXT ("Caught unexpected exception.\n")));
+          }
         retcode = DDS::RETCODE_ERROR;
       }
     return retcode;
@@ -324,10 +360,13 @@ namespace DCPS {
 
     if (profile_name.empty ())
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_topic_qos - ")
-          ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
-          qos_profile));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_topic_qos - ")
+              ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
+              qos_profile));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -341,9 +380,12 @@ namespace DCPS {
       }
     catch (...)
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_topic_qos - ")
-          ACE_TEXT ("Caught unexpected exception.\n")));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_topic_qos - ")
+              ACE_TEXT ("Caught unexpected exception.\n")));
+          }
         retcode = DDS::RETCODE_ERROR;
       }
     return retcode;
@@ -371,10 +413,13 @@ namespace DCPS {
 
     if (profile_name.empty ())
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_participant_qos - ")
-          ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
-          qos_profile));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_participant_qos - ")
+              ACE_TEXT ("Error parsing profile string <%C>, returning.\n"),
+              qos_profile));
+          }
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
@@ -387,9 +432,12 @@ namespace DCPS {
       }
     catch (...)
       {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_Loader::get_participant_qos - ")
-          ACE_TEXT ("Caught unexpected exception.\n")));
+        if (DCPS_debug_level > 5)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_Loader::get_participant_qos - ")
+              ACE_TEXT ("Caught unexpected exception.\n")));
+          }
         retcode = DDS::RETCODE_ERROR;
       }
     return retcode;

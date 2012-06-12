@@ -50,10 +50,13 @@ namespace DCPS {
 
         if (dom == 0)
           {
-            ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("QOS_XML_File_Handler::init - ")
-              ACE_TEXT ("Failed to open file %s\n"),
-              file));
+            if (DCPS_debug_level > 1)
+              {
+                ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("QOS_XML_File_Handler::init - ")
+                  ACE_TEXT ("Failed to open file %s\n"),
+                  file));
+              }
             return DDS::RETCODE_ERROR;
           }
 
