@@ -24,6 +24,11 @@ my $verbose = 0;
 my $source_root = $DDS_ROOT;
 my $run_dir = $DDS_ROOT;
 my $limit;
+my $rem_info_files = 1;
+my $collect_cov = 1;
+my $capture_info = 1;
+my $limit_capture_info = 1;
+my $create_final_cov = 1;
 
 sub traverse {
     my $params = shift;
@@ -41,6 +46,7 @@ sub traverse {
     opendir($dh, $dir);
     my @entries = grep { !/^\.\.?$/ } readdir($dh);
     closedir($dh);
+    my $continue = 1;
     foreach my $entry (@entries) {
         my $full_entry = "$dir/$entry";
         $full_entry =~ s/\/\//\//g;
@@ -48,19 +54,27 @@ sub traverse {
             if ($excludes{$entry}) {
                 next;
             }
-            my $continue = 1;
             if ($params->{dir_function}) {
                 $continue = &{$params->{dir_function}}($params, $full_entry);
             }
 
-            if ($continue && (!defined($params->{depth}) || $params->{depth} > $depth)) {
-                traverse($params, $full_entry, $depth + 1);
+            if (($continue == 1) &&
+                (!defined($params->{depth}) || $params->{depth} > $depth)) {
+                $continue = traverse($params, $full_entry, $depth + 1);
             }
         }
         elsif ($params->{file_function}) {
-            &{$params->{file_function}}($params, $full_entry);
+            $continue = &{$params->{file_function}}($params, $full_entry);
         }
+        if ($continue == -1) {
+            return -1;
+        }
+        else {
+            $continue = 1;
     }
+}
+
+    return 1;
 }
 
 sub removeFiles
@@ -76,6 +90,20 @@ sub removeFiles
     if ($file =~ /$file_pattern\.$extension$/) {
         unlink($file);
     }
+}
+
+sub findFileRelativePath
+{
+    my $params = shift;
+    my $file = shift;
+
+    my $to_find = $params->{to_find};
+    if ($file =~ /$to_find$/) {
+        $params->{found_path} = $file;
+        return -1;
+    }
+
+    return 1;
 }
 
 sub findNoCoverage
@@ -141,6 +169,14 @@ sub clean_path {
     return $path;
 }
 
+sub for_search {
+    my $search_str = shift;
+    clean_path($search_str);
+    $search_str =~ s/\//\\\//g;
+    $search_str =~ s/\./\\\./g;
+    return $search_str;
+}
+
 my %days = ();
 my $cleanup_only = 0;
 for (my $i = 0; $i <= $#ARGV; ++$i) {
@@ -172,6 +208,21 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
     elsif (($arg eq "-day") && (++$i <= $#ARGV)) {
         my $day = lc($ARGV[$i]);
         $days{$day} = 1;
+    }
+    elsif ($arg eq "-no_rem_info_files") {
+        $rem_info_files = 0;
+    }
+    elsif ($arg eq "-no_collect_cov") {
+        $collect_cov = 0;
+    }
+    elsif ($arg eq "-no_capture_info") {
+        $capture_info = 0;
+    }
+    elsif ($arg eq "-no_limit_capture_info") {
+        $limit_capture_info = 0;
+    }
+    elsif ($arg eq "-no_create_final_cov") {
+        $create_final_cov = 0;
     }
     else {
         print "Ignoring unkown argument: $ARGV[$i]\n";
@@ -224,113 +275,191 @@ print "  verbose=$verbose\n" if $verbose;
 print "  output=$output\n" if $verbose;
 print "  limit=$limit\n" if $verbose && defined($limit);
 
-print "Coverage: removing *.info\n" if $verbose;
-# traverse $run_dir and remove all *.info files
-traverse( { 'file_function' => \&removeFiles, 'extension' => 'info' });
-
-print "Coverage: collect coverage data\n" if $verbose;
+if ($rem_info_files) {
+    print "Coverage: removing *.info\n" if $verbose;
+    # traverse $run_dir and remove all *.info files
+    traverse( { 'file_function' => \&removeFiles, 'extension' => 'info' });
+}
 
 my $no_cov_filename = "$run_dir/file_dirs_with_no_coverage.lst";
-if (-f $no_cov_filename) {
-    # maintain the previous file so we know if new classes are added
-    # to the list
-    system("mv $no_cov_filename $no_cov_filename.bak");
-}
+if ($collect_cov) {
+    print "Coverage: identify no coverage classes\n" if $verbose;
+    if (-f $no_cov_filename) {
+        # maintain the previous file so we know if new classes are added
+        # to the list
+        system("mv $no_cov_filename $no_cov_filename.bak");
+    }
 
-if (!open(NO_COV_FILE, ">", "$no_cov_filename")) {
-    print STDERR __FILE__, ": Cannot write to $no_cov_filename for indicating files with no coverage data\n";
-    exit 1;
+    if (!open(NO_COV_FILE, ">", "$no_cov_filename")) {
+        print STDERR __FILE__, ": Cannot write to $no_cov_filename for indicating files with no coverage data\n";
+        exit 1;
+    }
+    traverse({ 'dir_function' => \&findNoCoverage,
+               'no_cov_fh' => \*NO_COV_FILE });
+    close(NO_COV_FILE);
 }
-traverse({ 'dir_function' => \&findNoCoverage,
-           'no_cov_fh' => \*NO_COV_FILE });
-close(NO_COV_FILE);
 
 my $original_dir;
 # use lcov to convert *.gcda files into a *.info file
-my $operating_dir = $run_dir;
+my $operating_dir = "$run_dir/dds";
+my $lcov_base = "--base-directory $source_root/dds ";
+my $lcov_dir = "--directory $operating_dir ";
 if ($source_root eq $run_dir) {
     $original_dir = getcwd();
-    chdir($run_dir);
+    chdir($operating_dir);
     $operating_dir = ".";
+    $lcov_base = "";
+    $lcov_dir = "--directory $operating_dir ";
 }
 
-my $output1 = "$operating_dir/to_clean_cov.info";
+my $output1 = "$run_dir/to_clean_cov.info";
 my $output2 = "";
 if (defined($limit)) {
     $output2 = $output1;
-    $output1 = "$operating_dir/to_limit_cov.info";
+    $output1 = "$run_dir/to_limit_cov.info";
 }
 
-my $status = system("lcov --capture --gcov-tool $gcov_tool --base-directory $source_root/dds " .
-                    "--directory $operating_dir --output-file $output1 --list-full-path --ignore-errors gcov,source --follow");
-if (!$status && defined($limit)) {
-    $status = system("lcov --gcov-tool $gcov_tool --output-file $output2 " .
-                     "--list-full-path --ignore-errors gcov,source --follow --extract $output1 \"$limit/*\" ");
-}
-
-# try to clean up any file paths that lcov got confused on because of relative paths
-my $record = "";
-my $search_str;
-if (defined($limit)) {
-    $search_str = "$limit"
-}
-else {
-    $search_str = "$source_root"
-}
-clean_path($search_str);
-$search_str =~ s/\//\\\//g;
-$search_str =~ s/\./\\\./g;
-if (!open(CLEANED_INFO_FILE, ">", "$operating_dir/final_cov.info")) {
-    print STDERR __FILE__, ": Cannot write to $operating_dir/final_cov.info\n";
-    exit 1;
-}
-if (!open(TO_CLEAN_INFO_FILE, "<", "$operating_dir/to_clean_cov.info")) {
-    print STDERR __FILE__, ": Cannot read from $operating_dir/to_clean_cov.info\n";
-    exit 1;
-}
-while (<TO_CLEAN_INFO_FILE>) {
-    my $line = $_;
-    if ($line =~ /^\s*end_of_record\s*$/) {
-        $record .= "$line\n";
-        print CLEANED_INFO_FILE "$record\n";
-        $record = "";
-        next;
-    }
-    if ($line =~ /^\s*SF:$search_str\/(\S+)\s*$/) {
-        unless (-f "$search_str\/$1") {
-            my $rel_path = $1;
-            my $dir_ss = "";
-            while (1) {
-                $dir_ss .= "[^\/]\/";
-                if ($rel_path !~ /^($dir_ss)/) {
-                    last;
-                }
-                my $base = $1;
-                my $orig_line = $line;
-                if ($line =~ s/^(\s*SF:$search_str\/)$base$base/$1$base/) {
-                    print "cleaned up:\n  $orig_line\nbecomes:\n  $line\n" if $verbose;
-                    last;
-                }
-            }
+my $status = 0;
+if ($capture_info) {
+    my $dds_output = "$run_dir/dds_cov.info";
+    print "Coverage: collect dds coverage data\n" if $verbose;
+    $status = system("lcov --capture --gcov-tool $gcov_tool $lcov_base" .
+                     "--directory $operating_dir --output-file $dds_output " .
+                     "--list-full-path --ignore-errors gcov,source --follow");
+    if (!$status) {
+        system("find $operating_dir -name \"*.gcda\" |" .
+               " xargs tar czf old_gcda.tgz");
+        system("find $operating_dir -name \"*.gcda\" | xargs rm ");
+        if (defined($original_dir)) {
+            chdir("..");
+            $lcov_base = "--base-directory $source_root/dds ";
+        }
+        else {
+            $operating_dir = $run_dir;
+        }
+        my $test_output = "$run_dir/test.info";
+        print "Coverage: collect test coverage data\n" if $verbose;
+        $status =
+            system("lcov --capture --gcov-tool $gcov_tool $lcov_base" .
+                   "--directory $operating_dir --output-file $test_output " .
+                   "--list-full-path --ignore-errors gcov,source --follow");
+        if (!$status) {
+            print "Coverage: combine coverage data\n" if $verbose;
+            $status =
+                system("lcov --add-tracefile $dds_output --add-tracefile " .
+                       " $dds_output --output-file $output1");
         }
     }
-    $record .= "$line\n";
 }
-close(TO_CLEAN_INFO_FILE);
-if ($record ne "") {
-    print CLEANED_INFO_FILE "$record\n";
-}
-close(CLEANED_INFO_FILE);
 
+if ($limit_capture_info) {
+    if (!$status && defined($limit)) {
+        $status = system("lcov --gcov-tool $gcov_tool --output-file $output2 " .
+                         "--list-full-path --ignore-errors gcov,source --follow --extract $output1 \"$limit/*\" ");
+    }
+}
+# try to clean up any file paths that lcov got confused on because of relative paths
+my $record = "";
+my $search_path;
+if (defined($limit)) {
+    $search_path = $limit;
+}
+else {
+    $search_path = $source_root;
+}
+my $search_str = for_search($search_path);
 
-if (!open(NO_COV_FILE, "<", "$no_cov_filename")) {
-    print STDERR __FILE__, ": Cannot open $no_cov_filename for limiting coverage to root\n";
-    next;
+if ($create_final_cov) {
+
+    if (!open(CLEANED_INFO_FILE, ">", "$operating_dir/final_cov.info")) {
+        print STDERR __FILE__, ": Cannot write to $operating_dir/final_cov.info\n";
+        exit 1;
+    }
+    if (!open(DROPPED_INFO_FILE, ">", "$operating_dir/dropped_cov.info")) {
+        print STDERR __FILE__, ": Cannot write to $operating_dir/dropped_cov.info\n";
+        exit 1;
+    }
+    if (!open(TO_CLEAN_INFO_FILE, "<", "$operating_dir/to_clean_cov.info")) {
+        print STDERR __FILE__, ": Cannot read from $operating_dir/to_clean_cov.info\n";
+        exit 1;
+    }
+    my $valid = 1;
+    my $record_file = "";
+    while (<TO_CLEAN_INFO_FILE>) {
+        my $line = $_;
+        if ($line =~ /^\s*end_of_record\s*$/) {
+            $record .= $line;
+            if ($valid) {
+                print CLEANED_INFO_FILE "$record";
+            }
+            elsif ($verbose) {
+                print DROPPED_INFO_FILE "$record";
+            }
+            $record = "";
+            $valid = 1;
+            next;
+        }
+        if ($line =~ /^\s*SF:$search_str\/(\S+)\s*$/) {
+            $record_file = $1;
+            unless (-f "$search_path\/$record_file") {
+                $valid = 0;
+                my $rel_path = $record_file;
+                my $dir_ss = "";
+                while (1) {
+                    $dir_ss .= "[^\/]\/";
+                    if ($rel_path !~ /^($dir_ss)/) {
+                        last;
+                    }
+                    my $base = $1;
+                    my $orig_line = $line;
+                    if ($line =~ s/^(\s*SF:$search_str\/)$base$base/$1$base/) {
+                        print "cleaned up:\n  $orig_line\nbecomes:\n  $line\n" if $verbose;
+                        $valid = 1;
+                        last;
+                    }
+                }
+                if (!$valid) {
+                    $record_file =~ /.*?([^\/]+)$/;
+                    my $params = {
+                        'file_function' => \&findFileRelativePath,
+                        'to_find' => $1 };
+                    traverse($params, $search_path); 
+                    if (defined($params->{found_path})) {
+                        my $orig_line = $line;
+                        my $found_path = $params->{found_path};
+                        $line =~ s/^(\s*SF:)$search_str(.*)$/$1$found_path\//;
+                        print "changed:\n  $orig_line\nbecomes:\n  $line\n" if $verbose;
+                        $valid = 1;
+                    }
+                }
+            }
+            if (!$valid && $verbose) {
+                print "/n/nERROR: file=$record_file could not be found" .
+                    " under $search_path, dropping!.\n";
+                $record_file =~ /.*?([^\/]+)$/;
+                system("find $search_path -name $1");
+                print "\n\n";
+            }
+        }
+        $record .= "$line";
+    }
+    close(TO_CLEAN_INFO_FILE);
+    if ($record ne "") {
+        print CLEANED_INFO_FILE "$record\n";
+    }
+    close(CLEANED_INFO_FILE);
 }
-if (<NO_COV_FILE>) {
-    print "Coverage: see $no_cov_filename for files with no coverage data\n";
+
+if ($collect_cov) {
+    if (!open(NO_COV_FILE, "<", "$no_cov_filename")) {
+        print STDERR __FILE__, ": Cannot open $no_cov_filename for limiting coverage to root\n";
+        next;
+    }
+    if (<NO_COV_FILE>) {
+        print "Coverage: see $no_cov_filename for files with no coverage data\n";
+    }
+    close(NO_COV_FILE);
 }
-close(NO_COV_FILE);
 
 if (!$status) {
     if (-d $output) {
