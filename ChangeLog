@@ -1,3 +1,10 @@
+Tue Jun 12 20:20:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  In Service_Participant::shutdown(), handle reactor_
+	  being null.
+
 Tue Jun 12 18:48:15 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * tests/DCPS/DpShutdown/dpshutdown.cpp:

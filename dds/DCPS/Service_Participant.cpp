@@ -219,8 +219,10 @@ Service_Participant::shutdown()
     domainRepoMap_.clear();
     discoveryMap_.clear();
 
-    reactor_->end_reactor_event_loop();
-    reactor_task_.wait();
+    if (0 != reactor_) {
+      reactor_->end_reactor_event_loop();
+      reactor_task_.wait();
+    }
 
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
