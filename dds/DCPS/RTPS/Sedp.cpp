@@ -727,7 +727,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   std::map<std::string, TopicDetailsEx>::iterator iter =
     topics_.find(topicName);
-  if (iter != topics_.end()) { // types must match, RtpsInfo checked for us
+  if (iter != topics_.end()) { // types must match, RtpsDiscovery checked for us
     iter->second.qos_ = qos;
     iter->second.has_dcps_key_ = hasDcpsKey;
     topicId = iter->second.repo_id_;
@@ -806,6 +806,33 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   }
 
   return true;
+}
+
+void
+Sedp::inconsistent_topic(const RepoIdSet& eps) const
+{
+  for (RepoIdSet::const_iterator iter(eps.begin()); iter != eps.end(); ++iter) {
+    if (0 == std::memcmp(participant_id_.guidPrefix, iter->guidPrefix,
+                         sizeof(GuidPrefix_t))) {
+      const bool reader = iter->entityId.entityKind & 4;
+      if (reader) {
+        const LocalSubscriptionCIter lsi = local_subscriptions_.find(*iter);
+        if (lsi != local_subscriptions_.end()) {
+          lsi->second.subscription_->inconsistent_topic();
+          // Only make one callback per inconsistent topic, even if we have
+          // more than one reader/writer on the topic -- it's the Topic object
+          // that will actually see the InconsistentTopicStatus change.
+          return;
+        }
+      } else {
+        const LocalPublicationCIter lpi = local_publications_.find(*iter);
+        if (lpi != local_publications_.end()) {
+          lpi->second.publication_->inconsistent_topic();
+          return; // see comment above
+        }
+      }
+    }
+  }
 }
 
 bool
@@ -1095,7 +1122,23 @@ Sedp::data_received(DCPS::MessageId message_id,
           top_it->second.data_type_ = wdata.ddsPublicationData.type_name;
           top_it->second.qos_.topic_data = wdata.ddsPublicationData.topic_data;
           top_it->second.repo_id_ = make_topic_guid();
+
+        } else if (top_it->second.data_type_ !=
+                   wdata.ddsPublicationData.type_name.in()) {
+          inconsistent_topic(top_it->second.endpoints_);
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_WARNING,
+                       ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - WARNING ")
+                       ACE_TEXT("topic %C discovered data type %C doesn't ")
+                       ACE_TEXT("match known data type %C, ignoring ")
+                       ACE_TEXT("discovered publication.\n"),
+                       topic_name.c_str(),
+                       wdata.ddsPublicationData.type_name.in(),
+                       top_it->second.data_type_.c_str()));
+          }
+          return;
         }
+
         TopicDetailsEx& td = top_it->second;
         topic_names_[td.repo_id_] = topic_name;
         td.endpoints_.insert(guid);
@@ -1231,7 +1274,23 @@ Sedp::data_received(DCPS::MessageId message_id,
           top_it->second.data_type_ = rdata.ddsSubscriptionData.type_name;
           top_it->second.qos_.topic_data = rdata.ddsSubscriptionData.topic_data;
           top_it->second.repo_id_ = make_topic_guid();
+
+        } else if (top_it->second.data_type_ !=
+                   rdata.ddsSubscriptionData.type_name.in()) {
+          inconsistent_topic(top_it->second.endpoints_);
+          if (DCPS::DCPS_debug_level) {
+            ACE_DEBUG((LM_WARNING,
+                       ACE_TEXT("(%P|%t) Sedp::data_received(drd) - WARNING ")
+                       ACE_TEXT("topic %C discovered data type %C doesn't ")
+                       ACE_TEXT("match known data type %C, ignoring ")
+                       ACE_TEXT("discovered subcription.\n"),
+                       topic_name.c_str(),
+                       rdata.ddsSubscriptionData.type_name.in(),
+                       top_it->second.data_type_.c_str()));
+          }
+          return;
         }
+
         TopicDetailsEx& td = top_it->second;
         topic_names_[td.repo_id_] = topic_name;
         td.endpoints_.insert(guid);

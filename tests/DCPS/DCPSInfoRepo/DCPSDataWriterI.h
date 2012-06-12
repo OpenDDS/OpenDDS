@@ -72,6 +72,8 @@ public:
   virtual void update_subscription_params(
     const OpenDDS::DCPS::RepoId&, const DDS::StringSeq &);
 
+  void inconsistent_topic() {}
+
   DiscReceivedCalls& received()
     {
       return received_;

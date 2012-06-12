@@ -103,10 +103,9 @@ Spdp::~Spdp()
         remove_discovered_participant(part);
       }
     }
-
-    tport_->close();
   }
   // release lock for reset of event handler, which may delete transport
+  tport_->close();
   eh_.reset();
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -680,16 +679,24 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   return 0;
 }
 
-
-// start of methods that just forward to sedp_
-
 DCPS::TopicStatus
 Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
                    const char* dataTypeName, const DDS::TopicQos& qos,
                    bool hasDcpsKey)
 {
+  if (std::strlen(topicName) > 256 || std::strlen(dataTypeName) > 256) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR Spdp::assert_topic() - ")
+                 ACE_TEXT("topic or type name length limit (256) exceeded\n")));
+    }
+    return DCPS::PRECONDITION_NOT_MET;
+  }
+
   return sedp_.assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey);
 }
+
+
+// start of methods that just forward to sedp_
 
 DCPS::TopicStatus
 Spdp::remove_topic(const RepoId& topicId, std::string& name)

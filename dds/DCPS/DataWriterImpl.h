@@ -187,6 +187,8 @@ public:
   virtual void update_subscription_params(const RepoId& readerId,
                                           const DDS::StringSeq& params);
 
+  virtual void inconsistent_topic();
+
   /**
    * cleanup the DataWriter.
    */

@@ -41,6 +41,8 @@ public:
                                    CORBA::Boolean callback) = 0;
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status) = 0;
+
+  virtual void inconsistent_topic() = 0;
 };
 
 } // namespace DCPS

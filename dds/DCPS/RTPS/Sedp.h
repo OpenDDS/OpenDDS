@@ -290,6 +290,7 @@ private:
   typedef std::map<DCPS::RepoId, LocalPublication,
                    DCPS::GUID_tKeyLessThan> LocalPublicationMap;
   typedef LocalPublicationMap::iterator LocalPublicationIter;
+  typedef LocalPublicationMap::const_iterator LocalPublicationCIter;
   LocalPublicationMap local_publications_;
 
   void populate_discovered_writer_msg(
@@ -307,6 +308,7 @@ private:
   typedef std::map<DCPS::RepoId, LocalSubscription,
                    DCPS::GUID_tKeyLessThan> LocalSubscriptionMap;
   typedef LocalSubscriptionMap::iterator LocalSubscriptionIter;
+  typedef LocalSubscriptionMap::const_iterator LocalSubscriptionCIter;
   LocalSubscriptionMap local_subscriptions_;
 
   void populate_discovered_reader_msg(
@@ -380,6 +382,7 @@ private:
 
   RepoIdSet defer_match_endpoints_, associated_participants_;
 
+  void inconsistent_topic(const RepoIdSet& endpoints) const;
   bool has_dcps_key(const DCPS::RepoId& topicId) const;
   DCPS::RepoId make_topic_guid();
 

@@ -256,6 +256,8 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
+  virtual void inconsistent_topic();
+
   /**
   * This is used to retrieve the listener for a certain status change.
   * If this datareader has a registered listener and the status kind

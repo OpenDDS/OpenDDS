@@ -118,7 +118,9 @@ TopicImpl::get_listener()
 DDS::ReturnCode_t
 TopicImpl::get_inconsistent_topic_status(DDS::InconsistentTopicStatus& a_status)
 {
+  set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, false);
   a_status = inconsistent_topic_status_;
+  inconsistent_topic_status_.total_count_change = 0;
   return DDS::RETCODE_OK;
 }
 
@@ -170,6 +172,26 @@ void
 TopicImpl::transport_config(const TransportConfig_rch&)
 {
   throw Transport::MiscProblem();
+}
+
+void
+TopicImpl::inconsistent_topic()
+{
+  ++inconsistent_topic_status_.total_count;
+  ++inconsistent_topic_status_.total_count_change;
+  set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, true);
+
+  DDS::TopicListener_var listener = listener_;
+  if (!listener || !(listener_mask_ & DDS::INCONSISTENT_TOPIC_STATUS)) {
+    listener = participant_->listener_for(DDS::INCONSISTENT_TOPIC_STATUS);
+  }
+
+  if (listener) {
+    listener->on_inconsistent_topic(this, inconsistent_topic_status_);
+    inconsistent_topic_status_.total_count_change = 0;
+  }
+
+  notify_status_condition();
 }
 
 } // namespace DCPS

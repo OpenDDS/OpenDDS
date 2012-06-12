@@ -74,6 +74,8 @@ public:
       const OpenDDS::DCPS::IncompatibleQosStatus & status
     );
 
+  void inconsistent_topic() {}
+
   DiscReceivedCalls& received()
     {
       return received_;

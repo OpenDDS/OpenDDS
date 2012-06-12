@@ -713,6 +713,12 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   notify_status_condition();
 }
 
+void
+DataReaderImpl::inconsistent_topic()
+{
+  topic_servant_->inconsistent_topic();
+}
+
 DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
   DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states,

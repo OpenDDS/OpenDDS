@@ -53,6 +53,7 @@ module OpenDDS
       NOT_FOUND,
       REMOVED,
       CONFLICTING_TYPENAME,
+      PRECONDITION_NOT_MET,
       INTERNAL_ERROR
     };
 

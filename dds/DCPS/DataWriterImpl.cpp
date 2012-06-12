@@ -737,6 +737,12 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 #endif
 }
 
+void
+DataWriterImpl::inconsistent_topic()
+{
+  topic_servant_->inconsistent_topic();
+}
+
 DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 {

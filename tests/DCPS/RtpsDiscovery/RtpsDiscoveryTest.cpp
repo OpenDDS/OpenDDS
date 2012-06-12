@@ -657,7 +657,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_DEBUG((LM_DEBUG, "ERROR: could not create Domain Participant 1\n"));
 
     } else {
-      DomainParticipantQos dp_qos = PARTICIPANT_QOS_DEFAULT;
+      DomainParticipantQos dp_qos;
+      dpf->get_default_participant_qos(dp_qos);
       set_qos(dp_qos.user_data.value, 128);
       dp2 = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
 

@@ -87,6 +87,8 @@ public:
 
   virtual void transport_config(const TransportConfig_rch& cfg);
 
+  void inconsistent_topic();
+
 private:
   /// The topic qos
   DDS::TopicQos                qos_;
@@ -105,8 +107,8 @@ private:
   /// The number of DataReaders and DataWriters using this Topic.
   CORBA::Long                  entity_refs_;
 
-  /// count of different topics with the same topic name but
-  /// different characteristics (typename or ?incompatible Qos?).
+  /// count of discovered (readers/writers using) topics with the same
+  ///  topic name but different characteristics (typename)
   DDS::InconsistentTopicStatus inconsistent_topic_status_;
 
   /// Pointer to the monitor object for this entity
