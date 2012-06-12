@@ -375,8 +375,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
         OpenDDS::DCPS::DCPSInfo_var info =
           OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
-	OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::InfoRepoDiscovery> ird =
-	  new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info);
+        OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::InfoRepoDiscovery> ird =
+          new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info);
         disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::Discovery>(ird);
         ird->set_ORB(orb);
 #ifndef DDS_HAS_MINIMUM_BIT

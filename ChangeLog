@@ -1,3 +1,9 @@
+Tue Jun 12 18:28:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+	  Replaced tabs with spaces.
+
 Tue Jun 12 17:41:48 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
