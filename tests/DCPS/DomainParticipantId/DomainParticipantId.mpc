@@ -1,6 +1,6 @@
 // $Id$
 
-project(DDS*DomainParticipantId) : dcpsexe_with_tcp, dcps_rtps_udp {
+project(DDS*DPId) : dcpsexe_with_tcp, dcps_rtps_udp {
   exename = dp
 
   Idl_Files {
