@@ -135,7 +135,7 @@ static bool got_log_verbose = false;
 
 Service_Participant::Service_Participant()
   : ORB_argv_(false /*substitute_env_args*/),
-    reactor_(new ACE_Reactor(new ACE_Select_Reactor, true)),
+    reactor_(0),
     dp_factory_servant_(0),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
@@ -338,6 +338,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
                    ACE_TEXT("nil DomainParticipantFactory. \n")));
         return DDS::DomainParticipantFactory::_nil();
       }
+
+      if (!reactor_)
+        reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
 
       if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
         ACE_ERROR((LM_ERROR,
