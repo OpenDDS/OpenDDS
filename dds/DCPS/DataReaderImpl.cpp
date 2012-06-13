@@ -451,10 +451,10 @@ DataReaderImpl::add_association(const RepoId& yourId,
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
-      DDS::DataReaderListener* listener
+      DDS::DataReaderListener_var listener
       = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-      if (listener != 0) {
+      if (!CORBA::is_nil(listener.in())) {
         listener->on_subscription_matched(
           dr_local_objref_.in(),
           this->subscription_match_status_);
@@ -605,10 +605,10 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
-      DDS::DataReaderListener* listener
+      DDS::DataReaderListener_var listener
       = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-      if (listener != 0) {
+      if (!CORBA::is_nil(listener.in())) {
         listener->on_subscription_matched(
           dr_local_objref_.in(),
           this->subscription_match_status_);
@@ -675,7 +675,7 @@ DataReaderImpl::remove_all_associations()
 void
 DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
-  DDS::DataReaderListener* listener =
+  DDS::DataReaderListener_var listener =
     listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
@@ -698,7 +698,7 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
     status.last_policy_id;
   requested_incompatible_qos_status_.policies = status.policies;
 
-  if (listener != 0) {
+  if (!CORBA::is_nil(listener.in())) {
     listener->on_requested_incompatible_qos(dr_local_objref_.in(),
                                             requested_incompatible_qos_status_);
 
@@ -1828,7 +1828,7 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
   return false;
 }
 
-DDS::DataReaderListener*
+DDS::DataReaderListener_ptr
 DataReaderImpl::listener_for(DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
@@ -3020,10 +3020,10 @@ void DataReaderImpl::notify_liveliness_change()
   // N.B. writers_lock_ should already be acquired when
   //      this method is called.
 
-  DDS::DataReaderListener* listener
+  DDS::DataReaderListener_var listener
   = listener_for(DDS::LIVELINESS_CHANGED_STATUS);
 
-  if (listener != 0) {
+  if (!CORBA::is_nil(listener.in())) {
     listener->on_liveliness_changed(dr_local_objref_.in(),
                                     liveliness_changed_status_);
 
@@ -3290,9 +3290,9 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
   this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
   this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
 
-  ::DDS::SubscriberListener* sub_listener =
+  ::DDS::SubscriberListener_var sub_listener =
       this->subscriber_servant_->listener_for(::DDS::DATA_ON_READERS_STATUS);
-  if (sub_listener != 0)
+  if (!CORBA::is_nil(sub_listener.in()))
   {
     if (reader == this) {
       // Release the sample_lock before listener callback.
@@ -3307,10 +3307,10 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
   {
     this->subscriber_servant_->notify_status_condition();
 
-    ::DDS::DataReaderListener* listener =
+    ::DDS::DataReaderListener_var listener =
       this->listener_for (::DDS::DATA_AVAILABLE_STATUS);
 
-    if (listener != 0)
+    if (!CORBA::is_nil(listener.in()))
     {
       if (reader == this) {
         // Release the sample_lock before listener callback.
