@@ -1,3 +1,10 @@
+Wed Jun 13 14:38:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+	  Fix for log file name handling when ACE_TCHAR is
+	  a wchar_t.
+
 Wed Jun 13 07:51:57 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h:

@@ -39,11 +39,11 @@
 
 namespace {
 
-void set_log_file_name(const std::string &fname)
+void set_log_file_name(const char* fname)
 {
   std::ofstream* output_stream = new std::ofstream();
 
-  output_stream->open (fname.c_str(),
+  output_stream->open (fname,
                        ios::out | ios::app);
 
   if (!output_stream->bad ()) {
@@ -481,7 +481,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
-      set_log_file_name(currentArg);
+      set_log_file_name(ACE_TEXT_ALWAYS_CHAR(currentArg));
       arg_shifter.consume_arg();
       got_log_fname = true;
 
@@ -1438,7 +1438,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
     } else {
       std::string log_fname;
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("ORBLogFile"), log_fname);
-      set_log_file_name(log_fname);
+      set_log_file_name(log_fname.c_str());
     }
 
     if (got_log_verbose) {
