@@ -1,9 +1,15 @@
+Wed Jun 13 15:49:14 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixing fuzz errors.
+
 Wed Jun 13 14:38:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-	  Fix for log file name handling when ACE_TCHAR is
-	  a wchar_t.
+          Fix for log file name handling when ACE_TCHAR is
+          a wchar_t.
 
 Wed Jun 13 07:51:57 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
@@ -49,6 +55,12 @@ Tue Jun 12 21:32:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
 
           Adjusted tests for the above changes.
+
+Tue Jun 12 20:57:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixing coverage script.
 
 Tue Jun 12 20:20:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
@@ -101,6 +113,7 @@ Tue Jun 12 17:41:48 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
           Added test that checks for rejections due to exceeding max_samples
           max_instances, and max_samples_per_instance.
 
+>>>>>>> .r5687
 Tue Jun 12 15:21:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

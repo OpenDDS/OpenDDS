@@ -423,7 +423,7 @@ if ($create_final_cov) {
                     my $params = {
                         'file_function' => \&findFileRelativePath,
                         'to_find' => $1 };
-                    traverse($params, $search_path); 
+                    traverse($params, $search_path);
                     if (defined($params->{found_path})) {
                         my $orig_line = $line;
                         my $found_path = $params->{found_path};
