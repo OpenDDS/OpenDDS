@@ -142,7 +142,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       {
         ::DDS::SubscriptionMatchedStatus status1;
         ::DDS::SubscriptionMatchedStatus status2;
-        if (dr1->get_subscription_matched_status (status1) == ::DDS::RETCODE_OK 
+        if (dr1->get_subscription_matched_status (status1) == ::DDS::RETCODE_OK
            && dr2->get_subscription_matched_status (status2) == ::DDS::RETCODE_OK)
         {
           if (status1.total_count == 1 && status2.total_count == 1)

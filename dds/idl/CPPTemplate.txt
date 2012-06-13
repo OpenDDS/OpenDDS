@@ -2155,7 +2155,7 @@ void
          dec_ref_data_element(item);
       }
     }
-    else if (this->qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED) 
+    else if (this->qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
     {
       long total_samples = 0;
       for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
