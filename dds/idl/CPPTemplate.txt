@@ -2157,13 +2157,13 @@ void
     }
     else if (this->qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
     {
-      long total_samples = 0;
+      CORBA::Long total_samples = 0;
       for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
            iter != instances_.end();
            ++iter) {
         OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
 
-        total_samples += ptr->rcvd_samples_.size_;
+        total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
       }
 
       if(total_samples >= this->qos_.resource_limits.max_samples)

@@ -32,7 +32,7 @@ DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr)
 void
 DataReaderListenerImpl::on_requested_deadline_missed (
     DDS::DataReader_ptr /* reader */,
-    DDS::RequestedDeadlineMissedStatus const & status)
+    DDS::RequestedDeadlineMissedStatus const & /* status */)
   throw (CORBA::SystemException)
 {
   //cerr << "DataReaderListenerImpl::on_requested_deadline_missed" << endl;
@@ -86,6 +86,9 @@ DataReaderListenerImpl::on_sample_rejected (
       break;
     case DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT:
       num_rejected_max_samples_per_instance_ ++;
+      break;
+    case DDS::NOT_REJECTED:
+      // eliminate warnings
       break;
     };
 }

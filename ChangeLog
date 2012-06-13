@@ -1,3 +1,19 @@
+Wed Jun 13 18:46:23 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/Rejects/DataReaderListener.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+
+          Fixes for warnings.
+
+Wed Jun 13 17:06:22 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/Rejects/README:
+        * tests/DCPS/Rejects/subscriber.cpp:
+
+          Fixed fuzz errors.
+
 Wed Jun 13 16:11:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:

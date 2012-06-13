@@ -32,7 +32,6 @@ const int MAX_INSTANCES = 2;
 const int MAX_SAMPLES = 7;
 const int MAX_SAMPLES_PER_INSTANCES = 4;
 
-static int NUM_WRITE_THREADS = 2;
 static ACE_Time_Value SLEEP_DURATION(ACE_Time_Value (1));
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
