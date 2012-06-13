@@ -1,3 +1,11 @@
+Wed Jun 13 16:11:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          In delete_topic(), check if a topic is used by any
+          reader or writer before allowing it to be deleted.
+          Fixes bugzilla bug #4045.
+
 Wed Jun 13 15:49:14 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * tools/scripts/lcov.pl:
