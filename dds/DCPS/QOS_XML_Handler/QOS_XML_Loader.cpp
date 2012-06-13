@@ -17,11 +17,9 @@ namespace DCPS {
   }
 
 
-  ACE_CString
+  char*
   QOS_XML_Loader::get_xml_file_name (const char * qos_profile)
   {
-    ACE_CString name;
-
     if (qos_profile)
       {
         char* buf = ACE_OS::strdup (qos_profile);
@@ -40,25 +38,22 @@ namespace DCPS {
                               "<xml_file_base_name>#<profile_name>\n",
                               qos_profile));
               }
-            return "";
+            return 0;
           }
 
-        char * ret = ACE_OS::strdup (file_name);
+        char * ret = (char*)ACE_OS::malloc (ACE_OS::strlen (file_name) + 5);
+        ret = ACE_OS::strcpy (ret, file_name);
+        ret = ACE_OS::strcat (ret, ".xml");
         ACE_OS::free (buf);
-
-        ACE_CString xml(".xml");
-        name = ret;
-        name = name + xml;
+        return ret;
       }
 
-    return name;
+    return 0;
   }
 
-  ACE_CString
+  char*
   QOS_XML_Loader::get_profile_name (const char * qos_profile)
   {
-    ACE_CString profile_string;
-
     if (qos_profile)
       {
         char* buf = ACE_OS::strdup (qos_profile);
@@ -78,15 +73,15 @@ namespace DCPS {
                               "<xml_file_base_name>#<profile_name>\n",
                               qos_profile));
               }
-            return "";
+            return 0;
           }
 
         char * ret = ACE_OS::strdup (prof_name);
         ACE_OS::free (buf);
-        profile_string = ret;
+        return ret;
       }
 
-    return profile_string;
+    return 0;
   }
 
 
@@ -104,9 +99,9 @@ namespace DCPS {
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
-    ACE_CString filename = this->get_xml_file_name (qos_profile);
+    char *filename = this->get_xml_file_name (qos_profile);
 
-    if (filename.empty ())
+    if (!filename)
       {
         if (DCPS_debug_level > 5)
           {
@@ -122,7 +117,11 @@ namespace DCPS {
       ACE_TEXT("DDS_ROOT"),
       ACE_TEXT("/docs/schema/"));
 
-    return this->xml_file_.init (filename.c_str ());
+    DDS::ReturnCode_t const retcode =  this->xml_file_.init (filename);
+
+    ACE_OS::free (filename);
+
+    return retcode;
   }
 
   DDS::ReturnCode_t
@@ -144,9 +143,9 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_CString const profile_name = this->get_profile_name (qos_profile);
+    char* profile_name = this->get_profile_name (qos_profile);
 
-    if (profile_name.empty ())
+    if (!profile_name)
       {
         if (DCPS_debug_level > 5)
           {
@@ -163,7 +162,7 @@ namespace DCPS {
     try
       {
         retcode = this->xml_file_.get_datawriter_qos (dw_qos,
-                                                      profile_name.c_str (),
+                                                      profile_name,
                                                       topic_name);
       }
     catch (...)
@@ -176,6 +175,7 @@ namespace DCPS {
           }
         retcode = DDS::RETCODE_ERROR;
       }
+    ACE_OS::free (profile_name);
     return retcode;
   }
 
@@ -198,9 +198,9 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_CString const profile_name = this->get_profile_name (qos_profile);
+    char* profile_name = this->get_profile_name (qos_profile);
 
-    if (profile_name.empty ())
+    if (!profile_name)
       {
         if (DCPS_debug_level > 5)
           {
@@ -217,7 +217,7 @@ namespace DCPS {
     try
       {
         retcode = this->xml_file_.get_datareader_qos (dr_qos,
-                                                      profile_name.c_str (),
+                                                      profile_name,
                                                       topic_name);
       }
     catch (...)
@@ -230,6 +230,8 @@ namespace DCPS {
           }
         retcode = ::DDS::RETCODE_ERROR;
       }
+    ACE_OS::free (profile_name);
+
     return retcode;
   }
 
@@ -251,9 +253,9 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_CString const profile_name = this->get_profile_name (qos_profile);
+    char* profile_name = this->get_profile_name (qos_profile);
 
-    if (profile_name.empty ())
+    if (!profile_name)
       {
         if (DCPS_debug_level > 5)
           {
@@ -269,8 +271,7 @@ namespace DCPS {
 
     try
       {
-        retcode = this->xml_file_.get_publisher_qos (pub_qos,
-                                                     profile_name.c_str ());
+        retcode = this->xml_file_.get_publisher_qos (pub_qos, profile_name);
       }
     catch (...)
       {
@@ -282,6 +283,8 @@ namespace DCPS {
           }
         retcode = DDS::RETCODE_ERROR;
       }
+    ACE_OS::free (profile_name);
+
     return retcode;
   }
 
@@ -303,9 +306,9 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_CString const profile_name = this->get_profile_name (qos_profile);
+    char* profile_name = this->get_profile_name (qos_profile);
 
-    if (profile_name.empty ())
+    if (!profile_name)
       {
         if (DCPS_debug_level > 5)
           {
@@ -321,8 +324,7 @@ namespace DCPS {
 
     try
       {
-        retcode = this->xml_file_.get_subscriber_qos (sub_qos,
-                                                      profile_name.c_str ());
+        retcode = this->xml_file_.get_subscriber_qos (sub_qos, profile_name);
       }
     catch (...)
       {
@@ -334,6 +336,9 @@ namespace DCPS {
           }
         retcode = DDS::RETCODE_ERROR;
       }
+
+    ACE_OS::free (profile_name);
+
     return retcode;
   }
 
@@ -356,9 +361,9 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_CString const profile_name = this->get_profile_name (qos_profile);
+    char* profile_name = this->get_profile_name (qos_profile);
 
-    if (profile_name.empty ())
+    if (!profile_name)
       {
         if (DCPS_debug_level > 5)
           {
@@ -375,7 +380,7 @@ namespace DCPS {
     try
       {
         retcode = this->xml_file_.get_topic_qos (topic_qos,
-                                                 profile_name.c_str (),
+                                                 profile_name,
                                                  topic_name);
       }
     catch (...)
@@ -388,6 +393,9 @@ namespace DCPS {
           }
         retcode = DDS::RETCODE_ERROR;
       }
+
+    ACE_OS::free (profile_name);
+
     return retcode;
   }
 
@@ -409,9 +417,9 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_CString const profile_name = this->get_profile_name (qos_profile);
+    char* profile_name = this->get_profile_name (qos_profile);
 
-    if (profile_name.empty ())
+    if (!profile_name)
       {
         if (DCPS_debug_level > 5)
           {
@@ -427,8 +435,7 @@ namespace DCPS {
 
     try
       {
-        retcode = this->xml_file_.get_participant_qos (part_qos,
-                                                       profile_name.c_str ());
+        retcode = this->xml_file_.get_participant_qos (part_qos, profile_name);
       }
     catch (...)
       {
@@ -440,8 +447,10 @@ namespace DCPS {
           }
         retcode = DDS::RETCODE_ERROR;
       }
+
+    ACE_OS::free (profile_name);
+
     return retcode;
   }
-
 }
 }

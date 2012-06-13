@@ -1,3 +1,12 @@
+Wed Jun 13 07:51:57 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
+          Fixed valgrind errors
+
+        * tests/DCPS/QoS_XML/dump/run_test.pl:
+          Simplified this script
+
 Wed Jun 13 06:55:46 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/Service_Participant.cpp:

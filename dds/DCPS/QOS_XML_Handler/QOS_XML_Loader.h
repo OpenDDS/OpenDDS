@@ -84,8 +84,8 @@ namespace DCPS {
   private:
     QOS_XML_File_Handler xml_file_;
 
-    ACE_CString get_xml_file_name (const char * qos_profile);
-    ACE_CString get_profile_name (const char * qos_profile);
+    char* get_xml_file_name (const char * qos_profile);
+    char* get_profile_name (const char * qos_profile);
   };
 }
 }

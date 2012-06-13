@@ -11,15 +11,11 @@ use PerlACE::TestTarget;
 my $program = PerlACE::TestTarget::create_target (1) || die "Create target 1 failed\n";
 
 $PROG = $program->CreateProcess ("qos_dump");
-$program_status = $PROG->Spawn ();
+$program_status = $PROG->SpawnWaitKill ($program->ProcessStartWaitInterval ());
 
 if ($program_status != 0) {
     print STDERR "ERROR: qos_dump returned $program_status\n";
     exit 1;
 }
-
-sleep ($program->ProcessStartWaitInterval());
-
-$program_status = $PROG->Kill ();
 
 exit 0;
