@@ -3051,7 +3051,7 @@ void DataReaderImpl::notify_liveliness_change()
                ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
                ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
                ACE_TEXT("\tNOTIFY: %C\n"),
-               listener,
+               listener.in (),
                listener_mask_,
                buffer.str().c_str()));
   }
