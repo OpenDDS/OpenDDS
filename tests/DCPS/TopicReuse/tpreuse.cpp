@@ -134,6 +134,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                           ACE_TEXT(" ERROR: should be able to delete datawriter\n")),
                         -1);
       }
+      dw = DDS::DataWriter::_nil ();
 
       DDS::Duration_t timeout;
       timeout.sec = 0;
@@ -155,6 +156,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                           ACE_TEXT(" ERROR: should be able to delete topic\n")),
                         -1);
       }
+      topic = DDS::Topic::_nil ();
 
       DDS::ReturnCode_t retcode6 = participant->delete_topic (topic2.in ());
       if (retcode6 != DDS::RETCODE_OK) {
@@ -163,9 +165,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                           ACE_TEXT(" ERROR: should be able to delete topic\n")),
                         -1);
       }
+      topic2 = DDS::Topic::_nil ();
+
+      DDS::ReturnCode_t retcode8 = participant->delete_publisher (pub.in ());
+      if (retcode8 != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: should be able to delete publisher\n")),
+                        -1);
+      }
+      pub = DDS::Publisher::_nil ();
 
       dpf->delete_participant(participant.in ());
+      participant = DDS::DomainParticipant::_nil ();
       dpf->delete_participant(participant2.in ());
+      participant2 = DDS::DomainParticipant::_nil ();
       TheServiceParticipant->shutdown ();
   }
   catch (CORBA::Exception& e)
