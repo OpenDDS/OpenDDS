@@ -484,7 +484,8 @@ DomainParticipantImpl::delete_topic_i(
     DomainParticipantImpl* the_dp_servant =
       dynamic_cast<DomainParticipantImpl*>(dp.in());
 
-    if (the_dp_servant != this || the_topic_servant->entity_refs()) {
+    if (the_dp_servant != this ||
+        (!remove_objref && the_topic_servant->entity_refs())) {
       // If entity_refs is true (nonzero), then some reader or writer is using
       // this topic and the spec requires delete_topic() to fail with the error:
       return DDS::RETCODE_PRECONDITION_NOT_MET;
