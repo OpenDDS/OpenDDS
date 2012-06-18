@@ -153,7 +153,6 @@ Tue Jun 12 17:41:48 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
           Added test that checks for rejections due to exceeding max_samples
           max_instances, and max_samples_per_instance.
 
->>>>>>> .r5687
 Tue Jun 12 15:21:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
