@@ -1438,7 +1438,9 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
     } else {
       std::string log_fname;
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("ORBLogFile"), log_fname);
-      set_log_file_name(log_fname.c_str());
+      if (!log_fname.empty()) {
+        set_log_file_name(log_fname.c_str());
+      }
     }
 
     if (got_log_verbose) {

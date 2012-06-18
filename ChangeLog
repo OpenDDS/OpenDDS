@@ -1,3 +1,9 @@
+Mon Jun 18 21:33:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed logic for when to set log file name from config file value.
+
 Mon Jun 18 18:08:44 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
