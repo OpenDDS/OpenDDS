@@ -53,13 +53,35 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           inst =
             OpenDDS::DCPS::TransportRegistry::instance()->create_inst("the_rtps_transport",
                                                                 "rtps_udp");
-          OpenDDS::DCPS::RtpsUdpInst_rch rui =
-            OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::RtpsUdpInst>(inst);
 
           config->instances_.push_back(inst);
 
           OpenDDS::DCPS::TransportRegistry::instance()->global_config(config);
         }
+
+      // Create another transport instance for participant2 since RTPS transport instances
+      // cannot be shared by domain participants.
+      OpenDDS::DCPS::TransportConfig_rch config2 =
+        OpenDDS::DCPS::TransportRegistry::instance()->get_config("dds4ccm_rtps_2");
+
+      if (config2.is_nil())
+        {
+          config2 =
+            OpenDDS::DCPS::TransportRegistry::instance()->create_config("dds4ccm_rtps_2");
+        }
+
+      OpenDDS::DCPS::TransportInst_rch inst2 =
+        OpenDDS::DCPS::TransportRegistry::instance()->get_inst("the_rtps_transport_2");
+
+      if (inst2.is_nil())
+        {
+          inst2 =
+            OpenDDS::DCPS::TransportRegistry::instance()->create_inst("the_rtps_transport_2",
+                                                                "rtps_udp");
+          config2->instances_.push_back(inst2);
+
+        }
+
 
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::RTPS::RtpsDiscovery_rch disc =
@@ -85,6 +107,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                     participant->get_instance_handle ()));
       }
 
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config, participant.in());
+
       DDS::DomainParticipant_var participant2 =
         dpf->create_participant(11,
                                 PARTICIPANT_QOS_DEFAULT,
@@ -99,6 +123,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         ACE_DEBUG ((LM_DEBUG, "Created participant 2 with instance handle %d\n",
                     participant2->get_instance_handle ()));
       }
+
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config2, participant2.in());
 
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =

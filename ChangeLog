@@ -1,3 +1,10 @@
+Tue Jun 19 16:02:10 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+
+	  Each domain participant now has its own transport instance
+	  as required when using RTPS transports.
+
 Mon Jun 18 21:33:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
