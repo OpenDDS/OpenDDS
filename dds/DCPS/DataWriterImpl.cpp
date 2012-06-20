@@ -1368,14 +1368,34 @@ DataWriterImpl::enable()
       qos_.history.depth,
       qos_.resource_limits.max_samples_per_instance);
 
+  bool resource_blocking = false;
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
     n_chunks_ = qos_.resource_limits.max_samples;
+
+    if (qos_.resource_limits.max_instances == DDS::LENGTH_UNLIMITED) {
+      resource_blocking = true;
+    }
+    else {
+      resource_blocking = 
+        (qos_.resource_limits.max_samples < qos_.resource_limits.max_instances)
+        || (qos_.resource_limits.max_samples <
+             (qos_.resource_limits.max_instances * depth));
+    }
   }
 
   //else using value from Service_Participant
 
   // enable the type specific part of this DataWriter
   this->enable_specific();
+
+  CORBA::Long max_instances = 0;
+  if (reliable && resource_blocking
+      && qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
+    max_instances = qos_.resource_limits.max_instances;
+
+  CORBA::Long max_total_samples = 0;
+  if (reliable && resource_blocking)
+    max_total_samples = qos_.resource_limits.max_samples;
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Get data durability cache if DataWriter QoS requires durable
@@ -1398,7 +1418,9 @@ DataWriterImpl::enable()
                                            durability_cache,
                                            qos_.durability_service,
 #endif
-                                           this->watchdog_);
+                                           this->watchdog_,
+                                           max_instances,
+                                           max_total_samples);
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.

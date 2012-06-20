@@ -80,7 +80,9 @@ WriteDataContainer::WriteDataContainer(
   DataDurabilityCache* durability_cache,
   DDS::DurabilityServiceQosPolicy const & durability_service,
 #endif
-  std::auto_ptr<OfferedDeadlineWatchdog>& watchdog)
+  std::auto_ptr<OfferedDeadlineWatchdog>& watchdog,
+  CORBA::Long     max_instances,
+  CORBA::Long     max_total_samples)
   : writer_(writer),
     depth_(depth),
     should_block_(should_block),
@@ -102,7 +104,9 @@ WriteDataContainer::WriteDataContainer(
     durability_cache_(durability_cache),
     durability_service_(durability_service),
 #endif
-    watchdog_(watchdog)
+    watchdog_(watchdog),
+    max_num_instances_(max_instances),
+    max_num_samples_(max_total_samples)
 {
 
   if (DCPS_debug_level >= 2) {
@@ -230,6 +234,11 @@ WriteDataContainer::register_instance(
   auto_ptr<PublicationInstance> safe_instance;
 
   if (instance_handle == DDS::HANDLE_NIL) {
+    if (max_num_instances_ > 0
+        && max_num_instances_ <= (CORBA::Long) instances_.size()) {
+      return DDS::RETCODE_OUT_OF_RESOURCES;
+    }
+
     // registered the instance for the first time.
     ACE_NEW_RETURN(instance,
                    PublicationInstance(registered_sample),
@@ -396,6 +405,26 @@ WriteDataContainer::num_samples(DDS::InstanceHandle_t handle,
     size = instance->samples_.size_;
     return DDS::RETCODE_OK;
   }
+}
+
+size_t
+WriteDataContainer::num_all_samples()
+{
+  size_t size = 0;
+
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->lock_,
+                   0);
+
+  for (PublicationInstanceMapType::iterator iter = instances_.begin();
+       iter != instances_.end();
+       ++iter)
+  {
+    size += iter->second->samples_.size_;
+  }
+
+  return size;
 }
 
 DataSampleList
@@ -716,6 +745,15 @@ WriteDataContainer::remove_oldest_sample(
     release_buffer(stale);
     released = true;
 
+    if (DCPS_debug_level > 9) {
+      GuidConverter converter(publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
+                 ACE_TEXT("domain %d topic %C publication %C sample removed from unsent.\n"),
+                 this->domain_id_,
+                 this->topic_name_,
+                 std::string(converter).c_str()));
+    }
   } else {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -794,6 +832,116 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
     return ret;
   }
 
+  ACE_Time_Value abs_timeout;
+  bool resource_limit_waited = false;
+
+  if ( (max_num_samples_ > 0)
+      && ((CORBA::Long) this->num_all_samples () >= max_num_samples_) ) {
+
+    if ((max_num_instances_ > 0)
+        && (max_num_samples_ < (max_num_instances_ * depth_)) ) {
+      // Try to remove samples from other instances
+
+      bool other_oldest_released = false;
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       guard,
+                       this->lock_,
+                       0);
+
+      if (DCPS_debug_level >= 2) {
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
+                              ACE_TEXT(" instance %d attempting to remove")
+                              ACE_TEXT(" oldest sample from any full queues\n"),
+                              handle));
+      }
+
+      PublicationInstanceMapType::iterator it = instances_.begin();
+
+      // try removing any full instances first
+      while (!other_oldest_released && it != instances_.end()) {
+        if (it->second->samples_.size_ == depth_) {
+          ret = this->remove_oldest_sample(it->second->samples_, other_oldest_released);
+        }
+        ++it;
+      }
+
+      // wasn't able to release one of the full instances or there wasnt any then
+      // remove from any that have more than 1
+      if (!other_oldest_released) {
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
+                                ACE_TEXT(" instance %d attempting to remove")
+                                ACE_TEXT(" oldest sample from any queues with")
+                                ACE_TEXT(" more than one sample\n"),
+                                handle));
+        }
+
+        it = instances_.begin();
+
+        // try removing any full instances first
+        while (!other_oldest_released && it != instances_.end()) {
+          if (it->second->samples_.size_ > 1) {
+            ret = this->remove_oldest_sample(it->second->samples_, other_oldest_released);
+          }
+          ++it;
+        }
+      }
+    }
+
+
+    // Still too many samples - need to wait
+    if ( ((CORBA::Long) this->num_all_samples () >= max_num_samples_)
+        && ((max_num_instances_ == 0)
+             || (max_num_samples_ < (max_num_instances_ * depth_)) ) ) {
+
+      resource_limit_waited = true;
+      abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
+      bool waited = false;
+      while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
+        waited = true;
+        waiting_on_release_ = true; // reduces broadcast to only when waiting
+
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) WriteDataContainer::obtain_buffer, ")
+                                ACE_TEXT ("wait for condition, any releases, oldest_released %d\n"),
+                                oldest_released));
+        }
+
+        // lock is released while waiting and aquired before returning
+        // from wait.
+        int const wait_result = condition_.wait(&abs_timeout);
+
+        if (wait_result == 0) { // signalled
+          if ((CORBA::Long) this->num_all_samples () < max_num_samples_) {
+            break;
+          } // else continue wait
+
+        } else {
+          if (errno == ETIME) {
+            ret = DDS::RETCODE_TIMEOUT;
+
+          } else {
+            // Other errors from wait.
+            ret = DDS::RETCODE_ERROR;
+          }
+
+          break;
+        }
+      }
+      if (!waited) {
+        // max-blocking_time_ was so short we did not even try to wait
+        ret = DDS::RETCODE_TIMEOUT;
+      }
+    } // end of Still too many samples - need to wait
+
+    //
+  }
+
+  if (ret != DDS::RETCODE_OK) {
+    this->release_buffer(element);
+    return ret;
+  }
+
   // Each write/enqueue just writes one element and hence the number
   // of samples will reach the size of sample list at some point.
   // We need remove enough to accomodate the new element.
@@ -811,7 +959,9 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 
       // wait for all "released" samples to be delivered
       // Timeout value from Qos.RELIABILITY.max_blocking_time
-      ACE_Time_Value abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
+      if (!resource_limit_waited)
+        abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
+
       bool waited = false;
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
         waited = true;

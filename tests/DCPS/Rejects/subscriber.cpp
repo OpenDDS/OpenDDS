@@ -28,7 +28,8 @@
 static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
 
-static ACE_Time_Value SLEEP_DURATION(10);
+static ACE_Time_Value SLEEP_DURATION(20);
+
 
 const int MAX_INSTANCES = 2;
 const int MAX_SAMPLES = 7;
@@ -145,7 +146,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (dr1->get_subscription_matched_status (status1) == ::DDS::RETCODE_OK
            && dr2->get_subscription_matched_status (status2) == ::DDS::RETCODE_OK)
         {
-          if (status1.total_count == 1 && status2.total_count == 1)
+          if (status1.total_count == 2 && status2.total_count == 2)
             break;
           ++ attempts;
           ACE_OS::sleep (1);

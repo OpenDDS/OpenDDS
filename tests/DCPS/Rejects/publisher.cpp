@@ -35,6 +35,7 @@ const int MAX_SAMPLES_PER_INSTANCES = 4;
 static ACE_Time_Value SLEEP_DURATION(ACE_Time_Value (1));
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
+  int result = 0;
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -103,29 +104,59 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         exit(1);
       }
 
+      DDS::DataWriter_var dw2 =
+        pub->create_datawriter (topic.in (),
+                                dw_qos,
+                                DDS::DataWriterListener::_nil (),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (CORBA::is_nil (dw2.in ()))
+      {
+        cerr << "ERROR: create_datawriter failed." << endl;
+        exit(1);
+      }
+
       {
         // Two threads use same datawriter to write different instances.
         std::auto_ptr<Writer> writer1 (new Writer (dw.in (), 99, SLEEP_DURATION));
         std::auto_ptr<Writer> writer2 (new Writer (dw.in (), 100, SLEEP_DURATION));
         std::auto_ptr<Writer> writer3 (new Writer (dw.in (), 101, SLEEP_DURATION));
+        std::auto_ptr<Writer> writer4 (new Writer (dw2.in (), 101, SLEEP_DURATION));
 
         writer1->start ();
         writer2->start ();
-        writer3->start ();
+        
         // ----------------------------------------------
 
-        // Wait for fully associate with DataReaders.
-        if (writer1->wait_for_start () == false
-            || writer2->wait_for_start () == false
-            || writer3->wait_for_start () == false)
+        // Wait for first writer threads to register with DataReaders.
+        if (writer1->wait_for_registered () == false
+            || writer2->wait_for_registered () == false)
         {
-          cerr << "ERROR: took too long to associate. " << endl;
+          cerr << "ERROR: first writers took too long to connect. " << endl;
           exit (1);
         }
+        writer3->start ();
+        if (writer3->wait_for_registered () == false)
+        {
+          cerr << "ERROR: writer 3 took too long to connect. " << endl;
+          exit (1);
+        }
+        writer4->start ();
+        if (writer4->wait_for_registered () == false)
+        {
+          cerr << "ERROR: writer 4 took too long to connect. " << endl;
+          exit (1);
+        }
+
+        writer1->start_sending ();
+        writer2->start_sending ();
+        writer3->start_sending ();
+        writer4->start_sending ();
 
         writer1->wait ();
         writer2->wait ();
         writer3->wait ();
+        writer4->wait ();
 
         // Wait for datareader finish.
         while (1)
@@ -136,6 +167,23 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
             break;
           else
             ACE_OS::sleep(1);
+        }
+
+        if (writer1->failed_registration() ) {
+          cerr << "ERROR: unexpected failed registration for writer 1. " << endl;
+          result = 1;
+        }
+        if (writer2->failed_registration() ) {
+          cerr << "ERROR: unexpected failed registration for writer 2. " << endl;
+          result = 1;
+        }
+        if (!writer3->failed_registration() ) {
+          cerr << "ERROR: unexpected registration for writer 3. " << endl;
+          result = 1;
+        }
+        if (writer4->failed_registration() ) {
+          cerr << "ERROR: unexpected failed registration for writer 4. " << endl;
+          result = 1;
         }
       }
 
@@ -150,5 +198,5 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
     exit(1);
   }
 
-  return 0;
+  return result;
 }

@@ -1,3 +1,20 @@
+Wed Jun 20 16:47:49 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * NEWS:
+        * tests/DCPS/Rejects/DataReaderListener.cpp:
+        * tests/DCPS/Rejects/DataReaderListener.h:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/run_test.pl:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Rejects/Writer.cpp:
+        * tests/DCPS/Rejects/Writer.h:
+
+          Added publication side checks for max_instances and
+          max_samples in reliable qos.
+
 Tue Jun 19 16:02:10 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/DpShutdown/dpshutdown.cpp:

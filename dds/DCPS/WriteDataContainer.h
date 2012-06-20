@@ -129,7 +129,11 @@ public:
     /// DURABILITY_SERVICE QoS specific to the DataWriter.
     DDS::DurabilityServiceQosPolicy const & durability_service,
 #endif
-    std::auto_ptr<OfferedDeadlineWatchdog> & watchdog);
+    std::auto_ptr<OfferedDeadlineWatchdog> & watchdog,
+    /// maximum number of instances, 0 for unlimited
+    CORBA::Long      max_instances,
+    /// maximum total number of samples, 0 for unlimited
+    CORBA::Long      max_total_samples);
 
   /**
    * Default destructor.
@@ -200,6 +204,11 @@ public:
   DDS::ReturnCode_t num_samples(
     DDS::InstanceHandle_t handle,
     size_t& size);
+
+  /**
+   * Return the number of samples for all instances.
+   */
+  size_t num_all_samples();
 
   /**
    * Obtain a list of data that has not yet been sent.  The data
@@ -383,6 +392,19 @@ private:
   /// QoS.RESOURCE_LIMITS.max_samples_per_instance for
   /// the case of QoS.HISTORY.kind==KEEP_ALL.
   CORBA::Long                     depth_;
+
+  /// The maximum number of instances allowed or zero
+  /// to indicate unlimited.
+  /// It corresponds to the QoS.RESOURCE_LIMITS.max_instances
+  /// when QoS.RELIABILITY.kind == DDS::RELIABLE_RELIABILITY_QOS
+  CORBA::Long                     max_num_instances_;
+
+  /// The maximum number of samples allowed or zero
+  /// to indicate unlimited.
+  /// It corresponds to the QoS.RESOURCE_LIMITS.max_instances
+  /// when QoS.RELIABILITY.kind == DDS::RELIABLE_RELIABILITY_QOS
+  CORBA::Long                     max_num_samples_;
+
 
   /// Flag to indicate whether the write operation should block
   /// to wait for space to become avaliable.

@@ -18,11 +18,15 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                ACE_Time_Value sleep_duration)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
-  condition_ (this->lock_),
-  associated_ (false),
+  register_condition_ (this->register_lock_),
+  sending_condition_ (this->sending_lock_),
+  registered_ (false),
   instance_handle_ (::DDS::HANDLE_NIL),
   key_ (key),
-  sleep_duration_ (sleep_duration)
+  sleep_duration_ (sleep_duration),
+  failed_registration_ (false),
+  start_sending_ (false),
+  ready_to_send_ (false)
 {
 }
 
@@ -65,12 +69,6 @@ Writer::svc ()
         ACE_OS::sleep(ACE_Time_Value(0,250000));
     }
 
-    {
-      GuardType guard (this->lock_);
-      this->associated_ = true;
-      this->condition_.signal ();
-    }
-
     Messenger::MessageDataWriter_var message_dw =
       Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
@@ -82,6 +80,12 @@ Writer::svc ()
     message.subject_id = this->key_;
     this->instance_handle_ = message_dw->register_instance(message);
 
+    {
+      GuardType guard (this->register_lock_);
+      this->registered_ = true;
+      this->register_condition_.signal ();
+    }
+
     message.from       = CORBA::string_dup("Comic Book Guy");
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
@@ -90,6 +94,22 @@ Writer::svc ()
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc sleep for %d.%d seconds.\n"),
               this->sleep_duration_.sec(),this->sleep_duration_.usec()));
+
+    {
+      GuardType guard (this->sending_lock_);
+      ready_to_send_ = true;
+      if (! this->start_sending_)
+        this->sending_condition_.wait ();
+    }
+
+    if (this->instance_handle_ == ::DDS::HANDLE_NIL)
+    {
+      failed_registration_ = true;
+      ACE_DEBUG ((LM_INFO,
+                  ACE_TEXT("(%P|%t) INFO: Writer::svc, ")
+                  ACE_TEXT ("instance registration failed.\n")));
+      return 0;
+    }
 
     ACE_OS::sleep (this->sleep_duration_);
 
@@ -109,7 +129,7 @@ Writer::svc ()
                     ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i,
-                    -1));
+                    ret));
       }
 
       ACE_OS::sleep (sleep_duration_);
@@ -134,17 +154,37 @@ Writer::get_instance_handle()
 }
 
 
-bool Writer::wait_for_start ()
+bool Writer::wait_for_registered ()
 {
-  GuardType guard (this->lock_);
+  GuardType guard (this->register_lock_);
 
-  if (! associated_)
+  if (! registered_)
   {
     ACE_Time_Value abs = ACE_OS::gettimeofday () + ACE_Time_Value (10);
-    if (this->condition_.wait (&abs) == -1)
+    if (this->register_condition_.wait (&abs) == -1)
     {
       return false;
     }
   }
   return true;
+}
+
+bool Writer::failed_registration() const
+{
+  return failed_registration_;
+}
+
+
+void Writer::start_sending ()
+{
+  GuardType guard (this->sending_lock_);
+
+  while (!ready_to_send_)
+  {
+    ACE_Time_Value abs = ACE_OS::gettimeofday () + ACE_Time_Value (0,250000);
+    this->sending_condition_.wait (&abs);
+  }
+
+  this->start_sending_ = true;
+  this->sending_condition_.signal ();
 }

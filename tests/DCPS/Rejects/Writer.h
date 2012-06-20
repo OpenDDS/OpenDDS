@@ -30,21 +30,30 @@ public:
 
   ACE_Time_Value get_start_time ();
 
-  bool wait_for_start ();
+  bool wait_for_registered ();
 
+  void start_sending ();
+
+  bool failed_registration() const;
 private:
 
   ::DDS::DataWriter_var writer_;
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
-  LockType lock_;
-  ACE_Condition<ACE_SYNCH_MUTEX> condition_;
+  LockType register_lock_;
+  ACE_Condition<ACE_SYNCH_MUTEX> register_condition_;
 
-  bool associated_;
+  LockType sending_lock_;
+  ACE_Condition<ACE_SYNCH_MUTEX> sending_condition_;
+
+  bool registered_;
   ::DDS::InstanceHandle_t instance_handle_;
   CORBA::Long key_;
   ACE_Time_Value sleep_duration_;
+  bool failed_registration_;
+  bool start_sending_;
+  bool ready_to_send_;
 };
 
 #endif /* WRITER_H */

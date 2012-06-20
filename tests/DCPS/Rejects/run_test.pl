@@ -19,12 +19,16 @@ if ($ARGV[0] eq 'rtps_disc') {
   $is_rtps_disc = 1;
 }
 
-my $pub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
-my $sub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
-
+my $puboutputfilename = "pub.log";
+my $suboutputfilename = "sub.log";
 my $dcpsrepo_ior = "repo.ior";
 
+my $pub_opts = "-ORBLogFile $puboutputfilename -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
+my $sub_opts = "-ORBLogFile $suboutputfilename -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
+
 unlink $dcpsrepo_ior;
+unlink $puboutputfilename;
+unlink $suboutputfilename;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                        "-o $dcpsrepo_ior");

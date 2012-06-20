@@ -18,6 +18,8 @@ Version 3.2 of OpenDDS.
 - Added new QOS_XML library with which QoS settings can be done through an XML
   file. Used at this moment by the CIAO DDS4CCM implementation.
 
+- Implemented rejection of samples due to exceeding max_instances and
+  max_samples.
 
 ========================================================================
 
