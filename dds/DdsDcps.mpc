@@ -157,7 +157,7 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dds4ccm_opendds, \
 }
 
 
-project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source {
+project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source {
   after       += OpenDDS_Dcps_lem_gen OpenDDS_Dcps_idl_gen
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -287,9 +287,6 @@ project(OpenDDS_Dcps): taolib, portableserver, core, coverage_optional, dds_macr
   Template_Files {
     DCPS
     DCPS/transport/framework
-  }
-
-  IDL_Files {
   }
 
   InstallData_Files {
