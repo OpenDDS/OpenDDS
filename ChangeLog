@@ -1,3 +1,12 @@
+Thu Jun 21 17:23:47 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+	  Explicitly include PortableServer.h which was
+          being implicitly included from Service_Participant.h
+          before include of PortableServer.h was removed
+	  from it.
 Thu Jun 21 15:46:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:

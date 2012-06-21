@@ -12,6 +12,8 @@
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
 #endif
 
+#include "tao/PortableServer/PortableServer.h"
+
 #include "ace/Arg_Shifter.h"
 #include "ace/Argv_Type_Converter.h"
 
