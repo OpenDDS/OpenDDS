@@ -85,6 +85,8 @@ WriteDataContainer::WriteDataContainer(
   CORBA::Long     max_total_samples)
   : writer_(writer),
     depth_(depth),
+    max_num_instances_(max_instances),
+    max_num_samples_(max_total_samples),
     should_block_(should_block),
     max_blocking_time_(max_blocking_time),
     waiting_on_release_(false),
@@ -104,9 +106,7 @@ WriteDataContainer::WriteDataContainer(
     durability_cache_(durability_cache),
     durability_service_(durability_service),
 #endif
-    watchdog_(watchdog),
-    max_num_instances_(max_instances),
-    max_num_samples_(max_total_samples)
+    watchdog_(watchdog)
 {
 
   if (DCPS_debug_level >= 2) {
