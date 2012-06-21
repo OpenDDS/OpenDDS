@@ -15,6 +15,7 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "tao/ORB_Core.h"
+#include "tao/PortableServer/PortableServer.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
