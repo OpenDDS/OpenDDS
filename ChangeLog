@@ -1,3 +1,9 @@
+Thu Jun 21 15:17:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Removed unneeded include of PortableServer.h.
+
 Wed Jun 20 18:03:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DdsDcps_pch.h:

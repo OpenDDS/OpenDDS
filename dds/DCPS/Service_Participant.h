@@ -20,8 +20,6 @@
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Discovery.h"
 
-#include "tao/PortableServer/PortableServer.h"
-
 #include "ace/Task.h"
 #include "ace/Configuration.h"
 #include "ace/Time_Value.h"
