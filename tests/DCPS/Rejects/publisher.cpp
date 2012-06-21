@@ -125,7 +125,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
         writer1->start ();
         writer2->start ();
-        
+
         // ----------------------------------------------
 
         // Wait for first writer threads to register with DataReaders.

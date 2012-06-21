@@ -1376,7 +1376,7 @@ DataWriterImpl::enable()
       resource_blocking = true;
     }
     else {
-      resource_blocking = 
+      resource_blocking =
         (qos_.resource_limits.max_samples < qos_.resource_limits.max_instances)
         || (qos_.resource_limits.max_samples <
              (qos_.resource_limits.max_instances * depth));

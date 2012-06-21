@@ -1,3 +1,10 @@
+Thu Jun 21 17:57:25 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+
+          Whitespace changes to fix fuzz warnings.
+
 Thu Jun 21 17:30:26 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/DomainParticipantId:
