@@ -1664,7 +1664,7 @@ DomainParticipantImpl::create_topic_i(
     return DDS::Topic::_nil();
   }
 
-  TopicImpl* topic_servant;
+  TopicImpl* topic_servant = 0;
 
   ACE_NEW_RETURN(topic_servant,
                  TopicImpl(topic_id,
@@ -1740,8 +1740,7 @@ DDS::DomainParticipantListener_ptr
 DomainParticipantImpl::listener_for(DDS::StatusKind kind)
 {
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    return 0;
-
+    return DDS::DomainParticipantListener::_nil ();
   } else {
     return DDS::DomainParticipantListener::_duplicate(listener_.in());
   }

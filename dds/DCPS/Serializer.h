@@ -47,7 +47,7 @@ public:
   /**
    * Constructor with a message block chain.  This installs the
    * message block chain and sets the current block to the first in
-   * the chain.  Memory management is the reponsibility of the owner
+   * the chain.  Memory management is the responsibility of the owner
    * of this object, and is not performed internally.  Ownership of
    * the message block chain is retained by the owner of this object
    * and the lifetime of the chain must be longer than the use of
@@ -55,7 +55,7 @@ public:
    *
    * Bytes are swapped when either reading or writing from the
    * message chain if the swap_bytes argument is true.  It is the
-   * reponsibility of the owner of this object to determine whether
+   * responsibility of the owner of this object to determine whether
    * this should be performed or not.
    */
   explicit Serializer(ACE_Message_Block* chain,

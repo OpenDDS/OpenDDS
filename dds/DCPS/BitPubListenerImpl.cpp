@@ -39,21 +39,22 @@ void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: BitPubListenerImpl::on_data_available ")
                  ACE_TEXT("_narrow failed!\n")));
+      return;
     }
 
     ::DDS::PublicationBuiltinTopicData data;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = bit_dr->take_next_sample(data, si);
+    DDS::ReturnCode_t const status = bit_dr->take_next_sample(data, si);
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         Discovery_rch disc =
           TheServiceParticipant->get_discovery(partipant_->get_domain_id());
         PublicationId pub_id =
           disc->bit_key_to_repo_id(partipant_, BUILT_IN_PUBLICATION_TOPIC, data.key);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-        CORBA::Long ownership_strength = data.ownership_strength.value;
+        CORBA::Long const ownership_strength = data.ownership_strength.value;
         this->partipant_->update_ownership_strength(pub_id, ownership_strength);
         GuidConverter writer_converter(pub_id);
         ACE_DEBUG((LM_DEBUG,

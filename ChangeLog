@@ -1,3 +1,14 @@
+Thu Jun 21 19:01:10 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+          Added missing return, const changes, make exclude scoped block larger
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+          Initialize pointer to 0 and use _nil for object ptr
+
+        * dds/DCPS/Serializer.h:
+          Doxygen fixes
+
 Thu Jun 21 17:57:25 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
@@ -12,7 +23,7 @@ Thu Jun 21 17:30:26 UTC 2012  Byron Harris  <harrisb@ociweb.com>
         * tests/DCPS/Rejects:
         * tests/DCPS/TopicReuse:
 
-	  Have subversion ignore generated files.
+          Have subversion ignore generated files.
 
 Thu Jun 21 17:23:47 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
