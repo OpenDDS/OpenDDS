@@ -1,3 +1,13 @@
+Fri Jun 22 22:55:29 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Corrected setting max_instances restriction.
+
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+          Corrected test to expect correct output and put error messags into
+          a separate output file.
+
 Fri Jun 22 08:02:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DataReaderImpl.h:

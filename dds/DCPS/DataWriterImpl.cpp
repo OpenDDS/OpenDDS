@@ -1382,8 +1382,7 @@ DataWriterImpl::enable()
   this->enable_specific();
 
   CORBA::Long max_instances = 0;
-  if (reliable && resource_blocking
-      && qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
+  if (reliable && qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
     max_instances = qos_.resource_limits.max_instances;
 
   CORBA::Long max_total_samples = 0;

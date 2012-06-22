@@ -16,9 +16,15 @@ $status = 0;
 my $options = '';
 my $DCPSREPO;
 
+# The test results in error output from attempting to register
+# more instances than allowed. Capture it to prevent false alarms.
+my $logfile = 'output.log';
+
+unlink $logfile;
+
 PerlDDS::add_lib_path('../FooType');
 
-$options = "-DCPSConfigFile rtps_disc.ini";
+$options = "-DCPSConfigFile rtps_disc.ini -ORBLogFile $logfile";
 
 $Topic = PerlDDS::create_process ("register_instance_test", "$options");
 

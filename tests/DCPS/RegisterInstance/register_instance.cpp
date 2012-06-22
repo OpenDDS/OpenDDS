@@ -97,9 +97,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::ReturnCode_t ret = foo_dw->write (foo2, ::DDS::HANDLE_NIL);
 
-      // write an unregistered instance. This should pass
-      //
-      TEST_CHECK (ret == ::DDS::RETCODE_OK);
+      // write an unregistered instance. This should fail
+      // (spec 1.2 section 7.1.2.4.2.11)
+      TEST_CHECK (ret == ::DDS::RETCODE_OUT_OF_RESOURCES);
 
       // Check whether the instance resides in DDS.
       ::DDS::InstanceHandle_t hnd = foo_dw->lookup_instance (foo2);
