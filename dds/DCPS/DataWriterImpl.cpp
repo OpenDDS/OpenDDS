@@ -60,7 +60,6 @@ DataWriterImpl::DataWriterImpl()
     topic_id_(GUID_UNKNOWN),
     topic_servant_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
-    fast_listener_(0),
     domain_id_(0),
     publisher_servant_(0),
     publication_id_(GUID_UNKNOWN),
@@ -173,11 +172,6 @@ DataWriterImpl::init(
 
   //Note: OK to _duplicate(nil).
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
-
-  if (!CORBA::is_nil(listener_.in())) {
-    fast_listener_ = listener_.in();
-  }
-
   listener_mask_ = mask;
 
   // Only store the participant pointer, since it is our "grand"
@@ -830,7 +824,6 @@ DataWriterImpl::set_listener(::DDS::DataWriterListener_ptr a_listener,
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
-  fast_listener_ = listener_.in();
   return DDS::RETCODE_OK;
 }
 

@@ -39,7 +39,6 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos()),
     listener_mask_(mask),
     listener_(DDS::PublisherListener::_duplicate(a_listener)),
-    fast_listener_(0),
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     change_depth_(0),
 #endif
@@ -52,9 +51,6 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     monitor_(0),
     publisher_id_(id)
 {
-  if (!CORBA::is_nil(a_listener)) {
-    fast_listener_ = listener_.in();
-  }
   monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
 }
 
@@ -474,7 +470,6 @@ PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::PublisherListener::_duplicate(a_listener);
-  fast_listener_ = listener_.in();
   return DDS::RETCODE_OK;
 }
 

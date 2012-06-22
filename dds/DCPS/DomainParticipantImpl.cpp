@@ -1050,7 +1050,6 @@ DomainParticipantImpl::set_listener(
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DomainParticipantListener::_duplicate(a_listener);
-  fast_listener_ = listener_.in();
   return DDS::RETCODE_OK;
 }
 

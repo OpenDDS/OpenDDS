@@ -62,7 +62,6 @@ DataReaderImpl::DataReaderImpl()
     subqos_ (TheServiceParticipant->initial_SubscriberQos()),
     topic_desc_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
-    fast_listener_(0),
     domain_id_(0),
     subscriber_servant_(0),
     subscription_id_(GUID_UNKNOWN),
@@ -206,11 +205,6 @@ void DataReaderImpl::init(
 #endif
 
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
-
-  if (!CORBA::is_nil(listener_.in())) {
-    fast_listener_ = listener_.in();
-  }
-
   listener_mask_ = mask;
 
   // Only store the participant pointer, since it is our "grand"
@@ -868,7 +862,6 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
-  fast_listener_ = listener_.in();
   return DDS::RETCODE_OK;
 }
 
@@ -3036,7 +3029,7 @@ void DataReaderImpl::notify_liveliness_change()
   if (DCPS_debug_level > 9) {
     std::stringstream buffer;
     buffer << "subscription " << GuidConverter(subscription_id_);
-    buffer << ", listener at: 0x" << std::hex << this->fast_listener_;
+    buffer << ", listener at: 0x" << std::hex << this->listener_.in ();
 
     for (WriterMapType::iterator current = this->writers_.begin();
          current != this->writers_.end();

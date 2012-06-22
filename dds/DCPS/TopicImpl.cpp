@@ -34,7 +34,6 @@ TopicImpl::TopicImpl(const RepoId                   topic_id,
     qos_(qos),
     listener_mask_(mask),
     listener_(DDS::TopicListener::_duplicate(a_listener)),
-    fast_listener_(0),
     id_(topic_id),
     entity_refs_(0),
     monitor_(0)
@@ -105,7 +104,6 @@ TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::TopicListener::_duplicate(a_listener);
-  fast_listener_ = listener_.in();
   return DDS::RETCODE_OK;
 }
 

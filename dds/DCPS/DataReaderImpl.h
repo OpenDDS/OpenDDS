@@ -690,7 +690,6 @@ private:
   DDS::TopicDescription_var    topic_desc_;
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
-  DDS::DataReaderListener*     fast_listener_;
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;

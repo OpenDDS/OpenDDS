@@ -172,8 +172,6 @@ private:
   DDS::StatusMask              listener_mask_;
   /// Used to notify the entity for relevant events.
   DDS::PublisherListener_var   listener_;
-  /// The publisher listener servant.
-  DDS::PublisherListener*      fast_listener_;
   /// This map is used to support datawriter lookup by topic name.
   DataWriterMap                datawriter_map_;
   /// This map is used to support datawriter lookup by datawriter

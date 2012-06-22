@@ -1,3 +1,19 @@
+Fri Jun 22 08:02:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+          Removed fast_listener_, not used anymore
+
 Fri Jun 22 07:49:53 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DCPS_Utils.h:

@@ -365,8 +365,6 @@ private:
   DDS::DomainParticipantQos            qos_;
   /// Used to notify the entity for relevant events.
   DDS::DomainParticipantListener_var   listener_;
-  /// The DomainParticipant listener servant.
-  DDS::DomainParticipantListener*      fast_listener_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask                      listener_mask_;

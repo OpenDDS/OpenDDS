@@ -179,7 +179,6 @@ private:
 
   DDS::StatusMask              listener_mask_;
   DDS::SubscriberListener_var  listener_;
-  DDS::SubscriberListener*     fast_listener_;
 
   DataReaderMap                datareader_map_;
   DataReaderSet                datareader_set_;

@@ -50,7 +50,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t handle,
     qos_(qos),
     default_datareader_qos_(TheServiceParticipant->initial_DataReaderQos()),
     listener_mask_(mask),
-    fast_listener_(0),
     participant_(participant),
     domain_id_(participant->get_domain_id()),
     raw_latency_buffer_size_(0),
@@ -60,10 +59,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t handle,
 {
   //Note: OK to duplicate a nil.
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
-
-  if (!CORBA::is_nil(a_listener)) {
-    fast_listener_ = listener_.in();
-  }
 
   monitor_ = TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this);
 }
@@ -657,7 +652,6 @@ SubscriberImpl::set_listener(
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
-  fast_listener_ = listener_.in();
   return DDS::RETCODE_OK;
 }
 

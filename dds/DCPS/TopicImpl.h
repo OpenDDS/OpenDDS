@@ -98,8 +98,6 @@ private:
   DDS::StatusMask              listener_mask_;
   /// The topic listener
   DDS::TopicListener_var       listener_;
-  /// The topic listener servant.
-  DDS::TopicListener*          fast_listener_;
 
   /// The id given by discovery.
   RepoId                       id_;

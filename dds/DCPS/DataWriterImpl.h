@@ -547,8 +547,6 @@ private:
   DDS::StatusMask                 listener_mask_;
   /// Used to notify the entity for relevant events.
   DDS::DataWriterListener_var     listener_;
-  /// The datawriter listener servant.
-  DDS::DataWriterListener*        fast_listener_;
   /// The domain id.
   DDS::DomainId_t                 domain_id_;
   /// The publisher servant which creates this datawriter.
