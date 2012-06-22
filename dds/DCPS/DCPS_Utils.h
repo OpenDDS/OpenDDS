@@ -29,7 +29,7 @@ increment_incompatibility_count(OpenDDS::DCPS::IncompatibleQosStatus* status,
                                 DDS::QosPolicyId_t incompatible_policy);
 
 /// Compares whether a publication and subscription are compatible
-/// by comparing their consituent parts.
+/// by comparing their constituent parts.
 OpenDDS_Dcps_Export
 bool compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
                    OpenDDS::DCPS::IncompatibleQosStatus* readerStatus,

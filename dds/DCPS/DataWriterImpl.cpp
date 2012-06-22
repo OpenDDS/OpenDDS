@@ -1567,7 +1567,7 @@ DataWriterImpl::register_instance_i(::DDS::InstanceHandle_t& handle,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DDS::ReturnCode_t ret =
+  DDS::ReturnCode_t const ret =
     this->data_container_->register_instance(handle, data);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1619,9 +1619,9 @@ DataWriterImpl::unregister_instance_i(::DDS::InstanceHandle_t handle,
     this->dispose(handle, source_timestamp);
   }
 
-  DataSample* unregistered_sample_data;
+  DataSample* unregistered_sample_data = 0;
 
-  DDS::ReturnCode_t ret =
+  DDS::ReturnCode_t const ret =
     this->data_container_->unregister(handle,
                                       unregistered_sample_data);
 
@@ -1682,7 +1682,7 @@ DataWriterImpl::write(DataSample* data,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DataSampleListElement* element;
+  DataSampleListElement* element = 0;
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
 
   if (ret == DDS::RETCODE_TIMEOUT) {
@@ -1777,7 +1777,7 @@ DataWriterImpl::dispose(::DDS::InstanceHandle_t handle,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DataSample* registered_sample_data;
+  DataSample* registered_sample_data = 0;
   DDS::ReturnCode_t ret =
     this->data_container_->dispose(handle,
                                    registered_sample_data);
@@ -1892,7 +1892,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
     header_data.key_fields_only_ = true;
   }
 
-  ACE_Message_Block* message;
+  ACE_Message_Block* message = 0;
   ACE_NEW_MALLOC_RETURN(message,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
