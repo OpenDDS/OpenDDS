@@ -29,9 +29,9 @@ bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
   if (!sample->registered_data_) return false;
 
   RakeData rd = {sample, instance, index_in_instance};
-  sorted_.insert(rd);
+  this->sorted_.insert(rd);
 
-  this->current_sample_ = sorted_.begin();
+  this->current_sample_ = this->sorted_.begin();
   return true;
 }
 

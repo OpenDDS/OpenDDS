@@ -1,3 +1,19 @@
+Fri Jun 22 07:26:09 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/GroupRakeData.cpp:
+          Use this-> to make clear it is a member we are using
+
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+          Doxygen fixes
+
+        * dds/DCPS/InstanceState.inl:
+          Use prefix increment, improves performance
+
+        * dds/DCPS/SubscriptionInstance.h:
+          No need to check a pointer for 0 before calling delete on it
+
 Thu Jun 21 19:01:10 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/BitPubListenerImpl.cpp:

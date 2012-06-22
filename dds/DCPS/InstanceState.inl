@@ -94,11 +94,11 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
 
   switch (this->instance_state_) {
   case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
-    this->disposed_generation_count_++ ;
+    ++this->disposed_generation_count_;
     break ;
 
   case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-    this->no_writers_generation_count_++ ;
+    ++this->no_writers_generation_count_;
     break ;
 
   default:

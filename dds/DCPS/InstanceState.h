@@ -198,8 +198,8 @@ private:
   Writers writers_;
   PublicationId owner_;
   bool exclusive_;
-  // registered with participant so it can be calledback as
-  // the owner is updated.
+  /// registered with participant so it can be calledback as
+  /// the owner is updated.
   bool registered_;
 };
 

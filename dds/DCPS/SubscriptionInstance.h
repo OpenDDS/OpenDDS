@@ -67,9 +67,7 @@ public:
 
   ~SubscriptionInstance()
   {
-    if (this->rcvd_strategy_ != 0) {
-      delete this->rcvd_strategy_;
-    }
+    delete this->rcvd_strategy_;
   }
 
   /// Instance state for this instance

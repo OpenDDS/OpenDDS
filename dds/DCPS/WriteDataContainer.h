@@ -421,8 +421,8 @@ private:
 
   /// This lock is used to protect the container and the map
   /// in the type-specific DataWriter.
-  /// This lock can be accessiable via the datawriter.
-  /// This lock is made to be globally accessable for
+  /// This lock can be accessible via the datawriter.
+  /// This lock is made to be globally accessible for
   /// performance concern. The lock is acquired as the external
   /// call (e.g. FooDataWriterImpl::write) started and the
   /// same lock will be used by the transport thread to notify

@@ -159,17 +159,17 @@ public:
 
 private:
 
-  // Keep track of all the DataReaders attached to this
-  // Subscriber: key is the topic_name
+  /// Keep track of all the DataReaders attached to this
+  /// Subscriber: key is the topic_name
   typedef std::multimap<std::string, DataReaderImpl*> DataReaderMap;
 
-  // Keep track of DataReaders with data
-  // std::set for now, want to encapsulate
-  // this so we can switch between a set or
-  // list depending on Presentation Qos.
+  /// Keep track of DataReaders with data
+  /// std::set for now, want to encapsulate
+  /// this so we can switch between a set or
+  /// list depending on Presentation Qos.
   typedef std::set<DataReaderImpl*> DataReaderSet;
 
-  // DataReader id to qos map.
+  /// DataReader id to qos map.
   typedef std::map<RepoId, DDS::DataReaderQos, GUID_tKeyLessThan> DrIdToQosMap;
 
   DDS::InstanceHandle_t        handle_;
