@@ -157,7 +157,7 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dds4ccm_opendds, \
 }
 
 
-project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source {
+project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source, dds_suppress_any_support {
   after       += OpenDDS_Dcps_lem_gen OpenDDS_Dcps_idl_gen
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -167,10 +167,14 @@ project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcp
   pch_source   = DCPS/DdsDcps_pch.cpp
   macros      += NOMINMAX         //don't #define min and max in Win32 headers
 
-
   //The following is only to make the PCH work, client projects should not have
   //this as an include path.
   includes += $(DDS_ROOT)/dds
+
+  // Empty IDL list because dds_suppress_any_support brings in taoidldefaults,
+  // and we need dds_suppress_any_support so that we link against anytypecode.
+  IDL_Files {
+  }
 
   Source_Files {
     DCPS

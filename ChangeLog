@@ -1,3 +1,10 @@
+Mon Jun 25 20:56:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_suppress_any_support.mpb:
+        * dds/DdsDcps.mpc:
+
+          For dds_suppress_anys=0 only, need to link against TAO_AnyTypeCode.
+
 Mon Jun 25 20:52:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
