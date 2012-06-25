@@ -61,7 +61,7 @@ private:
   DDS::Topic_var related_topic_;
   std::vector<DataReaderImpl*> readers_;
 
-  ///concurrent access to expression_parameters_ and readers_
+  /// Concurrent access to expression_parameters_ and readers_
   mutable ACE_Recursive_Thread_Mutex lock_;
 };
 

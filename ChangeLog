@@ -1,3 +1,11 @@
+Mon Jun 25 18:50:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Inconsistent_Qos test is dependent on DDS4CCM_OPENDDS
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+          Doxygen fix
+
 Mon Jun 25 09:30:06 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * bin/dcps_tests.lst:
