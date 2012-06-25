@@ -1,3 +1,20 @@
+Mon Jun 25 09:30:06 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/QOS_XML_Handler/XML_File_Intf.h:
+        * tests/DCPS/Inconsistent_Qos:
+        * tests/DCPS/Inconsistent_Qos/Inconsistent_Qos.mpc:
+        * tests/DCPS/Inconsistent_Qos/Messenger.idl:
+        * tests/DCPS/Inconsistent_Qos/Messenger_export.h:
+        * tests/DCPS/Inconsistent_Qos/deadline.xml:
+        * tests/DCPS/Inconsistent_Qos/inconsistent_qos.cpp:
+        * tests/DCPS/Inconsistent_Qos/rtps_disc.ini:
+        * tests/DCPS/Inconsistent_Qos/run_test.pl:
+        * tests/DCPS/Inconsistent_Qos/sample_rejected.xml:
+          Added test/reproducer which reprocudes an issue in parsing
+          the datawriter QOS. It returns an invalid QOS error without
+          mentioning the error itself.
+
 Fri Jun 22 22:55:29 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
