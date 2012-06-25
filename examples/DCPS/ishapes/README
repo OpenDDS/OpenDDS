@@ -5,10 +5,6 @@ This code has been adapted from The Simple DDS API
 (SIMD http://code.google.com/p/simd-cxx), and can be used to demonstrate
 OpenDDS RTPS interoperability with other DDS vendors.
 
-Documentation describing how to build and execute the application is
-included at doc/userguide.html.  That includes establishing the build and
-execution environments as well.
-
 ------------------------------------------------------------------------
 DIRECTORIES:
 

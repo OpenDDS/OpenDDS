@@ -1,3 +1,13 @@
+Mon Jun 25 20:52:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+
+          Added required "after" for TAO's Svc_Utils.
+
+        * examples/DCPS/ishapes/README:
+
+          Removed invalid reference to HTML documentation.
+
 Mon Jun 25 18:50:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * bin/dcps_tests.lst:

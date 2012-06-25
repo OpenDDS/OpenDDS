@@ -4,6 +4,7 @@ project(*Common) : dcps {
   dynamicflags   = STOCKQUOTERCOMMON_BUILD_DLL
   libout         = .
   requires += tao_orbsvcs
+  after    += Svc_Utils
   includes      += $(TAO_ROOT)/orbsvcs
   idlflags      += -I$(TAO_ROOT)/orbsvcs \
                    -Wb,export_macro=StockQuoterCommon_Export \
@@ -50,8 +51,6 @@ project(*Publisher) : dcpsexe, svc_utils {
   }
 
   Documentation_Files {
-    README.txt
-    domain_ids
     dds_tcp_conf.ini
     dds_udp_conf.ini
   }
@@ -84,8 +83,6 @@ project(*Subscriber) : dcpsexe {
   }
 
   Documentation_Files {
-    README.txt
-    domain_ids
     dds_tcp_conf.ini
     dds_udp_conf.ini
   }
