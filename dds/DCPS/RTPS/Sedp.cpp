@@ -673,7 +673,8 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
   switch (which_bit) {
   case Msg::MSG_REMOVE_FROM_PUB_BIT: {
     DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
-    if (bit) { // bit may be null if the DomainParticipant is shutting down
+    // bit may be null if the DomainParticipant is shutting down
+    if (bit && *bit_ih != DDS::HANDLE_NIL) {
       bit->set_instance_state(*bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
@@ -681,7 +682,8 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
   }
   case Msg::MSG_REMOVE_FROM_SUB_BIT: {
     DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
-    if (bit) { // bit may be null if the DomainParticipant is shutting down
+    // bit may be null if the DomainParticipant is shutting down
+    if (bit && *bit_ih != DDS::HANDLE_NIL) {
       bit->set_instance_state(*bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }

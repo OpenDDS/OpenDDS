@@ -239,7 +239,8 @@ Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
   bool removed = sedp_.disassociate(iter->second.pdata_);
   if (removed) {
     DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-    if (bit) { // bit may be null if the DomainParticipant is shutting down
+    // bit may be null if the DomainParticipant is shutting down
+    if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
       bit->set_instance_state(iter->second.bit_ih_,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
