@@ -123,6 +123,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                         -1);
       }
 
+
       // Create DataWriter
       // Use the qos xml file for that
       OpenDDS::DCPS::QOS_XML_File_Handler *xml_file_loader =
@@ -143,6 +144,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         }
 
       ::DDS::DataWriterQos dw_qos;
+
+      pub->get_default_datawriter_qos (dw_qos);
       xml_file_loader->get_datawriter_qos (dw_qos,
                                            "InconsistentQos",
                                             "");
@@ -198,6 +201,5 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
          << e << endl;
     exit(1);
   }
-
   return 0;
 }
