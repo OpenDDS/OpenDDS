@@ -189,7 +189,7 @@ Service_Participant::instance()
   // Hide the template instantiation to prevent multiple instances
   // from being created.
 
-  return ACE_Singleton<Service_Participant, TAO_SYNCH_MUTEX>::instance();
+  return ACE_Singleton<Service_Participant, ACE_SYNCH_MUTEX>::instance();
 }
 
 int
@@ -230,6 +230,13 @@ Service_Participant::shutdown()
     transient_data_cache_.reset();
     persistent_data_cache_.reset();
 #endif
+
+    typedef std::map<std::string, Discovery::Config*>::iterator iter;
+    for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
+      delete i->second;
+    }
+    discovery_types_.clear();
+
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }
@@ -1188,6 +1195,7 @@ void
 Service_Participant::register_discovery_type(const char* section_name,
                                              Discovery::Config* cfg)
 {
+  delete discovery_types_[section_name];
   discovery_types_[section_name] = cfg;
 }
 

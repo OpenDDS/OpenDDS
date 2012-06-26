@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "Transient_Kludge.h"
 
-#include "tao/TAO_Singleton.h"
+#include "ace/Singleton.h"
 
 #if !defined (__ACE_INLINE__)
 #include "Transient_Kludge.inl"
@@ -21,6 +21,5 @@ OpenDDS::DCPS::Transient_Kludge::instance()
   // Hide the template instantiation to prevent multiple instances
   // from being created.
 
-  return
-    TAO_Singleton<Transient_Kludge, TAO_SYNCH_MUTEX>::instance();
+  return ACE_Singleton<Transient_Kludge, ACE_SYNCH_MUTEX>::instance();
 }

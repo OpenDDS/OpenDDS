@@ -13,6 +13,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
@@ -84,6 +85,20 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
   TransportSendControlElement* send_element = 0;
 
   GuardType guard(this->lock_);
+
+  if (map_.empty()) {
+    // similar to the "no links" case in TransportClient::send()
+    if (DCPS_debug_level > 4) {
+      const GuidConverter converter(pub_id);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DatLinkSet::send_control: ")
+                 ACE_TEXT("no links for publication %C, ")
+                 ACE_TEXT("not control message.\n"),
+                 std::string(converter).c_str()));
+    }
+    listener->control_delivered(msg);
+    return SEND_CONTROL_OK;
+  }
 
   ACE_NEW_MALLOC_RETURN(send_element,
     static_cast<TransportSendControlElement*>(

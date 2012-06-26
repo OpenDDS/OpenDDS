@@ -14,7 +14,7 @@
 #include "dds/DdsDcpsTopicS.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
 
-#include "tao/TAO_Singleton.h"
+#include "ace/Singleton.h"
 
 #include <map>
 #include <string>
@@ -35,7 +35,7 @@ typedef std::map<void*, TypeSupportHash*> DomainHash;
 * Data types are split into separate domains.
 */
 class OpenDDS_Dcps_Export Data_Types_Register {
-  friend class TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>;
+  friend class ACE_Singleton<Data_Types_Register, ACE_SYNCH_MUTEX>;
 
 public:
 

@@ -1,3 +1,25 @@
+Tue Jun 26 21:49:22 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added a comment in Writer::write_control_msg().
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Delete the Discovery::Config objects when overwriting them
+          or during shutdown.
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Transient_Kludge.cpp:
+
+          Use ACE_Singleton instead of TAO_Singleton.
+
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          In send_control(), shortcut the actual send in
+          the case where the data link set is empty.
+
 Tue Jun 26 14:28:37 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

@@ -12,8 +12,8 @@
 
 #include "dds/DCPS/Util.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "tao/TAO_Singleton.h"
 
+#include "ace/Singleton.h"
 #include "ace/SString.h"
 
 #include <set>
@@ -81,8 +81,7 @@ Data_Types_Register::instance()
   // Hide the template instantiation to prevent multiple instances
   // from being created.
 
-  return
-    TAO_Singleton<Data_Types_Register, TAO_SYNCH_MUTEX>::instance();
+  return ACE_Singleton<Data_Types_Register, ACE_SYNCH_MUTEX>::instance();
 }
 
 DDS::ReturnCode_t Data_Types_Register::register_type(
