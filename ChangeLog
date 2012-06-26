@@ -1,3 +1,11 @@
+Tue Jun 26 23:30:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          When setting up discovery for DEFAULT_RTPS we need to create a
+          section in the ACE_Configuration_Heap, or else the
+          load_discovery_configuration() call ends up being a no-op.
+
 Tue Jun 26 21:49:22 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

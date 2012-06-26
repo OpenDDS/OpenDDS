@@ -1068,6 +1068,8 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
       ACE_Configuration_Heap cf;
       cf.open();
+      ACE_Configuration_Section_Key k;
+      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, 1 /*create*/, k);
       this->load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
       // Try to find it again
