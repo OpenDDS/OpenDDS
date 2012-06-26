@@ -10,7 +10,7 @@ Tue Jun 26 14:28:37 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 Tue Jun 26 09:29:53 UTC 2012  Marcel Smit  <msmit@remedy.nl>
 
         * tests/DCPS/Inconsistent_Qos/inconsistent_qos.cpp:
-          Allways retrieve the default qos first before retrieving
+          Always retrieve the default qos first before retrieving
           the actual QOS from file.
 
         * tests/DCPS/Inconsistent_Qos/deadline.xml:
