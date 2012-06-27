@@ -517,7 +517,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
         ri->second.durable_timestamp_ = ACE_OS::gettimeofday();
         if (Transport_debug_level > 3) {
           const GuidConverter conv(pub_id);
-          ACE_DEBUG((LM_ERROR,
+          ACE_DEBUG((LM_DEBUG,
             "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
             "storing durable data for local %C\n", std::string(conv).c_str()));
         }

@@ -194,7 +194,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       }
     }
     if (ce.link_.is_nil()) {
-      // Reservation lock must be released for the loopback case, since the peer
+      // TransportImpl lock must be released for the loopback case, since the peer
       // may be one of these impls, and it may need to make progress on the
       // active side in order for this wait to complete.
       ACE_Reverse_Lock<MultiReservLock> rev(mrl);
@@ -454,10 +454,10 @@ TransportClient::MultiReservLock::action_fwd(
 {
   typedef std::set<TransportImpl*>::iterator iter_t;
   for (iter_t iter = sorted_.begin(); iter != sorted_.end(); ++iter) {
-    int ret = ((*iter)->reservation_lock().*function)();
+    int ret = ((*iter)->*function)();
     if (ret != 0) {
       while (iter != sorted_.begin()) {
-        ((*--iter)->reservation_lock().*undo)();
+        ((*--iter)->*undo)();
       }
       return ret;
     }
@@ -472,7 +472,7 @@ TransportClient::MultiReservLock::action_rev(
   int ret = 0;
   typedef std::set<TransportImpl*>::reverse_iterator iter_t;
   for (iter_t iter = sorted_.rbegin(); iter != sorted_.rend(); ++iter) {
-    ret += ((*iter)->reservation_lock().*function)();
+    ret += ((*iter)->*function)();
   }
   return ret;
 }
@@ -480,27 +480,27 @@ TransportClient::MultiReservLock::action_rev(
 int
 TransportClient::MultiReservLock::acquire()
 {
-  typedef TransportImpl::ReservationLockType Lock;
+  typedef TransportImpl Lock;
   return action_fwd(&Lock::acquire, &Lock::release);
 }
 
 int
 TransportClient::MultiReservLock::tryacquire()
 {
-  typedef TransportImpl::ReservationLockType Lock;
+  typedef TransportImpl Lock;
   return action_fwd(&Lock::tryacquire, &Lock::release);
 }
 
 int
 TransportClient::MultiReservLock::release()
 {
-  return action_rev(&TransportImpl::ReservationLockType::release);
+  return action_rev(&TransportImpl::release);
 }
 
 int
 TransportClient::MultiReservLock::remove()
 {
-  return action_rev(&TransportImpl::ReservationLockType::remove);
+  return action_rev(&TransportImpl::remove);
 }
 
 }

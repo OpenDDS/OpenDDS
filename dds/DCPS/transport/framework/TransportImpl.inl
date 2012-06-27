@@ -32,20 +32,6 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
   return task._retn();
 }
 
-ACE_INLINE OpenDDS::DCPS::TransportImpl::ReservationLockType&
-OpenDDS::DCPS::TransportImpl::reservation_lock()
-{
-  DBG_ENTRY_LVL("TransportImpl","reservation_lock",6);
-  return this->reservation_lock_;
-}
-
-ACE_INLINE const OpenDDS::DCPS::TransportImpl::ReservationLockType&
-OpenDDS::DCPS::TransportImpl::reservation_lock() const
-{
-  DBG_ENTRY_LVL("TransportImpl","reservation_lock",6);
-  return this->reservation_lock_;
-}
-
 ACE_INLINE bool
 OpenDDS::DCPS::TransportImpl::connection_info
   (TransportLocator& local_info) const
@@ -58,4 +44,55 @@ ACE_INLINE void
 OpenDDS::DCPS::TransportImpl::pre_shutdown_i()
 {
   //noop
+}
+
+ACE_INLINE int
+OpenDDS::DCPS::TransportImpl::acquire()
+{
+  return reservation_lock_.acquire();
+}
+
+ACE_INLINE int
+OpenDDS::DCPS::TransportImpl::tryacquire()
+{
+  return reservation_lock_.tryacquire();
+}
+
+ACE_INLINE int
+OpenDDS::DCPS::TransportImpl::release()
+{
+  // Because of the current design, we may have already
+  // released this lock.  There are three possibilities
+  // for what state we can be in:
+  // 1) We took the lock and need to release it
+  // 2) We took the lock, released it, and nobody owns
+  //    it.
+  // 3) We took the lock, released it, and somebody else
+  //    owns it.
+  //
+  // Given the existing mutex APIs and portability
+  // concerns, the best approach is to just call release
+  // and swallow some of the return values.
+
+  int rv = reservation_lock_.release();
+
+  if (DCPS::DCPS_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportImpl::release() - ")
+               ACE_TEXT("attempting release, rv=%d\n"), rv));
+  }
+
+  switch (rv) {
+  case 0:      // Case 1
+  case EAGAIN: // Case 2?
+  case EPERM:  // Case 3
+    return 0;
+  default:
+    return rv;
+  }
+}
+
+ACE_INLINE int
+OpenDDS::DCPS::TransportImpl::remove()
+{
+  return reservation_lock_.remove();
 }

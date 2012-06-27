@@ -127,7 +127,7 @@ private:
     int acquire_read() { return 0; }
     int acquire_write() { return 0; }
   private:
-    typedef int (TransportImpl::ReservationLockType::*PMF)();
+    typedef int (TransportImpl::*PMF)();
     int action_fwd(PMF function, PMF undo);
     int action_rev(PMF function);
     const std::vector<TransportImpl_rch>& impls_;

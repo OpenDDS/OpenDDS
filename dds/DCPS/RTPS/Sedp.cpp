@@ -447,19 +447,8 @@ Sedp::increment_key(DDS::BuiltinTopicKey_t& key)
 }
 
 void
-Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
-{
-  task_.enqueue(new SPDPdiscoveredParticipantData(pdata));
-}
-
-void
-Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
-{
-  ACE_Auto_Basic_Ptr<const SPDPdiscoveredParticipantData> delete_the_data(ppdata);
-  const SPDPdiscoveredParticipantData& pdata = *ppdata;
-  // First create a 'prototypical' instance of AssociationData.  It will
-  // be copied and modified for each of the (up to) four SEDP Endpoints.
-  DCPS::AssociationData proto;
+create_association_data_proto(DCPS::AssociationData& proto,
+                              const SPDPdiscoveredParticipantData& pdata) {
   proto.publication_transport_priority_ = 0;
   proto.remote_reliable_ = true;
   std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
@@ -488,6 +477,15 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   proto.remote_data_[0].transport_type = "rtps_udp";
   proto.remote_data_[0].data.replace(
     static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+}
+
+void
+Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
+{
+  // First create a 'prototypical' instance of AssociationData.  It will
+  // be copied and modified for each of the (up to) four SEDP Endpoints.
+  DCPS::AssociationData proto;
+  create_association_data_proto(proto, pdata);
 
   const BuiltinEndpointSet_t& avail =
     pdata.participantProxy.availableBuiltinEndpoints;
@@ -496,17 +494,37 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    sedp_->publications_reader_.assoc(peer);
-  }
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    sedp_->publications_writer_.assoc(peer);
+    publications_reader_.assoc(peer);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    sedp_->subscriptions_reader_.assoc(peer);
+    subscriptions_reader_.assoc(peer);
+  }
+
+  SPDPdiscoveredParticipantData* dpd =
+    new SPDPdiscoveredParticipantData(pdata);
+  task_.enqueue(dpd);
+}
+
+void
+Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
+{
+  ACE_Auto_Basic_Ptr<const SPDPdiscoveredParticipantData> delete_the_data(ppdata);
+  const SPDPdiscoveredParticipantData& pdata = *ppdata;
+  // First create a 'prototypical' instance of AssociationData.  It will
+  // be copied and modified for each of the (up to) four SEDP Endpoints.
+  DCPS::AssociationData proto;
+  create_association_data_proto(proto, pdata);
+
+  const BuiltinEndpointSet_t& avail =
+    pdata.participantProxy.availableBuiltinEndpoints;
+
+  // See RTPS v2.1 section 8.5.5.1
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    sedp_->publications_writer_.assoc(peer);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
     DCPS::AssociationData peer = proto;

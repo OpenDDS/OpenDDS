@@ -1,3 +1,43 @@
+Wed Jun 27 17:42:36 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+          Fix some deadlocking issues with discovery and transport
+          handshaking.  These were specifically noticed using RTPS
+          discovery and transport, but may be present in other cases
+          as well.  This patch definitely improves things, but I see
+          indications of other handshaking issues that need to be
+          addressed.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Encapsulate the reservation_lock_ contained in the
+          TransportImpl class.  Allow multiple releases on
+          individual TransportImpl objects so that we can
+          release this lock while waiting for the handshake.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Release the TransportImpl lock while waiting for the handshake
+          to complete.
+
+        * dds/DCPS/RTPC/Sedp.cpp:
+
+          Move initialization of the passive (reader) side of the
+          association to the calling thread (from the Task thread).
+          This helps avoid some handshaking deadlocking during
+          discovery.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Clean up a debug message
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Remove an unused lock.
+
 Tue Jun 26 23:30:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

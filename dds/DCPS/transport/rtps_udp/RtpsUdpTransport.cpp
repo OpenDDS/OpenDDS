@@ -101,6 +101,12 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
     "waiting for handshake local %C remote %C\n", std::string(local).c_str(),
     std::string(remote).c_str()), 2);
+
+  // Release the TransportImpl's lock here while we wait for the handshake.
+  // This avoids deadlocks involving handshaking when lots of connections
+  // are being made in the same process.
+  release();
+
   if (!link->wait_for_handshake(local_id, remote_id)) {
     VDBG_LVL((LM_ERROR, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
       "ERROR: wait for handshake failed\n"), 2);

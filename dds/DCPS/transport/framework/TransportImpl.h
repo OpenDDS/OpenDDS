@@ -210,18 +210,18 @@ private:
                            bool active, bool connect);
 
 public:
-  typedef ACE_SYNCH_MUTEX                ReservationLockType;
-  typedef ACE_Guard<ReservationLockType> ReservationGuardType;
   /// Called by our friends, the TransportClient, and the DataLink.
   /// Since this TransportImpl can be attached to many TransportClient
   /// objects, and each TransportClient object could be "running" in
   /// a separate thread, we need to protect all of the "reservation"
   /// methods with a lock.  The protocol is that a client of ours
-  /// must "acquire" our reservation_lock() before it can proceed to
+  /// must "acquire" our reservation_lock_ before it can proceed to
   /// call any methods that affect the DataLink reservations.  It
-  /// should release the reservation_lock() as soon as it is done.
-  ReservationLockType& reservation_lock();
-  const ReservationLockType& reservation_lock() const;
+  /// should release the reservation_lock_ as soon as it is done.
+  int acquire();
+  int tryacquire();
+  int release();
+  int remove();
 
   /// Create the reactor task using sync send or optionally async send
   /// by parameter on supported Windows platforms only.
@@ -241,6 +241,7 @@ private:
   typedef ACE_Guard<LockType> GuardType;
 
   /// Our reservation lock.
+  typedef ACE_SYNCH_MUTEX                ReservationLockType;
   ReservationLockType reservation_lock_;
 
   /// Lock to protect the config_ and reactor_task_ data members.

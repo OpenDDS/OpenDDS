@@ -20,7 +20,6 @@
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
-#include "ace/Reverse_Lock_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -121,9 +120,6 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
-
-  typedef ACE_Reverse_Lock<ReservationLockType> Reverse_Lock_t;
-  Reverse_Lock_t reverse_reservation_lock_;
 
   void unbind_all(const std::vector<PriorityKey>& keys, GuardType* guard);
   void unbind_all(const std::vector<PriorityKey>& keys);
