@@ -227,6 +227,23 @@ project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcp
     DdsDcpsInfoUtilsTypeSupportImpl.h
     DdsDcpsInfrastructureTypeSupportImpl.h
 
+    DdsDcpsInfrastructureTypeSupportS.h
+
+    // Although these files only contain comments since
+    // service-side suppression is done,
+    // they are included here so that "make install" will
+    // work.
+    DdsDcpsS.h
+    DdsDcpsDomainS.h
+    DdsDcpsGuidS.h
+    DdsDcpsInfoUtilsS.h
+    DdsDcpsInfrastructureS.h
+    DdsDcpsPublicationS.h
+    DdsDcpsSubscriptionS.h
+    DdsDcpsSubscriptionExtS.h
+    DdsDcpsTopicS.h
+    DdsDcpsTypeSupportExtS.h
+
     CorbaSeq/BooleanSeqTypeSupportImpl.h
     CorbaSeq/CharSeqTypeSupportImpl.h
     CorbaSeq/DoubleSeqTypeSupportImpl.h
