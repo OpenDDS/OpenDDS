@@ -4,7 +4,7 @@
 #ifndef DOMAIN_PARTICIPANT_LISTENER_IMPL
 #define DOMAIN_PARTICIPANT_LISTENER_IMPL
 
-#include "dds/DdsDcpsDomainS.h"
+#include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

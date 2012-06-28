@@ -4,7 +4,7 @@
 #ifndef FORWARDINGLISTENER_H
 #define FORWARDINGLISTENER_H
 
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/Condition_T.h"

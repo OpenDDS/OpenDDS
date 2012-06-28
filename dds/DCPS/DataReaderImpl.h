@@ -12,7 +12,7 @@
 #include "dcps_export.h"
 #include "EntityImpl.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionExtS.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "Definitions.h"

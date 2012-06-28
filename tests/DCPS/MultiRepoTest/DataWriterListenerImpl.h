@@ -4,7 +4,7 @@
 #ifndef PUBLISHERLISTENERIMPL_H
 #define PUBLISHERLISTENERIMPL_H
 
-#include "dds/DdsDcpsPublicationS.h"
+#include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 

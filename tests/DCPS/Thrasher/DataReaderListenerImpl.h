@@ -5,7 +5,7 @@
 #ifndef DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 #define DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include <dds/DdsDcpsSubscriptionC.h>
 
 #include "ProgressIndicator.h"
 

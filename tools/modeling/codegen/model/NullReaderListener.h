@@ -11,7 +11,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "model_export.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Definitions.h"
 
 namespace OpenDDS { namespace Model {

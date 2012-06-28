@@ -10,7 +10,7 @@
 #define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
 #include "DomainParticipantFactoryImpl.h"
-#include "dds/DdsDcpsInfrastructureS.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "DomainParticipantFactoryImpl.h"

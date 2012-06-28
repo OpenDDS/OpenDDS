@@ -4,7 +4,7 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionExtS.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
 #include "MessengerC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

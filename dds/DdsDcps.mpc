@@ -7,6 +7,7 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, dds4ccm_opendd
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
               -Wb,export_macro=OpenDDS_Dcps_Export \
               -Wb,export_include=dds/DCPS/dcps_export.h \
+              -SS \
               -I$(DDS_ROOT)
   dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
                    -Wb,export_macro=OpenDDS_Dcps_Export \
@@ -124,14 +125,6 @@ project (OpenDDS_Dcps_lem_stub) : dcps, taolib, valuetype, dds4ccm_opendds, \
     DdsDcpsTopicEC.h
     DdsDcpsTypeSupportExtEC.h
     DdsDcps_lem_stub_export.h
-    DdsDcpsDomainES.h
-    DdsDcpsInfrastructureES.h
-    DdsDcpsSubscriptionES.h
-    DdsDcpsTopicES.h
-    DdsDcpsES.h
-    DdsDcpsPublicationES.h
-    DdsDcpsSubscriptionExtES.h
-    DdsDcpsTypeSupportExtES.h
     DdsDcpsDomain_svnt.h
     DdsDcpsInfoUtils_svnt.h
     DdsDcpsPublication_svnt.h
@@ -195,17 +188,6 @@ project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcp
     DdsDcpsInfoUtilsTypeSupportImpl.cpp
     DdsDcpsInfrastructureTypeSupportImpl.cpp
 
-    DdsDcpsS.cpp
-    DdsDcpsDomainS.cpp
-    DdsDcpsGuidS.cpp
-    DdsDcpsInfoUtilsS.cpp
-    DdsDcpsInfrastructureS.cpp
-    DdsDcpsPublicationS.cpp
-    DdsDcpsSubscriptionS.cpp
-    DdsDcpsSubscriptionExtS.cpp
-    DdsDcpsTopicS.cpp
-    DdsDcpsTypeSupportExtS.cpp
-
     CorbaSeq/BooleanSeqTypeSupportImpl.cpp
     CorbaSeq/CharSeqTypeSupportImpl.cpp
     CorbaSeq/DoubleSeqTypeSupportImpl.cpp
@@ -244,18 +226,6 @@ project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcp
     DdsDcpsGuidTypeSupportImpl.h
     DdsDcpsInfoUtilsTypeSupportImpl.h
     DdsDcpsInfrastructureTypeSupportImpl.h
-
-    DdsDcpsS.h
-    DdsDcpsDomainS.h
-    DdsDcpsGuidS.h
-    DdsDcpsInfoUtilsS.h
-    DdsDcpsInfrastructureS.h
-    DdsDcpsInfrastructureTypeSupportS.h
-    DdsDcpsPublicationS.h
-    DdsDcpsSubscriptionS.h
-    DdsDcpsSubscriptionExtS.h
-    DdsDcpsTopicS.h
-    DdsDcpsTypeSupportExtS.h
 
     CorbaSeq/BooleanSeqTypeSupportImpl.h
     CorbaSeq/CharSeqTypeSupportImpl.h

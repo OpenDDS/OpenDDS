@@ -4,7 +4,7 @@
 #ifndef DATAREADERLISTENER_H
 #define DATAREADERLISTENER_H
 
-#include "dds/DdsDcpsSubscriptionExtS.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/Condition_T.h"

@@ -7,7 +7,7 @@
 #include "dds/DCPS/TopicImpl.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "MyTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"

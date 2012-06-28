@@ -1,7 +1,7 @@
 #ifndef DATAWRITER_LISTENER_IMPL
 #define DATAWRITER_LISTENER_IMPL
 
-#include "dds/DdsDcpsPublicationS.h"
+#include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/Definitions.h"
 #include "ace/Condition_T.h"
 

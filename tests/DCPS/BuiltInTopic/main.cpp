@@ -18,7 +18,7 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"

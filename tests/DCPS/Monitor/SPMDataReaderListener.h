@@ -9,7 +9,7 @@
 #ifndef SPMDATAREADER_LISTENER_IMPL
 #define SPMDATAREADER_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include <dds/DdsDcpsSubscriptionC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

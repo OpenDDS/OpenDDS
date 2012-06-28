@@ -5,7 +5,7 @@
 #define DATAREADER_LISTENER_IMPL
 
 #include "ace/Synch.h"
-#include "dds/DdsDcpsSubscriptionExtS.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/Definitions.h"
 #include "TestStats.h"
 

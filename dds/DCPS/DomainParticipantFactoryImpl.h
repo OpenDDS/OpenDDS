@@ -10,7 +10,7 @@
 #define OPENDDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
 
 #include "Definitions.h"
-#include "dds/DdsDcpsDomainS.h"
+#include "dds/DdsDcpsDomainC.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "dds/DCPS/LocalObject.h"

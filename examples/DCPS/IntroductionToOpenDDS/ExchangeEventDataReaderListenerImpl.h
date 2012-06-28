@@ -9,7 +9,7 @@
 #ifndef EXCHANGE_EVENT_DATAREADER_LISTENER_IMPL
 #define EXCHANGE_EVENT_DATAREADER_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include <dds/DdsDcpsSubscriptionC.h>
 #include <ace/Synch.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

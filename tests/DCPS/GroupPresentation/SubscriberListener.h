@@ -9,7 +9,7 @@
 #ifndef SUBSCRIBER_LISTENER_IMPL
 #define SUBSCRIBER_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include <dds/DdsDcpsSubscriptionC.h>
 #include "MessengerC.h"
 
 

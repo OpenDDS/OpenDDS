@@ -4,7 +4,7 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include "ace/High_Res_Timer.h"
 

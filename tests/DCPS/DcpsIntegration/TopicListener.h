@@ -25,7 +25,7 @@
 #ifndef DDSDCPSTOPIC_LISTENER_I_H_
 #define DDSDCPSTOPIC_LISTENER_I_H_
 
-#include "dds/DdsDcpsTopicS.h"
+#include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

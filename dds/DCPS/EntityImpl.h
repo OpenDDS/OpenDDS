@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_ENTITY_IMPL_H
 #define OPENDDS_DCPS_ENTITY_IMPL_H
 
-#include "dds/DdsDcpsInfrastructureS.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/Atomic_Op_T.h"
 #include "dds/DCPS/LocalObject.h"
 #include "Definitions.h"

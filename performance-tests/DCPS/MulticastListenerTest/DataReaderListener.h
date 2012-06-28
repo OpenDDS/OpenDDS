@@ -6,7 +6,7 @@
 
 #include "ace/Synch.h"
 #include "ace/Containers_T.h"
-#include "dds/DdsDcpsSubscriptionExtS.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/DisjointSequence.h"
 #include "TestStats.h"
 

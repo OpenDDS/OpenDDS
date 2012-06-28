@@ -10,9 +10,9 @@
 #define REGISTERED_DATA_TYPES_H_
 
 #include "dcps_export.h"
-#include "dds/DdsDcpsInfrastructureS.h"
-#include "dds/DdsDcpsTopicS.h"
-#include "dds/DdsDcpsTypeSupportExtS.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsTopicC.h"
+#include "dds/DdsDcpsTypeSupportExtC.h"
 
 #include "ace/Singleton.h"
 

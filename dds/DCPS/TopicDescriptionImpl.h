@@ -9,8 +9,8 @@
 #ifndef OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 #define OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 
-#include "dds/DdsDcpsTopicS.h"
-#include "dds/DdsDcpsTypeSupportExtS.h"
+#include "dds/DdsDcpsTopicC.h"
+#include "dds/DdsDcpsTypeSupportExtC.h"
 #include "Definitions.h"
 #include "ace/SString.h"
 #include "ace/Atomic_Op.h"

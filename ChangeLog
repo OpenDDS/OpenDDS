@@ -1,3 +1,118 @@
+Thu Jun 28 16:37:53 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          When compiling OpenDDS_Dcps library's local IDL interfaces,
+          suppress generation of server-side source.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.h:
+        * dds/DCPS/BitPubListenerImpl.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DdsDcps.mpc:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * examples/DCPS/IntroductionToOpenDDS/ExchangeEventDataReaderListenerImpl.h:
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * performance-tests/Bench/src/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/BidirMessenger/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.h:
+        * tests/DCPS/ConfigTransports/DataReaderListener.h:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.h:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+        * tests/DCPS/DcpsIntegration/TopicListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.h:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/Federation/DataWriterListenerImpl.h:
+        * tests/DCPS/FooTest3_0/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+        * tests/DCPS/FooTest3_0/PublisherListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_2/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/GroupPresentation/DataReaderListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LatencyBudget/DataReaderListener.h:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.h:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Monitor/DPMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DataReaderListener.h:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.h:
+        * tests/DCPS/Monitor/SPMDataReaderListener.h:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.h:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.h:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/Ownership/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataWriterListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Rejects/DataReaderListener.h:
+        * tests/DCPS/Serializer_wstring/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.h:
+        * tests/DCPS/unit/Main.cpp:
+        * tools/modeling/codegen/model/NullListener.h:
+        * tools/modeling/codegen/model/NullParticipantListener.h:
+        * tools/modeling/codegen/model/NullPublisherListener.h:
+        * tools/modeling/codegen/model/NullReaderListener.h:
+        * tools/modeling/codegen/model/NullSubscriberListener.h:
+        * tools/modeling/codegen/model/NullTopicListener.h:
+        * tools/modeling/codegen/model/NullWriterListener.h:
+
+          #include client-side IDL generate code instead of
+          server-side code for local IDL interfaces.
+
 Wed Jun 27 17:42:36 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
 
           Fix some deadlocking issues with discovery and transport

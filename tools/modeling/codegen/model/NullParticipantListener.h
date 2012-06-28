@@ -5,7 +5,7 @@
 #define NULLPARTICIPANTLISTENER_H
 
 #include "model_export.h"
-#include "dds/DdsDcpsDomainS.h"
+#include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
