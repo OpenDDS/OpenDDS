@@ -1,3 +1,9 @@
+Fri Jun 29 19:47:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Fixed memory management of a string value in the test.
+
 Fri Jun 29 17:04:21 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.h:

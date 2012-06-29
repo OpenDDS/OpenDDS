@@ -253,7 +253,8 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   }
 
   QueryCondition_var query_cond = QueryCondition::_narrow(dr_qc);
-  if (std::string(query_cond->get_query_expression()) != "key = %0") {
+  CORBA::String_var expr = query_cond->get_query_expression();
+  if (std::string("key = %0") != expr.in()) {
     cout << "ERROR: get_query_expression() query expression should match " << endl;
     return false;
   }
