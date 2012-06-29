@@ -384,14 +384,27 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
 }
 
 bool
-RtpsDiscovery::remove_domain_participant(DDS::DomainId_t domain,
+RtpsDiscovery::remove_domain_participant(DDS::DomainId_t domain_id,
                                          const OpenDDS::DCPS::RepoId& participantId)
 {
+  // Use reference counting to ensure participant
+  // does not get deleted until lock as been released.
+  DCPS::RcHandle<Spdp> participant;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  participants_[domain].erase(participantId);
-  if (participants_[domain].empty()) {
+  DomainParticipantMap::iterator domain = participants_.find(domain_id);
+  if (domain == participants_.end()) {
+    return false;
+  }
+  ParticipantMap::iterator part = domain->second.find(participantId);
+  if (part == domain->second.end()) {
+    return false;
+  }
+  participant = part->second;
+  domain->second.erase(part);
+  if (domain->second.empty()) {
     participants_.erase(domain);
   }
+  
   return true;
 }
 

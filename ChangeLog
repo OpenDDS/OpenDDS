@@ -1,3 +1,10 @@
+Fri Jun 29 16:14:55 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          In remove_domain_participant() don't delete
+          participant until lock has been released.
+
 Thu Jun 28 20:08:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DdsDcps.mpc:
