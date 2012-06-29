@@ -1,3 +1,11 @@
+Fri Jun 29 21:02:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+
+          Set RTPS discovery's resend period to 2 seconds to
+          avoid the test occasionally running up to 2.5
+          minutes when using the default period of 30 seconds.
+
 Fri Jun 29 20:11:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

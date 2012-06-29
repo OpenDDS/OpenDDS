@@ -87,6 +87,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       OpenDDS::RTPS::RtpsDiscovery_rch disc =
         new OpenDDS::RTPS::RtpsDiscovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
 
+      // The recommended value for the resend period is 2 seconds for
+      // the current implementation of OpenDDS.
+      disc->resend_period(ACE_Time_Value(2));
+
       TheServiceParticipant->add_discovery(OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::Discovery>(disc));
       TheServiceParticipant->set_repo_domain(11, disc->key());
 #endif
@@ -228,7 +232,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 //                         -1);
 //       }
 
-      ACE_DEBUG ((LM_DEBUG, "Shuting down tsp with one participant still registered\n"));
+      ACE_DEBUG ((LM_DEBUG, "Shutting down the service participant with one participant still registered\n"));
       TheServiceParticipant->shutdown ();
   }
   catch (CORBA::Exception& e)
