@@ -1,3 +1,9 @@
+Fri Jun 29 20:11:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed logic for handling ORBVerboseLogging in config file.
+
 Fri Jun 29 19:47:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/QueryCondition/QueryConditionTest.cpp:

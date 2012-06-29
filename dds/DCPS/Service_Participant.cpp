@@ -1458,11 +1458,11 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
         ACE_DEBUG((LM_NOTICE,
                    ACE_TEXT("(%P|%t) NOTICE: using ORBVerboseLogging value ")
                    ACE_TEXT("from command option, overriding config file\n")));
-      } else {
-        unsigned long verbose_logging = 0;
-        GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ORBVerboseLogging"), verbose_logging, unsigned long);
-        set_log_verbose(verbose_logging);
       }
+    } else {
+      unsigned long verbose_logging = 0;
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ORBVerboseLogging"), verbose_logging, unsigned long);
+      set_log_verbose(verbose_logging);
     }
 
     // These are not handled on the command line.
