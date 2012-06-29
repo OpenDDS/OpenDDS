@@ -170,11 +170,12 @@ DomainParticipantFactoryImpl::delete_participant(
   if (the_servant->is_clean() == 0) {
     RepoId id = the_servant->get_id();
     GuidConverter converter(id);
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                      ACE_TEXT("the participant %C is not empty.\n"),
-                      std::string(converter).c_str()), DDS::RETCODE_PRECONDITION_NOT_MET);
+    ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
+               ACE_TEXT("(%P|%t) WARNING: ")
+               ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+               ACE_TEXT("the participant %C is not empty.\n"),
+               std::string(converter).c_str()));
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
   DDS::DomainId_t domain_id = the_servant->get_domain_id();

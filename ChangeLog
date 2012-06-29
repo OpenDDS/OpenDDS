@@ -1,3 +1,10 @@
+Fri Jun 29 21:24:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
+          In delete_participant(), don't log an ERROR when the participant is
+          non-empty.  User code (including tests) could call this intentionally.
+
 Fri Jun 29 21:02:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/DpShutdown/dpshutdown.cpp:
