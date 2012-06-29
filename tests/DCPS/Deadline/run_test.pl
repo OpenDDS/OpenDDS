@@ -17,6 +17,10 @@ my $is_rtps_disc = 0;
 
 if ($ARGV[0] eq 'rtps_disc') {
   $is_rtps_disc = 1;
+} elsif ($#ARGV > -1) {
+  print STDERR "ERROR: Illegal parameter passed to run_test.pl\n" .
+               "Usage: run_test.pl [rtps_disc]\n";
+  exit(1);
 }
 
 my $pub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");

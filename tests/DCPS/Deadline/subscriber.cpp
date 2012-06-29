@@ -17,6 +17,8 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
+#include "dds/DCPS/WaitSet.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -131,9 +133,20 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           exit (1);
         }
 
-        ACE_OS::sleep (2);
+        DDS::StatusCondition_var cond = tmp_dr->get_statuscondition();
+        cond->set_enabled_statuses(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
+        DDS::WaitSet_var ws = new DDS::WaitSet;
+        ws->attach_condition(cond);
+        DDS::Duration_t four_sec = {4, 0};
+        DDS::ConditionSeq active;
+        ws->wait(active, four_sec);
 
         // Check if the incompatible deadline was correctly flagged.
+        if ((active.length() == 0) || (active[0] != cond)) {
+          cerr << "ERROR: Failed to get requested incompatible qos status" << endl;
+          exit (1);
+        }
+
         DDS::RequestedIncompatibleQosStatus incompatible_status;
         if (tmp_dr->get_requested_incompatible_qos_status (incompatible_status) != ::DDS::RETCODE_OK)
         {

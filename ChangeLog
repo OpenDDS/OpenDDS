@@ -1,3 +1,23 @@
+Fri Jun 29 17:04:21 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Modify the Spdp implementation to send participant announcements whenever
+          a new participant is discovered.  This should reduce discovery time
+          with RTPS, especially when the default value of ResendPeriod=30 is used.
+
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Clean up the perl script and change the subscriber to use a status
+          condition instead of a sleep.  The sleep period was not long enough
+          for RTPS discovery.
+
+        * tests/DCPS/Messenger/rtps_disc.ini:
+
+          Remove ResendPeriod=30 from this test as it is no longer needed.
+
 Fri Jun 29 16:14:55 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.cpp:

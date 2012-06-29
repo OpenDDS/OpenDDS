@@ -137,6 +137,7 @@ private:
 
     void open();
     void write();
+    void write_i();
     void close();
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);

@@ -184,6 +184,10 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     // notify Sedp of association
     sedp_.associate(pdata);
 
+    // Since we've just seen a new participant, let's send out our
+    // own announcement, so they don't have to wait.
+    this->tport_->write_i();
+
     // add a new participant
     participants_[guid] = DiscoveredParticipant(pdata, time);
     DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
@@ -469,6 +473,13 @@ Spdp::SpdpTransport::close()
 void
 Spdp::SpdpTransport::write()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+  write_i();
+}
+
+void
+Spdp::SpdpTransport::write_i()
+{
   static const BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
@@ -494,7 +505,6 @@ Spdp::SpdpTransport::write()
   data_.writerSN.low = seq_.getLow();
   ++seq_;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   const GuidPrefix_t& gp = outer_->guid_.guidPrefix;
 
   const SPDPdiscoveredParticipantData pdata = {
