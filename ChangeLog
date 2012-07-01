@@ -1,3 +1,10 @@
+Sun Jul  1 13:28:26 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Messenger/rtps_disc.ini:
+
+          Change the ResendPeriod back to two seconds.  This should
+          increase the reliability of this test.
+
 Fri Jun 29 21:24:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
