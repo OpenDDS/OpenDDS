@@ -1,3 +1,9 @@
+Mon Jul  2 11:42:14 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+	  Removed trailing whitespace.
+
 Sun Jul  1 13:28:26 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/Messenger/rtps_disc.ini:

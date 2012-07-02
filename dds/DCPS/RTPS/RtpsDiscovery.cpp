@@ -404,7 +404,7 @@ RtpsDiscovery::remove_domain_participant(DDS::DomainId_t domain_id,
   if (domain->second.empty()) {
     participants_.erase(domain);
   }
-  
+
   return true;
 }
 
