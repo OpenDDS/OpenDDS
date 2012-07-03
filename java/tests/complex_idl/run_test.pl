@@ -24,8 +24,7 @@ my $opts = "";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
-my $test_opts = "$opts -ORBListenEndpoints iiop://127.0.0.1:12346 $debug_opt ".
-    "-ORBLogFile test.log";
+my $test_opts = "$opts $debug_opt -ORBLogFile test.log";
 
 my $dcpsrepo_ior = "repo.ior";
 

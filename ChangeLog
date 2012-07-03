@@ -1,3 +1,16 @@
+Tue Jul  3 16:40:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          ACE::init() is now required since we don't call ORB_init() until
+          later (and only if it's needed).  Java programs don't have ACE_TMAIN
+          to provide the automatic ACE::init() for us.
+
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/complex_idl/run_test.pl:
+
+          Removed fixed port numbers in -ORBListenEndpoints.
+
 Tue Jul  3 14:24:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.feature/feature.xml:

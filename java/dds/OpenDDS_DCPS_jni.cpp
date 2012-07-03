@@ -59,6 +59,7 @@ CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
 jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs(JNIEnv *jni,
                                                                  jclass, jobject ssholder)
 {
+  ACE::init();
   JniArgv jargv(jni, ssholder);
 
   try {
