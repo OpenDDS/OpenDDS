@@ -1711,7 +1711,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3010"
+        visualID="3.20"
         editPartClassName="Period6EditPart"
         itemSemanticEditPolicyClassName="Period6ItemSemanticEditPolicy"
         notationViewFactoryClassName="PeriodViewFactory"
@@ -2175,7 +2175,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3013"
+        visualID="3.23"
         editPartClassName="UdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="UdQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="UdQosPolicyViewFactory"
@@ -3807,7 +3807,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3012"
+        visualID="3.22"
         editPartClassName="EfQosPolicyEditPart"
         itemSemanticEditPolicyClassName="EfQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="EfQosPolicyViewFactory"
@@ -3895,7 +3895,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3014"
+        visualID="3.24"
         editPartClassName="GdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="GdQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="GdQosPolicyViewFactory"
@@ -3983,7 +3983,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3015"
+        visualID="3.25"
         editPartClassName="PartitionQosPolicyEditPart"
         itemSemanticEditPolicyClassName="PartitionQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="PartitionQosPolicyViewFactory"
@@ -4050,7 +4050,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3016"
+        visualID="3.26"
         editPartClassName="PresentationQosPolicyEditPart"
         itemSemanticEditPolicyClassName="PresentationQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="PresentationQosPolicyViewFactory"
@@ -4180,7 +4180,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3017"
+        visualID="3.27"
         editPartClassName="EfQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="EfQosPolicy2ItemSemanticEditPolicy"
         notationViewFactoryClassName="EfQosPolicyViewFactory"
@@ -4268,7 +4268,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3018"
+        visualID="3.28"
         editPartClassName="GdQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="GdQosPolicy2ItemSemanticEditPolicy"
         notationViewFactoryClassName="GdQosPolicyViewFactory"
@@ -4356,7 +4356,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3019"
+        visualID="3.29"
         editPartClassName="PartitionQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="PartitionQosPolicy2ItemSemanticEditPolicy"
         notationViewFactoryClassName="PartitionQosPolicyViewFactory"
@@ -6794,7 +6794,7 @@
       iD="org.opendds.modeling.diagram.dcpslib"
       name="OpenDDS DcpsLib Plugin"
       provider="Object Computing, Inc."
-      version="3.1.0.qualifier"
+      version="3.2.0.qualifier"
       printingEnabled="true">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
     <requiredPlugins>org.eclipse.gmf.runtime.draw2d.ui</requiredPlugins>
