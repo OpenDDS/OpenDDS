@@ -4,8 +4,6 @@ Version 3.2 of OpenDDS.
   Use "shmem" as the short name (in place of "tcp", "udp", "multicast", etc.).
   See dds/DCPS/transport/shmem/ShmemInst.h for configurable parameters.
 
-- Refactored InfoRepo-based discovery into its own library.
-
 - The udp transport now supports setting IP DSCP (DiffServ CodePoint) based on
   the writer's TRANSPORT_PRIORITY QoS value.
 
@@ -13,13 +11,28 @@ Version 3.2 of OpenDDS.
 
 - Made several changes in order to support CIAO 1.1.2 with DDS4CCM. From
   this version DDS4CCM has support for OpenDDS as DDS vendor. Check the CIAO
-  release notes for details on what has been ported
+  release notes for details on what has been ported.
 
 - Added new QOS_XML library with which QoS settings can be done through an XML
   file. Used at this moment by the CIAO DDS4CCM implementation.
 
 - Implemented rejection of samples due to exceeding max_instances and
   max_samples.
+
+- Made the RTPS discovery and transport code more robust.
+
+- Refactored InfoRepo-based discovery into its own library. This reduces the
+  dependency on TAO such that certain TAO libraries will no longer be loaded
+  unless they are needed for InfoRepo-based discovery. 
+
+- For IDL files that only contain local interfaces, the generation of
+  server-side TAO code was suppressed. The suppression applies to DdsDcps*.idl.
+  This means, for example, that code that was including DdsDcpsSubscriptionS.h
+  needs to be changed to include DdsDcpsSubscriptionC.h.
+
+- To reduce library size, OpenDDS can now be conditionally compiled to exclude
+  profiles discussed in the Compliance section of the DDS spec. See
+  section 1.3.3 in the Developer's Guide for more information.
 
 ========================================================================
 
