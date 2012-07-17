@@ -36,27 +36,33 @@ plot capacity with lines lw 3 lc rgb "black" t 'Network Capacity',\
      ''   index  3 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: rate and size vary',\
      ''   index  3 using 1:3 with points lc rgb "pink" t '',\
      ''   index  6 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: rate and size vary',\
-     ''   index  6 using 1:3 with points lc rgb "pink" t '',\
+     ''   index  6 using 1:3 with points lc rgb "yellow" t '',\
      ''   index  9 using 1:3 with lines  lc rgb "green" t 'UDP: rate and size vary',\
      ''   index  9 using 1:3 with points lc rgb "green" t '',\
      ''   index  0 using 1:3 with lines  lc rgb "cyan" t 'TCP: rate and size vary',\
-     ''   index  0 using 1:3 with points lc rgb "green" t '',\
+     ''   index  0 using 1:3 with points lc rgb "cyan" t '',\
+     ''   index  12 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: rate and size vary',\
+     ''   index  12 using 1:3 with points lc rgb "royalblue" t '',\
      ''   index  4 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed rate, size varies',\
      ''   index  4 using 1:3 with points lc rgb "pink" t '',\
      ''   index  7 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed rate, size varies',\
-     ''   index  7 using 1:3 with points lc rgb "pink" t '',\
+     ''   index  7 using 1:3 with points lc rgb "yellow" t '',\
      ''   index 10 using 1:3 with lines  lc rgb "green" t 'UDP: fixed rate, size varies',\
      ''   index 10 using 1:3 with points lc rgb "green" t '',\
      ''   index  1 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed rate, size varies',\
-     ''   index  1 using 1:3 with points lc rgb "green" t '',\
+     ''   index  1 using 1:3 with points lc rgb "cyan" t '',\
+     ''   index  13 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed rate, size varies',\
+     ''   index  13 using 1:3 with points lc rgb "royalblue" t '',\
      ''   index  5 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed size, rate varies',\
      ''   index  5 using 1:3 with points lc rgb "pink" t '',\
      ''   index  8 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed size, rate varies',\
-     ''   index  8 using 1:3 with points lc rgb "pink" t '',\
+     ''   index  8 using 1:3 with points lc rgb "yellow" t '',\
      ''   index 11 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
      ''   index 11 using 1:3 with points lc rgb "green" t '',\
      ''   index  2 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
-     ''   index  2 using 1:3 with points lc rgb "green" t ''
+     ''   index  2 using 1:3 with points lc rgb "cyan" t ''
+     ''   index  14 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed size, rate varies',\
+     ''   index  14 using 1:3 with points lc rgb "royalblue" t ''
 
 set terminal push
 set terminal png size 1000,750
@@ -70,31 +76,37 @@ set terminal pop
 set title 'Publication Bound Throughput Tests'
 plot capacity with lines lw 3 lc rgb "black" t 'Network Capacity',\
      ftpspeed with lines lw 3 lc rgb "red"   t 'Network ftp performance',\
-     '$0' index 18 using 1:(column(1)*column(2)*8.*2.) with lines lw 2 lc rgb "orange" t 'Test Rate',\
-     ''   index 15 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: rate and size vary',\
-     ''   index 15 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 18 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: rate and size vary',\
+     '$0' index 21 using 1:(column(1)*column(2)*8.*2.) with lines lw 2 lc rgb "orange" t 'Test Rate',\
+     ''   index 18 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: rate and size vary',\
      ''   index 18 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 21 using 1:3 with lines  lc rgb "green" t 'UDP: rate and size vary',\
-     ''   index 21 using 1:3 with points lc rgb "green" t '',\
-     ''   index 12 using 1:3 with lines  lc rgb "cyan" t 'TCP: rate and size vary',\
-     ''   index 12 using 1:3 with points lc rgb "green" t '',\
-     ''   index 16 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed rate, size varies',\
-     ''   index 16 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 19 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed rate, size varies',\
+     ''   index 21 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: rate and size vary',\
+     ''   index 21 using 1:3 with points lc rgb "yellow" t '',\
+     ''   index 24 using 1:3 with lines  lc rgb "green" t 'UDP: rate and size vary',\
+     ''   index 24 using 1:3 with points lc rgb "green" t '',\
+     ''   index 15 using 1:3 with lines  lc rgb "cyan" t 'TCP: rate and size vary',\
+     ''   index 15 using 1:3 with points lc rgb "cyan" t '',\
+     ''   index 27 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: rate and size vary',\
+     ''   index 27 using 1:3 with points lc rgb "royalblue" t '',\
+     ''   index 19 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed rate, size varies',\
      ''   index 19 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 22 using 1:3 with lines  lc rgb "green" t 'UDP: fixed rate, size varies',\
-     ''   index 22 using 1:3 with points lc rgb "green" t '',\
-     ''   index 13 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed rate, size varies',\
-     ''   index 13 using 1:3 with points lc rgb "green" t '',\
-     ''   index 17 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed size, rate varies',\
-     ''   index 17 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 20 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed size, rate varies',\
+     ''   index 22 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed rate, size varies',\
+     ''   index 22 using 1:3 with points lc rgb "yellow" t '',\
+     ''   index 25 using 1:3 with lines  lc rgb "green" t 'UDP: fixed rate, size varies',\
+     ''   index 25 using 1:3 with points lc rgb "green" t '',\
+     ''   index 16 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed rate, size varies',\
+     ''   index 16 using 1:3 with points lc rgb "cyan" t '',\
+     ''   index 28 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed rate, size varies',\
+     ''   index 28 using 1:3 with points lc rgb "royalblue" t '',\
+     ''   index 20 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed size, rate varies',\
      ''   index 20 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 23 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
-     ''   index 23 using 1:3 with points lc rgb "green" t '',\
-     ''   index 14 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
-     ''   index 14 using 1:3 with points lc rgb "green" t ''
+     ''   index 23 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed size, rate varies',\
+     ''   index 23 using 1:3 with points lc rgb "yellow" t '',\
+     ''   index 26 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
+     ''   index 26 using 1:3 with points lc rgb "green" t '',\
+     ''   index 17 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
+     ''   index 17 using 1:3 with points lc rgb "cyan" t ''
+     ''   index 29 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed size, rate varies',\
+     ''   index 29 using 1:3 with points lc rgb "royalblue" t ''
 
 set terminal push
 set terminal png size 1000,750
@@ -108,31 +120,37 @@ set terminal pop
 set title 'Subscription Bound Throughput Tests'
 plot capacity with lines lw 3 lc rgb "black" t 'Network Capacity',\
      ftpspeed with lines lw 3 lc rgb "red"   t 'Network ftp performance',\
-     '$0' index 27 using 1:(column(1)*column(2)*8.*4.) with lines lw 2 lc rgb "orange" t 'Test Rate',\
-     ''   index 27 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: rate and size vary',\
-     ''   index 27 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 30 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: rate and size vary',\
-     ''   index 30 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 33 using 1:3 with lines  lc rgb "green" t 'UDP: rate and size vary',\
-     ''   index 33 using 1:3 with points lc rgb "green" t '',\
-     ''   index 24 using 1:3 with lines  lc rgb "cyan" t 'TCP: rate and size vary',\
-     ''   index 24 using 1:3 with points lc rgb "green" t '',\
-     ''   index 28 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed rate, size varies',\
-     ''   index 28 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 31 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed rate, size varies',\
-     ''   index 31 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 34 using 1:3 with lines  lc rgb "green" t 'UDP: fixed rate, size varies',\
-     ''   index 34 using 1:3 with points lc rgb "green" t '',\
-     ''   index 25 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed rate, size varies',\
-     ''   index 25 using 1:3 with points lc rgb "green" t '',\
-     ''   index 29 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed size, rate varies',\
-     ''   index 29 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 32 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed size, rate varies',\
-     ''   index 32 using 1:3 with points lc rgb "pink" t '',\
-     ''   index 35 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
-     ''   index 35 using 1:3 with points lc rgb "green" t '',\
-     ''   index 26 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
-     ''   index 26 using 1:3 with points lc rgb "green" t ''
+     '$0' index 33 using 1:(column(1)*column(2)*8.*4.) with lines lw 2 lc rgb "orange" t 'Test Rate',\
+     ''   index 33 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: rate and size vary',\
+     ''   index 33 using 1:3 with points lc rgb "pink" t '',\
+     ''   index 36 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: rate and size vary',\
+     ''   index 36 using 1:3 with points lc rgb "yellow" t '',\
+     ''   index 39 using 1:3 with lines  lc rgb "green" t 'UDP: rate and size vary',\
+     ''   index 39 using 1:3 with points lc rgb "green" t '',\
+     ''   index 30 using 1:3 with lines  lc rgb "cyan" t 'TCP: rate and size vary',\
+     ''   index 30 using 1:3 with points lc rgb "cyan" t '',\
+     ''   index 42 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: rate and size vary',\
+     ''   index 42 using 1:3 with points lc rgb "royalblue" t '',\
+     ''   index 34 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed rate, size varies',\
+     ''   index 34 using 1:3 with points lc rgb "pink" t '',\
+     ''   index 37 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed rate, size varies',\
+     ''   index 37 using 1:3 with points lc rgb "yellow" t '',\
+     ''   index 40 using 1:3 with lines  lc rgb "green" t 'UDP: fixed rate, size varies',\
+     ''   index 40 using 1:3 with points lc rgb "green" t '',\
+     ''   index 31 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed rate, size varies',\
+     ''   index 31 using 1:3 with points lc rgb "cyan" t '',\
+     ''   index 43 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed rate, size varies',\
+     ''   index 43 using 1:3 with points lc rgb "royalblue" t '',\
+     ''   index 35 using 1:3 with lines  lc rgb "pink" t 'Multicast Best Effort: fixed size, rate varies',\
+     ''   index 35 using 1:3 with points lc rgb "pink" t '',\
+     ''   index 38 using 1:3 with lines  lc rgb "yellow" t 'Reliable Multicast: fixed size, rate varies',\
+     ''   index 38 using 1:3 with points lc rgb "yellow" t '',\
+     ''   index 41 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
+     ''   index 41 using 1:3 with points lc rgb "green" t '',\
+     ''   index 32 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
+     ''   index 32 using 1:3 with points lc rgb "cyan" t ''
+     ''   index 44 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed size, rate varies',\
+     ''   index 44 using 1:3 with points lc rgb "royalblue" t ''
 
 set terminal push
 set terminal png size 1000,750

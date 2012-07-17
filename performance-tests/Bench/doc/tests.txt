@@ -21,7 +21,7 @@ include:
 2) Select or create a service configuration file.  This will mostly
    involve definition of transport configurations and any service wide
    configuration settings.  Use of the 'etc/transport.ini' file will
-   provide 10 default transport instances for each of 4 transport types
+   provide 10 default transport instances for each of 5 transport types
    and select a round-robin scheduler for use when TRANSPORT_PRIORITY
    values other than the default are used.
 

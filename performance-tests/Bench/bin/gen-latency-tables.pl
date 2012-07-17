@@ -43,6 +43,7 @@ sub transportName {
   return "Multicast Reliable" if ($type eq "mre" || $type eq "mrel");
   return "Multicast Reliable" if $type eq "reliable multicast";
   return "UDP" if $type eq "udp";
+  return "RTPS" if $type eq "rtps";
   return "UNKNOWN TRANSPORT TYPE";
 }
 

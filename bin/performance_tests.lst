@@ -41,11 +41,22 @@ performance-tests/Bench/tests/latency/run_test.pl multi-rel 5000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl multi-rel 8000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl multi-rel 16000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl multi-rel 32000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl rtps 50: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 100: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 250: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 500: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 1000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 2500: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 5000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 8000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 16000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 32000: !DCPS_MIN RTPS
 
 performance-tests/Bench/tests/thru/run_test.pl tcp
 performance-tests/Bench/tests/thru/run_test.pl udp
 performance-tests/Bench/tests/thru/run_test.pl multi-be
 performance-tests/Bench/tests/thru/run_test.pl multi-rel
+performance-tests/Bench/tests/thru/run_test.pl rtps : RTPS
 
 
 ## Run local tests

@@ -134,6 +134,10 @@ all hosts: cd $TESTBASE/multi-rel
 # all hosts: mkdir -p $TESTBASE/tcp
 # all hosts: cd $TESTBASE/tcp
 
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-rtps.ini
+# all hosts: mkdir -p $TESTBASE/rtps
+# all hosts: cd $TESTBASE/rtps
+
 all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 
@@ -294,6 +298,10 @@ all hosts: cd $TESTBASE/multi-rel
 # all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
 # all hosts: mkdir -p $TESTBASE/tcp
 # all hosts: cd $TESTBASE/tcp
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-rtps.ini
+# all hosts: mkdir -p $TESTBASE/rtps
+# all hosts: cd $TESTBASE/rtps
 
 all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
@@ -463,6 +471,10 @@ all hosts: cd $TESTBASE/multi-rel
 # all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
 # all hosts: mkdir -p $TESTBASE/tcp
 # all hosts: cd $TESTBASE/tcp
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-rtps.ini
+# all hosts: mkdir -p $TESTBASE/rtps
+# all hosts: cd $TESTBASE/rtps
 
 all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
 all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"

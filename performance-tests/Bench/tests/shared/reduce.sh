@@ -8,6 +8,7 @@ export TRANSPORT_TCP=$BENCHBASE/tests/shared/transport-tcp.ini
 export TRANSPORT_UDP=$BENCHBASE/tests/shared/transport-udp.ini
 export TRANSPORT_MCAST_BE=$BENCHBASE/tests/shared/transport-mcast-be.ini
 export TRANSPORT_MCAST_REL=$BENCHBASE/tests/shared/transport-mcast-rel.ini
+export TRANSPORT_RTPS=$BENCHBASE/tests/shared/transport-rtps.ini
 
 mkdir -p data
 
@@ -40,6 +41,12 @@ $REDUCECMD $TESTBASE/run/2-1/mcast-be-latency-s1.data > data/2-1-mcast-be-s1.gpd
 $REDUCECMD $TESTBASE/run/4-1/mcast-be-latency-s1.data > data/4-1-mcast-be-s1.gpd
 $REDUCECMD $TESTBASE/run/8-1/mcast-be-latency-s1.data > data/8-1-mcast-be-s1.gpd
 $REDUCECMD $TESTBASE/run/16-1/mcast-be-latency-s1.data > data/16-1-mcast-be-s1.gpd
+
+$REDUCECMD $TESTBASE/run/1-1/rtps-latency-s1.data > data/1-1-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/2-1/rtps-latency-s1.data > data/2-1-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/4-1/rtps-latency-s1.data > data/4-1-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/8-1/rtps-latency-s1.data > data/8-1-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/16-1/rtps-latency-s1.data > data/16-1-rtps-rel-s1.gpd
 
 $REDUCECMD $TESTBASE/run/1-2/shmem-latency-s1.data > data/1-2-shmem-rel-s1.gpd
 $REDUCECMD $TESTBASE/run/1-2/shmem-latency-s2.data > data/1-2-shmem-rel-s2.gpd
@@ -188,3 +195,33 @@ $REDUCECMD $TESTBASE/run/1-16/mcast-be-latency-s14.data > data/1-16-mcast-be-s14
 $REDUCECMD $TESTBASE/run/1-16/mcast-be-latency-s15.data > data/1-16-mcast-be-s15.gpd
 $REDUCECMD $TESTBASE/run/1-16/mcast-be-latency-s16.data > data/1-16-mcast-be-s16.gpd
 
+$REDUCECMD $TESTBASE/run/1-2/rtps-latency-s1.data > data/1-2-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/1-2/rtps-latency-s2.data > data/1-2-rtps-rel-s2.gpd
+$REDUCECMD $TESTBASE/run/1-4/rtps-latency-s1.data > data/1-4-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/1-4/rtps-latency-s2.data > data/1-4-rtps-rel-s2.gpd
+$REDUCECMD $TESTBASE/run/1-4/rtps-latency-s3.data > data/1-4-rtps-rel-s3.gpd
+$REDUCECMD $TESTBASE/run/1-4/rtps-latency-s4.data > data/1-4-rtps-rel-s4.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s1.data > data/1-8-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s2.data > data/1-8-rtps-rel-s2.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s3.data > data/1-8-rtps-rel-s3.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s4.data > data/1-8-rtps-rel-s4.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s5.data > data/1-8-rtps-rel-s5.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s6.data > data/1-8-rtps-rel-s6.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s7.data > data/1-8-rtps-rel-s7.gpd
+$REDUCECMD $TESTBASE/run/1-8/rtps-latency-s8.data > data/1-8-rtps-rel-s8.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s1.data > data/1-16-rtps-rel-s1.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s2.data > data/1-16-rtps-rel-s2.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s3.data > data/1-16-rtps-rel-s3.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s4.data > data/1-16-rtps-rel-s4.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s5.data > data/1-16-rtps-rel-s5.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s6.data > data/1-16-rtps-rel-s6.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s7.data > data/1-16-rtps-rel-s7.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s8.data > data/1-16-rtps-rel-s8.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s9.data > data/1-16-rtps-rel-s9.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s10.data > data/1-16-rtps-rel-s10.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s11.data > data/1-16-rtps-rel-s11.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s12.data > data/1-16-rtps-rel-s12.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s13.data > data/1-16-rtps-rel-s13.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s14.data > data/1-16-rtps-rel-s14.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s15.data > data/1-16-rtps-rel-s15.gpd
+$REDUCECMD $TESTBASE/run/1-16/rtps-latency-s16.data > data/1-16-rtps-rel-s16.gpd

@@ -112,6 +112,7 @@ The transport types included in the pre-configured tests are:
   <tr><td>TCP</td><td>reliable stream transport.</td></tr>
   <tr><td>Best Effort Multicast</td><td>best effort multicast datagram transport.</td></tr>
   <tr><td>Reliable Multicast</td><td>reliable multicast datagram transport.</td></tr>
+  <tr><td>RTPS</td><td>real-time publish-subscribe transport.</td></tr>
 </table>
 
 =end html
@@ -122,6 +123,7 @@ The transport types included in the pre-configured tests are:
       TCP:                   reliable stream transport.
       Best Effort Multicast: best effort multicast datagram transport.
       Reliable Multicast:    reliable multicast datagram transport.
+      RTPS:                  real-time publish-subscribe transport.
 
 =end text
 
@@ -131,6 +133,7 @@ The transport types included in the pre-configured tests are:
       TCP:                   reliable stream transport.
       Best Effort Multicast: best effort multicast datagram transport.
       Reliable Multicast:    reliable multicast datagram transport.
+      RTPS:                  real-time publish-subscribe transport.
 
 =end man
 
@@ -196,14 +199,17 @@ BEGIN {
   $data = { bidir =>    { 'SimpleTcp'             => undef,
                           'best effort multicast' => undef,
                           'reliable multicast'    => undef,
+                          'rtps'                  => undef,
                           'udp'                   => undef},
             pubbound => { 'SimpleTcp'             => undef,
                           'best effort multicast' => undef,
                           'reliable multicast'    => undef,
+                          'rtps'                  => undef,
                           'udp'                   => undef},
             subbound => { 'SimpleTcp'             => undef,
                           'best effort multicast' => undef,
                           'reliable multicast'    => undef,
+                          'rtps'                  => undef,
                           'udp'                   => undef}
           };
 }

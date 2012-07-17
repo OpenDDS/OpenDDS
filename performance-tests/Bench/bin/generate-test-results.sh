@@ -68,6 +68,7 @@ process_latency_test ()
     $DDS_ROOT/performance-tests/Bench/bin/reduce-latency-data.pl "$TESTDIR/udp/latency-$sz.data" > "$DATADIR/latency-udp-$sz.gpd"
     $DDS_ROOT/performance-tests/Bench/bin/reduce-latency-data.pl "$TESTDIR/multi-be/latency-$sz.data" > "$DATADIR/latency-mbe-$sz.gpd"
     $DDS_ROOT/performance-tests/Bench/bin/reduce-latency-data.pl "$TESTDIR/multi-rel/latency-$sz.data" > "$DATADIR/latency-mrel-$sz.gpd"
+    $DDS_ROOT/performance-tests/Bench/bin/reduce-latency-data.pl "$TESTDIR/rtps/latency-$sz.data" > "$DATADIR/latency-rtps-$sz.gpd"
   done
 
   $DDS_ROOT/performance-tests/Bench/bin/extract-latency.pl "$DATADIR"/latency-*.gpd > "$DATADIR/latency.csv"

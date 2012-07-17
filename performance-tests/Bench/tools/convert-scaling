@@ -39,6 +39,15 @@ reduce.pl multi-rel/scaling-6.data > data/mrel-6.gpd
 reduce.pl multi-rel/scaling-7.data > data/mrel-7.gpd
 reduce.pl multi-rel/scaling-8.data > data/mrel-8.gpd
 
+reduce.pl rtps/scaling-1.data > data/rtps-1.gpd
+reduce.pl rtps/scaling-2.data > data/rtps-2.gpd
+reduce.pl rtps/scaling-3.data > data/rtps-3.gpd
+reduce.pl rtps/scaling-4.data > data/rtps-4.gpd
+reduce.pl rtps/scaling-5.data > data/rtps-5.gpd
+reduce.pl rtps/scaling-6.data > data/rtps-6.gpd
+reduce.pl rtps/scaling-7.data > data/rtps-7.gpd
+reduce.pl rtps/scaling-8.data > data/rtps-8.gpd
+
 extract.pl data/*.gpd > data/latency.csv
 genstats.pl data/latency.csv
 

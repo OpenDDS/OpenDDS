@@ -98,10 +98,12 @@ store_result_files ()
     tests/latency/udp \
     tests/latency/multi-rel \
     tests/latency/multi-be \
+    tests/latency/rtps \
     tests/thru/tcp \
     tests/thru/udp \
     tests/thru/multi-rel \
-    tests/thru/multi-be
+    tests/thru/multi-be \
+    tests/thru/rtps
 
   popd
 }
@@ -225,19 +227,22 @@ generate_latency_html ()
   echo '  <td class="graph_thumbnails"><a href="images/tcp-quantiles.png"><img src="images/thumbnails/tcp-quantiles.png" alt="TCP Latency Quantiles - all sizes"><br>TCP Latency Quantiles - all sizes</a>'
   echo '  <td class="graph_thumbnails"><a href="images/udp-quantiles.png"><img src="images/thumbnails/udp-quantiles.png" alt="UDP Latency Quantiles - all sizes"><br>UDP Latency Quantiles - all sizes</a>'
   echo '  <td class="graph_thumbnails"><a href="images/mbe-quantiles.png"><img src="images/thumbnails/mbe-quantiles.png" alt="Best Effort Multicast Latency Quantiles - all sizes"><br>Best Effort Multicast Latency Quantiles - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/mrel-quantiles.png"><img src="images/thumbnails/mrel-quantiles.png" alt="Reliable Multicast Latency Quantiles - all sizes"><br>Reliable Multicast Latency Quantiles - all sizes</a></tr>'
+  echo '  <td class="graph_thumbnails"><a href="images/mrel-quantiles.png"><img src="images/thumbnails/mrel-quantiles.png" alt="Reliable Multicast Latency Quantiles - all sizes"><br>Reliable Multicast Latency Quantiles - all sizes</a>'
+  echo '  <td class="graph_thumbnails"><a href="images/rtps-quantiles.png"><img src="images/thumbnails/rtps-quantiles.png" alt="Real-Time Publish-Subscribe Latency Quantiles - all sizes"><br>Real-Time Publish-Subscribe Latency Quantiles - all sizes</a></tr>'
   echo '<tr class="graph_thumbnails">'
   echo '  <td class="graph_thumbnails"><a href="images/tcp-density.png"><img src="images/thumbnails/tcp-density.png" alt="TCP Latency Density - all sizes"><br>TCP Latency Density - all sizes</a>'
   echo '  <td class="graph_thumbnails"><a href="images/udp-density.png"><img src="images/thumbnails/udp-density.png" alt="UDP Latency Density - all sizes"><br>UDP Latency Density - all sizes</a>'
   echo '  <td class="graph_thumbnails"><a href="images/mbe-density.png"><img src="images/thumbnails/mbe-density.png" alt="Best Effort Multicast Latency Density - all sizes"><br>Best Effort Multicast Latency Density - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/mrel-density.png"><img src="images/thumbnails/mrel-density.png" alt="Reliable Multicast Latency Density - all sizes"><br>Reliable Multicast Latency Density - all sizes</a></tr>'
+  echo '  <td class="graph_thumbnails"><a href="images/mrel-density.png"><img src="images/thumbnails/mrel-density.png" alt="Reliable Multicast Latency Density - all sizes"><br>Reliable Multicast Latency Density - all sizes</a>'
+  echo '  <td class="graph_thumbnails"><a href="images/rtps-density.png"><img src="images/thumbnails/rtps-density.png" alt="Real-Time Publish-Subscribe Latency Density - all sizes"><br>Real-Time Publish-Subscribe Latency Density - all sizes</a></tr>'
   for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
   do
     echo '<tr class="graph_thumbnails">'
     echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-tcp-$sz.png\"><img src=\"images/thumbnails/latency-tcp-$sz.png\" alt=\"TCP Latency - $sz bytes\"><br>TCP Latency - $sz bytes</a>"
     echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-udp-$sz.png\"><img src=\"images/thumbnails/latency-udp-$sz.png\" alt=\"UDP Latency - $sz bytes\"><br>UDP Latency - $sz bytes</a>"
     echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-mbe-$sz.png\"><img src=\"images/thumbnails/latency-mbe-$sz.png\" alt=\"Best Effort Multicast Latency - $sz bytes\"><br>Best Effort Multicast Latency - $sz bytes</a>"
-    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-mrel-$sz.png\"><img src=\"images/thumbnails/latency-mrel-$sz.png\" alt=\"Reliable Multicast Latency - $sz bytes\"><br>Reliable Multicast Latency - $sz bytes</a></tr>"
+    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-mrel-$sz.png\"><img src=\"images/thumbnails/latency-mrel-$sz.png\" alt=\"Reliable Multicast Latency - $sz bytes\"><br>Reliable Multicast Latency - $sz bytes</a>"
+    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-tcp-$sz.png\"><img src=\"images/thumbnails/latency-tcp-$sz.png\" alt=\"Real-Time Publish-Subscribe Latency - $sz bytes\"><br>Real-Time Publish-Subscribe Latency - $sz bytes</a></tr>"
   done
   echo '</table>'
   echo '<div>'
@@ -333,7 +338,8 @@ generate_throughput_html ()
   echo '  <td class="graph_thumbnails"><a href="images/thru-tcp.png"><img src="images/thumbnails/thru-tcp.png" alt="TCP Latency Quantiles - all sizes"><br>TCP Throughput</a>'
   echo '  <td class="graph_thumbnails"><a href="images/thru-udp.png"><img src="images/thumbnails/thru-udp.png" alt="UDP Latency Quantiles - all sizes"><br>UDP Throughput</a>'
   echo '  <td class="graph_thumbnails"><a href="images/thru-mbe.png"><img src="images/thumbnails/thru-mbe.png" alt="Best Effort Multicast Latency Quantiles - all sizes"><br>Best Effort Multicast Throughput</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/thru-mrel.png"><img src="images/thumbnails/thru-mrel.png" alt="Reliable Multicast Latency Quantiles - all sizes"><br>Reliable Multicast Throughput</a></tr>'
+  echo '  <td class="graph_thumbnails"><a href="images/thru-mrel.png"><img src="images/thumbnails/thru-mrel.png" alt="Reliable Multicast Latency Quantiles - all sizes"><br>Reliable Multicast Throughput</a>'
+  echo '  <td class="graph_thumbnails"><a href="images/thru-rtps.png"><img src="images/thumbnails/thru-rtps.png" alt="Real-Time Publish-Subscribe Latency Quantiles - all sizes"><br>Real-Time Publish-Subscribe Throughput</a></tr>'
   echo '</table>'
   echo '<div>'
   echo '<br />'

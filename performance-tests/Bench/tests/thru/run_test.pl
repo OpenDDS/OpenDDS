@@ -50,6 +50,10 @@ uses the multicast implementation with reliability disabled (Best Effort)
 
 uses the multicast implementation with reliability enabled
 
+=item rtps
+
+uses the rtps_udp transport implementation
+
 =back
 
 =head1 EXAMPLE
@@ -155,6 +159,12 @@ elsif ($transport_type eq 'tcp') {
    $sub_config_file = "$bench_location/tests/thru/bidir-remote-rel.ini";
     mkdir "tcp", 0777 unless -d "tcp";
     chdir "tcp";
+}
+elsif ($transport_type eq 'rtps') {
+   $trans_config_file = "$bench_location/etc/transport-rtps.ini";
+   $sub_config_file = "$bench_location/tests/thru/bidir-remote-rel.ini";
+    mkdir "rtps", 0777 unless -d "rtps";
+    chdir "rtps";
 }
 else {
     print "Unknown transport. Skipping...\n";

@@ -175,7 +175,8 @@ END {
     tcp  => "TCP<br>(reliable)",
     udp  => "UDP<br>(best effort)",
     mbe  => "Multicast<br>(best effort)",
-    mrel => "Multicast<br>(reliable)"
+    mrel => "Multicast<br>(reliable)",
+    rtps  => "RTPS<br>(reliable)",
   };
 
   # We will need to know how many columns we are generating before we

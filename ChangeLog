@@ -1,3 +1,38 @@
+Tue Jul 17 22:42:45 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/performance_tests.lst:
+        * performance-tests/Bench/bin/extract-throughput.pl:
+        * performance-tests/Bench/bin/gen-latency-tables.pl:
+        * performance-tests/Bench/bin/gen-throughput-tables.pl:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+        * performance-tests/Bench/bin/generate-test-results.sh:
+        * performance-tests/Bench/bin/mktable.pl:
+        * performance-tests/Bench/bin/plot-density.gpi:
+        * performance-tests/Bench/bin/plot-jitter.gpi:
+        * performance-tests/Bench/bin/plot-quantiles.gpi:
+        * performance-tests/Bench/bin/plot-test-results.sh:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+        * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+        * performance-tests/Bench/bin/plot-transports-scaling.gpi:
+        * performance-tests/Bench/bin/plot-transports.gpi:
+        * performance-tests/Bench/doc/tests-latency.txt:
+        * performance-tests/Bench/doc/tests.txt:
+        * performance-tests/Bench/etc/transport-rtps.ini:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/latency/test-commands.txt:
+        * performance-tests/Bench/tests/scaling/test-commands.txt:
+        * performance-tests/Bench/tests/shared/reduce.sh:
+        * performance-tests/Bench/tests/shared/run.sh:
+        * performance-tests/Bench/tests/shared/transport-rtps.ini:
+        * performance-tests/Bench/tests/thru/run_test.pl:
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+        * performance-tests/Bench/tools/convert-latency:
+        * performance-tests/Bench/tools/convert-scaling:
+
+          First round of changes for performance tests running with
+          RTPS transport.
+
 Tue Jul 17 15:56:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/update_version.pl:

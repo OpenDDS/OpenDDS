@@ -42,6 +42,10 @@ all hosts: cd $TESTBASE/multi-be
 # all hosts: mkdir -p $TESTBASE/tcp
 # all hosts: cd $TESTBASE/tcp
 
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-rtps.ini
+# all hosts: mkdir -p $TESTBASE/rtps
+# all hosts: cd $TESTBASE/rtps
+
 host 1: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p1-50.ini 2>&1 | tee p1-50.log
 host 2: $PROJECTBASE/bin/run_test -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG -s $TESTBASE/p2.ini 2>&1 | tee p2.log
 

@@ -50,6 +50,10 @@ uses the multicast implementation with reliability disabled (Best Effort)
 
 uses the multicast implementation with reliability enabled
 
+=item rtps
+
+uses the rtps_udp transport implementation
+
 =back
 
 Supported message sizes are B<50> B<100> B<250> B<500> B<1000>
@@ -166,6 +170,11 @@ elsif ($ARGV[0] eq 'multi-rel') {
 elsif ($ARGV[0] eq 'tcp') {
     mkdir "tcp", 0777 unless -d "tcp";
     chdir "tcp";
+}
+elsif ($ARGV[0] eq 'rtps') {
+    $trans_config_file = "$bench_location/etc/transport-rtps.ini ";
+    mkdir "rtps", 0777 unless -d "rtps";
+    chdir "rtps";
 }
 else {
     print "Unknown transport. Skipping...\n";

@@ -85,6 +85,8 @@ EOF
         call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-mbe-$sz.gpd" "$DATADIR/latency-mbe-$sz.stats" "$OUTDIR/latency-mbe-$sz.png" "Multicast - Best Effort / Message Size $sz bytes"
         # Plotting Multicast / reliable charts
         call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-mrel-$sz.gpd" "$DATADIR/latency-mrel-$sz.stats" "$OUTDIR/latency-mrel-$sz.png" "Multicast - Reliable / Message Size $sz bytes"
+        # Plotting RTPS charts
+        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-rtps-$sz.gpd" "$DATADIR/latency-rtps-$sz.stats" "$OUTDIR/latency-rtps-$sz.png" "RTPS / Message Size $sz bytes"
        exit
 EOF
     done

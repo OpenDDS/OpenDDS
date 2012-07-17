@@ -43,7 +43,7 @@ all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -P -t 30 -h $REPOHOST:$REPO
  $TESTCMD -s $TESTBASE/sub.ini
 
 
-* <transport> is one of: tcp, udp, multi-rel, and multi-be;
+* <transport> is one of: tcp, udp, rtps, multi-rel, and multi-be;
   <n> is a value between 1 and 8
 
 * 32 total tests should be executed (8 collections per transport)

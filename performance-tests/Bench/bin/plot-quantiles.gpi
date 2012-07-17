@@ -76,6 +76,19 @@ plot '$0/latency-mrel-50.gpd'    index 3 using (100.*column(0)/samples):1:(weigh
      '$0/latency-mrel-16000.gpd' index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '16000',\
      '$0/latency-mrel-32000.gpd' index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '32000'
 
+set output '$1/rtps-quantiles.png'
+set title "RTPS - Latency Quantiles per Message Size"
+plot '$0/latency-rtps-50.gpd'    index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '50',\
+     '$0/latency-rtps-100.gpd'   index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '100',\
+     '$0/latency-rtps-250.gpd'   index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '250',\
+     '$0/latency-rtps-500.gpd'   index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '500',\
+     '$0/latency-rtps-1000.gpd'  index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '1000',\
+     '$0/latency-rtps-2500.gpd'  index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '2500',\
+     '$0/latency-rtps-5000.gpd'  index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '5000',\
+     '$0/latency-rtps-8000.gpd'  index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '8000',\
+     '$0/latency-rtps-16000.gpd' index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '16000',\
+     '$0/latency-rtps-32000.gpd' index 3 using (100.*column(0)/samples):1:(weight) with lines smooth acsplines title '32000'
+
 set output
 set terminal pop
 

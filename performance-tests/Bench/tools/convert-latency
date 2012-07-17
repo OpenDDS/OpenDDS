@@ -43,6 +43,17 @@ reduce-latency-data.pl multi-rel/latency-8000.data > data/latency-mrel-8000.gpd
 reduce-latency-data.pl multi-rel/latency-16000.data > data/latency-mrel-16000.gpd
 reduce-latency-data.pl multi-rel/latency-32000.data > data/latency-mrel-32000.gpd
 
+reduce-latency-data.pl rtps/latency-50.data > data/latency-tcp-50.gpd
+reduce-latency-data.pl rtps/latency-100.data > data/latency-tcp-100.gpd
+reduce-latency-data.pl rtps/latency-250.data > data/latency-tcp-250.gpd
+reduce-latency-data.pl rtps/latency-500.data > data/latency-tcp-500.gpd
+reduce-latency-data.pl rtps/latency-1000.data > data/latency-tcp-1000.gpd
+reduce-latency-data.pl rtps/latency-2500.data > data/latency-tcp-2500.gpd
+reduce-latency-data.pl rtps/latency-5000.data > data/latency-tcp-5000.gpd
+reduce-latency-data.pl rtps/latency-8000.data > data/latency-tcp-8000.gpd
+reduce-latency-data.pl rtps/latency-16000.data > data/latency-tcp-16000.gpd
+reduce-latency-data.pl rtps/latency-32000.data > data/latency-tcp-32000.gpd
+
 extract-latency.pl data/latency-*.gpd > data/latency.csv
 gen-latency-stats.pl data/latency.csv
 

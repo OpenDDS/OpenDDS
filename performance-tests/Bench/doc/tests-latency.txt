@@ -61,6 +61,7 @@ configuration files.  These include:
   transport-multi-rel.ini   reliable multicast
   transport-tcp.ini         TCP
   transport-udp.ini         UDP
+  transport-rtps.ini        RTPS real-time publish-subscribe
 
 The 'transport-udp.ini' configuration file needs to be edited for each
 test host to specify the host or IP address to listen on.
