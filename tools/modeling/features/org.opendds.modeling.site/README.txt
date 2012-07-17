@@ -12,6 +12,8 @@ be incremented (per-plugin) -- the "qualifier" change is not enough.
   * Our policy is to increment the version numbers of all plugins together in
     lock step, even though some plugins may not be changing.  This reduces
     the potential for user confusion by keeping a single version number.
+  * Version numbers are of the form X.Y.Z.qualifier, so the feature/plugin
+    versions will have a "0" for the "Z" part even when OpenDDS itself does not.
   * see $DDS_ROOT/tools/modeling/update_version.pl
 
 3. Open site.xml from org.opendds.modeling.site and click the "Build All" button

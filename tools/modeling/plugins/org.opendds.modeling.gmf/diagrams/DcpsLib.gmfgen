@@ -1711,7 +1711,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.20"
+        visualID="3010"
         editPartClassName="Period6EditPart"
         itemSemanticEditPolicyClassName="Period6ItemSemanticEditPolicy"
         notationViewFactoryClassName="PeriodViewFactory"
@@ -2175,7 +2175,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.23"
+        visualID="3013"
         editPartClassName="UdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="UdQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="UdQosPolicyViewFactory"
@@ -3807,7 +3807,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.22"
+        visualID="3012"
         editPartClassName="EfQosPolicyEditPart"
         itemSemanticEditPolicyClassName="EfQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="EfQosPolicyViewFactory"
@@ -3895,7 +3895,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.24"
+        visualID="3014"
         editPartClassName="GdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="GdQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="GdQosPolicyViewFactory"
@@ -3983,7 +3983,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.25"
+        visualID="3015"
         editPartClassName="PartitionQosPolicyEditPart"
         itemSemanticEditPolicyClassName="PartitionQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="PartitionQosPolicyViewFactory"
@@ -4050,7 +4050,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.26"
+        visualID="3016"
         editPartClassName="PresentationQosPolicyEditPart"
         itemSemanticEditPolicyClassName="PresentationQosPolicyItemSemanticEditPolicy"
         notationViewFactoryClassName="PresentationQosPolicyViewFactory"
@@ -4180,7 +4180,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.27"
+        visualID="3017"
         editPartClassName="EfQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="EfQosPolicy2ItemSemanticEditPolicy"
         notationViewFactoryClassName="EfQosPolicyViewFactory"
@@ -4268,7 +4268,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.28"
+        visualID="3018"
         editPartClassName="GdQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="GdQosPolicy2ItemSemanticEditPolicy"
         notationViewFactoryClassName="GdQosPolicyViewFactory"
@@ -4356,7 +4356,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3.29"
+        visualID="3019"
         editPartClassName="PartitionQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="PartitionQosPolicy2ItemSemanticEditPolicy"
         notationViewFactoryClassName="PartitionQosPolicyViewFactory"

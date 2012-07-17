@@ -1,3 +1,17 @@
+Tue Jul 17 15:56:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/update_version.pl:
+
+          Fixed a bug in the script.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Updated instructions.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+
+          Reverted invalid replacements from prior execution of the script.
+
 Fri Jul 13 12:47:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * ChangeLog:
