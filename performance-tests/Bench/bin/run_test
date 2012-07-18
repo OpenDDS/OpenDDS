@@ -240,6 +240,16 @@ map {
   }
 } @PROCESSES;
 
+# Handle an interruption to kill the running processes.
+sub interrupt_handler {
+  map {
+    $status = $_->Kill();
+  } reverse @PROCESSES;
+  kill 2, @COLLECTORS;
+  exit;
+}
+$SIG{'INT'} = 'interrupt_handler';
+
 # block forever if no duration was specified.
 WaitForUserInput() if not $duration;
 
@@ -274,6 +284,8 @@ if( $startRepo) {
 
 # Terminate the statistics collectors.
 kill 2, @COLLECTORS;
+
+$SIG{'INT'} = 'DEFAULT';
 
 # Report results.
 if( $failed == 0) {
@@ -481,6 +493,7 @@ sub runCollector {
     exit;
   }
 }
+
 
 =head1 NAME
 

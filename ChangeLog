@@ -1,3 +1,14 @@
+Wed Jul 18 20:55:46 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+          Added signal handler to kill running processes. 
+
+        * performance-tests/Bench/etc/transport-rtps.ini:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/testprocess.cpp:
+        * performance-tests/Bench/src/TestProcess.mpc:
+          Corrections to build and run on static build.
+
 Tue Jul 17 22:42:45 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/performance_tests.lst:
