@@ -18,6 +18,8 @@
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include "MessengerTypeSupportImpl.h"

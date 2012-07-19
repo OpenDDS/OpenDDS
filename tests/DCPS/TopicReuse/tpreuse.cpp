@@ -13,6 +13,11 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
+
 #include "dds/DCPS/StaticIncludes.h"
 #include "MessengerTypeSupportImpl.h"
 

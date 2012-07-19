@@ -20,6 +20,10 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include "../common/TestSupport.h"
 #include "../FooType4/FooDefTypeSupportImpl.h"
