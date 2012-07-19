@@ -60,7 +60,7 @@ plot capacity with lines lw 3 lc rgb "black" t 'Network Capacity',\
      ''   index 11 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
      ''   index 11 using 1:3 with points lc rgb "green" t '',\
      ''   index  2 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
-     ''   index  2 using 1:3 with points lc rgb "cyan" t ''
+     ''   index  2 using 1:3 with points lc rgb "cyan" t '',\
      ''   index  14 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed size, rate varies',\
      ''   index  14 using 1:3 with points lc rgb "royalblue" t ''
 
@@ -104,7 +104,7 @@ plot capacity with lines lw 3 lc rgb "black" t 'Network Capacity',\
      ''   index 26 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
      ''   index 26 using 1:3 with points lc rgb "green" t '',\
      ''   index 17 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
-     ''   index 17 using 1:3 with points lc rgb "cyan" t ''
+     ''   index 17 using 1:3 with points lc rgb "cyan" t '',\
      ''   index 29 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed size, rate varies',\
      ''   index 29 using 1:3 with points lc rgb "royalblue" t ''
 
@@ -148,7 +148,7 @@ plot capacity with lines lw 3 lc rgb "black" t 'Network Capacity',\
      ''   index 41 using 1:3 with lines  lc rgb "green" t 'UDP: fixed size, rate varies',\
      ''   index 41 using 1:3 with points lc rgb "green" t '',\
      ''   index 32 using 1:3 with lines  lc rgb "cyan" t 'TCP: fixed size, rate varies',\
-     ''   index 32 using 1:3 with points lc rgb "cyan" t ''
+     ''   index 32 using 1:3 with points lc rgb "cyan" t '',\
      ''   index 44 using 1:3 with lines  lc rgb "royalblue" t 'RTPS: fixed size, rate varies',\
      ''   index 44 using 1:3 with points lc rgb "royalblue" t ''
 
