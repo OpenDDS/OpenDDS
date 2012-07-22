@@ -28,7 +28,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
   exename   = subscriber
   after    += DDS*idl
   libs     += DDS*idl

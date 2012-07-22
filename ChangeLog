@@ -1,3 +1,10 @@
+Sun Jul 22 22:27:23 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+          Added missing libraries for static builds.
+
 Thu Jul 19 20:19:13 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
