@@ -196,20 +196,20 @@ our ($current, $transport, $size, $rate, $time, $data, $test, $type);
 BEGIN {
   # Seed the test types and the transports so that we can maintain a
   # consistent set of indices in the output for our plotting scripts.
-  $data = { bidir =>    { 'SimpleTcp'             => undef,
+  $data = { bidir =>    { 'tcp'                   => undef,
+                          'best effort multicast' => undef,
+                          'reliable multicast'    => undef,
+                          'rtps_udp'              => undef,
+                          'udp'                   => undef},
+            pubbound => { 'tcp'                   => undef,
                           'best effort multicast' => undef,
                           'reliable multicast'    => undef,
                           'rtps'                  => undef,
                           'udp'                   => undef},
-            pubbound => { 'SimpleTcp'             => undef,
+            subbound => { 'tcp'                   => undef,
                           'best effort multicast' => undef,
                           'reliable multicast'    => undef,
-                          'rtps'                  => undef,
-                          'udp'                   => undef},
-            subbound => { 'SimpleTcp'             => undef,
-                          'best effort multicast' => undef,
-                          'reliable multicast'    => undef,
-                          'rtps'                  => undef,
+                          'rtps_udp'              => undef,
                           'udp'                   => undef}
           };
 }
@@ -242,7 +242,7 @@ if( not defined $current or $ARGV ne "$current") {
 
 /Options::loadPublication\(\) -   \[publication\/\S+] MessageRate == (\d+)\.$/ and do { $rate = $1; };
 /Options::loadPublication\(\) -   \[publication\/\S+] MessageSize == (\d+)\.$/ and do { $size = $1; };
-/::enable\(\) - (publication|subscription) \S+: obtained (.+) transport with index \d+\.$/ and do { $transport = $2; };
+/::enable\(\) - (publication|subscription) \S+: obtained (.+) transport with (index|config) \d+\.$/ and do { $transport = $2; };
 
 # No need to examine data if we have not found required information.
 next if ((not defined $transport) or (not defined $test));

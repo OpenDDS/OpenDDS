@@ -1,3 +1,8 @@
+Mon Jul 23 23:42:47 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+          Correct transport name detection.
+
 Sun Jul 22 22:27:23 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
