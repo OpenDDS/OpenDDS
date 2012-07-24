@@ -216,7 +216,6 @@ project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcp
     DdsDcpsGuidC.h
     DdsDcpsInfoUtilsC.h
     DdsDcpsInfrastructureC.h
-    DdsDcpsInfrastructureTypeSupportC.h
     DdsDcpsPublicationC.h
     DdsDcpsSubscriptionC.h
     DdsDcpsSubscriptionExtC.h
@@ -226,8 +225,6 @@ project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcp
     DdsDcpsGuidTypeSupportImpl.h
     DdsDcpsInfoUtilsTypeSupportImpl.h
     DdsDcpsInfrastructureTypeSupportImpl.h
-
-    DdsDcpsInfrastructureTypeSupportS.h
 
     // Although these files only contain comments since
     // service-side suppression is done,
@@ -267,7 +264,6 @@ project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcp
     DdsDcpsGuidC.inl
     DdsDcpsInfoUtilsC.inl
     DdsDcpsInfrastructureC.inl
-    DdsDcpsInfrastructureTypeSupportC.inl
     DdsDcpsPublicationC.inl
     DdsDcpsSubscriptionC.inl
     DdsDcpsSubscriptionExtC.inl

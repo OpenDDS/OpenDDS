@@ -2,6 +2,15 @@
 // or not the built_in_topics feature is enabled (which it is by default).
 
 feature (built_in_topics) {
+  Header_Files {
+    DdsDcpsInfrastructureTypeSupportC.h
+    DdsDcpsInfrastructureTypeSupportS.h
+  }
+
+  Inline_Files {
+    DdsDcpsInfrastructureTypeSupportC.inl
+  }
+
   Source_Files {
     DdsDcpsInfrastructureTypeSupportC.cpp
     DdsDcpsInfrastructureTypeSupportS.cpp

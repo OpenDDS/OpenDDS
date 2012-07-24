@@ -1,3 +1,11 @@
+Tue Jul 24 15:29:57 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits_source.mpb:
+
+          Generated files that are only generated when built_in_topics
+          is enabled must be listed in dcps_bits_source.mpb and not DdsDcps.mpc.
+
 Mon Jul 23 23:42:47 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/extract-throughput.pl:
@@ -32,7 +40,7 @@ Thu Jul 19 18:39:13 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 Wed Jul 18 20:55:46 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
-          Added signal handler to kill running processes. 
+          Added signal handler to kill running processes.
 
         * performance-tests/Bench/etc/transport-rtps.ini:
         * performance-tests/Bench/etc/transport.ini:
