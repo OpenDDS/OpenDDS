@@ -242,7 +242,7 @@ generate_latency_html ()
     echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-udp-$sz.png\"><img src=\"images/thumbnails/latency-udp-$sz.png\" alt=\"UDP Latency - $sz bytes\"><br>UDP Latency - $sz bytes</a>"
     echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-mbe-$sz.png\"><img src=\"images/thumbnails/latency-mbe-$sz.png\" alt=\"Best Effort Multicast Latency - $sz bytes\"><br>Best Effort Multicast Latency - $sz bytes</a>"
     echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-mrel-$sz.png\"><img src=\"images/thumbnails/latency-mrel-$sz.png\" alt=\"Reliable Multicast Latency - $sz bytes\"><br>Reliable Multicast Latency - $sz bytes</a>"
-    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-tcp-$sz.png\"><img src=\"images/thumbnails/latency-tcp-$sz.png\" alt=\"Real-Time Publish-Subscribe Latency - $sz bytes\"><br>Real-Time Publish-Subscribe Latency - $sz bytes</a></tr>"
+    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-rtps-$sz.png\"><img src=\"images/thumbnails/latency-rtps-$sz.png\" alt=\"Real-Time Publish-Subscribe Latency - $sz bytes\"><br>Real-Time Publish-Subscribe Latency - $sz bytes</a></tr>"
   done
   echo '</table>'
   echo '<div>'

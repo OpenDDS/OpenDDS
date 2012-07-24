@@ -46,6 +46,7 @@ sub transportName {
   return "Multicast Reliable" if $type eq "reliable multicast";
   return "UDP" if $type eq "udp";
   return "RTPS" if $type eq "rtps";
+  return "RTPS" if $type eq "rtps_udp";
   return "UNKNOWN TRANSPORT TYPE";
 }
 

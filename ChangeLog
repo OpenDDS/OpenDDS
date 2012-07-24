@@ -1,3 +1,12 @@
+Tue Jul 24 23:45:40 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-throughput-tables.pl:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+        * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+          Corrected throughput plot indices, rtps transport name detection
+          and html generation.
+
 Tue Jul 24 15:29:57 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DdsDcps.mpc:
