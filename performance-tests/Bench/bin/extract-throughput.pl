@@ -316,7 +316,10 @@ END {
     my $scale;
     my $groups;
     SWITCH:{
-      $type =~ /bidir/    && do { $scale = 16; $groups = &testGroups($type); last SWITCH; };
+      # bidir scale depend on whether the connections are full duplex 8 or half duplex 16
+      #  the test environment uses full duplex
+      #$type =~ /bidir/    && do { $scale = 16; $groups = &testGroups($type); last SWITCH; };
+      $type =~ /bidir/    && do { $scale =  8; $groups = &testGroups($type); last SWITCH; };
       $type =~ /pubbound/ && do { $scale =  8; $groups = &testGroups($type); last SWITCH; };
       $type =~ /subbound/ && do { $scale =  8; $groups = &testGroups($type); last SWITCH; };
     }
@@ -335,4 +338,3 @@ END {
     }
   }
 }
-

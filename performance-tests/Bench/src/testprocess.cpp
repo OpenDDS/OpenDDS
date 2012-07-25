@@ -15,6 +15,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -40,6 +41,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       process.run();
 
       std::cout << process << std::endl;
+
+      // Output to log file for throughput tests.
+      std::stringstream str;
+      str << process << std::endl;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C"), str.str().c_str() ));
     }
 
   } catch( CORBA::Exception& /* e */) {

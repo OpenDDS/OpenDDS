@@ -1,3 +1,14 @@
+Wed Jul 25 21:11:17 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+          Changed the bidir test scale.  The Bidirectional test scale was for
+          a half duplex network but the testing is done on a full duplex
+          network.
+
+        * performance-tests/Bench/src/testprocess.cpp:
+          Output the process to the ACE output for the orb log file in
+          throughput tests.
+
 Wed Jul 25 17:40:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/build.pl:
