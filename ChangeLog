@@ -1,3 +1,8 @@
+Wed Jul 25 21:51:17 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+          Added necessary rtps library dependencies.
+
 Wed Jul 25 21:11:17 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/extract-throughput.pl:
