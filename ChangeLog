@@ -1,3 +1,11 @@
+Wed Jul 25 17:40:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/build.pl:
+
+          If using eclipse to build from the command line
+          then if an error is encountered don't pop up a
+          dialog box.
+
 Tue Jul 24 23:45:40 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/gen-throughput-tables.pl:

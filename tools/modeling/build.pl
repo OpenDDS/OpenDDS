@@ -64,7 +64,7 @@ foreach my $s (@steps) {
     }
   }
 
-  my $cmd = "\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
+  my $cmd = "\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash --launcher.suppressErrors -data " .
       "$ECLIPSE_WORKSPACE -application org.eclipse.ant.core." .
       "antRunner -l ant.log @args -vmargs -Xmx1g";
   print "$cmd\n";
