@@ -657,7 +657,7 @@ namespace {
     void operator()(const char*) {}
     // not called.  prevents instantiation of the following with T = const char*
 
-    void operator()(ACE_CDR::LongDouble ld)
+    void operator()(ACE_CDR::LongDouble& ld)
     {
 #ifdef NONNATIVE_LONGDOUBLE
       ACE_CDR::LongDouble::NativeImpl ni;
