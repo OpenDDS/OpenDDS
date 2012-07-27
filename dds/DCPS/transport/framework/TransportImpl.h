@@ -243,6 +243,7 @@ private:
   /// Our reservation lock.
   typedef ACE_SYNCH_MUTEX                ReservationLockType;
   ReservationLockType reservation_lock_;
+  ACE_thread_t rlock_thread_id_;
 
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;

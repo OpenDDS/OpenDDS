@@ -1,3 +1,11 @@
+Fri Jul 27 13:14:50 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fix rtps discovery deadlock problem on Windows.
+
 Wed Jul 25 21:51:17 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * tests/DCPS/Ownership/Ownership.mpc:

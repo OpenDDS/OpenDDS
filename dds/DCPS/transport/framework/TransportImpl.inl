@@ -49,7 +49,11 @@ OpenDDS::DCPS::TransportImpl::pre_shutdown_i()
 ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::acquire()
 {
-  return reservation_lock_.acquire();
+  int rv = reservation_lock_.acquire();
+  if (rv == 0) {
+    rlock_thread_id_ = ACE_OS::thr_self();
+  }
+  return rv;
 }
 
 ACE_INLINE int
@@ -62,33 +66,16 @@ ACE_INLINE int
 OpenDDS::DCPS::TransportImpl::release()
 {
   // Because of the current design, we may have already
-  // released this lock.  There are three possibilities
-  // for what state we can be in:
-  // 1) We took the lock and need to release it
-  // 2) We took the lock, released it, and nobody owns
-  //    it.
-  // 3) We took the lock, released it, and somebody else
-  //    owns it.
-  //
-  // Given the existing mutex APIs and portability
-  // concerns, the best approach is to just call release
-  // and swallow some of the return values.
+  // released this lock.  Looking at the rlock_thread_id_
+  // data member should tell us whether we own the lock.
 
-  int rv = reservation_lock_.release();
-
-  if (DCPS::DCPS_debug_level > 5) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportImpl::release() - ")
-               ACE_TEXT("attempting release, rv=%d\n"), rv));
+  if (rlock_thread_id_ == ACE_OS::thr_self()) {
+    // we own it, clear the thread id and release
+    rlock_thread_id_ = 0;
+    return reservation_lock_.release();
   }
-
-  switch (rv) {
-  case 0:      // Case 1
-  case EAGAIN: // Case 2?
-  case EPERM:  // Case 3
-    return 0;
-  default:
-    return rv;
-  }
+  // we don't own it, do nothing
+  return 0;
 }
 
 ACE_INLINE int
