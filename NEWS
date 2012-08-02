@@ -1,3 +1,10 @@
+Version 3.3 of OpenDDS.
+
+- The support for the generation of the DDS4CCM needed LEM library has been
+  moved to CIAO DDS4CCM. This removed the optional dependency on CIAO
+
+========================================================================
+
 Version 3.2 of OpenDDS.
 
 - Added a new transport type: Shared Memory
@@ -23,7 +30,7 @@ Version 3.2 of OpenDDS.
 
 - Refactored InfoRepo-based discovery into its own library. This reduces the
   dependency on TAO such that certain TAO libraries will no longer be loaded
-  unless they are needed for InfoRepo-based discovery. 
+  unless they are needed for InfoRepo-based discovery.
 
 - For IDL files that only contain local interfaces, the generation of
   server-side TAO code was suppressed. The suppression applies to DdsDcps*.idl.
