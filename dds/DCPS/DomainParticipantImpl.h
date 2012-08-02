@@ -86,7 +86,7 @@ public:
     RepoId next();
   private:
     RepoId      base_;     // will be combined with serial to produce next
-    long        serial_;   // will be incremeneted each time
+    long        serial_;   // will be incremented each time
     GuidBuilder builder_;  // used to modify base
   };
 

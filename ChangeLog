@@ -1,3 +1,26 @@
+Thu Aug  2 09:24:28 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+          Fixed typo in comment
+
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+          Removed the ability of generating the CIAO lem for opendds. This has
+          been moved to CIAO making OpenDDS less dependent on CIAO, we only
+          need to specify ciao lem in the IDL files for which we need a lem
+          as part of CIAO
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+          Removed dependency on dds4ccm
+
+        * MPC/config/dcps_lem_stub.mpb:
+        * MPC/config/dds4ccm_opendds.mpb:
+          Removed these files.
+
 Fri Jul 27 15:46:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FilterEvaluator.cpp:

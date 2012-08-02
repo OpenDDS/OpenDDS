@@ -1,7 +1,0 @@
-// -*- MPC -*-
-// $Id$
-
-project : dds4ccm_stub, ccm_session_stub {
-  libs += OpenDDS_Dcps_lem_stub
-  after += OpenDDS_Dcps_lem_stub
-}

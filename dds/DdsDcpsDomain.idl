@@ -14,7 +14,7 @@
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
-#pragma ciao lem "dds/DdsDcpsDomainE.idl"
+#pragma ciao lem "DdsDcpsDomainE.idl"
 
 module DDS
 {

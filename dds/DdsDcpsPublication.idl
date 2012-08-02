@@ -11,7 +11,7 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 
-#pragma ciao lem "dds/DdsDcpsPublicationE.idl"
+#pragma ciao lem "DdsDcpsPublicationE.idl"
 
 module DDS {
    local interface Topic;

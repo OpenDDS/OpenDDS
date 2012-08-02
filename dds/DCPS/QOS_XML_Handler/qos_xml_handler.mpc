@@ -1,7 +1,7 @@
 //$Id$
 
 project (OpenDDS_XML_QOS_XSC_Generation) : install, xscdefaults {
-  requires += xsc dds4ccm_opendds
+  requires += xsc
 
   xscflags += --cxx-banner-file $(DDS_ROOT)/ddocs/schema/xsc-banner.cpp
   xscflags += --cxx-header-banner-file $(DDS_ROOT)/docs/schema/xsc-banner.h
@@ -31,8 +31,6 @@ project (OpenDDS_QOS_XML_XSC_Handler) : install, acelib, xerces, anytypecode, \
   after += OpenDDS_XML_QOS_XSC_Generation
   dynamicflags += XML_QOS_HANDLER_BUILD_DLL
   macros += XML_USE_PTHREADS
-
-  requires += dds4ccm_opendds
 
   Source_Files {
     dds_qos.cpp

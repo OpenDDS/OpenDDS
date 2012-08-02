@@ -35,7 +35,7 @@
 #include "tao/StringSeq.pidl"
 #include "tao/LongSeq.pidl"
 
-#pragma ciao lem "dds/DdsDcpsInfrastructureE.idl"
+#pragma ciao lem "DdsDcpsInfrastructureE.idl"
 
 module DDS {
 
