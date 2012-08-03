@@ -1,3 +1,9 @@
+Fri Aug  3 21:39:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Whitespace fix only.
+
 Fri Aug  3 18:19:50 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:

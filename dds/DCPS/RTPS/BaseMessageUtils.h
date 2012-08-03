@@ -104,7 +104,7 @@ address_to_bytes(OpenDDS::RTPS::OctetArray16& dest, const ACE_INET_Addr& addr)
   } else {
     const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
     std::memset(&dest[0], 0, 12);
-                std::memcpy(&dest[12], &in->sin_addr, 4);
+    std::memcpy(&dest[12], &in->sin_addr, 4);
   }
 }
 
