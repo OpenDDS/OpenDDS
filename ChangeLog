@@ -1,3 +1,9 @@
+Fri Aug  3 18:19:50 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+          Added dependency on mpc feature dds4ccm_opendds again, older
+          ACE versions don't have this library
+
 Thu Aug  2 13:20:35 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * NEWS:
