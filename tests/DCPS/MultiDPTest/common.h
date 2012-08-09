@@ -7,13 +7,6 @@
 #include "ace/SString.h"
 #include "ace/Atomic_Op.h"
 
-enum TransportInstanceId
-{
-  SUB_TRAFFIC_TCP_1,
-  SUB_TRAFFIC_TCP_2,
-  PUB_TRAFFIC_TCP
-};
-
 const long domain_id = 411;
 extern const char* type_name;
 extern int num_datawriters;

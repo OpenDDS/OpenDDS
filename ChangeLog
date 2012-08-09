@@ -1,3 +1,13 @@
+Thu Aug  9 17:12:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/MultiDPTest/common.h:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+
+          Remove setting of pub and sub addresses which
+          were not being used.
+
 Fri Aug  3 21:39:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:

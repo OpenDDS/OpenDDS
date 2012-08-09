@@ -36,7 +36,6 @@
 OpenDDS::DCPS::TransportImpl_rch reader_impl[2];
 ::DDS::DataReaderListener_var listener[2];
 ::DDS::DataReader_var datareader[2];
-ACE_TString reader_address_str[2];
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
@@ -49,7 +48,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
   {
     // options:
     //  -d history.depth            defaults to 1
-    //  -s subscriber transport address    defaults to localhost:23456
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -z length of float sequence in data type   defaults to 10
@@ -62,15 +60,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
     const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-s"))) != 0)
-    {
-      //Maximum two addresses.
-      static size_t i = 0;
-      reader_address_str[i] = currentArg;
-      i++;
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-m"))) != 0)
     {
       num_instances_per_writer = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();

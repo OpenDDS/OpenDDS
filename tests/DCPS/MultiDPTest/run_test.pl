@@ -20,9 +20,6 @@ PerlDDS::add_lib_path('../FooType5');
 $num_writers=1;
 $num_instances_per_writer=1;
 $num_samples_per_instance=10;
-$sub_addr1 = "localhost:16701";
-$sub_addr2 = "localhost:16702";
-$pub_addr = "localhost:29803";
 $sequence_length=10;
 
 $dcpsrepo_ior = "repo.ior";
@@ -40,11 +37,9 @@ unlink $publisher_ready;
 
 
 # test multiple cases
-$sub_parameters = "-s $sub_addr1 -s $sub_addr2 "
-              . " -m $num_instances_per_writer -i $num_samples_per_instance";
+$sub_parameters = "-m $num_instances_per_writer -i $num_samples_per_instance";
 
-$pub_parameters = "-p $pub_addr "
-              . " -m $num_instances_per_writer -i $num_samples_per_instance";
+$pub_parameters = "-m $num_instances_per_writer -i $num_samples_per_instance";
 
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",

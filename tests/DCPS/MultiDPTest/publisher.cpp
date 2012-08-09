@@ -30,8 +30,6 @@
 OpenDDS::DCPS::TransportImpl_rch writer_impl;
 ::DDS::DataWriter_var datawriter[2];
 Writer* writers[2];
-int writer_address_given = 0;
-ACE_TString writer_address_str = ACE_TEXT("localhost:0");
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
@@ -46,7 +44,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -i num_samples_per_instance    defaults to 1
     //  -w num_datawriters          defaults to 1
     //  -m num_instances_per_writer defaults to 1
-    //  -p pub transport address    defaults to localhost:23456
     //  -z length of float sequence in data type   defaults to 10
     //  -v                          verbose transport debug
 
@@ -60,12 +57,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_samples_per_instance = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
-    {
-      writer_address_str = currentArg;
-      writer_address_given = 1;
       arg_shifter.consume_arg ();
     }
    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-v")) == 0)
