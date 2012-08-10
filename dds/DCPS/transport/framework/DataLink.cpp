@@ -134,24 +134,32 @@ DataLink::wait_for_start()
 void
 DataLink::stop()
 {
-  GuardType guard(this->strategy_lock_);
+  this->pre_stop_i();
 
-  if (this->stopped_) return; // already stopped
+  TransportSendStrategy_rch send_strategy;
+  TransportStrategy_rch recv_strategy;
 
-  // Stop the TransportSendStrategy and the TransportReceiveStrategy.
-  if (!this->send_strategy_.is_nil()) {
-    this->send_strategy_->stop();
+  {
+    GuardType guard(this->strategy_lock_);
+
+    if (this->stopped_) return;
+
+    send_strategy = this->send_strategy_;
     this->send_strategy_ = 0;
-  }
 
-  if (!this->receive_strategy_.is_nil()) {
-    this->receive_strategy_->stop();
+    recv_strategy = this->receive_strategy_;
     this->receive_strategy_ = 0;
   }
 
-  // Tell our subclass about the "stop" event.
-  this->stop_i();
+  if (!send_strategy.is_nil()) {
+    send_strategy->stop();
+  }
 
+  if (!recv_strategy.is_nil()) {
+    recv_strategy->stop();
+  }
+
+  this->stop_i();
   this->stopped_ = true;
 }
 
@@ -574,7 +582,7 @@ DataLink::schedule_delayed_release()
   this->_add_ref();
   VDBG((LM_DEBUG, "(%P|%t) DataLink[%@]::schedule_delayed_release\n", this));
 
-  // The samples has to be removed at this point, otherwise the sample
+  // The samples have to be removed at this point, otherwise the samples
   // can not be delivered when new association is added and still use
   // this connection/datalink.
   if (!this->send_strategy_.is_nil()) {
@@ -583,7 +591,7 @@ DataLink::schedule_delayed_release()
 
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
   reactor->schedule_timer(this, 0, this->datalink_release_delay_);
-  scheduled_ = true;
+  this->scheduled_ = true;
 }
 
 bool
@@ -905,15 +913,19 @@ DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink", "transport_shutdown", 6);
 
-  if (! this->send_strategy_.is_nil ()) {
-    this->send_strategy_->transport_shutdown ();
+  if (!this->send_strategy_.is_nil()) {
+    this->send_strategy_->transport_shutdown();
   }
 
   if (this->cancel_release()) {
-    this->handle_timeout(ACE_OS::gettimeofday(), (const void *)0);
+    // Remove the extra reference added when schedule with the reactor.
+    // All other shutdown-related activites are handled by stop().
+    // This can't be the last reference because we are called from
+    // the TransportImpl-derived class which still has a reference.
+    this->_remove_ref();
   }
 
-  stop();
+  this->stop();
 
   // Drop our reference to the TransportImpl object
   this->impl_ = 0;
@@ -1310,48 +1322,17 @@ void DataLink::clear_associations()
 }
 
 int
-OpenDDS::DCPS::DataLink::handle_timeout(const ACE_Time_Value& /*tv*/,
-                                        const void* /*arg*/)
+DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
+
+  this->impl_->unbind_link(this);
+
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
-    this->pre_stop_i();
-
-    // The TransportImpl ptr should be cleaned in the dstr.
-    // This link will be used as a callback after the actual
-    // connection is closed.
-    //this->impl_ = 0;
-
-    TransportSendStrategy_rch send_strategy = 0;
-    TransportStrategy_rch recv_strategy = 0;
-    {
-      GuardType guard2(this->strategy_lock_);
-
-      if (!this->send_strategy_.is_nil()) {
-        send_strategy =  this->send_strategy_; // save copy
-        this->send_strategy_ = 0;
-      }
-
-      if (!this->receive_strategy_.is_nil()) {
-        recv_strategy = this->receive_strategy_; // save copy
-        this->receive_strategy_ = 0;
-      }
-    }
-
-    if (!send_strategy.is_nil()) {
-      send_strategy->stop();
-    }
-
-    if (!recv_strategy.is_nil()) {
-      recv_strategy->stop();
-    }
-
-    // Tell our subclass to handle a "stop" event.
-    this->stop_i();
+    this->stop();
   }
 
-  VDBG((LM_DEBUG, "(%P|%t) DataLink[%@]::handle_timeout\n", this));
   this->_remove_ref();
-
   return 0;
 }
 

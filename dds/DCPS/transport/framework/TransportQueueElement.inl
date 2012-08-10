@@ -107,6 +107,9 @@ bool
 TransportQueueElement::MatchOnDataPayload::matches(
   const TransportQueueElement& candidate) const
 {
+  if (!candidate.msg_payload()) {
+    return false;
+  }
   return this->data_ == candidate.msg_payload()->rd_ptr();
 }
 

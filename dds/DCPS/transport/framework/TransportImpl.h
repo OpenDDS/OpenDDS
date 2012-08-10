@@ -59,6 +59,9 @@ public:
 
   virtual ~TransportImpl();
 
+  /// Remove any pending_release mappings.
+  virtual void unbind_link(DataLink* link);
+
   /// Callback from the DataLink to clean up any associated resources.
   /// This usually is done when the DataLink is lost. The call is made with
   /// no transport/DCPS locks held.

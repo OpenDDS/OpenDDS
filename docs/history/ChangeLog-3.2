@@ -270,7 +270,7 @@ Wed Jun 27 17:42:36 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
           Release the TransportImpl lock while waiting for the handshake
           to complete.
 
-        * dds/DCPS/RTPC/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
 
           Move initialization of the passive (reader) side of the
           association to the calling thread (from the Task thread).
@@ -1418,67 +1418,6 @@ Thu Apr 19 14:49:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataReaderRemoteImpl.h:
         * dds/DCPS/DataReaderRemoteImpl.cpp:
-        * dds/DdsDcpsDataReaderRemote.idl:
-
-          Removed these files.
-
-Tue Apr 17 19:23:28 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
-
-        * dds/DCPS/DataReaderCallbacks.h:
-        * dds/DCPS/DataReaderImpl.h:
-        * dds/DCPS/DataReaderImpl.cpp:
-        * dds/DCPS/Discovery.h:
-
-        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
-        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
-        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
-        * dds/DCPS/InfoRepoDiscovery/Info.idl:
-        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
-        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
-        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
-
-        * dds/DCPS/MultiTopicDataReaderBase.cpp:
-
-        * dds/DCPS/RTPS/RtpsDiscovery.h:
-        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
-        * dds/DCPS/RTPS/Sedp.h:
-        * dds/DCPS/RTPS/Sedp.cpp:
-        * dds/DCPS/RTPS/Spdp.h:
-        * dds/DCPS/RTPS/Spdp.cpp:
-
-        * dds/DCPS/SubscriberImpl.h:
-        * dds/DCPS/SubscriberImpl.cpp:
-
-        * dds/DCPS/transport/framework/TransportClient.cpp:
-
-        * dds/DdsDcps.mpc:
-        * dds/DdsDcpsInfoUtils.idl:
-
-        * dds/InfoRepo/DCPSInfo_i.h:
-        * dds/InfoRepo/DCPS_IR_Domain.h:
-        * dds/InfoRepo/DCPS_IR_Publication.h:
-        * dds/InfoRepo/DCPS_IR_Subscription.h:
-
-        * tests/DCPS/ConfigTransports/Puller.h:
-
-        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
-        * tests/DCPS/DCPSInfoRepo/DiscReceivedCalls.h:
-        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
-
-        * tests/DCPS/FooTest3_1/test_helper.h:
-        * tests/DCPS/FooTest3_1/test_helper.cpp:
-
-        * tests/DCPS/FooTest3_2/test_helper.h:
-        * tests/DCPS/FooTest3_2/test_helper.cpp:
-
-        * tests/DCPS/FooType/FooType.idl:
-
-        * tests/DCPS/unit/MyTypeSupport.idl:
-        * tests/DCPS/unit/MyTypeSupportImpl.h:
-
-        * dds/DCPS/DataReaderRemoteImpl.h:
-        * dds/DCPS/DataReaderRemoteImpl.cpp:
-
         * dds/DdsDcpsDataReaderRemote.idl:
 
           Removed these files.

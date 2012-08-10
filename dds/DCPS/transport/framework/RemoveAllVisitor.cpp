@@ -33,7 +33,9 @@ OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* ele
 
   // Add the total_length() of the element->msg() chain to our
   // removed_bytes_ (running) total.
-  this->removed_bytes_ += element->msg()->total_length();
+  if (element->msg()) {
+    this->removed_bytes_ += element->msg()->total_length();
+  }
 
   // Inform the element that we've made a decision - and it is
   // data_dropped()

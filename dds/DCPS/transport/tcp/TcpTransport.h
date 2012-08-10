@@ -47,6 +47,8 @@ public:
 
   int fresh_link(TcpConnection_rch connection);
 
+  virtual void unbind_link(DataLink* link);
+
 protected:
 
   virtual DataLink* find_datalink_i(const RepoId& local_id,

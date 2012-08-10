@@ -1,3 +1,32 @@
+Fri Aug 10 21:08:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        Integrated changes from Scott Harris and Tim Bradley:
+
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+          msg_payload() and msg() methods of TransportQueueElement can return
+          NULL pointers.  Especially in the case of msg_payload(), there are
+          queue elements that have a header but no payload.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          handle_timeout() calls the new unbind_link() method on the transport,
+          which allows the link to be removed from transport-specific data
+          structures.  The rest of handle_timeout() was equivalent to stop().
+          pre_stop_i() is now called from stop().
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added new method unbind_link(), and enhanced logging in TcpTransport.
+
+        * docs/history/ChangeLog-3.2:
+
+          Fixed typos and invalid log entries.
+
 Thu Aug  9 17:12:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/MultiDPTest/common.h:

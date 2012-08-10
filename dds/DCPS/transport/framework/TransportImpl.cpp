@@ -274,6 +274,13 @@ TransportImpl::ConnectionEvent::complete(const DataLink_rch& link)
   return false;
 }
 
+void
+TransportImpl::unbind_link(DataLink*)
+{
+  // may be overridden by subclass
+  DBG_ENTRY_LVL("TransportImpl", "unbind_link",6);
+}
+
 bool
 TransportImpl::release_link_resources(DataLink* link)
 {

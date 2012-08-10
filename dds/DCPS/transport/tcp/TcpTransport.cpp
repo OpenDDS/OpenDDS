@@ -176,6 +176,15 @@ TcpTransport::connect_datalink_i(const RepoId& /*local_id*/,
     new TcpDataLink(key.address(), this, attribs.priority_,
                     key.is_loopback(), true /*active*/);
 
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) TcpTransport::connect_datalink_i link %@ PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            link.in(), link->transport_priority(),
+            link->remote_address().get_host_addr(),
+            link->remote_address().get_port_number(),
+            (int)link->is_loopback(),
+            (int)link->is_active()), 2);
+
   { // guard scope
     GuardType guard(this->links_lock_);
 
@@ -238,6 +247,15 @@ TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
       TcpDataLink_rch link =
         new TcpDataLink(key.address(), this, ce.attribs_.priority_,
                         key.is_loopback(), false /*active == false*/);
+      VDBG_LVL((LM_DEBUG,
+                "(%P|%t) TcpTransport::accept_datalink link %@ PriorityKey"
+                "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+                link.in(), link->transport_priority(),
+                link->remote_address().get_host_addr(),
+                link->remote_address().get_port_number(),
+                (int)link->is_loopback(),
+                (int)link->is_active()), 2);
+
       {
         GuardType guard(this->links_lock_);
         if (this->links_.bind(key, link) != 0) {
@@ -524,6 +542,16 @@ TcpTransport::release_datalink(DataLink* link)
     tcp_link->is_loopback(),
     tcp_link->is_active());
 
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) TcpTransport::release_datalink link %@ PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            link,
+            tcp_link->transport_priority(),
+            tcp_link->remote_address().get_host_addr(),
+            tcp_link->remote_address().get_port_number(),
+            (int)tcp_link->is_loopback(),
+            (int)tcp_link->is_active()), 2);
+
   if (this->links_.unbind(key, released_link) != 0) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: Unable to locate DataLink in order to "
@@ -531,17 +559,32 @@ TcpTransport::release_datalink(DataLink* link)
 
   } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
 
+    VDBG_LVL((LM_DEBUG,
+              "(%P|%t) TcpTransport::release_datalink datalink_release_delay "
+              "is %: sec %d usec\n",
+              link->datalink_release_delay().sec(),
+              link->datalink_release_delay().usec()), 4);
+
     released_link->set_release_pending(true);
-    if (this->pending_release_links_.bind(key, released_link) != 0) {
+    switch (this->pending_release_links_.bind(key, released_link)) {
+    case -1:
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
-                 "pending_release_links_ map.\n"));
-    } else {
+                 "pending_release_links_ map: %p\n", ACE_TEXT("bind")));
+      break;
+    case 1:
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
+                 "pending_release_links_ map: already bound\n"));
+      break;
+    case 0:
       link->schedule_delayed_release();
+      break;
+    default:
+      break;
     }
 
   } else { // datalink_release_delay_ is 0
-    link->pre_stop_i();
     link->stop();
   }
 
@@ -589,6 +632,12 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                         remote_address,
                         remote_address == this->tcp_config_->local_address_,
                         connection->is_connector());
+
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) TcpTransport::passive_connection() - "
+            ACE_TEXT("established with %C:%d.\n"),
+            remote_address.get_host_name(),
+            remote_address.get_port_number()), 2);
 
   GuardType guard(this->connections_lock_);
   TcpDataLink_rch link;
@@ -762,6 +811,52 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
   }
 
   return 0;
+}
+
+void
+TcpTransport::unbind_link(DataLink* link)
+{
+  TcpDataLink* tcp_link = static_cast<TcpDataLink*>(link);
+
+  if (tcp_link == 0) {
+    // Really an assertion failure
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
+               "Failed to downcast DataLink to TcpDataLink.\n"));
+    return;
+  }
+
+  // Attempt to remove the TcpDataLink from our links_ map.
+  PriorityKey key(
+    tcp_link->transport_priority(),
+    tcp_link->remote_address(),
+    tcp_link->is_loopback(),
+    tcp_link->is_active());
+
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) TcpTransport::unbind_link link %@ PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            link,
+            tcp_link->transport_priority(),
+            tcp_link->remote_address().get_host_addr(),
+            tcp_link->remote_address().get_port_number(),
+            (int)tcp_link->is_loopback(),
+            (int)tcp_link->is_active()), 2);
+
+  GuardType guard(this->links_lock_);
+
+  if (this->pending_release_links_.unbind(key) != 0) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
+               "Failed to find link %@ PriorityKey "
+               "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+               link,
+               tcp_link->transport_priority(),
+               tcp_link->remote_address().get_host_addr(),
+               tcp_link->remote_address().get_port_number(),
+               (int)tcp_link->is_loopback(),
+               (int)tcp_link->is_active()));
+  }
 }
 
 }
