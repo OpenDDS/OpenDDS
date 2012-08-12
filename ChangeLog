@@ -1,3 +1,12 @@
+Sun Aug 12 19:03:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+          Updated ciao lem
+
 Fri Aug 10 21:08:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         Integrated changes from Scott Harris and Tim Bradley:

@@ -11,7 +11,7 @@
 
 #include "dds/DdsDcpsInfrastructure.idl"
 
-#pragma ciao lem "DdsDcpsPublicationE.idl"
+#pragma ciao lem "dds/DdsDcpsPublicationE.idl"
 
 module DDS {
    local interface Topic;
@@ -185,32 +185,32 @@ module OpenDDS {
 
     local interface DataWriterListener : ::DDS::DataWriterListener {
 
-      // Called when a connection failure has been detected
-      // and there are still associations using the connection
-      // after the configurable graceful_disconnected_period.
+      /// Called when a connection failure has been detected
+      /// and there are still associations using the connection
+      /// after the configurable graceful_disconnected_period.
       void on_publication_disconnected(
         in ::DDS::DataWriter reader,
         in PublicationDisconnectedStatus status);
 
-      // Called when a disconnected connection
-      // has been reconnected.
+      /// Called when a disconnected connection
+      /// has been reconnected.
       void on_publication_reconnected(
         in ::DDS::DataWriter reader,
         in PublicationReconnectedStatus status);
 
-      // called when a connection is lost and hence one
-      // or more associations from this publication to
-      // some subscribers have been lost.
-      // A connection is "lost" when the retry attempts
-      // have been exhausted.
+      /// called when a connection is lost and hence one
+      /// or more associations from this publication to
+      /// some subscribers have been lost.
+      /// A connection is "lost" when the retry attempts
+      /// have been exhausted.
       void on_publication_lost(
         in ::DDS::DataWriter writer,
         in PublicationLostStatus status);
 
-      // called when the connection object is cleaned up and
-      // the reconnect thread exits.
-      // This hook is added for testing the reconnect thread
-      // leaking problem when the subscriber crashes.
+      /// called when the connection object is cleaned up and
+      /// the reconnect thread exits.
+      /// This hook is added for testing the reconnect thread
+      /// leaking problem when the subscriber crashes.
       void on_connection_deleted(
         in ::DDS::DataWriter writer);
     };
