@@ -30,7 +30,7 @@ OpenDDS::DCPS::TransportSendListener::data_delivered(const DataSampleListElement
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,
-             "(%P|%t) ERROR: Subclass should override if sending data samples."));
+             "(%P|%t) ERROR: Subclass should override if sending data samples.\n"));
 }
 
 void
@@ -40,7 +40,7 @@ OpenDDS::DCPS::TransportSendListener::data_dropped(const DataSampleListElement* 
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(dropped_by_transport);
   ACE_ERROR((LM_ERROR,
-             "(%P|%t) ERROR: Subclass should override if sending data samples."));
+             "(%P|%t) ERROR: Subclass should override if sending data samples.\n"));
 }
 
 void
@@ -48,7 +48,7 @@ OpenDDS::DCPS::TransportSendListener::control_delivered(ACE_Message_Block* sampl
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,
-             "(%P|%t) ERROR: Subclass should override if sending control samples."));
+             "(%P|%t) ERROR: Subclass should override if sending control samples.\n"));
 }
 
 void
@@ -58,7 +58,7 @@ OpenDDS::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(dropped_by_transport);
   ACE_ERROR((LM_ERROR,
-             "(%P|%t) ERROR: Subclass should override if sending control samples."));
+             "(%P|%t) ERROR: Subclass should override if sending control samples.\n"));
 }
 
 void

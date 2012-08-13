@@ -634,7 +634,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                         connection->is_connector());
 
   VDBG_LVL((LM_DEBUG,
-            "(%P|%t) TcpTransport::passive_connection() - "
+            ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
             ACE_TEXT("established with %C:%d.\n"),
             remote_address.get_host_name(),
             remote_address.get_port_number()), 2);
