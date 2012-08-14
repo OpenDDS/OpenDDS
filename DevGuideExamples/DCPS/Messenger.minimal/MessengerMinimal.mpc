@@ -1,6 +1,5 @@
-//
+// -*- MPC -*-
 // $Id$
-//
 
 project(*idl): dcps {
   TypeSupport_Files {

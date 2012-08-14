@@ -1,3 +1,13 @@
+Tue Aug 14 07:29:32 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+          File header change
+
+        * MPC/config/dds_model.mpb:
+          Changed this to use the new feature dds_model. This is enabled by
+          default, but can be set to zero which disabled all projects that
+          use the opendds dds_model library
+
 Mon Aug 13 21:49:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendListener.cpp:
