@@ -1,3 +1,9 @@
+Tue Aug 14 19:28:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Call datalink->stop() if the pending_release_ binding fails.
+
 Tue Aug 14 07:29:32 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:

@@ -571,11 +571,13 @@ TcpTransport::release_datalink(DataLink* link)
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
                  "pending_release_links_ map: %p\n", ACE_TEXT("bind")));
+      link->stop();
       break;
     case 1:
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
                  "pending_release_links_ map: already bound\n"));
+      link->stop();
       break;
     case 0:
       link->schedule_delayed_release();
