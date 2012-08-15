@@ -1344,6 +1344,10 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
    * implementation of setting the DiffServ codepoint.
    */
   int result = 0;
+
+  // Shift the code point up to bits, so that we only use the DS field
+  int tos = cp << 2;
+
   const char* which = "IPV4 TOS";
 #if defined (ACE_HAS_IPV6)
   ACE_INET_Addr local_address;
@@ -1370,8 +1374,8 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
     result = socket.set_option(
                IPPROTO_IPV6,
                IPV6_TCLASS,
-               &cp,
-               sizeof(cp));
+               &tos,
+               sizeof(tos));
 
   } else // This is a bit tricky and might be hard to follow...
 
@@ -1380,8 +1384,8 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
   result = socket.set_option(
              IPPROTO_IP,
              IP_TOS,
-             &cp,
-             sizeof(cp));
+             &tos,
+             sizeof(tos));
 
   if ((result == -1) && (errno != ENOTSUP)
 #ifdef WSAEINVAL

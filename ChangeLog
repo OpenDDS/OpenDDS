@@ -1,3 +1,12 @@
+Wed Aug 15 16:40:00 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Fix the way the transport priority QoS policy sets the diffserv
+          codepoint.  Shift the codepoint to the left 2 bits so that we
+          are properly setting the DS subfield when we set the socket
+          option for IP_TOS.
+
 Tue Aug 14 19:28:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpTransport.cpp:
