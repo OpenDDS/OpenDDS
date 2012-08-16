@@ -1,3 +1,8 @@
+Thu Aug 16 09:08:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+          Fixed C++11 warning
+
 Wed Aug 15 16:40:00 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

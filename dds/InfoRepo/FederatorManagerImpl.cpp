@@ -956,7 +956,7 @@ ManagerImpl::join_federation(
 
   } else {
     // Block while any different repository is joining.
-    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
+    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, 0);
 
     while (this->joiner_ != NIL_REPOSITORY) {
       // This releases the lock while we block.
