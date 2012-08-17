@@ -1,3 +1,10 @@
+Fri Aug 17 21:20:12 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/error_handling/main.cpp:
+
+          Fixed a warning and other cleanup.
+
 Fri Aug 17 20:59:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:

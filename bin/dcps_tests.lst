@@ -119,7 +119,7 @@ tests/transport/simple/run_test.pl shmem bp: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHM
 tests/transport/simple/run_test.pl shmem n: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM
 tests/transport/simple/run_test.pl shmem: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM
 
-tests/transport/error_handling/run_test.pl !NO_DDS_TRANSPORT !DCPS_MIN
+tests/transport/error_handling/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN
 
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA
 
