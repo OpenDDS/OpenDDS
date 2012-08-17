@@ -109,6 +109,11 @@ public:
   OpenDDS::DCPS::TopicStatus remove_topic(DCPS_IR_Participant* part,
                                           DCPS_IR_Topic*& topic);
 
+  /// Remove the topic from the id to topic map.
+  /// This method should only be called by the DCPS_IR_Topic
+  /// when deleting the topic.
+  void remove_topic_id_mapping(const OpenDDS::DCPS::RepoId& topicId);
+
   /// Mark a participant as being unresponsive (dead) and
   ///  schedule it to be removed next time
   ///  remove_dead_participants is called.

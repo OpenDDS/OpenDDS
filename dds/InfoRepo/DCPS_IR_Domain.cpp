@@ -1494,6 +1494,13 @@ void DCPS_IR_Domain::dispose_publication_bit(DCPS_IR_Publication* publication)
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
+void DCPS_IR_Domain::remove_topic_id_mapping(const OpenDDS::DCPS::RepoId& topicId)
+{
+  IdToTopicMap::iterator map_entry = this->idToTopicMap_.find(topicId);
+  if (map_entry != this->idToTopicMap_.end())
+    idToTopicMap_.erase(map_entry);
+}
+
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
 template class ACE_Node<DCPS_IR_Topic_Description*>;

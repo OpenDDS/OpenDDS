@@ -100,8 +100,8 @@ public:
   CORBA::ULong get_number_topics() const;
 
 private:
-  ACE_SString name_;
-  ACE_SString dataTypeName_;
+  ACE_CString name_;
+  ACE_CString dataTypeName_;
   DCPS_IR_Domain* domain_;
 
   DCPS_IR_Subscription_Set subscriptionRefs_;

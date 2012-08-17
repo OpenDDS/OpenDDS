@@ -95,11 +95,13 @@ void DCPS_IR_Topic::release(bool removing)
     this->removed_ = true;
 
     if (publicationRefs_.size() == 0 && subscriptionRefs_.size() == 0) {
+      this->domain_->remove_topic_id_mapping(this->id_);
       delete this;
     }
 
   } else if (this->removed_) {
     if (publicationRefs_.size() == 0 && subscriptionRefs_.size() == 0) {
+      this->domain_->remove_topic_id_mapping(this->id_);
       delete this;
     }
   }

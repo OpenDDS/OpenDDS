@@ -1,3 +1,16 @@
+Fri Aug 17 23:47:00 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Fixed memory leaks.  This included removing the
+          topic id to topic map entry from the DCPS_IR_Domain when
+          the topic was deleted, and cleaning up allocated objects
+          from the persistent objects before free.
+
 Fri Aug 17 21:20:12 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -61,6 +61,9 @@ struct TopicStrt<QosSeq, ACE_CString> {
 
   void cleanup(PersistenceUpdater::ALLOCATOR* allocator)
   {
+    name.clear(true);
+    dataType.clear(true);
+
     allocator->free(topicQos.second.second);
   }
 };
@@ -119,6 +122,8 @@ struct ActorStrt<QosSeq, QosSeq,
       participantId(actor.participantId), type(actor.type),
       callback(actor.callback.c_str(), allocator)
   {
+    callback.clear(true);
+
     pubsubQos.first = actor.pubsubQos.first;
     assign(pubsubQos.second, actor.pubsubQos.second, allocator);
 
@@ -658,6 +663,8 @@ PersistenceUpdater::create(const URActor& actor)
     ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( subscription) allocation failed.\n"));
     return;
   }
+  ArrDelAdapter<char> guard4(buf4);
+
   ACE_OS::memcpy(buf4, dst4.base(), len);
   ContentSubscriptionBin csp_bin;
   csp_bin.filterExpr = actor.contentSubscriptionProfile.filterExpr;
