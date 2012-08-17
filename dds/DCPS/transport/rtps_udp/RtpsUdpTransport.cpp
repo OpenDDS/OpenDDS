@@ -15,6 +15,7 @@
 #include "dds/DCPS/AssociationData.h"
 
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
@@ -31,7 +32,9 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
   : default_listener_(0)
 {
   if (!inst.is_nil()) {
-    configure(inst.in());
+    if (!configure(inst.in())) {
+      throw Transport::UnableToCreate();
+    }
   }
 }
 

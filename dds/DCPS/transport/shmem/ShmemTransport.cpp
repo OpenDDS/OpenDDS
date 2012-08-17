@@ -13,6 +13,7 @@
 
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "ace/Log_Msg.h"
 
@@ -28,7 +29,9 @@ ShmemTransport::ShmemTransport(const TransportInst_rch& inst)
   , hostname_(get_fully_qualified_hostname())
 {
   if (!inst.is_nil()) {
-    configure(inst.in());
+    if (!configure(inst.in())) {
+      throw Transport::UnableToCreate();
+    }
   }
 }
 

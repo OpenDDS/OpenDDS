@@ -19,6 +19,7 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/debug.h"
 #include <sstream>
@@ -32,7 +33,9 @@ TcpTransport::TcpTransport(const TransportInst_rch& inst)
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
   if (!inst.is_nil()) {
-    configure(inst.in());
+    if (!configure(inst.in())) {
+      throw Transport::UnableToCreate();
+    }
   }
 }
 

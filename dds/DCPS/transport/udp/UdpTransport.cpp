@@ -16,6 +16,7 @@
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
 
 namespace OpenDDS {
@@ -24,7 +25,9 @@ namespace DCPS {
 UdpTransport::UdpTransport(const TransportInst_rch& inst)
 {
   if (!inst.is_nil()) {
-    configure(inst.in());
+    if (!configure(inst.in())) {
+      throw Transport::UnableToCreate();
+    }
   }
 }
 

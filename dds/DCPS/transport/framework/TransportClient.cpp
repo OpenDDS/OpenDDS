@@ -98,12 +98,15 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
     if (check_transport_qos(*inst.in())) {
       TransportImpl_rch impl = inst->impl();
-      impl->attach_client(this);
-      impls_.push_back(impl);
-      const CORBA::ULong len = conn_info_.length();
-      conn_info_.length(len + 1);
-      impl->connection_info(conn_info_[len]);
-      cdr_encapsulation_ |= inst->requires_cdr();
+      if (!impl.is_nil()) 
+        {
+          impl->attach_client(this);
+          impls_.push_back(impl);
+          const CORBA::ULong len = conn_info_.length();
+          conn_info_.length(len + 1);
+          impl->connection_info(conn_info_[len]);
+          cdr_encapsulation_ |= inst->requires_cdr();
+        }
     }
   }
 

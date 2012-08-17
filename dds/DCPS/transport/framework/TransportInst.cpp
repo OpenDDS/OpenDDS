@@ -9,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportInst.h"
 #include "TransportImpl.h"
+#include "TransportExceptions.h"
 #include "EntryExit.h"
 
 #include "ace/Configuration.h"
@@ -109,7 +110,11 @@ OpenDDS::DCPS::TransportInst::impl()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
   if (this->impl_.is_nil()) {
-    this->impl_ = this->new_impl(TransportInst_rch(this, false));
+    try {
+      this->impl_ = this->new_impl(TransportInst_rch(this, false));
+    } catch (const OpenDDS::DCPS::Transport::UnableToCreate& ) {
+      return 0;
+    }
   }
   return this->impl_;
 }

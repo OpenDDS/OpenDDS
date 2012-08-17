@@ -20,6 +20,7 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -28,7 +29,9 @@ MulticastTransport::MulticastTransport(const TransportInst_rch& inst)
   : config_i_(0)
 {
   if (!inst.is_nil()) {
-    configure(inst.in());
+    if (!configure(inst.in())) {
+      throw Transport::UnableToCreate();
+    }
   }
 }
 

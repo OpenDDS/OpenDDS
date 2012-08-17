@@ -1,3 +1,26 @@
+Fri Aug 17 20:59:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          In transport constructors handle config errors
+          by throwing an exception instead of ignoring.
+
+        * tests/transport/error_handling:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+        * tests/transport/error_handling/error_handling.mpc:
+        * tests/transport/error_handling/main.cpp:
+        * tests/transport/error_handling/run_test.pl:
+        * bin/dcps_tests.lst:
+
+          Added test to verify exception is thrown in transport
+          constructor if a config error is encountered.
+
 Fri Aug 17 14:45:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/CompatibilityTest/run_test.pl:
