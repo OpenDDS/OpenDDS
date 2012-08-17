@@ -18,9 +18,6 @@ my $testnum = 0;
 PerlDDS::add_lib_path('../FooType4');
 PerlDDS::add_lib_path('../common');
 # single reader with single instances test
-my $sub_addr = "localhost:16701";
-my $pub_addr = "localhost:";
-my $port=29804;
 my $is_rtps_disc = 0;
 my $DCPScfg = "";
 my $DCPSREPO;
@@ -63,11 +60,11 @@ sub run_compatibility_tests {
 
   my $sub_time = 40;
   my $pub_time = $sub_time;
-  my $sub_parameters = "-s $sub_addr -l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -DCPSDebugLevel $level $DCPScfg -";
+  my $sub_parameters = "-l $sub_lease_time -x $sub_time -c $compatibility -d $sub_durability_kind -k $sub_liveliness_kind -r $sub_reliability_kind -DCPSDebugLevel $level $DCPScfg -";
 
   my $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 
-  my $pub_parameters = "-c $compatibility -d $pub_durability_kind -k $pub_liveliness_kind -r $pub_reliability_kind -l $pub_lease_time -x $pub_time -ORBDebugLevel $level -p $pub_addr$port $DCPScfg";
+  my $pub_parameters = "-c $compatibility -d $pub_durability_kind -k $pub_liveliness_kind -r $pub_reliability_kind -l $pub_lease_time -x $pub_time -ORBDebugLevel $level $DCPScfg";
 
   my $Publisher = PerlDDS::create_process ("publisher", "$pub_parameters");
 
