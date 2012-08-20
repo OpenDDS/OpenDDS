@@ -556,13 +556,18 @@ InfoRepoDiscovery::remove_publication(DDS::DomainId_t domainId,
                                       const RepoId& participantId,
                                       const RepoId& publicationId)
 {
+  bool removed = false;
   try {
     get_dcps_info()->remove_publication(domainId, participantId, publicationId);
-    return true;
+    removed = true;
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_publication: ");
-    return false;
   }
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
+  removeDataWriterRemote(publicationId);
+
+  return removed;
 }
 
 bool

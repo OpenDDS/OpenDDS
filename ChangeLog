@@ -1,3 +1,10 @@
+Mon Aug 20 21:43:53 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        
+          Added call to remove data writer that was missed during 
+          refactoring for InfoRepo(r5529).
+
 Fri Aug 17 23:47:00 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:
