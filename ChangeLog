@@ -1,3 +1,15 @@
+Tue Aug 21 22:42:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          When the scheduling policy is (empty string), use THR_INHERIT_SCHED
+          so that it's consistent with PerConnectionSynch and the default ACE
+          and pthread behavior.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Fixed logging: errno can't be logged when recv returns 0.
+
 Tue Aug 21 16:45:38 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:

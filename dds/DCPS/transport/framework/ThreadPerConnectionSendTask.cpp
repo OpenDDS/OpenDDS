@@ -94,6 +94,8 @@ int ThreadPerConnectionSendTask::open(void*)
 
   if (policy >= 0) {
     flags |= policy;
+  } else {
+    flags |= THR_INHERIT_SCHED;
   }
 
   if (DCPS_debug_level > 0) {
