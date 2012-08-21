@@ -98,7 +98,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
     if (check_transport_qos(*inst.in())) {
       TransportImpl_rch impl = inst->impl();
-      if (!impl.is_nil()) 
+      if (!impl.is_nil())
         {
           impl->attach_client(this);
           impls_.push_back(impl);

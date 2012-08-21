@@ -18,7 +18,7 @@ class SimpleTransportClient : public OpenDDS::DCPS::TransportClient
 
   void enable()
     {
-      try 
+      try
         {
           exceptionThrown = false;
           this->enable_transport(false, false);

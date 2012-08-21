@@ -1,8 +1,15 @@
+Tue Aug 21 16:45:38 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+
+          Fuzz fixes.
+
 Mon Aug 20 21:43:53 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
-        
-          Added call to remove data writer that was missed during 
+
+          Added call to remove data writer that was missed during
           refactoring for InfoRepo(r5529).
 
 Fri Aug 17 23:47:00 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
