@@ -525,5 +525,177 @@ RtpsSampleHeader::populate_inline_qos(
 
 #undef PROCESS_INLINE_QOS
 
+// simple marshaling helpers for RtpsSampleHeader::split()
+namespace {
+  void write(ACE_Message_Block* mb, ACE_CDR::UShort s, bool swap_bytes)
+  {
+    const char* ps = reinterpret_cast<const char*>(&s);
+    if (swap_bytes) {
+      ACE_CDR::swap_2(ps, mb->wr_ptr());
+      mb->wr_ptr(2);
+    } else {
+      mb->copy(ps, 2);
+    }
+  }
+
+  void write(ACE_Message_Block* mb, ACE_CDR::ULong i, bool swap_bytes)
+  {
+    const char* pi = reinterpret_cast<const char*>(&i);
+    if (swap_bytes) {
+      ACE_CDR::swap_4(pi, mb->wr_ptr());
+      mb->wr_ptr(4);
+    } else {
+      mb->copy(pi, 4);
+    }
+  }
+
+  // read without advancing rd_ptr()
+  void peek(ACE_CDR::UShort& target, const char* src, bool swap_bytes)
+  {
+    if (swap_bytes) {
+      ACE_CDR::swap_2(src, reinterpret_cast<char*>(&target));
+    } else {
+      std::memcpy(&target, src, sizeof(ACE_CDR::UShort));
+    }
+  }
+
+  void peek(ACE_CDR::ULong& target, const char* src, bool swap_bytes)
+  {
+    if (swap_bytes) {
+      ACE_CDR::swap_4(src, reinterpret_cast<char*>(&target));
+    } else {
+      std::memcpy(&target, src, sizeof(ACE_CDR::ULong));
+    }
+  }
+
+  // All of the fragments we generate will use the FRAG_SIZE of 1024, which is
+  // the smallest allowed by the spec (8.4.14.1.1).  There is no practical
+  // advantage to increasing this constant, since any number of 1024-byte
+  // fragments may appear in a single DATA_FRAG submessage.
+  const ACE_CDR::UShort FRAG_SIZE = 1024;
+}
+
+void
+RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
+                        ACE_Message_Block*& head, ACE_Message_Block*& tail)
+{
+  using namespace RTPS;
+  size_t data_offset = 0;
+  bool found_data = false;
+  const char* rd = orig.rd_ptr();
+  ACE_CDR::ULong starting_frag, sample_size;
+  ACE_CDR::Octet flags;
+  bool swap_bytes;
+
+  // Find the start of the DATA | DATA_FRAG submessage in the orig msg block.
+  // The submessages from the start of the msg block to this point (data_offset)
+  // will be copied to both the head and tail fragments.
+  while (true) {
+    flags = rd[data_offset + 1];
+    swap_bytes = ACE_CDR_BYTE_ORDER != bool(flags & FLAG_E);
+
+    switch (rd[data_offset]) {
+    case DATA:
+      if ((flags & (FLAG_D | FLAG_K_IN_DATA)) == 0) {
+        //ERROR, can't fragment a DATA D=0 K=0 submessage
+        // this check ensures that orig.cont() is non-null
+        return;
+      }
+      found_data = true;
+      starting_frag = 1;
+      sample_size = static_cast<ACE_CDR::ULong>(orig.cont()->total_length());
+      break;
+    case DATA_FRAG:
+      found_data = true;
+      peek(starting_frag, rd + data_offset + 24, swap_bytes);
+      peek(sample_size, rd + data_offset + 32, swap_bytes);
+      break;
+    }
+
+    if (found_data) {
+      break;
+    }
+
+    // Scan for next submessage in orig
+    ACE_CDR::UShort octetsToNextHeader;
+    peek(octetsToNextHeader, rd + data_offset + 2, swap_bytes);
+
+    data_offset += octetsToNextHeader;
+    if (data_offset >= orig.length()) {
+      //ERROR, this should not happen
+      return;
+    }
+  }
+
+  // Create the "head" message block (of size "sz") containing DATA_FRAG
+  size_t sz = orig.length();
+  ACE_CDR::Octet new_flags = flags;
+  size_t iqos_offset = data_offset + 8 + DATA_FRAG_OCTETS_TO_IQOS;
+  if (rd[data_offset] == DATA) {
+    sz += 12; // DATA_FRAG is 12 bytes larger than DATA
+    iqos_offset -= 12;
+    new_flags &= ~(FLAG_K_IN_DATA | FLAG_K_IN_FRAG);
+    if (flags & FLAG_K_IN_DATA) {
+      new_flags |= FLAG_K_IN_FRAG;
+    }
+  }
+  head = DataSampleHeader::alloc_msgblock(orig, sz, false);
+
+  head->copy(rd, data_offset);
+
+  head->wr_ptr()[0] = DATA_FRAG;
+  head->wr_ptr()[1] = new_flags;
+  head->wr_ptr(2);
+
+  std::memset(head->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
+  head->wr_ptr(4);
+
+  write(head, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+
+  head->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
+
+  write(head, starting_frag, swap_bytes);
+  const size_t max_data = size - sz, orig_payload = orig.cont()->total_length();
+  const ACE_CDR::UShort frags =
+    static_cast<ACE_CDR::UShort>(std::min(max_data, orig_payload) / FRAG_SIZE);
+  write(head, frags, swap_bytes);
+  write(head, FRAG_SIZE, swap_bytes);
+  write(head, sample_size, swap_bytes);
+
+  if (flags & FLAG_Q) {
+    head->copy(rd + iqos_offset, orig.length() - iqos_offset);
+  }
+
+  // Create the "tail" message block containing DATA_FRAG with Q=0
+  tail = DataSampleHeader::alloc_msgblock(orig, data_offset + 36, false);
+
+  tail->copy(rd, data_offset);
+
+  tail->wr_ptr()[0] = DATA_FRAG;
+  tail->wr_ptr()[1] = new_flags & ~FLAG_Q;
+  tail->wr_ptr(2);
+
+  std::memset(tail->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
+  tail->wr_ptr(4);
+
+  write(tail, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+  tail->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
+
+  write(tail, starting_frag + frags, swap_bytes);
+  const size_t tail_data = orig_payload - frags * FRAG_SIZE;
+  const ACE_CDR::UShort tail_frags =
+    static_cast<ACE_CDR::UShort>((tail_data + FRAG_SIZE - 1) / FRAG_SIZE);
+  write(tail, tail_frags, swap_bytes);
+  write(tail, FRAG_SIZE, swap_bytes);
+  write(tail, sample_size, swap_bytes);
+
+  ACE_Message_Block* payload_head = 0;
+  ACE_Message_Block* payload_tail;
+  DataSampleHeader::split_payload(*orig.cont(), frags * FRAG_SIZE,
+                                  payload_head, payload_tail);
+  head->cont(payload_head);
+  tail->cont(payload_tail);
+}
+
 }
 }

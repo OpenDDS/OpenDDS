@@ -137,7 +137,7 @@ public:
   /// the newly-created elements will need to invoke non-const methods on it).
   /// Each element in the pair will contain its own serialized modified
   /// DataSampleHeader.
-  ElementPair fragment(size_t size);
+  virtual ElementPair fragment(size_t size);
 
   /// Is this QueueElement the result of fragmentation?
   virtual bool is_fragment() const { return false; }

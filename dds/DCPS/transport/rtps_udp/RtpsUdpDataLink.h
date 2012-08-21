@@ -15,6 +15,7 @@
 #include "RtpsUdpSendStrategy_rch.h"
 #include "RtpsUdpReceiveStrategy.h"
 #include "RtpsUdpReceiveStrategy_rch.h"
+#include "RtpsCustomizedElement.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram.h"
@@ -143,7 +144,7 @@ private:
   int unicast_socket_type_;
 #endif
 
-  TransportCustomizedElementAllocator transport_customized_element_allocator_;
+  RtpsCustomizedElementAllocator rtps_customized_element_allocator_;
 
   struct MultiSendBuffer : TransportSendBuffer {
 

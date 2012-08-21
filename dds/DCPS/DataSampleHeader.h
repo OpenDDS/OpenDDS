@@ -228,6 +228,12 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   void pdu_remaining(size_t) { /* ignored, only RTPS uses this */ }
 
+  static ACE_Message_Block* alloc_msgblock(const ACE_Message_Block& mb,
+                                           size_t size, bool use_data_alloc);
+
+  static void split_payload(const ACE_Message_Block& orig, size_t size,
+                            ACE_Message_Block*& head, ACE_Message_Block*& tail);
+
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t marshaled_size_;

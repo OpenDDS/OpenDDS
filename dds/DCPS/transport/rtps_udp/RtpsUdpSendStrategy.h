@@ -49,8 +49,7 @@ protected:
 
   virtual size_t max_message_size() const
   {
-    // In the initial implementation we are not generating fragments
-    return 0; //UDP_MAX_MESSAGE_SIZE;
+    return UDP_MAX_MESSAGE_SIZE;
   }
 
 private:

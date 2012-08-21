@@ -37,6 +37,12 @@ public:
   // never want to go back to the reactor and wait for more bytes to arrive.)
   static bool partial(const ACE_Message_Block&) { return false; }
 
+  /// Create two new serialized headers (owned by caller), the "head" having at
+  /// most "size" bytes (header + data) and the "tail" having the rest.
+  /// Precondition: size must be larger than the max_marshaled_size().
+  static void split(const ACE_Message_Block& orig, size_t size,
+                    ACE_Message_Block*& head, ACE_Message_Block*& tail);
+
   RtpsSampleHeader();
   explicit RtpsSampleHeader(ACE_Message_Block& mb);
   RtpsSampleHeader& operator=(ACE_Message_Block& mn);

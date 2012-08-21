@@ -41,19 +41,22 @@ public:
 
   const TransportSendElement* original_send_element() const;
 
-  void set_requires_exclusive() { exclusive_ = true; }
-
 protected:
   virtual void release_element(bool dropped_by_transport);
 
   virtual bool requires_exclusive_packet() const { return exclusive_; }
+  void set_requires_exclusive() { exclusive_ = true; }
 
-private:
+  void set_fragment() { fragment_ = true; }
+
   TransportCustomizedElement(TransportQueueElement* orig,
                              bool fragment,
                              ACE_Allocator* allocator);
   virtual ~TransportCustomizedElement();
 
+  ACE_Allocator* allocator() { return allocator_; }
+
+private:
   RepoId subscription_id() const;
 
   TransportQueueElement* orig_;

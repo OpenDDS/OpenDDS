@@ -65,52 +65,53 @@ namespace {
     }
     return false;
   }
-
-  // Allocate a new message block using the allocators from an existing
-  // message block, "mb".  Use of mb's data_allocator_ is optional.
-  ACE_Message_Block* alloc_msgblock(const ACE_Message_Block& mb,
-                                    size_t size, bool use_data_alloc)
-  {
-    enum { DATA, DB, MB, N_ALLOC };
-    ACE_Allocator* allocators[N_ALLOC];
-    // It's an ACE bug that access_allocators isn't const
-    ACE_Message_Block& mut_mb = const_cast<ACE_Message_Block&>(mb);
-    mut_mb.access_allocators(allocators[DATA], allocators[DB], allocators[MB]);
-    if (allocators[MB]) {
-      ACE_Message_Block* result;
-      ACE_NEW_MALLOC_RETURN(result,
-        static_cast<ACE_Message_Block*>(
-          allocators[MB]->malloc(sizeof(ACE_Message_Block))),
-        ACE_Message_Block(size,
-                          ACE_Message_Block::MB_DATA,
-                          0, // cont
-                          0, // data
-                          use_data_alloc ? allocators[DATA] : 0,
-                          0, // locking_strategy
-                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                          ACE_Time_Value::zero,
-                          ACE_Time_Value::max_time,
-                          allocators[DB],
-                          allocators[MB]),
-        0);
-      return result;
-    } else {
-      return new ACE_Message_Block(size,
-                                   ACE_Message_Block::MB_DATA,
-                                   0, // cont
-                                   0, // data
-                                   use_data_alloc ? allocators[DATA] : 0,
-                                   0, // locking_strategy
-                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                   ACE_Time_Value::zero,
-                                   ACE_Time_Value::max_time,
-                                   allocators[DB]);
-    }
-  }
 }
 
 namespace OpenDDS {
 namespace DCPS {
+
+// Allocate a new message block using the allocators from an existing
+// message block, "mb".  Use of mb's data_allocator_ is optional.
+ACE_Message_Block*
+DataSampleHeader::alloc_msgblock(const ACE_Message_Block& mb,
+                                 size_t size, bool use_data_alloc)
+{
+  enum { DATA, DB, MB, N_ALLOC };
+  ACE_Allocator* allocators[N_ALLOC];
+  // It's an ACE bug that access_allocators isn't const
+  ACE_Message_Block& mut_mb = const_cast<ACE_Message_Block&>(mb);
+  mut_mb.access_allocators(allocators[DATA], allocators[DB], allocators[MB]);
+  if (allocators[MB]) {
+    ACE_Message_Block* result;
+    ACE_NEW_MALLOC_RETURN(result,
+      static_cast<ACE_Message_Block*>(
+        allocators[MB]->malloc(sizeof(ACE_Message_Block))),
+      ACE_Message_Block(size,
+                        ACE_Message_Block::MB_DATA,
+                        0, // cont
+                        0, // data
+                        use_data_alloc ? allocators[DATA] : 0,
+                        0, // locking_strategy
+                        ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                        ACE_Time_Value::zero,
+                        ACE_Time_Value::max_time,
+                        allocators[DB],
+                        allocators[MB]),
+      0);
+    return result;
+  } else {
+    return new ACE_Message_Block(size,
+                                  ACE_Message_Block::MB_DATA,
+                                  0, // cont
+                                  0, // data
+                                  use_data_alloc ? allocators[DATA] : 0,
+                                  0, // locking_strategy
+                                  ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                  ACE_Time_Value::zero,
+                                  ACE_Time_Value::max_time,
+                                  allocators[DB]);
+  }
+}
 
 bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 {
@@ -325,6 +326,32 @@ DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 }
 
 void
+DataSampleHeader::split_payload(const ACE_Message_Block& orig, size_t size,
+                                ACE_Message_Block*& head,
+                                ACE_Message_Block*& tail)
+{
+  if (!head) {
+    head = orig.duplicate();
+  }
+
+  ACE_Message_Block* frag = head;
+  size_t frag_remain = size;
+  for (; frag_remain > frag->length(); frag = frag->cont()) {
+    frag_remain -= frag->length();
+  }
+
+  if (frag_remain == frag->length()) { // split at ACE_Message_Block boundary
+    tail = frag->cont();
+  } else {
+    tail = frag->duplicate();
+    frag->wr_ptr(frag->wr_ptr() - frag->length() + frag_remain);
+    ACE_Message_Block::release(frag->cont());
+    tail->rd_ptr(frag_remain);
+  }
+  frag->cont(0);
+}
+
+void
 DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
                         ACE_Message_Block*& head, ACE_Message_Block*& tail)
 {
@@ -372,22 +399,8 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     return;
   }
 
-  ACE_Message_Block* frag = payload;
-  size_t frag_remain = size - hdr_len;
-  for (; frag_remain > frag->length(); frag = frag->cont()) {
-    frag_remain -= frag->length();
-  }
-
   ACE_Message_Block* payload_tail;
-  if (frag_remain == frag->length()) { // split at ACE_Message_Block boundary
-    payload_tail = frag->cont();
-  } else {
-    payload_tail = frag->duplicate();
-    frag->wr_ptr(frag->wr_ptr() - frag->length() + frag_remain);
-    ACE_Message_Block::release(frag->cont());
-    payload_tail->rd_ptr(frag_remain);
-  }
-  frag->cont(0);
+  split_payload(*payload, size - hdr_len, payload, payload_tail);
 
   hdr.more_fragments_ = true;
   hdr.message_length_ = static_cast<ACE_UINT32>(payload->total_length());

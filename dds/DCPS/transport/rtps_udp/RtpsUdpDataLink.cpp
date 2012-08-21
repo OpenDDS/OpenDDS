@@ -56,8 +56,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
              false),    // is_active
     config_(config),
     reactor_task_(reactor_task, false),
-    transport_customized_element_allocator_(40,
-                                            sizeof(TransportCustomizedElement)),
+    rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
     handshake_condition_(lock_),
     nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
@@ -498,14 +497,9 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     }
   }
 
-  TransportCustomizedElement* rtps =
-    TransportCustomizedElement::alloc(element, false,
-      &this->transport_customized_element_allocator_);
-  rtps->set_msg(hdr);
-
-  // Let the framework know each TransportCustomizedElement must be in its own
-  // Transport packet (i.e. have its own RTPS Message Header).
-  rtps->set_requires_exclusive();
+  RtpsCustomizedElement* rtps =
+    RtpsCustomizedElement::alloc(element, hdr,
+      &this->rtps_customized_element_allocator_);
 
   // Handle durability resends
   if (durable && rw != writers_.end()) {
