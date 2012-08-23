@@ -1,3 +1,10 @@
+Thu Aug 23 19:36:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed so member functions in all log statements agree
+          with name of function log statements appear.
+
 Tue Aug 21 22:42:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
