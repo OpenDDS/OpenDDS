@@ -122,8 +122,6 @@ struct ActorStrt<QosSeq, QosSeq,
       participantId(actor.participantId), type(actor.type),
       callback(actor.callback.c_str(), allocator)
   {
-    callback.clear(true);
-
     pubsubQos.first = actor.pubsubQos.first;
     assign(pubsubQos.second, actor.pubsubQos.second, allocator);
 
@@ -141,6 +139,8 @@ struct ActorStrt<QosSeq, QosSeq,
 
   void cleanup(PersistenceUpdater::ALLOCATOR* allocator)
   {
+    callback.clear(true);
+
     allocator->free(pubsubQos.second.second);
     allocator->free(drdwQos.second.second);
     allocator->free(transportInterfaceInfo.second);
