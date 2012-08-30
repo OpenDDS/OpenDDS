@@ -1,3 +1,16 @@
+Thu Aug 30 23:35:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+
+          Changed DEFAULT_REPO and DEFAULT_RTPS constants from std::string to
+          const char[] to avoid order-of-initialization problems that were
+          observed in static builds.
+
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+
+          Updated due to the above change.
+
 Thu Aug 30 21:02:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/MultiDPTest/publisher.cpp:

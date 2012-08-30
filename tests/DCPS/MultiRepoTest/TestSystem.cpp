@@ -31,13 +31,13 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: loading repository %C.\n"),
-      OpenDDS::DCPS::Discovery::DEFAULT_REPO.c_str()
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO
     ));
     TheServiceParticipant->set_repo_ior( this->config_.infoRepoIor().c_str());
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: binding subscriber domain to repository %C.\n"),
-      OpenDDS::DCPS::Discovery::DEFAULT_REPO.c_str()
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO
     ));
     TheServiceParticipant->set_repo_domain(
       this->config_.subscriberDomain(),
@@ -46,7 +46,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: binding publisher domain to repository %C.\n"),
-      OpenDDS::DCPS::Discovery::DEFAULT_REPO.c_str()
+      OpenDDS::DCPS::Discovery::DEFAULT_REPO
     ));
     TheServiceParticipant->set_repo_domain(
       this->config_.publisherDomain(),
