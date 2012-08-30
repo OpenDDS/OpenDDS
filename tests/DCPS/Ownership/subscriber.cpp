@@ -183,12 +183,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::SubscriptionMatchedStatus matches1 = { 0, 0, 0, 0, 0 };
     DDS::SubscriptionMatchedStatus matches2 = { 0, 0, 0, 0, 0 };
     do {
-      if (matches1.current_count == 0 && ws1->wait(conditions1, timeout) != DDS::RETCODE_OK) {
+      if (matches1.current_count > 0 && ws1->wait(conditions1, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: wait() failed!\n")), -1);
       }
-      if (matches2.current_count == 0 &&  ws2->wait(conditions2, timeout) != DDS::RETCODE_OK) {
+      if (matches2.current_count > 0 &&  ws2->wait(conditions2, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: wait() failed!\n")), -1);

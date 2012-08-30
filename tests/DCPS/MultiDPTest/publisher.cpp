@@ -207,11 +207,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                       ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
         }
 
+      const ACE_Time_Value small_time(0,250000);
       // Wait for the subscriber to be ready.
       FILE* readers_ready = 0;
       do
         {
-          ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
           readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_ready);
@@ -239,6 +239,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             {
               writers_finished = writers_finished && writers[i]->is_finished();
             }
+          ACE_OS::sleep(small_time);
         }
 
       {  // Extra scope for VC6
@@ -263,7 +264,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       FILE* readers_completed = 0;
       do
         {
-          ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_completed);

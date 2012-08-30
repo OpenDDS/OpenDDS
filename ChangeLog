@@ -1,10 +1,17 @@
+Thu Aug 30 21:02:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Fixes identified by Adam Mitz to reduce CPU usage.
+
 Thu Aug 30 17:11:30 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/PersistenceUpdater.cpp:
 
           Change method of allocation for the persisted strings.  The
           ACE_CString holds a reference to the allocator which is on the
-          stack and changes between persistent runs.  The change is 
+          stack and changes between persistent runs.  The change is
           to not give the ACE_CString the allocator but just provide it with
           the allocated memory.
 
