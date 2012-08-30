@@ -32,6 +32,16 @@ namespace {
     ACE_OS::memcpy(out_buf, from.second, len);
     to = std::make_pair(len, static_cast<char*>(out_buf));
   }
+
+  void assign(ACE_CString& to, const char* from,
+              Update::PersistenceUpdater::ALLOCATOR* allocator)
+  {
+    const size_t len = ACE_OS::strlen (from) + 1;
+    void* out_buf;
+    ACE_ALLOCATOR(out_buf, allocator->malloc(len));
+    ACE_OS::memcpy(out_buf, from, len);
+    to.set(static_cast<char*>(out_buf), len - 1, false);
+  }
 }
 
 namespace Update {
@@ -51,18 +61,29 @@ struct TopicStrt<QosSeq, ACE_CString> {
             PersistenceUpdater::ALLOCATOR* allocator)
     : domainId(topic.domainId),
       topicId(topic.topicId),
-      participantId(topic.participantId),
-      name(topic.name.c_str(), allocator),
-      dataType(topic.dataType.c_str(), allocator)
+      participantId(topic.participantId)
   {
+    assign(name, topic.name.c_str(), allocator);
+    assign(dataType, topic.dataType.c_str(), allocator);
+
     topicQos.first = TopicQos;
     assign(topicQos.second, topic.topicQos.second, allocator);
   }
 
   void cleanup(PersistenceUpdater::ALLOCATOR* allocator)
   {
-    name.clear(true);
-    dataType.clear(true);
+    if (name.length() > 0)
+    {
+      char* strMemory = const_cast<char*>(name.fast_rep());
+      name.fast_clear();
+      allocator->free(strMemory);
+    }
+    if (dataType.length() > 0)
+    {
+      char* strMemory = const_cast<char*>(dataType.fast_rep());
+      dataType.fast_clear();
+      allocator->free(strMemory);
+    }
 
     allocator->free(topicQos.second.second);
   }
@@ -119,9 +140,10 @@ struct ActorStrt<QosSeq, QosSeq,
     : domainId(actor.domainId),
       actorId(actor.actorId),
       topicId(actor.topicId),
-      participantId(actor.participantId), type(actor.type),
-      callback(actor.callback.c_str(), allocator)
+      participantId(actor.participantId), type(actor.type)
   {
+    assign(callback, actor.callback.c_str(), allocator);
+
     pubsubQos.first = actor.pubsubQos.first;
     assign(pubsubQos.second, actor.pubsubQos.second, allocator);
 
@@ -139,7 +161,12 @@ struct ActorStrt<QosSeq, QosSeq,
 
   void cleanup(PersistenceUpdater::ALLOCATOR* allocator)
   {
-    callback.clear(true);
+    if (callback.length() > 0)
+    {
+      char* strMemory = const_cast<char*>(callback.fast_rep());
+      callback.fast_clear();
+      allocator->free(strMemory);
+    }
 
     allocator->free(pubsubQos.second.second);
     allocator->free(drdwQos.second.second);
