@@ -845,7 +845,7 @@ int DCPS_IR_Domain::init_built_in_topics_transport()
   try {
     std::string config_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
-      + "InfoRepoBITTransportConfig";
+      + std::string("InfoRepoBITTransportConfig");
     transportConfig_ =
       OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_name);
 

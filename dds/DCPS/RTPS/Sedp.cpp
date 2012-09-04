@@ -273,7 +273,8 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                       "_SEDPTransportInst_" + key + domainStr, "rtps_udp");
+                       std::string("_SEDPTransportInst_") + key + domainStr,
+                       "rtps_udp");
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
@@ -302,7 +303,8 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 
   // Crete a config
   std::string config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                            "_SEDP_TransportCfg_" + key + domainStr;
+                            std::string("_SEDP_TransportCfg_") + key +
+                            domainStr;
   DCPS::TransportConfig_rch transport_cfg =
     TheTransportRegistry->create_config(config_name);
   transport_cfg->instances_.push_back(transport_inst_);

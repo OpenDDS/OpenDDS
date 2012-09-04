@@ -159,7 +159,7 @@ MonitorFactoryImpl::initialize()
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   static const std::string config_name = TransportRegistry::DEFAULT_INST_PREFIX
-    + "MonitorBITTransportConfig";
+    + std::string("MonitorBITTransportConfig");
   OpenDDS::DCPS::TransportConfig_rch config =
     TheTransportRegistry->get_config (config_name);
   if (config.is_nil ())
@@ -167,7 +167,7 @@ MonitorFactoryImpl::initialize()
     config = TransportRegistry::instance()->create_config(config_name);
 
     std::string inst_name = TransportRegistry::DEFAULT_INST_PREFIX
-      + "FederationBITTCPTransportInst";
+      + std::string("FederationBITTCPTransportInst");
     TransportInst_rch inst =
       TransportRegistry::instance()->create_inst(inst_name, "tcp");
     config->instances_.push_back(inst);

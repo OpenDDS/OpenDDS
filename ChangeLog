@@ -1,3 +1,25 @@
+Tue Sep  4 17:45:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Similar to the change in Thu Aug 30 23:35:20 UTC 2012, made the
+          constants DEFAULT_CONFIG_NAME and DEFAULT_INST_PREFIX const char[]
+          instead of std::string.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+
+          Updated due to the above change.
+
 Tue Sep  4 17:30:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/GroupPresentation/subscriber.cpp:

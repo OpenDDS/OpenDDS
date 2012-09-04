@@ -50,8 +50,8 @@ TransportRegistry::instance()
   return ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>::instance();
 }
 
-const std::string TransportRegistry::DEFAULT_CONFIG_NAME = "_OPENDDS_DEFAULT_CONFIG";
-const std::string TransportRegistry::DEFAULT_INST_PREFIX = "_OPENDDS_";
+const char TransportRegistry::DEFAULT_CONFIG_NAME[] = "_OPENDDS_DEFAULT_CONFIG";
+const char TransportRegistry::DEFAULT_INST_PREFIX[] = "_OPENDDS_";
 
 OpenDDS::DCPS::TransportRegistry::TransportRegistry()
   : global_config_(new TransportConfig(DEFAULT_CONFIG_NAME))

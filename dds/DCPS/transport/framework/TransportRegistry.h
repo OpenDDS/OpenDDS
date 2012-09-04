@@ -56,8 +56,8 @@ public:
   TransportInst_rch get_inst(const std::string& name) const;
   void remove_inst(const TransportInst_rch& inst);
 
-  static const std::string DEFAULT_CONFIG_NAME;
-  static const std::string DEFAULT_INST_PREFIX;
+  static const char DEFAULT_CONFIG_NAME[];
+  static const char DEFAULT_INST_PREFIX[];
 
   TransportConfig_rch create_config(const std::string& name);
   TransportConfig_rch get_config(const std::string& name) const;
