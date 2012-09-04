@@ -30,7 +30,7 @@
 
 int testcase = strength;
 
-DDS::Duration_t deadline = {DDS::DURATION_INFINITE_SEC, 
+DDS::Duration_t deadline = {DDS::DURATION_INFINITE_SEC,
                             DDS::DURATION_INFINITE_NSEC};
 DDS::Duration_t liveliness = {DDS::DURATION_INFINITE_SEC,
                               DDS::DURATION_INFINITE_NSEC};
