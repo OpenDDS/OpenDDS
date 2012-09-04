@@ -168,29 +168,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     condition1->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
     condition2->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-    DDS::WaitSet_var ws1 = new DDS::WaitSet;
-    DDS::WaitSet_var ws2 = new DDS::WaitSet;
-    ws1->attach_condition(condition1);
-    ws2->attach_condition(condition2);
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ws->attach_condition(condition1);
+    ws->attach_condition(condition2);
 
     DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
-    DDS::ConditionSeq conditions1;
-    DDS::ConditionSeq conditions2;
+    DDS::ConditionSeq conditions;
     DDS::SubscriptionMatchedStatus matches1 = { 0, 0, 0, 0, 0 };
     DDS::SubscriptionMatchedStatus matches2 = { 0, 0, 0, 0, 0 };
-    do {
-      if (matches1.current_count == 0 && ws1->wait(conditions1, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -1);
-      }
-      if (matches2.current_count == 0 &&  ws2->wait(conditions2, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -1);
-      }
+    while (true) {
       if (reader1->get_subscription_matched_status(matches1) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
@@ -202,19 +190,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-    } while (matches1.current_count > 0 && matches2.current_count > 0);
 
-
-    if (! subscriber_listener_svt->verify_result ()
-        || ! listener_svt1->verify_result()
-        || ! listener_svt2->verify_result()) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: failed to verify message!\n")), -1);
+      if ((matches1.current_count == 0 && matches1.total_count > 0) ||
+          (matches2.current_count == 0 && matches2.total_count > 0)) {
+        break;
+      }
+      ws->wait(conditions, timeout);
     }
 
-    ws1->detach_condition(condition1);
-    ws2->detach_condition(condition2);
+    ws->detach_condition(condition1);
+    ws->detach_condition(condition2);
 
     // Clean-up!
     participant->delete_contained_entities();

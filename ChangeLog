@@ -1,3 +1,12 @@
+Tue Sep  4 17:30:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Reworked the use of WaitSet and Condition so that it
+          can't fall-through before the readers make any associations.
+          (Change given by Adam Mitz.)
+
 Thu Aug 30 23:35:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Discovery.h:
