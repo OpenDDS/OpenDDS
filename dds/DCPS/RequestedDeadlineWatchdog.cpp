@@ -115,11 +115,12 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
 
         this->reader_impl_->notify_status_condition();
       }
+    }
 
-      if (!timer_called) {
-        this->cancel_timer(instance);
-        this->schedule_timer(instance);
-      }
+    // This next part is without status_lock_ held to avoid reactor deadlock.
+    if (!timer_called) {
+      this->cancel_timer(instance);
+      this->schedule_timer(instance);
     }
 
   } else {

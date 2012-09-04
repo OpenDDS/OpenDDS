@@ -116,14 +116,14 @@ $Publisher2->Spawn ();
 
 $PublisherResult = $Publisher1->WaitKill (60);
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher 1 returned $PublisherResult\n";
     $status = 1;
 }
 
 
 $PublisherResult = $Publisher2->WaitKill (60);
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher 2 returned $PublisherResult\n";
     $status = 1;
 }
 

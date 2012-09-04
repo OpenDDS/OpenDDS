@@ -30,9 +30,10 @@
 
 int testcase = strength;
 
-::DDS::Duration_t deadline = {::DDS::DURATION_INFINITE_SEC, 0};
-::DDS::Duration_t liveliness = {::DDS::DURATION_INFINITE_SEC, 0};
-
+DDS::Duration_t deadline = {DDS::DURATION_INFINITE_SEC, 
+                            DDS::DURATION_INFINITE_NSEC};
+DDS::Duration_t liveliness = {DDS::DURATION_INFINITE_SEC,
+                              DDS::DURATION_INFINITE_NSEC};
 int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
@@ -43,9 +44,11 @@ parse_args(int argc, ACE_TCHAR *argv[])
     switch (c) {
     case 'd':
       deadline.sec = ACE_OS::atoi (get_opts.opt_arg());
+      deadline.nanosec = 0;
       break;
     case 'l':
       liveliness.sec = ACE_OS::atoi (get_opts.opt_arg());
+      liveliness.nanosec = 0;
       break;
     case 't':
       testcase = ACE_OS::atoi (get_opts.opt_arg());

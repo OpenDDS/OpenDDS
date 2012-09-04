@@ -1553,7 +1553,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
-      this->lookup_instance (sample, instance);
+      ReceivedDataSample dup(sample);
+      this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
@@ -1580,8 +1581,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
-
-      this->lookup_instance (sample, instance);
+      ReceivedDataSample dup(sample);
+      this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
@@ -1607,7 +1608,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
-      this->lookup_instance (sample, instance);
+      ReceivedDataSample dup(sample);
+      this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
           || (this->is_exclusive_ownership_
