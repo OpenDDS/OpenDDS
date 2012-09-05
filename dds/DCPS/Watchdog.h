@@ -26,8 +26,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 /**
- * @class WatchDog
- *
  * @brief Watchdog abstract base class.
  *
  * A @c Watchdog object executes an operation each time a

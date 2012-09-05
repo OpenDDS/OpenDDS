@@ -955,7 +955,7 @@ TransportSendStrategy::stop()
     if (size > 0) {
       this->pkt_chain_->release();
       ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::~TransportSendStrategy() - ")
+                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
                  ACE_TEXT("terminating with %d unsent bytes.\n"),
                  size));
     }

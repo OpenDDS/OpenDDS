@@ -411,7 +411,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       } else if (DCPS_debug_level > 4) {
         GuidConverter converter(remote_id);
-        ACE_DEBUG((LM_WARNING,
+        ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
                    std::string(converter).c_str(),

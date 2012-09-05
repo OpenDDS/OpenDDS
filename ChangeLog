@@ -1,3 +1,21 @@
+Wed Sep  5 22:07:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          The generated 2-arg FooDataReaderImpl::lookup_instance() needs to
+          check the header for key_fields_only_.
+
+        * tests/DCPS/Deadline/publisher.cpp:
+
+          Updated expected values for number of deadlines missed during a 9
+          second sleep (2 deadline periods).
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Corrected doxygen comment and log message.
+
 Tue Sep  4 22:00:50 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
