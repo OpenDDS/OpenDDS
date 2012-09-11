@@ -1,3 +1,9 @@
+Tue Sep 11 21:35:06 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/transport/error_handling/main.cpp:
+
+          Fix so test runs under static builds.
+
 Tue Sep 11 14:42:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
