@@ -1,3 +1,12 @@
+Tue Sep 11 14:42:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Use RcHandle/RcObject to manage the WriterInfo objects.  This allows
+          writer_activity() to use the WriterInfo after remove_associations()
+          has removed it from the map.
+
 Wed Sep  5 22:07:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
