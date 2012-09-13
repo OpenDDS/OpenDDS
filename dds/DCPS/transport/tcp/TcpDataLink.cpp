@@ -108,6 +108,12 @@ OpenDDS::DCPS::TcpDataLink::connect(
 
   this->connection_ = connection;
 
+  if (this->connection_->peer().enable(ACE_NONBLOCK) == -1) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: TcpDataLink::connect failed to set "
+                      "ACE_NONBLOCK %p\n", ACE_TEXT("enable")), -1);
+  }
+
   // Let connection know the datalink for callbacks upon reconnect failure.
   this->connection_->set_datalink(this);
 

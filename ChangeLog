@@ -1,3 +1,11 @@
+Thu Sep 13 20:46:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          Set ACE_NONBLOCK on the socket after the initial handshaking is done.
+          VxWorks 6.4 was observed to need this for the receive strategy to
+          work properly, otherwise it would block in the recv().
+
 Tue Sep 11 21:35:06 UTC 2012  Byron Harris  <harrisb@ociweb.com>
 
         * tests/transport/error_handling/main.cpp:
