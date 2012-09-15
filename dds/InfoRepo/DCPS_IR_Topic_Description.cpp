@@ -454,6 +454,46 @@ CORBA::ULong DCPS_IR_Topic_Description::get_number_topics() const
   return static_cast<CORBA::ULong>(topics_.size());
 }
 
+std::string
+DCPS_IR_Topic_Description::dump_to_string(const std::string& prefix,
+                                          int depth) const
+{
+  std::string str;
+#if !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  for (int i=0; i < depth; i++)
+    str += prefix;
+  std::string indent = str + prefix;
+  str += "DCPS_IR_Topic_Description [";
+  str += name_.c_str();
+  str += "][";
+  str += dataTypeName_.c_str();
+  str += "]\n";
+
+  str += indent + "Subscription References [ ";
+  for (DCPS_IR_Subscription_Set::const_iterator sub = subscriptionRefs_.begin();
+       sub != subscriptionRefs_.end();
+       sub++)
+  {
+    OpenDDS::DCPS::RepoIdConverter sub_converter((*sub)->get_id());
+    str += std::string(sub_converter);
+    str += " ";
+  }
+  str += "]\n";
+
+  str += indent + "Topics [ ";
+  for (DCPS_IR_Topic_Set::const_iterator top = topics_.begin();
+       top != topics_.end();
+       top++)
+  {
+    OpenDDS::DCPS::RepoIdConverter top_converter((*top)->get_id());
+    str += std::string(top_converter);
+    str += " ";
+  }
+  str += "]\n";
+#endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  return str;
+}
+
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
 template class ACE_Node<DCPS_IR_Subscription*>;

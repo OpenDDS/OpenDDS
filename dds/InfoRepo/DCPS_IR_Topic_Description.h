@@ -99,6 +99,8 @@ public:
   /// Returns the number of topics
   CORBA::ULong get_number_topics() const;
 
+  std::string dump_to_string(const std::string& prefix, int depth) const;
+
 private:
   ACE_CString name_;
   ACE_CString dataTypeName_;

@@ -2200,3 +2200,22 @@ TAO_DDS_DCPSInfo_i::domains() const
 {
   return this->domains_;
 }
+
+
+char*
+TAO_DDS_DCPSInfo_i::dump_to_string()
+{
+  std::string dump;
+#if !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  std::string indent ("    ");
+
+  for (DCPS_IR_Domain_Map::const_iterator dm = domains_.begin();
+       dm != domains_.end();
+       dm++)
+  {
+    dump += dm->second->dump_to_string(indent, 0);
+  }
+#endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  return CORBA::string_dup(dump.c_str());
+
+}

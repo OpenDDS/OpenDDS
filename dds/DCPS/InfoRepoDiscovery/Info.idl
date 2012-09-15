@@ -274,6 +274,9 @@ module OpenDDS {
                 Invalid_Subscription);
 
       void shutdown();
+
+      // returns a string containing state information
+      string dump_to_string();
     };
 
   }; // module DDS

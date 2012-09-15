@@ -159,6 +159,8 @@ public:
   /// Expose a readable reference to the participant map.
   const DCPS_IR_Participant_Map& participants() const;
 
+  std::string dump_to_string(const std::string& prefix, int depth) const;
+
 private:
   OpenDDS::DCPS::TopicStatus add_topic_i(OpenDDS::DCPS::RepoId& topicId,
                                          const char * topicName,

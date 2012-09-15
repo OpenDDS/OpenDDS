@@ -115,6 +115,8 @@ public:
   /// This is used to reconnect Built in Topics after a persistent restart.
   void reassociate_all_publications();
 
+  std::string dump_to_string(const std::string& prefix, int depth) const;
+
 private:
   OpenDDS::DCPS::RepoId id_;
   DDS::TopicQos qos_;

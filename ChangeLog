@@ -1,3 +1,44 @@
+Sat Sep 15 21:07:10 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+
+          Fixed a potential race condition of deleting a publication or
+          subscription from the InfoRepo while an upcall was being made using
+          the publication/subscription.
+
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Corrected a leak that could occur if the publications and
+          subscriptions were not removed before the participant.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * tools/dcpsinfo_dump:
+        * tools/dcpsinfo_dump/dcpsinfo_dump.mpc:
+        * tools/dcpsinfo_dump/dump.cpp:
+
+          Added a method to the DCPSInfo to dump the state to a string.
+          Added a dcpsinfo_dump tool to print out the state of a DCPInfo
+          object.
+ 
 Thu Sep 13 20:46:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpDataLink.cpp:

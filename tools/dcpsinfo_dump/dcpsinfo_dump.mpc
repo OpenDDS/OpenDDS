@@ -1,0 +1,8 @@
+project(*): dcpsexe {
+  exename  = dcpsinfo_dump
+  exeout    = $(DDS_ROOT)/bin
+
+  Source_Files {
+    dump.cpp
+  }
+}

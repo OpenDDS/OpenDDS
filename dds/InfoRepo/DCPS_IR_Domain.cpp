@@ -1501,6 +1501,49 @@ void DCPS_IR_Domain::remove_topic_id_mapping(const OpenDDS::DCPS::RepoId& topicI
     idToTopicMap_.erase(map_entry);
 }
 
+std::string DCPS_IR_Domain::dump_to_string(const std::string& prefix, int depth) const
+{
+  std::string str;
+#if !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  for (int i=0; i < depth; i++)
+    str += prefix;
+  std::string indent = str + prefix;
+  std::ostringstream os;
+  os << "DCPS_IR_Domain[" << id_ << "]";
+  str += os.str();
+  if (useBIT_)
+    str += " BITS";
+  str += "\n";
+
+  str += indent + "Participants:\n";
+  for (DCPS_IR_Participant_Map::const_iterator pm = participants_.begin();
+       pm != participants_.end();
+       pm++)
+  {
+    str += pm->second->dump_to_string(prefix, depth+1);
+  }
+
+  str += indent + "Dead Participants:\n";
+  for (DCPS_IR_Participant_Set::const_iterator dp = deadParticipants_.begin();
+       dp != deadParticipants_.end();
+       dp++)
+  {
+    OpenDDS::DCPS::RepoIdConverter sub_converter((*dp)->get_id());
+    str += indent + std::string(sub_converter);
+    str += "\n";
+  }
+
+  str += indent + "Topic Descriptions:\n";
+  for (DCPS_IR_Topic_Description_Set::const_iterator tdi = topicDescriptions_.begin();
+       tdi != topicDescriptions_.end();
+       tdi++)
+  {
+    str += (*tdi)->dump_to_string(prefix, depth+1);
+  }
+#endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  return str;
+}
+
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
 template class ACE_Node<DCPS_IR_Topic_Description*>;
