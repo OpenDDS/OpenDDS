@@ -15,6 +15,8 @@
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include /**/ "ace/Unbounded_Set.h"
 
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */

@@ -14,6 +14,8 @@
 #include /**/ "ace/SString.h"
 #include /**/ "tao/corbafwd.h"
 
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
