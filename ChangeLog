@@ -1,3 +1,19 @@
+Mon Sep 17 18:56:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Reset receive_sample_remaining_ when skipping over headers.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Improve multicast handshaking so that the transport can respond to
+          SYNs before the callback from the discovery is received.
+          Fixed up the debug logging in the multicast transport.
+
 Mon Sep 17 17:45:28 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Topic.h:
@@ -45,7 +61,7 @@ Sat Sep 15 21:07:10 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
           Added a method to the DCPSInfo to dump the state to a string.
           Added a dcpsinfo_dump tool to print out the state of a DCPInfo
           object.
- 
+
 Thu Sep 13 20:46:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpDataLink.cpp:

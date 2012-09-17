@@ -94,7 +94,6 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
 
 MulticastDataLink*
 MulticastTransport::make_datalink(const RepoId& local_id,
-                                  const RepoId& remote_id,
                                   CORBA::Long priority,
                                   bool active)
 {
@@ -106,11 +105,10 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   }
 
   MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
-  MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::make_datalink "
-            "peers: local 0x%x remote 0x%x, priority %d active %d\n",
-            this->config_i_->name().c_str(), local_peer, remote_peer,
+            "peers: local 0x%x priority %d active %d\n",
+            this->config_i_->name().c_str(), local_peer,
             priority, active), 2);
 
   MulticastDataLink_rch link;
@@ -194,9 +192,15 @@ MulticastTransport::connect_datalink_i(const RepoId& local_id,
 {
   MulticastDataLink_rch link = this->client_link_;
   if (link.is_nil()) {
-    link = this->make_datalink(local_id, remote_id,
-                               attribs.priority_, true /*active*/);
+    link = this->make_datalink(local_id, attribs.priority_, true /*active*/);
     this->client_link_ = link;
+
+    if (this->server_link_.is_nil()) {
+      // Create the "server" link now, so that it can receive MULTICAST_SYN
+      // from any peers that have add_association() first.
+      this->server_link_ = make_datalink(local_id, attribs.priority_,
+                                         false /*active*/);
+    }
   }
 
   MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
@@ -244,8 +248,8 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
 
       MulticastDataLink_rch link = this->server_link_;
       if (link.is_nil()) {
-        link = this->make_datalink(ce.local_id_, remote_id,
-                                   ce.attribs_.priority_, false /*!active*/);
+        link = this->make_datalink(ce.local_id_, ce.attribs_.priority_,
+                                   false /*!active*/);
         this->server_link_ = link;
       }
 
@@ -254,11 +258,14 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
         VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::accept_datalink "
                   "peer 0x%x already completed handshake\n",
                   this->config_i_->name().c_str(), remote_peer), 2);
-        return link._retn();
+        // "link" returned to framework after session starts
+      } else {
+        // Can't return link to framework until handshaking is done, which will
+        // result in a call to MulticastTransport::passive_connection().
+        link = 0;
+        this->pending_connections_.insert(
+          std::pair<ConnectionEvent* const, MulticastPeer>(&ce, remote_peer));
       }
-
-      this->pending_connections_.insert(
-        std::pair<ConnectionEvent* const, MulticastPeer>(&ce, remote_peer));
 
       guard.release(); // start_session() called without connections_lock_,
       // at this point we know we will return and not need the lock again.
@@ -267,11 +274,9 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
                 "starting session for peer 0x%x\n",
                 this->config_i_->name().c_str(), remote_peer), 2);
 
-      MulticastSession_rch session = this->start_session(link, remote_peer,
-                                                         false /*!active*/);
-      // Can't return link to framework until handshaking is done, which will
-      // result in a call to MulticastTransport::passive_connection().
-      return 0;
+      MulticastSession_rch session =
+        this->start_session(this->server_link_, remote_peer, false /*!active*/);
+      return link._retn();
     }
   }
   return 0;

@@ -60,7 +60,6 @@ protected:
 
 private:
   MulticastDataLink* make_datalink(const RepoId& local_id,
-                                   const RepoId& remote_id,
                                    CORBA::Long priority,
                                    bool active);
 
