@@ -278,9 +278,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     opendds.publication_id_.entityId = rtps.writerId;
     opendds.message_id_ = SAMPLE_DATA;
     opendds.key_fields_only_ = (rtps.smHeader.flags & FLAG_K_IN_FRAG);
-
-    // Peek at the byte order from the encapsulation containing the payload.
-    opendds.byte_order_ = rds.sample_->rd_ptr()[1] & FLAG_E;
+    // opendds.byte_order_ set in RtpsUdpReceiveStrategy::reassemble().
 
     process_iqos(opendds, rtps.inlineQos);
 
@@ -568,10 +566,12 @@ namespace {
     }
   }
 
-  // All of the fragments we generate will use the FRAG_SIZE of 1024, which is
-  // the smallest allowed by the spec (8.4.14.1.1).  There is no practical
+  // All of the fragments we generate will use the FRAG_SIZE of 1024, which may
+  // be the smallest allowed by the spec (8.4.14.1.1).  There is no practical
   // advantage to increasing this constant, since any number of 1024-byte
-  // fragments may appear in a single DATA_FRAG submessage.
+  // fragments may appear in a single DATA_FRAG submessage.  The spec is
+  // ambiguous in its use of KB to mean either 1000 or 1024, and uses < instead
+  // of <= (see issue 16966).
   const ACE_CDR::UShort FRAG_SIZE = 1024;
 }
 
@@ -597,8 +597,10 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     switch (rd[data_offset]) {
     case DATA:
       if ((flags & (FLAG_D | FLAG_K_IN_DATA)) == 0) {
-        //ERROR, can't fragment a DATA D=0 K=0 submessage
-        // this check ensures that orig.cont() is non-null
+        if (Transport_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
+            "attempting to fragment a Data submessage with no payload.\n"));
+        }
         return;
       }
       found_data = true;
@@ -620,9 +622,12 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     ACE_CDR::UShort octetsToNextHeader;
     peek(octetsToNextHeader, rd + data_offset + 2, swap_bytes);
 
-    data_offset += octetsToNextHeader;
+    data_offset += octetsToNextHeader + SMHDR_SZ;
     if (data_offset >= orig.length()) {
-      //ERROR, this should not happen
+      if (Transport_debug_level) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
+          "invalid octetsToNextHeader encountered while fragmenting.\n"));
+      }
       return;
     }
   }

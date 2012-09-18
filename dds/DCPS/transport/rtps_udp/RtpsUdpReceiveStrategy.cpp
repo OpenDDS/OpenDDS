@@ -205,6 +205,9 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
     // in deliver_sample() which ends up calling RtpsUdpDataLink::received().
     // In particular we will need the SequenceNumber, but ignore the iQoS.
 
+    // Peek at the byte order from the encapsulation containing the payload.
+    data.header_.byte_order_ = data.sample_->rd_ptr()[1] & 1 /*FLAG_E*/;
+
     RtpsSampleHeader& rsh = received_sample_header();
     const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();
 

@@ -33,6 +33,7 @@ private:
   virtual ~RtpsCustomizedElement();
 
   ElementPair fragment(size_t size);
+  const ACE_Message_Block* msg_payload() const;
 };
 
 typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>

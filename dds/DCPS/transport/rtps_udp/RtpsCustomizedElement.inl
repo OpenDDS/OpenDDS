@@ -16,6 +16,7 @@ RtpsCustomizedElement::RtpsCustomizedElement(TransportQueueElement* orig,
   : TransportCustomizedElement(orig, false, allocator)
 {
   set_requires_exclusive();
+  set_msg(msg);
 }
 
 ACE_INLINE /*static*/
