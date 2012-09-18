@@ -105,6 +105,11 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                     receiver_.source_guid_prefix_);
     break;
 
+  case NACK_FRAG:
+    link_->received(rsh.submessage_.nack_frag_sm(),
+                    receiver_.source_guid_prefix_);
+    break;
+
   /* no case DATA_FRAG: by the time deliver_sample() is called, reassemble()
      has successfully reassembled the fragments and we now have a DATA submsg
    */

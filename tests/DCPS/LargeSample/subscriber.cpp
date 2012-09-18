@@ -118,9 +118,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DataReaderListenerImpl* listener_svt = new DataReaderListenerImpl;
     DDS::DataReaderListener_var listener(listener_svt);
 
+    DDS::DataReaderQos qos;
+    sub->get_default_datareader_qos(qos);
+    bool reliable = true; //TODO: cmd line
+    if (reliable) {
+      qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    }
+
     DDS::DataReader_var reader =
       sub->create_datareader(topic.in(),
-                             DATAREADER_QOS_DEFAULT,
+                             qos,
                              listener.in(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 

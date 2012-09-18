@@ -17,6 +17,7 @@
 #include "Writer.h"
 
 #include <sstream>
+#include <iomanip>
 
 const int num_instances_per_writer = 1;
 const int num_messages = 10;
@@ -115,7 +116,7 @@ Writer::svc()
     }
 
     std::ostringstream pid;
-    pid << ACE_OS::getpid();
+    pid << std::setw(5) << ACE_OS::getpid();
 
     Messenger::Message message1;
     message1.subject_id = 1;

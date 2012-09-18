@@ -45,6 +45,10 @@ elsif ($ARGV[0] eq 'nobits') {
     $pub_opts .= ' -DCPSBit 0 -DCPSConfigFile tcp.ini';
     $sub_opts .= ' -DCPSBit 0 -DCPSConfigFile tcp.ini';
 }
+elsif ($ARGV[0] eq 'rtps') {
+    $pub_opts .= '-DCPSConfigFile rtps.ini';
+    $sub_opts .= '-DCPSConfigFile rtps.ini';
+}
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;

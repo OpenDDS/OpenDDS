@@ -66,19 +66,21 @@ public:
 
   bool open(const ACE_SOCK_Dgram& unicast_socket);
 
-  void received(const OpenDDS::RTPS::DataSubmessage& data,
+  void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix);
 
-  void received(const OpenDDS::RTPS::GapSubmessage& gap,
+  void received(const RTPS::GapSubmessage& gap, const GuidPrefix_t& src_prefix);
+
+  void received(const RTPS::HeartBeatSubmessage& heartbeat,
                 const GuidPrefix_t& src_prefix);
 
-  void received(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
+  void received(const RTPS::HeartBeatFragSubmessage& hb_frag,
                 const GuidPrefix_t& src_prefix);
 
-  void received(const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
+  void received(const RTPS::AckNackSubmessage& acknack,
                 const GuidPrefix_t& src_prefix);
 
-  void received(const OpenDDS::RTPS::AckNackSubmessage& acknack,
+  void received(const RTPS::NackFragSubmessage& nackfrag,
                 const GuidPrefix_t& src_prefix);
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
@@ -115,7 +117,7 @@ private:
   static bool force_inline_qos_;
   bool requires_inline_qos(const PublicationId& pub_id);
 
-  void add_gap_submsg(OpenDDS::RTPS::SubmessageSeq& msg,
+  void add_gap_submsg(RTPS::SubmessageSeq& msg,
                       const TransportQueueElement& tqe);
 
   RtpsUdpInst* config_;
@@ -166,13 +168,17 @@ private:
   // RTPS reliability support for local writers:
 
   struct ReaderInfo {
-    CORBA::Long acknack_recvd_count_;
-    std::vector<OpenDDS::RTPS::SequenceNumberSet> requested_changes_;
+    CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
+    std::vector<RTPS::SequenceNumberSet> requested_changes_;
     bool handshake_done_;
     std::map<SequenceNumber, TransportQueueElement*> durable_data_;
     ACE_Time_Value durable_timestamp_;
 
-    ReaderInfo() : acknack_recvd_count_(0), handshake_done_(false) {}
+    ReaderInfo()
+      : acknack_recvd_count_(0)
+      , nackfrag_recvd_count_(0)
+      , handshake_done_(false)
+    {}
     ~ReaderInfo();
     void expire_durable_data();
   };
@@ -238,17 +244,17 @@ private:
   static void extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
                                   CORBA::ULong extent);
 
-  void process_heartbeat_i(const OpenDDS::RTPS::HeartBeatSubmessage& heartbeat,
+  void process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
                            const RepoId& src, RtpsReaderMap::value_type& rr);
 
-  void process_hb_frag_i(const OpenDDS::RTPS::HeartBeatFragSubmessage& hb_frag,
+  void process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
                          const RepoId& src, RtpsReaderMap::value_type& rr);
 
-  void process_gap_i(const OpenDDS::RTPS::GapSubmessage& gap,
-                     const RepoId& src, RtpsReaderMap::value_type& rr);
+  void process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src,
+                     RtpsReaderMap::value_type& rr);
 
-  void process_data_i(const OpenDDS::RTPS::DataSubmessage& data,
-                      const RepoId& src, RtpsReaderMap::value_type& rr);
+  void process_data_i(const RTPS::DataSubmessage& data, const RepoId& src,
+                      RtpsReaderMap::value_type& rr);
 
   void durability_resend(TransportQueueElement* element);
   void send_durability_gaps(const RepoId& writer, const RepoId& reader,
@@ -339,8 +345,8 @@ private:
 
   } heartbeat_;
 
-  OpenDDS::RTPS::InfoDestinationSubmessage info_dst_;
-  OpenDDS::RTPS::InfoReplySubmessage info_reply_;
+  RTPS::InfoDestinationSubmessage info_dst_;
+  RTPS::InfoReplySubmessage info_reply_;
 };
 
 } // namespace DCPS
