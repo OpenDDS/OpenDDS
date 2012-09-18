@@ -783,8 +783,7 @@ if the file C<testcommands> contains the following lines:
 =over 8
 
  # Send data from here.
- datasource -f testdata \
-           
+ datasource -f testdata
 
  # Process data in these.
  interpolate -i 0

@@ -1,7 +1,13 @@
+Tue Sep 18 14:53:22 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/run_dds.pl:
+
+          Fixed fuzz error.
+
 Mon Sep 17 23:15:14 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/run_dds.pl:
-        
+
           Adding an application running script that I use regularly.  It
           has the ability to run process and network information
           gathering tools as well.  Use the "--man" option to see more.
