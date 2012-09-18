@@ -103,10 +103,12 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(void const * act, bool timer_cal
 
         this->writer_impl_->notify_status_condition();
       }
-      if (!timer_called) {
-        this->cancel_timer(instance);
-        this->schedule_timer(instance);
-      }
+    }
+
+    // This next part is without status_lock_ held to avoid reactor deadlock.
+    if (!timer_called) {
+      this->cancel_timer(instance);
+      this->schedule_timer(instance);
     }
 
   } else {

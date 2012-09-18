@@ -1895,7 +1895,11 @@ void
     ser >> header;
   }
 
-  ser >> data;
+  if (sample.header_.key_fields_only_) {
+    ser >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(data);
+  } else {
+    ser >> data;
+  }
 
   DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
   InstanceMap::const_iterator const it = instance_map_.find(data);
@@ -1905,8 +1909,7 @@ void
 
   if (handle == ::DDS::HANDLE_NIL) {
     instance = 0;
-  }
-  else {
+  } else {
     instance = get_handle_instance(handle);
   }
 }

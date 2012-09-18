@@ -17,6 +17,7 @@
 #include /**/ "DCPS_IR_Topic_Description.h"
 
 #include /**/ "dds/DCPS/RepoIdConverter.h"
+#include <sstream>
 
 #include /**/ "tao/debug.h"
 
@@ -280,7 +281,11 @@ int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::RepoId pubId)
     }
 
     this->domain_->dispose_publication_bit(where->second);
-    delete where->second;
+    if (where->second->can_be_deleted()) {
+      delete where->second;
+    } else {
+      where->second->set_delete_after_remote_calls(true);
+    }
     topic->release(false);
     this->publications_.erase(where);
 
@@ -404,7 +409,11 @@ int DCPS_IR_Participant::remove_subscription(OpenDDS::DCPS::RepoId subId)
     }
 
     this->domain_->dispose_subscription_bit(where->second);
-    delete where->second;
+    if (where->second->can_be_deleted()) {
+      delete where->second;
+    } else {
+      where->second->set_delete_after_remote_calls(true);
+    }
     topic->release(false);
     this->subscriptions_.erase(where);
 
@@ -661,9 +670,11 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
                    this->domain_->get_id()));
       }
     }
+    // delete the publication
+    delete current->second;
   }
 
-  // Clear the container.  This will call the destructors as well.
+  // Clear the container.
   this->publications_.clear();
 
   // delete all the subscriptions
@@ -689,9 +700,11 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
                    this->domain_->get_id()));
       }
     }
+    // delete the subscription
+    delete current->second;
   }
 
-  // Clear the container.  This will call the destructors as well.
+  // Clear the container.
   this->subscriptions_.clear();
 }
 
@@ -916,6 +929,99 @@ void
 DCPS_IR_Participant::last_subscription_key(long key)
 {
   return this->subscriptionIdGenerator_.last(key);
+}
+
+std::string
+DCPS_IR_Participant::dump_to_string(const std::string& prefix, int depth) const
+{
+  std::string str;
+#if !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  OpenDDS::DCPS::RepoIdConverter local_converter(id_);
+
+  for (int i=0; i < depth; i++)
+    str += prefix;
+  std::string indent = str + prefix;
+  str += "DCPS_IR_Participant[";
+  str += std::string(local_converter);
+  str += "]";
+  if (isBIT_)
+    str += " (BIT)";
+  std::ostringstream os;
+  os << "federation id[" << federationId_ << "]  owner[" << owner_ << "]";
+  str += os.str();
+  str += aliveStatus_ ? " (alive)" : " (not alive)";
+  str += "\n";
+
+  str += indent + "Topics:\n";
+  for (DCPS_IR_Topic_Map::const_iterator tm = topicRefs_.begin();
+       tm != topicRefs_.end();
+       tm++)
+  {
+    str += tm->second->dump_to_string(prefix, depth+1);
+  }
+
+  str += indent + "Publications:\n";
+  for (DCPS_IR_Publication_Map::const_iterator pm = publications_.begin();
+       pm != publications_.end();
+       pm++)
+  {
+    str += pm->second->dump_to_string(prefix, depth+1);
+  }
+
+  str += indent + "Subscriptions:\n";
+  for (DCPS_IR_Subscription_Map::const_iterator sm = subscriptions_.begin();
+       sm != subscriptions_.end();
+       sm++)
+  {
+    str += sm->second->dump_to_string(prefix, depth+1);
+  }
+
+  str += indent + "ignored Participants [ ";
+  for (TAO_DDS_RepoId_Set::const_iterator ipart = ignoredParticipants_.begin();
+       ipart != ignoredParticipants_.end();
+       ipart++)
+  {
+    OpenDDS::DCPS::RepoIdConverter ipart_converter(*ipart);
+    str += std::string(ipart_converter);
+    str += " ";
+  }
+  str += "]\n";
+  str += indent + "ignored Topics [ ";
+
+  for (TAO_DDS_RepoId_Set::const_iterator itop = ignoredTopics_.begin();
+       itop != ignoredTopics_.end();
+       itop++)
+  {
+    OpenDDS::DCPS::RepoIdConverter itop_converter(*itop);
+    str += std::string(itop_converter);
+    str += " ";
+  }
+  str += "]\n";
+  str += indent + "ignored Publications [ ";
+
+  for (TAO_DDS_RepoId_Set::const_iterator ipub = ignoredPublications_.begin();
+       ipub != ignoredPublications_.end();
+       ipub++)
+  {
+    OpenDDS::DCPS::RepoIdConverter ipub_converter(*ipub);
+    str += std::string(ipub_converter);
+    str += " ";
+  }
+  str += "]\n";
+  str += indent + "ignored Subscriptions [ ";
+
+  for (TAO_DDS_RepoId_Set::const_iterator isub = ignoredSubscriptions_.begin();
+       isub != ignoredSubscriptions_.end();
+       isub++)
+  {
+    OpenDDS::DCPS::RepoIdConverter isub_converter(*isub);
+    str += std::string(isub_converter);
+    str += " ";
+  }
+  str += "]\n";
+
+#endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  return str;
 }
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

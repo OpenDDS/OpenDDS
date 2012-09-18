@@ -194,6 +194,8 @@ public:
   /// Expose a readable reference to the topic map.
   const DCPS_IR_Topic_Map& topics() const;
 
+  std::string dump_to_string(const std::string& prefix, int depth) const;
+
 private:
   OpenDDS::DCPS::RepoId id_;
   DCPS_IR_Domain* domain_;

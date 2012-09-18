@@ -219,8 +219,10 @@ MulticastDataLink::check_header(const TransportHeader& header)
                    false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(header.source_));
-  if (it == this->sessions_.end()) return false;
-  if (it->second->acked()) {
+  if (it == this->sessions_.end() && is_active()) {
+    return false;
+  }
+  if (it != this->sessions_.end() && it->second->acked()) {
     return it->second->check_header(header);
   }
 
@@ -266,11 +268,24 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
     // Transport control samples are delivered to all sessions
     // regardless of association status:
     {
+      char* const ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
+
       ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
                 guard,
                 this->session_lock_);
 
-      char* ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
+      const TransportHeader& theader = receive_strategy()->received_header();
+      if (!is_active() && sample.header_.submessage_id_ == MULTICAST_SYN &&
+          sessions_.find(theader.source_) == sessions_.end()) {
+        // We have received a SYN but there is no session (yet) for this source.
+        // Depending on the data, we may need to send SYNACK.
+        syn_received_no_session(theader.source_, sample.sample_,
+                                theader.swap_bytes());
+        if (ptr) {
+          sample.sample_->rd_ptr(ptr);
+        }
+        return;
+      }
 
       for (MulticastSessionMap::iterator it(this->sessions_.begin());
           it != this->sessions_.end(); ++it) {
@@ -291,6 +306,43 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
   default:
     data_received(sample);
   }
+}
+
+void
+MulticastDataLink::syn_received_no_session(MulticastPeer source,
+                                           ACE_Message_Block* data,
+                                           bool swap_bytes)
+{
+  Serializer serializer_read(data, swap_bytes);
+
+  MulticastPeer local_peer;
+  serializer_read >> local_peer;
+
+  if (local_peer != local_peer_) {
+    return;
+  }
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastDataLink[%C]::syn_received_no_session "
+                      "send_synack local 0x%x remote 0x%x\n",
+                      config_->name().c_str(), local_peer, source), 2);
+
+  ACE_Message_Block* synack_data = new ACE_Message_Block(sizeof(MulticastPeer));
+
+  Serializer serializer_write(synack_data);
+  serializer_write << source;
+
+  DataSampleHeader header;
+  ACE_Message_Block* control =
+    create_control(MULTICAST_SYNACK, header, synack_data);
+
+  const int error = send_control(header, control);
+  if (error != SEND_CONTROL_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) MulticastDataLink::syn_received_no_session: "
+                         "ERROR: send_control failed: %d!\n", error));
+    return;
+  }
+
+  transport_->passive_connection(source);
 }
 
 void

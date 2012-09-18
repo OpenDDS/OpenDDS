@@ -220,11 +220,11 @@ InfoRepoDiscovery::bit_config()
 #if !defined (DDS_HAS_MINIMUM_BIT)
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
-                                 "_BITTransportConfig_" + key();
+                                 std::string("_BITTransportConfig_") + key();
     bit_config_ = TransportRegistry::instance()->create_config(cfg_name);
 
     const std::string inst_name = TransportRegistry::DEFAULT_INST_PREFIX +
-                                  "_BITTCPTransportInst_" + key();
+                                  std::string("_BITTCPTransportInst_") + key();
     TransportInst_rch inst =
       TransportRegistry::instance()->create_inst(inst_name, "tcp");
     bit_config_->instances_.push_back(inst);

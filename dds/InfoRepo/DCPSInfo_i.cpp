@@ -1964,13 +1964,13 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 
     std::string config_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
-      + "InfoRepoBITTransportConfig";
+      + std::string("InfoRepoBITTransportConfig");
     OpenDDS::DCPS::TransportConfig_rch config =
       OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_name);
 
     std::string inst_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
-      + "InfoRepoBITTCPTransportInst";
+      + std::string("InfoRepoBITTCPTransportInst");
     OpenDDS::DCPS::TransportInst_rch inst =
       OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
                                                                "tcp");
@@ -2199,4 +2199,23 @@ const DCPS_IR_Domain_Map&
 TAO_DDS_DCPSInfo_i::domains() const
 {
   return this->domains_;
+}
+
+
+char*
+TAO_DDS_DCPSInfo_i::dump_to_string()
+{
+  std::string dump;
+#if !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  std::string indent ("    ");
+
+  for (DCPS_IR_Domain_Map::const_iterator dm = domains_.begin();
+       dm != domains_.end();
+       dm++)
+  {
+    dump += dm->second->dump_to_string(indent, 0);
+  }
+#endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  return CORBA::string_dup(dump.c_str());
+
 }

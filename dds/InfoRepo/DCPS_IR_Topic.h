@@ -15,6 +15,8 @@
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include /**/ "ace/Unbounded_Set.h"
 
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -114,6 +116,8 @@ public:
   /// Try to associate all the current publications.
   /// This is used to reconnect Built in Topics after a persistent restart.
   void reassociate_all_publications();
+
+  std::string dump_to_string(const std::string& prefix, int depth) const;
 
 private:
   OpenDDS::DCPS::RepoId id_;

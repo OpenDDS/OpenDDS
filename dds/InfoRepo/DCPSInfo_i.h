@@ -344,6 +344,9 @@ public:
   /// Cause the entire repository to exit.
   virtual void shutdown();
 
+  /// Dump the Repos state to string.
+  virtual char* dump_to_string();
+
   /**
    * @brief assert new ownership for a participant and its contained entities.
    *

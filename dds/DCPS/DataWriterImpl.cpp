@@ -371,7 +371,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
       GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete: ")
+                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
                  std::string(converter).c_str()));
     }
@@ -403,7 +403,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
         GuidConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete: ")
+                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
                    std::string(converter).c_str(),
                    handle));
@@ -411,8 +411,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       } else if (DCPS_debug_level > 4) {
         GuidConverter converter(remote_id);
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::association_complete: ")
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
                    std::string(converter).c_str(),
                    handle));

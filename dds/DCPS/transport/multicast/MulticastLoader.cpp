@@ -43,14 +43,15 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   TransportInst_rch default_unrel =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
-                          + "0410_MCAST_UNRELIABLE", MULTICAST_NAME);
+                          + std::string("0410_MCAST_UNRELIABLE"),
+                          MULTICAST_NAME);
   MulticastInst* mi = dynamic_cast<MulticastInst*>(default_unrel.in());
   mi->reliable_ = false;
   cfg->sorted_insert(default_unrel);
 
   TransportInst_rch default_rel =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
-                          + "0420_MCAST_RELIABLE", MULTICAST_NAME);
+                          + std::string("0420_MCAST_RELIABLE"), MULTICAST_NAME);
   cfg->sorted_insert(default_rel);
 
   initialized = true;

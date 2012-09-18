@@ -103,6 +103,9 @@ private:
   MulticastSessionMap sessions_;
 
   virtual void stop_i();
+
+  void syn_received_no_session(MulticastPeer source, ACE_Message_Block* data,
+                               bool swap_bytes);
 };
 
 } // namespace DCPS

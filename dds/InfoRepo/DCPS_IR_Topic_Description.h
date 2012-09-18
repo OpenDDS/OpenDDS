@@ -14,6 +14,8 @@
 #include /**/ "ace/SString.h"
 #include /**/ "tao/corbafwd.h"
 
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -98,6 +100,8 @@ public:
 
   /// Returns the number of topics
   CORBA::ULong get_number_topics() const;
+
+  std::string dump_to_string(const std::string& prefix, int depth) const;
 
 private:
   ACE_CString name_;

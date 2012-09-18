@@ -224,29 +224,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Publisher: got missed")
                               ACE_TEXT ("deadline status \n")));
 
-        // The timer is called in fixed timer (every 4 seconds). During this last
-        // SLEEP_DURATION(9 seconds) period, the timer was called twice, the deadline
-        // callback will not be triggered at the first time because the last sample
-        // was sent about 2 seconds ago and it will be triggered at the second time
-        // the timer is called. It should expect additional 2 deadline missed calls
-        // (1 per instance).
-
-        if (deadline_status.total_count != (NUM_EXPIRATIONS + 1) * NUM_WRITE_THREADS)
+        if (deadline_status.total_count != (NUM_EXPIRATIONS + 2) * NUM_WRITE_THREADS)
         {
           cerr << "ERROR: Unexpected number of missed offered "
             << "deadlines (" << deadline_status.total_count
-            << " instead of " << (NUM_EXPIRATIONS + 1) * NUM_WRITE_THREADS << ") "
+            << " instead of " << (NUM_EXPIRATIONS + 2) * NUM_WRITE_THREADS << ") "
             << endl;
 
           exit (1);
         }
 
-        if (deadline_status.total_count_change != NUM_WRITE_THREADS)
+        if (deadline_status.total_count_change != NUM_WRITE_THREADS * 2)
         {
           cerr << "ERROR: Incorrect missed offered "
             << "deadline count change ("
             << deadline_status.total_count_change
-            << ") instead of " << NUM_WRITE_THREADS
+            << ") instead of " << NUM_WRITE_THREADS * 2
             << endl;
 
           exit (1);

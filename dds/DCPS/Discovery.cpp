@@ -17,8 +17,8 @@
 namespace OpenDDS {
 namespace DCPS {
 
-const std::string Discovery::DEFAULT_REPO = "DEFAULT_REPO";
-const std::string Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";
+const char Discovery::DEFAULT_REPO[] = "DEFAULT_REPO";
+const char Discovery::DEFAULT_RTPS[] = "DEFAULT_RTPS";
 
 #ifndef DDS_HAS_MINIMUM_BIT
 DDS::ReturnCode_t

@@ -916,6 +916,8 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
     }
   }
 
+  this->receive_sample_remaining_ = 0;
+
   //
   // Adjust the buffer chain in case we crossed into the next
   // buffer after skipping the PDU.

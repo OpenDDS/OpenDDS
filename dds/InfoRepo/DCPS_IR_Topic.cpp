@@ -429,6 +429,47 @@ void DCPS_IR_Topic::reassociate_all_publications()
   }
 }
 
+std::string
+DCPS_IR_Topic::dump_to_string(const std::string& prefix, int depth) const
+{
+  std::string str;
+#if !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  OpenDDS::DCPS::RepoIdConverter local_converter(id_);
+
+  for (int i=0; i < depth; i++)
+    str += prefix;
+  std::string indent = str + prefix;
+  str += "DCPS_IR_Topic[";
+  str += std::string(local_converter);
+  str += "]";
+  if (isBIT_)
+    str += " (BIT)";
+  str += "\n";
+
+  str += indent + "Publications:\n";
+  for (DCPS_IR_Publication_Set::const_iterator pub = publicationRefs_.begin();
+       pub != publicationRefs_.end();
+       pub++)
+  {
+    OpenDDS::DCPS::RepoIdConverter pub_converter((*pub)->get_id());
+    str += indent + std::string(pub_converter);
+    str += "\n";
+
+  }
+
+  str += indent + "Subscriptions:\n";
+  for (DCPS_IR_Subscription_Set::const_iterator sub = subscriptionRefs_.begin();
+       sub != subscriptionRefs_.end();
+       sub++)
+  {
+    OpenDDS::DCPS::RepoIdConverter sub_converter((*sub)->get_id());
+    str += indent + std::string(sub_converter);
+    str += "\n";
+  }
+#endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
+  return str;
+}
+
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
 template class ACE_Node<DCPS_IR_Publication*>;

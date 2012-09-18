@@ -1,3 +1,233 @@
+Tue Sep 18 20:48:55 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/yard/yard_parser.hpp:
+
+          Fixed dependent template name problem.
+		  Fixed warning for printf specifier of size_t type.
+
+Tue Sep 18 14:53:22 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/run_dds.pl:
+
+          Fixed fuzz error.
+
+Mon Sep 17 23:15:14 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/run_dds.pl:
+
+          Adding an application running script that I use regularly.  It
+          has the ability to run process and network information
+          gathering tools as well.  Use the "--man" option to see more.
+
+Mon Sep 17 18:56:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Reset receive_sample_remaining_ when skipping over headers.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Improve multicast handshaking so that the transport can respond to
+          SYNs before the callback from the discovery is received.
+          Fixed up the debug logging in the multicast transport.
+
+Mon Sep 17 17:45:28 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+
+          Added string header include needed for some vc 2003 builds.
+
+Sat Sep 15 21:07:10 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+
+          Fixed a potential race condition of deleting a publication or
+          subscription from the InfoRepo while an upcall was being made using
+          the publication/subscription.
+
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Corrected a leak that could occur if the publications and
+          subscriptions were not removed before the participant.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * tools/dcpsinfo_dump:
+        * tools/dcpsinfo_dump/dcpsinfo_dump.mpc:
+        * tools/dcpsinfo_dump/dump.cpp:
+
+          Added a method to the DCPSInfo to dump the state to a string.
+          Added a dcpsinfo_dump tool to print out the state of a DCPInfo
+          object.
+
+Thu Sep 13 20:46:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          Set ACE_NONBLOCK on the socket after the initial handshaking is done.
+          VxWorks 6.4 was observed to need this for the receive strategy to
+          work properly, otherwise it would block in the recv().
+
+Tue Sep 11 21:35:06 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/transport/error_handling/main.cpp:
+
+          Fix so test runs under static builds.
+
+Tue Sep 11 14:42:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Use RcHandle/RcObject to manage the WriterInfo objects.  This allows
+          writer_activity() to use the WriterInfo after remove_associations()
+          has removed it from the map.
+
+Wed Sep  5 22:07:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          The generated 2-arg FooDataReaderImpl::lookup_instance() needs to
+          check the header for key_fields_only_.
+
+        * tests/DCPS/Deadline/publisher.cpp:
+
+          Updated expected values for number of deadlines missed during a 9
+          second sleep (2 deadline periods).
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Corrected doxygen comment and log message.
+
+Tue Sep  4 22:00:50 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          The 2-arg form of DataReader::lookup_instance() requires its own
+          duplicated message block, because it deserializes (moves rd_ptr).
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+
+          Cancelling a timer in the reactor can't be done with a lock held,
+          if that same lock is used by handle_timeout.  Doing that can
+          deadlock the reactor because its own internal lock is held during
+          the handle_timeout upcall and also used by cancel_timer.
+
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Correctly initialize "infinite" constants for deadline and liveliness
+          so that they are really not used unless the command line args enable.
+
+Tue Sep  4 19:13:27 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/Ownership/rtps.ini:
+        * tests/DCPS/Ownership/run_test.pl:
+
+          Extend test to be able to run with rtps discovery
+          and rtps_udp.
+
+Tue Sep  4 17:45:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Similar to the change in Thu Aug 30 23:35:20 UTC 2012, made the
+          constants DEFAULT_CONFIG_NAME and DEFAULT_INST_PREFIX const char[]
+          instead of std::string.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+
+          Updated due to the above change.
+
+Tue Sep  4 17:30:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Reworked the use of WaitSet and Condition so that it
+          can't fall-through before the readers make any associations.
+          (Change given by Adam Mitz.)
+
+Thu Aug 30 23:35:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+
+          Changed DEFAULT_REPO and DEFAULT_RTPS constants from std::string to
+          const char[] to avoid order-of-initialization problems that were
+          observed in static builds.
+
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+
+          Updated due to the above change.
+
+Thu Aug 30 21:02:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Fixes identified by Adam Mitz to reduce CPU usage.
+
+Thu Aug 30 17:11:30 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Change method of allocation for the persisted strings.  The
+          ACE_CString holds a reference to the allocator which is on the
+          stack and changes between persistent runs.  The change is
+          to not give the ACE_CString the allocator but just provide it with
+          the allocated memory.
+
+Fri Aug 24 18:50:19 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Corrected location of callback string clear.
+
+Thu Aug 23 19:36:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed so member functions in all log statements agree
+          with name of function log statements appear.
+
 Tue Aug 21 22:42:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:

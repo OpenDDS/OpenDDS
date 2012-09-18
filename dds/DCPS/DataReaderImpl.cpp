@@ -129,12 +129,6 @@ DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
 
-  for (WriterMapType::iterator iter = writers_.begin();
-       iter != writers_.end();
-       ++iter) {
-    delete iter->second;
-  }
-
   if (initialized_) {
     delete rd_allocator_;
   }
@@ -296,7 +290,8 @@ DataReaderImpl::add_association(const RepoId& yourId,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       const PublicationId& writer_id = writer.writerId;
-      WriterInfo* info = new WriterInfo(this, writer_id, writer.writerQos);
+      RcHandle<WriterInfo> info = new WriterInfo(this, writer_id,
+                                                 writer.writerQos);
       std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -535,7 +530,6 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       if (it != this->writers_.end()) {
         it->second->removed();
-        delete it->second;
       }
 
       if (this->writers_.erase(writer_id) == 0) {
@@ -1209,7 +1203,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
 {
   // caller should have the sample_lock_ !!!
 
-  WriterInfo* writer = 0;
+  RcHandle<WriterInfo> writer;
 
   // The received_activity() has to be called outside the writers_lock_
   // because it probably acquire writers_lock_ read lock recursively
@@ -1237,7 +1231,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
     }
   }
 
-  if (writer != 0) {
+  if (!writer.is_nil()) {
     ACE_Time_Value when = ACE_OS::gettimeofday();
     writer->received_activity(when);
 
@@ -1348,7 +1342,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     bool verify_coherent = false;
 #endif
-    WriterInfo* writer = 0;
+    RcHandle<WriterInfo> writer;
 
     if (header.publication_id_.entityId.entityKind
         != OpenDDS::DCPS::ENTITYKIND_OPENDDS_NIL_WRITER) {
@@ -1396,7 +1390,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (verify_coherent) {
-      accepted = this->verify_coherent_changes_completion (writer);
+      accepted = this->verify_coherent_changes_completion(writer.in());
     }
 #endif
 
@@ -1499,7 +1493,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                 buffer.str().c_str()));
     }
 
-    WriterInfo* writer = 0;
+    RcHandle<WriterInfo> writer;
     {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -1523,7 +1517,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       it->second->set_group_info (control);
     }
 
-    if (this->verify_coherent_changes_completion (writer)) {
+    if (this->verify_coherent_changes_completion(writer.in())) {
       this->notify_read_conditions();
     }
   }
@@ -1553,7 +1547,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
-      this->lookup_instance (sample, instance);
+      ReceivedDataSample dup(sample);
+      this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
@@ -1580,8 +1575,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
-
-      this->lookup_instance (sample, instance);
+      ReceivedDataSample dup(sample);
+      this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
@@ -1607,7 +1602,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
-      this->lookup_instance (sample, instance);
+      ReceivedDataSample dup(sample);
+      this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
           || (this->is_exclusive_ownership_

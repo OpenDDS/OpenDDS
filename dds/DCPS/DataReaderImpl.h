@@ -32,6 +32,8 @@
 #include "CoherentChangeControl.h"
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "RcHandle_T.h"
+#include "RcObject_T.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -77,7 +79,7 @@ enum MarshalingType {
 };
 
 /// Keeps track of a DataWriter's liveliness for a DataReader.
-class OpenDDS_Dcps_Export WriterInfo {
+class OpenDDS_Dcps_Export WriterInfo : public RcObject<ACE_SYNCH_MUTEX> {
   friend class DataReaderImpl;
 
 public:
@@ -756,7 +758,8 @@ private:
   bool statistics_enabled_;
 
   /// publications writing to this reader.
-  typedef std::map<PublicationId, WriterInfo*, GUID_tKeyLessThan> WriterMapType;
+  typedef std::map<PublicationId, RcHandle<WriterInfo>,
+                   GUID_tKeyLessThan> WriterMapType;
   WriterMapType writers_;
 
   /// RW lock for reading/writing publications.
