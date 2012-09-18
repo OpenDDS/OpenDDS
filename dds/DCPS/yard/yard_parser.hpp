@@ -91,7 +91,7 @@ namespace yard
         // AST functions
         Node* GetAstRoot() { return mTree.GetRoot(); }
         template<typename Rule_T>
-        void CreateNode() { mTree.CreateNode<Rule_T>(*this); }
+        void CreateNode() { mTree.OPENDDS_GCC33_TEMPLATE_DEPENDENT CreateNode<Rule_T>(*this); }
         void CompleteNode() { mTree.CompleteNode(*this); }
         void AbandonNode() { mTree.AbandonNode(*this); }
 
@@ -161,7 +161,7 @@ namespace yard
                 }
             }
 
-            printf("character number %d\n", n);
+            printf("character number "ACE_SIZE_T_FORMAT_SPECIFIER"\n", n);
             printf("line number %d\n", nline);
             printf("%s\n", line);
             printf("%s\n", marker);
