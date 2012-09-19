@@ -1,9 +1,15 @@
+Wed Sep 19 15:07:31 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/yard/yard_parser.hpp:
+
+          Fixed printf specifier for wide character build.
+
 Tue Sep 18 20:48:55 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * dds/DCPS/yard/yard_parser.hpp:
 
           Fixed dependent template name problem.
-		  Fixed warning for printf specifier of size_t type.
+          Fixed warning for printf specifier of size_t type.
 
 Tue Sep 18 14:53:22 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
 

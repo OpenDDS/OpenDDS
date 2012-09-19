@@ -161,7 +161,7 @@ namespace yard
                 }
             }
 
-            printf("character number "ACE_SIZE_T_FORMAT_SPECIFIER"\n", n);
+            printf("character number "ACE_SIZE_T_FORMAT_SPECIFIER_ASCII"\n", n);
             printf("line number %d\n", nline);
             printf("%s\n", line);
             printf("%s\n", marker);
