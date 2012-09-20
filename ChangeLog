@@ -1,3 +1,10 @@
+Thu Sep 20 14:55:43 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/yard/yard_parser.hpp:
+          
+          Use cast instead of ACE_SIZE_T_FORMAT_SPECIFIER_ASCII to 
+          avoid problem in certain build.
+
 Wed Sep 19 15:07:31 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * dds/DCPS/yard/yard_parser.hpp:
