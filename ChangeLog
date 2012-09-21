@@ -1,8 +1,33 @@
+Fri Sep 21 19:25:05 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Check for invalid message_id and submessage_id bytes in the
+          DataSampleHeader.
+          Fixed a bug in skip_bad_pdus().
+          Fixed a bug in setting the wr_ptr for ReceivedDataSample.
+          Allow derived classes to discard remaining received data (only
+          valid for datagram-based transports).
+
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+
+          Discard any remaining data after handle_dds_input() returns.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+
+          Allow specifying in the configuration the local network
+          interface which should be used for joining the multicast group.
+
 Thu Sep 20 14:55:43 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * dds/DCPS/yard/yard_parser.hpp:
-          
-          Use cast instead of ACE_SIZE_T_FORMAT_SPECIFIER_ASCII to 
+
+          Use cast instead of ACE_SIZE_T_FORMAT_SPECIFIER_ASCII to
           avoid problem in certain build.
 
 Wed Sep 19 15:07:31 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>

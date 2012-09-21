@@ -125,6 +125,22 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 
   if (len <= FLAGS_OFFSET) return true;
 
+  unsigned char msg_id;
+  if (!mb_peek(msg_id, mb, MESSAGE_ID_OFFSET,
+               false /*swap ignored for char*/)
+      || int(msg_id) >= MESSAGE_ID_MAX) {
+    // This check, and the similar one below for submessage id, are actually
+    // indicating an invalid header (and not a partial header) but we can
+    // treat it the same as partial for the sake of the TransportRecvStrategy.
+    return true;
+  }
+
+  if (!mb_peek(msg_id, mb, SUBMESSAGE_ID_OFFSET,
+               false /*swap ignored for char*/)
+      || int(msg_id) >= SUBMESSAGE_ID_MAX) {
+    return true;
+  }
+
   char flags;
   if (!mb_peek(flags, mb, FLAGS_OFFSET, false /*swap ignored for char*/)) {
     return true;

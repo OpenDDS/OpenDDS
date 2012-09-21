@@ -80,6 +80,12 @@ protected:
   /// Ignore bad PDUs by skipping over them.
   int skip_bad_pdus();
 
+  /// For datagram-based derived classes, reset() can be called to clear any
+  /// state that may be remaining from parsing the previous datagram.
+  void reset();
+
+  size_t pdu_remaining() const { return this->pdu_remaining_; }
+
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;
 
@@ -87,6 +93,8 @@ private:
 
   /// Manage an index into the receive buffer array.
   size_t successor_index(size_t index) const;
+
+  void update_buffer_index(bool& done);
 
   virtual bool reassemble(ReceivedDataSample& data);
 

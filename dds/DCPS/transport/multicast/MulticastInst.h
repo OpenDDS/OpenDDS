@@ -17,6 +17,8 @@
 
 #include "dds/DCPS/transport/framework/TransportInst.h"
 
+#include <string>
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -36,6 +38,11 @@ public:
   ///   224.0.0.128:<port> [IANA 2009-11-17], or
   ///    [FF01::80]:<port> [IANA 2009-08-28]
   ACE_INET_Addr group_address_;
+
+  /// If non-empty, the address to pass to ACE which indicates the
+  /// local network interface which should be used for joining the
+  /// multicast group.
+  std::string local_address_;
 
   /// Enables reliable communication. This option will eventually
   /// be deprecated.

@@ -594,6 +594,15 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
                 "for a complete sample header.  We are done for "
                 "now - we need to receive more data before we "
                 "can go on.\n"));
+          if (Transport_debug_level > 2) {
+            ACE_TCHAR ebuffer[350];
+            ACE_Message_Block& mb = *this->receive_buffers_[this->buffer_index_];
+            const size_t sz = (std::min)(DSH::max_marshaled_size(), mb.length());
+            ACE::format_hexdump(mb.rd_ptr(), sz, ebuffer, sizeof(ebuffer));
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Partial DataSampleHeader:\n%s\n", ebuffer));
+          }
+
           return 0;
 
         } else {
@@ -662,29 +671,8 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         }
       }
 
-      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-            "Adjust the buffer chain in case we crossed into the next "
-            "buffer after the last read(s).\n"));
-      //
-      // Adjust the buffer chain in case we crossed into the next
-      // buffer after the last read(s).
-      //
-      size_t initial = this->buffer_index_;
       bool last_buffer = false;
-
-      while (this->receive_buffers_[this->buffer_index_]->length() == 0) {
-        this->buffer_index_ = this->successor_index(this->buffer_index_);
-
-        VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-              "Set this->buffer_index_ = %d.\n",
-              this->buffer_index_));
-
-        if (initial == this->buffer_index_) {
-          last_buffer = true; // no other buffers in receive_buffers_ have data
-          break;
-        }
-      }
-
+      update_buffer_index(last_buffer);
 
       if (this->receive_sample_remaining_ > 0) {
         //
@@ -774,8 +762,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         //
         current_sample_block->rd_ptr(
           this->receive_buffers_[this->buffer_index_]->rd_ptr());
-        current_sample_block->wr_ptr(
-          this->receive_buffers_[this->buffer_index_]->wr_ptr());
+        current_sample_block->wr_ptr(current_sample_block->rd_ptr() + amount);
         this->receive_buffers_[this->buffer_index_]->rd_ptr(amount);
         this->receive_sample_remaining_ -= amount;
         this->pdu_remaining_            -= amount;
@@ -852,8 +839,9 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         // ~ReceivedDataSample() releases the payload_ message block
       }
 
-      if (last_buffer &&
-          this->receive_buffers_[this->buffer_index_]->length() == 0) {
+      update_buffer_index(last_buffer);
+
+      if (last_buffer) {
         // Relinquish control if there is no more data to process.
         VDBG((LM_DEBUG,"(%P|%t) DBG:   We are done - no more data.\n"));
         return 0;
@@ -884,6 +872,43 @@ TransportReceiveStrategy<TH, DSH>::reassemble(ReceivedDataSample&)
     "WARNING: derived class must override if specific transport type uses "
     "fragmentation and reassembly\n"));
   return false;
+}
+
+template<typename TH, typename DSH>
+void
+TransportReceiveStrategy<TH, DSH>::reset()
+{
+  this->receive_sample_remaining_ = 0;
+  ACE_Message_Block::release(this->payload_);
+  this->payload_ = 0;
+  this->good_pdu_ = true;
+  this->pdu_remaining_ = 0;
+  for (int i = 0; i < RECEIVE_BUFFERS; ++i) {
+    ACE_Message_Block& rb = *this->receive_buffers_[i];
+    rb.rd_ptr(rb.wr_ptr());
+  }
+}
+
+template<typename TH, typename DSH>
+void
+TransportReceiveStrategy<TH, DSH>::update_buffer_index(bool& done)
+{
+  VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+        "Adjust the buffer chain in case we crossed into the next "
+        "buffer after the last read(s).\n"));
+  const size_t initial = this->buffer_index_;
+  while (this->receive_buffers_[this->buffer_index_]->length() == 0) {
+    this->buffer_index_ = this->successor_index(this->buffer_index_);
+
+    VDBG((LM_DEBUG,"(%P|%t) DBG:   "
+          "Set this->buffer_index_ = %d.\n",
+          this->buffer_index_));
+
+    if (initial == this->buffer_index_) {
+      done = true; // no other buffers in receive_buffers_ have data
+      return;
+    }
+  }
 }
 
 template<typename TH, typename DSH>
@@ -918,22 +943,11 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
 
   this->receive_sample_remaining_ = 0;
 
-  //
-  // Adjust the buffer chain in case we crossed into the next
-  // buffer after skipping the PDU.
-  //
-  size_t initial = this->buffer_index_;
+  this->receive_sample_remaining_ = 0;
 
-  while (this->receive_buffers_[this->buffer_index_]->length() == 0) {
-    this->buffer_index_ = this->successor_index(this->buffer_index_);
-
-    if (initial == this->buffer_index_) {
-      // No more data to process, our work here is done.
-      return 0;
-    }
-  }
-
-  return 1;
+  bool done = false;
+  update_buffer_index(done);
+  return done ? 0 : 1;
 }
 
 }

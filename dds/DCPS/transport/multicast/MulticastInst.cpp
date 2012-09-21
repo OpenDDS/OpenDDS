@@ -94,6 +94,9 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
     this->group_address_.set(group_address_s.c_str());
   }
 
+  GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("local_address"),
+                          this->local_address_);
+
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("reliable"), this->reliable_, bool)
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("syn_backoff"),
@@ -150,6 +153,7 @@ MulticastInst::dump(std::ostream& os)
 
   os << formatNameForDump("group_address")       << this->group_address_.get_host_addr()
                                                            << ":" << this->group_address_.get_port_number() << std::endl;
+  os << formatNameForDump("local_address")       << this->local_address_ << std::endl;
   os << formatNameForDump("default_to_ipv6")     << (this->default_to_ipv6_ ? "true" : "false") << std::endl;
   os << formatNameForDump("port_offset")         << this->port_offset_ << std::endl;
   os << formatNameForDump("reliable")            << (this->reliable_ ? "true" : "false") << std::endl;
