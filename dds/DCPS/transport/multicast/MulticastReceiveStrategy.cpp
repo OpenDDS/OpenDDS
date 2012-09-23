@@ -29,7 +29,13 @@ MulticastReceiveStrategy::get_handle() const
 int
 MulticastReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  return this->handle_dds_input(fd);
+  const int result = this->handle_dds_input(fd);
+  if (result >= 0 && this->pdu_remaining()) {
+    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastReceiveStrategy[%@]::handle_input "
+      "resetting with %B bytes remaining\n", this, this->pdu_remaining()), 4);
+    this->reset();
+  }
+  return result;
 }
 
 ssize_t

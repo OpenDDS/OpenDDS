@@ -35,7 +35,8 @@ enum MessageId {
   SAMPLE_ACK,
   END_COHERENT_CHANGES,
   TRANSPORT_CONTROL,
-  DISPOSE_UNREGISTER_INSTANCE
+  DISPOSE_UNREGISTER_INSTANCE,
+  MESSAGE_ID_MAX // must be the last enumerator
 };
 
 enum SubMessageId {
@@ -43,7 +44,8 @@ enum SubMessageId {
   MULTICAST_SYN,
   MULTICAST_SYNACK,
   MULTICAST_NAK,
-  MULTICAST_NAKACK
+  MULTICAST_NAKACK,
+  SUBMESSAGE_ID_MAX // must be the last enumerator
 };
 
 enum DataSampleHeaderFlag {
@@ -66,7 +68,11 @@ enum DataSampleHeaderFlag2 {
 /// This header and the data sample are in different
 /// message block and will be chained together.
 struct OpenDDS_Dcps_Export DataSampleHeader {
-  static const size_t FLAGS_OFFSET = 2; // message_id_ + submessage_id_
+  enum {
+    MESSAGE_ID_OFFSET = 0,
+    SUBMESSAGE_ID_OFFSET = 1,
+    FLAGS_OFFSET = 2 // message_id_ + submessage_id_
+  };
 
   /// The enum MessageId.
   char message_id_;
