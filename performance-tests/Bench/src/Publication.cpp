@@ -468,7 +468,7 @@ Publication::svc ()
 
   // Wait for data to be delivered if we have been asked to.
   if( this->profile_->ackDelay) {
-    DDS::Duration_t timeout = { this->profile_->ackDelay, 0};
+    DDS::Duration_t timeout = {CORBA::Long(this->profile_->ackDelay), 0};
     DDS::ReturnCode_t result;
     result = this->writer_->wait_for_acknowledgments( timeout);
     switch( result) {

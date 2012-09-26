@@ -1,3 +1,14 @@
+Wed Sep 26 17:21:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tools/dissector/sample_manager.cpp:
+
+          Fixed GCC warnings (mostly "narrowing conversion").
+
 Wed Sep 26 15:46:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:

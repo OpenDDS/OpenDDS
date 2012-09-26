@@ -557,7 +557,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     DisjointSequence sequence;
     for (int i = 0; i < 32; ++i) sequence.insert(1 + 2 * i);
     // sequence contains all odd numbers in [1, 63]
-    CORBA::Long bitmap[] = {0xAAAAAAAA, 0xAAAAAAAA}; // 2:62/010101...
+    CORBA::Long bitmap[] = {CORBA::Long(0xAAAAAAAA), CORBA::Long(0xAAAAAAAA)};
+                           // 2:62/010101...
     CORBA::ULong num_bits;
     TEST_CHECK(sequence.to_bitmap(bitmap, 2, num_bits));
     TEST_CHECK(num_bits == 62);
