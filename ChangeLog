@@ -1,3 +1,9 @@
+Wed Sep 26 15:46:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          News items for the upcoming release.
+
 Fri Sep 21 19:25:05 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:
@@ -118,7 +124,7 @@ Sat Sep 15 21:07:10 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
         * tools/dcpsinfo_dump/dump.cpp:
 
           Added a method to the DCPSInfo to dump the state to a string.
-          Added a dcpsinfo_dump tool to print out the state of a DCPInfo
+          Added a dcpsinfo_dump tool to print out the state of a DCPSInfo
           object.
 
 Thu Sep 13 20:46:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
