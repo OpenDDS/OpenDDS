@@ -424,7 +424,7 @@ bool test_messages()
     ok &= test(pad, expected, "PadSubmessage");
   }
   {
-    CORBA::Long bits[] = {0, 0, 0, 0, 0, 0, 0, -2147483648};
+    CORBA::Long bits[] = {0, 0, 0, 0, 0, 0, 0, -2147483647 - 1};
     LongSeq8 bitmap(8, bits);
     NackFragSubmessage nf = { {NACK_FRAG, 1, 60}, ENTITYID_UNKNOWN,
       ENTITYID_SEDP_BUILTIN_TOPIC_WRITER, {0, 11}, { {12}, 256, bitmap}, {12} };
