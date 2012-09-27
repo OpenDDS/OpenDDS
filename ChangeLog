@@ -1,3 +1,12 @@
+Thu Sep 27 17:59:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Register the InfoRepoDiscovery type with the Service_Participant
+          before attempting to create an embedded InfoRepo.  This allows the
+          InfoRepo object to be destroyed and recreated in the same process.
+
 Thu Sep 27 14:11:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
