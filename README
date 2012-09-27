@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 3.2
+This directory structure contains OpenDDS 3.3
 
 
 ======================================================================
@@ -90,8 +90,8 @@ At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
 *** TAO 1.6a patch 13
-*** TAO 2.0a patch 1
-*** TAO 2.1.0 (DOC Group)
+*** TAO 2.0a patch 4
+*** TAO 2.1.4 (DOC Group)
 
 Note that the 1.6a and 2.0a releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -99,7 +99,7 @@ http://download.dre.vanderbilt.edu/.
 
 ** GNU Make
 
-GNU Make 3.80 was used for automating the compiling and linking of OpenDDS
+GNU Make 3.80+ was used for automating the compiling and linking of OpenDDS
 on Unix and Linux systems.
 
 ** Perl
@@ -121,9 +121,10 @@ Linux family:
 ** Red Hat EL 5, x86_64
 ** Red Hat EL 6.2, x86_64
 ** Fedora Core 6, x86
-** Fedora 12, x86_64
-** Ubuntu 10.04 LTS, x86_64 and x86
+** Fedoras 12, 15, and 17, x86_64
+** Ubuntu 12.04 LTS, x86_64
 ** openSUSE 11.4, x86_64
+** openSUSE 12.2, x86_64
 
 Windows family:
 ** Windows XP
@@ -150,16 +151,14 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
+** Microsoft Visual C++ 11 (Visual Studio 2012)
 ** gcc 3.3.2
-** gcc 4.1.1 (Red Hat 4.1.1-30) (Red Hat 4.1.1-52)
-** gcc 4.1.2 (Red Hat 4.1.2-14)
+** gcc 4.1.x
 ** gcc 4.2.1 (Apple Inc. build 5646 dot 1)
-** gcc 4.4.3 (Ubuntu 4.4.3-4ubuntu5)
-** gcc 4.4.4 (Red Hat 4.4.4-4)
-** gcc 4.4.6 (Red Hat 4.4.6-3)
-** gcc 4.5.1 (20101208 SUSE)
-** gcc 4.6.3
-** gcc 4.7.0
+** gcc 4.4.x
+** gcc 4.5.x
+** gcc 4.6.x
+** gcc 4.7.1
 ** QNX gcc 3.3.5
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 ** Sun C++ 5.9 SunOS_i386 Patch 124864-07 2008/08/22
@@ -167,7 +166,8 @@ This release of OpenDDS has been tested using the following compilers:
 
 * Building and Installing
 
-For building and installation instructions see INSTALL.
+For building and installation instructions
+see the INSTALL file in this directory.
 
 
 ======================================================================
@@ -178,7 +178,7 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
 
 
 ======================================================================
-* Known Limitations
+* Known Limitations (WARNING: some of these may be out of date)
 
 ----------------------------------------------------------------------
 ) An instance key must be a base type (not a complex type like array or
