@@ -1,3 +1,11 @@
+Thu Sep 27 01:40:55 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+
+          Now that resource limits are enforced on data writers, need to
+          increase the maximum instances so that the test can write all 10.
+
 Wed Sep 26 17:21:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:

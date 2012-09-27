@@ -156,7 +156,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT(" wrong reliability\n")),
                          -1);
     }
-    if (writer_qos.resource_limits.max_instances != 5) {
+    if (writer_qos.resource_limits.max_instances != 10) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" wrong resource_limits\n")),

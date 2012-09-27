@@ -45,7 +45,7 @@
     <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_JIkhIAMYEeCrTdheTycPFA" name="ls">
       <duration xmi:id="_rLUkQCf4EeCySrIVS40zlQ" nanosecond="7" second="8"/>
     </policies>
-    <policies xsi:type="opendds:rlQosPolicy" xmi:id="_Y8bbcAMYEeCrTdheTycPFA" name="limited" max_instances="5" max_samples="1000" max_samples_per_instance="100"/>
+    <policies xsi:type="opendds:rlQosPolicy" xmi:id="_Y8bbcAMYEeCrTdheTycPFA" name="limited" max_instances="10" max_samples="1000" max_samples_per_instance="100"/>
     <policies xsi:type="opendds:tpQosPolicy" xmi:id="_qJC4cAMYEeCrTdheTycPFA" name="high" value="3"/>
     <policies xsi:type="opendds:lbQosPolicy" xmi:id="_WCHsACfvEeCySrIVS40zlQ" name="very_latent">
       <duration xmi:id="_Xtm9cCfvEeCySrIVS40zlQ" nanosecond="11" second="1"/>
