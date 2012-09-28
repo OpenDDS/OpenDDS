@@ -1,3 +1,10 @@
+Version 3.4 of OpenDDS.
+
+-
+
+
+========================================================================
+
 Version 3.3 of OpenDDS.
 
 - If an instance of a transport can't be set up, an exception is thrown so
