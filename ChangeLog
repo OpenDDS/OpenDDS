@@ -1,3 +1,21 @@
+Fri Sep 28 00:30:24 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed a bug in aligning sequences with length 0.
+          Alignment is only used by the rtps_udp transport.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+
+          Use fully-qualified ::DDS namespace in case just "DDS"
+          would conflict with user's code.
+
+        * tests/DCPS/Compiler/namespace_conflict:
+
+          New test (compile-only) for the namespace issue.
+
 Thu Sep 27 20:45:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * AUTHORS:
