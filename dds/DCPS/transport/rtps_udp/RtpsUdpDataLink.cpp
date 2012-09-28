@@ -1199,7 +1199,10 @@ RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
 
   ri->second.nackfrag_recvd_count_ = nackfrag.count.value;
 
-  //TODO: implement recv NACK_FRAG
+  SequenceNumber seq;
+  seq.setValue(nackfrag.writerSN.high, nackfrag.writerSN.low);
+  ri->second.requested_frags_[seq] = nackfrag.fragmentNumberState;
+  nack_reply_.schedule(); // timer will invoke send_nack_replies()
 }
 
 void
@@ -1239,29 +1242,87 @@ RtpsUdpDataLink::send_nack_replies()
       }
     }
 
-    if (requests.empty()) {
-      continue;
-    }
-
-    std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
     DisjointSequence gaps;
-    SingleSendBuffer& sb = *rw->second.send_buff_;
-    {
-      ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
-      const RtpsUdpSendStrategy::OverrideToken ot =
-        send_strategy_->override_destinations(recipients);
-      for (size_t i = 0; i < ranges.size(); ++i) {
-        sb.resend_i(ranges[i], &gaps);
+    if (!requests.empty()) {
+      std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
+      SingleSendBuffer& sb = *rw->second.send_buff_;
+      {
+        ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
+        const RtpsUdpSendStrategy::OverrideToken ot =
+          send_strategy_->override_destinations(recipients);
+        for (size_t i = 0; i < ranges.size(); ++i) {
+          sb.resend_i(ranges[i], &gaps);
+        }
       }
     }
 
-    if (gaps.empty()) {
+    send_nackfrag_replies(writer, gaps, recipients);
+
+    if (!gaps.empty()) {
+      ACE_Message_Block* mb_gap = marshal_gaps(rw->first, GUID_UNKNOWN, gaps);
+      send_strategy_->send_rtps_control(*mb_gap, recipients);
+      mb_gap->release();
+    }
+  }
+}
+
+void
+RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
+                                       DisjointSequence& gaps,
+                                       std::set<ACE_INET_Addr>& gap_recipients)
+{
+  typedef std::map<SequenceNumber,
+                   std::pair<DisjointSequence, RepoId> > FragmentInfo;
+  std::map<ACE_INET_Addr, FragmentInfo> requests;
+
+  typedef ReaderInfoMap::iterator ri_iter;
+  const ri_iter end = writer.remote_readers_.end();
+  for (ri_iter ri = writer.remote_readers_.begin(); ri != end; ++ri) {
+
+    if (ri->second.requested_frags_.empty() || !locators_.count(ri->first)) {
       continue;
     }
 
-    ACE_Message_Block* mb_gap = marshal_gaps(rw->first, GUID_UNKNOWN, gaps);
-    send_strategy_->send_rtps_control(*mb_gap, recipients);
-    mb_gap->release();
+    const ACE_INET_Addr& addr = locators_[ri->first].addr_;
+
+    typedef std::map<SequenceNumber, RTPS::FragmentNumberSet>::iterator rf_iter;
+    const rf_iter rf_end = ri->second.requested_frags_.end();
+    for (rf_iter rf = ri->second.requested_frags_.begin(); rf != rf_end; ++rf) {
+
+      const SequenceNumber& seq = rf->first;
+      if (writer.send_buff_->contains(seq)) {
+        FragmentInfo& fi = requests[addr];
+        const bool new_entry = !fi.count(seq);
+        FragmentInfo::mapped_type& mapped = fi[seq];
+        const SequenceNumber base(rf->second.bitmapBase.value);
+        mapped.first.insert(base, rf->second.numBits,
+                            rf->second.bitmap.get_buffer());
+        if (new_entry) {
+          mapped.second = ri->first;
+        } else if (mapped.second != ri->first) {
+          mapped.second = GUID_UNKNOWN;
+        }
+      } else {
+        gaps.insert(seq);
+        gap_recipients.insert(addr);
+      }
+    }
+  }
+
+  typedef std::map<ACE_INET_Addr, FragmentInfo>::iterator req_iter;
+  for (req_iter req = requests.begin(); req != requests.end(); ++req) {
+    const FragmentInfo& fi = req->second;
+
+    for (FragmentInfo::const_iterator sn_iter = fi.begin();
+         sn_iter != fi.end(); ++sn_iter) {
+      const SequenceNumber& seq = sn_iter->first;
+      TransportSendStrategy::QueueType* q = writer.send_buff_->peek_queue(seq);
+      RtpsCustomizedElement* elt =
+        dynamic_cast<RtpsCustomizedElement*>(q->peek());
+      //TODO: ERROR if (!elt)
+      //TODO: build and send DATA_FRAG
+      // use part of RtpsSampleHeader::split() to get initial elements and iQos
+    }
   }
 }
 

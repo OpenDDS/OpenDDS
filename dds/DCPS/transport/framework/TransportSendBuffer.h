@@ -85,6 +85,9 @@ public:
   SequenceNumber low() const;
   SequenceNumber high() const;
   bool empty() const;
+  bool contains(const SequenceNumber& seq) const;
+
+  QueueType* peek_queue(const SequenceNumber& seq) const;
 
   void retain_all(RepoId pub_id);
   void insert(SequenceNumber sequence,

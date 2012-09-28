@@ -170,6 +170,7 @@ private:
   struct ReaderInfo {
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     std::vector<RTPS::SequenceNumberSet> requested_changes_;
+    std::map<SequenceNumber, RTPS::FragmentNumberSet> requested_frags_;
     bool handshake_done_;
     std::map<SequenceNumber, TransportQueueElement*> durable_data_;
     ACE_Time_Value durable_timestamp_;
@@ -261,6 +262,9 @@ private:
                             const DisjointSequence& gaps);
   ACE_Message_Block* marshal_gaps(const RepoId& writer, const RepoId& reader,
                                   const DisjointSequence& gaps);
+
+  void send_nackfrag_replies(RtpsWriter& writer, DisjointSequence& gaps,
+                             std::set<ACE_INET_Addr>& gap_recipients);
 
   template<typename T, typename FN>
   void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
