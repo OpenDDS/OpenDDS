@@ -250,7 +250,7 @@ struct TestParticipant: ACE_Event_Handler {
     df.inlineQos = inlineQoS;
 #else
     const DataFragSubmessage df = {
-      {DATA_FRAG, FLAG_E | (i ? 0 : FLAG_Q), 0},
+      {DATA_FRAG, CORBA::Octet(FLAG_E | (i ? 0 : FLAG_Q)), 0},
       0, DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq,
       {i + 1},       // fragmentStartingNum
       1,             // fragmentsInSubmessage

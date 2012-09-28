@@ -17,8 +17,8 @@ public:
   virtual ~<%TYPE%>TypeSupportImpl ();
 
   virtual
-  DDS::ReturnCode_t register_type (::DDS::DomainParticipant_ptr participant,
-                                   const char * type_name);
+  ::DDS::ReturnCode_t register_type (::DDS::DomainParticipant_ptr participant,
+                                     const char * type_name);
 
   virtual char * get_type_name ();
 
@@ -51,7 +51,7 @@ class <%EXPORT%> <%TYPE%>DataWriterImpl
 {
 public:
 
-  typedef std::map<<%SCOPED%>, DDS::InstanceHandle_t,
+  typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
   typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
 
@@ -61,18 +61,18 @@ public:
   //Destructor
   virtual ~<%TYPE%>DataWriterImpl (void);
 
-  virtual DDS::InstanceHandle_t register_instance (
+  virtual ::DDS::InstanceHandle_t register_instance (
       const ::<%SCOPED%> & instance);
 
-  virtual DDS::InstanceHandle_t register_instance_w_timestamp (
+  virtual ::DDS::InstanceHandle_t register_instance_w_timestamp (
       const ::<%SCOPED%> & instance,
       const ::DDS::Time_t & timestamp);
 
-  virtual DDS::ReturnCode_t unregister_instance (
+  virtual ::DDS::ReturnCode_t unregister_instance (
       const ::<%SCOPED%> & instance,
       ::DDS::InstanceHandle_t handle);
 
-  virtual DDS::ReturnCode_t unregister_instance_w_timestamp (
+  virtual ::DDS::ReturnCode_t unregister_instance_w_timestamp (
       const ::<%SCOPED%> & instance,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & timestamp);
@@ -80,28 +80,28 @@ public:
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual DDS::ReturnCode_t write (
+  virtual ::DDS::ReturnCode_t write (
       const ::<%SCOPED%> & instance_data,
       ::DDS::InstanceHandle_t handle);
 
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual DDS::ReturnCode_t write_w_timestamp (
+  virtual ::DDS::ReturnCode_t write_w_timestamp (
       const ::<%SCOPED%> & instance_data,
       ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & source_timestamp);
 
-  virtual DDS::ReturnCode_t dispose (
+  virtual ::DDS::ReturnCode_t dispose (
       const ::<%SCOPED%> & instance_data,
       ::DDS::InstanceHandle_t instance_handle);
 
-  virtual DDS::ReturnCode_t dispose_w_timestamp (
+  virtual ::DDS::ReturnCode_t dispose_w_timestamp (
       const ::<%SCOPED%> & instance_data,
       ::DDS::InstanceHandle_t instance_handle,
       const ::DDS::Time_t & source_timestamp);
 
-  virtual DDS::ReturnCode_t get_key_value (
+  virtual ::DDS::ReturnCode_t get_key_value (
       ::<%SCOPED%> & key_holder,
       ::DDS::InstanceHandle_t handle);
 
@@ -164,7 +164,7 @@ private:
    * create a new instance handle for it.
    */
   ::DDS::ReturnCode_t get_or_create_instance_handle(
-    DDS::InstanceHandle_t& handle,
+    ::DDS::InstanceHandle_t& handle,
     const ::<%SCOPED%>& instance_data,
     const ::DDS::Time_t & source_timestamp);
 
@@ -191,7 +191,7 @@ class <%EXPORT%> <%TYPE%>DataReaderImpl
 {
 public:
 
-  typedef std::map<<%SCOPED%>, DDS::InstanceHandle_t,
+  typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
   typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<<%SCOPED%>, ACE_Null_Mutex>  DataAllocator;
   typedef <%TYPE%>DataReader Interface;
@@ -202,7 +202,7 @@ public:
   //Destructor
   virtual ~<%TYPE%>DataReaderImpl (void);
 
-  virtual DDS::ReturnCode_t delete_contained_entities ();
+  virtual ::DDS::ReturnCode_t delete_contained_entities ();
 
   /**
    * Do parts of enable specific to the datatype.
@@ -210,7 +210,7 @@ public:
    */
   virtual ::DDS::ReturnCode_t enable_specific ();
 
-  virtual DDS::ReturnCode_t read (
+  virtual ::DDS::ReturnCode_t read (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -218,7 +218,7 @@ public:
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states);
 
-  virtual DDS::ReturnCode_t take (
+  virtual ::DDS::ReturnCode_t take (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -238,15 +238,15 @@ public:
       ::CORBA::Long max_samples,
       ::DDS::ReadCondition_ptr a_condition);
 
-  virtual DDS::ReturnCode_t read_next_sample (
+  virtual ::DDS::ReturnCode_t read_next_sample (
       ::<%SCOPED%> & received_data,
       ::DDS::SampleInfo & sample_info);
 
-  virtual DDS::ReturnCode_t take_next_sample (
+  virtual ::DDS::ReturnCode_t take_next_sample (
       ::<%SCOPED%> & received_data,
       ::DDS::SampleInfo & sample_info);
 
-  virtual DDS::ReturnCode_t read_instance (
+  virtual ::DDS::ReturnCode_t read_instance (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -255,7 +255,7 @@ public:
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states);
 
-  virtual DDS::ReturnCode_t take_instance (
+  virtual ::DDS::ReturnCode_t take_instance (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -264,7 +264,7 @@ public:
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states);
 
-  virtual DDS::ReturnCode_t read_next_instance (
+  virtual ::DDS::ReturnCode_t read_next_instance (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -273,7 +273,7 @@ public:
       ::DDS::ViewStateMask view_states,
       ::DDS::InstanceStateMask instance_states);
 
-  virtual DDS::ReturnCode_t take_next_instance (
+  virtual ::DDS::ReturnCode_t take_next_instance (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -296,18 +296,18 @@ public:
       ::DDS::InstanceHandle_t previous_handle,
       ::DDS::ReadCondition_ptr a_condition);
 
-  virtual DDS::ReturnCode_t return_loan (
+  virtual ::DDS::ReturnCode_t return_loan (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq);
 
-  virtual DDS::ReturnCode_t get_key_value (
+  virtual ::DDS::ReturnCode_t get_key_value (
       ::<%SCOPED%> & key_holder,
       ::DDS::InstanceHandle_t handle);
 
   virtual ::DDS::InstanceHandle_t lookup_instance (
       const ::<%SCOPED%> & instance_data);
 
-  virtual DDS::ReturnCode_t auto_return_loan(void* seq);
+  virtual ::DDS::ReturnCode_t auto_return_loan(void* seq);
 
   void release_loan (::<%SCOPED%><%SEQ%> & received_data);
 
@@ -316,36 +316,36 @@ public:
   virtual void delete_instance_map (void* map);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  bool contains_sample_filtered(DDS::SampleStateMask sample_states,
-                                DDS::ViewStateMask view_states,
-                                DDS::InstanceStateMask instance_states,
+  bool contains_sample_filtered(::DDS::SampleStateMask sample_states,
+                                ::DDS::ViewStateMask view_states,
+                                ::DDS::InstanceStateMask instance_states,
                                 const OpenDDS::DCPS::FilterEvaluator& evaluator,
-                                const DDS::StringSeq& params);
+                                const ::DDS::StringSeq& params);
 
-  DDS::ReturnCode_t read_generic(
+  ::DDS::ReturnCode_t read_generic(
     OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
-    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states);
+    ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states);
 
-  DDS::InstanceHandle_t lookup_instance_generic(const void* data);
+  ::DDS::InstanceHandle_t lookup_instance_generic(const void* data);
 
-  DDS::ReturnCode_t read_instance_generic(void*& data,
-    DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
-    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states);
+  ::DDS::ReturnCode_t read_instance_generic(void*& data,
+    ::DDS::SampleInfo& info, ::DDS::InstanceHandle_t instance,
+    ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states);
 
-  DDS::ReturnCode_t read_next_instance_generic(void*& data,
-    DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
-    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states);
+  ::DDS::ReturnCode_t read_next_instance_generic(void*& data,
+    ::DDS::SampleInfo& info, ::DDS::InstanceHandle_t previous_instance,
+    ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states);
 
 #endif
 
-  DDS::InstanceHandle_t store_synthetic_data(const <%SCOPED%>& sample,
-                                             DDS::ViewStateKind view);
+  ::DDS::InstanceHandle_t store_synthetic_data(const <%SCOPED%>& sample,
+                                             ::DDS::ViewStateKind view);
 
-  void set_instance_state(DDS::InstanceHandle_t instance,
-                          DDS::InstanceStateKind state);
+  void set_instance_state(::DDS::InstanceHandle_t instance,
+                          ::DDS::InstanceStateKind state);
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance);
@@ -398,7 +398,7 @@ public:
       int ignored);
 #endif
 
-    DDS::ReturnCode_t read_instance_i (
+    ::DDS::ReturnCode_t read_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -412,7 +412,7 @@ public:
       int ignored);
 #endif
 
-    DDS::ReturnCode_t take_instance_i (
+    ::DDS::ReturnCode_t take_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -426,7 +426,7 @@ public:
       int ignored);
 #endif
 
-    DDS::ReturnCode_t read_next_instance_i (
+    ::DDS::ReturnCode_t read_next_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
@@ -440,7 +440,7 @@ public:
       int ignored);
 #endif
 
-    DDS::ReturnCode_t take_next_instance_i (
+    ::DDS::ReturnCode_t take_next_instance_i (
       ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,

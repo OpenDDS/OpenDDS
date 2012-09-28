@@ -850,7 +850,9 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
                                                  num_bits, ack, wi->first);
 
         AckNackSubmessage acknack = {
-          {ACKNACK, 1 /*FLAG_E*/ | (nack ? 0 : 2 /*FLAG_F*/), 0 /*length*/},
+          {ACKNACK,
+           CORBA::Octet(1 /*FLAG_E*/ | (nack ? 0 : 2 /*FLAG_F*/)),
+           0 /*length*/},
           rr->first.entityId,
           wi->first.entityId,
           { // SequenceNumberSet: acking bitmapBase - 1
@@ -1469,7 +1471,9 @@ RtpsUdpDataLink::send_heartbeats()
                           has_data ? rw->second.send_buff_->high() : 1);
 
     const HeartBeatSubmessage hb = {
-      {HEARTBEAT, 1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0), HEARTBEAT_SZ},
+      {HEARTBEAT,
+       CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
+       HEARTBEAT_SZ},
       ENTITYID_UNKNOWN, // any matched reader may be interested in this
       rw->first.entityId,
       {firstSN.getHigh(), firstSN.getLow()},

@@ -280,7 +280,10 @@ namespace {
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       be_global->impl_ <<
-        "  find_size_ulong(size, padding);\n";
+        "  find_size_ulong(size, padding);\n"
+        "  if (seq.length() == 0) {\n"
+        "    return;\n"
+        "  }\n";
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
           "  size += seq.length() * max_marshaled_size_ulong();\n";
@@ -326,7 +329,10 @@ namespace {
       insertion.endArgs();
       be_global->impl_ <<
         "  const CORBA::ULong length = seq.length();\n"
-        << streamAndCheck("<< length");
+        << streamAndCheck("<< length") <<
+        "  if (length == 0) {\n"
+        "    return true;\n"
+        "  }\n";
       if (elem_cls & CL_PRIMITIVE) {
         be_global->impl_ <<
           "  return strm.write_" << getSerializerName(elem)

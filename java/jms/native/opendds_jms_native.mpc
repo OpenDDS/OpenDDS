@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project: dcps_java {
+project: dcps_java, dcps_inforepodiscovery {
 
     // Ensure sharedname matches the opendds-jms jar naming scheme:
     sharedname       = opendds-jms-native
