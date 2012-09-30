@@ -402,6 +402,31 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
 
 
 // Support for the send() data handling path
+namespace {
+  ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm)
+  {
+    size_t size = 0, padding = 0;
+    for (CORBA::ULong i = 0; i < subm.length(); ++i) {
+      if ((size + padding) % 4) {
+        padding += 4 - ((size + padding) % 4);
+      }
+      gen_find_size(subm[i], size, padding);
+    }
+
+    ACE_Message_Block* hdr = new ACE_Message_Block(size + padding);
+
+    for (CORBA::ULong i = 0; i < subm.length(); ++i) {
+      // byte swapping is handled in the operator<<() implementation
+      Serializer ser(hdr, false, Serializer::ALIGN_CDR);
+      ser << subm[i];
+      const size_t len = hdr->length();
+      if (len % 4) {
+        hdr->wr_ptr(4 - (len % 4));
+      }
+    }
+    return hdr;
+  }
+}
 
 TransportQueueElement*
 RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
@@ -482,27 +507,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
-  size_t size = 0, padding = 0;
-  for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-    if ((size + padding) % 4) {
-      padding += 4 - ((size + padding) % 4);
-    }
-    gen_find_size(subm[i], size, padding);
-  }
-
-  ACE_Message_Block* hdr =
-    new ACE_Message_Block(size + padding, ACE_Message_Block::MB_DATA, data);
-
-  for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-    // byte swapping is handled in the operator<<() implementation
-    Serializer ser(hdr, false, Serializer::ALIGN_CDR);
-    ser << subm[i];
-    const size_t len = hdr->length();
-    if (len % 4) {
-      hdr->wr_ptr(4 - (len % 4));
-    }
-  }
-
+  ACE_Message_Block* hdr = submsgs_to_msgblock(subm);
+  hdr->cont(data);
   RtpsCustomizedElement* rtps =
     RtpsCustomizedElement::alloc(element, hdr,
       &this->rtps_customized_element_allocator_);
@@ -894,9 +900,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
               "no locator for remote %C\n", std::string(conv).c_str()));
           }
         } else {
-          std::set<ACE_INET_Addr> recipients;
-          recipients.insert(locators_[wi->first].addr_);
-          send_strategy_->send_rtps_control(mb_acknack, recipients);
+          send_strategy_->send_rtps_control(mb_acknack,
+                                            locators_[wi->first].addr_);
         }
       }
     }
@@ -1268,13 +1273,21 @@ RtpsUdpDataLink::send_nack_replies()
   }
 }
 
+namespace {
+  struct FragmentDetails {
+    FragmentDetails() : reader_(GUID_UNKNOWN), requires_iqos_(false) {}
+    DisjointSequence frags_;
+    RepoId reader_;
+    bool requires_iqos_;
+  };
+}
+
 void
 RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
                                        DisjointSequence& gaps,
                                        std::set<ACE_INET_Addr>& gap_recipients)
 {
-  typedef std::map<SequenceNumber,
-                   std::pair<DisjointSequence, RepoId> > FragmentInfo;
+  typedef std::map<SequenceNumber, FragmentDetails> FragmentInfo;
   std::map<ACE_INET_Addr, FragmentInfo> requests;
 
   typedef ReaderInfoMap::iterator ri_iter;
@@ -1285,7 +1298,7 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
       continue;
     }
 
-    const ACE_INET_Addr& addr = locators_[ri->first].addr_;
+    const RemoteInfo& remote = locators_[ri->first];
 
     typedef std::map<SequenceNumber, RTPS::FragmentNumberSet>::iterator rf_iter;
     const rf_iter rf_end = ri->second.requested_frags_.end();
@@ -1293,20 +1306,20 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
 
       const SequenceNumber& seq = rf->first;
       if (writer.send_buff_->contains(seq)) {
-        FragmentInfo& fi = requests[addr];
+        FragmentInfo& fi = requests[remote.addr_];
         const bool new_entry = !fi.count(seq);
         FragmentInfo::mapped_type& mapped = fi[seq];
-        const SequenceNumber base(rf->second.bitmapBase.value);
-        mapped.first.insert(base, rf->second.numBits,
-                            rf->second.bitmap.get_buffer());
+        mapped.frags_.insert(rf->second.bitmapBase.value, rf->second.numBits,
+                             rf->second.bitmap.get_buffer());
         if (new_entry) {
-          mapped.second = ri->first;
-        } else if (mapped.second != ri->first) {
-          mapped.second = GUID_UNKNOWN;
+          mapped.reader_ = ri->first;
+        } else if (mapped.reader_ != ri->first) {
+          mapped.reader_ = GUID_UNKNOWN;
         }
+        mapped.requires_iqos_ |= remote.requires_inline_qos_;
       } else {
         gaps.insert(seq);
-        gap_recipients.insert(addr);
+        gap_recipients.insert(remote.addr_);
       }
     }
   }
@@ -1322,8 +1335,44 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
       RtpsCustomizedElement* elt =
         dynamic_cast<RtpsCustomizedElement*>(q->peek());
       //TODO: ERROR if (!elt)
-      //TODO: build and send DATA_FRAG
-      // use part of RtpsSampleHeader::split() to get initial elements and iQos
+      //TODO: support for instance control messages
+      const DataSampleListElement& dsle =
+        *elt->original_send_element()->sample();
+      const FragmentDetails& fdet = sn_iter->second;
+      SequenceNumber fn = fdet.frags_.low();
+      ACE_Message_Block* chain = 0;
+      ACE_Message_Block* last = 0;
+      size_t len = 0, n_blocks = 0;
+      while (fn <= fdet.frags_.high()) {
+        RTPS::SubmessageSeq subm;
+        size_t data_start, data_len;
+        bool send = false; // need to send 'chain' on this iteration?
+        if (RtpsSampleHeader::populate_data_frag_submessages(subm, fn,
+              dsle, fdet.requires_iqos_, fdet.frags_, fdet.reader_, len,
+              data_start, data_len)) {
+          ACE_Message_Block* hdr = submsgs_to_msgblock(subm);
+          ACE_Message_Block* data = dsle.sample_->duplicate();
+          data->rd_ptr(data_start);
+          data->wr_ptr(data->rd_ptr() + data_len);
+          hdr->cont(data);
+          len += hdr->total_length();
+          if (!chain) {
+            chain = hdr;
+          } else {
+            last->cont(hdr);
+          }
+          last = data;
+          n_blocks += 2;
+        } else {
+          send = true; // next frag didn't fit in this message, send the chain
+        }
+        if (send || fn > fdet.frags_.high() || n_blocks > MAX_SEND_BLOCKS - 3) {
+          send_strategy_->send_rtps_control(*chain, req->first);
+          chain->release();
+          chain = last = 0;
+          len = n_blocks = 0;
+        }
+      }
     }
   }
 }
@@ -1377,10 +1426,9 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
 void
 RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
-  std::set<ACE_INET_Addr> recipient;
-  recipient.insert(get_locator_i(element->subscription_id()));
   ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
-  send_strategy_->send_rtps_control(*msg, recipient);
+  send_strategy_->send_rtps_control(*msg,
+                                    get_locator_i(element->subscription_id()));
 }
 
 void
@@ -1393,9 +1441,7 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
   std::memcpy(info_dst_.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
   ser << info_dst_;
   mb.cont(marshal_gaps(writer, reader, gaps));
-  std::set<ACE_INET_Addr> recipient;
-  recipient.insert(get_locator_i(reader));
-  send_strategy_->send_rtps_control(mb, recipient);
+  send_strategy_->send_rtps_control(mb, get_locator_i(reader));
   mb.cont()->release();
 }
 

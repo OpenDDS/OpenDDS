@@ -331,6 +331,22 @@ DisjointSequence::contains(SequenceNumber value) const
   return iter != sequences_.end() && iter->first <= value;
 }
 
+SequenceRange
+DisjointSequence::next_gap(SequenceNumber value) const
+{
+  RangeSet::const_iterator iter =
+    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
+  if (iter == sequences_.end() || iter->first > value
+      || ++iter == sequences_.end()) {
+    SequenceNumber top = high();
+    ++top;
+    return SequenceRange(top, top);
+  }
+  SequenceNumber low = iter->second + 1;
+  ++iter;
+  return SequenceRange(low, iter->first.previous());
+}
+
 void
 DisjointSequence::validate(const SequenceRange& range)
 {

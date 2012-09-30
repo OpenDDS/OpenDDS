@@ -42,6 +42,8 @@ public:
     const std::set<ACE_INET_Addr>& destinations);
 
   void send_rtps_control(ACE_Message_Block& submessages,
+                         const ACE_INET_Addr& destination);
+  void send_rtps_control(ACE_Message_Block& submessages,
                          const std::set<ACE_INET_Addr>& destinations);
 
 protected:
@@ -56,6 +58,8 @@ private:
   void marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
                        const std::set<ACE_INET_Addr>& addrs);
+  ssize_t send_single_i(const iovec iov[], int n,
+                        const ACE_INET_Addr& addr);
 
   RtpsUdpDataLink* link_;
   const std::set<ACE_INET_Addr>* override_dest_;

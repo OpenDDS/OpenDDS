@@ -56,6 +56,10 @@ public:
 
   bool contains(SequenceNumber value) const;
 
+  /// Given a value that's in the DisjointSequence, get the next internal gap
+  /// or (high+1, high+1) if there is no next internal gap.
+  SequenceRange next_gap(SequenceNumber value) const;
+
   /// All insert() methods return true upon modifying the set and false if
   /// the set already contained the SequenceNumber(s) that were to be inserted.
   /// This is the general form of insert() whereby the caller receives a list of

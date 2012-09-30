@@ -21,6 +21,7 @@ namespace DCPS {
 
 class ReceivedDataSample;
 struct DataSampleListElement;
+class DisjointSequence;
 
 /// Adapt the TransportReceiveStrategy for RTPS's "sample" (submessage) Header
 class RtpsSampleHeader {
@@ -57,7 +58,7 @@ public:
 
   bool more_fragments() const;
 
-  OpenDDS::RTPS::Submessage submessage_;
+  RTPS::Submessage submessage_;
 
 private:
   void init(ACE_Message_Block& mb);
@@ -67,17 +68,26 @@ private:
 
 public:
   // Unlike the rest of this class, which is used with the
-  // TransportReceiveStrategy, thes functions do the inverse of
+  // TransportReceiveStrategy, these functions do the inverse of
   // into_received_data_sample() so they are used on the sending side:
   // translating from an OpenDDS data structure to the RTPS format.
-  static void populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+  static void populate_data_sample_submessages(RTPS::SubmessageSeq& subm,
                                                const DataSampleListElement& dsle,
                                                bool requires_inline_qos);
-  static void populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+  static void populate_data_control_submessages(RTPS::SubmessageSeq& subm,
                                                 const TransportSendControlElement& tsce,
                                                 bool requires_inline_qos);
+  static bool populate_data_frag_submessages(RTPS::SubmessageSeq& subm,
+                                             SequenceNumber& starting_frag,
+                                             const DataSampleListElement& dsle,
+                                             bool requires_inline_qos,
+                                             const DisjointSequence& frags,
+                                             const RepoId& reader,
+                                             size_t current_msg_len,
+                                             size_t& data_start,
+                                             size_t& data_len);
   static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
-                                  OpenDDS::RTPS::DataSubmessage& data);
+                                  RTPS::ParameterList& plist);
   static bool control_message_supported(char message_id);
 
 private:

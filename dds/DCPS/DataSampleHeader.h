@@ -228,7 +228,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   bool into_received_data_sample(ReceivedDataSample& rds);
 
-  ACE_UINT32 message_length() { return this->message_length_; }
+  ACE_UINT32 message_length() const { return this->message_length_; }
 
   bool more_fragments() const { return this->more_fragments_; }
 

@@ -106,6 +106,23 @@ RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 
 void
 RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
+                                       const ACE_INET_Addr& addr)
+{
+  rtps_header_mb_.cont(&submessages);
+
+  iovec iov[MAX_SEND_BLOCKS];
+  const int num_blocks = mb_to_iov(rtps_header_mb_, iov);
+  const ssize_t result = send_single_i(iov, num_blocks, addr);
+  if (result < 0) {
+    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
+      "failed to send RTPS control message\n"));
+  }
+
+  rtps_header_mb_.cont(0);
+}
+
+void
+RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const std::set<ACE_INET_Addr>& addrs)
 {
   rtps_header_mb_.cont(&submessages);
@@ -128,21 +145,30 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   ssize_t result = -1;
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
+    const ssize_t result_per_dest = send_single_i(iov, n, *iter);
+    if (result_per_dest >= 0) {
+      result = result_per_dest;
+    }
+  }
+  return result;
+}
+
+ssize_t
+RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
+                                   const ACE_INET_Addr& addr)
+{
 #ifdef ACE_HAS_IPV6
-    ACE_SOCK_Dgram& sock = link_->socket_for(iter->get_type());
+  ACE_SOCK_Dgram& sock = link_->socket_for(addr.get_type());
 #define USE_SOCKET sock
 #else
 #define USE_SOCKET link_->unicast_socket()
 #endif
-    ssize_t result_per_dest = USE_SOCKET.send(iov, n, *iter);
-    if (result_per_dest < 0) {
-      ACE_TCHAR addr_buff[256] = {};
-      iter->addr_to_string(addr_buff, 256, 0);
-      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_multi_i() - "
-        "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
-    } else {
-      result = result_per_dest;
-    }
+  const ssize_t result = USE_SOCKET.send(iov, n, addr);
+  if (result < 0) {
+    ACE_TCHAR addr_buff[256] = {};
+    addr.addr_to_string(addr_buff, 256, 0);
+    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+      "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
   }
   return result;
 }

@@ -13,6 +13,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/DisjointSequence.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
@@ -36,6 +37,14 @@ namespace {
           STATUS_INFO_DISPOSE = { { 0, 0, 0, 1 } },
           STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } },
           STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
+
+  // All of the fragments we generate will use the FRAG_SIZE of 1024, which may
+  // be the smallest allowed by the spec (8.4.14.1.1).  There is no practical
+  // advantage to increasing this constant, since any number of 1024-byte
+  // fragments may appear in a single DATA_FRAG submessage.  The spec is
+  // ambiguous in its use of KB to mean either 1000 or 1024, and uses < instead
+  // of <= (see issue 16966).
+  const ACE_CDR::UShort FRAG_SIZE = 1024;
 }
 
 namespace OpenDDS {
@@ -296,24 +305,34 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   return true;
 }
 
+namespace {
+  void add_timestamp(RTPS::SubmessageSeq& subm, ACE_CDR::Octet flags,
+    const DataSampleHeader& header)
+  {
+    using namespace OpenDDS::RTPS;
+    const DDS::Time_t st = {header.source_timestamp_sec_,
+                            header.source_timestamp_nanosec_};
+    const InfoTimestampSubmessage ts = {
+      {INFO_TS, flags, INFO_TS_SZ},
+      {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)}
+    };
+    const CORBA::ULong i = subm.length();
+    subm.length(i + 1);
+    subm[i].info_ts_sm(ts);
+  }
+}
+
 void
 RtpsSampleHeader::populate_data_sample_submessages(
-  OpenDDS::RTPS::SubmessageSeq& subm,
+  RTPS::SubmessageSeq& subm,
   const DataSampleListElement& dsle,
   bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
-  const ACE_CDR::Octet flags =
-    DataSampleHeader::test_flag(BYTE_ORDER_FLAG, dsle.sample_);
-  const ACE_CDR::UShort len = 8;
-  const DDS::Time_t st = { dsle.header_.source_timestamp_sec_,
-                           dsle.header_.source_timestamp_nanosec_ };
-  const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
-    {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)} };
+  const ACE_CDR::Octet flags = dsle.header_.byte_order_;
+  add_timestamp(subm, flags, dsle.header_);
   CORBA::ULong i = subm.length();
-  subm.length(i + 1);
-  subm[i++].info_ts_sm(ts);
 
   EntityId_t readerId = ENTITYID_UNKNOWN;
   if (dsle.num_subs_ == 1) {
@@ -353,7 +372,7 @@ RtpsSampleHeader::populate_data_sample_submessages(
     TransportSendListener::InlineQosData qos_data;
     dsle.send_listener_->retrieve_inline_qos_data(qos_data);
 
-    populate_inline_qos(qos_data, data);
+    populate_inline_qos(qos_data, data.inlineQos);
   }
 
   if (data.inlineQos.length() > 0) {
@@ -362,6 +381,76 @@ RtpsSampleHeader::populate_data_sample_submessages(
 
   subm.length(i + 1);
   subm[i].data_sm(data);
+}
+
+bool
+RtpsSampleHeader::populate_data_frag_submessages(
+  RTPS::SubmessageSeq& subm,
+  SequenceNumber& starting_frag,
+  const DataSampleListElement& dsle,
+  bool requires_inline_qos,
+  const DisjointSequence& frags,
+  const RepoId& reader,
+  size_t current_msg_len,
+  size_t& data_start,
+  size_t& data_len)
+{
+  using namespace OpenDDS::RTPS;
+  const ACE_CDR::Octet flags = dsle.header_.byte_order_;
+  size_t added_len = 0;
+  if (current_msg_len == 0) {
+    add_timestamp(subm, flags, dsle.header_);
+    added_len += SMHDR_SZ + INFO_TS_SZ;
+  }
+  CORBA::ULong i = subm.length();
+
+  if (current_msg_len == 0 && reader != GUID_UNKNOWN) {
+    InfoDestinationSubmessage idest;
+    idest.smHeader.submessageId = INFO_DST;
+    idest.smHeader.flags = flags;
+    idest.smHeader.submessageLength = INFO_DST_SZ;
+    std::memcpy(idest.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
+    subm.length(i + 1);
+    subm[i++].info_dst_sm(idest);
+    added_len += SMHDR_SZ + INFO_DST_SZ;
+  }
+
+  const SequenceRange frag_gap = frags.next_gap(starting_frag);
+  int n_frags = frag_gap.first.getLow() - starting_frag.getLow();
+  //TODO: complete this -- determine how many fragments can fit
+
+  DataFragSubmessage datafrag = {
+    {DATA_FRAG, flags, 0},
+    0, /* extra flags: unused */
+    DATA_FRAG_OCTETS_TO_IQOS,
+    reader.entityId,
+    dsle.publication_id_.entityId,
+    {dsle.header_.sequence_.getHigh(), dsle.header_.sequence_.getLow()},
+    starting_frag.getLow(),
+    static_cast<CORBA::UShort>(n_frags),
+    FRAG_SIZE,
+    dsle.header_.message_length(),
+    ParameterList()
+  };
+
+  if (requires_inline_qos && starting_frag == 1) {
+    TransportSendListener::InlineQosData qos_data;
+    dsle.send_listener_->retrieve_inline_qos_data(qos_data);
+    populate_inline_qos(qos_data, datafrag.inlineQos);
+  
+    if (datafrag.inlineQos.length() > 0) {
+      datafrag.smHeader.flags |= FLAG_Q;
+    }
+  }
+
+  subm.length(i + 1);
+  subm[i].data_frag_sm(datafrag);
+
+  starting_frag = starting_frag + n_frags;
+  if (starting_frag == frag_gap.first) {
+    starting_frag = frag_gap.second +1;
+  }
+  return true;
 }
 
 namespace {
@@ -390,15 +479,9 @@ RtpsSampleHeader::populate_data_control_submessages(
   using namespace OpenDDS::RTPS;
 
   const DataSampleHeader& header = tsce.header();
-  const ACE_CDR::Octet flags = (header.byte_order_ == true);
-  const ACE_CDR::UShort len = 8;
-  const ACE_INT32  st_sec  = header.source_timestamp_sec_;
-  const ACE_UINT32 st_nsec = header.source_timestamp_nanosec_;
-  const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
-    {st_sec, static_cast<ACE_UINT32>(st_nsec * NANOS_TO_RTPS_FRACS + .5)} };
+  const ACE_CDR::Octet flags = header.byte_order_;
+  add_timestamp(subm, flags, header);
   CORBA::ULong i = subm.length();
-  subm.length(i + 1);
-  subm[i++].info_ts_sm(ts);
 
   static const CORBA::Octet BUILT_IN_WRITER = 0xC2;
 
@@ -465,7 +548,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     TransportSendListener::InlineQosData qos_data;
     tsce.listener()->retrieve_inline_qos_data(qos_data);
 
-    populate_inline_qos(qos_data, data);
+    populate_inline_qos(qos_data, data.inlineQos);
   }
 
   if (data.inlineQos.length() > 0) {
@@ -478,24 +561,24 @@ RtpsSampleHeader::populate_data_control_submessages(
 
 #define PROCESS_INLINE_QOS(QOS_NAME, DEFAULT_QOS, WRITER_QOS) \
   if (WRITER_QOS.QOS_NAME != DEFAULT_QOS.QOS_NAME) {          \
-    const int qos_len = data.inlineQos.length();              \
-    data.inlineQos.length(qos_len + 1);                       \
-    data.inlineQos[qos_len].QOS_NAME(WRITER_QOS.QOS_NAME);    \
+    const int qos_len = plist.length();                       \
+    plist.length(qos_len + 1);                                \
+    plist[qos_len].QOS_NAME(WRITER_QOS.QOS_NAME);             \
   }
 
 void
 RtpsSampleHeader::populate_inline_qos(
   const TransportSendListener::InlineQosData& qos_data,
-  OpenDDS::RTPS::DataSubmessage& data)
+  RTPS::ParameterList& plist)
 {
   using namespace OpenDDS::RTPS;
 
   // Always include topic name (per the spec)
   {
-    const int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len + 1);
-    data.inlineQos[qos_len].string_data(qos_data.topic_name.c_str());
-    data.inlineQos[qos_len]._d(PID_TOPIC_NAME);
+    const int qos_len = plist.length();
+    plist.length(qos_len + 1);
+    plist[qos_len].string_data(qos_data.topic_name.c_str());
+    plist[qos_len]._d(PID_TOPIC_NAME);
   }
 
   // Conditionally include other QoS inline when the differ from the
@@ -566,13 +649,7 @@ namespace {
     }
   }
 
-  // All of the fragments we generate will use the FRAG_SIZE of 1024, which may
-  // be the smallest allowed by the spec (8.4.14.1.1).  There is no practical
-  // advantage to increasing this constant, since any number of 1024-byte
-  // fragments may appear in a single DATA_FRAG submessage.  The spec is
-  // ambiguous in its use of KB to mean either 1000 or 1024, and uses < instead
-  // of <= (see issue 16966).
-  const ACE_CDR::UShort FRAG_SIZE = 1024;
+  const size_t FRAG_START_OFFSET = 24, FRAG_SAMPLE_SIZE_OFFSET = 32;
 }
 
 void
@@ -581,7 +658,6 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
 {
   using namespace RTPS;
   size_t data_offset = 0;
-  bool found_data = false;
   const char* rd = orig.rd_ptr();
   ACE_CDR::ULong starting_frag, sample_size;
   ACE_CDR::Octet flags;
@@ -593,6 +669,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   while (true) {
     flags = rd[data_offset + 1];
     swap_bytes = ACE_CDR_BYTE_ORDER != bool(flags & FLAG_E);
+    bool found_data = false;
 
     switch (rd[data_offset]) {
     case DATA:
@@ -609,8 +686,8 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
       break;
     case DATA_FRAG:
       found_data = true;
-      peek(starting_frag, rd + data_offset + 24, swap_bytes);
-      peek(sample_size, rd + data_offset + 32, swap_bytes);
+      peek(starting_frag, rd + data_offset + FRAG_START_OFFSET, swap_bytes);
+      peek(sample_size, rd + data_offset + FRAG_SAMPLE_SIZE_OFFSET, swap_bytes);
       break;
     }
 
