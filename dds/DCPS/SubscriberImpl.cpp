@@ -142,53 +142,9 @@ SubscriberImpl::create_datareader(
 #endif
     }
   }
-
-  if (qos == DATAREADER_QOS_DEFAULT) {
-    this->get_default_datareader_qos(dr_qos);
-
-  } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
-#ifndef OPENDDS_NO_MULTI_TOPIC
-    if (mt) {
-      if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("SubscriberImpl::create_datareader, ")
-          ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
-          ACE_TEXT("to create a MultiTopic DataReader.\n")));
-      }
-      return DDS::DataReader::_nil();
-    }
-#endif
-    DDS::TopicQos topic_qos;
-    topic_servant->get_qos(topic_qos);
-
-    this->get_default_datareader_qos(dr_qos);
-
-    this->copy_from_topic_qos(dr_qos,
-                              topic_qos);
-
-  } else {
-    dr_qos = qos;
-  }
-
-  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
-  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
-  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
-
-  if (!Qos_Helper::valid(dr_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("SubscriberImpl::create_datareader, ")
-               ACE_TEXT("invalid qos.\n")));
+  
+  if (! validate_datareader_qos (qos, default_datareader_qos_, topic_servant , dr_qos, mt))
     return DDS::DataReader::_nil();
-  }
-
-  if (!Qos_Helper::consistent(dr_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("SubscriberImpl::create_datareader, ")
-               ACE_TEXT("inconsistent qos.\n")));
-    return DDS::DataReader::_nil();
-  }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   if (mt) {
@@ -275,6 +231,7 @@ SubscriberImpl::create_datareader(
   // add created data reader to this' data reader container -
   // done in enable_reader
   return DDS::DataReader::_duplicate(dr_obj.in());
+
 }
 
 DDS::ReturnCode_t
@@ -770,19 +727,7 @@ SubscriberImpl::copy_from_topic_qos(
   DDS::DataReaderQos & a_datareader_qos,
   const DDS::TopicQos & a_topic_qos)
 {
-  if (Qos_Helper::valid(a_topic_qos) &&
-      Qos_Helper::consistent(a_topic_qos)) {
-    // the caller can get the default before calling this
-    // method if it wants to.
-    //a_datareader_qos = this->default_datareader_qos_;
-    a_datareader_qos.durability = a_topic_qos.durability;
-    a_datareader_qos.deadline = a_topic_qos.deadline;
-    a_datareader_qos.latency_budget = a_topic_qos.latency_budget;
-    a_datareader_qos.liveliness = a_topic_qos.liveliness;
-    a_datareader_qos.reliability = a_topic_qos.reliability;
-    a_datareader_qos.destination_order = a_topic_qos.destination_order;
-    a_datareader_qos.history = a_topic_qos.history;
-    a_datareader_qos.resource_limits = a_topic_qos.resource_limits;
+  if (Qos_Helper::copy_from_topic_qos(a_datareader_qos, a_topic_qos) ) {
     return DDS::RETCODE_OK;
 
   } else {
@@ -985,6 +930,67 @@ SubscriberImpl::parent() const
 {
   return this->participant_;
 }
+
+bool 
+SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos, 
+                                    const DDS::DataReaderQos & default_qos, 
+                                    DDS::Topic_ptr a_topic, 
+                                    DDS::DataReaderQos & dr_qos,
+                                    bool mt)
+{
+
+
+  if (qos == DATAREADER_QOS_DEFAULT) {
+    dr_qos = default_qos;
+
+  } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
+#ifndef OPENDDS_NO_MULTI_TOPIC
+    if (mt) {
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("SubscriberImpl::create_datareader, ")
+          ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
+          ACE_TEXT("to create a MultiTopic DataReader.\n")));
+      }
+      return DDS::DataReader::_nil();
+    }
+#endif
+    DDS::TopicQos topic_qos;
+    a_topic->get_qos(topic_qos);
+
+    dr_qos = default_qos;
+
+    Qos_Helper::copy_from_topic_qos(dr_qos,
+                              topic_qos);
+
+  } else {
+    dr_qos = qos;
+  }
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, false);
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, false);
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, false);
+
+  if (!Qos_Helper::valid(dr_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("SubscriberImpl::create_datareader, ")
+               ACE_TEXT("invalid qos.\n")));
+    return false;
+  }
+
+  if (!Qos_Helper::consistent(dr_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("SubscriberImpl::create_datareader, ")
+               ACE_TEXT("inconsistent qos.\n")));
+    return false;
+  }
+
+
+  return true;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

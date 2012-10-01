@@ -269,6 +269,12 @@ public:
 
   static bool changeable(const DDS::DomainParticipantFactoryQos& qos1,
                          const DDS::DomainParticipantFactoryQos& qos2);
+  
+  static bool copy_from_topic_qos(DDS::DataReaderQos& a_datareader_qos,
+                                  const DDS::TopicQos& a_topic_qos);
+  
+  static bool copy_from_topic_qos(DDS::DataWriterQos& a_datareader_qos,
+                                  const DDS::TopicQos& a_topic_qos);
 };
 
 ACE_INLINE OpenDDS_Dcps_Export

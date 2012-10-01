@@ -1,0 +1,38 @@
+Mon Oct  1 21:22:32 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * DevGuideExamples/DCPS/Messenger_Relay/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/run_test.pl:
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/RecorderImp.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+        Initial commit for recorder and replayer implementation.

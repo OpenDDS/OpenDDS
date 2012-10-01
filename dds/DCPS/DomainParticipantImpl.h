@@ -35,6 +35,9 @@
 #include <set>
 #include <string>
 #include <vector>
+ 
+#include "Recorder.h"
+#include "Replayer.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -47,6 +50,10 @@ class PublisherImpl;
 class SubscriberImpl;
 class DomainParticipantFactoryImpl;
 class Monitor;
+
+
+class RecorderImpl;
+class ReplayerImpl;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 class FilterEvaluator;
@@ -333,18 +340,60 @@ public:
 #endif
 
   bool federated() const { return this->federated_; }
-
+  
+  
+  Recorder_rch create_recorder(DDS::Topic_ptr a_topic,
+                               const DDS::SubscriberQos & subscriber_qos,
+                               const DDS::DataReaderQos & datareader_qos,
+                               const RecorderListener_rch & a_listener, 
+                               DDS::StatusMask mask);
+  
+  Replayer_rch create_replayer(DDS::Topic_ptr a_topic,
+                               const DDS::PublisherQos & publisher_qos,
+                               const DDS::DataWriterQos & datawriter_qos,
+                               const ReplayerListener_rch & a_listener, 
+                               DDS::StatusMask mask);
+  
+  DDS::Topic_ptr create_typeless_topic(
+      const char * topic_name,
+      const char * type_name,
+      bool type_has_keys,
+      const DDS::TopicQos & qos,
+      DDS::TopicListener_ptr a_listener,
+      DDS::StatusMask mask);
+  
+  void delete_recorder(Recorder_rch recorder);
+  void delete_replayer(Replayer_rch replayer);
+    
 private:
-
+  
+  bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
+  bool validate_subscriber_qos(DDS::SubscriberQos & subscriber_qos);
+  
   /** The implementation of create_topic.
   */
+  
+  enum {
+    TOPIC_TYPE_HAS_KEYS =1,
+    TOPIC_TYPELESS = 2
+  } TopicTypeMask;
+  
   DDS::Topic_ptr create_topic_i(
+      const char * topic_name,
+      const char * type_name,
+      const DDS::TopicQos & qos,
+      DDS::TopicListener_ptr a_listener,
+      DDS::StatusMask mask, 
+      int topic_mask);
+  
+  DDS::Topic_ptr create_new_topic(
     const RepoId topic_id,
     const char * topic_name,
     const char * type_name,
     const DDS::TopicQos & qos,
     DDS::TopicListener_ptr a_listener,
-    const DDS::StatusMask & mask);
+    const DDS::StatusMask & mask,
+    OpenDDS::DCPS::TypeSupport_ptr type_support);
 
   /** Delete the topic with option of whether the
    *  topic object reference should be removed.
@@ -427,6 +476,24 @@ private:
   ACE_Thread_Mutex filter_cache_lock_;
   std::map<std::string, RcHandle<FilterEvaluator> > filter_cache_;
 #endif
+  
+  
+  struct RcHandleComparer {
+    template <typename T>
+    bool operator() (const RcHandle<T>& lhs, const RcHandle<T>& rhs) const {
+      return lhs.in() < rhs.in();
+    }
+  };
+  typedef std::set<Recorder_rch, RcHandleComparer> RecorderSet;
+  typedef std::set<Replayer_rch, RcHandleComparer> ReplayerSet;
+  
+  RecorderSet recorders_;
+  ReplayerSet replayers_;
+  
+  /// Protect the recorders collection.
+  ACE_Recursive_Thread_Mutex   recorders_protector_;
+  /// Protect the replayers collection.
+  ACE_Recursive_Thread_Mutex   replayers_protector_;
 };
 
 } // namespace DCPS
