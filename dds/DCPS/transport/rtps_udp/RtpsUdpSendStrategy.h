@@ -46,12 +46,14 @@ public:
   void send_rtps_control(ACE_Message_Block& submessages,
                          const std::set<ACE_INET_Addr>& destinations);
 
+  static const size_t MAX_MSG_SIZE = UDP_MAX_MESSAGE_SIZE;
+
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
   virtual size_t max_message_size() const
   {
-    return UDP_MAX_MESSAGE_SIZE;
+    return MAX_MSG_SIZE;
   }
 
 private:

@@ -216,6 +216,13 @@ operator+(const SequenceNumber& lhs, int rhs)
 }
 
 inline SequenceNumber
+operator+=(SequenceNumber& lhs, int rhs)
+{
+  lhs.setValue(lhs.getValue() + rhs);
+  return lhs;
+}
+
+inline SequenceNumber
 operator+(int lhs, const SequenceNumber& rhs)
 {
   return rhs + lhs;

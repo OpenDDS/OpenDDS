@@ -7,6 +7,7 @@
  */
 
 #include "RtpsSampleHeader.h"
+#include "RtpsUdpSendStrategy.h"
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/DataSampleList.h"
@@ -37,14 +38,6 @@ namespace {
           STATUS_INFO_DISPOSE = { { 0, 0, 0, 1 } },
           STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } },
           STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
-
-  // All of the fragments we generate will use the FRAG_SIZE of 1024, which may
-  // be the smallest allowed by the spec (8.4.14.1.1).  There is no practical
-  // advantage to increasing this constant, since any number of 1024-byte
-  // fragments may appear in a single DATA_FRAG submessage.  The spec is
-  // ambiguous in its use of KB to mean either 1000 or 1024, and uses < instead
-  // of <= (see issue 16966).
-  const ACE_CDR::UShort FRAG_SIZE = 1024;
 }
 
 namespace OpenDDS {
@@ -385,20 +378,15 @@ RtpsSampleHeader::populate_data_sample_submessages(
 
 bool
 RtpsSampleHeader::populate_data_frag_submessages(
-  RTPS::SubmessageSeq& subm,
-  SequenceNumber& starting_frag,
-  const DataSampleListElement& dsle,
-  bool requires_inline_qos,
-  const DisjointSequence& frags,
-  const RepoId& reader,
-  size_t current_msg_len,
-  size_t& data_start,
-  size_t& data_len)
+  RTPS::SubmessageSeq& subm, SequenceNumber& starting_frag,
+  const DataSampleListElement& dsle, bool requires_inline_qos,
+  const DisjointSequence& frags, const RepoId& reader,
+  const size_t current_msg_len, size_t& data_len)
 {
   using namespace OpenDDS::RTPS;
   const ACE_CDR::Octet flags = dsle.header_.byte_order_;
   size_t added_len = 0;
-  if (current_msg_len == 0) {
+  if (current_msg_len == 0 && starting_frag == 1) {
     add_timestamp(subm, flags, dsle.header_);
     added_len += SMHDR_SZ + INFO_TS_SZ;
   }
@@ -415,19 +403,15 @@ RtpsSampleHeader::populate_data_frag_submessages(
     added_len += SMHDR_SZ + INFO_DST_SZ;
   }
 
-  const SequenceRange frag_gap = frags.next_gap(starting_frag);
-  int n_frags = frag_gap.first.getLow() - starting_frag.getLow();
-  //TODO: complete this -- determine how many fragments can fit
-
   DataFragSubmessage datafrag = {
-    {DATA_FRAG, flags, 0},
+    {DATA_FRAG, flags, 0 /* submsgLength: determined below */},
     0, /* extra flags: unused */
     DATA_FRAG_OCTETS_TO_IQOS,
     reader.entityId,
     dsle.publication_id_.entityId,
     {dsle.header_.sequence_.getHigh(), dsle.header_.sequence_.getLow()},
-    starting_frag.getLow(),
-    static_cast<CORBA::UShort>(n_frags),
+    {starting_frag.getLow()},
+    0, /* fragments in submsg: determined below */
     FRAG_SIZE,
     dsle.header_.message_length(),
     ParameterList()
@@ -437,18 +421,51 @@ RtpsSampleHeader::populate_data_frag_submessages(
     TransportSendListener::InlineQosData qos_data;
     dsle.send_listener_->retrieve_inline_qos_data(qos_data);
     populate_inline_qos(qos_data, datafrag.inlineQos);
-  
+
     if (datafrag.inlineQos.length() > 0) {
       datafrag.smHeader.flags |= FLAG_Q;
     }
   }
 
+  size_t padding = 0, before_datafrag = added_len;
+  if ((added_len + padding) % 4) {
+    padding += 4 - ((added_len + padding) % 4);
+  }
+  gen_find_size(datafrag, added_len, padding);
+  added_len += padding;
+
+  const SequenceRange frag_gap = frags.next_gap(starting_frag);
+  int n_frags = 0;
+
+  for (unsigned int cur = starting_frag.getLow();
+       cur < frag_gap.first.getLow();
+       ++cur, ++n_frags) {
+    // check if the current fragment "cur" will fit
+    const size_t frag_len =
+      (cur * FRAG_SIZE > dsle.header_.message_length())
+      ? (dsle.header_.message_length() % FRAG_SIZE)
+      : FRAG_SIZE;
+    if (RTPSHDR_SZ + current_msg_len + added_len + data_len + frag_len >
+        RtpsUdpSendStrategy::MAX_MSG_SIZE) {
+      if (n_frags == 0) {
+        // starting fragment won't fit in this message
+        return false;
+      }
+      break;
+    }
+    data_len += frag_len;
+  }
+
+  datafrag.fragmentsInSubmessage = static_cast<CORBA::UShort>(n_frags);
+  const size_t smlen = added_len - before_datafrag - SMHDR_SZ + data_len;
+  datafrag.smHeader.submessageLength = static_cast<CORBA::UShort>(smlen);
+
   subm.length(i + 1);
   subm[i].data_frag_sm(datafrag);
 
-  starting_frag = starting_frag + n_frags;
+  starting_frag += n_frags;
   if (starting_frag == frag_gap.first) {
-    starting_frag = frag_gap.second +1;
+    starting_frag = frag_gap.second + 1;
   }
   return true;
 }

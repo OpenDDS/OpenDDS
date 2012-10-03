@@ -84,11 +84,18 @@ public:
                                              const DisjointSequence& frags,
                                              const RepoId& reader,
                                              size_t current_msg_len,
-                                             size_t& data_start,
                                              size_t& data_len);
   static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
                                   RTPS::ParameterList& plist);
   static bool control_message_supported(char message_id);
+
+  // All of the fragments we generate will use the FRAG_SIZE of 1024, which may
+  // be the smallest allowed by the spec (8.4.14.1.1).  There is no practical
+  // advantage to increasing this constant, since any number of 1024-byte
+  // fragments may appear in a single DATA_FRAG submessage.  The spec is
+  // ambiguous in its use of KB to mean either 1000 or 1024, and uses < instead
+  // of <= (see issue 16966).
+  static const ACE_CDR::UShort FRAG_SIZE = 1024;
 
 private:
   static void process_iqos(DataSampleHeader& opendds,

@@ -1345,14 +1345,15 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
       size_t len = 0, n_blocks = 0;
       while (fn <= fdet.frags_.high()) {
         RTPS::SubmessageSeq subm;
-        size_t data_start, data_len;
+        size_t data_len = 0;
         bool send = false; // need to send 'chain' on this iteration?
+        const unsigned int first = fn.getLow(); // 1st frag in submsg
         if (RtpsSampleHeader::populate_data_frag_submessages(subm, fn,
-              dsle, fdet.requires_iqos_, fdet.frags_, fdet.reader_, len,
-              data_start, data_len)) {
+              dsle, fdet.requires_iqos_, fdet.frags_, fdet.reader_,
+              len, data_len)) {
           ACE_Message_Block* hdr = submsgs_to_msgblock(subm);
           ACE_Message_Block* data = dsle.sample_->duplicate();
-          data->rd_ptr(data_start);
+          data->rd_ptr((first - 1) * RtpsSampleHeader::FRAG_SIZE);
           data->wr_ptr(data->rd_ptr() + data_len);
           hdr->cont(data);
           len += hdr->total_length();
