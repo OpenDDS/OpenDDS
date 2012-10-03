@@ -337,7 +337,7 @@ DisjointSequence::next_gap(SequenceNumber value) const
   RangeSet::const_iterator iter =
     sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
   if (iter == sequences_.end() || iter->first > value
-      || ++iter == sequences_.end()) {
+      || ++RangeSet::const_iterator(iter) == sequences_.end()) {
     SequenceNumber top = high();
     ++top;
     return SequenceRange(top, top);

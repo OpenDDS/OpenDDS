@@ -386,6 +386,7 @@ RtpsSampleHeader::populate_data_frag_submessages(
   using namespace OpenDDS::RTPS;
   const ACE_CDR::Octet flags = dsle.header_.byte_order_;
   size_t added_len = 0;
+  data_len = 0;
   if (current_msg_len == 0 && starting_frag == 1) {
     add_timestamp(subm, flags, dsle.header_);
     added_len += SMHDR_SZ + INFO_TS_SZ;

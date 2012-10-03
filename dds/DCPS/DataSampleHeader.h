@@ -198,7 +198,6 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   /// Create two new serialized headers (owned by caller), the "head" having at
   /// most "size" bytes (header + data) and the "tail" having the rest.
-  /// Precondition: size must be larger than the max_marshaled_size().
   static void split(const ACE_Message_Block& orig, size_t size,
                     ACE_Message_Block*& head, ACE_Message_Block*& tail);
 

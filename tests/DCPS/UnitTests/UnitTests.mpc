@@ -42,6 +42,14 @@ project(*Fragmentation): dcpsexe {
   }
 }
 
+project(*RtpsFragmentation): dcpsexe, dcps_rtps_udp {
+  exename   = *
+
+  Source_Files {
+    RtpsFragmentation.cpp
+  }
+}
+
 project(*GuidGenerator): dcps_rtpsexe {
   exename   = *
 

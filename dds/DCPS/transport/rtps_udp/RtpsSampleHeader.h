@@ -9,6 +9,8 @@
 #ifndef DCPS_RTPSSAMPLEHEADER_H
 #define DCPS_RTPSSAMPLEHEADER_H
 
+#include "Rtps_Udp_Export.h"
+
 #include "ace/Basic_Types.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
@@ -24,7 +26,7 @@ struct DataSampleListElement;
 class DisjointSequence;
 
 /// Adapt the TransportReceiveStrategy for RTPS's "sample" (submessage) Header
-class RtpsSampleHeader {
+class OpenDDS_Rtps_Udp_Export RtpsSampleHeader {
 public:
 
   // This is not really the max_marshaled_size, but it's used for determining
@@ -40,7 +42,6 @@ public:
 
   /// Create two new serialized headers (owned by caller), the "head" having at
   /// most "size" bytes (header + data) and the "tail" having the rest.
-  /// Precondition: size must be larger than the max_marshaled_size().
   static void split(const ACE_Message_Block& orig, size_t size,
                     ACE_Message_Block*& head, ACE_Message_Block*& tail);
 

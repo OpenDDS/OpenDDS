@@ -1345,7 +1345,7 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
       size_t len = 0, n_blocks = 0;
       while (fn <= fdet.frags_.high()) {
         RTPS::SubmessageSeq subm;
-        size_t data_len = 0;
+        size_t data_len;
         bool send = false; // need to send 'chain' on this iteration?
         const unsigned int first = fn.getLow(); // 1st frag in submsg
         if (RtpsSampleHeader::populate_data_frag_submessages(subm, fn,
