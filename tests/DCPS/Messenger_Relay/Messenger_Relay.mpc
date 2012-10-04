@@ -36,3 +36,12 @@ project(*subscriber) : dcpsexe_with_tcp {
     Subscriber.cpp
   }
 }
+
+project(*relay) : dcpsexe_with_tcp {
+  exename   = relay
+
+  Source_Files {
+    Relay.cpp
+  }
+}
+

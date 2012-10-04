@@ -24,23 +24,25 @@ WriterInfoListener::WriterInfoListener()
 /// tell instances when a DataWriter transitions to being alive
 /// The writer state is inout parameter, it has to be set ALIVE before
 /// handle_timeout is called since some subroutine use the state.
-void 
-  WriterInfoListener::writer_became_alive(WriterInfo&,
-                                             const ACE_Time_Value& )
+void
+WriterInfoListener::writer_became_alive(WriterInfo&,
+                                        const ACE_Time_Value& )
 {
 }
 
 /// tell instances when a DataWriter transitions to DEAD
 /// The writer state is inout parameter, the state is set to DEAD
 /// when it returns.
-void WriterInfoListener::writer_became_dead(WriterInfo&,
+void 
+  WriterInfoListener::writer_became_dead(WriterInfo&,
                                             const ACE_Time_Value& )
 {
 }
 
 /// tell instance when a DataWriter is removed.
 /// The liveliness status need update.
-void WriterInfoListener::writer_removed(WriterInfo& )
+void 
+  WriterInfoListener::writer_removed(WriterInfo& )
 {
 }
 

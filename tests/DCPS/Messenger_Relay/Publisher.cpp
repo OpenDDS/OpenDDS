@@ -6,31 +6,42 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
-
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DdsDcpsPublicationC.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
-
+ 
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/udp/Udp.h>
+#include <dds/DCPS/transport/multicast/Multicast.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#include <dds/DCPS/transport/shmem/Shmem.h>
+#endif
 
 #include "MessengerTypeSupportImpl.h"
+#include "Args.h"
 
-
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  try {
-    // Initialize DomainParticipantFactory
-    DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+ try {
+     // Initialize DomainParticipantFactory
+     DDS::DomainParticipantFactory_var dpf =
+       TheParticipantFactoryWithArgs(argc, argv);
+
+     int error;
+     if ((error = parse_args(argc, argv)) != 0) {
+       return error;
+     }
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(42,
+      dpf->create_participant(4,
                               PARTICIPANT_QOS_DEFAULT,
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -46,7 +57,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Messenger::MessageTypeSupport_var ts =
       new Messenger::MessageTypeSupportImpl;
 
-    if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
+    if (ts->register_type(participant, "Messenger") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" register_type failed!\n")),
@@ -55,6 +66,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Create Topic (Movie Discussion List)
     CORBA::String_var type_name = ts->get_type_name();
+    ACE_DEBUG((LM_DEBUG, "registered type name = %s\n", type_name.in()));
+    
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
                                 type_name,
@@ -167,16 +180,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                    ACE_TEXT(" write returned %d!\n"), error));
       }
     }
-
-    // //Wait for samples to be acknowledged
-    // DDS::Duration_t timeout = { 30, 0 };
-    // if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-    //   ACE_ERROR_RETURN((LM_ERROR,
-    //                     ACE_TEXT("ERROR: %N:%l: main() -")
-    //                     ACE_TEXT(" wait_for_acknowledgments failed!\n")),
-    //                    -1);
-    // }
-
+    
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant);

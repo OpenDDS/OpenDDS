@@ -48,8 +48,7 @@ namespace DCPS {
 
 
 ReplayerImpl::ReplayerImpl()
-  : enabled_(false),
-  data_dropped_count_(0),
+  : data_dropped_count_(0),
   data_delivered_count_(0),
   n_chunks_(TheServiceParticipant->n_chunks()),
   association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier()),
@@ -835,7 +834,6 @@ void
 ReplayerImpl::data_delivered(const DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("ReplayerImpl","data_delivered",6);
-
   if (!(sample->publication_id_ == this->publication_id_)) {
     GuidConverter sample_converter(sample->publication_id_);
     GuidConverter writer_converter(publication_id_);
@@ -928,44 +926,65 @@ ReplayerImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos
   qos_data.topic_name = this->topic_name_.in();
 }
 
-
-DDS::ReturnCode_t
-ReplayerImpl::write(const RawDataSample& sample)
+DDS::ReturnCode_t 
+ReplayerImpl::write (const RawDataSample* samples, 
+                     int num_samples, 
+                     DDS::InstanceHandle_t* reader_ih_ptr)
 {
   DBG_ENTRY_LVL("ReplayerImpl","write",6);
-  ::DDS::Time_t const source_timestamp =
-    ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-
-
-  DataSampleListElement* element = 0;
-
-  ACE_NEW_MALLOC_RETURN(
-    element,
-    static_cast<DataSampleListElement*>(
-      sample_list_element_allocator_->malloc(
-        sizeof(DataSampleListElement))),
-    DataSampleListElement(publication_id_,
-                          this,
-                          0,
-                          transport_send_element_allocator_.get(),
-                          transport_customized_element_allocator_.get()),
-    DDS::RETCODE_ERROR);
-
-  element->header_.byte_order_ = sample.sample_byte_order_;
-  element->header_.publication_id_ = sample.publication_id_;
-
-  DDS::ReturnCode_t ret = create_sample_data_message(sample.sample_,
-                                                     element->header_,
-                                                     element->sample_,
-                                                     sample.source_timestamp_,
-                                                     false);
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
+  
+  OpenDDS::DCPS::RepoId repo_id;
+  if (reader_ih_ptr) {
+    repo_id = this->participant_servant_->get_repoid(*reader_ih_ptr);
+    if (repo_id == GUID_UNKNOWN) {
+      ACE_ERROR_RETURN((LM_ERROR, 
+        ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::write: ")
+        ACE_TEXT("Invalid reader instance handle (%d)\n"), *reader_ih_ptr), 
+        DDS::RETCODE_ERROR);
+    }
   }
+
   DataSampleList list;
-  list.enqueue_tail_next_sample(element);
+  
+  for (int i = 0; i < num_samples; ++i) {
+    DataSampleListElement* element = 0;
 
+    ACE_NEW_MALLOC_RETURN(
+      element,
+      static_cast<DataSampleListElement*>(
+        sample_list_element_allocator_->malloc(
+          sizeof(DataSampleListElement))),
+      DataSampleListElement(publication_id_,
+                            this,
+                            0,
+                            transport_send_element_allocator_.get(),
+                            transport_customized_element_allocator_.get()),
+      DDS::RETCODE_ERROR);
 
+    element->header_.byte_order_ = samples[i].sample_byte_order_;
+    element->header_.publication_id_ = this->publication_id_;
+    list.enqueue_tail_next_sample(element);
+    
+    DDS::ReturnCode_t ret = create_sample_data_message(samples[i].sample_->duplicate(),
+                                                       element->header_,
+                                                       element->sample_,
+                                                       samples[i].source_timestamp_,
+                                                       false);
+    if (reader_ih_ptr) {
+      element->num_subs_ = 1;
+      element->subscription_ids_[0] = repo_id;
+    }
+    
+    if (ret != DDS::RETCODE_OK) {
+      // we need to free the list
+      while (list.dequeue_head_next_sample(element)) {
+        ACE_DES_FREE(element, sample_list_element_allocator_->free, DataSampleListElement);
+      }
+      
+      return ret;
+    }
+  }
+  
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, DDS::RETCODE_ERROR);
     ++pending_write_count_;
@@ -973,13 +992,18 @@ ReplayerImpl::write(const RawDataSample& sample)
 
   this->send(list);
 
-
   for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
        end = reader_info_.end(); iter != end; ++iter) {
     iter->second.expected_sequence_ = sequence_number_;
   }
 
   return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t
+ReplayerImpl::write(const RawDataSample& sample)
+{
+  return this->write(&sample, 1, 0);
 }
 
 DDS::ReturnCode_t
@@ -1078,6 +1102,30 @@ ReplayerImpl::need_sequence_repair() const
   return false;
 }
 
+DDS::InstanceHandle_t
+ReplayerImpl::get_instance_handle()
+{
+  return this->participant_servant_->get_handle(publication_id_);
+}
+
+
+
+
+DDS::ReturnCode_t 
+ReplayerImpl::write_to_reader (DDS::InstanceHandle_t subscription,
+                               const RawDataSample& sample )
+{
+  return write(&sample, 1, &subscription);
+}
+
+DDS::ReturnCode_t 
+ReplayerImpl::write_to_reader (DDS::InstanceHandle_t subscription,
+                               const RawDataSampleList& samples )
+{
+  if (samples.size())
+    return write(&samples[0], samples.size(), &subscription);
+  return DDS::RETCODE_ERROR;
+}
 
 } // namespace DCPS
 } // namespace

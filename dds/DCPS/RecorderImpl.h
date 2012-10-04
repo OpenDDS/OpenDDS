@@ -40,6 +40,7 @@ class RecorderImpl
   , public TransportReceiveListener
   , public DataReaderCallbacks
   , public Recorder
+  , public EntityImpl
   , private WriterInfoListener
 {
 public:
@@ -91,6 +92,11 @@ public:
   virtual void inconsistent_topic();
   
   void remove_all_associations();
+  
+  // implement Recoder
+  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId& id,
+                                      DDS::BuiltinTopicKey_t& key);
+  
   /**
    * Set the Quality of Service settings for the Recorder.
    *
@@ -114,10 +120,9 @@ public:
   DomainParticipantImpl*          participant() {
     return participant_servant_;
   }
+  
+  virtual DDS::InstanceHandle_t get_instance_handle();
 private:
-  bool enabled_;
-  void set_enabled() { enabled_ = true; }
-  bool is_enabled() const { return enabled_; }
   
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
   

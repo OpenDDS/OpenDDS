@@ -1753,6 +1753,7 @@ Service_Participant::create_replayer (DDS::DomainParticipant_ptr participant,
                               const DDS::DataWriterQos & datawriter_qos,
                               const ReplayerListener_rch & a_listener )
 {
+  ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);
@@ -1784,9 +1785,10 @@ Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participan
                                      DDS::StatusMask mask)
 {
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
-  if (participant_servant)
-      participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
-  return 0;
+  if (! participant_servant) {
+    return 0;
+  }
+  return participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
 }
 } // namespace DCPS
 } // namespace OpenDDS

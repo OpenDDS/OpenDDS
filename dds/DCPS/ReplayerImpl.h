@@ -61,7 +61,8 @@ namespace DCPS {
 class ReplayerImpl : public Replayer,
   public TransportClient,
   public TransportSendListener,
-  public DataWriterCallbacks
+  public DataWriterCallbacks,
+  public EntityImpl
 {
 public:
 
@@ -89,10 +90,10 @@ public:
   // implement Replayer
 
   virtual DDS::ReturnCode_t write (const RawDataSample& sample );
-  // virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t subscription,
-  //                                    const RawDataSample& sample );
-  // virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t subscription,
-  //                                    const RawDataSampleList& samples );
+  virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t subscription,
+                                     const RawDataSample& sample );
+  virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t subscription,
+                                     const RawDataSampleList& samples );
   virtual DDS::ReturnCode_t set_qos (const ::DDS::PublisherQos & publisher_qos,
                                      const DDS::DataWriterQos &  datawriter_qos);
   virtual DDS::ReturnCode_t get_qos (DDS::PublisherQos &  publisher_qos,
@@ -151,16 +152,14 @@ public:
   DomainParticipantImpl*          participant() {
     return participant_servant_;
   }
+  
+  virtual DDS::InstanceHandle_t get_instance_handle();
+  
 private:
-  bool enabled_;
-  void set_enabled() {
-    enabled_ = true;
-  }
-  bool is_enabled() const {
-    return enabled_;
-  }
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
+  
+  DDS::ReturnCode_t write (const RawDataSample* sample_array, int array_size, DDS::InstanceHandle_t* reader);
 
   DDS::ReturnCode_t
   create_sample_data_message(DataSample*         data,

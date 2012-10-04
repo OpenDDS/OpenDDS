@@ -7,7 +7,6 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "DataReaderImpl.h"
 #include "tao/ORB_Core.h"
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
@@ -45,8 +44,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RecorderImpl::RecorderImpl()
-  : enabled_(false),
-  qos_(TheServiceParticipant->initial_DataReaderQos()),
+  : qos_(TheServiceParticipant->initial_DataReaderQos()),
   participant_servant_(0),
   topic_servant_(0),
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -119,6 +117,14 @@ void RecorderImpl::init(
   DomainParticipantImpl*     participant,
   DDS::SubscriberQos         subqos)
 {
+  //
+  if (DCPS_debug_level >= 1) {
+
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) RecorderImpl::init \n")));
+  }
+  
+  
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
@@ -246,6 +252,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
                               const WriterAssociation& writer,
                               bool                     active)
 {
+  ACE_DEBUG((LM_DEBUG, "RecorderImpl::add_association\n"));
   //
   // The following block is for diagnostic purposes only.
   //
@@ -553,7 +560,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     }
   }
 
-  wr_len = updated_writers.length();
+  wr_len = updated_writers.length();  
 
   // Return now if the supplied writers have been removed already.
   if (wr_len == 0) {
@@ -570,18 +577,17 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
                    ACE_TEXT("lookup_instance_handles failed.\n")));
       }
     }
-
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
       id_to_handle_map_.erase(updated_writers[i]);
     }
   }
-
   for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
     this->disassociate(updated_writers[i]);
   }
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
+    
     // Derive the change in the number of publications writing to this reader.
     int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
@@ -590,7 +596,6 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     // Only process status if the number of publications has changed.
     if (this->subscription_match_status_.current_count_change != 0) {
       this->subscription_match_status_.current_count = matchedPublications;
-
       /// Section 7.1.4.1: total_count will not decrement.
 
       /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
@@ -739,7 +744,7 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
           subscriber_qos);
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
+                          ACE_TEXT("(%P|%t) RecorderImpl::set_qos, ")
                           ACE_TEXT("qos not updated. \n")),
                          DDS::RETCODE_ERROR);
       }
@@ -796,7 +801,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
     }
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataReaderImpl::lookup_instance_handles: ")
+               ACE_TEXT("(%P|%t) RecorderImpl::lookup_instance_handles: ")
                ACE_TEXT("searching for handles for writer Ids: %C.\n"),
                buffer.str().c_str()));
   }
@@ -814,6 +819,11 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
 DDS::ReturnCode_t
 RecorderImpl::enable()
 {
+  if (DCPS_debug_level >= 1) {
+
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) RecorderImpl::enable\n")));
+  }
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no
   // effect.
@@ -828,12 +838,16 @@ RecorderImpl::enable()
 
   // if (topic_servant_ && !transport_disabled_) {
   if (topic_servant_) {
+    
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) RecorderImpl::enable_transport\n")));
+    
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
                              this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
     } catch (const Transport::Exception&) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+                 ACE_TEXT("(%P|%t) ERROR: RecorderImpl::enable, ")
                  ACE_TEXT("Transport Exception.\n")));
       return DDS::RETCODE_ERROR;
 
@@ -847,6 +861,10 @@ RecorderImpl::enable()
 
     Discovery_rch disco =
       TheServiceParticipant->get_discovery(this->domain_id_);
+    
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
+    
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
@@ -860,7 +878,7 @@ RecorderImpl::enable()
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+                 ACE_TEXT("(%P|%t) ERROR: RecorderImpl::enable, ")
                  ACE_TEXT("add_subscription returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
@@ -875,6 +893,42 @@ RecorderImpl::enable()
   } else {
     return DDS::RETCODE_OK;
   }
+}
+
+DDS::InstanceHandle_t
+RecorderImpl::get_instance_handle()
+{
+  return this->participant_servant_->get_handle(subscription_id_);
+}
+
+DDS::ReturnCode_t 
+RecorderImpl::repoid_to_bit_key(const DCPS::RepoId& id,
+                                      DDS::BuiltinTopicKey_t& key)
+{
+  DDS::InstanceHandle_t publication_handle = this->participant_servant_->get_handle(id);
+  
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->publication_handle_lock_,
+                   DDS::RETCODE_ERROR);
+
+  BIT_Helper_1 < DDS::PublicationBuiltinTopicDataDataReader,
+                 DDS::PublicationBuiltinTopicDataDataReader_var,
+                 DDS::PublicationBuiltinTopicDataSeq > hh;
+
+  DDS::PublicationBuiltinTopicDataSeq data;
+
+  DDS::ReturnCode_t ret
+  = hh.instance_handle_to_bit_data(participant_servant_,
+                                   BUILT_IN_PUBLICATION_TOPIC,
+                                   publication_handle,
+                                   data);
+
+  if (ret == DDS::RETCODE_OK) {
+    key = data[0].key;
+  }
+
+  return ret;
 }
 
 } // namespace DCPS

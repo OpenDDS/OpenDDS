@@ -1940,7 +1940,7 @@ Recorder_rch DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
   Recorder_rch result(recorder);
   
   recorder->init(dynamic_cast<TopicDescriptionImpl*>(a_topic), 
-    datareader_qos, a_listener,
+    dr_qos, a_listener,
     mask, this, subscriber_qos);
 
   if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1)) {
@@ -1962,7 +1962,7 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
                              const ReplayerListener_rch & a_listener, 
                              DDS::StatusMask mask)
 {
-  
+    
   if (CORBA::is_nil(a_topic)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -1991,7 +1991,6 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
                  Replayer_rch());
       
   Replayer_rch result(replayer);
-  
   replayer->init(a_topic,
                    topic_servant,
                    dw_qos,
@@ -2002,6 +2001,7 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
 
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1) {
+        
     DDS::ReturnCode_t ret = replayer->enable();
 
     if (ret != DDS::RETCODE_OK) {

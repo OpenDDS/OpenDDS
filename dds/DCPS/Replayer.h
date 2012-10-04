@@ -35,8 +35,8 @@ public:
   *  Callback for when the Replayer is associated with a DataReader.
   *  @param replayer Replayer that received the association
   */
-  virtual void on_replayer_matched(const Replayer* replayer,
-                          const ::DDS::PublicationMatchedStatus & status );
+  virtual void on_replayer_matched(Replayer* replayer,
+                                   const ::DDS::PublicationMatchedStatus & status );
 };
 
 typedef RcHandle<ReplayerListener> ReplayerListener_rch;
@@ -65,37 +65,37 @@ public:
    *
    * @note Only samples of type SAMPLE_DATA should be sent.
    */
-  // virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t subscription, // from PublicationMatchedStatus
-  //                                    const RawDataSample& sample )=0;
+  virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t                                                       subscription, // from PublicationMatchedStatus
+                                             const RawDataSample& sample )=0;
 
   /**
    * Send the samples to the specified DataReader.
    *
    * @note Only samples of type SAMPLE_DATA should be sent.
    */
-  // virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t subscription, // from PublicationMatchedStatus
-  //                                    const RawDataSampleList& samples )=0;
+  virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t                                                       subscription, // from PublicationMatchedStatus
+                                             const RawDataSampleList& samples )=0;
 
   /**
    * Set the Quality of Service settings for the Replayer.
    *
    */
   virtual DDS::ReturnCode_t set_qos (const ::DDS::PublisherQos & publisher_qos,
-                             const DDS::DataWriterQos & datawriter_qos)=0;
+                                     const DDS::DataWriterQos & datawriter_qos)=0;
 
   /**
    * Get the Quality of Service settings for the Replayer.
    *
    */
   virtual DDS::ReturnCode_t get_qos (DDS::PublisherQos & publisher_qos,
-                             DDS::DataWriterQos & datawriter_qos)=0;
+                                     DDS::DataWriterQos & datawriter_qos)=0;
 
   /**
    * Change the listener for this Replayer.
    *
    */
   virtual DDS::ReturnCode_t set_listener (const ReplayerListener_rch & a_listener,
-                                  DDS::StatusMask mask = DEFAULT_STATUS_MASK)=0;
+                                          DDS::StatusMask mask = DEFAULT_STATUS_MASK)=0;
 
   /**
    * Get the listener for this Replayer.

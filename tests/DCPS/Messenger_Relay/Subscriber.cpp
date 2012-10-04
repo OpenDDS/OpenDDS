@@ -6,32 +6,52 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Log_Msg.h>
+ #include <dds/DdsDcpsInfrastructureC.h>
+ #include <dds/DCPS/Marked_Default_Qos.h>
+ #include <dds/DCPS/Service_Participant.h>
+ #include <dds/DCPS/SubscriberImpl.h>
+ #include <dds/DCPS/WaitSet.h>
 
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DdsDcpsSubscriptionC.h>
+ #include "dds/DCPS/StaticIncludes.h"
+ #ifdef ACE_AS_STATIC_LIBS
+ #include <dds/DCPS/transport/udp/Udp.h>
+ #include <dds/DCPS/transport/multicast/Multicast.h>
+ #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+ #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+ #include <dds/DCPS/transport/shmem/Shmem.h>
+ #endif
 
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/WaitSet.h>
+ #include <dds/DCPS/transport/framework/TransportRegistry.h>
+ #include <dds/DCPS/transport/framework/TransportConfig.h>
+ #include <dds/DCPS/transport/framework/TransportInst.h>
 
-#include "dds/DCPS/StaticIncludes.h"
+ #include "DataReaderListenerImpl.h"
+ #include "MessengerTypeSupportImpl.h"
+ #include "Args.h"
 
-#include "DataReaderListenerImpl.h"
-#include "MessengerTypeSupportImpl.h"
+ bool
+ make_dr_reliable()
+ {
+   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
+   return gc->instances_[0]->name() == "the_rtps_transport";
+ }
 
+ int
+ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+ {
+   try {
+     // Initialize DomainParticipantFactory
+     DDS::DomainParticipantFactory_var dpf =
+       TheParticipantFactoryWithArgs(argc, argv);
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
-{
-  try {
-    // Initialize DomainParticipantFactory
-    DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+     int error;
+     if ((error = parse_args(argc, argv)) != 0) {
+       return error;
+     }
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(42,
+      dpf->create_participant(4,
                               PARTICIPANT_QOS_DEFAULT,
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -46,7 +66,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Messenger::MessageTypeSupport_var ts =
       new Messenger::MessageTypeSupportImpl;
 
-    if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
+    if (ts->register_type(participant, "Messenger") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" register_type failed!\n")), -1);
@@ -69,11 +89,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     
     // setup partition
     DDS::SubscriberQos sub_qos;
-                participant->get_default_subscriber_qos(sub_qos);
-                DDS::StringSeq my_partition;
-                my_partition.length(1);
-                my_partition[0] = "One";
-                sub_qos.partition.name = my_partition;
+    participant->get_default_subscriber_qos(sub_qos);
+    DDS::StringSeq my_partition;
+    my_partition.length(1);
+    my_partition[0] = "Two";
+    sub_qos.partition.name = my_partition;
 
     // Create Subscriber
     DDS::Subscriber_var subscriber =
@@ -90,9 +110,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DataReader
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
+    DDS::DataReaderQos dr_qos;
+    subscriber->get_default_datareader_qos(dr_qos);
+    if (make_dr_reliable()) {
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    }
+
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic,
-                             DATAREADER_QOS_DEFAULT,
+                             dr_qos,
                              listener,
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 

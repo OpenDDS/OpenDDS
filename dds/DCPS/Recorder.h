@@ -39,15 +39,15 @@ public:
     *  @param sample the received SAMPLE_DATA type sample
     *
     */
-   virtual void on_sample_data_received(const Recorder_rch & writer,
-                                const RawDataSample& sample)=0;
+   virtual void on_sample_data_received(Recorder*            recorder,
+                                        const RawDataSample& sample)=0;
 
    /**
     *  Callback for when the Recorder is associated with a DataWriter.
     *  @param recorder Recorder that received the association
     */
-   virtual void on_recorder_matched(const Recorder* recorder,
-                            const ::DDS::SubscriptionMatchedStatus & status )=0;
+   virtual void on_recorder_matched(Recorder*                                recorder,
+                                    const ::DDS::SubscriptionMatchedStatus & status)=0;
 };
 
 
@@ -59,8 +59,8 @@ public:
   /**
    *  Find the bit key for a given repo id.
    */
-  // virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId& id,
-  //                                     DDS::BuiltinTopicKey_t& key)=0;
+  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId& id,
+                                      DDS::BuiltinTopicKey_t& key)=0;
 
 
   /**
@@ -68,14 +68,14 @@ public:
    *
    */
   virtual DDS::ReturnCode_t set_qos (const ::DDS::SubscriberQos & subscriber_qos,
-                             const DDS::DataReaderQos & datareader_qos)=0;
+                                     const DDS::DataReaderQos & datareader_qos)=0;
 
   /**
    * Get the Quality of Service settings for the Recorder.
    *
    */
   virtual DDS::ReturnCode_t get_qos (DDS::SubscriberQos & subscriber_qos,
-                             DDS::DataReaderQos & datareader_qos)=0;
+                                     DDS::DataReaderQos & datareader_qos)=0;
 
   /**
    * Change the listener for this Recorder.

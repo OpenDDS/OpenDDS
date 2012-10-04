@@ -1,3 +1,43 @@
+Thu Oct  4 21:19:30 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+
+        * tests/DCPS/Messenger_Relay:
+
+        * tests/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * tests/DCPS/Messenger_Relay/Publisher.cpp:
+        * tests/DCPS/Messenger_Relay/Relay.cpp:
+        * tests/DCPS/Messenger_Relay/Subscriber.cpp:
+        * tests/DCPS/Messenger_Relay/run_test.pl:
+        
+        First Working commit for recorder and replayer implementation.
+
+        * DevGuideExamples/DCPS/Messenger_Relay:
+
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * DevGuideExamples/DCPS/Messenger_Relay/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/run_test.pl:
+
+        * dds/DCPS/RecorderImp.cpp:
+
+          Removed these files.
+
 Mon Oct  1 21:22:32 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.h:
