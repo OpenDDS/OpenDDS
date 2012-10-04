@@ -922,6 +922,9 @@ RtpsUdpDataLink::generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nf,
   for (size_t i = 0; i < missing.size(); ++i) {
     recv_strategy_->has_fragments(missing[i], pub_id, &frag_info);
   }
+  // 1b. larger than the last received seq# but less than the heartbeat.lastSN
+  const SequenceRange range(wi.recvd_.high(), wi.hb_range_.second);
+  recv_strategy_->has_fragments(range, pub_id, &frag_info);
   for (size_t i = 0; i < frag_info.size(); ++i) {
     // If we've received a HeartbeatFrag, we know the last (available) frag #
     const iter_t iter = wi.frags_.find(frag_info[i].first);
@@ -1263,7 +1266,7 @@ RtpsUdpDataLink::send_nack_replies()
       }
     }
 
-    send_nackfrag_replies(writer, gaps, recipients);
+    send_nackfrag_replies(rw->first, writer, gaps, recipients);
 
     if (!gaps.empty()) {
       ACE_Message_Block* mb_gap = marshal_gaps(rw->first, GUID_UNKNOWN, gaps);
@@ -1283,7 +1286,8 @@ namespace {
 }
 
 void
-RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
+RtpsUdpDataLink::send_nackfrag_replies(const RepoId& writerId,
+                                       RtpsWriter& writer,
                                        DisjointSequence& gaps,
                                        std::set<ACE_INET_Addr>& gap_recipients)
 {
@@ -1334,8 +1338,16 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
       TransportSendStrategy::QueueType* q = writer.send_buff_->peek_queue(seq);
       RtpsCustomizedElement* elt =
         dynamic_cast<RtpsCustomizedElement*>(q->peek());
-      //TODO: ERROR if (!elt)
-      //TODO: support for instance control messages
+      if (!elt) {
+        if (Transport_debug_level) {
+          const GuidConverter conv(writerId);
+          ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_nackfrag_replies "
+            "ERROR in fragment resend for writer %C seq %q\n",
+            std::string(conv).c_str(), seq.getValue()));
+        }
+        continue;
+      }
+      //FUTURE: support for instance control messages (?)
       const DataSampleListElement& dsle =
         *elt->original_send_element()->sample();
       const FragmentDetails& fdet = sn_iter->second;
@@ -1368,6 +1380,9 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
           send = true; // next frag didn't fit in this message, send the chain
         }
         if (send || fn > fdet.frags_.high() || n_blocks > MAX_SEND_BLOCKS - 3) {
+          // MAX_SEND_BLOCKS - 3 to account for RTPS Header (1 block) and the
+          // next iteration (2 blocks: hdr => data).  If we have more than that,
+          // send the chain now so that the next iteration starts the next msg.
           send_strategy_->send_rtps_control(*chain, req->first);
           chain->release();
           chain = last = 0;

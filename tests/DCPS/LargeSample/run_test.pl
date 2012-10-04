@@ -14,40 +14,40 @@ use strict;
 
 my $status = 0;
 
-my $logging = "-ORBDebugLevel 1 -ORBVerboseLogging 1 " .
-    "-DCPSTransportDebugLevel 6";
-my $pub_opts = "$logging -ORBLogFile pub.log ";
-my $sub_opts = "$logging -ORBLogFile sub.log ";
+my $logging_p = "-ORBDebugLevel 1 -ORBVerboseLogging 1 " .
+    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
+my $logging_s = "-ORBDebugLevel 1 -ORBVerboseLogging 1 " .
+    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
+my $pub_opts = "$logging_p -ORBLogFile pub.log ";
+my $sub_opts = "$logging_s -ORBLogFile sub.log ";
 my $repo_bit_opt = '';
+my $reliable = 1;
 
 if ($ARGV[0] eq 'udp') {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= "-DCPSBit 0 -DCPSConfigFile udp.ini";
     $sub_opts .= "-DCPSBit 0 -DCPSConfigFile udp.ini";
+    $reliable = 0;
 }
 elsif ($ARGV[0] eq 'multicast') {
     $repo_bit_opt = '-NOBITS';
-    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile pub_multicast.ini";
-    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile sub_multicast.ini";
+    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile multicast.ini";
+    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile multicast.ini";
 }
 elsif ($ARGV[0] eq 'multicast_async') {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= "-DCPSBit 0 -DCPSConfigFile pub_multicast_async.ini";
-    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile sub_multicast.ini";
+    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile multicast.ini";
 }
 elsif ($ARGV[0] eq 'shmem') {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= "-DCPSBit 0 -DCPSConfigFile shmem.ini";
     $sub_opts .= "-DCPSBit 0 -DCPSConfigFile shmem.ini";
 }
-elsif ($ARGV[0] eq 'nobits') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= ' -DCPSBit 0 -DCPSConfigFile tcp.ini';
-    $sub_opts .= ' -DCPSBit 0 -DCPSConfigFile tcp.ini';
-}
 elsif ($ARGV[0] eq 'rtps') {
-    $pub_opts .= '-DCPSConfigFile rtps.ini';
-    $sub_opts .= '-DCPSConfigFile rtps.ini';
+    $repo_bit_opt = '-NOBITS';
+    $pub_opts .= '-DCPSBit 0 -DCPSConfigFile rtps.ini';
+    $sub_opts .= '-DCPSBit 0 -DCPSConfigFile rtps.ini';
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
@@ -64,9 +64,8 @@ unlink $dcpsrepo_ior;
 unlink <*.log>;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "-ORBDebugLevel 10 " .
-                                       "-ORBLogFile DCPSInfoRepo.log " .
                                        "$repo_bit_opt -o $dcpsrepo_ior");
+$sub_opts .= " -r $reliable";
 
 my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
 my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
@@ -92,22 +91,21 @@ $Publisher2->Spawn();
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn();
 
+my $SubscriberResult = $Subscriber->WaitKill(65);
+if ($SubscriberResult != 0) {
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
+    $status = 1;
+}
 
-my $PublisherResult = $Publisher->WaitKill(60);
+my $PublisherResult = $Publisher->WaitKill(10);
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult\n";
+    print STDERR "ERROR: publisher #1 returned $PublisherResult\n";
     $status = 1;
 }
 
 my $Publisher2Result = $Publisher2->WaitKill(10);
 if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher #2 returned $PublisherResult\n";
-    $status = 1;
-}
-
-my $SubscriberResult = $Subscriber->WaitKill(15);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
+    print STDERR "ERROR: publisher #2 returned $Publisher2Result\n";
     $status = 1;
 }
 

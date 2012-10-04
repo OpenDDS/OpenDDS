@@ -263,7 +263,8 @@ private:
   ACE_Message_Block* marshal_gaps(const RepoId& writer, const RepoId& reader,
                                   const DisjointSequence& gaps);
 
-  void send_nackfrag_replies(RtpsWriter& writer, DisjointSequence& gaps,
+  void send_nackfrag_replies(const RepoId& writerId, RtpsWriter& writer,
+                             DisjointSequence& gaps,
                              std::set<ACE_INET_Addr>& gap_recipients);
 
   template<typename T, typename FN>

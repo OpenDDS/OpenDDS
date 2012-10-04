@@ -112,17 +112,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    // Start writing threads
-    Writer* writer = new Writer(dw, dw2);
-    writer->start();
-
-    while (!writer->is_finished()) {
-      ACE_Time_Value small_time(0, 250000);
-      ACE_OS::sleep(small_time);
+    {
+      Writer writer(dw, dw2);
+      writer.write();
     }
-
-    writer->end();
-    delete writer;
 
     // Clean-up!
     participant->delete_contained_entities();

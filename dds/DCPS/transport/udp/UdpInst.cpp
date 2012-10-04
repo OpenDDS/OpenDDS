@@ -61,6 +61,8 @@ UdpInst::dump(std::ostream& os)
 
   os << formatNameForDump("local_address") << this->local_address_.get_host_addr()
                                            << ":" << this->local_address_.get_port_number() << std::endl;
+  os << formatNameForDump("send_buffer_size") << this->send_buffer_size_ << std::endl;
+  os << formatNameForDump("rcv_buffer_size") << this->rcv_buffer_size_ << std::endl;
 }
 
 } // namespace DCPS
