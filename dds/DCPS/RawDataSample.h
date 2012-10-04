@@ -11,6 +11,8 @@
 
 #include "dds/DCPS/DataSampleHeader.h"
 
+#include "ace/Basic_Types.h"
+
 class ACE_Message_Block;
 
 namespace OpenDDS {
@@ -21,8 +23,8 @@ class OpenDDS_Dcps_Export RawDataSample
 public:
   RawDataSample();
   RawDataSample(MessageId,
-                 int32_t sec,
-                 uint32_t nano_sec,
+                 ACE_INT32 sec,
+                 ACE_UINT32 nano_sec,
                  PublicationId pid,
                  bool byte_order,
                  ACE_Message_Block* blk);

@@ -1,3 +1,15 @@
+Thu Oct  4 22:37:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Portability fixes.
+
 Thu Oct  4 21:19:30 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -21,7 +33,7 @@ Thu Oct  4 21:19:30 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
         * tests/DCPS/Messenger_Relay/Relay.cpp:
         * tests/DCPS/Messenger_Relay/Subscriber.cpp:
         * tests/DCPS/Messenger_Relay/run_test.pl:
-        
+
         First Working commit for recorder and replayer implementation.
 
         * DevGuideExamples/DCPS/Messenger_Relay:

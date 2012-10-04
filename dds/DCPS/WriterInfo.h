@@ -174,7 +174,7 @@ public:
 
 };
 
-ACE_INLINE
+inline
 int
 OpenDDS::DCPS::WriterInfo::received_activity(const ACE_Time_Value& when)
 {

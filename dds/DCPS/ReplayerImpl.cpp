@@ -31,8 +31,11 @@
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "Util.h"
+
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
@@ -1123,7 +1126,7 @@ ReplayerImpl::write_to_reader (DDS::InstanceHandle_t subscription,
                                const RawDataSampleList& samples )
 {
   if (samples.size())
-    return write(&samples[0], samples.size(), &subscription);
+    return write(&samples[0], static_cast<int>(samples.size()), &subscription);
   return DDS::RETCODE_ERROR;
 }
 
