@@ -1,8 +1,108 @@
+Fri Oct  5 18:45:09 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * .:
+        * AUTHORS:
+        * ChangeLog:
+        * NEWS:
+        * PROBLEM-REPORT-FORM:
+        * README:
+        * VERSION:
+
+        * dds/DCPS/Service_Participant.cpp:
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+        * dds/Version.h:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+
+        * docs/history/ChangeLog-3.3:
+
+        * java/jms/example/jbossas/opendds-ds.xml:
+        * java/jms/example/jbossas/opendds-repo-ds.xml:
+
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+        * tests/DCPS/Compiler/namespace_conflict:
+
+        * tests/DCPS/Compiler/namespace_conflict/Nsc.idl:
+        * tests/DCPS/Compiler/namespace_conflict/main.cpp:
+        * tests/DCPS/Compiler/namespace_conflict/namespace_conflict.mpc:
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
+        * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+        * tools/dcpsinfo_dump:
+
+        * tools/dissector/sample_manager.cpp:
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+          
+          Merge Changes from trunk.
+
 Fri Oct  5 16:54:09 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * bin/dcps_tests.lst:
-          
-          Rename tests/DCPS/Messenger_Relay to tests/DCPS/RecorderReplayer. 
+
+          Rename tests/DCPS/Messenger_Relay to tests/DCPS/RecorderReplayer.
 
 Fri Oct  5 15:46:10 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 

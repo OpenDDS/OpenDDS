@@ -17,6 +17,7 @@
 #include "tao/Exception.h"
 
 #include "dds/InfoRepo/DCPSInfoRepoServ.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 
 #include "org_opendds_jms_DCPSInfoRepo.h"
 
@@ -131,6 +132,8 @@ Java_org_opendds_jms_DCPSInfoRepo_init(JNIEnv* env, jobject self, jobjectArray a
 
   if (argv != 0) {
     try {
+      OpenDDS::DCPS::InfoRepoDiscovery::StaticInitializer init;
+
       InfoRepo *peer = new InfoRepo(len, argv);
       set_InfoRepo_peer(env, self, peer);
 

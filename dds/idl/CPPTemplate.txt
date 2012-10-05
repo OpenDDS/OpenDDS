@@ -6,7 +6,7 @@
 {
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>TypeSupportImpl::register_type (
     ::DDS::DomainParticipant_ptr participant,
     const char * type_name)
@@ -100,7 +100,7 @@ bool
   delete db_lock_pool_;
 }
 
-DDS::InstanceHandle_t
+::DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::register_instance (
     const ::<%SCOPED%> & instance)
 {
@@ -109,7 +109,7 @@ DDS::InstanceHandle_t
   return register_instance_w_timestamp (instance, timestamp);
 }
 
-DDS::InstanceHandle_t
+::DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::register_instance_w_timestamp (
     const ::<%SCOPED%> & instance,
     const ::DDS::Time_t & timestamp)
@@ -139,7 +139,7 @@ DDS::InstanceHandle_t
 }
 
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::unregister_instance (
     const ::<%SCOPED%> & instance,
     ::DDS::InstanceHandle_t handle)
@@ -152,7 +152,7 @@ DDS::ReturnCode_t
                                           timestamp);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::unregister_instance_w_timestamp (
     const ::<%SCOPED%> & instance,
     ::DDS::InstanceHandle_t handle,
@@ -196,7 +196,7 @@ DDS::ReturnCode_t
   return OpenDDS::DCPS::DataWriterImpl::unregister_instance_i(handle, timestamp);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::write (
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t handle)
@@ -208,7 +208,7 @@ DDS::ReturnCode_t
                             source_timestamp);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::write_w_timestamp (
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t handle,
@@ -273,7 +273,7 @@ DDS::ReturnCode_t
                                               filter_out._retn());
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::dispose (
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle)
@@ -285,7 +285,7 @@ DDS::ReturnCode_t
                               source_timestamp);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::dispose_w_timestamp (
     const ::<%SCOPED%> & instance_data,
     ::DDS::InstanceHandle_t instance_handle,
@@ -313,7 +313,7 @@ DDS::ReturnCode_t
                                                 source_timestamp);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::get_key_value (
     ::<%SCOPED%> & key_holder,
     ::DDS::InstanceHandle_t handle)
@@ -535,7 +535,7 @@ ACE_Message_Block*
 
 ::DDS::ReturnCode_t
 <%TYPE%>DataWriterImpl::get_or_create_instance_handle(
-  DDS::InstanceHandle_t& handle,
+  ::DDS::InstanceHandle_t& handle,
   const ::<%SCOPED%>& instance_data,
   const ::DDS::Time_t & source_timestamp)
 {
@@ -647,14 +647,14 @@ void
 }
 
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::delete_contained_entities ()
 {
   return this->delete_contained_entities();
 }
 
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -663,7 +663,7 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("read", received_data, info_seq, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -674,7 +674,7 @@ DDS::ReturnCode_t
                 view_states, instance_states, 0);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_i (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -772,7 +772,7 @@ DDS::ReturnCode_t
   return ret;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -781,7 +781,7 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("take", received_data, info_seq, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -792,7 +792,7 @@ DDS::ReturnCode_t
                 view_states, instance_states, 0);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_i (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -890,14 +890,14 @@ DDS::ReturnCode_t
   return ret;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_w_condition (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & sample_info,
     ::CORBA::Long max_samples,
     ::DDS::ReadCondition_ptr a_condition)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("read_w_condition", received_data, sample_info, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -923,14 +923,14 @@ DDS::ReturnCode_t
 #endif
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_w_condition (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & sample_info,
     ::CORBA::Long max_samples,
     ::DDS::ReadCondition_ptr a_condition)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("take_w_condition", received_data, sample_info, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -957,7 +957,7 @@ DDS::ReturnCode_t
                 );
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_sample (
     ::<%SCOPED%> & received_data,
     ::DDS::SampleInfo & sample_info)
@@ -1029,7 +1029,7 @@ DDS::ReturnCode_t
   return found_data ? ::DDS::RETCODE_OK : ::DDS::RETCODE_NO_DATA;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_sample (
     ::<%SCOPED%> & received_data,
     ::DDS::SampleInfo & sample_info)
@@ -1133,7 +1133,7 @@ DDS::ReturnCode_t
   return found_data ? ::DDS::RETCODE_OK : ::DDS::RETCODE_NO_DATA;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_instance (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1143,7 +1143,7 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("read_instance", received_data, info_seq, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -1158,7 +1158,7 @@ DDS::ReturnCode_t
                          sample_states, view_states, instance_states, 0);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_instance_i (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1184,7 +1184,7 @@ DDS::ReturnCode_t
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
-  if (inst == 0) return DDS::RETCODE_BAD_PARAMETER;
+  if (inst == 0) return ::DDS::RETCODE_BAD_PARAMETER;
 
   if ((inst->instance_state_.view_state() & view_states) &&
       (inst->instance_state_.instance_state() & instance_states))
@@ -1220,7 +1220,7 @@ DDS::ReturnCode_t
   return ret;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_instance (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1230,7 +1230,7 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("take_instance", received_data, info_seq, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -1245,7 +1245,7 @@ DDS::ReturnCode_t
                          sample_states, view_states, instance_states, 0);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_instance_i (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1306,7 +1306,7 @@ DDS::ReturnCode_t
   return ret;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_instance (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1316,7 +1316,7 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("read_next_instance", received_data, info_seq, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -1327,7 +1327,7 @@ DDS::ReturnCode_t
                               sample_states, view_states, instance_states, 0);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_instance_i (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1373,7 +1373,7 @@ DDS::ReturnCode_t
   for (; it != the_end; ++it)
   {
     handle = it->second;
-    DDS::ReturnCode_t const status =
+    ::DDS::ReturnCode_t const status =
       read_instance_i(received_data, info_seq, max_samples, handle,
                       sample_states, view_states, instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
@@ -1392,7 +1392,7 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_NO_DATA;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_instance (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1402,7 +1402,7 @@ DDS::ReturnCode_t
     ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("take_next_instance", received_data, info_seq, max_samples);
   if (::DDS::RETCODE_OK != precond)
   {
@@ -1413,7 +1413,7 @@ DDS::ReturnCode_t
                               sample_states, view_states, instance_states, 0);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_instance_i (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1457,7 +1457,7 @@ DDS::ReturnCode_t
   for (; it != the_end; ++it)
   {
     handle = it->second;
-    DDS::ReturnCode_t const status =
+    ::DDS::ReturnCode_t const status =
       take_instance_i(received_data, info_seq, max_samples, handle,
                       sample_states, view_states, instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
@@ -1476,7 +1476,7 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_NO_DATA;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_instance_w_condition (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1484,7 +1484,7 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::ReadCondition_ptr a_condition)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("read_next_instance_w_condition", received_data, info_seq,
                  max_samples);
   if (::DDS::RETCODE_OK != precond)
@@ -1517,7 +1517,7 @@ DDS::ReturnCode_t
                               );
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_instance_w_condition (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
@@ -1525,7 +1525,7 @@ DDS::ReturnCode_t
     ::DDS::InstanceHandle_t a_handle,
     ::DDS::ReadCondition_ptr a_condition)
 {
-  DDS::ReturnCode_t const precond =
+  ::DDS::ReturnCode_t const precond =
     check_inputs("take_next_instance_w_condition", received_data, info_seq,
                  max_samples);
   if (::DDS::RETCODE_OK != precond)
@@ -1592,7 +1592,7 @@ void
 }
 
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::return_loan (
     ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq)
@@ -1617,7 +1617,7 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::get_key_value (
     ::<%SCOPED%> & key_holder,
     ::DDS::InstanceHandle_t handle)
@@ -1661,9 +1661,9 @@ DDS::ReturnCode_t
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 bool
-<%TYPE%>DataReaderImpl::contains_sample_filtered(DDS::SampleStateMask sample_states,
-  DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states,
-  const OpenDDS::DCPS::FilterEvaluator& evaluator, const DDS::StringSeq& params)
+<%TYPE%>DataReaderImpl::contains_sample_filtered(::DDS::SampleStateMask sample_states,
+  ::DDS::ViewStateMask view_states, ::DDS::InstanceStateMask instance_states,
+  const OpenDDS::DCPS::FilterEvaluator& evaluator, const ::DDS::StringSeq& params)
 {
   using namespace OpenDDS::DCPS;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
@@ -1692,14 +1692,14 @@ bool
   return false;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_generic(
   OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
-  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-  DDS::InstanceStateMask instance_states)
+  ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+  ::DDS::InstanceStateMask instance_states)
 {
   <%SCOPED%><%SEQ%> data;
-  DDS::ReturnCode_t rc = read_i(data, gen.info_, DDS::LENGTH_UNLIMITED,
+  ::DDS::ReturnCode_t rc = read_i(data, gen.info_, ::DDS::LENGTH_UNLIMITED,
     sample_states, view_states, instance_states, 0);
   gen.samples_.reserve(data.length());
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
@@ -1708,42 +1708,42 @@ DDS::ReturnCode_t
   return rc;
 }
 
-DDS::InstanceHandle_t
+::DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::lookup_instance_generic(const void* data)
 {
   return lookup_instance(*static_cast<const <%SCOPED%>*>(data));
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_instance_generic(void*& data,
-  DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
-  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-  DDS::InstanceStateMask instance_states)
+  ::DDS::SampleInfo& info, ::DDS::InstanceHandle_t instance,
+  ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+  ::DDS::InstanceStateMask instance_states)
 {
   <%SCOPED%><%SEQ%> dataseq;
-  DDS::SampleInfoSeq infoseq;
-  DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
-    DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
+  ::DDS::SampleInfoSeq infoseq;
+  ::DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
+    ::DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
     instance_states, 0);
-  if (rc == DDS::RETCODE_NO_DATA) return rc;
+  if (rc == ::DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);
   info = infoseq[last];
   return rc;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_instance_generic(void*& data,
-  DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
-  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-  DDS::InstanceStateMask instance_states)
+  ::DDS::SampleInfo& info, ::DDS::InstanceHandle_t previous_instance,
+  ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+  ::DDS::InstanceStateMask instance_states)
 {
   <%SCOPED%><%SEQ%> dataseq;
-  DDS::SampleInfoSeq infoseq;
-  DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
-    DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
+  ::DDS::SampleInfoSeq infoseq;
+  ::DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
+    ::DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
     instance_states, 0);
-  if (rc == DDS::RETCODE_NO_DATA) return rc;
+  if (rc == ::DDS::RETCODE_NO_DATA) return rc;
   const CORBA::ULong last = dataseq.length() - 1;
   data = new <%SCOPED%>(dataseq[last]);
   info = infoseq[last];
@@ -1752,26 +1752,26 @@ DDS::ReturnCode_t
 
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-DDS::InstanceHandle_t
+::DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,
-  DDS::ViewStateKind view)
+  ::DDS::ViewStateKind view)
 {
   using namespace OpenDDS::DCPS;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
-                   DDS::HANDLE_NIL);
+                   ::DDS::HANDLE_NIL);
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  DDS::TopicDescription_var descr = get_topicdescription();
+  ::DDS::TopicDescription_var descr = get_topicdescription();
   if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
     if (!mt->filter(sample)) {
-      return DDS::HANDLE_NIL;
+      return ::DDS::HANDLE_NIL;
     }
   }
 #endif
 
   get_subscriber_servant()->data_received(this);
 
-  DDS::InstanceHandle_t inst = lookup_instance(sample);
+  ::DDS::InstanceHandle_t inst = lookup_instance(sample);
   bool filtered;
   SubscriptionInstance* instance = 0;
 
@@ -1779,7 +1779,7 @@ DDS::InstanceHandle_t
   // process the INSTANCE_REGISTRATION.  In either case, store_instance_data()
   // owns the memory for the sample and it must come from the correct allocator.
   for (int i = 0; i < 2; ++i) {
-    if (i == 0 && inst != DDS::HANDLE_NIL) continue;
+    if (i == 0 && inst != ::DDS::HANDLE_NIL) continue;
 
     DataSampleHeader header;
     header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
@@ -1793,7 +1793,7 @@ DDS::InstanceHandle_t
   }
 
   if (!filtered) {
-    if (view == DDS::NOT_NEW_VIEW_STATE) {
+    if (view == ::DDS::NOT_NEW_VIEW_STATE) {
       instance->instance_state_.accessed();
     }
     notify_read_conditions();
@@ -1802,16 +1802,16 @@ DDS::InstanceHandle_t
 }
 
 void
-<%TYPE%>DataReaderImpl::set_instance_state(DDS::InstanceHandle_t instance,
-  DDS::InstanceStateKind state)
+<%TYPE%>DataReaderImpl::set_instance_state(::DDS::InstanceHandle_t instance,
+  ::DDS::InstanceStateKind state)
 {
   using namespace OpenDDS::DCPS;
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
   SubscriptionInstance* si = get_handle_instance(instance);
-  if (si && state != DDS::ALIVE_INSTANCE_STATE) {
+  if (si && state != ::DDS::ALIVE_INSTANCE_STATE) {
     DataSampleHeader header;
-    header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+    header.message_id_ = (state == ::DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
     bool just_registered, filtered;
     <%SCOPED%>* data;
@@ -1901,7 +1901,7 @@ void
     ser >> data;
   }
 
-  DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
+  ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
   InstanceMap::const_iterator const it = instance_map_.find(data);
   if (it != instance_map_.end()) {
     handle = it->second;
@@ -1926,7 +1926,7 @@ void
   bool is_dispose_msg = header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE;
   bool is_unregister_msg = header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE;
 
-  DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
+  ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
   //!!! caller should already have the sample_lock_
   //We will unlock it before calling into listeners
@@ -2010,7 +2010,7 @@ void
 
     just_registered = true;
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
-    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample( instance_data);
+    ::DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(instance_data);
     handle = handle == ::DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
     ACE_NEW (instance,
              OpenDDS::DCPS::SubscriptionInstance(this,
@@ -2393,7 +2393,7 @@ void
   this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::auto_return_loan(void* seq)
 {
   ::<%SCOPED%><%SEQ%>& received_data =
@@ -2407,7 +2407,7 @@ DDS::ReturnCode_t
   return ::DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t
+::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::check_inputs (
     const char* method_name,
     ::<%SCOPED%><%SEQ%> & received_data,

@@ -689,6 +689,7 @@ Service_Participant::initializeScheduling()
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE: Service_Participant::initializeScheduling() - ")
                ACE_TEXT("scheduling is not implemented on Win32.\n")));
+    ACE_UNUSED_ARG(ace_scheduler);
 #else
     ACE_Sched_Params params(
       ace_scheduler,

@@ -493,7 +493,6 @@ namespace OpenDDS
                                   const ACE_Configuration_Section_Key &key)
     {
       node->dissector_ = new Sample_Dissector (node->name_);
-      Sample_Field *f = 0;
 
       std::string label = node->name_ + ".order";
       std::string order;
@@ -509,7 +508,7 @@ namespace OpenDDS
           get_string_value (node->config_, key, p, kind);
           Sample_Dissector *value = this->fqfind (kind, node->parent_);
           if (value != 0)
-            f = node->dissector_->add_field (value, p);
+            node->dissector_->add_field (value, p);
           if (pos == std::string::npos)
             p.clear();
           else

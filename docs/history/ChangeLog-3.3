@@ -1,0 +1,726 @@
+Fri Sep 28 18:40:22 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * OpenDDS version 3.3 released.
+
+Fri Sep 28 18:04:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+          Updated version numbers for release 3.3.
+
+Fri Sep 28 00:30:24 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed a bug in aligning sequences with length 0.
+          Alignment is only used by the rtps_udp transport.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+
+          Use fully-qualified ::DDS namespace in case just "DDS"
+          would conflict with user's code.
+
+        * tests/DCPS/Compiler/namespace_conflict:
+
+          New test (compile-only) for the namespace issue.
+
+Thu Sep 27 20:45:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * AUTHORS:
+        * README:
+
+          Updates for the upcoming release.
+
+Thu Sep 27 17:59:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Register the InfoRepoDiscovery type with the Service_Participant
+          before attempting to create an embedded InfoRepo.  This allows the
+          InfoRepo object to be destroyed and recreated in the same process.
+
+Thu Sep 27 14:11:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          More warning fixes.
+
+Thu Sep 27 01:40:55 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+
+          Now that resource limits are enforced on data writers, need to
+          increase the maximum instances so that the test can write all 10.
+
+Wed Sep 26 17:21:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tools/dissector/sample_manager.cpp:
+
+          Fixed GCC warnings (mostly "narrowing conversion").
+
+Wed Sep 26 15:46:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          News items for the upcoming release.
+
+Fri Sep 21 19:25:05 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Check for invalid message_id and submessage_id bytes in the
+          DataSampleHeader.
+          Fixed a bug in skip_bad_pdus().
+          Fixed a bug in setting the wr_ptr for ReceivedDataSample.
+          Allow derived classes to discard remaining received data (only
+          valid for datagram-based transports).
+
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+
+          Discard any remaining data after handle_dds_input() returns.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+
+          Allow specifying in the configuration the local network
+          interface which should be used for joining the multicast group.
+
+Thu Sep 20 14:55:43 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/yard/yard_parser.hpp:
+
+          Use cast instead of ACE_SIZE_T_FORMAT_SPECIFIER_ASCII to
+          avoid problem in certain build.
+
+Wed Sep 19 15:07:31 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/yard/yard_parser.hpp:
+
+          Fixed printf specifier for wide character build.
+
+Tue Sep 18 20:48:55 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/yard/yard_parser.hpp:
+
+          Fixed dependent template name problem.
+          Fixed warning for printf specifier of size_t type.
+
+Tue Sep 18 14:53:22 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/run_dds.pl:
+
+          Fixed fuzz error.
+
+Mon Sep 17 23:15:14 UTC 2012  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/run_dds.pl:
+
+          Adding an application running script that I use regularly.  It
+          has the ability to run process and network information
+          gathering tools as well.  Use the "--man" option to see more.
+
+Mon Sep 17 18:56:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Reset receive_sample_remaining_ when skipping over headers.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Improve multicast handshaking so that the transport can respond to
+          SYNs before the callback from the discovery is received.
+          Fixed up the debug logging in the multicast transport.
+
+Mon Sep 17 17:45:28 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+
+          Added string header include needed for some vc 2003 builds.
+
+Sat Sep 15 21:07:10 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+
+          Fixed a potential race condition of deleting a publication or
+          subscription from the InfoRepo while an upcall was being made using
+          the publication/subscription.
+
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Corrected a leak that could occur if the publications and
+          subscriptions were not removed before the participant.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * tools/dcpsinfo_dump:
+        * tools/dcpsinfo_dump/dcpsinfo_dump.mpc:
+        * tools/dcpsinfo_dump/dump.cpp:
+
+          Added a method to the DCPSInfo to dump the state to a string.
+          Added a dcpsinfo_dump tool to print out the state of a DCPSInfo
+          object.
+
+Thu Sep 13 20:46:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          Set ACE_NONBLOCK on the socket after the initial handshaking is done.
+          VxWorks 6.4 was observed to need this for the receive strategy to
+          work properly, otherwise it would block in the recv().
+
+Tue Sep 11 21:35:06 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/transport/error_handling/main.cpp:
+
+          Fix so test runs under static builds.
+
+Tue Sep 11 14:42:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Use RcHandle/RcObject to manage the WriterInfo objects.  This allows
+          writer_activity() to use the WriterInfo after remove_associations()
+          has removed it from the map.
+
+Wed Sep  5 22:07:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          The generated 2-arg FooDataReaderImpl::lookup_instance() needs to
+          check the header for key_fields_only_.
+
+        * tests/DCPS/Deadline/publisher.cpp:
+
+          Updated expected values for number of deadlines missed during a 9
+          second sleep (2 deadline periods).
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Corrected doxygen comment and log message.
+
+Tue Sep  4 22:00:50 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          The 2-arg form of DataReader::lookup_instance() requires its own
+          duplicated message block, because it deserializes (moves rd_ptr).
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+
+          Cancelling a timer in the reactor can't be done with a lock held,
+          if that same lock is used by handle_timeout.  Doing that can
+          deadlock the reactor because its own internal lock is held during
+          the handle_timeout upcall and also used by cancel_timer.
+
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Correctly initialize "infinite" constants for deadline and liveliness
+          so that they are really not used unless the command line args enable.
+
+Tue Sep  4 19:13:27 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/Ownership/rtps.ini:
+        * tests/DCPS/Ownership/run_test.pl:
+
+          Extend test to be able to run with rtps discovery
+          and rtps_udp.
+
+Tue Sep  4 17:45:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Similar to the change in Thu Aug 30 23:35:20 UTC 2012, made the
+          constants DEFAULT_CONFIG_NAME and DEFAULT_INST_PREFIX const char[]
+          instead of std::string.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+
+          Updated due to the above change.
+
+Tue Sep  4 17:30:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Reworked the use of WaitSet and Condition so that it
+          can't fall-through before the readers make any associations.
+          (Change given by Adam Mitz.)
+
+Thu Aug 30 23:35:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+
+          Changed DEFAULT_REPO and DEFAULT_RTPS constants from std::string to
+          const char[] to avoid order-of-initialization problems that were
+          observed in static builds.
+
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+
+          Updated due to the above change.
+
+Thu Aug 30 21:02:56 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Fixes identified by Adam Mitz to reduce CPU usage.
+
+Thu Aug 30 17:11:30 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Change method of allocation for the persisted strings.  The
+          ACE_CString holds a reference to the allocator which is on the
+          stack and changes between persistent runs.  The change is
+          to not give the ACE_CString the allocator but just provide it with
+          the allocated memory.
+
+Fri Aug 24 18:50:19 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Corrected location of callback string clear.
+
+Thu Aug 23 19:36:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed so member functions in all log statements agree
+          with name of function log statements appear.
+
+Tue Aug 21 22:42:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          When the scheduling policy is (empty string), use THR_INHERIT_SCHED
+          so that it's consistent with PerConnectionSynch and the default ACE
+          and pthread behavior.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Fixed logging: errno can't be logged when recv returns 0.
+
+Tue Aug 21 16:45:38 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+
+          Fuzz fixes.
+
+Mon Aug 20 21:43:53 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Added call to remove data writer that was missed during
+          refactoring for InfoRepo(r5529).
+
+Fri Aug 17 23:47:00 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Fixed memory leaks.  This included removing the
+          topic id to topic map entry from the DCPS_IR_Domain when
+          the topic was deleted, and cleaning up allocated objects
+          from the persistent objects before free.
+
+Fri Aug 17 21:20:12 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/error_handling/main.cpp:
+
+          Fixed a warning and other cleanup.
+
+Fri Aug 17 20:59:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          In transport constructors handle config errors
+          by throwing an exception instead of ignoring.
+
+        * tests/transport/error_handling:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+        * tests/transport/error_handling/error_handling.mpc:
+        * tests/transport/error_handling/main.cpp:
+        * tests/transport/error_handling/run_test.pl:
+        * bin/dcps_tests.lst:
+
+          Added test to verify exception is thrown in transport
+          constructor if a config error is encountered.
+
+Fri Aug 17 14:45:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+
+          Removed passing of endpoints to pub and sub which
+          wasn't being used.
+
+Thu Aug 16 09:08:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+          Fixed C++11 warning
+
+Wed Aug 15 16:40:00 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Fix the way the transport priority QoS policy sets the diffserv
+          codepoint.  Shift the codepoint to the left 2 bits so that we
+          are properly setting the DS subfield when we set the socket
+          option for IP_TOS.
+
+Tue Aug 14 19:28:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Call datalink->stop() if the pending_release_ binding fails.
+
+Tue Aug 14 07:29:32 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+          File header change
+
+        * MPC/config/dds_model.mpb:
+          Changed this to use the new feature dds_model. This is enabled by
+          default, but can be set to zero which disabled all projects that
+          use the opendds dds_model library
+
+Mon Aug 13 21:49:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed ACE Logging usage issues.
+
+Sun Aug 12 19:03:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+          Updated ciao lem
+
+Fri Aug 10 21:08:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        Integrated changes from Scott Harris and Tim Bradley:
+
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+          msg_payload() and msg() methods of TransportQueueElement can return
+          NULL pointers.  Especially in the case of msg_payload(), there are
+          queue elements that have a header but no payload.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          handle_timeout() calls the new unbind_link() method on the transport,
+          which allows the link to be removed from transport-specific data
+          structures.  The rest of handle_timeout() was equivalent to stop().
+          pre_stop_i() is now called from stop().
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added new method unbind_link(), and enhanced logging in TcpTransport.
+
+        * docs/history/ChangeLog-3.2:
+
+          Fixed typos and invalid log entries.
+
+Thu Aug  9 17:12:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/MultiDPTest/common.h:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+
+          Remove setting of pub and sub addresses which
+          were not being used.
+
+Fri Aug  3 21:39:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Whitespace fix only.
+
+Fri Aug  3 18:19:50 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+          Added dependency on mpc feature dds4ccm_opendds again, older
+          ACE versions don't have this library
+
+Thu Aug  2 13:20:35 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * NEWS:
+          Mention CIAO dependency removal
+
+Thu Aug  2 09:24:28 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+          Fixed typo in comment
+
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+          Removed the ability of generating the CIAO lem for opendds. This has
+          been moved to CIAO making OpenDDS less dependent on CIAO, we only
+          need to specify ciao lem in the IDL files for which we need a lem
+          as part of CIAO
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+          Removed dependency on dds4ccm
+
+        * MPC/config/dcps_lem_stub.mpb:
+        * MPC/config/dds4ccm_opendds.mpb:
+          Removed these files.
+
+Fri Jul 27 15:46:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Fixed a bug in converting filter terms to LongDouble.
+
+Fri Jul 27 13:14:50 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fix rtps discovery deadlock problem on Windows.
+
+Wed Jul 25 21:51:17 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+          Added necessary rtps library dependencies.
+
+Wed Jul 25 21:11:17 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+          Changed the bidir test scale.  The Bidirectional test scale was for
+          a half duplex network but the testing is done on a full duplex
+          network.
+
+        * performance-tests/Bench/src/testprocess.cpp:
+          Output the process to the ACE output for the orb log file in
+          throughput tests.
+
+Wed Jul 25 17:40:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/build.pl:
+
+          If using eclipse to build from the command line
+          then if an error is encountered don't pop up a
+          dialog box.
+
+Tue Jul 24 23:45:40 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-throughput-tables.pl:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+        * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+          Corrected throughput plot indices, rtps transport name detection
+          and html generation.
+
+Tue Jul 24 15:29:57 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits_source.mpb:
+
+          Generated files that are only generated when built_in_topics
+          is enabled must be listed in dcps_bits_source.mpb and not DdsDcps.mpc.
+
+Mon Jul 23 23:42:47 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+          Correct transport name detection.
+
+Sun Jul 22 22:27:23 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+          Added missing libraries for static builds.
+
+Thu Jul 19 20:19:13 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+        * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+          Corrected typos.
+
+Thu Jul 19 18:39:13 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/DomainParticipantId/dp.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          Added includes for rtps in static builds.
+
+Wed Jul 18 20:55:46 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+          Added signal handler to kill running processes.
+
+        * performance-tests/Bench/etc/transport-rtps.ini:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/testprocess.cpp:
+        * performance-tests/Bench/src/TestProcess.mpc:
+          Corrections to build and run on static build.
+
+Tue Jul 17 22:42:45 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * bin/performance_tests.lst:
+        * performance-tests/Bench/bin/extract-throughput.pl:
+        * performance-tests/Bench/bin/gen-latency-tables.pl:
+        * performance-tests/Bench/bin/gen-throughput-tables.pl:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+        * performance-tests/Bench/bin/generate-test-results.sh:
+        * performance-tests/Bench/bin/mktable.pl:
+        * performance-tests/Bench/bin/plot-density.gpi:
+        * performance-tests/Bench/bin/plot-jitter.gpi:
+        * performance-tests/Bench/bin/plot-quantiles.gpi:
+        * performance-tests/Bench/bin/plot-test-results.sh:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+        * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+        * performance-tests/Bench/bin/plot-transports-scaling.gpi:
+        * performance-tests/Bench/bin/plot-transports.gpi:
+        * performance-tests/Bench/doc/tests-latency.txt:
+        * performance-tests/Bench/doc/tests.txt:
+        * performance-tests/Bench/etc/transport-rtps.ini:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/latency/test-commands.txt:
+        * performance-tests/Bench/tests/scaling/test-commands.txt:
+        * performance-tests/Bench/tests/shared/reduce.sh:
+        * performance-tests/Bench/tests/shared/run.sh:
+        * performance-tests/Bench/tests/shared/transport-rtps.ini:
+        * performance-tests/Bench/tests/thru/run_test.pl:
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+        * performance-tests/Bench/tools/convert-latency:
+        * performance-tests/Bench/tools/convert-scaling:
+
+          First round of changes for performance tests running with
+          RTPS transport.
+
+Tue Jul 17 15:56:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/update_version.pl:
+
+          Fixed a bug in the script.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Updated instructions.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+
+          Reverted invalid replacements from prior execution of the script.
+
+Fri Jul 13 12:47:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * ChangeLog:
+        * docs/history/ChangeLog-3.2:
+
+          Moved version 3.2 ChangeLog entries to a separate file.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
