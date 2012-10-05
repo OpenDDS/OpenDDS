@@ -58,7 +58,7 @@ namespace DCPS {
  * underlying system methods.
  */
 
-class ReplayerImpl : public Replayer,
+class OpenDDS_Dcps_Export ReplayerImpl : public Replayer,
   public TransportClient,
   public TransportSendListener,
   public DataWriterCallbacks,

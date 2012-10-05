@@ -23,7 +23,7 @@ namespace DCPS {
   
 class WriterInfo;
   
-class WriterInfoListener
+class OpenDDS_Dcps_Export WriterInfoListener
 {
 public:
   WriterInfoListener();

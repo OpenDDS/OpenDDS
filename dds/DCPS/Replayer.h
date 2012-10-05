@@ -28,7 +28,7 @@ typedef RcHandle<Replayer> Replayer_rch;
 *
 * This class is for handling callbacks from the Replayer object.
 */
-class ReplayerListener : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export ReplayerListener : public RcObject<ACE_SYNCH_MUTEX> {
 public:
   ~ReplayerListener();
   /**
@@ -50,7 +50,7 @@ typedef std::vector<RawDataSample> RawDataSampleList;
  * This class is for sending raw sample data.  Combined with data saved from
  * a recorder, this allows the data to be replayed to DataReaders.
  */
-class Replayer : public  RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export Replayer : public  RcObject<ACE_SYNCH_MUTEX> {
 public:
   virtual ~Replayer();
   /**

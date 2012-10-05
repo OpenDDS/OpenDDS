@@ -35,7 +35,7 @@ namespace DCPS {
   * underlying system methods.
   */
    
-class RecorderImpl 
+class OpenDDS_Dcps_Export RecorderImpl 
   : public TransportClient
   , public TransportReceiveListener
   , public DataReaderCallbacks

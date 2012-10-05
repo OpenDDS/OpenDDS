@@ -1,3 +1,49 @@
+Fri Oct  5 15:46:10 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/WriterInfo.h:
+        
+          Add missing export macros to some classes.
+
+        * tests/DCPS/RecorderReplayer:
+
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+
+        * tests/DCPS/Messenger_Relay:
+
+        * tests/DCPS/Messenger_Relay/Args.h:
+        * tests/DCPS/Messenger_Relay/DataReaderListenerImpl.h:
+        * tests/DCPS/Messenger_Relay/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Messenger_Relay/Messenger.idl:
+        * tests/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * tests/DCPS/Messenger_Relay/Publisher.cpp:
+        * tests/DCPS/Messenger_Relay/Relay.cpp:
+        * tests/DCPS/Messenger_Relay/Subscriber.cpp:
+        * tests/DCPS/Messenger_Relay/pub.ini:
+        * tests/DCPS/Messenger_Relay/pub_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/pub_multicast.ini:
+        * tests/DCPS/Messenger_Relay/pub_udp.ini:
+        * tests/DCPS/Messenger_Relay/relay.ini:
+        * tests/DCPS/Messenger_Relay/relay_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/relay_multicast.ini:
+        * tests/DCPS/Messenger_Relay/relay_udp.ini:
+        * tests/DCPS/Messenger_Relay/rtps.ini:
+        * tests/DCPS/Messenger_Relay/rtps_disc.ini:
+        * tests/DCPS/Messenger_Relay/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger_Relay/rtps_uni.ini:
+        * tests/DCPS/Messenger_Relay/run_test.pl:
+        * tests/DCPS/Messenger_Relay/shmem.ini:
+        * tests/DCPS/Messenger_Relay/sub.ini:
+        * tests/DCPS/Messenger_Relay/sub_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/sub_multicast.ini:
+        * tests/DCPS/Messenger_Relay/sub_udp.ini:
+
+        * tests/DCPS/RecorderReplayer/Messenger_Relay.mpc:
+
+          Move tests/DCPS/Messenger_Relay to tests/DCPS/RecorderReplayer.
+
 Fri Oct  5 14:34:27 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * tests/DCPS/Messenger_Relay/Args.h:
@@ -18,7 +64,7 @@ Fri Oct  5 14:34:27 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
         * tests/DCPS/Messenger_Relay/sub_ipv6.ini:
         * tests/DCPS/Messenger_Relay/sub_multicast.ini:
         * tests/DCPS/Messenger_Relay/sub_udp.ini:
-        
+
           Add missing files.
 
 Thu Oct  4 22:37:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
