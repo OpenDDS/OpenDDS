@@ -13,20 +13,7 @@ OpenDDS::DCPS::DataReaderImpl::get_dr_obj_ref()
   return DDS::DataReader::_duplicate(dr_local_objref_.in()) ;
 }
 
-ACE_INLINE
-int
-OpenDDS::DCPS::WriterInfo::received_activity(const ACE_Time_Value& when)
-{
-  last_liveliness_activity_time_ = when;
 
-  if (state_ != ALIVE) { // NOT_SET || DEAD
-    reader_->writer_became_alive(*this, when);
-    return 0;
-  }
-
-  //TBD - is the "was alive" return value used?
-  return 1;
-}
 
 ACE_INLINE
 const OpenDDS::DCPS::DataReaderImpl::StatsMapType&

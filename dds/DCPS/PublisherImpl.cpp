@@ -98,50 +98,9 @@ PublisherImpl::create_datawriter(
   DDS::DataWriterListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  if (CORBA::is_nil(a_topic)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("topic is nil.\n")));
-    return DDS::DataWriter::_nil();
-  }
-
   DDS::DataWriterQos dw_qos;
-
-  if (qos == DATAWRITER_QOS_DEFAULT) {
-    this->get_default_datawriter_qos(dw_qos);
-
-  } else if (qos == DATAWRITER_QOS_USE_TOPIC_QOS) {
-    DDS::TopicQos topic_qos;
-    a_topic->get_qos(topic_qos);
-
-    this->get_default_datawriter_qos(dw_qos);
-
-    this->copy_from_topic_qos(dw_qos, topic_qos);
-
-  } else {
-    dw_qos = qos;
-  }
-
-  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-
-  if (!Qos_Helper::valid(dw_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("invalid qos.\n")));
-    return DDS::DataWriter::_nil();
-  }
-
-  if (!Qos_Helper::consistent(dw_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("inconsistent qos.\n")));
+  
+  if (!validate_datawriter_qos(qos, default_datawriter_qos_, a_topic, dw_qos)) {
     return DDS::DataWriter::_nil();
   }
 
@@ -766,26 +725,8 @@ DDS::ReturnCode_t
 PublisherImpl::copy_from_topic_qos(DDS::DataWriterQos & a_datawriter_qos,
                                    const DDS::TopicQos & a_topic_qos)
 {
-  if (Qos_Helper::valid(a_topic_qos)
-      && Qos_Helper::consistent(a_topic_qos)) {
-    // Some members in the DataWriterQos are not contained
-    // in the TopicQos. The caller needs initialize them.
-    a_datawriter_qos.durability = a_topic_qos.durability;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    a_datawriter_qos.durability_service = a_topic_qos.durability_service;
-#endif
-    a_datawriter_qos.deadline = a_topic_qos.deadline;
-    a_datawriter_qos.latency_budget = a_topic_qos.latency_budget;
-    a_datawriter_qos.liveliness = a_topic_qos.liveliness;
-    a_datawriter_qos.reliability = a_topic_qos.reliability;
-    a_datawriter_qos.destination_order = a_topic_qos.destination_order;
-    a_datawriter_qos.history = a_topic_qos.history;
-    a_datawriter_qos.resource_limits = a_topic_qos.resource_limits;
-    a_datawriter_qos.transport_priority = a_topic_qos.transport_priority;
-    a_datawriter_qos.lifespan = a_topic_qos.lifespan;
-
+  if (Qos_Helper::copy_from_topic_qos(a_datawriter_qos, a_topic_qos)) {
     return DDS::RETCODE_OK;
-
   } else {
     return DDS::RETCODE_INCONSISTENT_POLICY;
   }
@@ -911,6 +852,59 @@ PublisherImpl::parent() const
 {
   return this->participant_;
 }
+
+bool 
+PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos, 
+                                       const DDS::DataWriterQos& default_qos,
+                                       DDS::Topic_ptr a_topic,
+                                       DDS::DataWriterQos& dw_qos)
+{
+  if (CORBA::is_nil(a_topic)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("PublisherImpl::create_datawriter, ")
+               ACE_TEXT("topic is nil.\n")));
+    return DDS::DataWriter::_nil();
+  }
+
+  if (qos == DATAWRITER_QOS_DEFAULT) {
+    dw_qos = default_qos;
+
+  } else if (qos == DATAWRITER_QOS_USE_TOPIC_QOS) {
+    DDS::TopicQos topic_qos;
+    a_topic->get_qos(topic_qos);    
+    dw_qos = default_qos;
+
+    Qos_Helper::copy_from_topic_qos(dw_qos, topic_qos);
+
+  } else {
+    dw_qos = qos;
+  }
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+
+  if (!Qos_Helper::valid(dw_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("PublisherImpl::create_datawriter, ")
+               ACE_TEXT("invalid qos.\n")));
+    return DDS::DataWriter::_nil();
+  }
+
+  if (!Qos_Helper::consistent(dw_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("PublisherImpl::create_datawriter, ")
+               ACE_TEXT("inconsistent qos.\n")));
+    return DDS::DataWriter::_nil();
+  }
+  return true;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

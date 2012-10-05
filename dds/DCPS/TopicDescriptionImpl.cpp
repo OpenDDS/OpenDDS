@@ -27,14 +27,16 @@ TopicDescriptionImpl::TopicDescriptionImpl(const char*            topic_name,
 {
   // make sure the type_support doesn't get deleted while
   // were still using it.
-  type_support_->_add_ref();
+  if (type_support_)
+    type_support_->_add_ref();
 }
 
 // Implementation skeleton destructor
 TopicDescriptionImpl::~TopicDescriptionImpl()
 {
   // were finished with the type_support
-  type_support_->_remove_ref();
+  if (type_support_)
+    type_support_->_remove_ref();
 }
 
 char *

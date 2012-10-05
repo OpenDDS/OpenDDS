@@ -34,6 +34,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "RcHandle_T.h"
 #include "RcObject_T.h"
+#include "WriterInfo.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -65,125 +66,9 @@ class FilterEvaluator;
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-enum Coherent_State {
-  NOT_COMPLETED_YET,
-  COMPLETED,
-  REJECTED
-};
-#endif
-
 enum MarshalingType {
   FULL_MARSHALING,
   KEY_ONLY_MARSHALING
-};
-
-/// Keeps track of a DataWriter's liveliness for a DataReader.
-class OpenDDS_Dcps_Export WriterInfo : public RcObject<ACE_SYNCH_MUTEX> {
-  friend class DataReaderImpl;
-
-public:
-  enum WriterState { NOT_SET, ALIVE, DEAD };
-
-  WriterInfo();  // needed for maps
-
-  WriterInfo(DataReaderImpl* reader,
-             const PublicationId&  writer_id,
-             const ::DDS::DataWriterQos&  writer_qos);
-
-  /// check to see if this writer is alive (called by handle_timeout).
-  /// @param now next time this DataWriter will become not active (not alive)
-  ///      if no sample or liveliness message is received.
-  /// @returns absolute time when the Writer will become not active (if no activity)
-  ///          of ACE_Time_Value::zero if the writer is already or became not alive
-  ACE_Time_Value check_activity(const ACE_Time_Value& now);
-
-  /// called when a sample or other activity is received from this writer.
-  int received_activity(const ACE_Time_Value& when);
-
-  /// returns 1 if the DataWriter is lively; 2 if dead; otherwise returns 0.
-  WriterState get_state() {
-    return state_;
-  };
-
-  std::string get_state_str() const;
-
-  /// update liveliness when remove_association is called.
-  void removed();
-
-  /// Remove ack requests prior to the given sequence.
-  /// NOTE: This removes *all* ack requests for this publication
-  ///       satisfied by this sequence.
-  void clear_acks(SequenceNumber sequence);
-
-  /// Determine if a SAMPLE_ACK message should be sent to this
-  /// publication.
-  bool should_ack(ACE_Time_Value now);
-
-  /// Set the time after which we no longer need to generate a
-  /// SAMPLE_ACK for this sequence value.
-  void ack_deadline(SequenceNumber sequence, ACE_Time_Value when);
-
-  /// Update the last observed sequence number.
-  void ack_sequence(SequenceNumber value);
-
-  /// Return the most recently observed contiguous sequence number.
-  SequenceNumber ack_sequence() const;
-
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  Coherent_State coherent_change_received ();
-  void reset_coherent_info ();
-  void set_group_info (const CoherentChangeControl& info);
-#endif
-
-  void clear_owner_evaluated ();
-  void set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag);
-  bool is_owner_evaluated (::DDS::InstanceHandle_t instance);
-
-private:
-
-  /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
-  ACE_Time_Value last_liveliness_activity_time_;
-
-  /// Times after which we no longer need to respond to a REQUEST_ACK message.
-  typedef std::list<std::pair<SequenceNumber, ACE_Time_Value> > DeadlineList;
-  DeadlineList ack_deadlines_;
-
-  DisjointSequence ack_sequence_;
-
-  bool seen_data_;
-
-  /// State of the writer.
-  WriterState state_;
-
-  /// The DataReader owning this WriterInfo
-  DataReaderImpl* reader_;
-
-  /// DCPSInfoRepo ID of the DataWriter
-  PublicationId writer_id_;
-
-  /// Writer qos
-  ::DDS::DataWriterQos writer_qos_;
-
-  /// The publication entity instance handle.
-  ::DDS::InstanceHandle_t handle_;
-
-  /// Number of received coherent changes in active change set.
-  ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
-
-  /// Is this writer evaluated for owner ?
-  typedef std::map < ::DDS::InstanceHandle_t, bool> OwnerEvaluateFlag;
-  OwnerEvaluateFlag owner_evaluated_;
-
-  /// Data to support GROUP access scope.
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  bool group_coherent_;
-  RepoId publisher_id_;
-  DisjointSequence coherent_sample_sequence_;
-  WriterCoherentSample  writer_coherent_samples_;
-  GroupCoherentSamples  group_coherent_samples_;
-#endif
-
 };
 
 /// Elements stored for managing statistical data.
@@ -230,7 +115,8 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportReceiveListener,
-    public virtual ACE_Event_Handler {
+    public virtual ACE_Event_Handler,
+    private WriterInfoListener {
 public:
   friend class RequestedDeadlineWatchdog;
   friend class QueryConditionImpl;
@@ -684,7 +570,6 @@ private:
     return data.publication_transport_priority_;
   }
 
-  friend class WriterInfo;
   friend class InstanceState;
 
   friend class ::DDS_TEST; //allows tests to get at private data
@@ -695,7 +580,6 @@ private:
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
-  RepoId                       subscription_id_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -730,13 +614,7 @@ private:
   /// timer.
   ACE_Reactor_Timer_Interface* reactor_;
 
-  /// The time interval for checking liveliness.
-  /// TBD: Should this be initialized with
-  ///      DDS::DURATION_INFINITE_SEC and DDS::DURATION_INFINITE_NSEC
-  ///      instead of ACE_Time_Value::zero to be consistent with default
-  ///      duration qos ? Or should we simply use the ACE_Time_Value::zero
-  ///      to indicate the INFINITY duration ?
-  ACE_Time_Value               liveliness_lease_duration_;
+
 
   /// liveliness timer id; -1 if no timer is set
   long liveliness_timer_id_;

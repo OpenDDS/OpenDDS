@@ -27,6 +27,8 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
+#include "RecorderImpl.h"
+#include "ReplayerImpl.h"
 #include <sstream>
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -100,32 +102,10 @@ DomainParticipantImpl::create_publisher(
 {
   ACE_UNUSED_ARG(mask);
 
-  DDS::PublisherQos pub_qos;
-
-  if (qos == PUBLISHER_QOS_DEFAULT) {
-    this->get_default_publisher_qos(pub_qos);
-
-  } else {
-    pub_qos = qos;
-  }
-
-  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Publisher::_nil());
-
-  if (!Qos_Helper::valid(pub_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::create_publisher, ")
-               ACE_TEXT("invalid qos.\n")));
+  DDS::PublisherQos pub_qos = qos;
+  
+  if (! this->validate_publisher_qos(pub_qos))
     return DDS::Publisher::_nil();
-  }
-
-  if (!Qos_Helper::consistent(pub_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::create_publisher, ")
-               ACE_TEXT("inconsistent qos.\n")));
-    return DDS::Publisher::_nil();
-  }
 
   PublisherImpl* pub = 0;
   ACE_NEW_RETURN(pub,
@@ -204,30 +184,9 @@ DomainParticipantImpl::create_subscriber(
   DDS::SubscriberListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  DDS::SubscriberQos sub_qos;
+  DDS::SubscriberQos sub_qos = qos;
 
-  if (qos == SUBSCRIBER_QOS_DEFAULT) {
-    this->get_default_subscriber_qos(sub_qos);
-
-  } else {
-    sub_qos = qos;
-  }
-
-  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::Subscriber::_nil());
-
-  if (!Qos_Helper::valid(sub_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::create_subscriber, ")
-               ACE_TEXT("invalid qos.\n")));
-    return DDS::Subscriber::_nil();
-  }
-
-  if (!Qos_Helper::consistent(sub_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::create_subscriber, ")
-               ACE_TEXT("inconsistent qos.\n")));
+  if (! this->validate_subscriber_qos(sub_qos)) {
     return DDS::Subscriber::_nil();
   }
 
@@ -325,6 +284,43 @@ DomainParticipantImpl::create_topic(
   DDS::TopicListener_ptr a_listener,
   DDS::StatusMask mask)
 {
+  return create_topic_i(topic_name,
+                        type_name,
+                        qos,
+                        a_listener,
+                        mask,
+                        0);
+}
+
+DDS::Topic_ptr
+DomainParticipantImpl::create_typeless_topic(
+  const char * topic_name,
+  const char * type_name,
+  bool type_has_keys,
+  const DDS::TopicQos & qos,
+  DDS::TopicListener_ptr a_listener,
+  DDS::StatusMask mask)
+{
+  int topic_mask = (type_has_keys ? TOPIC_TYPE_HAS_KEYS : 0 ) | TOPIC_TYPELESS;
+  
+  return create_topic_i(topic_name,
+                        type_name,
+                        qos,
+                        a_listener,
+                        mask,
+                        topic_mask);
+}
+
+
+DDS::Topic_ptr
+DomainParticipantImpl::create_topic_i(
+  const char * topic_name,
+  const char * type_name,
+  const DDS::TopicQos & qos,
+  DDS::TopicListener_ptr a_listener,
+  DDS::StatusMask mask, 
+  int topic_mask)
+{
   DDS::TopicQos topic_qos;
 
   if (qos == TOPIC_QOS_DEFAULT) {
@@ -421,9 +417,15 @@ DomainParticipantImpl::create_topic(
     }
 
   } else {
-    OpenDDS::DCPS::TypeSupport_ptr type_support =
-      Registered_Data_Types->lookup(this, type_name);
 
+    OpenDDS::DCPS::TypeSupport_ptr type_support=0;
+    bool has_keys = (topic_mask & TOPIC_TYPE_HAS_KEYS);
+    
+    if (0 == topic_mask){
+      // creating a topic with compile time type
+       type_support= Registered_Data_Types->lookup(this, type_name);
+       has_keys = type_support->has_dcps_key();
+    }
     RepoId topic_id;
 
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -433,15 +435,16 @@ DomainParticipantImpl::create_topic(
                                              topic_name,
                                              type_name,
                                              topic_qos,
-                                             type_support->has_dcps_key());
+                                             has_keys);
 
     if (status == CREATED || status == FOUND) {
-      DDS::Topic_ptr new_topic = create_topic_i(topic_id,
+      DDS::Topic_ptr new_topic = create_new_topic(topic_id,
                                                 topic_name,
                                                 type_name,
                                                 topic_qos,
                                                 a_listener,
-                                                mask);
+                                                mask,
+                                                type_support);
       if (this->monitor_) {
         this->monitor_->report();
       }
@@ -593,13 +596,27 @@ DomainParticipantImpl::find_topic(
                                            qos.out(),
                                            topic_id);
 
+    
     if (status == FOUND) {
-      DDS::Topic_ptr new_topic = create_topic_i(topic_id,
+      OpenDDS::DCPS::TypeSupport_ptr type_support = Registered_Data_Types->lookup(this, type_name.in());
+      if (0 == type_support) {
+        if (DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                       ACE_TEXT("DomainParticipantImpl::find_topic, ")
+                       ACE_TEXT("can't create a Topic: type_name \"%C\"")
+                       ACE_TEXT("is not registered.\n"), type_name.in()));
+        }
+
+        return DDS::Topic::_nil();
+      }
+      
+      DDS::Topic_ptr new_topic = create_new_topic(topic_id,
                                                   topic_name,
                                                   type_name,
                                                   qos,
                                                   DDS::TopicListener::_nil(),
-                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK,
+                                                  type_support);
       return new_topic;
 
     } else if (status == INTERNAL_ERROR) {
@@ -925,6 +942,41 @@ DomainParticipantImpl::delete_contained_entities()
       }
     }
   }
+  
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->recorders_protector_,
+                     DDS::RETCODE_ERROR);
+    
+    RecorderSet::iterator it = recorders_.begin();
+    for (; it != recorders_.end(); ++it ){
+      RecorderImpl* impl = static_cast<RecorderImpl* >(it->in());
+      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+      if (impl) result = impl->cleanup();
+      if (result != DDS::RETCODE_OK) ret = result;
+    }
+    recorders_.clear();
+  }
+  
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->replayers_protector_,
+                     DDS::RETCODE_ERROR);
+    
+    ReplayerSet::iterator it = replayers_.begin();
+    for (; it != replayers_.end(); ++it ){
+      ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
+      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+      if (impl) result = impl->cleanup();
+      if (result != DDS::RETCODE_OK) ret = result;
+      
+    }
+    
+    replayers_.clear();
+  }
+  
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 
@@ -1629,39 +1681,28 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
 }
 
 DDS::Topic_ptr
-DomainParticipantImpl::create_topic_i(
+DomainParticipantImpl::create_new_topic(
   const RepoId topic_id,
   const char * topic_name,
   const char * type_name,
   const DDS::TopicQos & qos,
   DDS::TopicListener_ptr a_listener,
-  const DDS::StatusMask & mask)
+  const DDS::StatusMask & mask,
+  OpenDDS::DCPS::TypeSupport_ptr type_support)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,
                    this->topics_protector_,
                    DDS::Topic::_nil());
 
+  /*
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, topic_name, entry) == 0) {
     entry->client_refs_ ++;
     return DDS::Topic::_duplicate(entry->pair_.obj_.in());
   }
-
-  OpenDDS::DCPS::TypeSupport_ptr type_support =
-    Registered_Data_Types->lookup(this, type_name);
-
-  if (0 == type_support) {
-    if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::create_topic_i, ")
-                 ACE_TEXT("can't create a Topic: type_name \"%C\"")
-                 ACE_TEXT("is not registered.\n"), type_name));
-    }
-
-    return DDS::Topic::_nil();
-  }
+  */
 
   TopicImpl* topic_servant = 0;
 
@@ -1820,6 +1861,176 @@ DomainParticipantImpl::RepoIdSequence::next()
   return builder_;
 }
 
+
+////////////////////////////////////////////////////////////////
+
+
+bool 
+DomainParticipantImpl::validate_publisher_qos(DDS::PublisherQos & pub_qos)
+{
+  if (pub_qos == PUBLISHER_QOS_DEFAULT) {
+    this->get_default_publisher_qos(pub_qos);
+  } 
+  
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(pub_qos, false);
+
+  if (!Qos_Helper::valid(pub_qos) || !Qos_Helper::consistent(pub_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantImpl::validate_publisher_qos, ")
+               ACE_TEXT("invalid qos.\n")));
+    return false;
+  }
+
+  return true;
+}
+
+bool 
+DomainParticipantImpl::validate_subscriber_qos(DDS::SubscriberQos & subscriber_qos)
+{
+  if (subscriber_qos == SUBSCRIBER_QOS_DEFAULT) {
+    this->get_default_subscriber_qos(subscriber_qos);
+  } 
+
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(subscriber_qos, false);
+
+  if (!Qos_Helper::valid(subscriber_qos) || !Qos_Helper::consistent(subscriber_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantImpl::validate_subscriber_qos, ")
+               ACE_TEXT("invalid qos.\n")));
+    return false;
+  }
+
+
+  return true;
+}
+
+Recorder_rch DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
+                             const DDS::SubscriberQos & subscriber_qos,
+                             const DDS::DataReaderQos & datareader_qos,
+                             const RecorderListener_rch & a_listener, 
+                             DDS::StatusMask mask)
+{
+  if (CORBA::is_nil(a_topic)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("SubscriberImpl::create_datareader, ")
+               ACE_TEXT("topic desc is nil.\n")));
+    return Recorder_rch();
+  }
+  
+  DDS::SubscriberQos sub_qos = subscriber_qos;
+  DDS::DataReaderQos dr_qos;
+  
+  if (! this->validate_subscriber_qos(sub_qos) || 
+      ! SubscriberImpl::validate_datareader_qos(datareader_qos, 
+                                                TheServiceParticipant->initial_DataReaderQos(),
+                                                a_topic,
+                                                dr_qos, false) ) {
+    return Recorder_rch();
+  }
+
+
+  RecorderImpl* recorder = 0 ;
+  ACE_NEW_RETURN(recorder,
+                 RecorderImpl,
+                 Recorder_rch());
+  
+  Recorder_rch result(recorder);
+  
+  recorder->init(dynamic_cast<TopicDescriptionImpl*>(a_topic), 
+    dr_qos, a_listener,
+    mask, this, subscriber_qos);
+
+  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1)) {
+    recorder->enable();
+  }
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(recorders_protector_);
+  recorders_.insert(result);
+  
+  return result;
+}
+
+
+  
+Replayer_rch 
+DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
+                             const DDS::PublisherQos & publisher_qos,
+                             const DDS::DataWriterQos & datawriter_qos,
+                             const ReplayerListener_rch & a_listener, 
+                             DDS::StatusMask mask)
+{
+    
+  if (CORBA::is_nil(a_topic)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("SubscriberImpl::create_datareader, ")
+               ACE_TEXT("topic desc is nil.\n")));
+    return Replayer_rch();
+  }
+  
+  DDS::PublisherQos pub_qos = publisher_qos;
+  DDS::DataWriterQos dw_qos;
+  
+  if (! this->validate_publisher_qos(pub_qos) ||
+      ! PublisherImpl::validate_datawriter_qos(datawriter_qos, 
+                                               TheServiceParticipant->initial_DataWriterQos(),
+                                               a_topic,
+                                               dw_qos)) {
+    return Replayer_rch();
+  }
+  
+  TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
+
+
+  ReplayerImpl* replayer = 0;
+  ACE_NEW_RETURN(replayer,
+                 ReplayerImpl,
+                 Replayer_rch());
+      
+  Replayer_rch result(replayer);
+  replayer->init(a_topic,
+                   topic_servant,
+                   dw_qos,
+                   a_listener,
+                   mask,
+                   this,
+                   pub_qos);
+
+  if (this->enabled_ == true
+      && qos_.entity_factory.autoenable_created_entities == 1) {
+        
+    DDS::ReturnCode_t ret = replayer->enable();
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::create_replayer, ")
+                 ACE_TEXT("enable failed.\n")));
+      return Replayer_rch();
+    }
+  }
+  
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
+  replayers_.insert(result);
+  return result;                               
+}
+
+void 
+DomainParticipantImpl::delete_recorder(Recorder_rch recorder)
+{
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(recorders_protector_);
+  recorders_.insert(recorder);
+}
+
+void 
+DomainParticipantImpl::delete_replayer(Replayer_rch replayer)
+{
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
+  replayers_.erase(replayer);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS
