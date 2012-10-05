@@ -16,6 +16,7 @@
 
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
 #include "ace/Default_Constants.h"
@@ -923,8 +924,10 @@ RtpsUdpDataLink::generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nf,
     recv_strategy_->has_fragments(missing[i], pub_id, &frag_info);
   }
   // 1b. larger than the last received seq# but less than the heartbeat.lastSN
-  const SequenceRange range(wi.recvd_.high(), wi.hb_range_.second);
-  recv_strategy_->has_fragments(range, pub_id, &frag_info);
+  if (!wi.recvd_.empty()) {
+    const SequenceRange range(wi.recvd_.high(), wi.hb_range_.second);
+    recv_strategy_->has_fragments(range, pub_id, &frag_info);
+  }
   for (size_t i = 0; i < frag_info.size(); ++i) {
     // If we've received a HeartbeatFrag, we know the last (available) frag #
     const iter_t iter = wi.frags_.find(frag_info[i].first);
@@ -1335,21 +1338,55 @@ RtpsUdpDataLink::send_nackfrag_replies(const RepoId& writerId,
     for (FragmentInfo::const_iterator sn_iter = fi.begin();
          sn_iter != fi.end(); ++sn_iter) {
       const SequenceNumber& seq = sn_iter->first;
-      TransportSendStrategy::QueueType* q = writer.send_buff_->peek_queue(seq);
-      RtpsCustomizedElement* elt =
-        dynamic_cast<RtpsCustomizedElement*>(q->peek());
-      if (!elt) {
-        if (Transport_debug_level) {
-          const GuidConverter conv(writerId);
-          ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_nackfrag_replies "
-            "ERROR in fragment resend for writer %C seq %q\n",
-            std::string(conv).c_str(), seq.getValue()));
+      // Get marshaled data from send buffer, read and interpret headers
+      ACE_Message_Block* orig_msg = writer.send_buff_->msg(seq)->cont();
+      ACE_Message_Block* msg = orig_msg->duplicate();
+      DataSampleHeader dsh;
+      RTPS::ParameterList inlineQos;
+      std::memcpy(dsh.publication_id_.guidPrefix, local_prefix_,
+                  sizeof(GuidPrefix_t));
+      bool err = false, done = false;
+      for (RtpsSampleHeader rsh(*msg); !err && !done; rsh = *msg) {
+        if (!rsh.valid()) {
+          if (Transport_debug_level) {
+            const GuidConverter conv(writerId);
+            ACE_ERROR((LM_ERROR,
+              "(%P|%t) RtpsUdpDataLink::send_nackfrag_replies "
+              "ERROR in fragment resend for writer %C seq %q\n",
+              std::string(conv).c_str(), seq.getValue()));
+          }
+          err = true;
+          break;
         }
-        continue;
+        switch (rsh.submessage_._d()) {
+        case RTPS::INFO_TS:
+          if (!(rsh.submessage_.info_ts_sm().smHeader.flags & 2 /*FLAG_I*/)) {
+            dsh.source_timestamp_sec_ =
+              rsh.submessage_.info_ts_sm().timestamp.seconds;
+            dsh.source_timestamp_nanosec_ =
+              static_cast<ACE_UINT32>(rsh.submessage_.info_ts_sm().timestamp.fraction
+                                      / RTPS::NANOS_TO_RTPS_FRACS + .5);
+          }
+          break;
+        case RTPS::DATA: {
+          const RTPS::DataSubmessage& data = rsh.submessage_.data_sm();
+          dsh.byte_order_ = data.smHeader.flags & 1 /*FLAG_E*/;
+          dsh.key_fields_only_ = data.smHeader.flags & 8 /*FLAG_K*/;
+          dsh.publication_id_.entityId = data.writerId;
+          dsh.sequence_.setValue(data.writerSN.high, data.writerSN.low);
+          dsh.message_length_ = rsh.message_length();
+          if (data.smHeader.flags & 2 /*FLAG_Q*/) {
+            inlineQos = data.inlineQos;
+          }
+          done = true;
+          break;
+        }
+        default:
+          break;
+        }
       }
-      //FUTURE: support for instance control messages (?)
-      const DataSampleListElement& dsle =
-        *elt->original_send_element()->sample();
+      msg->release();
+      if (err) continue;
       const FragmentDetails& fdet = sn_iter->second;
       SequenceNumber fn = fdet.frags_.low();
       ACE_Message_Block* chain = 0;
@@ -1361,10 +1398,10 @@ RtpsUdpDataLink::send_nackfrag_replies(const RepoId& writerId,
         bool send = false; // need to send 'chain' on this iteration?
         const unsigned int first = fn.getLow(); // 1st frag in submsg
         if (RtpsSampleHeader::populate_data_frag_submessages(subm, fn,
-              dsle, fdet.requires_iqos_, fdet.frags_, fdet.reader_,
+              dsh, inlineQos, fdet.frags_, fdet.reader_,
               len, data_len)) {
           ACE_Message_Block* hdr = submsgs_to_msgblock(subm);
-          ACE_Message_Block* data = dsle.sample_->duplicate();
+          ACE_Message_Block* data = orig_msg->cont()->duplicate();
           data->rd_ptr((first - 1) * RtpsSampleHeader::FRAG_SIZE);
           data->wr_ptr(data->rd_ptr() + data_len);
           hdr->cont(data);

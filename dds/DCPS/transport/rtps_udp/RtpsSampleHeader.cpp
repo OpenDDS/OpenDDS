@@ -379,16 +379,16 @@ RtpsSampleHeader::populate_data_sample_submessages(
 bool
 RtpsSampleHeader::populate_data_frag_submessages(
   RTPS::SubmessageSeq& subm, SequenceNumber& starting_frag,
-  const DataSampleListElement& dsle, bool requires_inline_qos,
+  const DataSampleHeader& dsh, const RTPS::ParameterList& inlineQos,
   const DisjointSequence& frags, const RepoId& reader,
   const size_t current_msg_len, size_t& data_len)
 {
   using namespace OpenDDS::RTPS;
-  const ACE_CDR::Octet flags = dsle.header_.byte_order_;
+  const ACE_CDR::Octet flags = dsh.byte_order_;
   size_t added_len = 0;
   data_len = 0;
   if (current_msg_len == 0 && starting_frag == 1) {
-    add_timestamp(subm, flags, dsle.header_);
+    add_timestamp(subm, flags, dsh);
     added_len += SMHDR_SZ + INFO_TS_SZ;
   }
   CORBA::ULong i = subm.length();
@@ -409,23 +409,22 @@ RtpsSampleHeader::populate_data_frag_submessages(
     0, /* extra flags: unused */
     DATA_FRAG_OCTETS_TO_IQOS,
     reader.entityId,
-    dsle.publication_id_.entityId,
-    {dsle.header_.sequence_.getHigh(), dsle.header_.sequence_.getLow()},
+    dsh.publication_id_.entityId,
+    {dsh.sequence_.getHigh(), dsh.sequence_.getLow()},
     {starting_frag.getLow()},
     0, /* fragments in submsg: determined below */
     FRAG_SIZE,
-    dsle.header_.message_length(),
+    dsh.message_length(),
     ParameterList()
   };
 
-  if (requires_inline_qos && starting_frag == 1) {
-    TransportSendListener::InlineQosData qos_data;
-    dsle.send_listener_->retrieve_inline_qos_data(qos_data);
-    populate_inline_qos(qos_data, datafrag.inlineQos);
+  if (dsh.key_fields_only_) {
+    datafrag.smHeader.flags |= FLAG_K_IN_FRAG;
+  }
 
-    if (datafrag.inlineQos.length() > 0) {
-      datafrag.smHeader.flags |= FLAG_Q;
-    }
+  if (starting_frag == 1 && inlineQos.length()) {
+    datafrag.smHeader.flags |= FLAG_Q;
+    datafrag.inlineQos = inlineQos;
   }
 
   size_t padding = 0, before_datafrag = added_len;
@@ -443,8 +442,8 @@ RtpsSampleHeader::populate_data_frag_submessages(
        ++cur, ++n_frags) {
     // check if the current fragment "cur" will fit
     const size_t frag_len =
-      (cur * FRAG_SIZE > dsle.header_.message_length())
-      ? (dsle.header_.message_length() % FRAG_SIZE)
+      (cur * FRAG_SIZE > dsh.message_length())
+      ? (dsh.message_length() % FRAG_SIZE)
       : FRAG_SIZE;
     if (RTPSHDR_SZ + current_msg_len + added_len + data_len + frag_len >
         RtpsUdpSendStrategy::MAX_MSG_SIZE) {

@@ -8,7 +8,7 @@
 
 #include "ace/OS_main.h"
 
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/DisjointSequence.h"
@@ -43,28 +43,6 @@ const bool SWAP =
 #else
   true;
 #endif
-
-struct MockTransportSendListener : TransportSendListener {
-  void notify_publication_disconnected(const ReaderIdSeq&) {}
-  void notify_publication_reconnected(const ReaderIdSeq&) {}
-  void notify_publication_lost(const ReaderIdSeq&) {}
-  void notify_connection_deleted() {}
-  void remove_associations(const ReaderIdSeq&, bool) {}
-  void retrieve_inline_qos_data(InlineQosData& qos_data) const
-  {
-    qos_data.topic_name = "test_topic";
-    qos_data.pub_qos = TheServiceParticipant->initial_PublisherQos();
-    qos_data.dw_qos = TheServiceParticipant->initial_DataWriterQos();
-  }
-  const ACE_CDR::UShort plist_len_;
-  ParameterList plist_;
-  MockTransportSendListener() : plist_len_(24), plist_(1)
-  {
-    plist_.length(1);
-    plist_[0].string_data("test_topic");
-    plist_[0]._d(PID_TOPIC_NAME);
-  }
-} mock_tsl;
 
 size_t header_len(const SubmessageSeq& subm)
 {
@@ -226,12 +204,13 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   bld.entityKind(KIND_WRITER);
   const RepoId writerGuid(bld);
   const OpenDDS::RTPS::EntityId_t& writerId = writerGuid.entityId;
-  DataSampleListElement dsle(bld, &mock_tsl, 0, 0, 0);
-  dsle.header_.byte_order_ = true;
-  dsle.header_.source_timestamp_sec_ = 1349190278;
-  dsle.header_.source_timestamp_nanosec_ = 387505069;
-  dsle.header_.sequence_ = 23;
-  dsle.header_.message_length_ = 75000; // 73 full frags, 1 frag of 248 bytes
+  DataSampleHeader dsh;
+  dsh.byte_order_ = true;
+  dsh.source_timestamp_sec_ = 1349190278;
+  dsh.source_timestamp_nanosec_ = 387505069;
+  dsh.sequence_ = 23;
+  dsh.publication_id_ = writerGuid;
+  dsh.message_length_ = 75000; // 73 full frags, 1 frag of 248 bytes
   {
     DisjointSequence requested_fragments;
     requested_fragments.insert(SequenceRange(1, 3));
@@ -243,7 +222,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     SequenceNumber current_frag = requested_fragments.low();
     for (int i = 0;
          RtpsSampleHeader::populate_data_frag_submessages(subm_it, current_frag,
-           dsle, false, requested_fragments, GUID_UNKNOWN, length, data_len);
+           dsh, ParameterList(), requested_fragments, GUID_UNKNOWN,
+           length, data_len);
          ++i) {
       length += header_len(subm_it) + data_len;
       for (CORBA::ULong j = 0; j < subm_it.length(); ++j) {
@@ -306,7 +286,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     readerId.entityKind(KIND_READER);
     const OpenDDS::RTPS::GUID_t readerGuid = readerId;
     const bool ret = RtpsSampleHeader::populate_data_frag_submessages(subm,
-      current_frag, dsle, false, requested_fragments, readerId, 0, data_len);
+      current_frag, dsh, ParameterList(), requested_fragments, readerId,
+      0, data_len);
     TEST_ASSERT(ret);
     TEST_ASSERT(current_frag >= 75);
     TEST_ASSERT(data_len == 1024 + 248);
@@ -324,23 +305,27 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       matches(subm[1].data_frag_sm(), expected);
     }
     // Test w/ inlineQoS
+    ParameterList plist;
+    plist.length(1);
+    plist[0].string_data("test_topic");
+    plist[0]._d(PID_TOPIC_NAME);
     current_frag = requested_fragments.low();
     subm.length(0);
     TEST_ASSERT(RtpsSampleHeader::populate_data_frag_submessages(subm,
-      current_frag, dsle, true, requested_fragments, GUID_UNKNOWN, 0, data_len));
+      current_frag, dsh, plist, requested_fragments, GUID_UNKNOWN, 0, data_len));
     TEST_ASSERT(subm.length() == 2);
     TEST_ASSERT(subm[0]._d() == INFO_TS);
     TEST_ASSERT(subm[1]._d() == DATA_FRAG);
     {
       const DataFragSubmessage expected = {
-        {DATA_FRAG, 3, 32 + 3*1024 + mock_tsl.plist_len_}, 0,
+        {DATA_FRAG, 3, 32 + 3*1024 + 24 /*qos*/}, 0,
         DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writerId, {0, 23},
-        {1}, 3, 1024, 75000, mock_tsl.plist_};
+        {1}, 3, 1024, 75000, plist};
       matches(subm[1].data_frag_sm(), expected);
     }
     length = header_len(subm);
     TEST_ASSERT(RtpsSampleHeader::populate_data_frag_submessages(subm,
-      current_frag, dsle, true, requested_fragments, GUID_UNKNOWN,
+      current_frag, dsh, plist, requested_fragments, GUID_UNKNOWN,
       length, data_len));
     TEST_ASSERT(subm.length() == 3);
     TEST_ASSERT(subm[2]._d() == DATA_FRAG);

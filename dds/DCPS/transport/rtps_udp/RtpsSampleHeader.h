@@ -80,8 +80,8 @@ public:
                                                 bool requires_inline_qos);
   static bool populate_data_frag_submessages(RTPS::SubmessageSeq& subm,
                                              SequenceNumber& starting_frag,
-                                             const DataSampleListElement& dsle,
-                                             bool requires_inline_qos,
+                                             const DataSampleHeader& dsh,
+                                             const RTPS::ParameterList& inlineQos,
                                              const DisjointSequence& frags,
                                              const RepoId& reader,
                                              size_t current_msg_len,

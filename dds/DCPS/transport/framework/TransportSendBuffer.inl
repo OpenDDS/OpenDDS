@@ -56,14 +56,14 @@ SingleSendBuffer::contains(const SequenceNumber& seq) const
   return this->buffers_.count(seq);
 }
 
-ACE_INLINE SingleSendBuffer::QueueType*
-SingleSendBuffer::peek_queue(const SequenceNumber& seq) const
+ACE_INLINE ACE_Message_Block*
+SingleSendBuffer::msg(const SequenceNumber& seq) const
 {
   BufferMap::const_iterator iter = this->buffers_.find(seq);
   if (iter == this->buffers_.end()) {
     return 0;
   }
-  return iter->second.first;
+  return iter->second.second;
 }
 
 } // namespace DCPS
