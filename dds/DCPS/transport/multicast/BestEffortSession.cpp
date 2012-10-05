@@ -42,7 +42,7 @@ BestEffortSession::check_header(const TransportHeader& header)
 }
 
 bool
-BestEffortSession::start(bool active)
+BestEffortSession::start(bool active, bool acked)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX,
                    guard,
