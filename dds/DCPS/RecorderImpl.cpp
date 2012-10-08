@@ -123,8 +123,8 @@ void RecorderImpl::init(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::init \n")));
   }
-  
-  
+
+
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
@@ -252,7 +252,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
                               const WriterAssociation& writer,
                               bool                     active)
 {
-  ACE_DEBUG((LM_DEBUG, "RecorderImpl::add_association\n"));
+    ACE_DEBUG((LM_DEBUG, "RecorderImpl::add_association\n"));
   //
   // The following block is for diagnostic purposes only.
   //
@@ -560,7 +560,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     }
   }
 
-  wr_len = updated_writers.length();  
+  wr_len = updated_writers.length();
 
   // Return now if the supplied writers have been removed already.
   if (wr_len == 0) {
@@ -587,7 +587,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
-    
+
     // Derive the change in the number of publications writing to this reader.
     int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
@@ -838,10 +838,10 @@ RecorderImpl::enable()
 
   // if (topic_servant_ && !transport_disabled_) {
   if (topic_servant_) {
-    
+
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::enable_transport\n")));
-    
+
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
                              this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
@@ -861,10 +861,10 @@ RecorderImpl::enable()
 
     Discovery_rch disco =
       TheServiceParticipant->get_discovery(this->domain_id_);
-    
+
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
-    
+
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
@@ -901,12 +901,13 @@ RecorderImpl::get_instance_handle()
   return this->participant_servant_->get_handle(subscription_id_);
 }
 
-DDS::ReturnCode_t 
-RecorderImpl::repoid_to_bit_key(const DCPS::RepoId& id,
-                                      DDS::BuiltinTopicKey_t& key)
+#if !defined (DDS_HAS_MINIMUM_BIT)
+DDS::ReturnCode_t
+RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
+                                DDS::BuiltinTopicKey_t& key)
 {
   DDS::InstanceHandle_t publication_handle = this->participant_servant_->get_handle(id);
-  
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->publication_handle_lock_,
@@ -919,10 +920,10 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId& id,
   DDS::PublicationBuiltinTopicDataSeq data;
 
   DDS::ReturnCode_t ret
-  = hh.instance_handle_to_bit_data(participant_servant_,
-                                   BUILT_IN_PUBLICATION_TOPIC,
-                                   publication_handle,
-                                   data);
+    = hh.instance_handle_to_bit_data(participant_servant_,
+                                     BUILT_IN_PUBLICATION_TOPIC,
+                                     publication_handle,
+                                     data);
 
   if (ret == DDS::RETCODE_OK) {
     key = data[0].key;
@@ -930,6 +931,6 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId& id,
 
   return ret;
 }
-
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 } // namespace DCPS
 } // namespace

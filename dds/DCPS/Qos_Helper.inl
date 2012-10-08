@@ -1503,7 +1503,7 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataReaderQos& a_datareader_qos,
   return true;
 }
 
-ACE_INLINE 
+ACE_INLINE
 bool Qos_Helper::copy_from_topic_qos(DDS::DataWriterQos& a_datawriter_qos,
                                      const DDS::TopicQos& a_topic_qos)
 {

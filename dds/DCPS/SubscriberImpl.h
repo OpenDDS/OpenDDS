@@ -157,9 +157,9 @@ public:
 
   virtual EntityImpl* parent() const;
 
-  static bool validate_datareader_qos(const DDS::DataReaderQos & qos, 
-                                      const DDS::DataReaderQos & default_qos, 
-                                      DDS::Topic_ptr a_topic, 
+  static bool validate_datareader_qos(const DDS::DataReaderQos & qos,
+                                      const DDS::DataReaderQos & default_qos,
+                                      DDS::Topic_ptr a_topic,
                                       DDS::DataReaderQos & result_qos, bool mt);
 
 private:

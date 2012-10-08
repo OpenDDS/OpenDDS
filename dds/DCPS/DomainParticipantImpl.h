@@ -35,7 +35,7 @@
 #include <set>
 #include <string>
 #include <vector>
- 
+
 #include "Recorder.h"
 #include "Replayer.h"
 
@@ -60,57 +60,59 @@ class FilterEvaluator;
 #endif
 
 /**
-* @class DomainParticipantImpl
-*
-* @brief Implements the OpenDDS::DCPS::DomainParticipant interfaces.
-*
-* This class acts as an entrypoint of the service and a factory
-* for publisher, subscriber and topic. It also acts as a container
-* for the publisher, subscriber and topic objects.
-*
-* See the DDS specification, OMG formal/04-12-02, for a description of
-* the interface this class is implementing.
-*/
+ * @class DomainParticipantImpl
+ *
+ * @brief Implements the OpenDDS::DCPS::DomainParticipant interfaces.
+ *
+ * This class acts as an entrypoint of the service and a factory
+ * for publisher, subscriber and topic. It also acts as a container
+ * for the publisher, subscriber and topic objects.
+ *
+ * See the DDS specification, OMG formal/04-12-02, for a description of
+ * the interface this class is implementing.
+ */
 class OpenDDS_Dcps_Export DomainParticipantImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
-    public virtual OpenDDS::DCPS::EntityImpl {
+  public virtual OpenDDS::DCPS::EntityImpl {
 public:
   typedef Objref_Servant_Pair <SubscriberImpl, DDS::Subscriber,
-          DDS::Subscriber_ptr, DDS::Subscriber_var> Subscriber_Pair;
+                               DDS::Subscriber_ptr, DDS::Subscriber_var> Subscriber_Pair;
 
   typedef Objref_Servant_Pair <PublisherImpl, DDS::Publisher,
-          DDS::Publisher_ptr, DDS::Publisher_var> Publisher_Pair;
+                               DDS::Publisher_ptr, DDS::Publisher_var> Publisher_Pair;
 
   typedef Objref_Servant_Pair <TopicImpl, DDS::Topic,
-          DDS::Topic_ptr, DDS::Topic_var> Topic_Pair;
+                               DDS::Topic_ptr, DDS::Topic_var> Topic_Pair;
 
   typedef std::set<Subscriber_Pair> SubscriberSet;
   typedef std::set<Publisher_Pair> PublisherSet;
 
   class OpenDDS_Dcps_Export RepoIdSequence {
-  public:
+public:
     explicit RepoIdSequence(RepoId& base);
     RepoId next();
-  private:
-    RepoId      base_;     // will be combined with serial to produce next
-    long        serial_;   // will be incremented each time
+private:
+    RepoId base_;          // will be combined with serial to produce next
+    long serial_;          // will be incremented each time
     GuidBuilder builder_;  // used to modify base
   };
 
   struct RefCounted_Topic {
     RefCounted_Topic()
       : client_refs_(0)
-    {}
+    {
+    }
 
     explicit RefCounted_Topic(const Topic_Pair& pair)
       : pair_(pair),
-        client_refs_(1)
-    {}
+      client_refs_(1)
+    {
+    }
 
     /// The topic object reference.
-    Topic_Pair     pair_;
+    Topic_Pair pair_;
     /// The reference count on the obj_.
-    CORBA::Long    client_refs_;
+    CORBA::Long client_refs_;
   };
 
   typedef std::map<std::string, RefCounted_Topic> TopicMap;
@@ -121,13 +123,13 @@ public:
   typedef std::map<DDS::InstanceHandle_t, RepoId> RepoIdMap;
 
   ///Constructor
-  DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
-                        const DDS::DomainId_t&               domain_id,
-                        const RepoId&                        dp_id,
-                        const DDS::DomainParticipantQos &    qos,
-                        DDS::DomainParticipantListener_ptr   a_listener,
-                        const DDS::StatusMask &              mask,
-                        bool                                 federated = false);
+  DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
+                        const DDS::DomainId_t&             domain_id,
+                        const RepoId&                      dp_id,
+                        const DDS::DomainParticipantQos &  qos,
+                        DDS::DomainParticipantListener_ptr a_listener,
+                        const DDS::StatusMask &            mask,
+                        bool                               federated = false);
 
   ///Destructor
   virtual ~DomainParticipantImpl();
@@ -135,17 +137,17 @@ public:
   virtual DDS::InstanceHandle_t get_instance_handle();
 
   virtual DDS::Publisher_ptr create_publisher(
-    const DDS::PublisherQos & qos,
+    const DDS::PublisherQos &  qos,
     DDS::PublisherListener_ptr a_listener,
-    DDS::StatusMask mask);
+    DDS::StatusMask            mask);
 
   virtual DDS::ReturnCode_t delete_publisher(
     DDS::Publisher_ptr p);
 
   virtual DDS::Subscriber_ptr create_subscriber(
-    const DDS::SubscriberQos & qos,
+    const DDS::SubscriberQos &  qos,
     DDS::SubscriberListener_ptr a_listener,
-    DDS::StatusMask mask);
+    DDS::StatusMask             mask);
 
   virtual DDS::ReturnCode_t delete_subscriber(
     DDS::Subscriber_ptr s);
@@ -153,46 +155,46 @@ public:
   virtual DDS::Subscriber_ptr get_builtin_subscriber();
 
   virtual DDS::Topic_ptr create_topic(
-    const char * topic_name,
-    const char * type_name,
-    const DDS::TopicQos & qos,
+    const char *           topic_name,
+    const char *           type_name,
+    const DDS::TopicQos &  qos,
     DDS::TopicListener_ptr a_listener,
-    DDS::StatusMask mask);
+    DDS::StatusMask        mask);
 
   virtual DDS::ReturnCode_t delete_topic(
     DDS::Topic_ptr a_topic);
 
   virtual DDS::Topic_ptr find_topic(
-    const char * topic_name,
+    const char *            topic_name,
     const DDS::Duration_t & timeout);
 
   virtual DDS::TopicDescription_ptr lookup_topicdescription(
     const char * name);
 
-  #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
   virtual DDS::ContentFilteredTopic_ptr create_contentfilteredtopic(
-    const char * name,
-    DDS::Topic_ptr related_topic,
-    const char * filter_expression,
+    const char *           name,
+    DDS::Topic_ptr         related_topic,
+    const char *           filter_expression,
     const DDS::StringSeq & expression_parameters);
 
   virtual DDS::ReturnCode_t delete_contentfilteredtopic(
     DDS::ContentFilteredTopic_ptr a_contentfilteredtopic);
 
-  #endif
+#endif
 
-  #ifndef OPENDDS_NO_MULTI_TOPIC
+#ifndef OPENDDS_NO_MULTI_TOPIC
 
   virtual DDS::MultiTopic_ptr create_multitopic(
-    const char * name,
-    const char * type_name,
-    const char * subscription_expression,
+    const char *           name,
+    const char *           type_name,
+    const char *           subscription_expression,
     const DDS::StringSeq & expression_parameters);
 
   virtual DDS::ReturnCode_t delete_multitopic(DDS::MultiTopic_ptr a_multitopic);
 
-  #endif
+#endif
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -213,7 +215,7 @@ public:
 
   virtual DDS::ReturnCode_t set_listener(
     DDS::DomainParticipantListener_ptr a_listener,
-    DDS::StatusMask mask);
+    DDS::StatusMask                    mask);
 
   virtual DDS::DomainParticipantListener_ptr get_listener();
 
@@ -261,14 +263,14 @@ public:
 
   virtual DDS::ReturnCode_t get_discovered_participant_data(
     DDS::ParticipantBuiltinTopicData & participant_data,
-    DDS::InstanceHandle_t participant_handle);
+    DDS::InstanceHandle_t              participant_handle);
 
   virtual DDS::ReturnCode_t get_discovered_topics(
     DDS::InstanceHandleSeq & topic_handles);
 
   virtual DDS::ReturnCode_t get_discovered_topic_data(
     DDS::TopicBuiltinTopicData & topic_data,
-    DDS::InstanceHandle_t topic_handle);
+    DDS::InstanceHandle_t        topic_handle);
 
 #endif
 
@@ -278,8 +280,8 @@ public:
   /// local operations.
 
   /**
-  *  Return the id given by discovery.
-  */
+   *  Return the id given by discovery.
+   */
   RepoId get_id();
 
   /**
@@ -298,101 +300,103 @@ public:
   RepoId get_repoid(const DDS::InstanceHandle_t& id);
 
   /**
-  *  Associate the servant with the object reference.
-  *  This is required to pass to the topic servant.
-  */
+   *  Associate the servant with the object reference.
+   *  This is required to pass to the topic servant.
+   */
   void set_object_reference(const DDS::DomainParticipant_ptr& dp);
 
   /**
-  *  Check if the topic is used by any datareader or datawriter.
-  */
+   *  Check if the topic is used by any datareader or datawriter.
+   */
   int is_clean() const;
 
   /**
-  * This is used to retrieve the listener for a certain status change.
-  * If this DomainParticipant has a registered listener and the status
-  * kind is in the listener mask then the listener is returned.
-  * Otherwise, return nil.
-  */
+   * This is used to retrieve the listener for a certain status change.
+   * If this DomainParticipant has a registered listener and the status
+   * kind is in the listener mask then the listener is returned.
+   * Otherwise, return nil.
+   */
   DDS::DomainParticipantListener_ptr listener_for(DDS::StatusKind kind);
 
   typedef std::vector<RepoId> TopicIdVec;
   /**
-  * Populates an std::vector with the RepoId of the topics this
-  * participant has created/found.
-  */
+   * Populates an std::vector with the RepoId of the topics this
+   * participant has created/found.
+   */
   void get_topic_ids(TopicIdVec& topics);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
   /** Accessor for ownership manager.
-  */
+   */
   OwnershipManager* ownership_manager();
 
 
   /**
-  * Called upon receiving new BIT publication data to
-  * update the ownership strength of a publication.
-  */
+   * Called upon receiving new BIT publication data to
+   * update the ownership strength of a publication.
+   */
   void update_ownership_strength(const PublicationId& pub_id,
-                                 const CORBA::Long& ownership_strength);
+                                 const CORBA::Long&   ownership_strength);
 
 #endif
 
-  bool federated() const { return this->federated_; }
-  
-  
-  Recorder_rch create_recorder(DDS::Topic_ptr a_topic,
-                               const DDS::SubscriberQos & subscriber_qos,
-                               const DDS::DataReaderQos & datareader_qos,
-                               const RecorderListener_rch & a_listener, 
-                               DDS::StatusMask mask);
-  
-  Replayer_rch create_replayer(DDS::Topic_ptr a_topic,
-                               const DDS::PublisherQos & publisher_qos,
-                               const DDS::DataWriterQos & datawriter_qos,
-                               const ReplayerListener_rch & a_listener, 
-                               DDS::StatusMask mask);
-  
+  bool federated() const {
+    return this->federated_;
+  }
+
+
+  Recorder_rch create_recorder(DDS::Topic_ptr               a_topic,
+                               const DDS::SubscriberQos &   subscriber_qos,
+                               const DDS::DataReaderQos &   datareader_qos,
+                               const RecorderListener_rch & a_listener,
+                               DDS::StatusMask              mask);
+
+  Replayer_rch create_replayer(DDS::Topic_ptr               a_topic,
+                               const DDS::PublisherQos &    publisher_qos,
+                               const DDS::DataWriterQos &   datawriter_qos,
+                               const ReplayerListener_rch & a_listener,
+                               DDS::StatusMask              mask);
+
   DDS::Topic_ptr create_typeless_topic(
-      const char * topic_name,
-      const char * type_name,
-      bool type_has_keys,
-      const DDS::TopicQos & qos,
-      DDS::TopicListener_ptr a_listener,
-      DDS::StatusMask mask);
-  
+    const char *           topic_name,
+    const char *           type_name,
+    bool                   type_has_keys,
+    const DDS::TopicQos &  qos,
+    DDS::TopicListener_ptr a_listener,
+    DDS::StatusMask        mask);
+
   void delete_recorder(Recorder_rch recorder);
   void delete_replayer(Replayer_rch replayer);
-    
+
 private:
-  
+
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
   bool validate_subscriber_qos(DDS::SubscriberQos & subscriber_qos);
-  
+
   /** The implementation of create_topic.
-  */
-  
+   */
+
   enum {
     TOPIC_TYPE_HAS_KEYS =1,
     TOPIC_TYPELESS = 2
   } TopicTypeMask;
-  
+
   DDS::Topic_ptr create_topic_i(
-      const char * topic_name,
-      const char * type_name,
-      const DDS::TopicQos & qos,
-      DDS::TopicListener_ptr a_listener,
-      DDS::StatusMask mask, 
-      int topic_mask);
-  
-  DDS::Topic_ptr create_new_topic(
-    const RepoId topic_id,
-    const char * topic_name,
-    const char * type_name,
-    const DDS::TopicQos & qos,
+    const char *           topic_name,
+    const char *           type_name,
+    const DDS::TopicQos &  qos,
     DDS::TopicListener_ptr a_listener,
-    const DDS::StatusMask & mask,
+    DDS::StatusMask        mask,
+    int                    topic_mask);
+
+  DDS::Topic_ptr create_new_topic(
+    const RepoId                   topic_id,
+    const char *                   topic_name,
+    const char *                   type_name,
+    const DDS::TopicQos &          qos,
+    DDS::TopicListener_ptr         a_listener,
+    const DDS::StatusMask &        mask,
     OpenDDS::DCPS::TypeSupport_ptr type_support);
 
   /** Delete the topic with option of whether the
@@ -400,63 +404,63 @@ private:
    */
   DDS::ReturnCode_t delete_topic_i(
     DDS::Topic_ptr a_topic,
-    bool             remove_objref);
+    bool           remove_objref);
 
   DomainParticipantFactoryImpl* factory_;
   /// The default topic qos.
-  DDS::TopicQos        default_topic_qos_;
+  DDS::TopicQos default_topic_qos_;
   /// The default publisher qos.
-  DDS::PublisherQos    default_publisher_qos_;
+  DDS::PublisherQos default_publisher_qos_;
   /// The default subscriber qos.
-  DDS::SubscriberQos   default_subscriber_qos_;
+  DDS::SubscriberQos default_subscriber_qos_;
 
   /// The qos of this DomainParticipant.
-  DDS::DomainParticipantQos            qos_;
+  DDS::DomainParticipantQos qos_;
   /// Used to notify the entity for relevant events.
-  DDS::DomainParticipantListener_var   listener_;
+  DDS::DomainParticipantListener_var listener_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
-  DDS::StatusMask                      listener_mask_;
+  DDS::StatusMask listener_mask_;
   /// The id of the domain that creates this participant.
-  DDS::DomainId_t                      domain_id_;
+  DDS::DomainId_t domain_id_;
   /// This participant id given by discovery.
-  RepoId                               dp_id_;
+  RepoId dp_id_;
 
   /// Whether this DomainParticipant is attached to a federated
   /// repository.
-  bool                                 federated_;
+  bool federated_;
 
   /// Collection of publishers.
-  PublisherSet   publishers_;
+  PublisherSet publishers_;
   /// Collection of subscribers.
-  SubscriberSet  subscribers_;
+  SubscriberSet subscribers_;
   /// Collection of topics.
-  TopicMap       topics_;
+  TopicMap topics_;
 #if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
   /// Bidirectional collection of handles <--> RepoIds.
-  HandleMap      handles_;
-  RepoIdMap      repoIds_;
+  HandleMap handles_;
+  RepoIdMap repoIds_;
   /// Collection of ignored participants.
-  HandleMap      ignored_participants_;
+  HandleMap ignored_participants_;
   /// Collection of ignored topics.
-  HandleMap      ignored_topics_;
+  HandleMap ignored_topics_;
   /// Protect the publisher collection.
-  ACE_Recursive_Thread_Mutex   publishers_protector_;
+  ACE_Recursive_Thread_Mutex publishers_protector_;
   /// Protect the subscriber collection.
-  ACE_Recursive_Thread_Mutex   subscribers_protector_;
+  ACE_Recursive_Thread_Mutex subscribers_protector_;
   /// Protect the topic collection.
-  ACE_Recursive_Thread_Mutex   topics_protector_;
+  ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
-  ACE_Recursive_Thread_Mutex   handle_protector_;
+  ACE_Recursive_Thread_Mutex handle_protector_;
 
   /// The object reference activated from this servant.
   DDS::DomainParticipant_var participant_objref_;
 
   /// The built in topic subscriber.
-  DDS::Subscriber_var        bit_subscriber_;
+  DDS::Subscriber_var bit_subscriber_;
 
   /// Instance handle generators for non-repo backed entities
   /// (i.e. subscribers and publishers).
@@ -469,15 +473,15 @@ private:
 #endif
 
   /// Publisher ID generator.
-  RepoIdSequence   pub_id_gen_;
+  RepoIdSequence pub_id_gen_;
   RepoId nextPubId();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;
   std::map<std::string, RcHandle<FilterEvaluator> > filter_cache_;
 #endif
-  
-  
+
+
   struct RcHandleComparer {
     template <typename T>
     bool operator() (const RcHandle<T>& lhs, const RcHandle<T>& rhs) const {
@@ -486,14 +490,14 @@ private:
   };
   typedef std::set<Recorder_rch, RcHandleComparer> RecorderSet;
   typedef std::set<Replayer_rch, RcHandleComparer> ReplayerSet;
-  
+
   RecorderSet recorders_;
   ReplayerSet replayers_;
-  
+
   /// Protect the recorders collection.
-  ACE_Recursive_Thread_Mutex   recorders_protector_;
+  ACE_Recursive_Thread_Mutex recorders_protector_;
   /// Protect the replayers collection.
-  ACE_Recursive_Thread_Mutex   replayers_protector_;
+  ACE_Recursive_Thread_Mutex replayers_protector_;
 };
 
 } // namespace DCPS

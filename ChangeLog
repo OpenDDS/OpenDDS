@@ -1,3 +1,34 @@
+Mon Oct  8 16:54:11 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+        * tests/DCPS/RecorderReplayer/Messenger_export.h:
+        * tests/DCPS/RecorderReplayer/Publisher.cpp:
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+        * tests/DCPS/RecorderReplayer/Subscriber.cpp:
+        
+          Remove fuzz errors and fix problems in
+          static/DDS_HAS_MINIMUM_BIT builds.
+
 Fri Oct  5 19:25:02 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * bin/dcps_tests.lst:
@@ -62,9 +93,9 @@ Fri Oct  5 19:25:02 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
         * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
-        
+
           Merged the branch "recorder", which includes the implementation
-          of recorder and replayer. For details see the branch-specific 
+          of recorder and replayer. For details see the branch-specific
           change log at docs/history/ChangeLog-RecorderReplayer.
 
 Fri Sep 28 20:24:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>

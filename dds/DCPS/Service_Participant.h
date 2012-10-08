@@ -303,7 +303,7 @@ public:
                                Discovery::Config* cfg);
 
   ACE_ARGV* ORB_argv() { return &ORB_argv_; }
-  
+
  /**
   *  Create a Recorder object.
   */

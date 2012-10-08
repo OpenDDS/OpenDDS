@@ -28,10 +28,10 @@
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/Sched_Params.h"
- 
+
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
- 
+
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -1719,7 +1719,7 @@ Service_Participant::domainRepoMap() const
   return this->domainRepoMap_;
 }
 
-Recorder_rch 
+Recorder_rch
 Service_Participant::create_recorder (DDS::DomainParticipant_ptr participant,
                               DDS::Topic_ptr a_topic,
                               const DDS::SubscriberQos & subscriber_qos,
@@ -1733,7 +1733,7 @@ Service_Participant::create_recorder (DDS::DomainParticipant_ptr participant,
 }
 
 
-DDS::ReturnCode_t 
+DDS::ReturnCode_t
 Service_Participant::delete_recorder (Recorder_rch & recorder )
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
@@ -1747,7 +1747,7 @@ Service_Participant::delete_recorder (Recorder_rch & recorder )
 
 
 
-Replayer_rch 
+Replayer_rch
 Service_Participant::create_replayer (DDS::DomainParticipant_ptr participant,
                               DDS::Topic_ptr a_topic,
                               const DDS::PublisherQos & publisher_qos,
@@ -1762,7 +1762,7 @@ Service_Participant::create_replayer (DDS::DomainParticipant_ptr participant,
 }
 
 
-DDS::ReturnCode_t 
+DDS::ReturnCode_t
 Service_Participant::delete_replayer (Replayer_rch & replayer )
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
@@ -1776,7 +1776,7 @@ Service_Participant::delete_replayer (Replayer_rch & replayer )
 
 
 
-DDS::Topic_ptr 
+DDS::Topic_ptr
 Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participant,
                                      const char * topic_name,
                                      const char * type_name,

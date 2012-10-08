@@ -150,7 +150,7 @@ public:
   bool is_suspended() const;
 
   virtual EntityImpl* parent() const;
-  static bool validate_datawriter_qos(const DDS::DataWriterQos& qos, 
+  static bool validate_datawriter_qos(const DDS::DataWriterQos& qos,
                                          const DDS::DataWriterQos& default_qos,
                                          DDS::Topic_ptr a_topic,
                                          DDS::DataWriterQos& dw_qos);

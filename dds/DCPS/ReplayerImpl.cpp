@@ -165,12 +165,12 @@ ReplayerImpl::init(
   topic_id_      = topic_servant_->get_id();
   type_name_     = topic_servant_->get_type_name();
 
-  #if !defined (DDS_HAS_MINIMUM_BIT)
+#if !defined (DDS_HAS_MINIMUM_BIT)
   is_bit_ = ACE_OS::strcmp(topic_name_.in(), BUILT_IN_PARTICIPANT_TOPIC) == 0
             || ACE_OS::strcmp(topic_name_.in(), BUILT_IN_TOPIC_TOPIC) == 0
             || ACE_OS::strcmp(topic_name_.in(), BUILT_IN_SUBSCRIPTION_TOPIC) == 0
             || ACE_OS::strcmp(topic_name_.in(), BUILT_IN_PUBLICATION_TOPIC) == 0;
-  #endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif   // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
 
@@ -929,26 +929,26 @@ ReplayerImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos
   qos_data.topic_name = this->topic_name_.in();
 }
 
-DDS::ReturnCode_t 
-ReplayerImpl::write (const RawDataSample* samples, 
-                     int num_samples, 
+DDS::ReturnCode_t
+ReplayerImpl::write (const RawDataSample*   samples,
+                     int                    num_samples,
                      DDS::InstanceHandle_t* reader_ih_ptr)
 {
   DBG_ENTRY_LVL("ReplayerImpl","write",6);
-  
+
   OpenDDS::DCPS::RepoId repo_id;
   if (reader_ih_ptr) {
     repo_id = this->participant_servant_->get_repoid(*reader_ih_ptr);
     if (repo_id == GUID_UNKNOWN) {
-      ACE_ERROR_RETURN((LM_ERROR, 
-        ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::write: ")
-        ACE_TEXT("Invalid reader instance handle (%d)\n"), *reader_ih_ptr), 
-        DDS::RETCODE_ERROR);
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::write: ")
+                        ACE_TEXT("Invalid reader instance handle (%d)\n"), *reader_ih_ptr),
+                       DDS::RETCODE_ERROR);
     }
   }
 
   DataSampleList list;
-  
+
   for (int i = 0; i < num_samples; ++i) {
     DataSampleListElement* element = 0;
 
@@ -967,7 +967,7 @@ ReplayerImpl::write (const RawDataSample* samples,
     element->header_.byte_order_ = samples[i].sample_byte_order_;
     element->header_.publication_id_ = this->publication_id_;
     list.enqueue_tail_next_sample(element);
-    
+
     DDS::ReturnCode_t ret = create_sample_data_message(samples[i].sample_->duplicate(),
                                                        element->header_,
                                                        element->sample_,
@@ -977,17 +977,17 @@ ReplayerImpl::write (const RawDataSample* samples,
       element->num_subs_ = 1;
       element->subscription_ids_[0] = repo_id;
     }
-    
+
     if (ret != DDS::RETCODE_OK) {
       // we need to free the list
       while (list.dequeue_head_next_sample(element)) {
         ACE_DES_FREE(element, sample_list_element_allocator_->free, DataSampleListElement);
       }
-      
+
       return ret;
     }
   }
-  
+
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, DDS::RETCODE_ERROR);
     ++pending_write_count_;
@@ -1114,15 +1114,15 @@ ReplayerImpl::get_instance_handle()
 
 
 
-DDS::ReturnCode_t 
+DDS::ReturnCode_t
 ReplayerImpl::write_to_reader (DDS::InstanceHandle_t subscription,
-                               const RawDataSample& sample )
+                               const RawDataSample&  sample )
 {
   return write(&sample, 1, &subscription);
 }
 
-DDS::ReturnCode_t 
-ReplayerImpl::write_to_reader (DDS::InstanceHandle_t subscription,
+DDS::ReturnCode_t
+ReplayerImpl::write_to_reader (DDS::InstanceHandle_t    subscription,
                                const RawDataSampleList& samples )
 {
   if (samples.size())

@@ -86,7 +86,7 @@
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_topic failed!\n")), -1);
     }
-    
+
     // setup partition
     DDS::SubscriberQos sub_qos;
     participant->get_default_subscriber_qos(sub_qos);

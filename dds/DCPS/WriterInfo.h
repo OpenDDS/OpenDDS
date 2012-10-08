@@ -5,8 +5,8 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
- 
- 
+
+
 #ifndef OPENDDS_DCPS_WRITERINFO_H
 #define OPENDDS_DCPS_WRITERINFO_H
 
@@ -17,50 +17,50 @@
 #include "Definitions.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
- 
+
 namespace OpenDDS {
 namespace DCPS {
-  
+
 class WriterInfo;
-  
+
 class OpenDDS_Dcps_Export WriterInfoListener
 {
 public:
   WriterInfoListener();
-  
-  RepoId                       subscription_id_;
-  
+
+  RepoId subscription_id_;
+
   /// The time interval for checking liveliness.
   /// TBD: Should this be initialized with
   ///      DDS::DURATION_INFINITE_SEC and DDS::DURATION_INFINITE_NSEC
   ///      instead of ACE_Time_Value::zero to be consistent with default
   ///      duration qos ? Or should we simply use the ACE_Time_Value::zero
   ///      to indicate the INFINITY duration ?
-  ACE_Time_Value               liveliness_lease_duration_;  
-  
+  ACE_Time_Value liveliness_lease_duration_;
+
   /// tell instances when a DataWriter transitions to being alive
   /// The writer state is inout parameter, it has to be set ALIVE before
   /// handle_timeout is called since some subroutine use the state.
-  virtual void writer_became_alive(WriterInfo& info,
-                           const ACE_Time_Value& when);
+  virtual void writer_became_alive(WriterInfo&           info,
+                                   const ACE_Time_Value& when);
 
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  virtual void writer_became_dead(WriterInfo& info,
-                          const ACE_Time_Value& when);
+  virtual void writer_became_dead(WriterInfo&           info,
+                                  const ACE_Time_Value& when);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
   virtual void writer_removed(WriterInfo& info);
 };
-   
-   
+
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 enum Coherent_State {
- NOT_COMPLETED_YET,
- COMPLETED,
- REJECTED
+  NOT_COMPLETED_YET,
+  COMPLETED,
+  REJECTED
 };
 #endif
 
@@ -75,9 +75,9 @@ public:
 
   WriterInfo();  // needed for maps
 
-  WriterInfo(WriterInfoListener* reader,
-            const PublicationId&  writer_id,
-            const ::DDS::DataWriterQos&  writer_qos);
+  WriterInfo(WriterInfoListener*         reader,
+             const PublicationId&        writer_id,
+             const ::DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
   /// @param now next time this DataWriter will become not active (not alive)
@@ -91,7 +91,7 @@ public:
 
   /// returns 1 if the DataWriter is lively; 2 if dead; otherwise returns 0.
   WriterState get_state() {
-   return state_;
+    return state_;
   };
 
   std::string get_state_str() const;
@@ -118,11 +118,11 @@ public:
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
 
-  #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();
   void reset_coherent_info ();
   void set_group_info (const CoherentChangeControl& info);
-  #endif
+#endif
 
   void clear_owner_evaluated ();
   void set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag);
@@ -163,13 +163,13 @@ public:
   typedef std::map < ::DDS::InstanceHandle_t, bool> OwnerEvaluateFlag;
   OwnerEvaluateFlag owner_evaluated_;
 
- /// Data to support GROUP access scope.
+  /// Data to support GROUP access scope.
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool group_coherent_;
   RepoId publisher_id_;
   DisjointSequence coherent_sample_sequence_;
-  WriterCoherentSample  writer_coherent_samples_;
-  GroupCoherentSamples  group_coherent_samples_;
+  WriterCoherentSample writer_coherent_samples_;
+  GroupCoherentSamples group_coherent_samples_;
 #endif
 
 };
@@ -192,5 +192,4 @@ OpenDDS::DCPS::WriterInfo::received_activity(const ACE_Time_Value& when)
 } // namespace DCPS
 } // namespace
 
- #endif /* end of include guard: OPENDDS_DCPS_WRITERINFO_H */
- 
+#endif  /* end of include guard: OPENDDS_DCPS_WRITERINFO_H */

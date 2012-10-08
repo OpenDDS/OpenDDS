@@ -14,7 +14,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
- 
+
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/udp/Udp.h>
@@ -67,7 +67,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create Topic (Movie Discussion List)
     CORBA::String_var type_name = ts->get_type_name();
     ACE_DEBUG((LM_DEBUG, "registered type name = %s\n", type_name.in()));
-    
+
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
                                 type_name,
@@ -81,11 +81,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" create_topic failed!\n")),
                        -1);
     }
-    
+
     // setup partition
     DDS::PublisherQos pub_qos;
     participant->get_default_publisher_qos(pub_qos);
-    
+
     DDS::StringSeq my_partition;
     my_partition.length(1);
     my_partition[0] = "One";
@@ -180,7 +180,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                    ACE_TEXT(" write returned %d!\n"), error));
       }
     }
-    
+
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
