@@ -86,10 +86,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
+    DDS::DataWriterQos qos;
+    pub->get_default_datawriter_qos(qos);
+    qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+    qos.liveliness.lease_duration.sec = 5;
+    qos.liveliness.lease_duration.nanosec = 0;
+
     // Create DataWriter
     DDS::DataWriter_var dw =
       pub->create_datawriter(topic.in(),
-                             DATAWRITER_QOS_DEFAULT,
+                             qos,
                              DDS::DataWriterListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -102,7 +108,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataWriter_var dw2 =
       pub->create_datawriter(topic.in(),
-                             DATAWRITER_QOS_DEFAULT,
+                             qos,
                              DDS::DataWriterListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 

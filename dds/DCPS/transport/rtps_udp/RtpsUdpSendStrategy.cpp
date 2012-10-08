@@ -31,6 +31,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
                           new NullSynchStrategy),
     link_(link),
     override_dest_(0),
+    override_single_dest_(0),
     rtps_header_db_(RTPS::RTPSHDR_SZ, ACE_Message_Block::MB_DATA,
                     rtps_header_data_, 0, 0, ACE_Message_Block::DONT_DELETE, 0),
     rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE)
@@ -51,6 +52,10 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
 ssize_t
 RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
+  if (override_single_dest_) {
+    return send_single_i(iov, n, *override_single_dest_);
+  }
+
   if (override_dest_) {
     return send_multi_i(iov, n, *override_dest_);
   }
@@ -85,6 +90,13 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 }
 
 RtpsUdpSendStrategy::OverrideToken
+RtpsUdpSendStrategy::override_destinations(const ACE_INET_Addr& destination)
+{
+  override_single_dest_ = &destination;
+  return OverrideToken(this);
+}
+
+RtpsUdpSendStrategy::OverrideToken
 RtpsUdpSendStrategy::override_destinations(const std::set<ACE_INET_Addr>& dest)
 {
   override_dest_ = &dest;
@@ -93,6 +105,7 @@ RtpsUdpSendStrategy::override_destinations(const std::set<ACE_INET_Addr>& dest)
 
 RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
 {
+  outer_->override_single_dest_ = 0;
   outer_->override_dest_ = 0;
 }
 

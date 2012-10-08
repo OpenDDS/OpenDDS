@@ -42,8 +42,10 @@ public:
 
   /// Create two new serialized headers (owned by caller), the "head" having at
   /// most "size" bytes (header + data) and the "tail" having the rest.
-  static void split(const ACE_Message_Block& orig, size_t size,
-                    ACE_Message_Block*& head, ACE_Message_Block*& tail);
+  /// Returns a pair containing the largest fragment number in each new header.
+  static SequenceRange split(const ACE_Message_Block& orig, size_t size,
+                             ACE_Message_Block*& head,
+                             ACE_Message_Block*& tail);
 
   RtpsSampleHeader();
   explicit RtpsSampleHeader(ACE_Message_Block& mb);
@@ -78,14 +80,6 @@ public:
   static void populate_data_control_submessages(RTPS::SubmessageSeq& subm,
                                                 const TransportSendControlElement& tsce,
                                                 bool requires_inline_qos);
-  static bool populate_data_frag_submessages(RTPS::SubmessageSeq& subm,
-                                             SequenceNumber& starting_frag,
-                                             const DataSampleHeader& dsh,
-                                             const RTPS::ParameterList& inlineQos,
-                                             const DisjointSequence& frags,
-                                             const RepoId& reader,
-                                             size_t current_msg_len,
-                                             size_t& data_len);
   static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
                                   RTPS::ParameterList& plist);
   static bool control_message_supported(char message_id);

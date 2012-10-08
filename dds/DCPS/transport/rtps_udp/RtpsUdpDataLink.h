@@ -104,6 +104,7 @@ public:
 
 private:
   virtual void stop_i();
+  virtual void send_i(TransportQueueElement* element, bool relink = true);
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);

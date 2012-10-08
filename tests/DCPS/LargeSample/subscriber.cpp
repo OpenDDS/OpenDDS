@@ -131,6 +131,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataReaderQos qos;
     sub->get_default_datareader_qos(qos);
+    qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+    qos.liveliness.lease_duration.sec = 10;
+    qos.liveliness.lease_duration.nanosec = 0;
+
     bool reliable = true;
     parse_args(argc, argv, reliable);
     if (reliable) {

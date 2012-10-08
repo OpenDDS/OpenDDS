@@ -303,6 +303,16 @@ RtpsUdpDataLink::handshake_done(const RepoId& local_id, const RepoId& remote_id)
 }
 
 void
+RtpsUdpDataLink::send_i(TransportQueueElement* element, bool relink)
+{
+  // Lock here to maintain the locking order:
+  // RtpsUdpDataLink before RtpsUdpSendStrategy
+  // which is required for resending due to nacks
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  DataLink::send_i(element, relink);
+}
+
+void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
@@ -372,14 +382,16 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
                                          TransportSendStrategy::QueueType* q,
                                          ACE_Message_Block* chain)
 {
-  const SequenceNumber seq = q->peek()->sequence();
+  // Called from TransportSendStrategy::send_packet().
+  // RtpsUdpDataLink is already locked.
+  const TransportQueueElement* const tqe = q->peek();
+  const SequenceNumber seq = tqe->sequence();
   if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     return;
   }
 
-  const RepoId pub_id = q->peek()->publication_id();
+  const RepoId pub_id = tqe->publication_id();
 
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
   if (wi == outer_->writers_.end()) {
     return; // this datawriter is not reliable
@@ -393,12 +405,26 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   }
 
   if (Transport_debug_level > 5) {
-    GuidConverter pub(pub_id);
+    const GuidConverter pub(pub_id);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert() - "
-      "pub_id %C seq %q\n", std::string(pub).c_str(), seq.getValue()));
+      "pub_id %C seq %q frag %d\n", std::string(pub).c_str(), seq.getValue(),
+      (int)tqe->is_fragment()));
   }
 
-  send_buff->insert(seq, q, chain);
+  if (tqe->is_fragment()) {
+    const RtpsCustomizedElement* const rce =
+      dynamic_cast<const RtpsCustomizedElement*>(tqe);
+    if (rce) {
+      send_buff->insert_fragment(seq, rce->last_fragment(), q, chain);
+    } else if (Transport_debug_level) {
+      const GuidConverter pub(pub_id);
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert()"
+        " - ERROR: couldn't get fragment number for pub_id %C seq %q\n",
+        std::string(pub).c_str(), seq.getValue()));
+    }
+  } else {
+    send_buff->insert(seq, q, chain);
+  }
 }
 
 
@@ -1279,22 +1305,13 @@ RtpsUdpDataLink::send_nack_replies()
   }
 }
 
-namespace {
-  struct FragmentDetails {
-    FragmentDetails() : reader_(GUID_UNKNOWN), requires_iqos_(false) {}
-    DisjointSequence frags_;
-    RepoId reader_;
-    bool requires_iqos_;
-  };
-}
-
 void
 RtpsUdpDataLink::send_nackfrag_replies(const RepoId& writerId,
                                        RtpsWriter& writer,
                                        DisjointSequence& gaps,
                                        std::set<ACE_INET_Addr>& gap_recipients)
 {
-  typedef std::map<SequenceNumber, FragmentDetails> FragmentInfo;
+  typedef std::map<SequenceNumber, DisjointSequence> FragmentInfo;
   std::map<ACE_INET_Addr, FragmentInfo> requests;
 
   typedef ReaderInfoMap::iterator ri_iter;
@@ -1305,7 +1322,7 @@ RtpsUdpDataLink::send_nackfrag_replies(const RepoId& writerId,
       continue;
     }
 
-    const RemoteInfo& remote = locators_[ri->first];
+    const ACE_INET_Addr& remote_addr = locators_[ri->first].addr_;
 
     typedef std::map<SequenceNumber, RTPS::FragmentNumberSet>::iterator rf_iter;
     const rf_iter rf_end = ri->second.requested_frags_.end();
@@ -1313,119 +1330,30 @@ RtpsUdpDataLink::send_nackfrag_replies(const RepoId& writerId,
 
       const SequenceNumber& seq = rf->first;
       if (writer.send_buff_->contains(seq)) {
-        FragmentInfo& fi = requests[remote.addr_];
-        const bool new_entry = !fi.count(seq);
-        FragmentInfo::mapped_type& mapped = fi[seq];
-        mapped.frags_.insert(rf->second.bitmapBase.value, rf->second.numBits,
-                             rf->second.bitmap.get_buffer());
-        if (new_entry) {
-          mapped.reader_ = ri->first;
-        } else if (mapped.reader_ != ri->first) {
-          mapped.reader_ = GUID_UNKNOWN;
-        }
-        mapped.requires_iqos_ |= remote.requires_inline_qos_;
+        FragmentInfo& fi = requests[remote_addr];
+        fi[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
+                       rf->second.bitmap.get_buffer());
       } else {
         gaps.insert(seq);
-        gap_recipients.insert(remote.addr_);
+        gap_recipients.insert(remote_addr);
       }
     }
+    ri->second.requested_frags_.clear();
   }
 
   typedef std::map<ACE_INET_Addr, FragmentInfo>::iterator req_iter;
   for (req_iter req = requests.begin(); req != requests.end(); ++req) {
     const FragmentInfo& fi = req->second;
 
+    ACE_GUARD(TransportSendBuffer::LockType, guard,
+      writer.send_buff_->strategy_lock());
+    const RtpsUdpSendStrategy::OverrideToken ot =
+      send_strategy_->override_destinations(req->first);
+
     for (FragmentInfo::const_iterator sn_iter = fi.begin();
          sn_iter != fi.end(); ++sn_iter) {
       const SequenceNumber& seq = sn_iter->first;
-      // Get marshaled data from send buffer, read and interpret headers
-      ACE_Message_Block* orig_msg = writer.send_buff_->msg(seq)->cont();
-      ACE_Message_Block* msg = orig_msg->duplicate();
-      DataSampleHeader dsh;
-      RTPS::ParameterList inlineQos;
-      std::memcpy(dsh.publication_id_.guidPrefix, local_prefix_,
-                  sizeof(GuidPrefix_t));
-      bool err = false, done = false;
-      for (RtpsSampleHeader rsh(*msg); !err && !done; rsh = *msg) {
-        if (!rsh.valid()) {
-          if (Transport_debug_level) {
-            const GuidConverter conv(writerId);
-            ACE_ERROR((LM_ERROR,
-              "(%P|%t) RtpsUdpDataLink::send_nackfrag_replies "
-              "ERROR in fragment resend for writer %C seq %q\n",
-              std::string(conv).c_str(), seq.getValue()));
-          }
-          err = true;
-          break;
-        }
-        switch (rsh.submessage_._d()) {
-        case RTPS::INFO_TS:
-          if (!(rsh.submessage_.info_ts_sm().smHeader.flags & 2 /*FLAG_I*/)) {
-            dsh.source_timestamp_sec_ =
-              rsh.submessage_.info_ts_sm().timestamp.seconds;
-            dsh.source_timestamp_nanosec_ =
-              static_cast<ACE_UINT32>(rsh.submessage_.info_ts_sm().timestamp.fraction
-                                      / RTPS::NANOS_TO_RTPS_FRACS + .5);
-          }
-          break;
-        case RTPS::DATA: {
-          const RTPS::DataSubmessage& data = rsh.submessage_.data_sm();
-          dsh.byte_order_ = data.smHeader.flags & 1 /*FLAG_E*/;
-          dsh.key_fields_only_ = data.smHeader.flags & 8 /*FLAG_K*/;
-          dsh.publication_id_.entityId = data.writerId;
-          dsh.sequence_.setValue(data.writerSN.high, data.writerSN.low);
-          dsh.message_length_ = rsh.message_length();
-          if (data.smHeader.flags & 2 /*FLAG_Q*/) {
-            inlineQos = data.inlineQos;
-          }
-          done = true;
-          break;
-        }
-        default:
-          break;
-        }
-      }
-      msg->release();
-      if (err) continue;
-      const FragmentDetails& fdet = sn_iter->second;
-      SequenceNumber fn = fdet.frags_.low();
-      ACE_Message_Block* chain = 0;
-      ACE_Message_Block* last = 0;
-      size_t len = 0, n_blocks = 0;
-      while (fn <= fdet.frags_.high()) {
-        RTPS::SubmessageSeq subm;
-        size_t data_len;
-        bool send = false; // need to send 'chain' on this iteration?
-        const unsigned int first = fn.getLow(); // 1st frag in submsg
-        if (RtpsSampleHeader::populate_data_frag_submessages(subm, fn,
-              dsh, inlineQos, fdet.frags_, fdet.reader_,
-              len, data_len)) {
-          ACE_Message_Block* hdr = submsgs_to_msgblock(subm);
-          ACE_Message_Block* data = orig_msg->cont()->duplicate();
-          data->rd_ptr((first - 1) * RtpsSampleHeader::FRAG_SIZE);
-          data->wr_ptr(data->rd_ptr() + data_len);
-          hdr->cont(data);
-          len += hdr->total_length();
-          if (!chain) {
-            chain = hdr;
-          } else {
-            last->cont(hdr);
-          }
-          last = data;
-          n_blocks += 2;
-        } else {
-          send = true; // next frag didn't fit in this message, send the chain
-        }
-        if (send || fn > fdet.frags_.high() || n_blocks > MAX_SEND_BLOCKS - 3) {
-          // MAX_SEND_BLOCKS - 3 to account for RTPS Header (1 block) and the
-          // next iteration (2 blocks: hdr => data).  If we have more than that,
-          // send the chain now so that the next iteration starts the next msg.
-          send_strategy_->send_rtps_control(*chain, req->first);
-          chain->release();
-          chain = last = 0;
-          len = n_blocks = 0;
-        }
-      }
+      writer.send_buff_->resend_fragments_i(seq, sn_iter->second);
     }
   }
 }

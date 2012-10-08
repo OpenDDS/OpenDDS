@@ -376,100 +376,6 @@ RtpsSampleHeader::populate_data_sample_submessages(
   subm[i].data_sm(data);
 }
 
-bool
-RtpsSampleHeader::populate_data_frag_submessages(
-  RTPS::SubmessageSeq& subm, SequenceNumber& starting_frag,
-  const DataSampleHeader& dsh, const RTPS::ParameterList& inlineQos,
-  const DisjointSequence& frags, const RepoId& reader,
-  const size_t current_msg_len, size_t& data_len)
-{
-  using namespace OpenDDS::RTPS;
-  const ACE_CDR::Octet flags = dsh.byte_order_;
-  size_t added_len = 0;
-  data_len = 0;
-  if (current_msg_len == 0 && starting_frag == 1) {
-    add_timestamp(subm, flags, dsh);
-    added_len += SMHDR_SZ + INFO_TS_SZ;
-  }
-  CORBA::ULong i = subm.length();
-
-  if (current_msg_len == 0 && reader != GUID_UNKNOWN) {
-    InfoDestinationSubmessage idest;
-    idest.smHeader.submessageId = INFO_DST;
-    idest.smHeader.flags = flags;
-    idest.smHeader.submessageLength = INFO_DST_SZ;
-    std::memcpy(idest.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
-    subm.length(i + 1);
-    subm[i++].info_dst_sm(idest);
-    added_len += SMHDR_SZ + INFO_DST_SZ;
-  }
-
-  DataFragSubmessage datafrag = {
-    {DATA_FRAG, flags, 0 /* submsgLength: determined below */},
-    0, /* extra flags: unused */
-    DATA_FRAG_OCTETS_TO_IQOS,
-    reader.entityId,
-    dsh.publication_id_.entityId,
-    {dsh.sequence_.getHigh(), dsh.sequence_.getLow()},
-    {starting_frag.getLow()},
-    0, /* fragments in submsg: determined below */
-    FRAG_SIZE,
-    dsh.message_length(),
-    ParameterList()
-  };
-
-  if (dsh.key_fields_only_) {
-    datafrag.smHeader.flags |= FLAG_K_IN_FRAG;
-  }
-
-  if (starting_frag == 1 && inlineQos.length()) {
-    datafrag.smHeader.flags |= FLAG_Q;
-    datafrag.inlineQos = inlineQos;
-  }
-
-  size_t padding = 0, before_datafrag = added_len;
-  if ((added_len + padding) % 4) {
-    padding += 4 - ((added_len + padding) % 4);
-  }
-  gen_find_size(datafrag, added_len, padding);
-  added_len += padding;
-
-  const SequenceRange frag_gap = frags.next_gap(starting_frag);
-  int n_frags = 0;
-
-  for (unsigned int cur = starting_frag.getLow();
-       cur < frag_gap.first.getLow();
-       ++cur, ++n_frags) {
-    // check if the current fragment "cur" will fit
-    const size_t frag_len =
-      (cur * FRAG_SIZE > dsh.message_length())
-      ? (dsh.message_length() % FRAG_SIZE)
-      : FRAG_SIZE;
-    if (RTPSHDR_SZ + current_msg_len + added_len + data_len + frag_len >
-        RtpsUdpSendStrategy::MAX_MSG_SIZE) {
-      if (n_frags == 0) {
-        // starting fragment won't fit in this message
-        return false;
-      }
-      break;
-    }
-    data_len += frag_len;
-  }
-
-  datafrag.fragmentsInSubmessage = static_cast<CORBA::UShort>(n_frags);
-  const size_t smlen = added_len - before_datafrag - SMHDR_SZ + data_len;
-  datafrag.smHeader.submessageLength = static_cast<CORBA::UShort>(smlen);
-
-  subm.length(i + 1);
-  subm[i].data_frag_sm(datafrag);
-
-  starting_frag += n_frags;
-  if (starting_frag == frag_gap.first) {
-    starting_frag = frag_gap.second + 1;
-  }
-  return true;
-}
-
 namespace {
   // Interoperability note:
   // used for discovery (SEDP) only, this helps interoperability because they
@@ -669,11 +575,13 @@ namespace {
   const size_t FRAG_START_OFFSET = 24, FRAG_SAMPLE_SIZE_OFFSET = 32;
 }
 
-void
+SequenceRange
 RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
                         ACE_Message_Block*& head, ACE_Message_Block*& tail)
 {
   using namespace RTPS;
+  static const SequenceRange unknown_range(SequenceNumber::SEQUENCENUMBER_UNKNOWN(),
+                                           SequenceNumber::SEQUENCENUMBER_UNKNOWN());
   size_t data_offset = 0;
   const char* rd = orig.rd_ptr();
   ACE_CDR::ULong starting_frag, sample_size;
@@ -695,7 +603,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
           ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
             "attempting to fragment a Data submessage with no payload.\n"));
         }
-        return;
+        return unknown_range;
       }
       found_data = true;
       starting_frag = 1;
@@ -722,7 +630,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
         ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
           "invalid octetsToNextHeader encountered while fragmenting.\n"));
       }
-      return;
+      return unknown_range;
     }
   }
 
@@ -794,6 +702,9 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
                                   payload_head, payload_tail);
   head->cont(payload_head);
   tail->cont(payload_tail);
+
+  return SequenceRange(starting_frag + frags - 1,
+                       starting_frag + frags + tail_frags - 1);
 }
 
 }

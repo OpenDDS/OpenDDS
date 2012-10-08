@@ -44,18 +44,6 @@ const bool SWAP =
   true;
 #endif
 
-size_t header_len(const SubmessageSeq& subm)
-{
-  size_t size = 0, padding = 0;
-  for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-    if ((size + padding) % 4) {
-      padding += 4 - ((size + padding) % 4);
-    }
-    gen_find_size(subm[i], size, padding);
-  }
-  return size + padding;
-}
-
 void matches(const DataFragSubmessage& df, const DataFragSubmessage& expected)
 {
   TEST_CHECK(df.smHeader.submessageId == expected.smHeader.submessageId);
@@ -124,10 +112,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     data.wr_ptr(N);
     header_mb.cont(&data);
     Fragments f;
-    RtpsSampleHeader::split(header_mb, N / 2, f.head_, f.tail_);
+    const SequenceRange sr =
+      RtpsSampleHeader::split(header_mb, N / 2, f.head_, f.tail_);
     header_mb.cont(0);
 
     // Check results
+    TEST_CHECK(sr.first == 1 && sr.second == 2);
     RtpsSampleHeader header1(*f.head_);
     TEST_CHECK(header1.valid());
     TEST_CHECK(header1.submessage_._d() == INFO_TS);
@@ -164,10 +154,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
     // Fragment the resulting "tail"
     Fragments f2;
-    RtpsSampleHeader::split(*before_fragmentation.tail_,
-                            N / 2, f2.head_, f2.tail_);
+    const SequenceRange sr2 =
+      RtpsSampleHeader::split(*before_fragmentation.tail_,
+                              N / 2, f2.head_, f2.tail_);
 
     // Check results
+    TEST_CHECK(sr2.first == 2 && sr2.second == 3);
     RtpsSampleHeader header3(*f2.head_);
     TEST_CHECK(header3.valid());
     TEST_CHECK(header3.submessage_._d() == INFO_TS);
@@ -193,148 +185,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         {{5, 6, 7}, 8}, {0, 9}, {3}, 1, 1024, N, ParameterList()};
       matches(header4.submessage_.data_frag_sm(), expected);
       TEST_CHECK(f2.tail_->cont() && f2.tail_->cont()->length() == N - 2 * 1024);
-    }
-  }
-  // Tests for RtpsSampleHeader::populate_data_frag_submessages(), which is used
-  // to send the DATA_FRAG messages which are replies to NACK_FRAGs.
-  RepoIdBuilder bld;
-  bld.federationId(1);
-  bld.participantId(2);
-  bld.entityKey(3);
-  bld.entityKind(KIND_WRITER);
-  const RepoId writerGuid(bld);
-  const OpenDDS::RTPS::EntityId_t& writerId = writerGuid.entityId;
-  DataSampleHeader dsh;
-  dsh.byte_order_ = true;
-  dsh.source_timestamp_sec_ = 1349190278;
-  dsh.source_timestamp_nanosec_ = 387505069;
-  dsh.sequence_ = 23;
-  dsh.publication_id_ = writerGuid;
-  dsh.message_length_ = 75000; // 73 full frags, 1 frag of 248 bytes
-  {
-    DisjointSequence requested_fragments;
-    requested_fragments.insert(SequenceRange(1, 3));
-    requested_fragments.insert(5);
-    requested_fragments.insert(SequenceRange(7, 10));
-    requested_fragments.insert(SequenceRange(18, 74)); // won't fit in 1 msg
-    SubmessageSeq subm, subm_it;
-    size_t length = 0, data_len;
-    SequenceNumber current_frag = requested_fragments.low();
-    for (int i = 0;
-         RtpsSampleHeader::populate_data_frag_submessages(subm_it, current_frag,
-           dsh, ParameterList(), requested_fragments, GUID_UNKNOWN,
-           length, data_len);
-         ++i) {
-      length += header_len(subm_it) + data_len;
-      for (CORBA::ULong j = 0; j < subm_it.length(); ++j) {
-        const CORBA::ULong seq_len = subm.length();
-        subm.length(seq_len + 1);
-        subm[seq_len] = subm_it[j];
-      }
-      subm_it.length(0);
-      switch (i) {
-      case 0: TEST_ASSERT(current_frag == 5 && data_len == 3*1024); break;
-      case 1: TEST_ASSERT(current_frag == 7 && data_len == 1024); break;
-      case 2: TEST_ASSERT(current_frag == 18 && data_len == 4*1024); break;
-      case 3: TEST_ASSERT(current_frag == 73 && data_len == 55*1024); break;
-      default: TEST_ASSERT(false);
-      }
-      if (current_frag > requested_fragments.high()) {
-        break;
-      }
-    }
-    TEST_ASSERT(subm.length() == 5);
-    TEST_ASSERT(subm[0]._d() == INFO_TS);
-    TEST_ASSERT(subm[1]._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 32 + 3*1024}, 0, DATA_FRAG_OCTETS_TO_IQOS,
-        ENTITYID_UNKNOWN, writerId, {0, 23}, {1}, 3, 1024, 75000,
-        ParameterList()};
-      matches(subm[1].data_frag_sm(), expected);
-    }
-    TEST_ASSERT(subm[2]._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 32 + 1024}, 0, DATA_FRAG_OCTETS_TO_IQOS,
-        ENTITYID_UNKNOWN, writerId, {0, 23}, {5}, 1, 1024, 75000,
-        ParameterList()};
-      matches(subm[2].data_frag_sm(), expected);
-    }
-    TEST_ASSERT(subm[3]._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 32 + 4*1024}, 0, DATA_FRAG_OCTETS_TO_IQOS,
-        ENTITYID_UNKNOWN, writerId, {0, 23}, {7}, 4, 1024, 75000,
-        ParameterList()};
-      matches(subm[3].data_frag_sm(), expected);
-    }
-    TEST_ASSERT(subm[4]._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 32 + 55*1024}, 0, DATA_FRAG_OCTETS_TO_IQOS,
-        ENTITYID_UNKNOWN, writerId, {0, 23}, {18}, 55, 1024, 75000,
-        ParameterList()};
-      matches(subm[4].data_frag_sm(), expected);
-    }
-    subm.length(0);
-    GuidBuilder readerId;
-    readerId.guidPrefix0(0x01030507);
-    readerId.guidPrefix1(0xFEDCBA98);
-    readerId.guidPrefix2(0x76543210);
-    readerId.entityKey(123);
-    readerId.entityKind(KIND_READER);
-    const OpenDDS::RTPS::GUID_t readerGuid = readerId;
-    const bool ret = RtpsSampleHeader::populate_data_frag_submessages(subm,
-      current_frag, dsh, ParameterList(), requested_fragments, readerId,
-      0, data_len);
-    TEST_ASSERT(ret);
-    TEST_ASSERT(current_frag >= 75);
-    TEST_ASSERT(data_len == 1024 + 248);
-    TEST_ASSERT(subm.length() == 2);
-    TEST_ASSERT(subm[0]._d() == INFO_DST);
-    TEST_ASSERT(!std::memcmp(subm[0].info_dst_sm().guidPrefix,
-                             readerGuid.guidPrefix,
-                             sizeof(OpenDDS::RTPS::GuidPrefix_t)));
-    TEST_ASSERT(subm[1]._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, static_cast<ACE_CDR::UShort>(32 + data_len)}, 0,
-        DATA_FRAG_OCTETS_TO_IQOS, readerGuid.entityId, writerId, {0, 23},
-        {73}, 2, 1024, 75000, ParameterList()};
-      matches(subm[1].data_frag_sm(), expected);
-    }
-    // Test w/ inlineQoS
-    ParameterList plist;
-    plist.length(1);
-    plist[0].string_data("test_topic");
-    plist[0]._d(PID_TOPIC_NAME);
-    current_frag = requested_fragments.low();
-    subm.length(0);
-    TEST_ASSERT(RtpsSampleHeader::populate_data_frag_submessages(subm,
-      current_frag, dsh, plist, requested_fragments, GUID_UNKNOWN, 0, data_len));
-    TEST_ASSERT(subm.length() == 2);
-    TEST_ASSERT(subm[0]._d() == INFO_TS);
-    TEST_ASSERT(subm[1]._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 3, 32 + 3*1024 + 24 /*qos*/}, 0,
-        DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writerId, {0, 23},
-        {1}, 3, 1024, 75000, plist};
-      matches(subm[1].data_frag_sm(), expected);
-    }
-    length = header_len(subm);
-    TEST_ASSERT(RtpsSampleHeader::populate_data_frag_submessages(subm,
-      current_frag, dsh, plist, requested_fragments, GUID_UNKNOWN,
-      length, data_len));
-    TEST_ASSERT(subm.length() == 3);
-    TEST_ASSERT(subm[2]._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 32 + 1024}, 0,
-        DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writerId, {0, 23},
-        {5}, 1, 1024, 75000, ParameterList()};
-      matches(subm[2].data_frag_sm(), expected);
     }
   }
   return 0;

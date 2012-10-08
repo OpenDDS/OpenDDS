@@ -82,19 +82,30 @@ public:
   // caller must already have the send strategy lock
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0);
 
+  void resend_fragments_i(const SequenceNumber& sequence,
+                          const DisjointSequence& fragments);
+
   SequenceNumber low() const;
   SequenceNumber high() const;
   bool empty() const;
   bool contains(const SequenceNumber& seq) const;
 
-  ACE_Message_Block* msg(const SequenceNumber& seq) const;
-
   void retain_all(RepoId pub_id);
   void insert(SequenceNumber sequence,
               TransportSendStrategy::QueueType* queue,
               ACE_Message_Block* chain);
+  void insert_fragment(SequenceNumber sequence,
+                       SequenceNumber fragment,
+                       TransportSendStrategy::QueueType* queue,
+                       ACE_Message_Block* chain);
 
 private:
+  void check_capacity();
+  RemoveResult retain_buffer(const RepoId& pub_id, BufferType& buffer);
+  void insert_buffer(BufferType& buffer,
+                     TransportSendStrategy::QueueType* queue,
+                     ACE_Message_Block* chain);
+
   size_t n_chunks_;
 
   TransportRetainedElementAllocator retained_allocator_;
@@ -105,6 +116,9 @@ private:
   DataBlockAllocator replaced_db_allocator_;
 
   BufferMap buffers_;
+
+  typedef std::map<SequenceNumber, BufferMap> FragmentMap;
+  FragmentMap* fragments_;
 };
 
 } // namespace DCPS

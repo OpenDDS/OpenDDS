@@ -26,6 +26,9 @@ public:
                                       ACE_Message_Block* msg,
                                       ACE_Allocator* allocator = 0);
 
+  SequenceNumber sequence() const;
+  SequenceNumber last_fragment() const;
+
 private:
   RtpsCustomizedElement(TransportQueueElement* orig,
                         ACE_Message_Block* msg,
@@ -34,6 +37,8 @@ private:
 
   ElementPair fragment(size_t size);
   const ACE_Message_Block* msg_payload() const;
+
+  SequenceNumber seq_, last_frag_;
 };
 
 typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>

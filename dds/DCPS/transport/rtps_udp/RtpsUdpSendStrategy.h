@@ -38,6 +38,7 @@ public:
   };
   friend struct OverrideToken;
 
+  OverrideToken override_destinations(const ACE_INET_Addr& destination);
   OverrideToken override_destinations(
     const std::set<ACE_INET_Addr>& destinations);
 
@@ -65,6 +66,7 @@ private:
 
   RtpsUdpDataLink* link_;
   const std::set<ACE_INET_Addr>* override_dest_;
+  const ACE_INET_Addr* override_single_dest_;
 
   OpenDDS::RTPS::Header rtps_header_;
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
