@@ -53,8 +53,8 @@ RecorderImpl::RecorderImpl()
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   owner_manager_ (0),
 #endif
-  topic_desc_(0),
   subqos_ (TheServiceParticipant->initial_SubscriberQos()),
+  topic_desc_(0),
   listener_mask_(DEFAULT_STATUS_MASK),
   domain_id_(0),
   is_bit_(false)
@@ -220,22 +220,21 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 
 }
 
-void RecorderImpl::notify_subscription_disconnected(const WriterIdSeq& pubids)
+void RecorderImpl::notify_subscription_disconnected(const WriterIdSeq&)
 {
-
 }
 
-void RecorderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
+void RecorderImpl::notify_subscription_reconnected(const WriterIdSeq&)
 {
 
 }
 
 void
-RecorderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq& handles)
+RecorderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq&)
 {
 }
 
-void RecorderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
+void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 {
 
 }

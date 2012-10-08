@@ -1,3 +1,9 @@
+Mon Oct  8 19:26:56 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/RecorderImpl.cpp:
+
+          Fixed unused parameter warnings.
+
 Mon Oct  8 16:54:11 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:
@@ -25,7 +31,7 @@ Mon Oct  8 16:54:11 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
         * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
         * tests/DCPS/RecorderReplayer/Relay.cpp:
         * tests/DCPS/RecorderReplayer/Subscriber.cpp:
-        
+
           Remove fuzz errors and fix problems in
           static/DDS_HAS_MINIMUM_BIT builds.
 
