@@ -27,6 +27,7 @@ class OpenDDS_Dcps_Export WriterInfoListener
 {
 public:
   WriterInfoListener();
+  virtual ~WriterInfoListener();
 
   RepoId subscription_id_;
 

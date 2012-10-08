@@ -721,6 +721,26 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
   const DDS::DataReaderQos & qos)
 {
 
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(subscriber_qos, DDS::RETCODE_UNSUPPORTED);
+
+  if (Qos_Helper::valid(subscriber_qos) && Qos_Helper::consistent(subscriber_qos)) {
+    if (subqos_ == subscriber_qos)
+      return DDS::RETCODE_OK;
+
+    // for the not changeable qos, it can be changed before enable
+    if (!Qos_Helper::changeable(subqos_, subscriber_qos) && enabled_ == true) {
+      return DDS::RETCODE_IMMUTABLE_POLICY;
+
+    } else {
+      subqos_ = subscriber_qos;
+    }
+
+    return DDS::RETCODE_OK;
+
+  } else {
+    return DDS::RETCODE_INCONSISTENT_POLICY;
+  }
+  
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);

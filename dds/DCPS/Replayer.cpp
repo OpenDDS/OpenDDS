@@ -17,6 +17,8 @@ ReplayerListener::~ReplayerListener()
 void ReplayerListener::on_replayer_matched(Replayer*                               replayer,
                                            const ::DDS::PublicationMatchedStatus & status )
 {
+  ACE_UNUSED_ARG(replayer);
+  ACE_UNUSED_ARG(status);
 }
 
 Replayer::~Replayer()

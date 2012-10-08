@@ -191,6 +191,23 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const ::DDS::PublisherQos & publisher_q
                                          const DDS::DataWriterQos &  qos)
 {
 
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+
+  if (Qos_Helper::valid(publisher_qos) && Qos_Helper::consistent(publisher_qos)) {
+    if (publisher_qos_ == publisher_qos)
+      return DDS::RETCODE_OK;
+
+    // for the not changeable qos, it can be changed before enable
+    if (!Qos_Helper::changeable(publisher_qos_, publisher_qos) && enabled_ == true) {
+      return DDS::RETCODE_IMMUTABLE_POLICY;
+
+    } else {
+      publisher_qos_ = publisher_qos;
+    }
+  } else {
+    return DDS::RETCODE_INCONSISTENT_POLICY;
+  }
+  
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);

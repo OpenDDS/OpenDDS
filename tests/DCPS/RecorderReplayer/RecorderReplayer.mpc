@@ -44,7 +44,10 @@ project(DDS*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_u
 
 project(DDS*Relay) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem {
   exename   = relay
-  
+
+  Idl_Files {
+  }
+
   Source_Files {
     Relay.cpp
   }

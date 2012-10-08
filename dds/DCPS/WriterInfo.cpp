@@ -24,6 +24,10 @@ WriterInfoListener::WriterInfoListener()
 {
 }
 
+WriterInfoListener::~WriterInfoListener()
+{
+}
+
 /// tell instances when a DataWriter transitions to being alive
 /// The writer state is inout parameter, it has to be set ALIVE before
 /// handle_timeout is called since some subroutine use the state.
