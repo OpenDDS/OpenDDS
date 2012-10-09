@@ -1,3 +1,123 @@
+Mon Oct  8 21:59:37 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Fixed some unsed parameter and virtual destructor warnings.
+
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+
+          Added  Idl clause for relay target.
+
+Mon Oct  8 19:26:56 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/RecorderImpl.cpp:
+
+          Fixed unused parameter warnings.
+
+Mon Oct  8 16:54:11 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+        * tests/DCPS/RecorderReplayer/Messenger_export.h:
+        * tests/DCPS/RecorderReplayer/Publisher.cpp:
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+        * tests/DCPS/RecorderReplayer/Subscriber.cpp:
+
+          Remove fuzz errors and fix problems in
+          static/DDS_HAS_MINIMUM_BIT builds.
+
+Fri Oct  5 19:25:02 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+        * docs/history/ChangeLog-RecorderReplayer:
+
+        * tests/DCPS/RecorderReplayer:
+
+        * tests/DCPS/RecorderReplayer/Args.h:
+        * tests/DCPS/RecorderReplayer/DataReaderListenerImpl.h:
+        * tests/DCPS/RecorderReplayer/DataReaderListenerImpl.cpp:
+        * tests/DCPS/RecorderReplayer/Messenger.idl:
+        * tests/DCPS/RecorderReplayer/Publisher.cpp:
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+        * tests/DCPS/RecorderReplayer/Subscriber.cpp:
+        * tests/DCPS/RecorderReplayer/pub.ini:
+        * tests/DCPS/RecorderReplayer/pub_ipv6.ini:
+        * tests/DCPS/RecorderReplayer/pub_multicast.ini:
+        * tests/DCPS/RecorderReplayer/pub_udp.ini:
+        * tests/DCPS/RecorderReplayer/relay.ini:
+        * tests/DCPS/RecorderReplayer/relay_ipv6.ini:
+        * tests/DCPS/RecorderReplayer/relay_multicast.ini:
+        * tests/DCPS/RecorderReplayer/relay_udp.ini:
+        * tests/DCPS/RecorderReplayer/rtps.ini:
+        * tests/DCPS/RecorderReplayer/rtps_disc.ini:
+        * tests/DCPS/RecorderReplayer/rtps_disc_tcp.ini:
+        * tests/DCPS/RecorderReplayer/rtps_uni.ini:
+        * tests/DCPS/RecorderReplayer/run_test.pl:
+        * tests/DCPS/RecorderReplayer/shmem.ini:
+        * tests/DCPS/RecorderReplayer/sub.ini:
+        * tests/DCPS/RecorderReplayer/sub_ipv6.ini:
+        * tests/DCPS/RecorderReplayer/sub_multicast.ini:
+        * tests/DCPS/RecorderReplayer/sub_udp.ini:
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
+        * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
+
+          Merged the branch "recorder", which includes the implementation
+          of recorder and replayer. For details see the branch-specific
+          change log at docs/history/ChangeLog-RecorderReplayer.
+
 Fri Sep 28 20:24:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * ChangeLog:

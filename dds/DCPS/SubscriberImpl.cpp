@@ -41,21 +41,21 @@ namespace OpenDDS {
 namespace DCPS {
 
 // Implementation skeleton constructor
-SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t handle,
-                               const DDS::SubscriberQos & qos,
+SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
+                               const DDS::SubscriberQos &  qos,
                                DDS::SubscriberListener_ptr a_listener,
-                               const DDS::StatusMask& mask,
-                               DomainParticipantImpl* participant)
+                               const DDS::StatusMask&      mask,
+                               DomainParticipantImpl*      participant)
   : handle_(handle),
-    qos_(qos),
-    default_datareader_qos_(TheServiceParticipant->initial_DataReaderQos()),
-    listener_mask_(mask),
-    participant_(participant),
-    domain_id_(participant->get_domain_id()),
-    raw_latency_buffer_size_(0),
-    raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-    monitor_(0),
-    access_depth_ (0)
+  qos_(qos),
+  default_datareader_qos_(TheServiceParticipant->initial_DataReaderQos()),
+  listener_mask_(mask),
+  participant_(participant),
+  domain_id_(participant->get_domain_id()),
+  raw_latency_buffer_size_(0),
+  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
+  monitor_(0),
+  access_depth_ (0)
 {
   //Note: OK to duplicate a nil.
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
@@ -102,10 +102,10 @@ SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
 
 DDS::DataReader_ptr
 SubscriberImpl::create_datareader(
-  DDS::TopicDescription_ptr a_topic_desc,
-  const DDS::DataReaderQos & qos,
+  DDS::TopicDescription_ptr   a_topic_desc,
+  const DDS::DataReaderQos &  qos,
   DDS::DataReaderListener_ptr a_listener,
-  DDS::StatusMask mask)
+  DDS::StatusMask             mask)
 {
   if (CORBA::is_nil(a_topic_desc)) {
     ACE_ERROR((LM_ERROR,
@@ -124,6 +124,8 @@ SubscriberImpl::create_datareader(
 #endif
 #ifndef OPENDDS_NO_MULTI_TOPIC
   MultiTopicImpl* mt = 0;
+#else
+  bool mt = false;
 #endif
 
   if (!topic_servant) {
@@ -143,52 +145,8 @@ SubscriberImpl::create_datareader(
     }
   }
 
-  if (qos == DATAREADER_QOS_DEFAULT) {
-    this->get_default_datareader_qos(dr_qos);
-
-  } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
-#ifndef OPENDDS_NO_MULTI_TOPIC
-    if (mt) {
-      if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("SubscriberImpl::create_datareader, ")
-          ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
-          ACE_TEXT("to create a MultiTopic DataReader.\n")));
-      }
-      return DDS::DataReader::_nil();
-    }
-#endif
-    DDS::TopicQos topic_qos;
-    topic_servant->get_qos(topic_qos);
-
-    this->get_default_datareader_qos(dr_qos);
-
-    this->copy_from_topic_qos(dr_qos,
-                              topic_qos);
-
-  } else {
-    dr_qos = qos;
-  }
-
-  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
-  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
-  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataReader::_nil());
-
-  if (!Qos_Helper::valid(dr_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("SubscriberImpl::create_datareader, ")
-               ACE_TEXT("invalid qos.\n")));
+  if (!validate_datareader_qos (qos, default_datareader_qos_, topic_servant, dr_qos, mt))
     return DDS::DataReader::_nil();
-  }
-
-  if (!Qos_Helper::consistent(dr_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("SubscriberImpl::create_datareader, ")
-               ACE_TEXT("inconsistent qos.\n")));
-    return DDS::DataReader::_nil();
-  }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   if (mt) {
@@ -210,11 +168,11 @@ SubscriberImpl::create_datareader(
       }
       return dr._retn();
     } catch (const std::exception& e) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("SubscriberImpl::create_datareader, ")
-                   ACE_TEXT("creation of MultiTopicDataReader failed: %C.\n"),
-                   e.what()));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("creation of MultiTopicDataReader failed: %C.\n"),
+                 e.what()));
     }
     return DDS::DataReader::_nil();
   }
@@ -261,7 +219,7 @@ SubscriberImpl::create_datareader(
   if ((this->enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities == 1)) {
     DDS::ReturnCode_t ret
-    = dr_servant->enable();
+      = dr_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
@@ -275,6 +233,7 @@ SubscriberImpl::create_datareader(
   // add created data reader to this' data reader container -
   // done in enable_reader
   return DDS::DataReader::_duplicate(dr_obj.in());
+
 }
 
 DDS::ReturnCode_t
@@ -385,7 +344,7 @@ SubscriberImpl::delete_contained_entities()
   // mark that the entity is being deleted
   set_deleted(true);
 
-  ACE_Vector<DDS::DataReader_ptr> drs ;
+  ACE_Vector<DDS::DataReader_ptr> drs;
 
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -468,9 +427,9 @@ SubscriberImpl::lookup_datareader(
 
 DDS::ReturnCode_t
 SubscriberImpl::get_datareaders(
-  DDS::DataReaderSeq & readers,
-  DDS::SampleStateMask sample_states,
-  DDS::ViewStateMask view_states,
+  DDS::DataReaderSeq &   readers,
+  DDS::SampleStateMask   sample_states,
+  DDS::ViewStateMask     view_states,
   DDS::InstanceStateMask instance_states)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -490,26 +449,26 @@ SubscriberImpl::get_datareaders(
     if (this->qos_.presentation.ordered_access) {
 
       GroupRakeData data;
-      for (DataReaderSet::const_iterator pos = datareader_set_.begin() ;
-        pos != datareader_set_.end() ; ++pos) {
-          (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
+      for (DataReaderSet::const_iterator pos = datareader_set_.begin();
+           pos != datareader_set_.end(); ++pos) {
+        (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
       }
 
       // Return list of readers in the order of the source timestamp of the received
       // samples from readers.
       data.get_datareaders (readers);
 
-      return DDS::RETCODE_OK ;
+      return DDS::RETCODE_OK;
     }
   }
 #endif
 
   // Return set of datareaders.
-  int count(0) ;
+  int count(0);
   readers.length(count);
 
-  for (DataReaderSet::const_iterator pos = datareader_set_.begin() ;
-       pos != datareader_set_.end() ; ++pos) {
+  for (DataReaderSet::const_iterator pos = datareader_set_.begin();
+       pos != datareader_set_.end(); ++pos) {
     if ((*pos)->have_sample_states(sample_states) &&
         (*pos)->have_view_states(view_states) &&
         (*pos)->have_instance_states(instance_states)) {
@@ -518,7 +477,7 @@ SubscriberImpl::get_datareaders(
     }
   }
 
-  return DDS::RETCODE_OK ;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
@@ -558,7 +517,7 @@ SubscriberImpl::notify_datareaders()
   }
 #endif
 
-  return DDS::RETCODE_OK ;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
@@ -587,15 +546,15 @@ SubscriberImpl::set_qos(
                          DDS::RETCODE_ERROR);
         DataReaderMap::const_iterator endIter = datareader_map_.end();
 
-        for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
-             iter != endIter ; ++iter) {
+        for (DataReaderMap::const_iterator iter = datareader_map_.begin();
+             iter != endIter; ++iter) {
           DataReaderImpl* reader = iter->second;
           reader->set_subscriber_qos (qos);
           DDS::DataReaderQos qos;
           reader->get_qos(qos);
           RepoId id = reader->get_subscription_id();
           std::pair<DrIdToQosMap::iterator, bool> pair
-          = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
+            = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
 
           if (pair.second == false) {
             GuidConverter converter(id);
@@ -612,11 +571,11 @@ SubscriberImpl::set_qos(
       while (iter != idToQosMap.end()) {
         Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
         const bool status
-        = disco->update_subscription_qos(this->domain_id_,
-                                         participant_->get_id(),
-                                         iter->first,
-                                         iter->second,
-                                         this->qos_);
+          = disco->update_subscription_qos(this->domain_id_,
+                                           participant_->get_id(),
+                                           iter->first,
+                                           iter->second,
+                                           this->qos_);
 
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -647,7 +606,7 @@ SubscriberImpl::get_qos(
 DDS::ReturnCode_t
 SubscriberImpl::set_listener(
   DDS::SubscriberListener_ptr a_listener,
-  DDS::StatusMask mask)
+  DDS::StatusMask             mask)
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -728,8 +687,8 @@ SubscriberImpl::end_access()
   // and last change to the current change set:
   if (this->access_depth_ == 0) {
     for (DataReaderSet::iterator it = this->datareader_set_.begin();
-      it != this->datareader_set_.end(); ++it) {
-        (*it)->end_access();
+         it != this->datareader_set_.end(); ++it) {
+      (*it)->end_access();
     }
   }
 
@@ -767,22 +726,10 @@ SubscriberImpl::get_default_datareader_qos(
 
 DDS::ReturnCode_t
 SubscriberImpl::copy_from_topic_qos(
-  DDS::DataReaderQos & a_datareader_qos,
+  DDS::DataReaderQos &  a_datareader_qos,
   const DDS::TopicQos & a_topic_qos)
 {
-  if (Qos_Helper::valid(a_topic_qos) &&
-      Qos_Helper::consistent(a_topic_qos)) {
-    // the caller can get the default before calling this
-    // method if it wants to.
-    //a_datareader_qos = this->default_datareader_qos_;
-    a_datareader_qos.durability = a_topic_qos.durability;
-    a_datareader_qos.deadline = a_topic_qos.deadline;
-    a_datareader_qos.latency_budget = a_topic_qos.latency_budget;
-    a_datareader_qos.liveliness = a_topic_qos.liveliness;
-    a_datareader_qos.reliability = a_topic_qos.reliability;
-    a_datareader_qos.destination_order = a_topic_qos.destination_order;
-    a_datareader_qos.history = a_topic_qos.history;
-    a_datareader_qos.resource_limits = a_topic_qos.resource_limits;
+  if (Qos_Helper::copy_from_topic_qos(a_datareader_qos, a_topic_qos) ) {
     return DDS::RETCODE_OK;
 
   } else {
@@ -838,7 +785,7 @@ SubscriberImpl::data_received(DataReaderImpl* reader)
 }
 
 DDS::ReturnCode_t
-SubscriberImpl::reader_enabled(const char* topic_name,
+SubscriberImpl::reader_enabled(const char*     topic_name,
                                DataReaderImpl* reader)
 {
   if (DCPS_debug_level >= 4) {
@@ -917,7 +864,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 void
 SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
-                                  const CORBA::Long& ownership_strength)
+                                           const CORBA::Long&   ownership_strength)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -937,7 +884,7 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
-SubscriberImpl::coherent_change_received (RepoId& publisher_id,
+SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
                                           DataReaderImpl* reader,
                                           Coherent_State& group_state)
 {
@@ -945,8 +892,8 @@ SubscriberImpl::coherent_change_received (RepoId& publisher_id,
   // is either COMPLETED or REJECTED.
   group_state = COMPLETED;
   DataReaderSet::const_iterator endIter = datareader_set_.end();
-  for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
-    iter != endIter ; ++iter) {
+  for (DataReaderSet::const_iterator iter = datareader_set_.begin();
+       iter != endIter; ++iter) {
 
     Coherent_State state = COMPLETED;
     (*iter)->coherent_change_received (publisher_id, state);
@@ -960,19 +907,19 @@ SubscriberImpl::coherent_change_received (RepoId& publisher_id,
   }
 
   PublicationId writerId = GUID_UNKNOWN;
-  for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
-    iter != endIter ; ++iter) {
-      if (group_state == COMPLETED) {
-        (*iter)->accept_coherent (writerId, publisher_id);
-      }
-      else { //REJECTED
-        (*iter)->reject_coherent (writerId, publisher_id);
-      }
+  for (DataReaderSet::const_iterator iter = datareader_set_.begin();
+       iter != endIter; ++iter) {
+    if (group_state == COMPLETED) {
+      (*iter)->accept_coherent (writerId, publisher_id);
+    }
+    else {   //REJECTED
+      (*iter)->reject_coherent (writerId, publisher_id);
+    }
   }
 
   if (group_state == COMPLETED) {
-    for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
-      iter != endIter ; ++iter) {
+    for (DataReaderSet::const_iterator iter = datareader_set_.begin();
+         iter != endIter; ++iter) {
       (*iter)->coherent_changes_completed (reader);
       (*iter)->reset_coherent_info (writerId, publisher_id);
     }
@@ -986,6 +933,66 @@ SubscriberImpl::parent() const
   return this->participant_;
 }
 
+bool
+SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
+                                        const DDS::DataReaderQos & default_qos,
+                                        DDS::Topic_ptr             a_topic,
+                                        DDS::DataReaderQos &       dr_qos,
+                                        bool                       mt)
+{
+
+
+  if (qos == DATAREADER_QOS_DEFAULT) {
+    dr_qos = default_qos;
+
+  } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
+#ifndef OPENDDS_NO_MULTI_TOPIC
+    if (mt) {
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("SubscriberImpl::create_datareader, ")
+                   ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
+                   ACE_TEXT("to create a MultiTopic DataReader.\n")));
+      }
+      return DDS::DataReader::_nil();
+    }
+#endif
+    DDS::TopicQos topic_qos;
+    a_topic->get_qos(topic_qos);
+
+    dr_qos = default_qos;
+
+    Qos_Helper::copy_from_topic_qos(dr_qos,
+                                    topic_qos);
+
+  } else {
+    dr_qos = qos;
+  }
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, false);
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, false);
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, false);
+
+  if (!Qos_Helper::valid(dr_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("SubscriberImpl::create_datareader, ")
+               ACE_TEXT("invalid qos.\n")));
+    return false;
+  }
+
+  if (!Qos_Helper::consistent(dr_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("SubscriberImpl::create_datareader, ")
+               ACE_TEXT("inconsistent qos.\n")));
+    return false;
+  }
+
+
+  return true;
+}
+
+
 } // namespace DCPS
 } // namespace OpenDDS
-

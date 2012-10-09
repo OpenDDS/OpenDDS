@@ -28,28 +28,28 @@ namespace OpenDDS {
 namespace DCPS {
 
 // Implementation skeleton constructor
-PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
-                             RepoId id,
-                             const DDS::PublisherQos& qos,
+PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
+                             RepoId                     id,
+                             const DDS::PublisherQos&   qos,
                              DDS::PublisherListener_ptr a_listener,
-                             const DDS::StatusMask& mask,
-                             DomainParticipantImpl* participant)
+                             const DDS::StatusMask&     mask,
+                             DomainParticipantImpl*     participant)
   : handle_(handle),
-    qos_(qos),
-    default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos()),
-    listener_mask_(mask),
-    listener_(DDS::PublisherListener::_duplicate(a_listener)),
+  qos_(qos),
+  default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos()),
+  listener_mask_(mask),
+  listener_(DDS::PublisherListener::_duplicate(a_listener)),
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-    change_depth_(0),
+  change_depth_(0),
 #endif
-    domain_id_(participant->get_domain_id()),
-    participant_(participant),
-    suspend_depth_count_(0),
-    sequence_number_(),
-    aggregation_period_start_(ACE_Time_Value::zero),
-    reverse_pi_lock_(pi_lock_),
-    monitor_(0),
-    publisher_id_(id)
+  domain_id_(participant->get_domain_id()),
+  participant_(participant),
+  suspend_depth_count_(0),
+  sequence_number_(),
+  aggregation_period_start_(ACE_Time_Value::zero),
+  reverse_pi_lock_(pi_lock_),
+  monitor_(0),
+  publisher_id_(id)
 {
   monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
 }
@@ -93,55 +93,14 @@ PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
 
 DDS::DataWriter_ptr
 PublisherImpl::create_datawriter(
-  DDS::Topic_ptr a_topic,
-  const DDS::DataWriterQos & qos,
+  DDS::Topic_ptr              a_topic,
+  const DDS::DataWriterQos &  qos,
   DDS::DataWriterListener_ptr a_listener,
-  DDS::StatusMask mask)
+  DDS::StatusMask             mask)
 {
-  if (CORBA::is_nil(a_topic)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("topic is nil.\n")));
-    return DDS::DataWriter::_nil();
-  }
-
   DDS::DataWriterQos dw_qos;
 
-  if (qos == DATAWRITER_QOS_DEFAULT) {
-    this->get_default_datawriter_qos(dw_qos);
-
-  } else if (qos == DATAWRITER_QOS_USE_TOPIC_QOS) {
-    DDS::TopicQos topic_qos;
-    a_topic->get_qos(topic_qos);
-
-    this->get_default_datawriter_qos(dw_qos);
-
-    this->copy_from_topic_qos(dw_qos, topic_qos);
-
-  } else {
-    dw_qos = qos;
-  }
-
-  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-
-  if (!Qos_Helper::valid(dw_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("invalid qos.\n")));
-    return DDS::DataWriter::_nil();
-  }
-
-  if (!Qos_Helper::consistent(dw_qos)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("inconsistent qos.\n")));
+  if (!validate_datawriter_qos(qos, default_datawriter_qos_, a_topic, dw_qos)) {
     return DDS::DataWriter::_nil();
   }
 
@@ -349,9 +308,9 @@ PublisherImpl::delete_contained_entities()
 
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-        guard,
-        this->pi_lock_,
-        DDS::RETCODE_ERROR);
+                       guard,
+                       this->pi_lock_,
+                       DDS::RETCODE_ERROR);
 
       if (datawriter_map_.empty()) {
         break;
@@ -431,12 +390,12 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
       while (iter != idToQosMap.end()) {
         Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
         const bool status
-        = disco->update_publication_qos(
-            participant_->get_domain_id(),
-            participant_->get_id(),
-            iter->first,
-            iter->second,
-            this->qos_);
+          = disco->update_publication_qos(
+          participant_->get_domain_id(),
+          participant_->get_id(),
+          iter->first,
+          iter->second,
+          this->qos_);
 
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -465,7 +424,7 @@ PublisherImpl::get_qos(DDS::PublisherQos & qos)
 
 DDS::ReturnCode_t
 PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
-                            DDS::StatusMask mask)
+                            DDS::StatusMask            mask)
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -636,16 +595,16 @@ PublisherImpl::end_coherent_changes()
 
       std::pair<GroupCoherentSamples::iterator, bool> pair =
         group_samples.insert(GroupCoherentSamples::value_type(
-          it->second->get_publication_id(),
-          WriterCoherentSample(it->second->coherent_samples_,
-                               it->second->sequence_number_)));
+                               it->second->get_publication_id(),
+                               WriterCoherentSample(it->second->coherent_samples_,
+                                                    it->second->sequence_number_)));
 
       if (pair.second == false) {
         ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
-          ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
-          DDS::RETCODE_ERROR);
-        }
+                          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
+                          ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
+                         DDS::RETCODE_ERROR);
+      }
     }
 
     for (PublicationMap::iterator it = this->publication_map_.begin();
@@ -763,29 +722,11 @@ PublisherImpl::get_default_datawriter_qos(DDS::DataWriterQos & qos)
 }
 
 DDS::ReturnCode_t
-PublisherImpl::copy_from_topic_qos(DDS::DataWriterQos & a_datawriter_qos,
+PublisherImpl::copy_from_topic_qos(DDS::DataWriterQos &  a_datawriter_qos,
                                    const DDS::TopicQos & a_topic_qos)
 {
-  if (Qos_Helper::valid(a_topic_qos)
-      && Qos_Helper::consistent(a_topic_qos)) {
-    // Some members in the DataWriterQos are not contained
-    // in the TopicQos. The caller needs initialize them.
-    a_datawriter_qos.durability = a_topic_qos.durability;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    a_datawriter_qos.durability_service = a_topic_qos.durability_service;
-#endif
-    a_datawriter_qos.deadline = a_topic_qos.deadline;
-    a_datawriter_qos.latency_budget = a_topic_qos.latency_budget;
-    a_datawriter_qos.liveliness = a_topic_qos.liveliness;
-    a_datawriter_qos.reliability = a_topic_qos.reliability;
-    a_datawriter_qos.destination_order = a_topic_qos.destination_order;
-    a_datawriter_qos.history = a_topic_qos.history;
-    a_datawriter_qos.resource_limits = a_topic_qos.resource_limits;
-    a_datawriter_qos.transport_priority = a_topic_qos.transport_priority;
-    a_datawriter_qos.lifespan = a_topic_qos.lifespan;
-
+  if (Qos_Helper::copy_from_topic_qos(a_datawriter_qos, a_topic_qos)) {
     return DDS::RETCODE_OK;
-
   } else {
     return DDS::RETCODE_INCONSISTENT_POLICY;
   }
@@ -827,7 +768,7 @@ PublisherImpl::is_clean() const
 }
 
 DDS::ReturnCode_t
-PublisherImpl::writer_enabled(const char* topic_name,
+PublisherImpl::writer_enabled(const char*     topic_name,
                               DataWriterImpl* writer)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -911,6 +852,59 @@ PublisherImpl::parent() const
 {
   return this->participant_;
 }
+
+bool
+PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
+                                       const DDS::DataWriterQos& default_qos,
+                                       DDS::Topic_ptr            a_topic,
+                                       DDS::DataWriterQos&       dw_qos)
+{
+  if (CORBA::is_nil(a_topic)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("PublisherImpl::create_datawriter, ")
+               ACE_TEXT("topic is nil.\n")));
+    return DDS::DataWriter::_nil();
+  }
+
+  if (qos == DATAWRITER_QOS_DEFAULT) {
+    dw_qos = default_qos;
+
+  } else if (qos == DATAWRITER_QOS_USE_TOPIC_QOS) {
+    DDS::TopicQos topic_qos;
+    a_topic->get_qos(topic_qos);
+    dw_qos = default_qos;
+
+    Qos_Helper::copy_from_topic_qos(dw_qos, topic_qos);
+
+  } else {
+    dw_qos = qos;
+  }
+
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+
+  if (!Qos_Helper::valid(dw_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("PublisherImpl::create_datawriter, ")
+               ACE_TEXT("invalid qos.\n")));
+    return DDS::DataWriter::_nil();
+  }
+
+  if (!Qos_Helper::consistent(dw_qos)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("PublisherImpl::create_datawriter, ")
+               ACE_TEXT("inconsistent qos.\n")));
+    return DDS::DataWriter::_nil();
+  }
+  return true;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

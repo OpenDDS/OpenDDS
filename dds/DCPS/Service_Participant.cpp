@@ -29,6 +29,9 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/Sched_Params.h"
 
+#include "RecorderImpl.h"
+#include "ReplayerImpl.h"
+
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -1716,6 +1719,78 @@ Service_Participant::domainRepoMap() const
   return this->domainRepoMap_;
 }
 
+Recorder_rch
+Service_Participant::create_recorder (DDS::DomainParticipant_ptr participant,
+                              DDS::Topic_ptr a_topic,
+                              const DDS::SubscriberQos & subscriber_qos,
+                              const DDS::DataReaderQos & datareader_qos,
+                              const RecorderListener_rch & a_listener )
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant)
+    return participant_servant->create_recorder(a_topic, subscriber_qos, datareader_qos, a_listener, 0);
+  return Recorder_rch();
+}
+
+
+DDS::ReturnCode_t
+Service_Participant::delete_recorder (Recorder_rch & recorder )
+{
+  DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
+  RecorderImpl* impl = static_cast<RecorderImpl*>(recorder.in());
+  if (impl){
+    ret = impl->cleanup();
+    impl->participant()->delete_recorder(recorder);
+  }
+  return ret;
+}
+
+
+
+Replayer_rch
+Service_Participant::create_replayer (DDS::DomainParticipant_ptr participant,
+                              DDS::Topic_ptr a_topic,
+                              const DDS::PublisherQos & publisher_qos,
+                              const DDS::DataWriterQos & datawriter_qos,
+                              const ReplayerListener_rch & a_listener )
+{
+  ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant)
+    return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);
+  return Replayer_rch();
+}
+
+
+DDS::ReturnCode_t
+Service_Participant::delete_replayer (Replayer_rch & replayer )
+{
+  DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
+  ReplayerImpl* impl = static_cast<ReplayerImpl*>(replayer.in());
+  if (impl) {
+    ret = impl->cleanup();
+    impl->participant()->delete_replayer(replayer);
+  }
+  return ret;
+}
+
+
+
+DDS::Topic_ptr
+Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participant,
+                                     const char * topic_name,
+                                     const char * type_name,
+                                     bool type_has_keys,
+                                     const DDS::TopicQos & qos,
+                                     DDS::TopicListener_ptr a_listener,
+                                     DDS::StatusMask mask)
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (! participant_servant) {
+    return 0;
+  }
+  return participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
+}
 } // namespace DCPS
 } // namespace OpenDDS
 

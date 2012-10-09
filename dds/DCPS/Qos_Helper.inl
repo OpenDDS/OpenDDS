@@ -1483,5 +1483,51 @@ bool Qos_Helper::changeable(const DDS::DomainParticipantFactoryQos& qos1,
   return changeable(qos1.entity_factory, qos2.entity_factory);
 }
 
+ACE_INLINE
+bool Qos_Helper::copy_from_topic_qos(DDS::DataReaderQos& a_datareader_qos,
+                                     const DDS::TopicQos& a_topic_qos)
+{
+  if (!Qos_Helper::valid(a_topic_qos) || !Qos_Helper::consistent(a_topic_qos)) {
+        return false;
+  }
+    // the caller can get the default before calling this
+    // method if it wants to.
+  a_datareader_qos.durability = a_topic_qos.durability;
+  a_datareader_qos.deadline = a_topic_qos.deadline;
+  a_datareader_qos.latency_budget = a_topic_qos.latency_budget;
+  a_datareader_qos.liveliness = a_topic_qos.liveliness;
+  a_datareader_qos.reliability = a_topic_qos.reliability;
+  a_datareader_qos.destination_order = a_topic_qos.destination_order;
+  a_datareader_qos.history = a_topic_qos.history;
+  a_datareader_qos.resource_limits = a_topic_qos.resource_limits;
+  return true;
+}
+
+ACE_INLINE
+bool Qos_Helper::copy_from_topic_qos(DDS::DataWriterQos& a_datawriter_qos,
+                                     const DDS::TopicQos& a_topic_qos)
+{
+  if (!Qos_Helper::valid(a_topic_qos) || !Qos_Helper::consistent(a_topic_qos)) {
+    return false;
+  }
+  // Some members in the DataWriterQos are not contained
+  // in the TopicQos. The caller needs initialize them.
+  a_datawriter_qos.durability = a_topic_qos.durability;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+  a_datawriter_qos.durability_service = a_topic_qos.durability_service;
+#endif
+  a_datawriter_qos.deadline = a_topic_qos.deadline;
+  a_datawriter_qos.latency_budget = a_topic_qos.latency_budget;
+  a_datawriter_qos.liveliness = a_topic_qos.liveliness;
+  a_datawriter_qos.reliability = a_topic_qos.reliability;
+  a_datawriter_qos.destination_order = a_topic_qos.destination_order;
+  a_datawriter_qos.history = a_topic_qos.history;
+  a_datawriter_qos.resource_limits = a_topic_qos.resource_limits;
+  a_datawriter_qos.transport_priority = a_topic_qos.transport_priority;
+  a_datawriter_qos.lifespan = a_topic_qos.lifespan;
+
+  return true;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
