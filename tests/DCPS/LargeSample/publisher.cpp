@@ -19,6 +19,7 @@
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include "MessengerTypeSupportImpl.h"
@@ -85,10 +86,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
+    DDS::DataWriterQos qos;
+    pub->get_default_datawriter_qos(qos);
+    qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+    qos.liveliness.lease_duration.sec = 5;
+    qos.liveliness.lease_duration.nanosec = 0;
+
     // Create DataWriter
     DDS::DataWriter_var dw =
       pub->create_datawriter(topic.in(),
-                             DATAWRITER_QOS_DEFAULT,
+                             qos,
                              DDS::DataWriterListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -101,7 +108,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataWriter_var dw2 =
       pub->create_datawriter(topic.in(),
-                             DATAWRITER_QOS_DEFAULT,
+                             qos,
                              DDS::DataWriterListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -112,17 +119,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    // Start writing threads
-    Writer* writer = new Writer(dw, dw2);
-    writer->start();
-
-    while (!writer->is_finished()) {
-      ACE_Time_Value small_time(0, 250000);
-      ACE_OS::sleep(small_time);
+    {
+      Writer writer(dw, dw2);
+      writer.write();
     }
-
-    writer->end();
-    delete writer;
 
     // Clean-up!
     participant->delete_contained_entities();

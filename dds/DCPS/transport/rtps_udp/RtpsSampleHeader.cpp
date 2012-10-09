@@ -7,12 +7,14 @@
  */
 
 #include "RtpsSampleHeader.h"
+#include "RtpsUdpSendStrategy.h"
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/DisjointSequence.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
@@ -278,9 +280,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     opendds.publication_id_.entityId = rtps.writerId;
     opendds.message_id_ = SAMPLE_DATA;
     opendds.key_fields_only_ = (rtps.smHeader.flags & FLAG_K_IN_FRAG);
-
-    // Peek at the byte order from the encapsulation containing the payload.
-    opendds.byte_order_ = rds.sample_->rd_ptr()[1] & FLAG_E;
+    // opendds.byte_order_ set in RtpsUdpReceiveStrategy::reassemble().
 
     process_iqos(opendds, rtps.inlineQos);
 
@@ -298,24 +298,34 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   return true;
 }
 
+namespace {
+  void add_timestamp(RTPS::SubmessageSeq& subm, ACE_CDR::Octet flags,
+    const DataSampleHeader& header)
+  {
+    using namespace OpenDDS::RTPS;
+    const DDS::Time_t st = {header.source_timestamp_sec_,
+                            header.source_timestamp_nanosec_};
+    const InfoTimestampSubmessage ts = {
+      {INFO_TS, flags, INFO_TS_SZ},
+      {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)}
+    };
+    const CORBA::ULong i = subm.length();
+    subm.length(i + 1);
+    subm[i].info_ts_sm(ts);
+  }
+}
+
 void
 RtpsSampleHeader::populate_data_sample_submessages(
-  OpenDDS::RTPS::SubmessageSeq& subm,
+  RTPS::SubmessageSeq& subm,
   const DataSampleListElement& dsle,
   bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
-  const ACE_CDR::Octet flags =
-    DataSampleHeader::test_flag(BYTE_ORDER_FLAG, dsle.sample_);
-  const ACE_CDR::UShort len = 8;
-  const DDS::Time_t st = { dsle.header_.source_timestamp_sec_,
-                           dsle.header_.source_timestamp_nanosec_ };
-  const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
-    {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)} };
+  const ACE_CDR::Octet flags = dsle.header_.byte_order_;
+  add_timestamp(subm, flags, dsle.header_);
   CORBA::ULong i = subm.length();
-  subm.length(i + 1);
-  subm[i++].info_ts_sm(ts);
 
   EntityId_t readerId = ENTITYID_UNKNOWN;
   if (dsle.num_subs_ == 1) {
@@ -355,7 +365,7 @@ RtpsSampleHeader::populate_data_sample_submessages(
     TransportSendListener::InlineQosData qos_data;
     dsle.send_listener_->retrieve_inline_qos_data(qos_data);
 
-    populate_inline_qos(qos_data, data);
+    populate_inline_qos(qos_data, data.inlineQos);
   }
 
   if (data.inlineQos.length() > 0) {
@@ -392,15 +402,9 @@ RtpsSampleHeader::populate_data_control_submessages(
   using namespace OpenDDS::RTPS;
 
   const DataSampleHeader& header = tsce.header();
-  const ACE_CDR::Octet flags = (header.byte_order_ == true);
-  const ACE_CDR::UShort len = 8;
-  const ACE_INT32  st_sec  = header.source_timestamp_sec_;
-  const ACE_UINT32 st_nsec = header.source_timestamp_nanosec_;
-  const InfoTimestampSubmessage ts = { {INFO_TS, flags, len},
-    {st_sec, static_cast<ACE_UINT32>(st_nsec * NANOS_TO_RTPS_FRACS + .5)} };
+  const ACE_CDR::Octet flags = header.byte_order_;
+  add_timestamp(subm, flags, header);
   CORBA::ULong i = subm.length();
-  subm.length(i + 1);
-  subm[i++].info_ts_sm(ts);
 
   static const CORBA::Octet BUILT_IN_WRITER = 0xC2;
 
@@ -467,7 +471,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     TransportSendListener::InlineQosData qos_data;
     tsce.listener()->retrieve_inline_qos_data(qos_data);
 
-    populate_inline_qos(qos_data, data);
+    populate_inline_qos(qos_data, data.inlineQos);
   }
 
   if (data.inlineQos.length() > 0) {
@@ -480,24 +484,24 @@ RtpsSampleHeader::populate_data_control_submessages(
 
 #define PROCESS_INLINE_QOS(QOS_NAME, DEFAULT_QOS, WRITER_QOS) \
   if (WRITER_QOS.QOS_NAME != DEFAULT_QOS.QOS_NAME) {          \
-    const int qos_len = data.inlineQos.length();              \
-    data.inlineQos.length(qos_len + 1);                       \
-    data.inlineQos[qos_len].QOS_NAME(WRITER_QOS.QOS_NAME);    \
+    const int qos_len = plist.length();                       \
+    plist.length(qos_len + 1);                                \
+    plist[qos_len].QOS_NAME(WRITER_QOS.QOS_NAME);             \
   }
 
 void
 RtpsSampleHeader::populate_inline_qos(
   const TransportSendListener::InlineQosData& qos_data,
-  OpenDDS::RTPS::DataSubmessage& data)
+  RTPS::ParameterList& plist)
 {
   using namespace OpenDDS::RTPS;
 
   // Always include topic name (per the spec)
   {
-    const int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len + 1);
-    data.inlineQos[qos_len].string_data(qos_data.topic_name.c_str());
-    data.inlineQos[qos_len]._d(PID_TOPIC_NAME);
+    const int qos_len = plist.length();
+    plist.length(qos_len + 1);
+    plist[qos_len].string_data(qos_data.topic_name.c_str());
+    plist[qos_len]._d(PID_TOPIC_NAME);
   }
 
   // Conditionally include other QoS inline when the differ from the
@@ -524,6 +528,184 @@ RtpsSampleHeader::populate_inline_qos(
 }
 
 #undef PROCESS_INLINE_QOS
+
+// simple marshaling helpers for RtpsSampleHeader::split()
+namespace {
+  void write(ACE_Message_Block* mb, ACE_CDR::UShort s, bool swap_bytes)
+  {
+    const char* ps = reinterpret_cast<const char*>(&s);
+    if (swap_bytes) {
+      ACE_CDR::swap_2(ps, mb->wr_ptr());
+      mb->wr_ptr(2);
+    } else {
+      mb->copy(ps, 2);
+    }
+  }
+
+  void write(ACE_Message_Block* mb, ACE_CDR::ULong i, bool swap_bytes)
+  {
+    const char* pi = reinterpret_cast<const char*>(&i);
+    if (swap_bytes) {
+      ACE_CDR::swap_4(pi, mb->wr_ptr());
+      mb->wr_ptr(4);
+    } else {
+      mb->copy(pi, 4);
+    }
+  }
+
+  // read without advancing rd_ptr()
+  void peek(ACE_CDR::UShort& target, const char* src, bool swap_bytes)
+  {
+    if (swap_bytes) {
+      ACE_CDR::swap_2(src, reinterpret_cast<char*>(&target));
+    } else {
+      std::memcpy(&target, src, sizeof(ACE_CDR::UShort));
+    }
+  }
+
+  void peek(ACE_CDR::ULong& target, const char* src, bool swap_bytes)
+  {
+    if (swap_bytes) {
+      ACE_CDR::swap_4(src, reinterpret_cast<char*>(&target));
+    } else {
+      std::memcpy(&target, src, sizeof(ACE_CDR::ULong));
+    }
+  }
+
+  const size_t FRAG_START_OFFSET = 24, FRAG_SAMPLE_SIZE_OFFSET = 32;
+}
+
+SequenceRange
+RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
+                        ACE_Message_Block*& head, ACE_Message_Block*& tail)
+{
+  using namespace RTPS;
+  static const SequenceRange unknown_range(SequenceNumber::SEQUENCENUMBER_UNKNOWN(),
+                                           SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+  size_t data_offset = 0;
+  const char* rd = orig.rd_ptr();
+  ACE_CDR::ULong starting_frag, sample_size;
+  ACE_CDR::Octet flags;
+  bool swap_bytes;
+
+  // Find the start of the DATA | DATA_FRAG submessage in the orig msg block.
+  // The submessages from the start of the msg block to this point (data_offset)
+  // will be copied to both the head and tail fragments.
+  while (true) {
+    flags = rd[data_offset + 1];
+    swap_bytes = ACE_CDR_BYTE_ORDER != bool(flags & FLAG_E);
+    bool found_data = false;
+
+    switch (rd[data_offset]) {
+    case DATA:
+      if ((flags & (FLAG_D | FLAG_K_IN_DATA)) == 0) {
+        if (Transport_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
+            "attempting to fragment a Data submessage with no payload.\n"));
+        }
+        return unknown_range;
+      }
+      found_data = true;
+      starting_frag = 1;
+      sample_size = static_cast<ACE_CDR::ULong>(orig.cont()->total_length());
+      break;
+    case DATA_FRAG:
+      found_data = true;
+      peek(starting_frag, rd + data_offset + FRAG_START_OFFSET, swap_bytes);
+      peek(sample_size, rd + data_offset + FRAG_SAMPLE_SIZE_OFFSET, swap_bytes);
+      break;
+    }
+
+    if (found_data) {
+      break;
+    }
+
+    // Scan for next submessage in orig
+    ACE_CDR::UShort octetsToNextHeader;
+    peek(octetsToNextHeader, rd + data_offset + 2, swap_bytes);
+
+    data_offset += octetsToNextHeader + SMHDR_SZ;
+    if (data_offset >= orig.length()) {
+      if (Transport_debug_level) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) RtpsSampleHeader::split() ERROR - "
+          "invalid octetsToNextHeader encountered while fragmenting.\n"));
+      }
+      return unknown_range;
+    }
+  }
+
+  // Create the "head" message block (of size "sz") containing DATA_FRAG
+  size_t sz = orig.length();
+  ACE_CDR::Octet new_flags = flags;
+  size_t iqos_offset = data_offset + 8 + DATA_FRAG_OCTETS_TO_IQOS;
+  if (rd[data_offset] == DATA) {
+    sz += 12; // DATA_FRAG is 12 bytes larger than DATA
+    iqos_offset -= 12;
+    new_flags &= ~(FLAG_K_IN_DATA | FLAG_K_IN_FRAG);
+    if (flags & FLAG_K_IN_DATA) {
+      new_flags |= FLAG_K_IN_FRAG;
+    }
+  }
+  head = DataSampleHeader::alloc_msgblock(orig, sz, false);
+
+  head->copy(rd, data_offset);
+
+  head->wr_ptr()[0] = DATA_FRAG;
+  head->wr_ptr()[1] = new_flags;
+  head->wr_ptr(2);
+
+  std::memset(head->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
+  head->wr_ptr(4);
+
+  write(head, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+
+  head->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
+
+  write(head, starting_frag, swap_bytes);
+  const size_t max_data = size - sz, orig_payload = orig.cont()->total_length();
+  const ACE_CDR::UShort frags =
+    static_cast<ACE_CDR::UShort>(std::min(max_data, orig_payload) / FRAG_SIZE);
+  write(head, frags, swap_bytes);
+  write(head, FRAG_SIZE, swap_bytes);
+  write(head, sample_size, swap_bytes);
+
+  if (flags & FLAG_Q) {
+    head->copy(rd + iqos_offset, orig.length() - iqos_offset);
+  }
+
+  // Create the "tail" message block containing DATA_FRAG with Q=0
+  tail = DataSampleHeader::alloc_msgblock(orig, data_offset + 36, false);
+
+  tail->copy(rd, data_offset);
+
+  tail->wr_ptr()[0] = DATA_FRAG;
+  tail->wr_ptr()[1] = new_flags & ~FLAG_Q;
+  tail->wr_ptr(2);
+
+  std::memset(tail->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
+  tail->wr_ptr(4);
+
+  write(tail, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+  tail->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
+
+  write(tail, starting_frag + frags, swap_bytes);
+  const size_t tail_data = orig_payload - frags * FRAG_SIZE;
+  const ACE_CDR::UShort tail_frags =
+    static_cast<ACE_CDR::UShort>((tail_data + FRAG_SIZE - 1) / FRAG_SIZE);
+  write(tail, tail_frags, swap_bytes);
+  write(tail, FRAG_SIZE, swap_bytes);
+  write(tail, sample_size, swap_bytes);
+
+  ACE_Message_Block* payload_head = 0;
+  ACE_Message_Block* payload_tail;
+  DataSampleHeader::split_payload(*orig.cont(), frags * FRAG_SIZE,
+                                  payload_head, payload_tail);
+  head->cont(payload_head);
+  tail->cont(payload_tail);
+
+  return SequenceRange(starting_frag + frags - 1,
+                       starting_frag + frags + tail_frags - 1);
+}
 
 }
 }

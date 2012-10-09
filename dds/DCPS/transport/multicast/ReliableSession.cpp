@@ -414,7 +414,7 @@ ReliableSession::send_nakack(SequenceNumber low)
 }
 
 bool
-ReliableSession::start(bool active)
+ReliableSession::start(bool active, bool acked)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
 
@@ -434,12 +434,17 @@ ReliableSession::start(bool active)
   // received data. If a gap is discovered, MULTICAST_NAK control
   // samples will be sent to initiate repairs.
   // Only subscriber send naks so just schedule for sub role.
-  if (!active && !this->nak_watchdog_.schedule(reactor)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableSession::start: ")
-                      ACE_TEXT("failed to schedule NAK watchdog!\n")),
-                     false);
+  if (!active) {
+    if (acked) {
+      this->acked_ = true;
+    } 
+    if (!this->nak_watchdog_.schedule(reactor)) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("ReliableSession::start: ")
+                        ACE_TEXT("failed to schedule NAK watchdog!\n")),
+                       false);
+    }
   }
 
   // Active peers schedule a watchdog timer to initiate a 2-way

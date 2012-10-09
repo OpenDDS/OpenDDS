@@ -27,6 +27,7 @@
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include "DataReaderListener.h"
@@ -36,6 +37,16 @@
 namespace {
 
 const long num_messages_expected = 40;
+
+void parse_args(int argc, ACE_TCHAR* argv[], bool& reliable)
+{
+  ACE_Get_Opt getopt(argc, argv, "r:");
+  for (int opt = 0; (opt = getopt()) != EOF;) {
+    if (opt == 'r') {
+      reliable = ACE_OS::atoi(getopt.opt_arg());
+    }
+  }
+}
 
 } // namespace
 
@@ -118,9 +129,21 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DataReaderListenerImpl* listener_svt = new DataReaderListenerImpl;
     DDS::DataReaderListener_var listener(listener_svt);
 
+    DDS::DataReaderQos qos;
+    sub->get_default_datareader_qos(qos);
+    qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+    qos.liveliness.lease_duration.sec = 10;
+    qos.liveliness.lease_duration.nanosec = 0;
+
+    bool reliable = true;
+    parse_args(argc, argv, reliable);
+    if (reliable) {
+      qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    }
+
     DDS::DataReader_var reader =
       sub->create_datareader(topic.in(),
-                             DATAREADER_QOS_DEFAULT,
+                             qos,
                              listener.in(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -130,51 +153,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -1);
-      }
-
-      if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
-      }
-    } while (matches.current_count > 0);
-
-    ws->detach_condition(condition);
-
     for (int delay = 0; listener_svt->num_samples() != num_messages_expected
-         && delay < 10; ++delay) {
+         && delay < 60; ++delay) {
       ACE_OS::sleep(1);
     }
 
     const long received = listener_svt->num_samples();
-    if (received != num_messages_expected) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l main()")
-                 ACE_TEXT(" ERROR: did not receive expected samples !\n")));
-      // not actually a test failure for udp and unreliable multicast
-      // ACE log messages are redirected, so it won't fail the test
-    }
-
-    if (received <= num_messages_expected * 0.75) {
-      std::cout << "ERROR: data loss >= 25% (" << received << "/"
+    if (reliable && received < num_messages_expected) {
+      std::cout << "ERROR: data loss (" << received << "/"
                 << num_messages_expected << " received)\n";
       ok = false;
     }

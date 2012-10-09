@@ -59,7 +59,7 @@ public:
   void nakack_received(ACE_Message_Block* control);
   virtual void send_nakack(SequenceNumber low);
 
-  virtual bool start(bool active);
+  virtual bool start(bool active, bool acked);
   virtual void stop();
 
   virtual void syn_hook(const SequenceNumber& seq);

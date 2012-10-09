@@ -70,7 +70,7 @@ public:
   virtual bool control_received(char submessage_id,
                                 ACE_Message_Block* control);
 
-  virtual bool start(bool active) = 0;
+  virtual bool start(bool active, bool acked) = 0;
   virtual void stop();
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
@@ -103,10 +103,11 @@ protected:
 
   TransportReassembly reassembly_;
 
+  bool acked_;
+
 private:
   ACE_SYNCH_MUTEX ack_lock_;
   ACE_SYNCH_CONDITION ack_cond_;
-  bool acked_;
 
   SynWatchdog syn_watchdog_;
 };

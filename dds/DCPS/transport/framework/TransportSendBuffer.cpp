@@ -49,13 +49,15 @@ SingleSendBuffer::SingleSendBuffer(size_t capacity,
     retained_db_allocator_(this->n_chunks_ * 2),
     replaced_allocator_(this->n_chunks_),
     replaced_mb_allocator_(this->n_chunks_ * 2),
-    replaced_db_allocator_(this->n_chunks_ * 2)
+    replaced_db_allocator_(this->n_chunks_ * 2),
+    fragments_(0)
 {
 }
 
 SingleSendBuffer::~SingleSendBuffer()
 {
   release_all();
+  delete fragments_;
 }
 
 void
@@ -74,18 +76,38 @@ SingleSendBuffer::release(BufferMap::iterator buffer_iter)
   if (Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::release() - ")
-      ACE_TEXT("releasing buffer at: (0x%x,0x%x)\n"),
+      ACE_TEXT("releasing buffer at: (0x%@,0x%@)\n"),
       buffer.first, buffer.second
     ));
   }
-  RemoveAllVisitor visitor;
-  buffer.first->accept_remove_visitor(visitor);
-  delete buffer.first;
 
-  buffer.second->release();
-  buffer.second = 0;
+  if (buffer.first && buffer.second) {
+    // not a fragment
+    RemoveAllVisitor visitor;
+    buffer.first->accept_remove_visitor(visitor);
+    delete buffer.first;
 
-  this->buffers_.erase(buffer_iter);
+    buffer.second->release();
+    buffer.second = 0;
+
+  } else if (fragments_) {
+    // data actually stored in fragments_
+    const FragmentMap::iterator fm_it = fragments_->find(buffer_iter->first);
+    if (fm_it != fragments_->end()) {
+      for (BufferMap::iterator bm_it = fm_it->second.begin();
+           bm_it != fm_it->second.end(); ++bm_it) {
+        RemoveAllVisitor visitor;
+        bm_it->second.first->accept_remove_visitor(visitor);
+        delete bm_it->second.first;
+
+        bm_it->second.second->release();
+        bm_it->second.second = 0;
+      }
+      fragments_->erase(fm_it);
+    }
+  }
+
+  buffers_.erase(buffer_iter);
 }
 
 void
@@ -101,30 +123,55 @@ SingleSendBuffer::retain_all(RepoId pub_id)
   }
   for (BufferMap::iterator it(this->buffers_.begin());
        it != this->buffers_.end();) {
+    if (it->second.first && it->second.second) {
+      if (retain_buffer(pub_id, it->second) == REMOVE_ERROR) {
+        GuidConverter converter(pub_id);
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("SingleSendBuffer::retain_all: ")
+                   ACE_TEXT("failed to retain data from publication: %C!\n"),
+                   std::string(converter).c_str()));
+        release(it++);
+      } else {
+        ++it;
+      }
 
-    BufferType& buffer(it->second);
-
-    TransportQueueElement::MatchOnPubId match(pub_id);
-    PacketRemoveVisitor visitor(match,
-                                buffer.second,
-                                buffer.second,
-                                this->replaced_allocator_,
-                                this->replaced_mb_allocator_,
-                                this->replaced_db_allocator_);
-
-    buffer.first->accept_replace_visitor(visitor);
-    if (visitor.status() == REMOVE_ERROR) {
-      GuidConverter converter(pub_id);
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("SingleSendBuffer::retain_all: ")
-                 ACE_TEXT("failed to retain data from publication: %C!\n"),
-                 std::string(converter).c_str()));
-      release(it++);
-    } else {
+    } else if (fragments_) {
+      const FragmentMap::iterator fm_it = fragments_->find(it->first);
+      if (fm_it != fragments_->end()) {
+        for (BufferMap::iterator bm_it = fm_it->second.begin();
+             bm_it != fm_it->second.end();) {
+          if (retain_buffer(pub_id, bm_it->second) == REMOVE_ERROR) {
+            GuidConverter converter(pub_id);
+            ACE_ERROR((LM_WARNING,
+                       ACE_TEXT("(%P|%t) WARNING: ")
+                       ACE_TEXT("SingleSendBuffer::retain_all: failed to ")
+                       ACE_TEXT("retain fragment data from publication: %C!\n"),
+                       std::string(converter).c_str()));
+            release(bm_it++);
+          } else {
+            ++bm_it;
+          }
+        }
+      }
       ++it;
     }
   }
+}
+
+RemoveResult
+SingleSendBuffer::retain_buffer(const RepoId& pub_id, BufferType& buffer)
+{
+  TransportQueueElement::MatchOnPubId match(pub_id);
+  PacketRemoveVisitor visitor(match,
+                              buffer.second,
+                              buffer.second,
+                              this->replaced_allocator_,
+                              this->replaced_mb_allocator_,
+                              this->replaced_db_allocator_);
+
+  buffer.first->accept_replace_visitor(visitor);
+  return visitor.status();
 }
 
 void
@@ -132,26 +179,26 @@ SingleSendBuffer::insert(SequenceNumber sequence,
                          TransportSendStrategy::QueueType* queue,
                          ACE_Message_Block* chain)
 {
-
-  // Age off oldest sample if we are at capacity:
-  if (this->buffers_.size() == this->capacity_) {
-    BufferMap::iterator it(this->buffers_.begin());
-    if (it == this->buffers_.end()) return;
-
-    if (Transport_debug_level >= 10) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) SingleSendBuffer::insert() - ")
-        ACE_TEXT("aging off PDU: %q as buffer(%q,%q)\n"),
-        it->first.getValue(),
-        it->second.first, it->second.second
-      ));
-    }
-
-    release(it);
-  }
+  check_capacity();
 
   BufferType& buffer = this->buffers_[sequence];
+  insert_buffer(buffer, queue, chain);
 
+  if (Transport_debug_level >= 10) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SingleSendBuffer::insert() - ")
+      ACE_TEXT("saved PDU: %q as buffer(0x%@,0x%@)\n"),
+      sequence.getValue(),
+      buffer.first, buffer.second
+    ));
+  }
+}
+
+void
+SingleSendBuffer::insert_buffer(BufferType& buffer,
+                                TransportSendStrategy::QueueType* queue,
+                                ACE_Message_Block* chain)
+{
   // Copy sample's TransportQueueElements:
   TransportSendStrategy::QueueType*& elems = buffer.first;
   ACE_NEW(elems, TransportSendStrategy::QueueType(queue->size(), 1));
@@ -167,14 +214,57 @@ SingleSendBuffer::insert(SequenceNumber sequence,
   data = TransportQueueElement::clone_mb(chain,
                                          &this->retained_mb_allocator_,
                                          &this->retained_db_allocator_);
+}
+
+void
+SingleSendBuffer::insert_fragment(SequenceNumber sequence,
+                                  SequenceNumber fragment,
+                                  TransportSendStrategy::QueueType* queue,
+                                  ACE_Message_Block* chain)
+{
+  check_capacity();
+
+  // Insert into buffers_ so that the overall capacity is maintained
+  // The entry in buffers_ with two null pointers indicates that the
+  // actual data is stored in fragments_[sequence].
+  buffers_[sequence] = std::make_pair(static_cast<QueueType*>(0),
+                                      static_cast<ACE_Message_Block*>(0));
+
+  if (!fragments_) {
+    fragments_ = new FragmentMap;
+  }
+
+  BufferType& buffer = (*fragments_)[sequence][fragment];
+  insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) SingleSendBuffer::insert() - ")
-      ACE_TEXT("saved PDU: 0x%x as buffer(0x%x,0x%x)\n"),
-      sequence.getValue(),
+      ACE_TEXT("(%P|%t) SingleSendBuffer::insert_fragment() - ")
+      ACE_TEXT("saved PDU: %q,%q as buffer(0x%@,0x%@)\n"),
+      sequence.getValue(), fragment.getValue(),
       buffer.first, buffer.second
     ));
+  }
+}
+
+void
+SingleSendBuffer::check_capacity()
+{
+  // Age off oldest sample if we are at capacity:
+  if (this->buffers_.size() == this->capacity_) {
+    BufferMap::iterator it(this->buffers_.begin());
+    if (it == this->buffers_.end()) return;
+
+    if (Transport_debug_level >= 10) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) SingleSendBuffer::check_capacity() - ")
+        ACE_TEXT("aging off PDU: %q as buffer(0x%@,0x%@)\n"),
+        it->first.getValue(),
+        it->second.first, it->second.second
+      ));
+    }
+
+    release(it);
   }
 }
 
@@ -201,12 +291,22 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
       if (Transport_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) SingleSendBuffer::resend() - ")
-                   ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
+                   ACE_TEXT("resending PDU: %q, (0x%@,0x%@)\n"),
                    sequence.getValue(),
                    it->second.first,
                    it->second.second));
       }
-      resend_one(it->second);
+      if (it->second.first && it->second.second) {
+        resend_one(it->second);
+      } else if (fragments_) {
+        const FragmentMap::iterator fm_it = fragments_->find(it->first);
+        if (fm_it != fragments_->end()) {
+          for (BufferMap::iterator bm_it = fm_it->second.begin();
+                bm_it != fm_it->second.end(); ++bm_it) {
+            resend_one(bm_it->second);
+          }
+        }
+      }
     }
   }
 
@@ -214,6 +314,35 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
   return range.first >= low() && range.second <= high();
 }
 
+void
+SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
+                                     const DisjointSequence& requested_frags)
+{
+  if (!fragments_ || fragments_->empty() || requested_frags.empty()) {
+    return;
+  }
+  const BufferMap& buffers = (*fragments_)[seq];
+  const std::vector<SequenceRange> psr =
+    requested_frags.present_sequence_ranges();
+  SequenceNumber sent = SequenceNumber::ZERO();
+  for (size_t i = 0; i < psr.size(); ++i) {
+    BufferMap::const_iterator it = buffers.lower_bound(psr[i].first);
+    if (it == buffers.end()) {
+      return;
+    }
+    BufferMap::const_iterator it2 = buffers.lower_bound(psr[i].second);
+    while (true) {
+      if (sent < it->first) {
+        resend_one(it->second);
+        sent = it->first;
+      }
+      if (it == it2) {
+        break;
+      }
+      ++it;
+    }
+  }
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

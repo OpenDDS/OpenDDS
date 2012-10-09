@@ -17,39 +17,19 @@
 #include "Writer.h"
 
 #include <sstream>
+#include <iomanip>
 
-const int num_instances_per_writer = 1;
 const int num_messages = 10;
 
 Writer::Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2)
   : writer1_(DDS::DataWriter::_duplicate(writer1)),
     writer2_(DDS::DataWriter::_duplicate(writer2)),
-    finished_instances_(0),
     timeout_writes_(0)
 {
 }
 
-void
-Writer::start()
-{
-  // Lanuch num_instances_per_writer threads. Each thread writes one
-  // instance which uses the thread id as the key value.
-  if (activate(THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%N:%l: start()")
-               ACE_TEXT(" activate failed!\n")));
-    ACE_OS::exit(-1);
-  }
-}
-
-void
-Writer::end()
-{
-  wait();
-}
-
 namespace {
-  void wait_for_match(DDS::DataWriter_ptr writer)
+  void wait_for_match(DDS::DataWriter_ptr writer, bool match = true)
   {
     DDS::StatusCondition_var condition = writer->get_statuscondition();
     condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -63,14 +43,7 @@ namespace {
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
 
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: wait_for_match()")
-                   ACE_TEXT(" ERROR: wait failed!\n")));
-        ACE_OS::exit(-1);
-      }
-
+    while (true) {
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: wait_for_match()")
@@ -78,14 +51,23 @@ namespace {
         ACE_OS::exit(-1);
       }
 
-    } while (matches.current_count < 1);
-
+      if (match ? (matches.current_count < 1) : (matches.current_count > 0)) {
+        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l: wait_for_match()")
+                     ACE_TEXT(" ERROR: wait failed!\n")));
+          ACE_OS::exit(-1);
+        }
+      } else {
+        break;
+      }
+    }
     ws->detach_condition(condition);
   }
 }
 
-int
-Writer::svc()
+void
+Writer::write()
 {
   DDS::InstanceHandleSeq handles;
 
@@ -115,7 +97,7 @@ Writer::svc()
     }
 
     std::ostringstream pid;
-    pid << ACE_OS::getpid();
+    pid << std::setw(5) << ACE_OS::getpid();
 
     Messenger::Message message1;
     message1.subject_id = 1;
@@ -153,7 +135,7 @@ Writer::svc()
         }
       }
 
-      ACE_OS::sleep(ACE_Time_Value(1));
+      ACE_OS::sleep(1);
 
       error = message_dw2->write(message2, handle2);
 
@@ -171,19 +153,15 @@ Writer::svc()
       ++message2.count;
     }
 
+    // Let readers disconnect first, once they either get the data or
+    // give up and time-out.  This allows the writer to be alive while
+    // processing requests for retransmission from the readers.
+    wait_for_match(writer1_, false);
+    wait_for_match(writer2_, false);
+
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");
   }
-
-  finished_instances_ ++;
-
-  return 0;
-}
-
-bool
-Writer::is_finished() const
-{
-  return finished_instances_ == num_instances_per_writer;
 }
 
 int

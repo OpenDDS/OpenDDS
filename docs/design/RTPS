@@ -13,7 +13,6 @@ Not Currently Implemented
 -------------------------
 (Items in this list are not necessarily needed for compliance or interop)
 - Non-default LIVELINESS QoS (8.7.2.2.3 and 8.4.13)
-- Sending fragmented data (8.4.14.1), receiving is implemented
 - Writer-side content filtering (8.7.3)
   - OpenDDS may still drop samples that aren't needed (due to content filtering)
     by any associated readers -- this is done above the transport layer

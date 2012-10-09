@@ -61,10 +61,7 @@ throw(CORBA::SystemException)
 
           std::cout << "Message: subject = " << message.subject.in()
                     << " subject_id = " << message.subject_id
-                    << " count = " << message.count
-                    << " from = " << message.from.in()
-                    << "\n\t text = " << message.text.in()
-                    << " data.length = " << message.data.length() << "\n";
+                    << " count = " << message.count << '\n';
 
           for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
             if ((message.subject_id == 1 &&

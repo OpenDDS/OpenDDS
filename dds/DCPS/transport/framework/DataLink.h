@@ -295,7 +295,7 @@ protected:
   /// sample or control message delivery. IThey just simply
   /// delegate to the send strategy.
   void send_start_i();
-  void send_i(TransportQueueElement* element, bool relink = true);
+  virtual void send_i(TransportQueueElement* element, bool relink = true);
   void send_stop_i();
 
   /// For a given local RepoId (publication or subscription), return the list

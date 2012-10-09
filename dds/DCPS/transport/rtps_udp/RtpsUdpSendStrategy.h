@@ -38,9 +38,12 @@ public:
   };
   friend struct OverrideToken;
 
+  OverrideToken override_destinations(const ACE_INET_Addr& destination);
   OverrideToken override_destinations(
     const std::set<ACE_INET_Addr>& destinations);
 
+  void send_rtps_control(ACE_Message_Block& submessages,
+                         const ACE_INET_Addr& destination);
   void send_rtps_control(ACE_Message_Block& submessages,
                          const std::set<ACE_INET_Addr>& destinations);
 
@@ -49,17 +52,19 @@ protected:
 
   virtual size_t max_message_size() const
   {
-    // In the initial implementation we are not generating fragments
-    return 0; //UDP_MAX_MESSAGE_SIZE;
+    return UDP_MAX_MESSAGE_SIZE;
   }
 
 private:
   void marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
                        const std::set<ACE_INET_Addr>& addrs);
+  ssize_t send_single_i(const iovec iov[], int n,
+                        const ACE_INET_Addr& addr);
 
   RtpsUdpDataLink* link_;
   const std::set<ACE_INET_Addr>* override_dest_;
+  const ACE_INET_Addr* override_single_dest_;
 
   OpenDDS::RTPS::Header rtps_header_;
   char rtps_header_data_[RTPS::RTPSHDR_SZ];

@@ -9,6 +9,8 @@
 #ifndef DCPS_RTPSSAMPLEHEADER_H
 #define DCPS_RTPSSAMPLEHEADER_H
 
+#include "Rtps_Udp_Export.h"
+
 #include "ace/Basic_Types.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
@@ -21,9 +23,10 @@ namespace DCPS {
 
 class ReceivedDataSample;
 struct DataSampleListElement;
+class DisjointSequence;
 
 /// Adapt the TransportReceiveStrategy for RTPS's "sample" (submessage) Header
-class RtpsSampleHeader {
+class OpenDDS_Rtps_Udp_Export RtpsSampleHeader {
 public:
 
   // This is not really the max_marshaled_size, but it's used for determining
@@ -36,6 +39,13 @@ public:
   // (The header could fail to parse in init(), but unlike the TCP case we
   // never want to go back to the reactor and wait for more bytes to arrive.)
   static bool partial(const ACE_Message_Block&) { return false; }
+
+  /// Create two new serialized headers (owned by caller), the "head" having at
+  /// most "size" bytes (header + data) and the "tail" having the rest.
+  /// Returns a pair containing the largest fragment number in each new header.
+  static SequenceRange split(const ACE_Message_Block& orig, size_t size,
+                             ACE_Message_Block*& head,
+                             ACE_Message_Block*& tail);
 
   RtpsSampleHeader();
   explicit RtpsSampleHeader(ACE_Message_Block& mb);
@@ -51,7 +61,7 @@ public:
 
   bool more_fragments() const;
 
-  OpenDDS::RTPS::Submessage submessage_;
+  RTPS::Submessage submessage_;
 
 private:
   void init(ACE_Message_Block& mb);
@@ -61,18 +71,26 @@ private:
 
 public:
   // Unlike the rest of this class, which is used with the
-  // TransportReceiveStrategy, thes functions do the inverse of
+  // TransportReceiveStrategy, these functions do the inverse of
   // into_received_data_sample() so they are used on the sending side:
   // translating from an OpenDDS data structure to the RTPS format.
-  static void populate_data_sample_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+  static void populate_data_sample_submessages(RTPS::SubmessageSeq& subm,
                                                const DataSampleListElement& dsle,
                                                bool requires_inline_qos);
-  static void populate_data_control_submessages(OpenDDS::RTPS::SubmessageSeq& subm,
+  static void populate_data_control_submessages(RTPS::SubmessageSeq& subm,
                                                 const TransportSendControlElement& tsce,
                                                 bool requires_inline_qos);
   static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
-                                  OpenDDS::RTPS::DataSubmessage& data);
+                                  RTPS::ParameterList& plist);
   static bool control_message_supported(char message_id);
+
+  // All of the fragments we generate will use the FRAG_SIZE of 1024, which may
+  // be the smallest allowed by the spec (8.4.14.1.1).  There is no practical
+  // advantage to increasing this constant, since any number of 1024-byte
+  // fragments may appear in a single DATA_FRAG submessage.  The spec is
+  // ambiguous in its use of KB to mean either 1000 or 1024, and uses < instead
+  // of <= (see issue 16966).
+  static const ACE_CDR::UShort FRAG_SIZE = 1024;
 
 private:
   static void process_iqos(DataSampleHeader& opendds,

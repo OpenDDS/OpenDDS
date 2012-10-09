@@ -75,7 +75,7 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
       return 0;
     }
 
-    if (!session->start(active)) {
+    if (!session->start(active, this->connections_.count(remote_peer))) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("MulticastTransport[%C]::find_datalink_i: ")
@@ -171,7 +171,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                      0);
   }
 
-  if (!session->start(active)) {
+  if (!session->start(active, this->connections_.count(remote_peer))) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")

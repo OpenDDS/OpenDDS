@@ -75,8 +75,8 @@ MulticastSession::MulticastSession(MulticastDataLink* link,
   , remote_peer_(remote_peer)
   , started_(false)
   , active_(true)
-  , ack_cond_(ack_lock_)
   , acked_(false)
+  , ack_cond_(ack_lock_)
   , syn_watchdog_(this)
 {
 }

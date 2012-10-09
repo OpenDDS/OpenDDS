@@ -198,7 +198,6 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   /// Create two new serialized headers (owned by caller), the "head" having at
   /// most "size" bytes (header + data) and the "tail" having the rest.
-  /// Precondition: size must be larger than the max_marshaled_size().
   static void split(const ACE_Message_Block& orig, size_t size,
                     ACE_Message_Block*& head, ACE_Message_Block*& tail);
 
@@ -228,11 +227,17 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   bool into_received_data_sample(ReceivedDataSample& rds);
 
-  ACE_UINT32 message_length() { return this->message_length_; }
+  ACE_UINT32 message_length() const { return this->message_length_; }
 
   bool more_fragments() const { return this->more_fragments_; }
 
   void pdu_remaining(size_t) { /* ignored, only RTPS uses this */ }
+
+  static ACE_Message_Block* alloc_msgblock(const ACE_Message_Block& mb,
+                                           size_t size, bool use_data_alloc);
+
+  static void split_payload(const ACE_Message_Block& orig, size_t size,
+                            ACE_Message_Block*& head, ACE_Message_Block*& tail);
 
 private:
   /// Keep track of the amount of data read from a buffer.

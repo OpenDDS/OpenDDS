@@ -12,26 +12,18 @@
 #include <ace/Task.h>
 #include <dds/DdsDcpsPublicationC.h>
 
-class Writer : public ACE_Task_Base {
+class Writer {
 public:
 
   Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2);
 
-  void start();
-
-  void end();
-
-  /** Lanch a thread to write. **/
-  virtual int svc();
-
-  bool is_finished() const;
+  void write();
 
   int get_timeout_writes() const;
 
 private:
   DDS::DataWriter_var writer1_;
   DDS::DataWriter_var writer2_;
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> timeout_writes_;
 };
 

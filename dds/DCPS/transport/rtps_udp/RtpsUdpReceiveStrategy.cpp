@@ -105,6 +105,11 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                     receiver_.source_guid_prefix_);
     break;
 
+  case NACK_FRAG:
+    link_->received(rsh.submessage_.nack_frag_sm(),
+                    receiver_.source_guid_prefix_);
+    break;
+
   /* no case DATA_FRAG: by the time deliver_sample() is called, reassemble()
      has successfully reassembled the fragments and we now have a DATA submsg
    */
@@ -204,6 +209,9 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
     // to be a fully-formed DataSubmessage, just enough for this class to use
     // in deliver_sample() which ends up calling RtpsUdpDataLink::received().
     // In particular we will need the SequenceNumber, but ignore the iQoS.
+
+    // Peek at the byte order from the encapsulation containing the payload.
+    data.header_.byte_order_ = data.sample_->rd_ptr()[1] & 1 /*FLAG_E*/;
 
     RtpsSampleHeader& rsh = received_sample_header();
     const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();

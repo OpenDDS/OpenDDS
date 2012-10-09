@@ -1,6 +1,10 @@
 Version 3.4 of OpenDDS.
 
--
+- Added new OpenDDS-specific APIs for sending and receiving untyped data,
+  (does not require code generation from IDL data structures).  See the
+  Recorder and Replayer classes and the test in tests/DCPS/RecorderReplayer.
+
+- Implemented the ability to send fragmented data with the rtps_udp transport.
 
 
 ========================================================================

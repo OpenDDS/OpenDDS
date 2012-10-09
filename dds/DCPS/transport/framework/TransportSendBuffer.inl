@@ -50,5 +50,11 @@ SingleSendBuffer::empty() const
   return this->buffers_.empty();
 }
 
+ACE_INLINE bool
+SingleSendBuffer::contains(const SequenceNumber& seq) const
+{
+  return this->buffers_.count(seq);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
