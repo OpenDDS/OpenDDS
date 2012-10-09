@@ -117,7 +117,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     header_mb.cont(0);
 
     // Check results
-    TEST_CHECK(sr.first == 1 && sr.second == 2);
+    TEST_CHECK(sr.first == 1 && sr.second == 3);
     RtpsSampleHeader header1(*f.head_);
     TEST_CHECK(header1.valid());
     TEST_CHECK(header1.submessage_._d() == INFO_TS);
