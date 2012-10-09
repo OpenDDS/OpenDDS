@@ -184,7 +184,6 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
   typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
 
   if (local_id == GUID_UNKNOWN) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     for (iter_t iter = locators_.begin(); iter != locators_.end(); ++iter) {
       addrs.insert(iter->second.addr_);
     }
@@ -205,13 +204,6 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
 
 ACE_INET_Addr
 RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
-  return get_locator_i(remote_id);
-}
-
-ACE_INET_Addr
-RtpsUdpDataLink::get_locator_i(const RepoId& remote_id) const
 {
   using std::map;
   typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
@@ -1408,7 +1400,7 @@ RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
   ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
   send_strategy_->send_rtps_control(*msg,
-                                    get_locator_i(element->subscription_id()));
+                                    get_locator(element->subscription_id()));
 }
 
 void
@@ -1421,7 +1413,7 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
   std::memcpy(info_dst_.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
   ser << info_dst_;
   mb.cont(marshal_gaps(writer, reader, gaps));
-  send_strategy_->send_rtps_control(mb, get_locator_i(reader));
+  send_strategy_->send_rtps_control(mb, get_locator(reader));
   mb.cont()->release();
 }
 
