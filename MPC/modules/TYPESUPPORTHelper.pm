@@ -30,8 +30,7 @@ sub get_output {
     $i2j->do_cached_parse($file, $flags);
 
     my $tsfile = $tsidl;
-    #is this right? or should it replace with a / (see IDL2JNIHelper.pm)
-    $tsfile =~ s/\\//g;
+    $tsfile =~ s/\\/\//g;
 
     my $tsinfo = $i2j->get_typesupport_info($tsfile);
     if (defined $tsinfo) {

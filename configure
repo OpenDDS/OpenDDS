@@ -11,6 +11,8 @@ use Getopt::Long;
 use Dumpvalue;
 use File::Spec;
 use File::Copy;
+require File::Temp;
+use File::Temp ();
 use FileHandle;
 use Cwd;
 use strict;
@@ -24,6 +26,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Options controlling the configure script:',
     'help|h|?', 'Show this help and exit',
     'verbose|v', 'Trace script execution',
+    'dry-run|n', 'Don\'t do anything',
    ],
    ['Build platform and compiler:',
     'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
@@ -46,6 +49,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'configh=s@', 'Extra text for config.h',
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
+    'mpcopts=s', 'Extra command-line args for MPC (if MPC is run)',
    ],
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -59,15 +63,15 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'boost-version:s', 'Boost version (only if needed to find headers)',
    ],
    ['Minimizing OpenDDS:',
-    'built-in-topics!', 'Support Built-in Topics (yes)',
-    'content-subscription!', 'Support Content-Subscription Profile (yes)',
-    'content-filtered-topic!', 'Support ContentFilteredTopic from Content-Subscription Profile (yes)',
-    'multi-topic!', 'Support MultiTopic from Content-Subscription Profile (yes)',
-    'query-condition!', 'Support QueryCondition from Content-Subscription Profile (yes)',
-    'ownership-profile!', 'Support Ownership Profile (yes)',
-    'ownership-kind-exclusive!', 'Support Ownership kind = EXCLUSIVE and OwnershipStrength QoS policy from the Ownership Profile (yes)',
-    'object-model-profile!', 'Support Object Model Profile (yes)',
-    'persistence-profile!', 'Support Persistence Profile (yes)',
+    'built-in-topics!', 'Built-in Topics (yes)',
+    'content-subscription!', 'Content-Subscription Profile (yes)',
+    'content-filtered-topic!', 'ContentFilteredTopic (CS Profile) (yes)',
+    'multi-topic!', 'MultiTopic (CS Profile) (yes)',
+    'query-condition!', 'QueryCondition (CS Profile) (yes)',
+    'ownership-profile!', 'Ownership Profile (yes)',
+    'ownership-kind-exclusive!', 'Exclusive Ownership (Ownership Profile) (yes)',
+    'object-model-profile!', 'Object Model Profile (yes)',
+    'persistence-profile!', 'Persistence Profile (yes)',
     'tests!', 'Build tests, examples, and performance tests (yes)',
    ],
   );
@@ -114,7 +118,7 @@ EOT
             $optkey = "[no-]$optkey"
               if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
             $optkey .= '...' if $opt =~ /s\@$/;
-            print "--$optkey" . ' ' x (28 - length $optkey) . "$descr\n";
+            print "--$optkey" . ' ' x (27 - length $optkey) . " $descr\n";
           }
          );
   exit 1;
@@ -339,12 +343,20 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
     if ($@) {
       if (which('wget')) {
         print "Downloading ACE+TAO 1.6a with latest patches (using wget)\n";
+        if ($opts{'dry-run'}) {
+          print "Dry-run: would run wget $urlbase$file\nExiting\n";
+          exit 1;
+        }
         if (system("wget $urlbase$file")) {
           die "ERROR from wget, stopped";
         }
       }
       elsif (which('curl')) {
         print "Downloading ACE+TAO 1.6a with latest patches (using curl)\n";
+        if ($opts{'dry-run'}) {
+          print "Dry-run: would run curl $urlbase$file -o $file\nExiting\n";
+          exit 1;
+        }
         if (system("curl $urlbase$file -o $file")) {
           die "ERROR from curl, stopped";
         }
@@ -358,6 +370,10 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
       my $ua = LWP::UserAgent->new;
       $ua->env_proxy;
       print "Downloading ACE+TAO 1.6a with latest patches\n";
+      if ($opts{'dry-run'}) {
+        print "Dry-run: would LWP::UserAgent get $urlbase$file\nExiting\n";
+        exit 1;
+      }
       my $response = $ua->get($urlbase . $file, ':content_file' => $file);
       if ($response->is_error) {
         die $response->message . "\nstopped";
@@ -372,6 +388,11 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
     chdir('..');
     my $err = 1;
     if ($slash eq '/') {
+      if ($opts{'dry-run'}) {
+        print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
+          "tar xzf $ddsroot/$file\nExiting\n";
+        exit 1;
+      }
       $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
     }
     if ($err) {
@@ -382,6 +403,10 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
   }
   else {
     my $ae = Archive::Extract->new('archive' => $file);
+    if ($opts{'dry-run'}) {
+      print "Dry-run: would Archive::Extract $file\nExiting\n";
+      exit 1;
+    }
     if (!$ae->extract('to' => '..')) {
       die $ae->error . "\nstopped";
     }
@@ -407,11 +432,14 @@ close TAOVER;
 
 sub backup_and_open {
   my $file = shift;
-  if (-r $file) {
+  if (!$opts{'dry-run'} && -r $file) {
     my $backup = (-e $file . '.bak') ? ($file . '.bak') : $file . ".bak.$$";
     copy($file, $backup);
     print "WARNING: overwriting existing $file (saved a backup copy as " .
       "$backup)\n";
+  }
+  if ($opts{'dry-run'}) {
+    return File::Temp->new(UNLINK => 1);
   }
   my $fh = new FileHandle;
   open $fh, ">$file" or die "Can't write to $file, stopped";
@@ -428,10 +456,9 @@ else {
   my $pi = $platforminfo{$opts{'host'}};
 
   # config.h
-  open CFGH, ">$ENV{'ACE_ROOT'}/ace/config.h"
-    or die "Can't write to config.h, stopped";
+  my $CFGH = backup_and_open("$ENV{'ACE_ROOT'}/ace/config.h");
   for my $line (@{$opts{'configh'}}) {
-    print CFGH "$line\n";
+    print $CFGH "$line\n";
   }
   my $cfg = $opts{'host'};
   if ($pi->{'aceconfig'}) {
@@ -439,8 +466,8 @@ else {
     $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
   }
   $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
-  print CFGH "#include \"ace/config-$cfg.h\"\n";
-  close CFGH;
+  print $CFGH "#include \"ace/config-$cfg.h\"\n";
+  close $CFGH;
   print "Wrote config.h\n" if $opts{'verbose'};
 
   # default.features
@@ -582,11 +609,10 @@ else {
 
 ## Run MPC (if needed)
 
-for my $feat ('built-in-topics',
-  'content-subscription', 'content-filtered-topic', 'multi-topic', 'query-condition',
-  'ownership-profile', 'ownership-kind-exclusive',
-  'object-model-profile',
-  'persistence-profile') {
+for my $feat (qw/built-in-topics content-subscription content-filtered-topic
+                 multi-topic query-condition ownership-profile
+                 ownership-kind-exclusive object-model-profile
+                 persistence-profile/) {
   if (exists $opts{$feat} && !$opts{$feat}) {
     my $f = $feat;
     $f =~ s/-/_/g;
@@ -631,14 +657,15 @@ if ($needmpc) {
     my $df_file =
       "$ENV{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
     my $DF = $wrote_df
-      ? new FileHandle(">>$df_file")
+      ? ($opts{'dry-run'} ? File::Temp->new(UNLINK => 1)
+                          : new FileHandle(">>$df_file"))
       : backup_and_open($df_file);
     for my $f (@features) {
       print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
     }
     $DF->close;
     if ($opts{'verbose'}) {
-      print ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n";
+      print '' . ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n";
     }
   }
 
@@ -665,11 +692,13 @@ if ($needmpc) {
 
   print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  print "mwc command line: -type $needmpc $ws $static\n"
+  my $mwcargs = "-type $needmpc $ws $static " . $opts{'mpcargs'};
+  print "mwc command line: $mwcargs\n"
     if $opts{'verbose'};
-  if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl -type $needmpc $ws $static")
-      != 0) {
-    die "Error from MPC, stopped";
+  if (!$opts{'dry-run'}) {
+    if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
+      die "Error from MPC, stopped";
+    }
   }
 
   $ws =~ s/\.mwc$/.sln/;
@@ -693,7 +722,7 @@ my %specific =
 
 my $MK = undef;
 if ($slash eq '/') {
-  if (!-r 'GNUmakefile.dist') {
+  if (!$opts{'dry-run'} && !-r 'GNUmakefile.dist') {
     move('GNUmakefile', 'GNUmakefile.dist');
   }
   $MK = backup_and_open('GNUmakefile');

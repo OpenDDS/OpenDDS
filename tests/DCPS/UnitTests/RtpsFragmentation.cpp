@@ -21,6 +21,8 @@
 
 #include "../common/TestSupport.h"
 
+#include <cstring>
+
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 

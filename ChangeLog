@@ -1,3 +1,19 @@
+Tue Oct  9 19:31:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+
+          Addressed a possible bug listed in the comments.
+
+        * configure:
+
+          Added a --dry-run option (mostly useful for maintaining the script).
+          Added an option to provide extra args to mwc.pl.
+          Cleaned up script.
+
+        * tests/DCPS/UnitTests/RtpsFragmentation.cpp:
+
+          Fixed missing std library #include.
+
 Tue Oct  9 18:27:17 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * dds/DCPS/RecorderImpl.cpp:
