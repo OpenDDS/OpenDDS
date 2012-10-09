@@ -1,3 +1,15 @@
+Tue Oct  9 18:27:17 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * ChangeLog:
+
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+
+Tue Oct  9 18:26:29 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+
 Tue Oct  9 17:21:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:
