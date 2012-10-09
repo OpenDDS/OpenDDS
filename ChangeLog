@@ -1,3 +1,10 @@
+Tue Oct  9 20:28:00 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Removed an unused parameter.
+
 Tue Oct  9 19:31:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/modules/TYPESUPPORTHelper.pm:

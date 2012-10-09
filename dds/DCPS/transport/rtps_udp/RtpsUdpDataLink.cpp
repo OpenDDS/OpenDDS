@@ -1295,7 +1295,7 @@ RtpsUdpDataLink::send_nack_replies()
       }
     }
 
-    send_nackfrag_replies(rw->first, writer, gaps, recipients);
+    send_nackfrag_replies(writer, gaps, recipients);
 
     if (!gaps.empty()) {
       ACE_Message_Block* mb_gap = marshal_gaps(rw->first, GUID_UNKNOWN, gaps);
@@ -1306,8 +1306,7 @@ RtpsUdpDataLink::send_nack_replies()
 }
 
 void
-RtpsUdpDataLink::send_nackfrag_replies(const RepoId& writerId,
-                                       RtpsWriter& writer,
+RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
                                        DisjointSequence& gaps,
                                        std::set<ACE_INET_Addr>& gap_recipients)
 {
