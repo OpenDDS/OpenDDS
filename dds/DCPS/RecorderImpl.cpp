@@ -306,7 +306,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
       const PublicationId& writer_id = writer.writerId;
       RcHandle<WriterInfo> info = new WriterInfo(this, writer_id,
                                                  writer.writerQos);
-      std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
+      /*std::pair<WriterMapType::iterator, bool> bpair =*/
+      this->writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
           writer_id,

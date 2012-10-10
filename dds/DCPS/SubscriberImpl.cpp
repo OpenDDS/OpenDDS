@@ -956,6 +956,8 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
       }
       return DDS::DataReader::_nil();
     }
+#else
+    ACE_UNUSED_ARG(mt);
 #endif
     DDS::TopicQos topic_qos;
     a_topic->get_qos(topic_qos);

@@ -1,3 +1,11 @@
+Wed Oct 10 13:43:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+
+          Fixed compiler warnings.
+
 Tue Oct  9 21:19:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
