@@ -31,7 +31,7 @@ RtpsCustomizedElement::fragment(size_t size)
     RtpsCustomizedElement::alloc(0, head, allocator());
   frag->set_publication_id(publication_id());
   frag->seq_ = sequence();
-  frag->set_fragment();  
+  frag->set_fragment();
   frag->last_frag_ = fragNumbers.first;
 
   RtpsCustomizedElement* rest =

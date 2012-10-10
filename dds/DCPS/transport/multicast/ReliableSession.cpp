@@ -437,7 +437,7 @@ ReliableSession::start(bool active, bool acked)
   if (!active) {
     if (acked) {
       this->acked_ = true;
-    } 
+    }
     if (!this->nak_watchdog_.schedule(reactor)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
