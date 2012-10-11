@@ -394,7 +394,7 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
   std::cout << "EXTRACTING SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
-  Values observed;
+  Values observed = {};
   extractions(testchain, observed, swap, align);
   if (testchain->total_length()) {
     std::cout << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;

@@ -105,6 +105,7 @@ Serializer::read_string(ACE_CDR::Char*& dest)
   //
   // Ensure no bad values leave the routine.
   //
+  CORBA::string_free(dest);
   dest = 0;
 
   //
@@ -152,6 +153,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
   //
   // Ensure no bad values leave the routine.
   //
+  CORBA::wstring_free(dest);
   dest = 0;
 
   //

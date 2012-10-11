@@ -1,3 +1,12 @@
+Thu Oct 11 21:55:13 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          In Serializer::read_string(), deallocate the existing
+          string if there is one.  When demarshaing a string sequence
+          there will be an existing string, even if it's the empty string.
+
 Wed Oct 10 13:43:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RecorderImpl.cpp:
