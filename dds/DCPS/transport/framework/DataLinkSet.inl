@@ -91,9 +91,9 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
     if (DCPS_debug_level > 4) {
       const GuidConverter converter(pub_id);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DatLinkSet::send_control: ")
+                 ACE_TEXT("(%P|%t) DataLinkSet::send_control: ")
                  ACE_TEXT("no links for publication %C, ")
-                 ACE_TEXT("not control message.\n"),
+                 ACE_TEXT("not sending control message.\n"),
                  std::string(converter).c_str()));
     }
     listener->control_delivered(msg);

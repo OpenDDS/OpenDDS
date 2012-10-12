@@ -943,7 +943,10 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch&  links,
        end = links->map().end(); iter != end; ++iter) {
 
     const DataLink_rch& datalink = iter->second;
-    GUIDSeq_var intersect = datalink->target_intersection(ac.customized_);
+    size_t n_subs;
+    GUIDSeq_var intersect =
+      datalink->target_intersection(header.publication_id_, ac.customized_,
+                                    n_subs);
     // "intersect" is the list of GUIDs for the subs on this link that will
     // need to get a customized REQUEST_ACK message.
 

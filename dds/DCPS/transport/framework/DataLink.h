@@ -234,9 +234,11 @@ public:
   /// DataLink's control.
   SendControlStatus send_control(const DataSampleHeader& header, ACE_Message_Block* data);
 
-  /// Return the subset of the input set which are also targets of
-  /// this DataLink (see is_target()).
-  GUIDSeq* target_intersection(const GUIDSeq& in);
+  /// For a given publication "pub_id", store the total number of corresponding
+  /// subscriptions in "n_subs" and given a set of subscriptions
+  /// (the "in" sequence), return the subset of the input set "in" which are
+  /// targets of this DataLink (see is_target()).
+  GUIDSeq* target_intersection(const RepoId& pub_id, const GUIDSeq& in, size_t& n_subs);
 
   CORBA::ULong num_targets() const;
   RepoIdSet_rch get_targets() const;

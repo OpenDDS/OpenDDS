@@ -1148,14 +1148,16 @@ DataLink::is_target(const RepoId& sub_id)
 }
 
 GUIDSeq*
-DataLink::target_intersection(const GUIDSeq& in)
+DataLink::target_intersection(const RepoId& pub_id, const GUIDSeq& in,
+                              size_t& n_subs)
 {
   GUIDSeq_var res;
-  GuardType guard(this->sub_map_lock_);
+  GuardType guard(this->pub_map_lock_);
+  ReceiveListenerSet_rch rlset = this->pub_map_.find(pub_id);
+  n_subs = rlset->map().size();
   const CORBA::ULong len = in.length();
   for (CORBA::ULong i(0); i < len; ++i) {
-    RepoIdSet_rch target = this->sub_map_.find(in[i]);
-    if (!target.is_nil()) {
+    if (rlset->exist(in[i])) {
       if (res.ptr() == 0) {
         res = new GUIDSeq;
       }

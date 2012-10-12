@@ -348,8 +348,11 @@ TransportClient::send(const DataSampleList& samples)
         typedef DataLinkSet::MapType MapType;
         MapType& map = pub_links->map();
         for (MapType::iterator itr = map.begin(); itr != map.end(); ++itr) {
-          GUIDSeq_var ti = itr->second->target_intersection(cur->filter_out_);
-          if (ti.ptr() == 0 || ti->length() != itr->second->num_targets()) {
+          size_t n_subs;
+          GUIDSeq_var ti =
+            itr->second->target_intersection(cur->publication_id_,
+                                             cur->filter_out_, n_subs);
+          if (ti.ptr() == 0 || ti->length() != n_subs) {
             if (!subset.in()) {
               subset = new DataLinkSet;
             }

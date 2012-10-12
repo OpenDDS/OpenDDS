@@ -1,3 +1,17 @@
+Fri Oct 12 22:19:51 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Updated support for writer-side Content-Filtered Topic evaluation.
+          If the same DataLink is used for other readers that are not
+          filtered-out but are also not associated with the writer, that should
+          not prevent the link from being skipped (no need to send the data on
+          that particular link).
+
 Fri Oct 12 14:16:17 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Serializer.cpp:
