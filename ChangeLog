@@ -1,3 +1,9 @@
+Fri Oct 12 14:16:17 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.cpp:
+
+          Added #include.
+
 Thu Oct 11 21:55:13 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Serializer.cpp:

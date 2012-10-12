@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "Serializer.h"
+#include <tao/String_Alloc.h>
 #include <ace/OS_NS_string.h>
 #include <ace/OS_Memory.h>
 
