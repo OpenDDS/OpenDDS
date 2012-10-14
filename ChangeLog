@@ -1,3 +1,11 @@
+Sun Oct 14 22:56:56 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Changed remove_dead_participants to repeatedly check the end() method
+          since it can change while processing, which can lead to invalid
+          pointer usage.
+
 Fri Oct 12 22:19:51 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

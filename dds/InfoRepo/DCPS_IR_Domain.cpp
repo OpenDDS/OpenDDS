@@ -991,9 +991,10 @@ void DCPS_IR_Domain::remove_dead_participants()
   if (0 < deadParticipants_.size()) {
     DCPS_IR_Participant* dead = 0;
     DCPS_IR_Participant_Set::ITERATOR iter = deadParticipants_.begin();
-    DCPS_IR_Participant_Set::ITERATOR end = deadParticipants_.end();
 
-    while (iter != end) {
+    // repeat end() due to the value possibly changing from additional dead
+    // participants during notifications
+    while (iter != deadParticipants_.end()) {
       dead = *iter;
       ++iter;
 
