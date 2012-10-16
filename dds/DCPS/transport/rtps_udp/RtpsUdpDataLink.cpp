@@ -804,8 +804,8 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         bitmap.length(1);
         bitmap[0] = 0;
 
-        const SequenceNumber& hb_low = wi->second.hb_range_.first,
-          hb_high = wi->second.hb_range_.second;
+        const SequenceNumber& hb_low = wi->second.hb_range_.first;
+        const SequenceNumber& hb_high = wi->second.hb_range_.second;
         const SequenceNumber::Value hb_low_val = hb_low.getValue(),
           hb_high_val = hb_high.getValue();
 
@@ -850,19 +850,22 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
         const SequenceNumber::Value ack_val = ack.getValue();
 
-        if (!recvd.empty() && hb_high > recvd.high()
-            && hb_high <= ack_val + 255) {
-          // Nack the range between the received high and the heartbeat high.
+        if (!recvd.empty() && hb_high > recvd.high()) {
+          const SequenceNumber eff_high =
+            (hb_high <= ack_val + 255) ? hb_high : (ack_val + 255);
+          const SequenceNumber::Value eff_high_val = eff_high.getValue();
+          // Nack the range between the received high and the effective high.
           const CORBA::ULong old_len = bitmap.length(),
-            new_len = bitmap_num_longs(ack, hb_high);
+            new_len = bitmap_num_longs(ack, eff_high);
           if (new_len > old_len) {
             bitmap.length(new_len);
             for (CORBA::ULong i = old_len; i < new_len; ++i) {
               bitmap[i] = 0;
             }
           }
-          const CORBA::ULong idx_hb_high = CORBA::ULong(hb_high_val - ack_val),
-            idx_recv_high = CORBA::ULong(recvd.high().getValue() - ack_val);
+          const CORBA::ULong idx_hb_high = CORBA::ULong(eff_high_val - ack_val),
+            idx_recv_high = recvd.disjoint() ?
+                            CORBA::ULong(recvd.high().getValue() - ack_val) : 0;
           DisjointSequence::fill_bitmap_range(idx_recv_high, idx_hb_high,
                                               bitmap.get_buffer(), new_len,
                                               num_bits);

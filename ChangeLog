@@ -1,3 +1,25 @@
+Tue Oct 16 19:41:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fixed a bug in generation of RTPS ACKNACK messages when more than
+          255 sequence numbers are missing at the high end of the heartbeat
+          range.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_1/rtps.ini:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest3_2/rtps.ini:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Allow tests to be run with the rtps_udp transport, including
+          correctly enabling reliability QoS and letting the writer continue
+          to run after the last write(), in order to respond to nacks.
+
 Sun Oct 14 22:56:56 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Domain.cpp:

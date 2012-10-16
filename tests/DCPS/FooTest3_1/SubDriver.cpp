@@ -125,7 +125,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
 
   datareader_
     = subscriber_->create_datareader(topic_.in (),
-                                     DATAREADER_QOS_DEFAULT,
+                                     DATAREADER_QOS_USE_TOPIC_QOS,
                                      drl.in(),
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datareader_.in ()));

@@ -35,6 +35,7 @@ my $publisher_running_sec=30;
 my $subscriber_running_sec=20;
 my $repo_bit_conf = "-NOBITS";
 my $app_bit_conf = "-DCPSBit 0";
+my $cfgfile = '';
 
 # multiple instances test
 if ($ARGV[0] eq 'mi') {
@@ -64,7 +65,7 @@ elsif ($ARGV[0] eq 'bp_remove') {
   $publisher_running_sec=150;
   $subscriber_running_sec=120;
 }
-elsif ($ARGV[0] eq 'b') {
+elsif ($ARGV[0] eq 'b' || $ARGV[0] eq 'rtps_b') {
   # test of blocking write
   $blocking_write=1;
   $max_samples_per_instance=1;
@@ -74,6 +75,7 @@ elsif ($ARGV[0] eq 'b') {
   $receive_delay_msec=100;
   $publisher_running_sec=150;
   $subscriber_running_sec=120;
+  $cfgfile = '-DCPSConfigFile rtps.ini' if $ARGV[0] eq 'rtps_b';
 }
 elsif ($ARGV[0] eq '') {
   # default test
@@ -93,7 +95,7 @@ my $DCPSREPO=PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                       "$repo_bit_conf -o $dcpsrepo_ior");
 
 my $publisher=PerlDDS::create_process ("FooTest3_publisher",
-                                       "$app_bit_conf"
+                                       "$app_bit_conf $cfgfile"
                                        . " -DCPSInfoRepo file://$dcpsrepo_ior"
                                        . " -t $num_threads_to_write"
                                        . " -w $num_writers"
@@ -108,7 +110,7 @@ my $publisher=PerlDDS::create_process ("FooTest3_publisher",
 print $publisher->CommandLine(), "\n";
 
 my $subscriber=PerlDDS::create_process ("FooTest3_subscriber",
-                                        "$app_bit_conf"
+                                        "$app_bit_conf $cfgfile"
                                         . " -DCPSInfoRepo file://$dcpsrepo_ior"
                                         . " -n $num_writes"
                                         . " -l $receive_delay_msec");

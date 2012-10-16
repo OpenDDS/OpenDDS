@@ -160,6 +160,14 @@ Writer::svc ()
 
   }
 
+  while (true) {
+    writer_->get_matched_subscriptions(handles);
+    if (handles.length() == 0)
+      break;
+    else
+      ACE_OS::sleep(ACE_Time_Value(0,200000));
+  }
+
   finished_ = true;
 
   return 0;

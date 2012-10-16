@@ -161,6 +161,14 @@ Writer::svc ()
       writer_servant_->data_delivered_count_, writer_servant_->data_dropped_count_));
   }
 
+  while (true) {
+    writer_->get_matched_subscriptions(handles);
+    if (handles.length() == 0)
+      break;
+    else
+      ACE_OS::sleep(ACE_Time_Value(0, 200000));
+  }
+
   finished_ = true;
 
   return 0;
