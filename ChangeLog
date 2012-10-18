@@ -1,3 +1,12 @@
+Thu Oct 18 19:25:40 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Copying from Topic QoS to DataReader or DataWriter QoS
+          fixed to include the Ownership policy.  This was added
+          in one of the OMG spec updates but hadn't yet been
+          changed in the copy-from-topic methods.
+
 Wed Oct 17 13:43:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Serializer/SerializerTest.cpp:

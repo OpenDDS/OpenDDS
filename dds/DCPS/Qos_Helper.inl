@@ -1500,6 +1500,7 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataReaderQos& a_datareader_qos,
   a_datareader_qos.destination_order = a_topic_qos.destination_order;
   a_datareader_qos.history = a_topic_qos.history;
   a_datareader_qos.resource_limits = a_topic_qos.resource_limits;
+  a_datareader_qos.ownership = a_topic_qos.ownership;
   return true;
 }
 
@@ -1525,7 +1526,7 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataWriterQos& a_datawriter_qos,
   a_datawriter_qos.resource_limits = a_topic_qos.resource_limits;
   a_datawriter_qos.transport_priority = a_topic_qos.transport_priority;
   a_datawriter_qos.lifespan = a_topic_qos.lifespan;
-
+  a_datawriter_qos.ownership = a_topic_qos.ownership;
   return true;
 }
 
