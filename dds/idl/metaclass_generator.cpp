@@ -46,9 +46,28 @@ bool metaclass_generator::gen_enum(UTL_ScopedName* name,
 
 namespace {
 
+  void delegateToNested(const std::string& fieldName, AST_Field* field,
+                        const std::string& firstArg, bool skip = false)
+  {
+    const size_t n = fieldName.size() + 1 /* 1 for the dot */;
+    const std::string fieldType = scoped(field->field_type()->name());
+    be_global->impl_ <<
+      "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
+      << ") == 0) {\n"
+      "      return getMetaStruct<" << fieldType << ">().getValue("
+      << firstArg << ", field + " << n << ");\n"
+      "    }" << (skip ? "" : "\n");
+    if (skip) {
+      be_global->impl_ << " else {\n"
+        "      gen_skip_over(" << firstArg << ", static_cast<" << fieldType
+        << "*>(0));\n"
+        "    }\n";
+    }
+  }
+
   void gen_field_getValue(AST_Field* field)
   {
-    Classification cls = classify(field->field_type());
+    const Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
@@ -67,15 +86,120 @@ namespace {
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
-      size_t n = fieldName.size() + 1 /* 1 for the dot */;
-      std::string fieldType = scoped(field->field_type()->name());
-      be_global->impl_ <<
-        "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
-        << ") == 0) {\n"
-        "      return getMetaStruct<" << fieldType << ">().getValue(&typed."
-        << fieldName << ", field + " << n << ");\n"
-        "    }\n";
+      delegateToNested(fieldName, field, "&typed." + fieldName);
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
+    }
+  }
+
+  std::string to_cxx_type(AST_Type* type, int& size)
+  {
+    const Classification cls = classify(type);
+    if (cls & CL_ENUM) {
+      size = 4;
+      return "ACE_CDR::ULong";
+    }
+    if (cls & CL_STRING) {
+      size = 4; // encoding of str length is 4 bytes
+      return ((cls & CL_WIDE) ? "TAO::W" : "TAO::")
+        + std::string("String_Manager");
+    }
+    if (cls & CL_PRIMITIVE) {
+      resolveActualType(type);
+      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      switch (p->pt()) {
+      case AST_PredefinedType::PT_long:
+        size = 4;
+        return "ACE_CDR::Long";
+      case AST_PredefinedType::PT_ulong:
+        size = 4;
+        return "ACE_CDR::ULong";
+      case AST_PredefinedType::PT_longlong:
+        size = 8;
+        return "ACE_CDR::LongLong";
+      case AST_PredefinedType::PT_ulonglong:
+        size = 8;
+        return "ACE_CDR::ULongLong";
+      case AST_PredefinedType::PT_short:
+        size = 2;
+        return "ACE_CDR::Short";
+      case AST_PredefinedType::PT_ushort:
+        size = 2;
+        return "ACE_CDR::UShort";
+      case AST_PredefinedType::PT_float:
+        size = 4;
+        return "ACE_CDR::Float";
+      case AST_PredefinedType::PT_double:
+        size = 8;
+        return "ACE_CDR::Double";
+      case AST_PredefinedType::PT_longdouble:
+        size = 16;
+        return "ACE_CDR::LongDouble";
+      case AST_PredefinedType::PT_char:
+        size = 1;
+        return "ACE_CDR::Char";
+      case AST_PredefinedType::PT_wchar:
+        size = 1; // encoding of wchar length is 1 byte
+        return "ACE_CDR::WChar";
+      case AST_PredefinedType::PT_boolean:
+        size = 1;
+        return "ACE_CDR::Boolean";
+      case AST_PredefinedType::PT_octet:
+        size = 1;
+        return "ACE_CDR::Octet";
+      default:
+        break;
+      }
+    }
+    return scoped(type->name());
+  }
+
+  void gen_field_getValueFromSerialized(AST_Field* field)
+  {
+    AST_Type* type = field->field_type();
+    const Classification cls = classify(type);
+    const std::string fieldName = field->local_name()->get_string();
+    int size = 0;
+    const std::string cxx_type = to_cxx_type(type, size);
+    if (cls & CL_SCALAR) {
+      const std::string val =
+        (cls & CL_STRING) ? "val.out()" : getWrapper("val", type, WD_INPUT);
+      be_global->impl_ <<
+        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+        "      " << cxx_type << " val;\n"
+        "      if (!(ser >> " << val << ")) {\n"
+        "        throw std::runtime_error(\"Field '" << fieldName << "' could "
+        "not be deserialized\");\n"
+        "      }\n"
+        "      return val;\n"
+        "    } else {\n";
+      if (cls & CL_STRING) {
+        be_global->impl_ <<
+          "      ACE_CDR::ULong len;\n"
+          "      if (!(ser >> len)) {\n"
+          "        throw std::runtime_error(\"String '" << fieldName <<
+          "' length could not be deserialized\");\n"
+          "      }\n"
+          "      ser.skip(len);\n";
+      } else if (cls & CL_WIDE) {
+        be_global->impl_ <<
+          "      ACE_CDR::Octet len;\n"
+          "      if (!(ser >> ACE_InputCDR::to_octet(len))) {\n"
+          "        throw std::runtime_error(\"WChar '" << fieldName <<
+          "' length could not be deserialized\");\n"
+          "      }\n"
+          "      ser.skip(len);\n";
+      } else {
+        be_global->impl_ <<
+          "      ser.skip(1, " << size << ");\n";
+      }
+      be_global->impl_ <<
+        "    }\n";
+    } else if (cls & CL_STRUCTURE) {
+      delegateToNested(fieldName, field, "ser", true);
+    } else { // array, sequence, union:
+      be_global->impl_ <<
+        "    gen_skip_over(ser, static_cast<" << cxx_type
+        << ((cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
     }
   }
 
@@ -234,12 +358,22 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "    const " << clazz << "& typed = *static_cast<const " << clazz
     << "*>(stru);\n";
   std::for_each(fields.begin(), fields.end(), gen_field_getValue);
-  std::string exception =
+  const std::string exception =
     "    throw std::runtime_error(\"Field \" + std::string(field) + \" not "
-    "found or its type is not supported (in Struct " + clazz + ")\");\n";
+    "found or its type is not supported (in struct " + clazz + ")\");\n";
   be_global->impl_ <<
     "    ACE_UNUSED_ARG(typed);\n" <<
     exception <<
+    "  }\n\n"
+    "  Value getValue(Serializer& ser, const char* field) const\n"
+    "  {\n";
+  std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
+  be_global->impl_ <<
+    "    if (!field[0]) {\n"   // if 'field' is the empty string...
+    "      return 0;\n"        // ...we've skipped the entire struct
+    "    }\n"                  //    and the return value is ignored
+    "    throw std::runtime_error(\"Field \" + std::string(field) + \" not "
+    "valid for struct " << clazz << "\");\n"
     "  }\n\n"
     "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
     "ComparatorBase::Ptr next) const\n"
@@ -293,5 +427,143 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "  static MetaStructImpl<" << clazz << "> msi;\n"
     "  return msi;\n"
     "}\n\n";
+  {
+    Function f("gen_skip_over", "void");
+    f.addArg("ser", "Serializer&");
+    f.addArg("", clazz + "*");
+    f.endArgs();
+    be_global->impl_ <<
+      "  MetaStructImpl<" << clazz << ">().getValue(ser, \"\");\n";
+  }
+  return true;
+}
+
+bool
+metaclass_generator::gen_typedef(UTL_ScopedName* name, AST_Type* type, const char*)
+{
+  AST_Array* arr = AST_Array::narrow_from_decl(type);
+  AST_Sequence* seq = 0;
+  if (!arr && !(seq = AST_Sequence::narrow_from_decl(type))) {
+    return true;
+  }
+
+  const Classification cls = classify(type);
+  const std::string clazz = scoped(name);
+  ContentSubscriptionGuard csg;
+  NamespaceGuard ng;
+  Function f("gen_skip_over", "void");
+  f.addArg("ser", "Serializer&");
+  f.addArg("", clazz + ((cls & CL_ARRAY) ? "_forany*" : "*"));
+  f.endArgs();
+
+  std::string len;
+  AST_Type* elem;
+
+  if (arr) {
+    elem = arr->base_type();
+    size_t n_elems = 1;
+    for (size_t i = 0; i < arr->n_dims(); ++i) {
+      n_elems *= arr->dims()[i]->ev()->u.ulval;
+    }
+    std::ostringstream strstream;
+    strstream << n_elems;
+    len = strstream.str();
+  } else { // Sequence
+    elem = seq->base_type();
+    be_global->impl_ <<
+      "  ACE_CDR::ULong length;\n"
+      "  ser >> length;\n";
+    len = "length";
+  }
+
+  const std::string cxx_elem = scoped(elem->name());
+  resolveActualType(elem);
+  const Classification elem_cls = classify(elem);
+
+  if ((elem_cls & (CL_PRIMITIVE | CL_ENUM)) && !(elem_cls & CL_WIDE)) {
+    // fixed-length sequence/array element -> skip all elements at once
+    int sz = 1;
+    to_cxx_type(elem, sz);
+    be_global->impl_ <<
+      "  ser.skip(" << len << ", " << sz << ");\n";
+  } else {
+    be_global->impl_ <<
+      "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
+    if ((elem_cls & CL_PRIMITIVE) && (elem_cls & CL_WIDE)) {
+      be_global->impl_ <<
+        "    ACE_CDR::Octet o;\n"
+        "    ser >> ACE_InputCDR::to_octet(o);\n"
+        "    ser.skip(o);\n";
+    } else if (elem_cls & CL_STRING) {
+      be_global->impl_ <<
+        "    ACE_CDR::ULong strlength;\n"
+        "    ser >> strlength;\n"
+        "    ser.skip(strlength);\n";
+    } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
+      be_global->impl_ <<
+        "    gen_skip_over(ser, static_cast<" << cxx_elem
+        << ((elem_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
+    }
+    be_global->impl_ <<
+      "  }\n";
+  }
+
+  return true;
+}
+
+bool
+metaclass_generator::gen_union(UTL_ScopedName* name,
+  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
+  const char*)
+{
+  const std::string clazz = scoped(name);
+  ContentSubscriptionGuard csg;
+  NamespaceGuard ng;
+  Function f("gen_skip_over", "void");
+  f.addArg("ser", "Serializer&");
+  f.addArg("", clazz + "*");
+  f.endArgs();
+  be_global->impl_ <<
+    "  " << scoped(discriminator->name()) << " disc;\n"
+    "  ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ";\n"
+    "  switch (disc) {\n";
+  size_t n_labels = 0;
+  bool has_default = false;
+  for (size_t i = 0; i < branches.size(); ++i) {
+    generateBranchLabels(branches[i], discriminator, n_labels, has_default);
+    AST_Type* br_type = branches[i]->field_type();
+    const Classification br_cls = classify(br_type);
+    if (br_cls & CL_STRING) {
+      be_global->impl_ <<
+        "    {\n"
+        "      ACE_CDR::ULong len;\n"
+        "      ser >> len;\n"
+        "      ser.skip(len);\n"
+        "    }\n";
+    } else if (br_cls & CL_WIDE) {
+      be_global->impl_ <<
+        "    {\n"
+        "      ACE_CDR::Octet len;\n"
+        "      ser >> ACE_InputCDR::to_octet(len);\n"
+        "      ser.skip(len);\n"
+        "    }\n";
+    } else if (br_cls & CL_SCALAR) {
+      int sz = 1;
+      to_cxx_type(br_type, sz);
+      be_global->impl_ <<
+        "    ser.skip(1, " << sz << ");\n";
+    } else {
+      be_global->impl_ <<
+        "    gen_skip_over(ser, static_cast<" << scoped(br_type->name())
+        << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
+    }
+  }
+  if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
+    be_global->impl_ <<
+      "  default:\n"
+      "    break;\n";
+  }
+  be_global->impl_ <<
+    "  }\n";
   return true;
 }

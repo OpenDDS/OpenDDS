@@ -68,8 +68,7 @@ public:
     std::for_each(children_.begin(), children_.end(), deleteChild);
   }
 
-  virtual Value eval(const void* sample, const MetaStruct& meta,
-                     const DDS::StringSeq& params) = 0;
+  virtual Value eval(DataForEval& data) = 0;
 
 private:
   static void deleteChild(EvalNode* child)
@@ -80,6 +79,39 @@ private:
 protected:
   std::vector<EvalNode*> children_;
 };
+
+Value
+FilterEvaluator::DeserializedForEval::lookup(const char* field) const
+{
+  return meta_.getValue(deserialized_, field);
+}
+
+namespace {
+  struct AMB_Releaser {
+    explicit AMB_Releaser(ACE_Message_Block* mb) : mb_(mb) {}
+    ~AMB_Releaser() { mb_->release(); }
+    ACE_Message_Block* mb_;
+  };
+}
+
+Value
+FilterEvaluator::SerializedForEval::lookup(const char* field) const
+{
+  const std::map<std::string, Value>::const_iterator iter = cache_.find(field);
+  if (iter != cache_.end()) {
+    return iter->second;
+  }
+  ACE_Message_Block* const mb = serialized_->duplicate();
+  AMB_Releaser release(mb);
+  Serializer ser(mb, swap_,
+                 cdr_ ? Serializer::ALIGN_CDR : Serializer::ALIGN_NONE);
+  if (cdr_) {
+    ser.skip(4); // CDR encapsulation header
+  }
+  const Value v = meta_.getValue(ser, field);
+  cache_.insert(std::make_pair(field, v));
+  return v;
+}
 
 FilterEvaluator::~FilterEvaluator()
 {
@@ -97,10 +129,9 @@ namespace {
       : fieldName_(toString(fnNode))
     {}
 
-    Value eval(const void* sample, const MetaStruct& meta,
-               const DDS::StringSeq&)
+    Value eval(FilterEvaluator::DataForEval& data)
     {
-      return meta.getValue(sample, fieldName_.c_str());
+      return data.lookup(fieldName_.c_str());
     }
 
     std::string fieldName_;
@@ -120,7 +151,7 @@ namespace {
       }
     }
 
-    Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
+    Value eval(FilterEvaluator::DataForEval&)
     {
       return Value(value_, true);
     }
@@ -134,7 +165,7 @@ namespace {
       : value_(toString(fnNode)[1])
     {}
 
-    Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
+    Value eval(FilterEvaluator::DataForEval&)
     {
       return Value(value_, true);
     }
@@ -148,7 +179,7 @@ namespace {
       : value_(std::atof(toString(fnNode).c_str()))
     {}
 
-    Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
+    Value eval(FilterEvaluator::DataForEval&)
     {
       return Value(value_, true);
     }
@@ -164,7 +195,7 @@ namespace {
       value_.erase(value_.length() - 1); // trim right '
     }
 
-    Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
+    Value eval(FilterEvaluator::DataForEval&)
     {
       return Value(value_.c_str(), true);
     }
@@ -178,9 +209,9 @@ namespace {
       : param_(std::atoi(toString(fnNode).c_str() + 1 /* skip % */))
     {}
 
-    Value eval(const void*, const MetaStruct&, const DDS::StringSeq& params)
+    Value eval(FilterEvaluator::DataForEval& data)
     {
-      return Value(params[param_], true);
+      return Value(data.params_[param_], true);
     }
 
     int param_;
@@ -221,11 +252,10 @@ namespace {
       addChild(right_);
     }
 
-    Value eval(const void* sample, const MetaStruct& meta,
-               const DDS::StringSeq& params)
+    Value eval(FilterEvaluator::DataForEval& data)
     {
-      Value left = left_->eval(sample, meta, params);
-      Value right = right_->eval(sample, meta, params);
+      Value left = left_->eval(data);
+      Value right = right_->eval(data);
       switch (oper_type_) {
       case OPER_EQ:
         return left == right;
@@ -294,12 +324,11 @@ namespace {
       addChild(right_);
     }
 
-    Value eval(const void* sample, const MetaStruct& meta,
-               const DDS::StringSeq& params)
+    Value eval(FilterEvaluator::DataForEval& data)
     {
-      Value field = field_->eval(sample, meta, params);
-      Value left = left_->eval(sample, meta, params);
-      Value right = right_->eval(sample, meta, params);
+      Value field = field_->eval(data);
+      Value left = left_->eval(data);
+      Value right = right_->eval(data);
       bool btwn = !(field < left) && !(right < field);
       return invert_ ? !btwn : btwn;
     }
@@ -324,10 +353,9 @@ namespace {
       }
     }
 
-    Value eval(const void* sample, const MetaStruct& meta,
-               const DDS::StringSeq& params)
+    Value eval(FilterEvaluator::DataForEval& data)
     {
-      Value left = children_[0]->eval(sample, meta, params);
+      Value left = children_[0]->eval(data);
       assert(left.type_ == Value::VAL_BOOL);
       switch (op_) {
       case LG_NOT:
@@ -339,7 +367,7 @@ namespace {
         if (left.b_) return true;
         break;
       }
-      return children_[1]->eval(sample, meta, params);
+      return children_[1]->eval(data);
     }
 
   private:
@@ -365,7 +393,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node,
     eval = new Logical(Logical::LG_NOT, prev);
   } else if (node->TypeMatches<Cond>()) {
     for (AstNode* iter = node->GetFirstChild(); iter;
-        iter = iter->GetSibling()) {
+         iter = iter->GetSibling()) {
       eval = walkAst(iter, eval);
     }
   } else {
@@ -380,10 +408,9 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node,
 }
 
 bool
-FilterEvaluator::eval_i(const void* sample, const MetaStruct& meta,
-                        const DDS::StringSeq& params) const
+FilterEvaluator::eval_i(DataForEval& data) const
 {
-  return filter_root_->eval(sample, meta, params).b_;
+  return filter_root_->eval(data).b_;
 }
 
 std::vector<std::string>
@@ -432,6 +459,16 @@ Value::Value(ACE_CDR::LongDouble ld, bool conversion_preferred)
 
 Value::Value(const char* s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(s))
+  , conversion_preferred_(conversion_preferred)
+{}
+
+Value::Value(const TAO::String_Manager& s, bool conversion_preferred)
+  : type_(VAL_STRING), s_(ACE_OS::strdup(s.in()))
+  , conversion_preferred_(conversion_preferred)
+{}
+
+Value::Value(const TAO::WString_Manager& s, bool conversion_preferred)
+  : type_(VAL_STRING), s_(ACE_OS::strdup(ACE_Wide_To_Ascii(s.in()).char_rep()))
   , conversion_preferred_(conversion_preferred)
 {}
 

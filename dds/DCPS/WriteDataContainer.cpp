@@ -188,8 +188,14 @@ WriteDataContainer::enqueue(
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(ReaderIdSeq const & rds,
-                                  DDS::LifespanQosPolicy const & lifespan)
+WriteDataContainer::reenqueue_all(const RepoId& reader_id,
+                                  const DDS::LifespanQosPolicy& lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                                  ,
+                                  const FilterEvaluator* eval,
+                                  const DDS::StringSeq& expression_params
+#endif
+                                  )
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -201,15 +207,23 @@ WriteDataContainer::reenqueue_all(ReaderIdSeq const & rds,
   if (sending_data_.size_ > 0) {
     this->copy_and_append(this->resend_data_,
                           sending_data_,
-                          rds,
-                          lifespan);
+                          reader_id,
+                          lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                          , eval, expression_params
+#endif
+                          );
   }
 
   if (sent_data_.size_ > 0) {
     this->copy_and_append(this->resend_data_,
                           sent_data_,
-                          rds,
-                          lifespan);
+                          reader_id,
+                          lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                          , eval, expression_params
+#endif
+                          );
 
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
@@ -1127,14 +1141,16 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
 
 void
 WriteDataContainer::copy_and_append(DataSampleList& list,
-                                    DataSampleList const & appended,
-                                    ReaderIdSeq const & rds,
-                                    DDS::LifespanQosPolicy const & lifespan)
+                                    const DataSampleList& appended,
+                                    const RepoId& reader_id,
+                                    const DDS::LifespanQosPolicy& lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                                    ,
+                                    const FilterEvaluator* eval,
+                                    const DDS::StringSeq& params
+#endif
+                                    )
 {
-  CORBA::ULong const num_rds = rds.length();
-  CORBA::ULong const num_iters_per_sample =
-    num_rds / MAX_READERS_PER_ELEM + 1;
-
   for (DataSampleListElement* cur = appended.head_;
        cur != 0;
        cur = cur->next_send_sample_) {
@@ -1143,30 +1159,25 @@ WriteDataContainer::copy_and_append(DataSampleList& list,
     if (resend_data_expired(*cur, lifespan))
       continue;
 
-    CORBA::ULong num_rds_left = num_rds;
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+    if (eval && writer_->filter_out(*cur, *eval, params))
+      continue;
+#endif
 
-    for (CORBA::ULong i = 0; i < num_iters_per_sample; ++i) {
-      DataSampleListElement* element = 0;
-      ACE_NEW_MALLOC(element,
-                     static_cast<DataSampleListElement*>(
-                       sample_list_element_allocator_.malloc(
-                         sizeof(DataSampleListElement))),
-                     DataSampleListElement(*cur));
+    DataSampleListElement* element = 0;
+    ACE_NEW_MALLOC(element,
+                    static_cast<DataSampleListElement*>(
+                      sample_list_element_allocator_.malloc(
+                        sizeof(DataSampleListElement))),
+                    DataSampleListElement(*cur));
 
-      // @todo Does ACE_NEW_MALLOC throw?  Where's the check for
-      //       allocation failure, i.e. element == 0?
+    // @todo Does ACE_NEW_MALLOC throw?  Where's the check for
+    //       allocation failure, i.e. element == 0?
 
-      element->num_subs_ =
-        num_rds_left <= MAX_READERS_PER_ELEM
-        ? num_rds_left
-        : MAX_READERS_PER_ELEM;
+    element->num_subs_ = 1;
+    element->subscription_ids_[0] = reader_id;
 
-      for (CORBA::ULong j = 0; j < element->num_subs_; ++j)
-        element->subscription_ids_[j] = rds[j + i * MAX_READERS_PER_ELEM];
-
-      list.enqueue_tail_next_send_sample(element);
-      num_rds_left -= element->num_subs_;
-    }
+    list.enqueue_tail_next_send_sample(element);
   }
 }
 

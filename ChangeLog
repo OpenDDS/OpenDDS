@@ -1,3 +1,29 @@
+Mon Oct 22 01:23:03 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added support for publisher-side filtering of durable data
+          when the subscribing side is using a ContentFilteredTopic.
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          Code generation support for the above, adding the ability
+          to skip to individual fields inside serialized data samples.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Testing ContentFilteredTopic with durable data.
+
 Thu Oct 18 19:25:40 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:

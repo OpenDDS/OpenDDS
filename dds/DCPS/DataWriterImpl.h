@@ -24,7 +24,7 @@
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"
 #endif
 
@@ -449,6 +449,12 @@ public:
 
   virtual EntityImpl* parent() const;
 
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  bool filter_out(const DataSampleListElement& elt,
+                  const FilterEvaluator& evaluator,
+                  const DDS::StringSeq& expression_params) const;
+#endif
+
 protected:
 
   // type specific DataWriter's part of enable.
@@ -477,7 +483,7 @@ protected:
   DomainParticipantImpl*          participant_servant_;
 
   struct ReaderInfo {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DomainParticipantImpl* participant_;
     DDS::StringSeq expression_params_;
     std::string filter_;

@@ -306,7 +306,7 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
                                        const DDS::StringSeq& params,
                                        DomainParticipantImpl* participant,
                                        bool durable)
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   : participant_(participant)
   , expression_params_(params)
   , filter_(filter)
@@ -322,16 +322,16 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
   ACE_UNUSED_ARG(params);
   ACE_UNUSED_ARG(participant);
 }
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
 DataWriterImpl::ReaderInfo::~ReaderInfo()
 {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   eval_ = RcHandle<FilterEvaluator>();
   if (!filter_.empty()) {
     participant_->deref_filter_eval(filter_.c_str());
   }
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
 }
 
 
@@ -366,6 +366,10 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
   bool reader_durable = false;
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  RcHandle<FilterEvaluator> eval;
+  DDS::StringSeq expression_params;
+#endif
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
@@ -378,6 +382,10 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     RepoIdToReaderInfoMap::const_iterator it = reader_info_.find(remote_id);
     if (it != reader_info_.end()) {
       reader_durable = it->second.durable_;
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+      eval = it->second.eval_;
+      expression_params = it->second.expression_params_;
+#endif
     }
   }
 
@@ -443,10 +451,11 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
   if (reader_durable) {
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
-    ReaderIdSeq rd_ids(1);
-    rd_ids.length(1);
-    rd_ids[0] = remote_id;
-    this->data_container_->reenqueue_all(rd_ids, this->qos_.lifespan);
+    this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                                         , eval.in(), expression_params
+#endif
+                                         );
 
     // Acquire the data writer container lock to avoid deadlock. The
     // thread calling association_complete() has to acquire lock in the
@@ -712,7 +721,7 @@ void
 DataWriterImpl::update_subscription_params(const RepoId& readerId,
                                            const DDS::StringSeq& params)
 {
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifdef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   ACE_UNUSED_ARG(readerId);
   ACE_UNUSED_ARG(params);
 #else
@@ -1724,7 +1733,7 @@ DataWriterImpl::write(DataSample* data,
 
   this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
   std::set<GUID_t, GUID_tKeyLessThan> excluded;
   if (filter_out && reader_info_.size()) {
@@ -1743,7 +1752,7 @@ DataWriterImpl::write(DataSample* data,
        end = reader_info_.end(); iter != end; ++iter) {
     iter->second.expected_sequence_ = sequence_number_;
   }
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
   if (this->coherent_) {
     ++this->coherent_samples_;
@@ -2066,6 +2075,22 @@ DataWriterImpl::parent() const
 {
   return this->publisher_servant_;
 }
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+bool
+DataWriterImpl::filter_out(const DataSampleListElement& elt,
+                           const FilterEvaluator& evaluator,
+                           const DDS::StringSeq& expression_params) const
+{
+  TypeSupportImpl* const typesupport =
+    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+
+  return !evaluator.eval(elt.sample_->cont(),
+    elt.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+    elt.header_.cdr_encapsulation_, typesupport->getMetaStructForType(),
+    expression_params);
+}
+#endif
 
 bool
 DataWriterImpl::check_transport_qos(const TransportInst&)

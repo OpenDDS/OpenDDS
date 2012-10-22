@@ -59,7 +59,7 @@ size_t takeSamples(const DataReader_var& dr, F filter)
     for (CORBA::ULong i(0); i < data.length(); ++i) {
       if (infoseq[i].valid_data) {
         ++count;
-        cout << "received data with key == " << data[i].key << endl;
+        cout << dr << " received data with key == " << data[i].key << endl;
         if (!filter(data[i].key)) {
           cout << "ERROR: data should be filtered" << endl;
           return 0;
@@ -84,8 +84,14 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   DataWriter_var dw =
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
+  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Message sample = {0};
+  mdw->write(sample, HANDLE_NIL); // durable, filtered
+  sample.key = 99;
+  mdw->write(sample, HANDLE_NIL); // durable, not filtered
   DataWriter_var dw2 =
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
 
@@ -93,10 +99,12 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  DataReaderQos dr_qos_durable = dr_qos;
+  dr_qos_durable.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
     "MyTopic-Filtered", topic, "key > 1", StringSeq());
   DataReader_var dr =
-    sub->create_datareader(cft, dr_qos, 0, DEFAULT_STATUS_MASK);
+    sub->create_datareader(cft, dr_qos_durable, 0, DEFAULT_STATUS_MASK);
   TopicDescription_var td = dr->get_topicdescription();
   ContentFilteredTopic_var cft_from_td = ContentFilteredTopic::_narrow(td);
   if (!cft_from_td) {
@@ -127,13 +135,19 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   }
   ws->detach_condition(dw_sc);
 
+  // read durable data from dr
+  if (!waitForSample(dr)) return false;
+  if (takeSamples(dr, bind2nd(greater<CORBA::Long>(), 98)) != 1) {
+    cout << "ERROR: take() should have returned a valid durable sample (99)"
+         << endl;
+    return false;
+  }
+
   DDS::StringSeq params(1);
   params.length(1);
   params[0] = "2";
   cft2->set_expression_parameters(params);
 
-  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message sample;
   for (sample.key = 1; sample.key < 4; ++sample.key) {
     if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
   }

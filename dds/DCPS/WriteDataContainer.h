@@ -30,6 +30,7 @@ class DataWriterImpl;
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
+class FilterEvaluator;
 
 typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
 
@@ -153,11 +154,16 @@ public:
   /**
    * Create a resend list with the copies of all current "sending"
    * and "sent" samples. The samples will be sent to the
-   *  subscribers specified.
+   *  subscriber specified.
    */
-  DDS::ReturnCode_t
-  reenqueue_all(OpenDDS::DCPS::ReaderIdSeq const & rds,
-                DDS::LifespanQosPolicy const & lifespan);
+  DDS::ReturnCode_t reenqueue_all(const RepoId& reader_id,
+                                  const DDS::LifespanQosPolicy& lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                                  ,
+                                  const FilterEvaluator* eval,
+                                  const DDS::StringSeq& params
+#endif
+                                  );
 
   /**
    * Dynamically allocate a PublicationInstance object and add to
@@ -328,9 +334,15 @@ private:
   // --------------------------
 
   void copy_and_append(DataSampleList& list,
-                       DataSampleList const & appended,
-                       OpenDDS::DCPS::ReaderIdSeq const & rds,
-                       DDS::LifespanQosPolicy const & lifespan);
+                       const DataSampleList& appended,
+                       const RepoId& reader_id,
+                       const DDS::LifespanQosPolicy& lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                       ,
+                       const FilterEvaluator* eval,
+                       const DDS::StringSeq& params
+#endif
+                       );
 
   /**
    * Remove the oldest sample (head) from the instance history list.

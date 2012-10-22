@@ -27,8 +27,7 @@ public:
   bool gen_struct(UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields, const char* repoid);
 
-  bool gen_typedef(UTL_ScopedName*, AST_Type*, const char*)
-  { return true; }
+  bool gen_typedef(UTL_ScopedName* name, AST_Type* type, const char* repoid);
 
   bool gen_interf(UTL_ScopedName*, bool,
                   const std::vector<AST_Interface*>&,
@@ -43,9 +42,9 @@ public:
   bool gen_native(UTL_ScopedName*, const char*)
   { return true; }
 
-  bool gen_union(UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
-                 AST_Type*, const char*)
-  { return true; }
+  bool gen_union(UTL_ScopedName* name,
+                 const std::vector<AST_UnionBranch*>& branches,
+                 AST_Type* type, const char* repoid);
 
 private:
   bool first_struct_;

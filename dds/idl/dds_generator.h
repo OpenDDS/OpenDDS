@@ -12,6 +12,8 @@
 #include "be_extern.h"
 
 #include "utl_scoped_name.h"
+#include "utl_identifier.h"
+
 #include "ast.h"
 #include "ast_component_fwd.h"
 #include "ast_eventtype_fwd.h"
@@ -218,9 +220,15 @@ namespace AstTypeClassification {
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
-      return (p->pt() == AST_PredefinedType::PT_any
-        || p->pt() == AST_PredefinedType::PT_object)
-        ? CL_UNKNOWN : (CL_SCALAR | CL_PRIMITIVE);
+      switch (p->pt()) {
+      case AST_PredefinedType::PT_any:
+      case AST_PredefinedType::PT_object:
+        return CL_UNKNOWN;
+      case AST_PredefinedType::PT_wchar:
+        return CL_SCALAR | CL_PRIMITIVE | CL_WIDE;
+      default:
+        return CL_SCALAR | CL_PRIMITIVE;
+      }
     }
     case AST_Decl::NT_array:
       return CL_ARRAY;
@@ -277,5 +285,130 @@ struct NestedForLoops {
   std::string index_;
 };
 
+enum WrapDirection {WD_OUTPUT, WD_INPUT};
+
+inline
+std::string wrapPrefix(AST_Type* type, WrapDirection wd)
+{
+  switch (type->node_type()) {
+  case AST_Decl::NT_pre_defined:
+    {
+      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      switch (p->pt()) {
+      case AST_PredefinedType::PT_char:
+        return (wd == WD_OUTPUT)
+          ? "ACE_OutputCDR::from_char(" : "ACE_InputCDR::to_char(";
+      case AST_PredefinedType::PT_wchar:
+        return (wd == WD_OUTPUT)
+          ? "ACE_OutputCDR::from_wchar(" : "ACE_InputCDR::to_wchar(";
+      case AST_PredefinedType::PT_octet:
+        return (wd == WD_OUTPUT)
+          ? "ACE_OutputCDR::from_octet(" : "ACE_InputCDR::to_octet(";
+      case AST_PredefinedType::PT_boolean:
+        return (wd == WD_OUTPUT)
+          ? "ACE_OutputCDR::from_boolean(" : "ACE_InputCDR::to_boolean(";
+      default:
+        return "";
+      }
+    }
+  case AST_Decl::NT_string:
+    return (wd == WD_OUTPUT)
+      ? "ACE_OutputCDR::from_string(" : "ACE_InputCDR::to_string(";
+  case AST_Decl::NT_wstring:
+    return (wd == WD_OUTPUT)
+      ? "ACE_OutputCDR::from_wstring(" : "ACE_InputCDR::to_wstring(";
+  default:
+    return "";
+  }
+}
+
+inline
+std::string getWrapper(const std::string& name, AST_Type* type, WrapDirection wd)
+{
+  std::string pre = wrapPrefix(type, wd);
+  return (pre.empty()) ? name : (pre + name + ')');
+}
+
+inline
+std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
+{
+  std::string e = scoped(disc->name()),
+    label = label_val->n()->last_component()->get_string();
+  const size_t colon = e.rfind("::");
+  if (colon == std::string::npos) {
+    return label;
+  }
+  return e.replace(colon + 2, std::string::npos, label);
+}
+
+inline
+std::ostream& operator<<(std::ostream& o, const AST_Expression& e)
+{
+  // TAO_IDL_FE interfaces are not const-correct
+  AST_Expression& e_nonconst = const_cast<AST_Expression&>(e);
+  const AST_Expression::AST_ExprValue& ev = *e_nonconst.ev();
+  switch (ev.et) {
+  case AST_Expression::EV_short:
+    return o << ev.u.sval;
+  case AST_Expression::EV_ushort:
+    return o << ev.u.usval;
+  case AST_Expression::EV_long:
+    return o << ev.u.lval;
+  case AST_Expression::EV_ulong:
+    return o << ev.u.ulval;
+  case AST_Expression::EV_longlong:
+    return o << ev.u.llval << "LL";
+  case AST_Expression::EV_ulonglong:
+    return o << ev.u.ullval << "ULL";
+  case AST_Expression::EV_char:
+    return o << '\'' << ev.u.cval << '\'';
+  case AST_Expression::EV_bool:
+    return o << std::boolalpha << static_cast<bool>(ev.u.bval);
+  default:
+    return o;
+  }
+}
+
+inline
+void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
+                          size_t& n_labels, bool& has_default)
+{
+  for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+    ++n_labels;
+    AST_UnionLabel* label = branch->label(j);
+    if (label->label_kind() == AST_UnionLabel::UL_default) {
+      be_global->impl_ << "  default:\n";
+      has_default = true;
+    } else if (discriminator->node_type() == AST_Decl::NT_enum) {
+      be_global->impl_ << "  case "
+        << getEnumLabel(label->label_val(), discriminator) << ":\n";
+    } else {
+      be_global->impl_ << "  case " << *label->label_val() << ":\n";
+    }
+  }
+}
+
+// see TAO_IDL_BE be_union::gen_empty_default_label()
+inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
+{
+  AST_Decl::NodeType nt = disc->node_type();
+  if (nt == AST_Decl::NT_enum) return true;
+
+  AST_PredefinedType* pdt = AST_PredefinedType::narrow_from_decl(disc);
+  switch (pdt->pt()) {
+  case AST_PredefinedType::PT_boolean:
+    return n_labels < 2;
+  case AST_PredefinedType::PT_char:
+    return n_labels < ACE_OCTET_MAX;
+  case AST_PredefinedType::PT_short:
+  case AST_PredefinedType::PT_ushort:
+    return n_labels < ACE_UINT16_MAX;
+  case AST_PredefinedType::PT_long:
+  case AST_PredefinedType::PT_ulong:
+    return n_labels < ACE_UINT32_MAX;
+  default:
+    return true;
+  }
+}
 
 #endif

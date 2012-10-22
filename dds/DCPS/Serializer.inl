@@ -210,9 +210,12 @@ Serializer::good_bit() const
 }
 
 ACE_INLINE bool
-Serializer::skip(ACE_CDR::UShort bytes)
+Serializer::skip(ACE_CDR::UShort n, int size)
 {
-  for (size_t len = bytes; len;) {
+  if (size > 1 && this->alignment_ != ALIGN_NONE) {
+    this->align_r(size_t(size) > MAX_ALIGN ? MAX_ALIGN : size);
+  }
+  for (size_t len = n * size; len;) {
     if (!this->current_) {
       this->good_bit_ = false;
       return false;
