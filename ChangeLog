@@ -1,3 +1,27 @@
+Mon Oct 29 18:58:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Attempting to fix MinGW link errors.
+
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Moved common code from generated "FooTypeSupportImpl"
+          to non-generated TypeSupportImpl.
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          Fixed Coverity warnings, corrected the code for the new gen_skip_over
+          function overloads for IDL unions.
+
+        * dds/DCPS/Serializer.inl:
+
+          Fixed a Coverity warning.
+
 Mon Oct 29 16:21:40 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

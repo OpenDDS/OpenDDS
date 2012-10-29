@@ -109,10 +109,10 @@ public:
   struct DataForEval {
     DataForEval(const MetaStruct& meta, const DDS::StringSeq& params)
       : meta_(meta), params_(params) {}
-    virtual ~DataForEval();
+    OpenDDS_Dcps_Export virtual ~DataForEval();
+    virtual Value lookup(const char* field) const = 0;
     const MetaStruct& meta_;
     const DDS::StringSeq& params_;
-    virtual Value lookup(const char* field) const = 0;
   private:
     DataForEval(const DataForEval&);
     DataForEval& operator=(const DataForEval&);
@@ -128,18 +128,19 @@ private:
     DeserializedForEval(const void* data, const MetaStruct& meta,
                         const DDS::StringSeq& params)
       : DataForEval(meta, params), deserialized_(data) {}
-    const void* const deserialized_;
+    OpenDDS_Dcps_Export virtual ~DeserializedForEval();
     OpenDDS_Dcps_Export Value lookup(const char* field) const;
+    const void* const deserialized_;
   };
 
   struct SerializedForEval : DataForEval {
     SerializedForEval(ACE_Message_Block* data, const MetaStruct& meta,
                       const DDS::StringSeq& params, bool swap, bool cdr)
       : DataForEval(meta, params), serialized_(data), swap_(swap), cdr_(cdr) {}
+    Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     bool swap_, cdr_;
     mutable std::map<std::string, Value> cache_;
-    Value lookup(const char* field) const;
   };
 
   bool eval_i(DataForEval& data) const;

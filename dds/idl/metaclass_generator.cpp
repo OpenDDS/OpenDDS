@@ -557,6 +557,8 @@ metaclass_generator::gen_union(UTL_ScopedName* name,
         "    gen_skip_over(ser, static_cast<" << scoped(br_type->name())
         << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
     }
+    be_global->impl_ <<
+      "    break;\n";
   }
   if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
     be_global->impl_ <<

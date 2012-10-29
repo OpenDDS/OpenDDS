@@ -6,34 +6,6 @@
 {
 }
 
-::DDS::ReturnCode_t
-<%TYPE%>TypeSupportImpl::register_type (
-    ::DDS::DomainParticipant_ptr participant,
-    const char * type_name)
-{
-  if (type_name == 0 || type_name[0] == '\0')
-     this->type_name_ = this->get_type_name();
-  else
-     this->type_name_ = CORBA::string_dup (type_name);
-
-  return
-    ::OpenDDS::DCPS::Registered_Data_Types->register_type(
-        participant,
-        this->type_name_.in (),
-        this);
-}
-
-
-char *
-<%TYPE%>TypeSupportImpl::get_type_name ()
-{
-  if (this->type_name_.in () == 0)
-    return CORBA::string_dup (this->_interface_repository_id());
-  else
-    return CORBA::string_dup (this->type_name_.in ());
-}
-
-
 ::DDS::DataWriter_ptr
 <%TYPE%>TypeSupportImpl::create_datawriter ()
 {

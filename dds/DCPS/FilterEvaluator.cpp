@@ -31,6 +31,9 @@ namespace DCPS {
 FilterEvaluator::DataForEval::~DataForEval()
 {}
 
+FilterEvaluator::DeserializedForEval::~DeserializedForEval()
+{}
+
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : filter_root_(0)
 {

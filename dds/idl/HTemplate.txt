@@ -9,22 +9,11 @@ class <%EXPORT%> <%TYPE%>TypeSupportImpl
   , public virtual OpenDDS::DCPS::TypeSupportImpl
 {
 public:
+  <%TYPE%>TypeSupportImpl();
+  virtual ~<%TYPE%>TypeSupportImpl();
 
-  //Constructor
-  <%TYPE%>TypeSupportImpl ();
-
-  //Destructor
-  virtual ~<%TYPE%>TypeSupportImpl ();
-
-  virtual
-  ::DDS::ReturnCode_t register_type (::DDS::DomainParticipant_ptr participant,
-                                     const char * type_name);
-
-  virtual char * get_type_name ();
-
-  virtual ::DDS::DataWriter_ptr create_datawriter ();
-
-  virtual ::DDS::DataReader_ptr create_datareader ();
+  virtual ::DDS::DataWriter_ptr create_datawriter();
+  virtual ::DDS::DataReader_ptr create_datareader();
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual ::DDS::DataReader_ptr create_multitopic_datareader();
@@ -35,9 +24,6 @@ public:
 #endif
 
   virtual bool has_dcps_key();
-
-private:
-  CORBA::String_var type_name_;
 };
 
 /** Servant for DataWriter interface of the <%TYPE%> data type.

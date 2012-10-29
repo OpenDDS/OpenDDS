@@ -341,12 +341,23 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
   return e.replace(colon + 2, std::string::npos, label);
 }
 
+struct RestoreOutputStreamState {
+  explicit RestoreOutputStreamState(std::ostream& o)
+    : os_(o), state_(o.flags()) {}
+  ~RestoreOutputStreamState() {
+    os_.flags(state_);
+  }
+  std::ostream& os_;
+  std::ios_base::fmtflags state_;
+};
+
 inline
 std::ostream& operator<<(std::ostream& o, const AST_Expression& e)
 {
   // TAO_IDL_FE interfaces are not const-correct
   AST_Expression& e_nonconst = const_cast<AST_Expression&>(e);
   const AST_Expression::AST_ExprValue& ev = *e_nonconst.ev();
+  RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_short:
     return o << ev.u.sval;
