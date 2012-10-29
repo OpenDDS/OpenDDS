@@ -13,7 +13,9 @@ namespace DCPS {
 
 
 RawDataSample::RawDataSample()
-  : sample_(0)
+  : message_id_(SAMPLE_DATA)
+  , sample_byte_order_(0)
+  , sample_(0)
 {
 }
 

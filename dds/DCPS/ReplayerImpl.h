@@ -243,14 +243,14 @@ private:
   IdSet readers_;
 
   /// Status conditions.
-  DDS::LivelinessLostStatus liveliness_lost_status_;
-  DDS::OfferedDeadlineMissedStatus offered_deadline_missed_status_;
+  // DDS::LivelinessLostStatus liveliness_lost_status_;
+  // DDS::OfferedDeadlineMissedStatus offered_deadline_missed_status_;
   DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_;
   DDS::PublicationMatchedStatus publication_match_status_;
 
   /// True if the writer failed to actively signal its liveliness within
   /// its offered liveliness period.
-  bool liveliness_lost_;
+  // bool liveliness_lost_;
 
   /**
    * @todo The publication_lost_status_ and
