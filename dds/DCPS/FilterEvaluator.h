@@ -106,10 +106,10 @@ public:
 
   class EvalNode;
 
-  struct DataForEval {
+  struct OpenDDS_Dcps_Export DataForEval {
     DataForEval(const MetaStruct& meta, const DDS::StringSeq& params)
       : meta_(meta), params_(params) {}
-    OpenDDS_Dcps_Export virtual ~DataForEval();
+    virtual ~DataForEval();
     virtual Value lookup(const char* field) const = 0;
     const MetaStruct& meta_;
     const DDS::StringSeq& params_;
@@ -124,12 +124,12 @@ private:
 
   EvalNode* walkAst(const AstNodeWrapper& node, EvalNode* prev);
 
-  struct DeserializedForEval : DataForEval {
+  struct OpenDDS_Dcps_Export DeserializedForEval : DataForEval {
     DeserializedForEval(const void* data, const MetaStruct& meta,
                         const DDS::StringSeq& params)
       : DataForEval(meta, params), deserialized_(data) {}
-    OpenDDS_Dcps_Export virtual ~DeserializedForEval();
-    OpenDDS_Dcps_Export Value lookup(const char* field) const;
+    virtual ~DeserializedForEval();
+    Value lookup(const char* field) const;
     const void* const deserialized_;
   };
 

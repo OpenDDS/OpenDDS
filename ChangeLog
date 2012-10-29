@@ -1,3 +1,9 @@
+Mon Oct 29 20:04:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+
+          Re-worked the export macros to work on MinGW.
+
 Mon Oct 29 19:00:31 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
 
         * dds/DCPS/RecorderImpl.cpp:
@@ -7,7 +13,7 @@ Mon Oct 29 19:00:31 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
         * dds/DCPS/RawDataSample.cpp:
         * dds/DCPS/ReplayerImpl.h:
 
-         Fixed issue with uninitialized data members.
+          Fixed issue with uninitialized data members.
 
 Mon Oct 29 18:58:20 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
