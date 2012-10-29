@@ -109,6 +109,7 @@ public:
   struct DataForEval {
     DataForEval(const MetaStruct& meta, const DDS::StringSeq& params)
       : meta_(meta), params_(params) {}
+    virtual ~DataForEval();
     const MetaStruct& meta_;
     const DDS::StringSeq& params_;
     virtual Value lookup(const char* field) const = 0;

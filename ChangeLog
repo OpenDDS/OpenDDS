@@ -1,3 +1,16 @@
+Mon Oct 29 16:21:40 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added #include needed for some inline=0 builds.
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Fixed warnings on older GCC versions and compile errors on SunCC.
+          The "no virtual destructor" warning is annoying since such a
+          destructor is not needed.  Newer GCC seems to have removed this.
+
 Mon Oct 22 01:23:03 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

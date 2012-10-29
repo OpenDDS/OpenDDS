@@ -28,6 +28,9 @@ using namespace OpenDDS::DCPS::FilterExpressionGrammar;
 namespace OpenDDS {
 namespace DCPS {
 
+FilterEvaluator::DataForEval::~DataForEval()
+{}
+
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : filter_root_(0)
 {
@@ -109,7 +112,7 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
     ser.skip(4); // CDR encapsulation header
   }
   const Value v = meta_.getValue(ser, field);
-  cache_.insert(std::make_pair(field, v));
+  cache_.insert(std::make_pair(std::string(field), v));
   return v;
 }
 

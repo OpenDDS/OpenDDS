@@ -20,9 +20,12 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
+#include "TypeSupportImpl.h"
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
+
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
