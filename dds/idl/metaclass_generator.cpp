@@ -525,7 +525,9 @@ metaclass_generator::gen_union(UTL_ScopedName* name,
   f.endArgs();
   be_global->impl_ <<
     "  " << scoped(discriminator->name()) << " disc;\n"
-    "  ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ";\n"
+    "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
+    "    return;\n"
+    "  }\n"
     "  switch (disc) {\n";
   size_t n_labels = 0;
   bool has_default = false;

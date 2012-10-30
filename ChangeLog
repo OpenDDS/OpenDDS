@@ -1,3 +1,9 @@
+Tue Oct 30 19:52:06 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fixed a warning in code generated for IDL unions.
+
 Tue Oct 30 14:20:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/HTemplate.txt:
