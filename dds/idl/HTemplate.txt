@@ -24,6 +24,12 @@ public:
 #endif
 
   virtual bool has_dcps_key();
+
+  typedef <%TYPE%>TypeSupport::_ptr_type _ptr_type;
+  typedef <%TYPE%>TypeSupport::_var_type _var_type;
+  static _ptr_type _narrow(CORBA::Object_ptr obj) {
+    return <%TYPE%>TypeSupport::_narrow(obj);
+  }
 };
 
 /** Servant for DataWriter interface of the <%TYPE%> data type.

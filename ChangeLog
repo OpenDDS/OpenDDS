@@ -1,3 +1,10 @@
+Tue Oct 30 14:20:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/HTemplate.txt:
+
+          Added _var_type, _ptr_type, and narrow()
+          to the generated FooTypeSupportImpl class.
+
 Mon Oct 29 20:04:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FilterEvaluator.h:
