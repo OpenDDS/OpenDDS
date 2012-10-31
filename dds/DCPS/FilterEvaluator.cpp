@@ -15,6 +15,7 @@
 #include "FilterEvaluator.h"
 #include "FilterExpressionGrammar.h"
 #include "AstNodeWrapper.h"
+#include "Definitions.h"
 
 #include <ace/ACE.h>
 
@@ -474,9 +475,18 @@ Value::Value(const TAO::String_Manager& s, bool conversion_preferred)
 {}
 
 Value::Value(const TAO::WString_Manager& s, bool conversion_preferred)
-  : type_(VAL_STRING), s_(ACE_OS::strdup(ACE_Wide_To_Ascii(s.in()).char_rep()))
+  : type_(VAL_STRING)
+#ifdef DDS_HAS_WCHAR
+  , s_(ACE_OS::strdup(ACE_Wide_To_Ascii(s.in()).char_rep()))
+#else
+  , s_(0)
+#endif
   , conversion_preferred_(conversion_preferred)
-{}
+{
+#ifndef DDS_HAS_WCHAR
+  ACE_UNUSED_ARG(s);
+#endif
+}
 
 template<> bool& Value::get() { return b_; }
 template<> int& Value::get() { return i_; }

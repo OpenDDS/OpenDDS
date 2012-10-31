@@ -395,12 +395,15 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
                                           const DDS::DomainParticipantQos& qos)
 {
   try {
-    return get_dcps_info()->add_domain_participant(domainId, qos);
+    const DCPSInfo_var info = get_dcps_info();
+    if (!CORBA::is_nil(info)) {
+      return info->add_domain_participant(domainId, qos);
+    }
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_domain_participant: ");
-    const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
-    return ads;
   }
+  const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  return ads;
 }
 
 bool
