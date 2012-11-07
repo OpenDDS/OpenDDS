@@ -44,6 +44,9 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , shutdown_(shutdown)
   , reassociate_timer_id_(-1)
 {
+  int argc = 1;
+  char* argv[1] = {"TAO_DDS_DCPSInfo_i_faked_arg"};
+  dispatchingOrb_ = CORBA::ORB_init(argc, argv, "dispatchingOnly");
 }
 
 //  destructor
@@ -382,13 +385,36 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
 
   OpenDDS::DCPS::RepoId pubId = partPtr->get_next_publication_id();
 
+  // Remarshall the remote reference onto the dispatching orb.
+  OpenDDS::DCPS::DataWriterRemote_var marshalledPub(OpenDDS::DCPS::DataWriterRemote::_duplicate(publication));
+  if (CORBA::is_nil(marshalledPub.in())) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
+                 ACE_TEXT("invalid publication reference.\n")));
+    }
+    return OpenDDS::DCPS::GUID_UNKNOWN;
+  }
+  CORBA::String_var pubStr = orb_->object_to_string(marshalledPub.in());
+  CORBA::Object_var pubObj = dispatchingOrb_->string_to_object(pubStr.in());
+  if (CORBA::is_nil(pubObj.in()))  {
+    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
+                 ACE_TEXT("failure marshalling publication on dispatching orb.\n")));
+    }
+    return OpenDDS::DCPS::GUID_UNKNOWN;
+  }
+  OpenDDS::DCPS::DataWriterRemote_var dispatchingPublication
+  = OpenDDS::DCPS::DataWriterRemote::_unchecked_narrow(pubObj.in());
+
   DCPS_IR_Publication* pubPtr;
   ACE_NEW_RETURN(pubPtr,
                  DCPS_IR_Publication(
                    pubId,
                    partPtr,
                    topic,
-                   publication,
+                   dispatchingPublication.in(),
                    qos,
                    transInfo,
                    publisherQos),
@@ -491,7 +517,16 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
 
   /// @TODO: Check if this is already stored.  If so, just clear the callback IOR.
 
-  CORBA::Object_var obj = orb_->string_to_object(pub_str);
+  CORBA::Object_var obj = dispatchingOrb_->string_to_object(pub_str);
+  if (CORBA::is_nil(obj.in())) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
+                 ACE_TEXT("failure marshalling publication %s on dispatching orb.\n"),
+                 pub_str));
+    }
+    return false;
+  }
   OpenDDS::DCPS::DataWriterRemote_var publication
   = OpenDDS::DCPS::DataWriterRemote::_unchecked_narrow(obj.in());
 
@@ -648,13 +683,38 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
 
   OpenDDS::DCPS::RepoId subId = partPtr->get_next_subscription_id();
 
+  // Remarshall the remote reference onto the dispatching orb.
+  OpenDDS::DCPS::DataReaderRemote_var marshalledSub (
+    OpenDDS::DCPS::DataReaderRemote::_duplicate(subscription));
+  if (CORBA::is_nil(marshalledSub.in())) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
+                 ACE_TEXT("invalid subscription reference.\n")));
+    }
+    return OpenDDS::DCPS::GUID_UNKNOWN;
+  }
+
+  CORBA::String_var subStr = orb_->object_to_string(marshalledSub.in());
+  CORBA::Object_var subObj = dispatchingOrb_->string_to_object(subStr.in());
+  if (CORBA::is_nil(subObj.in())) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
+                 ACE_TEXT("failure marshalling subscription on dispatching orb.\n")));
+    }
+    return OpenDDS::DCPS::GUID_UNKNOWN;
+  }
+  OpenDDS::DCPS::DataReaderRemote_var dispatchingSubscription
+  = OpenDDS::DCPS::DataReaderRemote::_unchecked_narrow(subObj.in());
+
   DCPS_IR_Subscription* subPtr;
   ACE_NEW_RETURN(subPtr,
                  DCPS_IR_Subscription(
                    subId,
                    partPtr,
                    topic,
-                   subscription,
+                   dispatchingSubscription.in(),
                    qos,
                    transInfo,
                    subscriberQos,
@@ -765,7 +825,16 @@ TAO_DDS_DCPSInfo_i::add_subscription(
     return false;
   }
 
-  CORBA::Object_var obj = orb_->string_to_object(sub_str);
+  CORBA::Object_var obj = dispatchingOrb_->string_to_object(sub_str);
+  if (CORBA::is_nil(obj.in())) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
+                 ACE_TEXT("failure marshalling subscription %s on dispatching orb.\n"),
+                 sub_str));
+    }
+    return false;
+  }
   OpenDDS::DCPS::DataReaderRemote_var subscription
   = OpenDDS::DCPS::DataReaderRemote::_unchecked_narrow(obj.in());
 

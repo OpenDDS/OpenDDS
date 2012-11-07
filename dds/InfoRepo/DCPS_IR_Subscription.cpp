@@ -33,8 +33,6 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(OpenDDS::DCPS::RepoId id,
     topic_(topic),
     handle_(0),
     isBIT_(0),
-    removeAssociationsRemoteCallCount_(0),
-    deleteAfterRemoteCalls_(false),
     qos_(qos),
     info_(info),
     subscriberQos_(subscriberQos),
@@ -149,7 +147,6 @@ int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub
                                                         bool notify_both_side)
 {
   bool marked_dead = false;
-  bool made_remote_call = false;
 
   if (sendNotify) {
     OpenDDS::DCPS::WriterIdSeq idSeq(5);
@@ -165,16 +162,10 @@ int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub
                      id_, pub->get_id()));
         }
 
-        made_remote_call = true;
-        ++removeAssociationsRemoteCallCount_;
-
         reader_->remove_associations(idSeq, notify_lost);
-        --removeAssociationsRemoteCallCount_;
 
         if (notify_both_side) {
-          ++removeAssociationsRemoteCallCount_;
           pub->remove_associated_subscription(this, sendNotify, notify_lost);
-          --removeAssociationsRemoteCallCount_;
         }
 
       } catch (const CORBA::Exception& ex) {
@@ -213,17 +204,6 @@ int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub
                std::string(pub_converter).c_str(),
                pub));
   } // if (0 == status)
-
-  if (deleteAfterRemoteCalls_ && made_remote_call && this->can_be_deleted()) {
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DCPS_IR_Subscription::remove_associated_publication: ")
-                 ACE_TEXT("delayed deletion of subscription %C\n"),
-                 std::string(sub_converter).c_str() ));
-    }
-    delete this;
-  }
 
   if (marked_dead) {
     return -1;
@@ -799,18 +779,6 @@ DCPS_IR_Subscription::dump_to_string(const std::string& prefix, int depth) const
   return str;
 }
 
-bool
-DCPS_IR_Subscription::can_be_deleted () const
-{
-  return removeAssociationsRemoteCallCount_ == 0;
-}
-
-
-void
-DCPS_IR_Subscription::set_delete_after_remote_calls (bool deleteAfter)
-{
-  deleteAfterRemoteCalls_ = deleteAfter;
-}
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 

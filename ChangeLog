@@ -1,3 +1,17 @@
+Wed Nov  7 23:36:58 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+
+          Implemented a separate dispatching thread to prevent nested upcalls
+          from occurring during oneway calls from transport flush or connects.
+          Removed the delete during remove association as it should not happen.
+
 Wed Oct 31 19:59:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:

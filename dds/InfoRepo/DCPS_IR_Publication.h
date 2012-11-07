@@ -175,15 +175,6 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
-  // Check to see if this can be deleted
-  // Returns false if there is currently remote calls being performed
-  bool can_be_deleted () const;
-
-  // Set this to delete after the current upcalls are complete.
-  // This should only be done when it should be deleted but
-  // there are currently remote calls.
-  void set_delete_after_remote_calls (bool deleteAfter);
-
 private:
 
   OpenDDS::DCPS::RepoId id_;
@@ -191,11 +182,6 @@ private:
   DCPS_IR_Topic* topic_;
   DDS::InstanceHandle_t handle_;
   CORBA::Boolean isBIT_;
-  // These are used to allow delayed deletion of the object due to the race
-  // condition between removing publication and subscription at same time
-  // with processing occurring during upcall
-  long removeAssociationsRemoteCallCount_;
-  bool deleteAfterRemoteCalls_;
 
   /// the corresponding DataWriterRemote object
   OpenDDS::DCPS::DataWriterRemote_var writer_;

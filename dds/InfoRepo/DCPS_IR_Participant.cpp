@@ -281,11 +281,7 @@ int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::RepoId pubId)
     }
 
     this->domain_->dispose_publication_bit(where->second);
-    if (where->second->can_be_deleted()) {
-      delete where->second;
-    } else {
-      where->second->set_delete_after_remote_calls(true);
-    }
+    delete where->second;
     topic->release(false);
     this->publications_.erase(where);
 
@@ -409,11 +405,7 @@ int DCPS_IR_Participant::remove_subscription(OpenDDS::DCPS::RepoId subId)
     }
 
     this->domain_->dispose_subscription_bit(where->second);
-    if (where->second->can_be_deleted()) {
-      delete where->second;
-    } else {
-      where->second->set_delete_after_remote_calls(true);
-    }
+    delete where->second;
     topic->release(false);
     this->subscriptions_.erase(where);
 

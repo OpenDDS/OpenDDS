@@ -407,6 +407,7 @@ public:
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
+  CORBA::ORB_var dispatchingOrb_;
 
   long            federation_;
   RepoIdGenerator participantIdGenerator_;
