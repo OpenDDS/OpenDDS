@@ -184,7 +184,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // autopurge_disposed_samples_delay facets of
     // the READER_DATA_LIFECYCLE QoS policy.
     //
-    ACE_DEBUG((LM_ERROR,
+    ACE_DEBUG((LM_INFO,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing autopurge_disposed_samples_delay...\n")));
     {
@@ -224,7 +224,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
-    ACE_DEBUG((LM_ERROR,
+    ACE_DEBUG((LM_INFO,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing autopurge_nowriter_samples_delay...\n")));
     reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = default_delay;
