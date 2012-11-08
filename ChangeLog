@@ -1,3 +1,14 @@
+Thu Nov  8 22:16:22 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed a compiler warning.
+
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+
+          Test the two RDL QoS settings in isolation: during the no-writers
+          purging test, the instance should not also be disposed.
+
 Wed Nov  7 23:36:58 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Participant.cpp:

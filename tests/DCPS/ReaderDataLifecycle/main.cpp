@@ -20,31 +20,27 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
-namespace
-{
+namespace {
 
-static const size_t SAMPLES_PER_TEST = 100;
-
-static const DDS::Duration_t autopurge_delay = { 5, 0 };
+  const size_t SAMPLES_PER_TEST = 100;
+  const DDS::Duration_t autopurge_delay = { 5, 0 };
 
 } // namespace
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  try
-  {
-    TheParticipantFactoryWithArgs(argc, argv);
+  try {
+    DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
     // Create Participant
     DDS::DomainParticipant_var participant =
-      TheParticipantFactory->create_participant(42,
-                                                PARTICIPANT_QOS_DEFAULT,
-                                                DDS::DomainParticipantListener::_nil(),
-                                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dpf->create_participant(42,
+                              PARTICIPANT_QOS_DEFAULT,
+                              DDS::DomainParticipantListener::_nil(),
+                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(participant.in()))
-    {
+    if (CORBA::is_nil(participant)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_participant failed!\n")), -1);
@@ -56,8 +52,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(subscriber.in()))
-    {
+    if (CORBA::is_nil(subscriber)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_subscriber failed!\n")), -1);
@@ -69,8 +64,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                                     DDS::PublisherListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(publisher.in()))
-    {
+    if (CORBA::is_nil(publisher)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_publisher failed!\n")), -1);
@@ -78,8 +72,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
-    {
+    if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: register_type failed!\n")), -1);
@@ -93,8 +86,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(topic.in()))
-    {
+    if (CORBA::is_nil(topic)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_topic failed!\n")), -1);
@@ -102,56 +94,56 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Create DataReader
     DDS::DataReaderQos reader_qos;
-
-    if (subscriber->get_default_datareader_qos(reader_qos) != DDS::RETCODE_OK)
-    {
+    if (subscriber->get_default_datareader_qos(reader_qos) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: get_default_datareader_qos failed!\n")), -1);
     }
 
+    const DDS::Duration_t default_delay =
+      reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay;
+
     reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-    reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = autopurge_delay;
     reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = autopurge_delay;
 
     DDS::DataReader_var reader =
-      subscriber->create_datareader(topic.in(),
+      subscriber->create_datareader(topic,
                                     reader_qos,
                                     DDS::DataReaderListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(reader.in()))
-    {
+    if (CORBA::is_nil(reader)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
     }
 
     FooDataReader_var reader_i = FooDataReader::_narrow(reader);
-    if (CORBA::is_nil(reader_i))
-    {
+    if (CORBA::is_nil(reader_i)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: _narrow failed!\n")), -1);
     }
 
+    DDS::DataWriterQos writer_qos;
+    publisher->get_default_datawriter_qos(writer_qos);
+    writer_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
+
     // Create DataWriter
     DDS::DataWriter_var writer =
-      publisher->create_datawriter(topic.in(),
-                                   DATAWRITER_QOS_DEFAULT,
+      publisher->create_datawriter(topic,
+                                   writer_qos,
                                    DDS::DataWriterListener::_nil(),
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(writer.in()))
-    {
+    if (CORBA::is_nil(writer)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")), -1);
     }
 
     FooDataWriter_var writer_i = FooDataWriter::_narrow(writer);
-    if (CORBA::is_nil(writer_i))
-    {
+    if (CORBA::is_nil(writer_i)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: _narrow failed!\n")), -1);
@@ -164,29 +156,27 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(cond);
 
-    DDS::Duration_t timeout =
+    const DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    do
-    {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-      {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait failed!\n")), -1);
-      }
-
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
-      {
+    while (true) {
+      if (writer->get_publication_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: Failed to get publication match status!\n")), -1);
       }
-    }
-    while (matches.current_count < 1);
 
+      if (matches.current_count > 0) {
+        break;
+      }
+
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l main()")
+                          ACE_TEXT(" ERROR: wait failed!\n")), -1);
+      }
+    }
     ws->detach_condition(cond);
 
     //
@@ -198,19 +188,18 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing autopurge_disposed_samples_delay...\n")));
     {
-      Foo foo = { 42, 0, 0, 0 };
+      const Foo foo = { 42, 0, 0, 0 };
 
       DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
 
-      for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
-      {
-        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
-        {
+      for (size_t i = 0; i < SAMPLES_PER_TEST; ++i) {
+        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("%N:%l main()")
                               ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
         }
       }
+
       ACE_OS::sleep(5); // wait for samples to arrive
 
       writer_i->dispose(foo, handle);
@@ -221,15 +210,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       {
         FooSeq foo;
         DDS::SampleInfoSeq info;
-
-        DDS::ReturnCode_t error;
-        if ((error = reader_i->take(foo,
-                                    info,
-                                    DDS::LENGTH_UNLIMITED,
-                                    DDS::ANY_SAMPLE_STATE,
-                                    DDS::ANY_VIEW_STATE,
-                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_NO_DATA)
-        {
+        const DDS::ReturnCode_t error = reader_i->take(foo,
+                                                       info,
+                                                       DDS::LENGTH_UNLIMITED,
+                                                       DDS::ANY_SAMPLE_STATE,
+                                                       DDS::ANY_VIEW_STATE,
+                                                       DDS::ANY_INSTANCE_STATE);
+        if (error != DDS::RETCODE_NO_DATA) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l main()")
                             ACE_TEXT(" ERROR: Unexpected samples taken!\n")), -1);
@@ -240,17 +227,21 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing autopurge_nowriter_samples_delay...\n")));
+    reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = default_delay;
+    reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = autopurge_delay;
+    reader->set_qos(reader_qos);
+
     {
-      for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
-      {
-        Foo foo;
-        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
-        {
+      const Foo foo = { 43, 0, 0, 0 };
+
+      for (size_t i = 0; i < SAMPLES_PER_TEST; ++i) {
+        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("%N:%l main()")
                               ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
         }
       }
+
       ACE_OS::sleep(5); // wait for samples to arrive
 
       publisher->delete_datawriter(writer);
@@ -261,15 +252,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       {
         FooSeq foo;
         DDS::SampleInfoSeq info;
-
-        DDS::ReturnCode_t error;
-        if ((error = reader_i->take(foo,
-                                    info,
-                                    DDS::LENGTH_UNLIMITED,
-                                    DDS::ANY_SAMPLE_STATE,
-                                    DDS::ANY_VIEW_STATE,
-                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_NO_DATA)
-        {
+        const DDS::ReturnCode_t error = reader_i->take(foo,
+                                                       info,
+                                                       DDS::LENGTH_UNLIMITED,
+                                                       DDS::ANY_SAMPLE_STATE,
+                                                       DDS::ANY_VIEW_STATE,
+                                                       DDS::ANY_INSTANCE_STATE);
+        if (error != DDS::RETCODE_NO_DATA) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l main()")
                             ACE_TEXT(" ERROR: Unexpected samples taken!\n")), -1);
@@ -279,12 +268,11 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Clean-up!
     participant->delete_contained_entities();
-    TheParticipantFactory->delete_participant(participant);
+    dpf->delete_participant(participant);
 
     TheServiceParticipant->shutdown();
-  }
-  catch (const CORBA::Exception& e)
-  {
+
+  } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Caught in main()");
     return -1;
   }

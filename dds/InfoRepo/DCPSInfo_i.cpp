@@ -44,9 +44,9 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , shutdown_(shutdown)
   , reassociate_timer_id_(-1)
 {
-  int argc = 1;
-  char* argv[1] = {"TAO_DDS_DCPSInfo_i_faked_arg"};
-  dispatchingOrb_ = CORBA::ORB_init(argc, argv, "dispatchingOnly");
+  int argc = 0;
+  char** no_argv = 0;
+  dispatchingOrb_ = CORBA::ORB_init(argc, no_argv, "dispatchingOnly");
 }
 
 //  destructor
