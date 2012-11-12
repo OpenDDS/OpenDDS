@@ -88,7 +88,14 @@ TransportCustomizedElement::msg_payload() const
 const TransportSendElement*
 TransportCustomizedElement::original_send_element() const
 {
-  return dynamic_cast<TransportSendElement*>(orig_);
+  const TransportSendElement* ose =
+    dynamic_cast<const TransportSendElement*>(orig_);
+  if (!ose) {
+    const TransportCustomizedElement* tce =
+      dynamic_cast<const TransportCustomizedElement*>(orig_);
+    return tce ? tce->original_send_element() : 0;
+  }
+  return ose;
 }
 
 } // namespace DCPS

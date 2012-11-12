@@ -259,6 +259,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                        DDS::ANY_VIEW_STATE,
                                                        DDS::ANY_INSTANCE_STATE);
         if (error != DDS::RETCODE_NO_DATA) {
+          for (CORBA::ULong i = 0; i < info.length(); ++i) {
+            ACE_DEBUG((LM_DEBUG, "sample %d instance %d state %d key %d\n",
+              i, info[i].instance_handle, info[i].instance_state,
+              info[i].valid_data ? foo[i].key : -1234));
+          }
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l main()")
                             ACE_TEXT(" ERROR: Unexpected samples taken!\n")), -1);

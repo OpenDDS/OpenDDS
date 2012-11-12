@@ -1,3 +1,28 @@
+Mon Nov 12 19:13:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          When a matched writer is deleted normally, update each instance's
+          state accordingly.  The unregister/dispose message may not be
+          receieved.
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          Need to account for multiple levels of customization in order
+          to get back to the original send element.
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Avoid spinning in the main thread without yielding CPU.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+        * tests/DCPS/ReaderDataLifecycle/rtps.ini:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+
+          Optionally run this test with the rtps_udp transport.
+
 Thu Nov  8 22:16:22 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:

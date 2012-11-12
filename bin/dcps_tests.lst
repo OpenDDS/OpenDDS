@@ -92,6 +92,7 @@ tests/DCPS/MultiRepoTest/run_test.pl: !DCPS_MIN
 tests/DCPS/MultiRepoTest/run_test.pl fileconfig: !DCPS_MIN
 tests/DCPS/Presentation/run_test.pl: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/ReaderDataLifecycle/run_test.pl: !DCPS_MIN
+tests/DCPS/ReaderDataLifecycle/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/Reconnect/run_test.pl: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN

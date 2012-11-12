@@ -452,6 +452,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       while ( !writers_finished )
         {
+          const ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep(small_time);
+
           writers_finished = true;
           for (int i = 0; i < num_datawriters; i ++)
             {

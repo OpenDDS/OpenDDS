@@ -559,6 +559,9 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
+  void instances_liveliness_update(WriterInfo& info,
+                                   const ACE_Time_Value& when);
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);

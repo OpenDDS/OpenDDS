@@ -35,6 +35,7 @@
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
+#include "ace/OS_NS_sys_time.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -2078,6 +2079,8 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
 
+  instances_liveliness_update(info, ACE_OS::gettimeofday());
+
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
     this->notify_liveliness_change();
@@ -2221,23 +2224,24 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
     return;
   }
 
-  SubscriptionInstanceMapType::iterator iter = instances_.begin();
-  SubscriptionInstanceMapType::iterator next = iter;
-
-  while (iter != instances_.end()) {
-    ++next;
-    SubscriptionInstance *ptr = iter->second;
-
-    ptr->instance_state_.writer_became_dead(
-      info.writer_id_, liveliness_changed_status_.alive_count, when);
-
-    iter = next;
-  }
+  instances_liveliness_update(info, when);
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
     this->notify_liveliness_change();
+  }
+}
+
+void
+DataReaderImpl::instances_liveliness_update(WriterInfo& info,
+                                            const ACE_Time_Value& when)
+{
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
+       next = iter; iter != instances_.end(); iter = next) {
+    ++next;
+    iter->second->instance_state_.writer_became_dead(
+      info.writer_id_, liveliness_changed_status_.alive_count, when);
   }
 }
 
