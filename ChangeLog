@@ -1,3 +1,18 @@
+Wed Nov 14 21:07:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Static initialization can't depend on functions that use
+          statics from other compilation units.
+
+        * tests/DCPS/DpShutdown/DpShutdown.mpc:
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+        * tests/DCPS/ReaderDataLifecycle/ReaderDataLifecycle.mpc:
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+
+          Enabled testing with RTPS on static builds.
+
 Mon Nov 12 19:13:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

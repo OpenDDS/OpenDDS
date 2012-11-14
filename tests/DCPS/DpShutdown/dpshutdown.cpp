@@ -17,8 +17,13 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig_rch.h>
+
 #ifndef DDS_HAS_MINIMUM_BIT
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#endif
+
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include "dds/DCPS/StaticIncludes.h"

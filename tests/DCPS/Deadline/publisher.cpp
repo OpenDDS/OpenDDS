@@ -42,10 +42,7 @@ static DDS::Duration_t const DEADLINE_PERIOD =
 static int NUM_EXPIRATIONS = 2;
 
 // Time to sleep waiting for deadline periods to expire
-static ACE_Time_Value SLEEP_DURATION(
-          OpenDDS::DCPS::duration_to_time_value (DEADLINE_PERIOD)
-          * NUM_EXPIRATIONS
-          + ACE_Time_Value (1));
+static ACE_Time_Value SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
 
 static int NUM_WRITE_THREADS = 2;
 

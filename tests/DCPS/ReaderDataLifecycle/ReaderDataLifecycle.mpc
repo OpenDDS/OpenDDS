@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project: dcpsexe_with_tcp {
+project: dcpsexe_with_tcp, dcps_rtps_udp {
   exename   = test
   
   after    += DcpsFooType
