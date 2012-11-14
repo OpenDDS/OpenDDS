@@ -1,3 +1,9 @@
+Wed Nov 14 21:48:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Use strict Perl for easier maintenance.
+
 Wed Nov 14 21:07:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Deadline/publisher.cpp:

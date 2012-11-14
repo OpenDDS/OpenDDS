@@ -12,8 +12,9 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use Getopt::Std;
 use Data::Dumper;
+use strict;
 
-use vars qw/ $opt_d, $opt_t /;
+use vars qw/ $opt_d $opt_t /;
 getopts('d:t:');
 my $debug = $opt_d;
 
@@ -33,11 +34,11 @@ my $dcpsrepo_ior = "repo.ior";
 
 my $qos = {
     autoenable    => undef,
-    durability => transient_local,
-    liveliness => automatic,
+    durability => 'transient_local',
+    liveliness => 'automatic',
     lease_time => 5,
-#    reliability => reliable,
-    reliability => best_effort,
+#    reliability => 'reliable',
+    reliability => 'best_effort',
 };
 
 ## Entity: [none, participant, pubsub, rw] Determines the level at which
@@ -84,31 +85,31 @@ my $qos = {
 my @explicit_configuration = (
 
   {
-    entity        => none,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
-    compatibility => true,
+    entity        => 'none',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
 
   {
-    entity        => participant,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
+    entity        => 'participant',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
 
   {
-    entity        => pubsub,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
+    entity        => 'pubsub',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -117,12 +118,12 @@ my @explicit_configuration = (
     # Note that without disabling the 'autoenable' policy, the new RW will kick off the
     # transport negotiation and a transport will be selected *before* one has the chance
     # to specify which transport configuration must be used.
-    autoenable    => false,
-    entity        => rw,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
+    autoenable    => 'false',
+    entity        => 'rw',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -132,56 +133,56 @@ my @explicit_configuration = (
 my @explicit_configuration_and_negotiation = (
 
   {
-    entity        => none,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
-    compatibility => true,
+    entity        => 'none',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
+    compatibility => 'true',
     # The hash referred-to by qos ...
-    publisher     => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
-    subscriber    => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
+    publisher     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
+    subscriber    => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
   },
 
     {
-    entity        => participant,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
-    negotiated => [udp1],
+    entity        => 'participant',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
+    negotiated => ['udp1'],
     publisher     => $qos,
     subscriber    => $qos
   },
 
   {
-    entity        => participant,
-    collocation   => none,
-    configuration => Tcp_Only,
-    protocol      => [mytcp1],
-    compatibility => true,
-    negotiated => [mytcp1],
+    entity        => 'participant',
+    collocation   => 'none',
+    configuration => 'Tcp_Only',
+    protocol      => ['mytcp1'],
+    compatibility => 'true',
+    negotiated => ['mytcp1'],
     publisher     => $qos,
     subscriber    => $qos
   },
 
   {
-    entity        => pubsub,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    negotiated => [udp1],
-    compatibility => true,
+    entity        => 'pubsub',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    negotiated => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
 
   {
-    entity        => pubsub,
-    collocation   => none,
-    configuration => Tcp_Only,
-    protocol      => [mytcp1],
-    negotiated => [mytcp1],
-    compatibility => true,
+    entity        => 'pubsub',
+    collocation   => 'none',
+    configuration => 'Tcp_Only',
+    protocol      => ['mytcp1'],
+    negotiated => ['mytcp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -190,13 +191,13 @@ my @explicit_configuration_and_negotiation = (
     # Note that without disabling the 'autoenable' policy, the new RW will kick off the
     # transport negotiation and a transport will be selected *before* one has the chance
     # to specify which transport configuration must be used.
-    autoenable    => false,
-    entity        => rw,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
-    negotiated => [udp1],
+    autoenable    => 'false',
+    entity        => 'rw',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
+    negotiated => ['udp1'],
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -205,13 +206,13 @@ my @explicit_configuration_and_negotiation = (
     # Note that without disabling the 'autoenable' policy, the new RW will kick off the
     # transport negotiation and a transport will be selected *before* one has the chance
     # to specify which transport configuration must be used.
-    autoenable    => false,
-    entity        => rw,
-    collocation   => none,
-    configuration => Tcp_Only,
-    protocol      => [mytcp1],
-    compatibility => true,
-    negotiated => [mytcp1],
+    autoenable    => 'false',
+    entity        => 'rw',
+    collocation   => 'none',
+    configuration => 'Tcp_Only',
+    protocol      => ['mytcp1'],
+    compatibility => 'true',
+    negotiated => ['mytcp1'],
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -229,11 +230,11 @@ my @configuration_file_unused = (
   # the test to fail because assigning non-existent configuration to an entity
   # is wrong.
   {
-    entity        => none,
-    collocation   => none,
-    configuration => whatever_just_to_ensure_there_is_a_config_file_on_the_command_line,
-    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
-    compatibility => true,
+    entity        => 'none',
+    collocation   => 'none',
+    configuration => 'whatever_just_to_ensure_there_is_a_config_file_on_the_command_line',
+    protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -245,11 +246,11 @@ my @without_configuration_file = (
   # contains just the TCP. Any other entity value will have the same effect,
   # because there is no configuration to assign anyway..
   {
-    entity        => none,
-    collocation   => none,
+    entity        => 'none',
+    collocation   => 'none',
     configuration => undef,
-    protocol      => [_OPENDDS_0500_TCP],
-    compatibility => true,
+    protocol      => ['_OPENDDS_0500_TCP'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos,
   },
@@ -258,31 +259,31 @@ my @without_configuration_file = (
 my @explicit_configuration_collocated = (
 
   {
-    entity        => none,
-    collocation   => process,
-    configuration => Udp_Only,
-    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
-    compatibility => true,
+    entity        => 'none',
+    collocation   => 'process',
+    configuration => 'Udp_Only',
+    protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
 
   {
-    entity        => participant,
-    collocation   => process,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
+    entity        => 'participant',
+    collocation   => 'process',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
 
   {
-    entity        => pubsub,
-    collocation   => process,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
+    entity        => 'pubsub',
+    collocation   => 'process',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -291,12 +292,12 @@ my @explicit_configuration_collocated = (
     # Note that without disabling the 'autoenable' policy, the new RW will kick off the
     # transport negotiation and a transport will be selected *before* one has the chance
     # to specify which transport configuration must be used.
-    autoenable    => false,
-    entity        => rw,
-    collocation   => process,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
+    autoenable    => 'false',
+    entity        => 'rw',
+    collocation   => 'process',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
@@ -308,41 +309,41 @@ my @test_configuration = (
 
 
 {
-    entity        => participant,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [udp1],
-    compatibility => true,
+    entity        => 'participant',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['udp1'],
+    compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos
   },
 
 {
-    entity        => participant,
-    collocation   => none,
-    configuration => Tcp_Only,
-    protocol      => [mytcp1],
-    compatibility => true,
-    negotiated => [mytcp1],
+    entity        => 'participant',
+    collocation   => 'none',
+    configuration => 'Tcp_Only',
+    protocol      => ['mytcp1'],
+    compatibility => 'true',
+    negotiated => ['mytcp1'],
     publisher     => $qos,
     subscriber    => $qos
   },
 
  {
-    entity        => none,
-    collocation   => none,
-    configuration => Udp_Only,
-    protocol      => [_OPENDDS_0300_UDP, _OPENDDS_0410_MCAST_UNRELIABLE, _OPENDDS_0420_MCAST_RELIABLE, _OPENDDS_0500_TCP],
-    compatibility => true,
+    entity        => 'none',
+    collocation   => 'none',
+    configuration => 'Udp_Only',
+    protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
+    compatibility => 'true',
     # The hash referred-to by qos ...
-    publisher     => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
-    subscriber     => {%$qos, negotiated => [_OPENDDS_0300_UDP],},
-#    subscriber    => {%$qos, negotiated => [_OPENDDS_0500_TCP],},
+    publisher     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
+    subscriber     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
+#    subscriber    => {%$qos, negotiated => ['_OPENDDS_0500_TCP'],},
   },
 
 );
 
-@scenario = (
+my @scenario = (
   @explicit_configuration_collocated,
   @without_configuration_file,
   @configuration_file_unused,
@@ -504,7 +505,7 @@ my $count = 0;
 my $failed = 0;
 
 # Only run with the built-in topics when not debugging
-my @builtinscases = $debug ? (undef) : (undef, true);
+my @builtinscases = $debug ? (undef) : (undef, 'true');
 
 for my $hasbuiltins (@builtinscases) {
 
@@ -518,7 +519,7 @@ for my $hasbuiltins (@builtinscases) {
         my $S = PerlDDS::create_process ($process, $parameters);
 
         my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
-        my ($process, $parameters) = command('subscriber', $sub_parameters, $sub_time, $debug);
+        ($process, $parameters) = command('subscriber', $sub_parameters, $sub_time, $debug);
         my $P = PerlDDS::create_process ($process, $parameters);
 
         if (0 != run($P, $pub_time, $S, $sub_time)) {
