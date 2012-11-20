@@ -1,3 +1,9 @@
+Tue Nov 20 15:32:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+
+          Make sure the two changes of QoS happen in the right order.
+
 Wed Nov 14 21:48:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ConfigTransports/run_test.pl:

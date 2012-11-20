@@ -17,6 +17,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
+#include <dds/DCPS/WaitSet.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -158,8 +159,28 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      // Now change second DataReader to have deadline period to be 10 seconds. This
-      // value is compatible with DataWriter so it was accepted.
+      // Wait for dr1 to be unmatched from the writer (due to writer set_qos).
+      DDS::WaitSet_var ws = new DDS::WaitSet;
+      DDS::StatusCondition_var sc = dr1->get_statuscondition();
+      sc->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+      ws->attach_condition(sc);
+      DDS::SubscriptionMatchedStatus matched;
+      const DDS::Duration_t timeout = {5, 0}; // seconds
+      while (dr1->get_subscription_matched_status(matched) == DDS::RETCODE_OK
+             && matched.current_count)
+      {
+        DDS::ConditionSeq active;
+        if (ws->wait(active, timeout) == DDS::RETCODE_TIMEOUT)
+        {
+          cerr << "ERROR: timeout expired while waiting for dr1 to be "
+            "unmatched from the writer which now has a 6 second deadline\n";
+          exit (1);
+        }
+      }
+      ws->detach_condition(sc);
+
+      // Now change second DataReader to have deadline period to be 5 seconds. This
+      // value is compatible with DataWriter so it will be matched.
       dr_qos.deadline.period.sec = 5;
 
       if (dr2->set_qos (dr_qos) != ::DDS::RETCODE_OK)
