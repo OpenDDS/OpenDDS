@@ -85,7 +85,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Create Topic (FooTopic)
     DDS::Topic_var topic =
       participant->create_topic("FooTopic",
-                                ts->get_type_name(),
+                                CORBA::String_var(ts->get_type_name()),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);

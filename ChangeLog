@@ -1,3 +1,9 @@
+Wed Nov 21 15:46:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+
+          Fixed very small memory leak of the data type name.
+
 Tue Nov 20 15:32:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/SetQosDeadline/subscriber.cpp:
