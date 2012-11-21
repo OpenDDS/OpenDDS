@@ -490,6 +490,7 @@ TransportRegistry::release()
   type_map_.clear();
   inst_map_.clear();
   config_map_.clear();
+  domain_default_config_map_.clear();
   global_config_ = 0;
 }
 

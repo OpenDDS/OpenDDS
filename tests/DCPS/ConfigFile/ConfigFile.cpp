@@ -177,6 +177,13 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
 
+    OpenDDS::DCPS::TransportConfig_rch tconf =
+      TransportRegistry::instance()->domain_default_config(domain);
+    TEST_CHECK(!tconf.is_nil());
+    OpenDDS::DCPS::TransportConfig_rch myconf =
+      TransportRegistry::instance()->get_config("myconfig");
+    TEST_CHECK(tconf == myconf);
+
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);
     OpenDDS::RTPS::RtpsDiscovery_rch rd =
@@ -200,6 +207,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheServiceParticipant->domainRepoMap();
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
+
+    OpenDDS::DCPS::TransportConfig_rch tconf =
+      TransportRegistry::instance()->domain_default_config(domain);
+    TEST_CHECK(!tconf.is_nil());
 
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
     TEST_CHECK(discovery != 0);

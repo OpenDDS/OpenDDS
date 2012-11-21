@@ -105,6 +105,7 @@ public:
   // Implement TransportClient
   virtual bool check_transport_qos(const TransportInst& inst);
   virtual const RepoId& get_repo_id() const;
+  DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
 
   // Implement TransportSendListener

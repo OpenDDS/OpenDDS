@@ -10,15 +10,18 @@
 #include "TransportInst.h"
 #include "TransportType.h"
 
+namespace OpenDDS {
+namespace DCPS {
+
 ACE_INLINE
-OpenDDS::DCPS::TransportRegistry::~TransportRegistry()
+TransportRegistry::~TransportRegistry()
 {
   DBG_ENTRY_LVL("TransportRegistry", "~TransportRegistry", 6);
 }
 
 ACE_INLINE
-OpenDDS::DCPS::TransportConfig_rch
-OpenDDS::DCPS::TransportRegistry::global_config() const
+TransportConfig_rch
+TransportRegistry::global_config() const
 {
   DBG_ENTRY_LVL("TransportRegistry", "global_config()", 6);
   GuardType guard(this->lock_);
@@ -27,7 +30,7 @@ OpenDDS::DCPS::TransportRegistry::global_config() const
 
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportRegistry::global_config(const TransportConfig_rch& cfg)
+TransportRegistry::global_config(const TransportConfig_rch& cfg)
 {
   DBG_ENTRY_LVL("TransportRegistry", "global_config(cfg)", 6);
   GuardType guard(this->lock_);
@@ -36,7 +39,27 @@ OpenDDS::DCPS::TransportRegistry::global_config(const TransportConfig_rch& cfg)
 
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportRegistry::remove_inst(const TransportInst_rch& inst)
+TransportRegistry::domain_default_config(DDS::DomainId_t domain,
+                                         const TransportConfig_rch& cfg)
+{
+  GuardType guard(this->lock_);
+  domain_default_config_map_[domain] = cfg;
+}
+
+ACE_INLINE
+TransportConfig_rch
+TransportRegistry::domain_default_config(DDS::DomainId_t domain) const
+{
+  GuardType guard(this->lock_);
+  const DomainConfigMap::const_iterator iter =
+    domain_default_config_map_.find(domain);
+  return (iter == domain_default_config_map_.end())
+    ? TransportConfig_rch() : iter->second;
+}
+
+ACE_INLINE
+void
+TransportRegistry::remove_inst(const TransportInst_rch& inst)
 {
   GuardType guard(this->lock_);
   this->inst_map_.erase(inst->name());
@@ -44,18 +67,19 @@ OpenDDS::DCPS::TransportRegistry::remove_inst(const TransportInst_rch& inst)
 
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportRegistry::remove_config(const TransportConfig_rch& cfg)
+TransportRegistry::remove_config(const TransportConfig_rch& cfg)
 {
   GuardType guard(this->lock_);
   this->config_map_.erase(cfg->name());
 }
 
-
 ACE_INLINE
 void
-OpenDDS::DCPS::TransportRegistry::bind_config(const std::string& name,
+TransportRegistry::bind_config(const std::string& name,
                                               DDS::Entity_ptr entity)
 {
   this->bind_config(this->get_config(name), entity);
 }
 
+}
+}

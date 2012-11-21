@@ -66,6 +66,10 @@ public:
   TransportConfig_rch global_config() const;
   void global_config(const TransportConfig_rch& cfg);
 
+  void domain_default_config(DDS::DomainId_t domain,
+                             const TransportConfig_rch& cfg);
+  TransportConfig_rch domain_default_config(DDS::DomainId_t domain) const;
+
   void bind_config(const std::string& name, DDS::Entity_ptr entity);
   void bind_config(const TransportConfig_rch& cfg, DDS::Entity_ptr entity);
 
@@ -103,6 +107,7 @@ private:
   typedef std::map<std::string, TransportConfig_rch> ConfigMap;
   typedef std::map<std::string, TransportInst_rch> InstMap;
   typedef std::map<std::string, std::string> LibDirectiveMap;
+  typedef std::map<DDS::DomainId_t, TransportConfig_rch> DomainConfigMap;
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -111,6 +116,7 @@ private:
   ConfigMap config_map_;
   InstMap inst_map_;
   LibDirectiveMap lib_directive_map_;
+  DomainConfigMap domain_default_config_map_;
 
   TransportConfig_rch global_config_;
 

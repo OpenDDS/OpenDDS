@@ -1,3 +1,41 @@
+Wed Nov 21 16:08:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/ReplayerImpl.h:
+
+          Allow a per-domain default transport config.  If the Entity being
+          enabled (DataReader/DataWriter) doesn't have a transport config bound
+          directly or to a parent Entity, use the per-domain default if set.
+          The per-domain default can be set by method calls on TransportRegistry
+          or by using the config file option DefaultTransportConfig in the
+          [domain/*] section.  The value can be any transport config name or the
+          special $file value which is also used by DCPSGlobalTransportConfig.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+
+          Test the new configuration option.
+
+        * tests/transport/error_handling/SimpleTransportClient.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataWriter.h:
+
+          Implement new virtual method for TransportClient.
+
 Wed Nov 21 15:46:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ReaderDataLifecycle/main.cpp:

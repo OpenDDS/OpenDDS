@@ -55,20 +55,29 @@ TransportClient::~TransportClient()
 void
 TransportClient::enable_transport(bool reliable, bool durable)
 {
-  EntityImpl* ent = dynamic_cast<EntityImpl*>(this);
+  // Search for a TransportConfig to use:
+  TransportConfig_rch tc;
 
-  TransportConfig_rch tc = ent ? ent->transport_config() : 0;
-  for (EntityImpl* p = ent ? ent->parent() : 0;
-       p && tc.is_nil(); p = p->parent()) {
-    tc = p->transport_config();
+  // 1. If this object is an Entity, check if a TransportConfig has been
+  //    bound either directly to this entity or to a parent entity.
+  for (const EntityImpl* ent = dynamic_cast<const EntityImpl*>(this);
+       ent && tc.is_nil(); ent = ent->parent()) {
+    tc = ent->transport_config();
   }
 
   if (tc.is_nil()) {
-    TransportRegistry* reg = TransportRegistry::instance();
-    tc = reg->global_config();
-    if (!tc.is_nil() && tc->instances_.empty()
-        && tc->name() == TransportRegistry::DEFAULT_CONFIG_NAME) {
-      tc = reg->fix_empty_default();
+    TransportRegistry* const reg = TransportRegistry::instance();
+    // 2. Check for a TransportConfig that is the default for this Domain.
+    tc = reg->domain_default_config(domain_id());
+    if (tc.is_nil()) {
+      // 3. Use the global_config if one has been set.
+      tc = reg->global_config();
+      if (!tc.is_nil() && tc->instances_.empty()
+          && tc->name() == TransportRegistry::DEFAULT_CONFIG_NAME) {
+        // 4. Set the "fallback option" if the global_config is empty.
+        //    (only applies if the user hasn't changed the global config)
+        tc = reg->fix_empty_default();
+      }
     }
   }
 

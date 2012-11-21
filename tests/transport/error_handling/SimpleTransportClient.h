@@ -31,6 +31,8 @@ class SimpleTransportClient : public OpenDDS::DCPS::TransportClient
     { return true; }
   const OpenDDS::DCPS::RepoId& get_repo_id() const
     { return repoId_; }
+  DDS::DomainId_t domain_id() const
+    { return 0; }
   CORBA::Long get_priority_value(const OpenDDS::DCPS::AssociationData&) const
     { return 0; }
 

@@ -164,6 +164,8 @@ public:
     { return true; }
   const RepoId& get_repo_id() const
     { return sub_id_; }
+  DDS::DomainId_t domain_id() const
+    { return 0; }
   CORBA::Long get_priority_value(const AssociationData&) const
     { return 0; }
 

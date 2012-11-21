@@ -188,6 +188,8 @@ private:
       { return true; }
     const DCPS::RepoId& get_repo_id() const
       { return repo_id_; }
+    DDS::DomainId_t domain_id() const
+      { return 0; } // not used for SEDP
     CORBA::Long get_priority_value(const DCPS::AssociationData&) const
       { return 0; }
 

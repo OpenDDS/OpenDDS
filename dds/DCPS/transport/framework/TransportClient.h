@@ -80,6 +80,7 @@ private:
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
   virtual const RepoId& get_repo_id() const = 0;
+  virtual DDS::DomainId_t domain_id() const = 0;
   virtual CORBA::Long get_priority_value(const AssociationData& data) const = 0;
 
   // transport_detached() is called from TransportImpl when it shuts down

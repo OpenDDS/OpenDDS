@@ -568,6 +568,7 @@ private:
 #endif
 
   const RepoId& get_repo_id() const { return this->subscription_id_; }
+  DDS::DomainId_t domain_id() const { return this->domain_id_; }
 
   CORBA::Long get_priority_value(const AssociationData& data) const {
     return data.publication_transport_priority_;

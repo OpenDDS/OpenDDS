@@ -1258,18 +1258,6 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
-  // sections to allow error reporting on bad discovery config names.
-  status = this->load_domain_configuration(this->cf_);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_domain_configuration () returned %d\n"),
-                      status),
-                     -1);
-  }
-
   status = TransportRegistry::instance()->load_transport_configuration(
              ACE_TEXT_ALWAYS_CHAR(config_fname.c_str()), this->cf_);
   if (this->global_transport_config_ != ACE_TEXT("")) {
@@ -1289,6 +1277,20 @@ Service_Participant::load_configuration()
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("load_transport_configuration () returned %d\n"),
+                      status),
+                     -1);
+  }
+
+  // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
+  // sections to allow error reporting on bad discovery config names.
+  // Also loaded after the transport configuration so that
+  // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
+  status = this->load_domain_configuration(this->cf_);
+
+  if (status != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+                      ACE_TEXT("load_domain_configuration () returned %d\n"),
                       status),
                      -1);
   }
@@ -1494,7 +1496,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
 int
 Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
 {
-  const ACE_Configuration_Section_Key &root = cf.root_section();
+  const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_sect;
 
   if (cf.open_section(root, DOMAIN_SECTION_NAME, 0, domain_sect) != 0) {
@@ -1521,7 +1523,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
     }
     // Process the subsections of this section (the individual domains)
     KeyList keys;
-    if (processSections( cf, domain_sect, keys ) != 0) {
+    if (processSections(cf, domain_sect, keys) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
                         ACE_TEXT("too many nesting layers in the [domain] section.\n")),
@@ -1529,49 +1531,59 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
     }
 
     // Loop through the [domain/*] sections
-    for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-      std::string domain_name = (*it).first;
+    for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
+      std::string domain_name = it->first;
 
       ValueMap values;
-      pullValues( cf, (*it).second, values );
+      pullValues(cf, it->second, values);
       DDS::DomainId_t domainId = -1;
       Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
-      for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-        std::string name = (*it).first;
+      std::string perDomainDefaultTportConfig;
+      for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+        std::string name = it->first;
         if (name == "DomainId") {
-          std::string value = (*it).second;
+          std::string value = it->second;
           if (!convertToInteger(value, domainId)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                              ACE_TEXT("Illegal integer value for DomainId (%s) in [domain/%s] section.\n"),
+                              ACE_TEXT("Illegal integer value for DomainId (%C) in [domain/%C] section.\n"),
                               value.c_str(), domain_name.c_str()),
                              -1);
           }
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [domain/%s]: DomainId == %d\n"),
+                       ACE_TEXT("(%P|%t) [domain/%C]: DomainId == %d\n"),
                        domain_name.c_str(), domainId));
           }
         } else if (name == "DomainRepoKey") {
           // We will still process this for backward compatibility, but
           // it can now be replaced by "DiscoveryConfig=REPO:<key>"
-          repoKey = (*it).second;
+          repoKey = it->second;
           if (repoKey == "-1") {
             repoKey = Discovery::DEFAULT_REPO;
           }
 
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [domain/%s]: DomainRepoKey == %C\n"),
+                       ACE_TEXT("(%P|%t) [domain/%C]: DomainRepoKey == %C\n"),
                        domain_name.c_str(), repoKey.c_str()));
           }
         } else if (name == "DiscoveryConfig") {
-          repoKey = (*it).second;
+          repoKey = it->second;
+
+        } else if (name == "DefaultTransportConfig") {
+          if (it->second == "$file") {
+            // When the special string of "$file" is used, substitute the file name
+            perDomainDefaultTportConfig = ACE_TEXT_ALWAYS_CHAR(config_fname.c_str());
+
+          } else {
+            perDomainDefaultTportConfig = it->second;
+          }
 
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Unexpected entry (%s) in [domain/%s] section.\n"),
+                            ACE_TEXT("Unexpected entry (%C) in [domain/%C] section.\n"),
                             name.c_str(), domain_name.c_str()),
                            -1);
         }
@@ -1582,9 +1594,22 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
         if (!convertToInteger(domain_name, domainId)) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Missing DomainId value in [domain/%s] section.\n"),
+                            ACE_TEXT("Missing DomainId value in [domain/%C] section.\n"),
                             domain_name.c_str()),
                            -1);
+        }
+      }
+
+      if (!perDomainDefaultTportConfig.empty()) {
+        TransportRegistry* const reg = TransportRegistry::instance();
+        TransportConfig_rch tc = reg->get_config(perDomainDefaultTportConfig);
+        if (tc.is_nil()) {
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
+            ACE_TEXT("Unknown transport config %C in [domain/%C] section.\n"),
+            perDomainDefaultTportConfig.c_str(), domain_name.c_str()), -1);
+        } else {
+          reg->domain_default_config(domainId, tc);
         }
       }
 
