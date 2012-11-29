@@ -2022,7 +2022,7 @@ void
 DomainParticipantImpl::delete_recorder(Recorder_rch recorder)
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(recorders_protector_);
-  recorders_.insert(recorder);
+  recorders_.erase(recorder);
 }
 
 void

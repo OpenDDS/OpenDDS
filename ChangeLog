@@ -1,3 +1,11 @@
+Thu Nov 29 21:50:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+
+          Fixed a bug in delete_recorder().
+          Thanks to Joachim Achtzehnter and Carol Wong.
+
 Wed Nov 21 16:08:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

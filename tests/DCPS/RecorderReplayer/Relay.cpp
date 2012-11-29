@@ -273,6 +273,9 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                        -1);
     }
 
+    service->delete_recorder(recorder);
+    service->delete_replayer(replayer);
+
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
