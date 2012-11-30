@@ -1,3 +1,19 @@
+Fri Nov 30 21:55:49 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed a bug in tracking remote endpoint data when
+          a local topic is removed and then re-created.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Test the scenario described above.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Fixed a leak of refcount on the subscriber object
+          when invoking its listener for on_data_on_readers().
+
 Thu Nov 29 21:50:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:

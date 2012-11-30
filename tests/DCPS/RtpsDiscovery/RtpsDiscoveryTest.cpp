@@ -122,7 +122,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
   TypeSupport_var ts = new TestMsgTypeSupportImpl;
 
   if (ts->register_type(dp2, "") != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support\n"));
     return 0;
   }
 
@@ -137,7 +137,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                       DEFAULT_STATUS_MASK);
 
   if (!topic) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic\n"));
     return 0;
   }
 
@@ -146,7 +146,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                             DEFAULT_STATUS_MASK);
 
   if (!pub) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create publisher"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create publisher\n"));
     return 0;
   }
 
@@ -160,10 +160,41 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                              DEFAULT_STATUS_MASK);
 
   if (!dw) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data writer"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data writer\n"));
     return 0;
   }
   return dw;
+}
+
+void recreate_data_writer_and_topic(DataWriter_var& dw)
+{
+  DataWriterQos dw_qos;
+  dw->get_qos(dw_qos);
+
+  Topic_var topic = dw->get_topic();
+  TopicQos topic_qos;
+  topic->get_qos(topic_qos);
+  CORBA::String_var topic_name = topic->get_name(),
+    type_name = topic->get_type_name();
+
+  Publisher_var pub = dw->get_publisher();
+  DomainParticipant_var dp = pub->get_participant();
+  pub->delete_datawriter(dw);
+  dw = 0;
+
+  dp->delete_topic(topic);
+  topic = 0;
+
+  topic = dp->create_topic(topic_name, type_name, topic_qos, 0, 0);
+  if (!topic) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to re-create topic\n"));
+    return;
+  }
+
+  dw = pub->create_datawriter(topic, dw_qos, 0, 0);
+  if (!dw) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to re-create data writer\n"));
+  }
 }
 
 DataReader_var create_data_reader(const DomainParticipant_var& dp)
@@ -171,7 +202,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
   TypeSupport_var ts = new TestMsgTypeSupportImpl;
 
   if (ts->register_type(dp, "") != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support\n"));
     return 0;
   }
 
@@ -186,7 +217,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                      DEFAULT_STATUS_MASK);
 
   if (!topic) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic\n"));
     return 0;
   }
 
@@ -195,7 +226,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                              DEFAULT_STATUS_MASK);
 
   if (!sub) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create subscriber"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create subscriber\n"));
     return 0;
   }
 
@@ -210,7 +241,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                              DEFAULT_STATUS_MASK);
 
   if (!dr) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data reader"));
+    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data reader\n"));
     return 0;
   }
   return dr;
@@ -522,6 +553,18 @@ bool run_test(DomainParticipant_var& dp,
   }
 
   WriterSync::wait_match(dw);
+
+  // Remove the writer and its topic, then re-create them.  The writer's
+  // participant should still have discovery info about the reader so that
+  // the association between the new writer and old reader can be established.
+  recreate_data_writer_and_topic(dw);
+
+  WriterSync::wait_match(dw);
+
+  // Get the new instance handle as pub_ih
+  if (!read_publication_bit(bit_sub, pub_ih, 2, 1)) {
+    return false;
+  }
 
   TestMsgDataWriter_var tmdw = TestMsgDataWriter::_narrow(dw);
   const TestMsg msg = {42};

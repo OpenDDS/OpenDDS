@@ -753,6 +753,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
     iter->second.qos_ = qos;
     iter->second.has_dcps_key_ = hasDcpsKey;
     topicId = iter->second.repo_id_;
+    topic_names_[iter->second.repo_id_] = topicName;
     return DCPS::FOUND;
   }
 
@@ -772,18 +773,15 @@ Sedp::remove_topic(const RepoId& topicId, std::string& name)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   name = topic_names_[topicId];
-  // Remove all publications and subscriptions on this topic
   std::map<std::string, TopicDetailsEx>::iterator top_it =
       topics_.find(name);
   if (top_it != topics_.end()) {
     TopicDetailsEx& td = top_it->second;
-    RepoIdSet::iterator ep;
-    for (ep = td.endpoints_.begin(); ep!= td.endpoints_.end(); ++ep) {
-      match_endpoints(*ep, td, true /*remove*/);
+    if (td.endpoints_.empty()) {
+      topics_.erase(name);
     }
   }
 
-  topics_.erase(name);
   topic_names_.erase(topicId);
   return DCPS::REMOVED;
 }
@@ -922,6 +920,7 @@ Sedp::remove_publication(const RepoId& publicationId)
             topics_.find(topic_name);
       if (top_it != topics_.end()) {
         match_endpoints(publicationId, top_it->second, true /*remove*/);
+        top_it->second.endpoints_.erase(publicationId);
       }
     } else {
       ACE_DEBUG((LM_ERROR,
@@ -1013,6 +1012,7 @@ Sedp::remove_subscription(const RepoId& subscriptionId)
             topics_.find(topic_name);
       if (top_it != topics_.end()) {
         match_endpoints(subscriptionId, top_it->second, true /*remove*/);
+        top_it->second.endpoints_.erase(subscriptionId);
       }
     } else {
       ACE_DEBUG((LM_ERROR,

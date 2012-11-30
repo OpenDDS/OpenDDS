@@ -2289,7 +2289,7 @@ void
       {
         ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-        sub_listener->on_data_on_readers(get_subscriber()) ;
+        sub_listener->on_data_on_readers(sub);
         sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       }
       else
