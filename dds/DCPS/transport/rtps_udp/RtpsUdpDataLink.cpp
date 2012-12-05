@@ -1573,7 +1573,8 @@ RtpsUdpDataLink::HeartBeat::enable()
 {
   if (!enabled_) {
     const ACE_Time_Value& per = outer_->config_->heartbeat_period_;
-    const long timer = outer_->get_reactor()->schedule_timer(this, 0, per, per);
+    const long timer =
+      outer_->get_reactor()->schedule_timer(this, 0, ACE_Time_Value::zero, per);
 
     if (timer == -1) {
       ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::HeartBeat::enable"
