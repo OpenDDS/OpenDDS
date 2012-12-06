@@ -154,6 +154,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
             exit(1);
           }
         }
+
+        // We know the reader has been disassociated, but the reader itself may
+        // not have been notified yet.  Introducing delay here to let the reader
+        // sync up with the disassociated state before re-associating.
+        ACE_OS::sleep(1);
         ACE_DEBUG((LM_DEBUG, "Writer restoring deadline to compatible value\n"));
 
         // change it back

@@ -1,3 +1,11 @@
+Thu Dec  6 17:48:36 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+
+          Fixed a test synchronization issue that
+          resulted in intermittent failures.
+
 Wed Dec  5 21:57:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:

@@ -160,6 +160,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Wait for dr1 to be unmatched from the writer (due to writer set_qos).
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) check for dr1 unmatch\n"));
       DDS::WaitSet_var ws = new DDS::WaitSet;
       DDS::StatusCondition_var sc = dr1->get_statuscondition();
       sc->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
@@ -170,6 +171,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
              && matched.current_count)
       {
         DDS::ConditionSeq active;
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) wait for dr1 unmatch\n"));
         if (ws->wait(active, timeout) == DDS::RETCODE_TIMEOUT)
         {
           cerr << "ERROR: timeout expired while waiting for dr1 to be "
@@ -178,6 +180,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       }
       ws->detach_condition(sc);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) done dr1 unmatch\n"));
 
       // Now change second DataReader to have deadline period to be 5 seconds. This
       // value is compatible with DataWriter so it will be matched.
