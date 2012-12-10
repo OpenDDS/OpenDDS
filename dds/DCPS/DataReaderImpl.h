@@ -386,6 +386,7 @@ public:
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
+  OwnershipManager* ownership_manager() const { return owner_manager_; }
 #endif
 
   virtual void delete_instance_map (void* map) = 0;

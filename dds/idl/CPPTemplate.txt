@@ -2215,12 +2215,6 @@ void
       instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
     }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    if (this->is_exclusive_ownership_ && is_unregister_msg) {
-      this->owner_manager_->unregister_reader (this->topic_servant_->type_name(),this);
-    }
-#endif
-
     if (! event_notify)
     {
        return;

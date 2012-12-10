@@ -43,6 +43,12 @@ OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
 OpenDDS::DCPS::InstanceState::~InstanceState()
 {
   cancel_release();
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  if (registered_) {
+    OwnershipManager* om = reader_->ownership_manager();
+    if (om) om->remove_instance(this);
+  }
+#endif
 }
 
 void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,

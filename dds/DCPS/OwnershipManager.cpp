@@ -51,6 +51,9 @@ OwnershipManager::~OwnershipManager()
     // There is no way to pass the instance map to concrete datareader
     // to delete, so it will be leaked.
     // delete iter->second.map_;
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) OwnershipManager::~OwnershipManager ")
+      ACE_TEXT("- non-empty type_instance_map_\n")));
     ++ iter;
   }
 
@@ -148,6 +151,21 @@ OwnershipManager::remove_writer (const PublicationId& pub_id)
   }
 }
 
+void
+OwnershipManager::remove_instance(InstanceState* instance_state)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, this->instance_lock_);
+  DDS::InstanceHandle_t ih = instance_state->instance_handle();
+  InstanceOwnershipWriterInfos::iterator i = instance_ownership_infos_.find(ih);
+  if (i != instance_ownership_infos_.end()) {
+    for (size_t j = 0; j < i->second.instance_states_.size(); ++j) {
+      if (i->second.instance_states_[j] == instance_state) {
+        i->second.instance_states_.erase(i->second.instance_states_.begin() + j);
+        break;
+      }
+    }
+  }
+}
 
 void
 OwnershipManager::remove_writers (const ::DDS::InstanceHandle_t& instance_handle)

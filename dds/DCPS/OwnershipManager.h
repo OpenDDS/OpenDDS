@@ -141,6 +141,8 @@ public:
   */
   void remove_owner (const ::DDS::InstanceHandle_t& instance_handle);
 
+  void remove_instance(InstanceState* instance_state);
+
   /**
   * Update the ownership strength of a publication.
   */

@@ -1,3 +1,18 @@
+Mon Dec 10 21:43:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Corrected some issues with object lifecycle when using exclusive
+          ownership QoS: the DataReaderImpl must be unregistered from the
+          OwnershipManager at the right time, and the InstanceState must be
+          removed from the OwnershipManager before it (InstanceState) goes away.
+
 Thu Dec  6 17:48:36 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/SetQosDeadline/publisher.cpp:

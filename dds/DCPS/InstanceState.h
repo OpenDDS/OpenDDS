@@ -128,6 +128,8 @@ public:
 
   void reset_ownership (::DDS::InstanceHandle_t instance);
 
+  DDS::InstanceHandle_t instance_handle() const { return handle_; }
+
 private:
   ACE_Recursive_Thread_Mutex& lock_;
 

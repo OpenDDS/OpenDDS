@@ -156,13 +156,18 @@ DataReaderImpl::cleanup()
     }
   }
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  if (owner_manager_) {
+    owner_manager_->unregister_reader(topic_servant_->type_name(), this);
+  }
+#endif
+
   if (topic_servant_) {
     topic_servant_->remove_entity_ref();
     topic_servant_->_remove_ref();
   }
 
   dr_local_objref_ = DDS::DataReader::_nil();
-
 }
 
 void DataReaderImpl::init(
