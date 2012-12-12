@@ -1,3 +1,9 @@
+Wed Dec 12 22:16:36 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed leak of type name string when removing multitopic.
+
 Wed Dec 12 21:55:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReaderBase.cpp:

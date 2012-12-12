@@ -807,7 +807,8 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
   DDS::MultiTopic_var mt = DDS::MultiTopic::_duplicate(a_multitopic);
-  TopicDescriptionMap::iterator iter = topic_descrs_.find(mt->get_name());
+  CORBA::String_var mt_name = mt->get_name();
+  TopicDescriptionMap::iterator iter = topic_descrs_.find(mt_name.in());
   if (iter == topic_descrs_.end()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
