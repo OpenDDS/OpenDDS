@@ -12,31 +12,51 @@
 
 #include "MultiTopicTestTypeSupportImpl.h"
 
+#include <sstream>
+
 using namespace DDS;
 using namespace OpenDDS::DCPS;
 
 const int N_ITERATIONS = 5;
 
-void waitForMatch(const StatusCondition_var& sc)
+void check(ReturnCode_t ret)
 {
+  if (ret != RETCODE_OK) {
+    std::ostringstream oss;
+    oss << "DDS API call failed with return code: " << ret;
+    throw std::runtime_error(oss.str());
+  }
+}
+
+void waitForMatch(const DataWriter_var& dw, int count = 1)
+{
+  StatusCondition_var sc = dw->get_statuscondition();
   sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(sc);
-  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
+  const Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  ws->wait(active, infinite);
+  PublicationMatchedStatus pubmatched;
+  while (dw->get_publication_matched_status(pubmatched) == RETCODE_OK
+         && pubmatched.current_count != count) {
+    ws->wait(active, infinite);
+  }
   ws->detach_condition(sc);
 }
 
 template <typename TSImpl>
 struct Writer {
-  Writer(const Publisher_var& pub, const char* topic_name)
+  Writer(const Publisher_var& pub, const char* topic_name,
+         const DomainParticipant_var& other_participant)
     : ts_(new TSImpl)
   {
     DomainParticipant_var dp = pub->get_participant();
-    ts_->register_type(dp, "");
+    check(ts_->register_type(dp, ""));
+    check(ts_->register_type(other_participant, ""));
     CORBA::String_var type_name = ts_->get_type_name();
     Topic_var topic = dp->create_topic(topic_name, type_name,
+      TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+    Topic_var topic2 = other_participant->create_topic(topic_name, type_name,
       TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
     dw_ = pub->create_datawriter(topic,
       DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
@@ -48,29 +68,27 @@ struct Writer {
 
 bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 {
+  DomainParticipant_var sub_dp = sub->get_participant();
+
   // Writer-side setup
 
-  Writer<LocationInfoTypeSupportImpl> location(pub, "Location");
-  Writer<PlanInfoTypeSupportImpl> flightplan(pub, "FlightPlan");
-  Writer<MoreInfoTypeSupportImpl> more(pub, "More");
-  Writer<UnrelatedInfoTypeSupportImpl> unrelated(pub, "Unrelated");
+  Writer<LocationInfoTypeSupportImpl> location(pub, "Location", sub_dp);
+  Writer<PlanInfoTypeSupportImpl> flightplan(pub, "FlightPlan", sub_dp);
+  Writer<MoreInfoTypeSupportImpl> more(pub, "More", sub_dp);
+  Writer<UnrelatedInfoTypeSupportImpl> unrelated(pub, "Unrelated", sub_dp);
   MoreInfoDataWriter_var midw = MoreInfoDataWriter::_narrow(more.dw_);
 
-  CORBA::String_var type_name;
-  DomainParticipant_var dp;
+  // Reader-side setup
+
+  ResultingTypeSupport_var ts_res = new ResultingTypeSupportImpl;
+  check(ts_res->register_type(sub_dp, ""));
+  CORBA::String_var type_name = ts_res->get_type_name();
   MoreInfo mi;
   DDS::DataReader_var dr;
+
   for (int i = 0; i < N_ITERATIONS; ++i) {
 
-    // Reader-side setup
-
-    if (i == 0) {
-      ResultingTypeSupport_var ts_res = new ResultingTypeSupportImpl;
-      dp = sub->get_participant();
-      ts_res->register_type(dp, "");
-      type_name = ts_res->get_type_name();
-    }
-    MultiTopic_var mt = dp->create_multitopic("MyMultiTopic", type_name,
+    MultiTopic_var mt = sub_dp->create_multitopic("MyMultiTopic", type_name,
       "SELECT flight_name, x, y, z AS height, more, misc "
       "FROM Location NATURAL JOIN FlightPlan NATURAL JOIN More NATURAL JOIN "
       "Unrelated WHERE height < 1000 AND x<23", StringSeq());
@@ -80,8 +98,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 
     // Write samples (Location)
 
-    StatusCondition_var dw_sc = location.dw_->get_statuscondition();
-    waitForMatch(dw_sc);
+    waitForMatch(location.dw_);
     LocationInfoDataWriter_var locdw =
       LocationInfoDataWriter::_narrow(location.dw_);
     LocationInfo sample = {100, 97, 23, 2, 3}; // filtered out (x < 23)
@@ -99,8 +116,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 
     // Write samples (FlightPlan)
 
-    StatusCondition_var dw2_sc = flightplan.dw_->get_statuscondition();
-    waitForMatch(dw2_sc);
+    waitForMatch(flightplan.dw_);
     PlanInfoDataWriter_var pidw = PlanInfoDataWriter::_narrow(flightplan.dw_);
     PlanInfo sample4;
     sample4.flight_id1 = 100;
@@ -122,8 +138,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 
     // Write samples (More)
 
-    StatusCondition_var dw3_sc = more.dw_->get_statuscondition();
-    waitForMatch(dw3_sc);
+    waitForMatch(more.dw_);
     mi.flight_id1 = 12345;
     mi.more = "Shouldn't see this";
     ret = midw->write(mi, HANDLE_NIL);
@@ -135,8 +150,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 
     // Write samples (Unrelated)
 
-    StatusCondition_var dw4_sc = unrelated.dw_->get_statuscondition();
-    waitForMatch(dw4_sc);
+    waitForMatch(unrelated.dw_);
     UnrelatedInfoDataWriter_var uidw =
       UnrelatedInfoDataWriter::_narrow(unrelated.dw_);
     UnrelatedInfo ui;
@@ -181,7 +195,11 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     // Reader cleanup
     if (i != N_ITERATIONS - 1) {
       sub->delete_datareader(dr);
-      dp->delete_multitopic(mt);
+      waitForMatch(location.dw_, 0);
+      waitForMatch(flightplan.dw_, 0);
+      waitForMatch(more.dw_, 0);
+      waitForMatch(unrelated.dw_, 0);
+      sub_dp->delete_multitopic(mt);
     }
   }
 
@@ -224,8 +242,8 @@ int run_test(int argc, ACE_TCHAR* argv[])
     dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
                             DEFAULT_STATUS_MASK);
 
-  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-                                             DEFAULT_STATUS_MASK);
+  Subscriber_var sub = dp2->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
+                                              DEFAULT_STATUS_MASK);
 
   TransportRegistry& treg = *TheTransportRegistry;
   if (!treg.get_config("t1").is_nil()) {

@@ -124,6 +124,7 @@ public:
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
+  void remove_from_datareader_set(DataReaderImpl* reader);
 #endif
 
   DDS::SubscriberListener_ptr listener_for(DDS::StatusKind kind);

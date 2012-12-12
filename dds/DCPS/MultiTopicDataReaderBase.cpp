@@ -259,11 +259,15 @@ bool MultiTopicDataReaderBase::have_sample_states(
 
 void MultiTopicDataReaderBase::cleanup()
 {
+  DDS::Subscriber_var sub = resulting_reader_->get_subscriber();
   for (std::map<std::string, QueryPlan>::iterator it = query_plans_.begin();
        it != query_plans_.end(); ++it) {
-    it->second.data_reader_->set_listener(0, ALL_STATUS_MASK);
+    sub->delete_datareader(it->second.data_reader_);
   }
-  dynamic_cast<DataReaderImpl*>(resulting_reader_.in())->cleanup();
+  DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
+  SubscriberImpl* si = dynamic_cast<SubscriberImpl*>(sub.in());
+  si->remove_from_datareader_set(dri);
+  dri->cleanup();
 }
 
 DDS::InstanceHandle_t MultiTopicDataReaderBase::get_instance_handle()

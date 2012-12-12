@@ -1,3 +1,17 @@
+Wed Dec 12 21:55:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Corrected cleanup of data readers created
+          internally by the multi topic data reader.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+
+          Test with separate domain participants for the
+          publishing and subscribing parts of the application.
+
 Mon Dec 10 21:43:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

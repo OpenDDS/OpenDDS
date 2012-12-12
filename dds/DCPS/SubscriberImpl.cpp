@@ -346,20 +346,37 @@ SubscriberImpl::delete_contained_entities()
 
   ACE_Vector<DDS::DataReader_ptr> drs;
 
+#ifndef OPENDDS_NO_MULTI_TOPIC
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
-
-#ifndef OPENDDS_NO_MULTI_TOPIC
     for (std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
            multitopic_reader_map_.begin();
          mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
       drs.push_back(mt_iter->second);
     }
+  }
+
+  for (size_t i = 0; i < drs.size(); ++i) {
+    const DDS::ReturnCode_t ret = delete_datareader(drs[i]);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("SubscriberImpl::delete_contained_entities, ")
+                        ACE_TEXT("failed to delete datareader\n")),
+                       ret);
+    }
+  }
+  drs.clear();
 #endif
 
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     this->si_lock_,
+                     DDS::RETCODE_ERROR);
     DataReaderMap::iterator it;
     DataReaderMap::iterator itEnd = datareader_map_.end();
 
@@ -816,6 +833,13 @@ SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
   CORBA::String_var topic = td->get_name();
   multitopic_reader_map_[topic.in()] = DDS::DataReader::_duplicate(reader);
   return DDS::RETCODE_OK;
+}
+
+void
+SubscriberImpl::remove_from_datareader_set(DataReaderImpl* reader)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, si_lock_);
+  datareader_set_.erase(reader);
 }
 #endif
 
