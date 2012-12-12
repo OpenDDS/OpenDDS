@@ -13,6 +13,7 @@
 #include "MultiTopicTestTypeSupportImpl.h"
 
 #include <sstream>
+#include <stdexcept>
 
 using namespace DDS;
 using namespace OpenDDS::DCPS;
