@@ -512,6 +512,19 @@ std::ostream& operator<<(std::ostream& os, const SubMessageId rhs)
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 {
+  struct SaveAndRestoreStreamState {
+    explicit SaveAndRestoreStreamState(std::ostream& s)
+      : fill_(s.fill()), fmt_(s.flags()), s_(s) {}
+    ~SaveAndRestoreStreamState()
+    {
+      s_.fill(fill_);
+      s_.flags(fmt_);
+    }
+    char fill_;
+    std::ios_base::fmtflags fmt_;
+    std::ostream& s_;
+  } stream_state(str);
+
   if (value.submessage_id_ != SUBMESSAGE_NONE) {
     str << SubMessageId(value.submessage_id_)
       << " (0x" << std::hex << std::setw(2) << std::setfill('0')

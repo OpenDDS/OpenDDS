@@ -771,14 +771,14 @@ TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
   } else {
     for (size_t i = 0; i < num_delayed_notifications; i++) {
       if (modes[i] == MODE_TERMINATED) {
-        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
+        if (!this->transport_shutdown_ || samples[i]->owned_by_transport()) {
           bool deleted = samples[i]->data_dropped(true);
           if (found_element == samples[i]) {
             element.released (deleted);
           }
         }
       } else {
-        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
+        if (!this->transport_shutdown_ || samples[i]->owned_by_transport()) {
           bool deleted = samples[i]->data_delivered();
           if (found_element == samples[i]) {
             element.released (deleted);

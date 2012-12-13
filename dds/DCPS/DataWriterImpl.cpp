@@ -900,8 +900,9 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
     }
   }
 
-  ACE_Message_Block* data;
+  ACE_Message_Block* data = 0;
   if (!token.marshal(data, this->swap_bytes())) {
+    delete data;
     return DDS::RETCODE_OUT_OF_RESOURCES;
   }
 

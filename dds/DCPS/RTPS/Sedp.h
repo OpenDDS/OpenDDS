@@ -325,7 +325,7 @@ private:
                      const DiscoveredReaderData& rdata);
 
   struct DiscoveredPublication {
-    DiscoveredPublication() {}
+    DiscoveredPublication() : bit_ih_(DDS::HANDLE_NIL) {}
     explicit DiscoveredPublication(const DiscoveredWriterData& w)
       : writer_data_(w), bit_ih_(DDS::HANDLE_NIL) {}
     DiscoveredWriterData writer_data_;
@@ -337,7 +337,7 @@ private:
   DiscoveredPublicationMap discovered_publications_;
 
   struct DiscoveredSubscription {
-    DiscoveredSubscription() {}
+    DiscoveredSubscription() : bit_ih_(DDS::HANDLE_NIL) {}
     explicit DiscoveredSubscription(const DiscoveredReaderData& r)
       : reader_data_(r), bit_ih_(DDS::HANDLE_NIL) {}
     DiscoveredReaderData reader_data_;

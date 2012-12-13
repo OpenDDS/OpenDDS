@@ -267,6 +267,8 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Element queue and unsent message block "
                    "chain is out-of-synch. remaining_chain == 0.\n"));
+        this->status_ = REMOVE_ERROR;
+        return 0;
       }
 
       // Extract/unchain the first block from the remaining_chain.
