@@ -244,16 +244,16 @@ private:
   static void extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
                                   CORBA::ULong extent);
 
-  void process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
+  bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
                            const RepoId& src, RtpsReaderMap::value_type& rr);
 
-  void process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
+  bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
                          const RepoId& src, RtpsReaderMap::value_type& rr);
 
-  void process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src,
+  bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src,
                      RtpsReaderMap::value_type& rr);
 
-  void process_data_i(const RTPS::DataSubmessage& data, const RepoId& src,
+  bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src,
                       RtpsReaderMap::value_type& rr);
 
   void durability_resend(TransportQueueElement* element);
@@ -278,12 +278,13 @@ private:
     std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
     src.entityId = submessage.writerId;
 
+    bool schedule_timer = false;
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     if (local.entityId == ENTITYID_UNKNOWN) {
       for (pair<RtpsReaderIndex::iterator, RtpsReaderIndex::iterator> iters =
              reader_index_.equal_range(src);
            iters.first != iters.second; ++iters.first) {
-        (this->*func)(submessage, src, *iters.first->second);
+        schedule_timer |= (this->*func)(submessage, src, *iters.first->second);
       }
 
     } else {
@@ -291,7 +292,11 @@ private:
       if (rr == readers_.end()) {
         return;
       }
-      (this->*func)(submessage, src, *rr);
+      schedule_timer = (this->*func)(submessage, src, *rr);
+    }
+    g.release();
+    if (schedule_timer) {
+      heartbeat_reply_.schedule();
     }
   }
 

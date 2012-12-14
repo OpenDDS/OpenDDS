@@ -1,3 +1,13 @@
+Fri Dec 14 23:23:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Revised locking strategy for dealing with scheduling
+          ACE timers: need to schedule the timer after releasing
+          the datalink's mutex to avoid calling into the reactor
+          with the mutex held.
+
 Thu Dec 13 19:32:31 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.inl:

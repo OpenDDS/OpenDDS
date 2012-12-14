@@ -656,7 +656,7 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
   datareader_dispatch(data, src_prefix, &RtpsUdpDataLink::process_data_i);
 }
 
-void
+bool
 RtpsUdpDataLink::process_data_i(const RTPS::DataSubmessage& data,
                                 const RepoId& src,
                                 RtpsReaderMap::value_type& rr)
@@ -668,6 +668,7 @@ RtpsUdpDataLink::process_data_i(const RTPS::DataSubmessage& data,
     wi->second.recvd_.insert(seq);
     wi->second.frags_.erase(seq);
   }
+  return false;
 }
 
 void
@@ -677,7 +678,7 @@ RtpsUdpDataLink::received(const RTPS::GapSubmessage& gap,
   datareader_dispatch(gap, src_prefix, &RtpsUdpDataLink::process_gap_i);
 }
 
-void
+bool
 RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
                                const RepoId& src, RtpsReaderMap::value_type& rr)
 {
@@ -693,6 +694,7 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
                              gap.gapList.bitmap.get_buffer());
     //FUTURE: to support wait_for_acks(), notify DCPS layer of the GAP
   }
+  return false;
 }
 
 void
@@ -703,7 +705,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
                       &RtpsUdpDataLink::process_heartbeat_i);
 }
 
-void
+bool
 RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
                                      const RepoId& src,
                                      RtpsReaderMap::value_type& rr)
@@ -711,13 +713,13 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
   const WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
   if (wi == rr.second.remote_writers_.end()) {
     // we may not be associated yet, even if the writer thinks we are
-    return;
+    return false;
   }
 
   WriterInfo& info = wi->second;
 
   if (heartbeat.count.value <= info.heartbeat_recvd_count_) {
-    return;
+    return false;
   }
   info.heartbeat_recvd_count_ = heartbeat.count.value;
 
@@ -731,7 +733,7 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
   if (!rr.second.durable_ && info.initial_hb_) {
     if (last.getValue() < starting.getValue()) {
       // this is an invalid heartbeat -- last must be positive
-      return;
+      return false;
     }
     // For the non-durable reader, the first received HB or DATA establishes
     // a baseline of the lowest sequence number we'd ever need to NACK.
@@ -759,10 +761,11 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
       (rr.second.durable_ && recvd.empty()) ||
       recv_strategy_->has_fragments(info.hb_range_, wi->first)))) {
     info.ack_pending_ = true;
-    heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
+    return true; // timer will invoke send_heartbeat_replies()
   }
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
+  return false;
 }
 
 bool
@@ -1041,7 +1044,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatFragSubmessage& hb_frag,
   datareader_dispatch(hb_frag, src_prefix, &RtpsUdpDataLink::process_hb_frag_i);
 }
 
-void
+bool
 RtpsUdpDataLink::process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
                                    const RepoId& src,
                                    RtpsReaderMap::value_type& rr)
@@ -1049,11 +1052,11 @@ RtpsUdpDataLink::process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
   WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
   if (wi == rr.second.remote_writers_.end()) {
     // we may not be associated yet, even if the writer thinks we are
-    return;
+    return false;
   }
 
   if (hb_frag.count.value <= wi->second.hb_frag_recvd_count_) {
-    return;
+    return false;
   }
 
   wi->second.hb_frag_recvd_count_ = hb_frag.count.value;
@@ -1069,8 +1072,9 @@ RtpsUdpDataLink::process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
       || !wi->second.recvd_.contains(seq)) {
     wi->second.frags_[seq] = hb_frag.lastFragmentNum;
     wi->second.ack_pending_ = true;
-    heartbeat_reply_.schedule(); // timer will invoke send_heartbeat_replies()
+    return true; // timer will invoke send_heartbeat_replies()
   }
+  return false;
 }
 
 
@@ -1176,10 +1180,12 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   // we don't need to do anything further.
   if (!final) {
     ri->second.requested_changes_.push_back(acknack.readerSNState);
-    nack_reply_.schedule(); // timer will invoke send_nack_replies()
   }
 
   g.release();
+  if (!final) {
+    nack_reply_.schedule(); // timer will invoke send_nack_replies()
+  }
   typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
   for (iter_t it = pendingCallbacks.begin();
        it != pendingCallbacks.end(); ++it) {
@@ -1236,6 +1242,7 @@ RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
   SequenceNumber seq;
   seq.setValue(nackfrag.writerSN.high, nackfrag.writerSN.low);
   ri->second.requested_frags_[seq] = nackfrag.fragmentNumberState;
+  g.release();
   nack_reply_.schedule(); // timer will invoke send_nack_replies()
 }
 
