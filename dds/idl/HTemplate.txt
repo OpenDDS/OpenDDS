@@ -194,8 +194,6 @@ public:
   //Destructor
   virtual ~<%TYPE%>DataReaderImpl (void);
 
-  virtual ::DDS::ReturnCode_t delete_contained_entities ();
-
   /**
    * Do parts of enable specific to the datatype.
    * Called by DataReaderImpl::enable().

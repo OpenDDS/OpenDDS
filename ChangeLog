@@ -1,3 +1,20 @@
+Mon Dec 17 21:02:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Fixed DataReader::delete_contained_entities().
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          Tested the above.
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Fixed inconsistent QoS policy names that are also wrong in the DDS
+          spec.  The correct names are obvious, so we'll deviate from the spec.
+
 Fri Dec 14 23:23:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:

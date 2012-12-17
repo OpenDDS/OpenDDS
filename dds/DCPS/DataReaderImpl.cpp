@@ -768,11 +768,9 @@ DDS::ReturnCode_t DataReaderImpl::delete_readcondition(
 
 DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
 {
-  if (DCPS_debug_level >= 2)
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) ")
-               ACE_TEXT("DataReaderImpl::delete_contained_entities\n")));
-
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+                   DDS::RETCODE_OUT_OF_RESOURCES);
+  read_conditions_.clear();
   return DDS::RETCODE_OK;
 }
 

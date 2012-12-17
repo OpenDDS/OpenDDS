@@ -118,7 +118,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
   ws->detach_condition(dr_rc);
   dr->delete_readcondition(dr_rc);
   ws->detach_condition(dr_rc2);
-  dr->delete_readcondition(dr_rc2);
+
+  // Instead of: dr->delete_readcondition(dr_rc2);
+  dr->delete_contained_entities();
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);

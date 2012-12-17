@@ -327,7 +327,8 @@ module DDS {
     const string WRITERDATALIFECYCLE_QOS_POLICY_NAME = "WriterDataLifecycle";
     const string READERDATALIFECYCLE_QOS_POLICY_NAME = "ReaderDataLifecycle";
     const string TOPICDATA_QOS_POLICY_NAME           = "TopicData";
-    const string GROUPDATA_QOS_POLICY_NAME           = "TransportPriority";
+    const string GROUPDATA_QOS_POLICY_NAME           = "GroupData";
+    const string TRANSPORTPRIORITY_QOS_POLICY_NAME   = "TransportPriority";
     const string LIFESPAN_QOS_POLICY_NAME            = "Lifespan";
     const string DURABILITYSERVICE_POLICY_NAME       = "DurabilityService";
 

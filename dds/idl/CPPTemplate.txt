@@ -618,14 +618,6 @@ void
   //X SHH release the data samples in the instance_map_.
 }
 
-
-::DDS::ReturnCode_t
-<%TYPE%>DataReaderImpl::delete_contained_entities ()
-{
-  return this->delete_contained_entities();
-}
-
-
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read (
     ::<%SCOPED%><%SEQ%> & received_data,
