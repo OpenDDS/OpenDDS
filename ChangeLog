@@ -1,3 +1,13 @@
+Wed Dec 19 16:34:05 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Due to the change in Heartbeat timing from the commit
+          Wed Dec  5 21:57:56 UTC 2012, need to make sure that the AckNack
+          response to the initial Heartbeat (for handshaking) doesn't
+          unnecessarily cause retransmisison of sample with sequence number 1.
+
 Mon Dec 17 21:02:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

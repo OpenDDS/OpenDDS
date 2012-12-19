@@ -193,6 +193,7 @@ private:
     bool durable_;
 
     RtpsWriter() : heartbeat_count_(0), durable_(false) {}
+    SequenceNumber heartbeat_high(const ReaderInfo&) const;
   };
 
   typedef std::map<RepoId, RtpsWriter, GUID_tKeyLessThan> RtpsWriterMap;

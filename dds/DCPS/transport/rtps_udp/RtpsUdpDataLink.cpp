@@ -815,14 +815,15 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         if (recvd.empty()) {
           // Nack the entire heartbeat range.  Only reached when durable.
           ack = hb_low;
-          bitmap.length(bitmap_num_longs(ack, hb_high));
-          const CORBA::ULong idx = (hb_high_val > hb_low_val + 255)
-                                   ? 255
-                                   : CORBA::ULong(hb_high_val - hb_low_val);
-          DisjointSequence::fill_bitmap_range(0, idx,
-                                              bitmap.get_buffer(),
-                                              bitmap.length(), num_bits);
-
+          if (!(hb_low == hb_high && hb_low == 1)) { // Empty bitmap if HB[1,1]
+            bitmap.length(bitmap_num_longs(ack, hb_high));
+            const CORBA::ULong idx = (hb_high_val > hb_low_val + 255)
+                                     ? 255
+                                     : CORBA::ULong(hb_high_val - hb_low_val);
+            DisjointSequence::fill_bitmap_range(0, idx,
+                                                bitmap.get_buffer(),
+                                                bitmap.length(), num_bits);
+          }
         } else if (prev_empty && recvd.low() > hb_low) {
           // Nack the range between the heartbeat low and the recvd low.
           ack = hb_low;
@@ -1132,6 +1133,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   }
 
   std::map<SequenceNumber, TransportQueueElement*> pendingCallbacks;
+  const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
   if (!ri->second.durable_data_.empty()) {
     SequenceNumber ack;
@@ -1142,8 +1144,14 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       ri->second.durable_data_.swap(pendingCallbacks);
     } else {
       DisjointSequence requests;
-      requests.insert(ack, acknack.readerSNState.numBits,
-                      acknack.readerSNState.bitmap.get_buffer());
+      if (!requests.insert(ack, acknack.readerSNState.numBits,
+                           acknack.readerSNState.bitmap.get_buffer())
+          && !final && ack == rw->second.heartbeat_high(ri->second)) {
+        // This is a non-final AckNack with no bits in the bitmap.
+        // Attempt to reply to a request for the "base" value which
+        // is neither Acked nor Nacked, only when it's the HB high.
+        requests.insert(ack);
+      }
       // Attempt to reply to nacks for durable data
       bool sent_some = false;
       typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
@@ -1173,8 +1181,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       }
     }
   }
-
-  const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
   // we don't need to do anything further.
@@ -1272,7 +1278,15 @@ RtpsUdpDataLink::send_nack_replies()
         const SequenceNumberSet& sn_state = ri->second.requested_changes_[i];
         SequenceNumber base;
         base.setValue(sn_state.bitmapBase.high, sn_state.bitmapBase.low);
-        requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
+        if (sn_state.numBits == 1 && !(sn_state.bitmap[0] & 1)
+            && base == writer.heartbeat_high(ri->second)) {
+          // Since there is an entry in requested_changes_, the DR must have
+          // sent a non-final AckNack.  If the base value is the high end of
+          // the heartbeat range, treat it as a request for that seq#.
+          requests.insert(base);
+        } else {
+          requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
+        }
       }
 
       if (ri->second.requested_changes_.size()) {
@@ -1286,7 +1300,7 @@ RtpsUdpDataLink::send_nack_replies()
     DisjointSequence gaps;
     if (!requests.empty()) {
       std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
-      SingleSendBuffer& sb = *rw->second.send_buff_;
+      SingleSendBuffer& sb = *writer.send_buff_;
       {
         ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
         const RtpsUdpSendStrategy::OverrideToken ot =
@@ -1546,6 +1560,16 @@ RtpsUdpDataLink::ReaderInfo::expire_durable_data()
   for (iter_t it = durable_data_.begin(); it != durable_data_.end(); ++it) {
     it->second->data_dropped();
   }
+}
+
+SequenceNumber
+RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo& ri) const
+{
+  const SequenceNumber durable_max =
+    ri.durable_data_.empty() ? 0 : ri.durable_data_.rbegin()->first;
+  const SequenceNumber data_max =
+    send_buff_.is_nil() ? 0 : (send_buff_->empty() ? 0 : send_buff_->high());
+  return std::max(durable_max, data_max);
 }
 
 
