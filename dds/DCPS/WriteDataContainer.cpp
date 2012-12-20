@@ -494,12 +494,14 @@ WriteDataContainer::get_resend_data()
   //
   DataSampleList list = this->resend_data_;
 
-  //
-  // The unsent_data_ already linked with the
-  // next_send_sample during enqueue.
-  // Append the unsent_data_ to current sending_data_
-  // list.
-  released_data_.enqueue_tail_next_send_sample(list);
+  if (list.size_) {
+    //
+    // The unsent_data_ already linked with the
+    // next_send_sample during enqueue.
+    // Append the unsent_data_ to current sending_data_
+    // list.
+    released_data_.enqueue_tail_next_send_sample(list);
+  }
 
   //
   // Clear the unsent data list.

@@ -1,3 +1,13 @@
+Thu Dec 20 15:46:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Allow for the resend_data_ list to be empty.  This can happen if
+          content filtering is used along with non-volatile durability and
+          all of the durable data happened to get filtered-out.
+          Content filtering the durable data is a new feature as of the commit
+          Mon Oct 22 01:23:03 UTC 2012.
+
 Wed Dec 19 16:34:05 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
