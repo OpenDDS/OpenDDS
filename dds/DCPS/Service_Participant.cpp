@@ -1537,7 +1537,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
       ValueMap values;
       pullValues(cf, it->second, values);
       DDS::DomainId_t domainId = -1;
-      Discovery::RepoKey repoKey = Discovery::DEFAULT_REPO;
+      Discovery::RepoKey repoKey;
       std::string perDomainDefaultTportConfig;
       for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
         std::string name = it->first;
@@ -1614,16 +1614,18 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
       }
 
       // Check to see if the specified discovery configuration has been defined
-      if ((repoKey != Discovery::DEFAULT_REPO) &&
-          (repoKey != Discovery::DEFAULT_RTPS) &&
-          (this->discoveryMap_.find(repoKey) == this->discoveryMap_.end())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                          ACE_TEXT("Specified configuration (%C) not found.  Referenced in [domain/%C] section.\n"),
-                          repoKey.c_str(), domain_name.c_str()),
-                         -1);
+      if (!repoKey.empty()) {
+        if ((repoKey != Discovery::DEFAULT_REPO) &&
+            (repoKey != Discovery::DEFAULT_RTPS) &&
+            (this->discoveryMap_.find(repoKey) == this->discoveryMap_.end())) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
+                            ACE_TEXT("Specified configuration (%C) not found.  Referenced in [domain/%C] section.\n"),
+                            repoKey.c_str(), domain_name.c_str()),
+                           -1);
+        }
+        this->set_repo_domain(domainId, repoKey);
       }
-      this->set_repo_domain(domainId, repoKey);
     }
   }
 

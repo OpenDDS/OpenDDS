@@ -165,6 +165,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheServiceParticipant->domainRepoMap();
     TEST_CHECK(domainRepoMap.find(domain) != domainRepoMap.end());
     TEST_CHECK(domainRepoMap.find(domain)->second == key);
+
+    OpenDDS::DCPS::TransportConfig_rch tconf =
+      TransportRegistry::instance()->domain_default_config(domain);
+    TEST_CHECK(tconf.is_nil());
   }
 
   {
@@ -223,6 +227,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(rd->spdp_send_addrs()[2] == "host3:10003");
     TEST_CHECK(rd->spdp_send_addrs()[3] == "host4:10004");
     TEST_CHECK(rd->spdp_send_addrs()[4] == "host5:10005");
+  }
+  {
+    DDS::DomainId_t domain = 97;
+    OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
+    TEST_CHECK(discovery != 0);
+    TEST_CHECK(discovery->key() == "MyDefaultDiscovery");
   }
 #endif
 

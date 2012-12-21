@@ -1,3 +1,15 @@
+Fri Dec 21 17:06:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          If a [domain/] section is in the config file but doesn't have
+          a discovery setting, use the default discovery.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Check for AckNack with empty bitmap when processing durable data.
+
 Thu Dec 20 15:46:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
