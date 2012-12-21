@@ -1,3 +1,9 @@
+Fri Dec 21 19:52:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed an instance of reactor timer scheduling deadlock.
+
 Fri Dec 21 17:06:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

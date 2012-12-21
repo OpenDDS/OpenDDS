@@ -1400,6 +1400,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       instance->last_sample_tv_ = instance->cur_sample_tv_;
       instance->cur_sample_tv_ = ACE_OS::gettimeofday();
 
+      // Watchdog can't be called with sample_lock_ due to reactor deadlock
+      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
       if (is_new_instance) {
         this->watchdog_->schedule_timer(instance);
 
