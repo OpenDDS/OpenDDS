@@ -602,11 +602,12 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
               sizeof(GuidPrefix_t));
   part.entityId = ENTITYID_PARTICIPANT;
   associated_participants_.erase(part);
+  const BuiltinEndpointSet_t avail =
+    pdata.participantProxy.availableBuiltinEndpoints;
+
   { // Release lock, so we can call into transport
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
-    const BuiltinEndpointSet_t& avail =
-      pdata.participantProxy.availableBuiltinEndpoints;
 
     // See RTPS v2.1 section 8.5.5.2
     if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {

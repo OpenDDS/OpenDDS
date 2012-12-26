@@ -1,3 +1,14 @@
+Wed Dec 26 19:54:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Copy the availableBuiltinEndpoints locally before releasing lock.
+
+        * tests/DCPS/TopicReuse/rtps_disc.ini:
+        * tests/DCPS/TopicReuse/run_test.pl:
+
+          Cleaned up test script, use some shorter timeouts in config file.
+
 Wed Dec 26 15:19:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -10,27 +10,23 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
-my $debugFile;
-my $debug;
+my $status = 0;
+my $debug = 0;
 # $debug = 10;
-$debugFile = "test.log";
-my $debugOpts = "";
-$debugOpts .= "-DCPSDebugLevel $debug " if $debug;
+my $debugFile = "test.log";
+my $debugOpts = "-DCPSDebugLevel $debug" if $debug;
 
 unlink $debugFile;
 
-$is_rtps_disc = 1;
+my $pub_opts = "-DCPSConfigFile rtps_disc.ini";
 
-my $pub_opts = ($is_rtps_disc ? "-DCPSConfigFile rtps_disc.ini" : "");
-
-$CL = PerlDDS::create_process ("tpreuse",
-                              "$debugOpts $pub_opts");
+my $CL = PerlDDS::create_process("tpreuse", "$debugOpts $pub_opts");
 
 print $CL->CommandLine() . "\n";
 
-$client = $CL->SpawnWaitKill (30);
+my $client = $CL->SpawnWaitKill(60);
 
 if ($client != 0) {
     print STDERR "ERROR: client returned $client\n";
