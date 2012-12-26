@@ -1157,7 +1157,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
       iter_t it = ri->second.durable_data_.begin();
       const std::vector<SequenceRange> psr = requests.present_sequence_ranges();
-      SequenceNumber::Value lastSent;
+      SequenceNumber::Value lastSent = 0;
       if (!requests.empty()) {
         lastSent = requests.low().getValue() - 1;
       }
