@@ -536,6 +536,7 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   //FUTURE: if/when topic propagation is supported, add it here
 
   ACE_GUARD(ACE_Thread_Mutex, g, sedp_->lock_);
+  if (spdp_->shutting_down()) { return; }
 
   proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
   sedp_->associated_participants_.insert(proto.remote_id_);

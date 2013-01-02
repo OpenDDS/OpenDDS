@@ -1,3 +1,14 @@
+Wed Jan  2 22:28:43 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed problems with shutting down objects in the wrong order.
+
+        * NEWS:
+
+          Added noteworthy changes for the upcoming release.
+
 Wed Dec 26 19:54:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

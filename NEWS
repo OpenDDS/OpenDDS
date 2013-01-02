@@ -6,6 +6,21 @@ Version 3.4 of OpenDDS.
 
 - Implemented the ability to send fragmented data with the rtps_udp transport.
 
+- Fixed a bug in copy_from_topic_qos(): the Ownership policy is now copied.
+
+- The optimization of publisher-side content filtering now applies to durable
+  data in addition to newly written data samples.
+
+- As with versions before 3.2, the DCPSInfoRepo object reference is allowed to
+  fail to resolve.  If it fails, the current operation can be re-tried at a
+  later time when the DCPSInfoRepo server is available.
+
+- Added a new option for per-domain default transport configurations.
+
+- Corrected IDL string constants for QoS policy names which were wrong in the
+  DDS spec (GROUPDATA and TRANSPORTPRIORITY ..._QOS_POLICY_NAME).  These are
+  not used anywhere in OpenDDS.
+
 
 ========================================================================
 

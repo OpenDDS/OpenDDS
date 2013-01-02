@@ -149,31 +149,6 @@ private:
       : type_(mt), id_(id), payload_(p) {}
   };
 
-  struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
-    explicit Task(Sedp* sedp)
-      : spdp_(&sedp->spdp_), sedp_(sedp)
-    {
-      activate();
-    }
-    ~Task();
-
-    void enqueue(const SPDPdiscoveredParticipantData* pdata);
-    void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
-    void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
-    void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
-
-  private:
-    int svc();
-
-    void svc_i(const SPDPdiscoveredParticipantData* pdata);
-    void svc_i(DCPS::MessageId id, const DiscoveredWriterData* wdata);
-    void svc_i(DCPS::MessageId id, const DiscoveredReaderData* rdata);
-    void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
-
-    Spdp* spdp_;
-    Sedp* sedp_;
-  } task_;
-
   class Endpoint : public DCPS::TransportClient {
   public:
     Endpoint(const DCPS::RepoId& repo_id, Sedp& sedp)
@@ -267,6 +242,31 @@ private:
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
   } publications_reader_, subscriptions_reader_;
+
+  struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
+    explicit Task(Sedp* sedp)
+      : spdp_(&sedp->spdp_), sedp_(sedp)
+    {
+      activate();
+    }
+    ~Task();
+
+    void enqueue(const SPDPdiscoveredParticipantData* pdata);
+    void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
+    void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+    void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
+
+  private:
+    int svc();
+
+    void svc_i(const SPDPdiscoveredParticipantData* pdata);
+    void svc_i(DCPS::MessageId id, const DiscoveredWriterData* wdata);
+    void svc_i(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+    void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
+
+    Spdp* spdp_;
+    Sedp* sedp_;
+  } task_;
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;
