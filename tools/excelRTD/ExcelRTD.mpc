@@ -11,6 +11,13 @@ project (ExcelRTD): taolib, dcps, dcps_inforepodiscovery, dcps_tcp, dcps_monitor
     macros += RTD_DLL_NAME=<%equote%>$(TargetFileName)<%equote%>
   }
 
+  specific(nmake) {
+    // This project doesn't build with -type nmake because the generated
+    // makefile doesn't have rules for the non-C++ files in the Source_Files
+    // scope below (*.idl, *.def).
+    requires += dummy_label
+  }
+
   sharedname = OpenDDS_ExcelRTD
   dllout  = $(DDS_ROOT)/lib
   libs  += OpenDDS_monitor 

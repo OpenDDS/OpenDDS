@@ -1,3 +1,10 @@
+Thu Jan  3 21:40:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+
+          Skip this project when building with nmake makefiles.
+          See the comment in the .mpc file for details.
+
 Thu Jan  3 15:57:11 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
