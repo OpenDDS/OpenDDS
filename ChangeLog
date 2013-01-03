@@ -1,3 +1,9 @@
+Thu Jan  3 15:57:11 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Corrected initializer list order to fix warning.
+
 Wed Jan  2 22:28:43 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

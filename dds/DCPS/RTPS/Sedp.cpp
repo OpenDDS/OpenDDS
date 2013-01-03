@@ -234,7 +234,6 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   : participant_id_(participant_id)
   , spdp_(owner)
   , lock_(lock)
-  , task_(this)
   , publications_writer_(make_id(participant_id,
                                  ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
                          *this)
@@ -247,6 +246,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , subscriptions_reader_(make_id(participant_id,
                                   ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
                           *this)
+  , task_(this)
   , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
 {
   pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
