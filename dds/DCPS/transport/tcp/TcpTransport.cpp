@@ -34,6 +34,8 @@ TcpTransport::TcpTransport(const TransportInst_rch& inst)
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
   if (!inst.is_nil()) {
     if (!configure(inst.in())) {
+      delete con_checker_;
+      delete acceptor_;
       throw Transport::UnableToCreate();
     }
   }

@@ -1,3 +1,10 @@
+Fri Jan  4 22:12:33 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Clean up resources if a transport fails to configure.
+
 Thu Jan  3 21:40:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * tools/excelRTD/ExcelRTD.mpc:

@@ -122,7 +122,8 @@ TransportImpl::configure(TransportInst* config)
       dump();
     }
 
-    this->config_ = 0;
+    guard.release();
+    shutdown();
 
     // The subclass rejected the configuration attempt.
     ACE_ERROR_RETURN((LM_ERROR,
