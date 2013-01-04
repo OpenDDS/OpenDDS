@@ -197,6 +197,22 @@ void recreate_data_writer_and_topic(DataWriter_var& dw)
   }
 }
 
+void wait_match(const DataReader_var& dr, int n)
+{
+  StatusCondition_var condition = dr->get_statuscondition();
+  condition->set_enabled_statuses(SUBSCRIPTION_MATCHED_STATUS);
+  WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(condition);
+  ConditionSeq conditions;
+  SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
+  const Duration_t timeout = {1, 0};
+  while (dr->get_subscription_matched_status(ms) == RETCODE_OK
+         && ms.current_count != n) {
+    ws->wait(conditions, timeout);
+  }
+  ws->detach_condition(condition);
+}
+
 DataReader_var create_data_reader(const DomainParticipant_var& dp)
 {
   TypeSupport_var ts = new TestMsgTypeSupportImpl;
@@ -560,6 +576,10 @@ bool run_test(DomainParticipant_var& dp,
   recreate_data_writer_and_topic(dw);
 
   WriterSync::wait_match(dw);
+
+  // The new writer is associated with the reader, but the reader may still
+  // also be associated with the old writer.
+  wait_match(dr, 1);
 
   // Get the new instance handle as pub_ih
   if (!read_publication_bit(bit_sub, pub_ih, 2, 1)) {

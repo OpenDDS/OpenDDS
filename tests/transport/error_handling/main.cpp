@@ -50,8 +50,9 @@ bool testConnectionErrorHandling()
   }
 }
 
-int
-ACE_TMAIN (int /*argc*/, ACE_TCHAR* /*argv*/[])
+int ACE_TMAIN (int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  return testConnectionErrorHandling() ? EXIT_SUCCESS : EXIT_FAILURE;
+  const bool result = testConnectionErrorHandling();
+  TheTransportRegistry->release();
+  return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }
