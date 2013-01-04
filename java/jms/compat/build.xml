@@ -139,10 +139,16 @@
         <antjms target="rar"/> <!-- ensure RAR is built -->
 
         <echo message="Starting DCPSInfoRepo in ${env.DDS_ROOT}"/>
+        <delete file="repo.ior"/>
         <exec executable="${env.DDS_ROOT}/bin/DCPSInfoRepo" spawn="true">
             <arg line="-ORBListenEndpoints iiop://:6666"/>
             <arg line="-ORBSvcConf ${conf.dir}/tcp.conf"/>
         </exec>
+
+        <waitfor maxwait="10" maxwaitunit="second">
+            <available file="repo.ior"/>
+        </waitfor>
+
         <property name="bootstrap.invoked" value="INVOKED"/>
     </target>
 

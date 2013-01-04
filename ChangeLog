@@ -1,3 +1,9 @@
+Fri Jan  4 22:24:34 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/compat/build.xml:
+
+          In testing, wait for repo.ior before starting.
+
 Fri Jan  4 22:15:20 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
