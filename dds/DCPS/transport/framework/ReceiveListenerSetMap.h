@@ -52,9 +52,6 @@ public:
 
   ssize_t size() const;
 
-  /// Only called by the DataLink.
-  int data_received(ReceivedDataSample& sample);
-
   /// Give access to the underlying map for iteration purposes.
   MapType& map();
   const MapType& map() const;

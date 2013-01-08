@@ -1,3 +1,10 @@
+Tue Jan  8 20:02:45 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+
+          Removed unused method.
+
 Fri Jan  4 22:24:34 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/compat/build.xml:

@@ -77,26 +77,6 @@ OpenDDS::DCPS::ReceiveListenerSetMap::size() const
   return map_.size();
 }
 
-ACE_INLINE int
-OpenDDS::DCPS::ReceiveListenerSetMap::data_received(ReceivedDataSample& sample)
-{
-  DBG_ENTRY_LVL("ReceiveListenerSetMap","data_received",6);
-
-  char* ptr = sample.sample_->rd_ptr();
-
-  // Iterate over each entry in our map_.
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
-    // reset read pointer because demarshal (in data_received()) moves it.
-    sample.sample_->rd_ptr(ptr);
-    // Deliver the sample to the set of TransportReceiveListener objects
-    itr->second->data_received(sample);
-  }
-
-  return 0;
-}
-
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSetMap::MapType&
 OpenDDS::DCPS::ReceiveListenerSetMap::map()
 {
