@@ -1,3 +1,9 @@
+Wed Jan  9 20:51:51 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RawDataSample.cpp:
+
+          Fixed Coverity warnings.
+
 Wed Jan  9 14:38:22 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jms_scoreboard.pl:
