@@ -2,7 +2,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
     if 0;
 
-# 1st arg: [build|test]
+# 1st arg: [build|test|jboss]
 # subsequent args: passed to ant directly
 # Build or test the java/jms subtree with one command.
 # Requires ANT_HOME, JAVA_HOME, and JBOSS_HOME to be set.
@@ -23,7 +23,10 @@ if ($operation eq 'build') {
     @targets = (['.', 'rar'], ['compat', 'ear']);
 }
 elsif ($operation eq 'test') {
-    @targets = (['.', 'test'], ['compat', 'jboss42x']);
+    @targets = (['.', 'test']);
+}
+elsif ($operation eq 'jboss') {
+    @targets = (['compat', 'jboss42x']);
 }
 else {
     print "ERROR: unknown operation: $operation\n";

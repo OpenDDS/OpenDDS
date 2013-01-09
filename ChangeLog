@@ -1,3 +1,10 @@
+Wed Jan  9 14:38:22 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Moved JBoss integration testing to its own top-level
+          command option for this script.
+
 Tue Jan  8 20:02:45 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
