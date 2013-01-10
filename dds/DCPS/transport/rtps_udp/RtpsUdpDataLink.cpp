@@ -111,13 +111,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   send_strategy_->send_buffer(&multi_buff_);
 
-  // Set up info_dst_ and info_reply_ messages for use with ACKNACKS
+  // Set up info_reply_ messages for use with ACKNACKS
   using namespace OpenDDS::RTPS;
-  info_dst_.smHeader.submessageId = INFO_DST;
-  info_dst_.smHeader.flags = 1 /*FLAG_E*/;
-  info_dst_.smHeader.submessageLength = INFO_DST_SZ;
-  std::memcpy(info_dst_.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
-
   info_reply_.smHeader.submessageId = INFO_REPLY;
   info_reply_.smHeader.flags = 1 /*FLAG_E*/;
   info_reply_.unicastLocatorList.length(1);
@@ -232,8 +227,9 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   const GuidConverter conv(local_id);
   const EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER && remote_reliable) {
-    writers_[local_id].remote_readers_[remote_id];
-    writers_[local_id].durable_ = local_durable;
+    RtpsWriter& w = writers_[local_id];
+    w.remote_readers_[remote_id];
+    w.durable_ = local_durable;
     enable_heartbeat = true;
 
   } else if (kind == KIND_READER) {
@@ -467,7 +463,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   if (rw != writers_.end() && !rw->second.remote_readers_.empty()) {
     for (ReaderInfoMap::iterator ri = rw->second.remote_readers_.begin();
          ri != rw->second.remote_readers_.end(); ++ri) {
-      if (!ri->second.durable_data_.empty()) {
+      if (!ri->second.durable_data_.empty()
+          || 0 == ri->second.acknack_recvd_count_) {
         // Can't add an in-line GAP if some Data Reader is expecting durable
         // data, the GAP could cause that Data Reader to ignore the durable
         // data.  The other readers will eventually learn about the GAP by
@@ -480,6 +477,12 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 
   if (gap_ok) {
     add_gap_submsg(subm, *element);
+  }
+
+  const SequenceNumber seq = element->sequence();
+  if (rw != writers_.end() && seq != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    rw->second.expected_ = seq;
+    ++rw->second.expected_;
   }
 
   TransportSendElement* tse = dynamic_cast<TransportSendElement*>(element);
@@ -641,9 +644,6 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
     msg.length(i + 1);
     msg[i].gap_sm(gap);
   }
-
-  rw.expected_ = seq;
-  ++rw.expected_;
 }
 
 
@@ -663,12 +663,37 @@ RtpsUdpDataLink::process_data_i(const RTPS::DataSubmessage& data,
 {
   const WriterInfoMap::iterator wi = rr.second.remote_writers_.find(src);
   if (wi != rr.second.remote_writers_.end()) {
+    WriterInfo& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
-    wi->second.recvd_.insert(seq);
-    wi->second.frags_.erase(seq);
+    info.frags_.erase(seq);
+    const RepoId& readerId = rr.first;
+    if (info.recvd_.disjoint() ||
+        (!info.recvd_.empty() && info.recvd_.cumulative_ack() != seq.previous())
+        || (rr.second.durable_ && !info.recvd_.empty() && info.recvd_.low() > 1)
+        || (rr.second.durable_ && info.recvd_.empty() && seq > 1)) {
+      const ReceivedDataSample* sample =
+        recv_strategy_->withhold_data_from(readerId);
+      info.held_.insert(std::make_pair(seq, *sample));
+    }
+    info.recvd_.insert(seq);
+    deliver_held_data(readerId, info, rr.second.durable_);
   }
   return false;
+}
+
+void
+RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, WriterInfo& info,
+                                   bool durable)
+{
+  if (durable && (info.recvd_.empty() || info.recvd_.low() > 1)) return;
+  const SequenceNumber ca = info.recvd_.cumulative_ack();
+  typedef std::map<SequenceNumber, ReceivedDataSample>::iterator iter;
+  const iter end = info.held_.upper_bound(ca);
+  for (iter it = info.held_.begin(); it != end; /*increment in loop body*/) {
+    data_received(it->second, readerId);
+    info.held_.erase(it++);
+  }
 }
 
 void
@@ -692,6 +717,7 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
     wi->second.recvd_.insert(sr);
     wi->second.recvd_.insert(base, gap.gapList.numBits,
                              gap.gapList.bitmap.get_buffer());
+    deliver_held_data(rr.first, wi->second, rr.second.durable_);
     //FUTURE: to support wait_for_acks(), notify DCPS layer of the GAP
   }
   return false;
@@ -749,6 +775,9 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
     recvd.insert(SequenceRange(zero,
                                (first > starting) ? first.previous() : zero));
   }
+
+  deliver_held_data(rr.first, info, rr.second.durable_);
+
   //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
   //        numbers we no longer expect to receive due to HEARTBEAT
 
@@ -898,7 +927,11 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         gen_find_size(acknack, size, padding);
         acknack.smHeader.submessageLength =
           static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
-        gen_find_size(info_dst_, size, padding);
+        InfoDestinationSubmessage info_dst = {
+          {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+        };
+        gen_find_size(info_dst, size, padding);
 
         std::vector<NackFragSubmessage> nack_frags;
         size += generate_nack_frags(nack_frags, wi->second, wi->first);
@@ -906,9 +939,9 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
         // byte swapping is handled in the operator<<() implementation
         Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
-        std::memcpy(info_dst_.guidPrefix, wi->first.guidPrefix,
+        std::memcpy(info_dst.guidPrefix, wi->first.guidPrefix,
                     sizeof(GuidPrefix_t));
-        ser << info_dst_;
+        ser << info_dst;
         // Interoperability note: we used to insert "info_reply_" here, but
         // testing indicated that other DDS implementations didn't accept it.
         ser << acknack;
@@ -1150,7 +1183,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
         // This is a non-final AckNack with no bits in the bitmap.
         // Attempt to reply to a request for the "base" value which
         // is neither Acked nor Nacked, only when it's the HB high.
-        requests.insert(ack);
+        if (ri->second.durable_data_.count(ack)) requests.insert(ack);
       }
       // Attempt to reply to nacks for durable data
       bool sent_some = false;
@@ -1264,10 +1297,6 @@ RtpsUdpDataLink::send_nack_replies()
   typedef RtpsWriterMap::iterator rw_iter;
   for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
-    if (rw->second.send_buff_.is_nil() || rw->second.send_buff_->empty()) {
-      continue; // no data available
-    }
-
     // consolidate requests from N readers
     std::set<ACE_INET_Addr> recipients;
     DisjointSequence requests;
@@ -1286,7 +1315,9 @@ RtpsUdpDataLink::send_nack_replies()
           // Since there is an entry in requested_changes_, the DR must have
           // sent a non-final AckNack.  If the base value is the high end of
           // the heartbeat range, treat it as a request for that seq#.
-          requests.insert(base);
+          if (!writer.send_buff_.is_nil() && writer.send_buff_->contains(base)) {
+            requests.insert(base);
+          }
         } else {
           requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
         }
@@ -1302,9 +1333,11 @@ RtpsUdpDataLink::send_nack_replies()
 
     DisjointSequence gaps;
     if (!requests.empty()) {
-      std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
-      SingleSendBuffer& sb = *writer.send_buff_;
-      {
+      if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
+        gaps = requests;
+      } else {
+        std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
+        SingleSendBuffer& sb = *writer.send_buff_;
         ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
         const RtpsUdpSendStrategy::OverrideToken ot =
           send_strategy_->override_destinations(recipients);
@@ -1317,9 +1350,12 @@ RtpsUdpDataLink::send_nack_replies()
     send_nackfrag_replies(writer, gaps, recipients);
 
     if (!gaps.empty()) {
-      ACE_Message_Block* mb_gap = marshal_gaps(rw->first, GUID_UNKNOWN, gaps);
-      send_strategy_->send_rtps_control(*mb_gap, recipients);
-      mb_gap->release();
+      ACE_Message_Block* mb_gap =
+        marshal_gaps(rw->first, GUID_UNKNOWN, gaps, writer.durable_);
+      if (mb_gap) {
+        send_strategy_->send_rtps_control(*mb_gap, recipients);
+        mb_gap->release();
+      }
     }
   }
 }
@@ -1378,7 +1414,7 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
 
 ACE_Message_Block*
 RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
-                              const DisjointSequence& gaps)
+                              const DisjointSequence& gaps, bool durable)
 {
   using namespace RTPS;
   // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
@@ -1409,16 +1445,50 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     {gapListBase, num_bits, bitmap}
   };
 
-  size_t size = 0, padding = 0;
-  gen_find_size(gap, size, padding);
+  size_t gap_size = 0, padding = 0;
+  gen_find_size(gap, gap_size, padding);
   gap.smHeader.submessageLength =
-    static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+    static_cast<CORBA::UShort>(gap_size + padding) - SMHDR_SZ;
 
-  ACE_Message_Block* mb_gap = new ACE_Message_Block(size + padding);
+  // For durable writers, change a non-directed Gap into multiple directed gaps.
+  std::vector<RepoId> readers;
+  if (durable && reader.entityId == ENTITYID_UNKNOWN) {
+    const RtpsWriterMap::iterator iter = writers_.find(writer);
+    RtpsWriter& rw = iter->second;
+    for (ReaderInfoMap::iterator ri = rw.remote_readers_.begin();
+         ri != rw.remote_readers_.end(); ++ri) {
+      ReaderInfo& rinfo = ri->second;
+      if (rinfo.acknack_recvd_count_ && rinfo.durable_data_.empty()) {
+        readers.push_back(ri->first);
+      }
+    }
+    if (readers.empty()) return 0;
+  }
+
+  const size_t size_per_idst = INFO_DST_SZ + SMHDR_SZ,
+    prefix_sz = sizeof(reader.guidPrefix);
+  // no additional padding needed for INFO_DST
+  const size_t total_sz = readers.empty() ? (gap_size + padding) :
+    (readers.size() * (gap_size + padding + size_per_idst));
+
+  ACE_Message_Block* mb_gap = new ACE_Message_Block(total_sz);
   //FUTURE: allocators?
   // byte swapping is handled in the operator<<() implementation
   Serializer ser(mb_gap, false, Serializer::ALIGN_CDR);
-  ser << gap;
+  if (readers.empty()) {
+    ser << gap;
+  } else {
+    InfoDestinationSubmessage idst = {
+      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+    for (size_t i = 0; i < readers.size(); ++i) {
+      std::memcpy(idst.guidPrefix, readers[i].guidPrefix, prefix_sz);
+      gap.readerId = readers[i].entityId;
+      ser << idst;
+      ser << gap;
+    }
+  }
   return mb_gap;
 }
 
@@ -1437,8 +1507,12 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
 {
   ACE_Message_Block mb(RTPS::INFO_DST_SZ + RTPS::SMHDR_SZ);
   Serializer ser(&mb, false, Serializer::ALIGN_CDR);
-  std::memcpy(info_dst_.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
-  ser << info_dst_;
+  RTPS::InfoDestinationSubmessage info_dst = {
+    {RTPS::INFO_DST, 1 /*FLAG_E*/, RTPS::INFO_DST_SZ},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  };
+  std::memcpy(info_dst.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
+  ser << info_dst;
   mb.cont(marshal_gaps(writer, reader, gaps));
   send_strategy_->send_rtps_control(mb, get_locator(reader));
   mb.cont()->release();

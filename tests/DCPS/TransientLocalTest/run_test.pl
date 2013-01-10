@@ -13,26 +13,22 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $status = 0;
-my $debug  = 0; #10;
+my $debug  = 0;
 
-my $opts = $debug ? "-DCPSDebugLevel $debug " : '';
+my $opts = $debug ? "-DCPSDebugLevel $debug -DCPSTransportDebugLevel $debug ".
+                    "-ORBVerboseLogging 1 " : '';
 my $cfg = ($ARGV[0] eq 'rtps') ? 'rtps.ini' : 'tcp.ini';
-my $pub_opts = "$opts -DCPSConfigFile $cfg";
+my $pub_opts = $opts . "-DCPSConfigFile $cfg -DCPSBit 0";
 my $sub_opts = $pub_opts;
 
 my $dcpsrepo_ior = "repo.ior";
-my $repo_bit_opt = $opts;
 
 unlink $dcpsrepo_ior;
 
-my $data_file = "test_run.data";
-unlink $data_file;
-
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$repo_bit_opt -o $dcpsrepo_ior ");
-my $Subscriber = PerlDDS::create_process("subscriber", "$sub_opts");
-my $Publisher = PerlDDS::create_process("publisher", "$pub_opts " .
-                                        "-ORBLogFile $data_file");
+                                       "$opts -o $dcpsrepo_ior -NOBITS");
+my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
+my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
 
 print $DCPSREPO->CommandLine() . "\n";
 print $Publisher->CommandLine() . "\n";
@@ -46,23 +42,7 @@ if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
 
 $Publisher->Spawn();
 
-if (PerlACE::waitforfile_timed($data_file, 30) == -1) {
-    print STDERR "ERROR: waiting for Publisher file\n";
-    $Publisher->Kill();
-    $DCPSREPO->Kill();
-    exit 1;
-}
-
-if (PerlACE::waitforfileoutput_timed($data_file, "Done writing", 90) == -1) {
-    print STDERR "ERROR: waiting for Publisher output.\n";
-    $Publisher->Kill();
-    $DCPSREPO->Kill();
-    exit 1;
-}
-
-#Sleep for 2 seconds after publisher send all samples to avoid the timing issue
-#that the subscriber may start and finish in 1 second while the publisher is waiting
-#for it to start.
+# Sleep for 2 seconds for publisher to write durable data.
 sleep(2);
 
 print $Subscriber->CommandLine() . "\n";

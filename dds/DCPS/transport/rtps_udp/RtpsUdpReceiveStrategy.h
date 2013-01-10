@@ -21,12 +21,14 @@
 #include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
 
+#include <set>
 #include <cstring>
 
 namespace OpenDDS {
 namespace DCPS {
 
 class RtpsUdpDataLink;
+class ReceivedDataSample;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
   : public TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>,
@@ -53,7 +55,12 @@ public:
   bool has_fragments(const SequenceRange& range, const RepoId& pub_id,
                      FragmentInfo* frag_info = 0);
 
-protected:
+  /// Prevent delivery of the currently in-progress data sample to the
+  /// subscription sub_id.  Returns pointer to the in-progress data so
+  /// it can be stored for later delivery.
+  const ReceivedDataSample* withhold_data_from(const RepoId& sub_id);
+
+private:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
                                 ACE_INET_Addr& remote_address,
@@ -71,9 +78,12 @@ protected:
 
   virtual bool reassemble(ReceivedDataSample& data);
 
-private:
+
   RtpsUdpDataLink* link_;
   SequenceNumber last_received_;
+
+  const ReceivedDataSample* recvd_sample_;
+  std::set<RepoId, GUID_tKeyLessThan> readers_withheld_;
 
   SequenceRange frags_;
   TransportReassembly reassembly_;

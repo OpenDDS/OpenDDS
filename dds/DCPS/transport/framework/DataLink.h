@@ -148,6 +148,11 @@ public:
   int data_received(ReceivedDataSample& sample,
                     const RepoId& readerId = GUID_UNKNOWN);
 
+  /// Varation of data_received() that allows for excluding a subset of readers.
+  /// Any reader ID that appears in the exclude set will be skipped.
+  void data_received_excluding(ReceivedDataSample& sample,
+                               const std::set<RepoId, GUID_tKeyLessThan>& excl);
+
   /// SAMPLE_ACK message received on this link.
   void ack_received(ReceivedDataSample& sample);
 
@@ -345,6 +350,10 @@ private:
   virtual void release_remote_i(const RepoId& /*remote_id*/) {}
   virtual void release_reservations_i(const RepoId& /*remote_id*/,
                                       const RepoId& /*local_id*/) {}
+
+  void data_received_i(ReceivedDataSample& sample,
+                       const RepoId& readerId,
+                       const std::set<RepoId, GUID_tKeyLessThan>& exclude);
 
   typedef ACE_SYNCH_MUTEX     LockType;
 

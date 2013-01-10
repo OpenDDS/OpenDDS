@@ -24,6 +24,7 @@ namespace DCPS {
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link)
   : link_(link)
   , last_received_()
+  , recvd_sample_(0)
   , receiver_(link->local_prefix())
 {
 }
@@ -76,14 +77,25 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   case DATA: {
     receiver_.fill_header(sample.header_);
     const DataSubmessage& data = rsh.submessage_.data_sm();
+    recvd_sample_ = &sample;
+    readers_withheld_.clear();
+    // If this sample should be withheld from some readers in order to maintain
+    // in-order delivery, link_->received() will add it to readers_withheld_.
     link_->received(data, receiver_.source_guid_prefix_);
-    RepoId reader = GUID_UNKNOWN;
+    recvd_sample_ = 0;
+
     if (data.readerId != ENTITYID_UNKNOWN) {
+      RepoId reader;
       std::memcpy(reader.guidPrefix, link_->local_prefix(),
                   sizeof(GuidPrefix_t));
       reader.entityId = data.readerId;
+      if (!readers_withheld_.count(reader)) {
+        link_->data_received(sample, reader);
+      }
+
+    } else {
+      link_->data_received_excluding(sample, readers_withheld_);
     }
-    link_->data_received(sample, reader);
     break;
   }
   case GAP:
@@ -196,6 +208,13 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
   }
 
   return header.valid();
+}
+
+const ReceivedDataSample*
+RtpsUdpReceiveStrategy::withhold_data_from(const RepoId& sub_id)
+{
+  readers_withheld_.insert(sub_id);
+  return recvd_sample_;
 }
 
 bool

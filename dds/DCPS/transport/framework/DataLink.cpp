@@ -685,10 +685,25 @@ int
 DataLink::data_received(ReceivedDataSample& sample,
                         const RepoId& readerId /* = GUID_UNKNOWN */)
 {
-  DBG_ENTRY_LVL("DataLink", "data_received", 6);
+  data_received_i(sample, readerId, std::set<RepoId, GUID_tKeyLessThan>());
+  return 0;
+}
 
-  // Which remote publisher sent this message?
-  RepoId publisher_id = sample.header_.publication_id_;
+void
+DataLink::data_received_excluding(ReceivedDataSample& sample,
+                                  const std::set<RepoId, GUID_tKeyLessThan>& excl)
+{
+  data_received_i(sample, GUID_UNKNOWN, excl);
+}
+
+void
+DataLink::data_received_i(ReceivedDataSample& sample,
+                          const RepoId& readerId,
+                          const std::set<RepoId, GUID_tKeyLessThan>& exclude)
+{
+  DBG_ENTRY_LVL("DataLink", "data_received_i", 6);
+  // Which remote publication sent this message?
+  const RepoId& publication_id = sample.header_.publication_id_;
 
   // Locate the set of TransportReceiveListeners associated with this
   // DataLink that are interested in hearing about any samples received
@@ -698,39 +713,39 @@ DataLink::data_received(ReceivedDataSample& sample,
   if (Transport_debug_level > 9) {
     std::stringstream buffer;
     buffer << sample.header_;
-    GuidConverter converter(publisher_id);
+    const GuidConverter converter(publication_id);
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataLink::data_received: ")
-               ACE_TEXT(" publisher %C received sample: %C.\n"),
+               ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
+               ACE_TEXT("from publication %C received sample: %C.\n"),
                std::string(converter).c_str(),
                buffer.str().c_str()));
   }
 
   {
     GuardType guard(this->pub_map_lock_);
-    listener_set = this->pub_map_.find(publisher_id);
+    listener_set = this->pub_map_.find(publication_id);
     if (listener_set.is_nil() && this->default_listener_) {
       this->default_listener_->data_received(sample);
-      return 0;
+      return;
     }
   }
 
   if (listener_set.is_nil()) {
     // Nobody has any interest in this message.  Drop it on the floor.
     if (Transport_debug_level > 4) {
-      GuidConverter converter(publisher_id);
+      const GuidConverter converter(publication_id);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataLink::data_received: ")
-                 ACE_TEXT(" discarding sample from publisher %C due to no listeners.\n"),
+                 ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
+                 ACE_TEXT(" discarding sample from publication %C due to no listeners.\n"),
                  std::string(converter).c_str()));
     }
 
-    return 0;
+    return;
   }
 
   if (readerId != GUID_UNKNOWN) {
     listener_set->data_received(sample, readerId);
-    return 0;
+    return;
   }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -738,19 +753,17 @@ DataLink::data_received(ReceivedDataSample& sample,
       && sample.header_.content_filter_entries_.length()) {
     ReceiveListenerSet subset(*listener_set.in());
     subset.remove_all(sample.header_.content_filter_entries_);
-    subset.data_received(sample);
+    subset.data_received(sample, exclude);
   } else {
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   // Just get the set to do our dirty work by having it iterate over its
   // collection of TransportReceiveListeners, and invoke the data_received()
   // method on each one.
-  listener_set->data_received(sample);
+  listener_set->data_received(sample, exclude);
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   }
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
-  return 0;
 }
 
 void

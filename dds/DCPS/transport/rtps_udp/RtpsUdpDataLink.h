@@ -204,6 +204,7 @@ private:
 
   struct WriterInfo {
     DisjointSequence recvd_;
+    std::map<SequenceNumber, ReceivedDataSample> held_;
     SequenceRange hb_range_;
     std::map<SequenceNumber, RTPS::FragmentNumber_t> frags_;
     bool ack_pending_, initial_hb_;
@@ -230,6 +231,8 @@ private:
   typedef std::multimap<RepoId, RtpsReaderMap::iterator, GUID_tKeyLessThan>
     RtpsReaderIndex;
   RtpsReaderIndex reader_index_; // keys are remote data writer GUIDs
+
+  void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 
   bool handshake_done(const RepoId& local, const RepoId& remote);
 
@@ -261,7 +264,8 @@ private:
   void send_durability_gaps(const RepoId& writer, const RepoId& reader,
                             const DisjointSequence& gaps);
   ACE_Message_Block* marshal_gaps(const RepoId& writer, const RepoId& reader,
-                                  const DisjointSequence& gaps);
+                                  const DisjointSequence& gaps,
+                                  bool durable = false);
 
   void send_nackfrag_replies(RtpsWriter& writer, DisjointSequence& gaps,
                              std::set<ACE_INET_Addr>& gap_recipients);
@@ -354,7 +358,6 @@ private:
 
   } heartbeat_;
 
-  RTPS::InfoDestinationSubmessage info_dst_;
   RTPS::InfoReplySubmessage info_reply_;
 };
 

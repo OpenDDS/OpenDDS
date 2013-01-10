@@ -94,7 +94,8 @@ ReceiveListenerSet::size() const
 }
 
 ACE_INLINE void
-ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
+ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
+                                  const std::set<RepoId, GUID_tKeyLessThan>& exclude)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);
 
@@ -105,6 +106,8 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample)
        ++itr) {
 
     if (itr->second == 0) continue; // invalid listener
+
+    if (exclude.count(itr->first)) continue;
 
     if (map_.size() > 1 && sample.sample_) {
       // demarshal (in data_received()) updates the rd_ptr() of any of
