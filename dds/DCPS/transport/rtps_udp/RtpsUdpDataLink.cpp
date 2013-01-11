@@ -668,7 +668,9 @@ RtpsUdpDataLink::process_data_i(const RTPS::DataSubmessage& data,
     seq.setValue(data.writerSN.high, data.writerSN.low);
     info.frags_.erase(seq);
     const RepoId& readerId = rr.first;
-    if (info.recvd_.disjoint() ||
+    if (info.recvd_.contains(seq)) {
+      recv_strategy_->withhold_data_from(readerId);
+    } else if (info.recvd_.disjoint() ||
         (!info.recvd_.empty() && info.recvd_.cumulative_ack() != seq.previous())
         || (rr.second.durable_ && !info.recvd_.empty() && info.recvd_.low() > 1)
         || (rr.second.durable_ && info.recvd_.empty() && seq > 1)) {
@@ -824,6 +826,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
       DisjointSequence& recvd = wi->second.recvd_;
       const bool nack = wi->second.should_nack() ||
                         (rr->second.durable_ && recvd.empty());
+      bool final = !nack;
 
       if (wi->second.ack_pending_ || nack) {
         const bool prev_empty =
@@ -907,12 +910,29 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         // If the receive strategy is holding any fragments, those should
         // not be "nacked" in the ACKNACK reply.  They will be accounted for
         // in the NACK_FRAG(s) instead.
-        recv_strategy_->remove_frags_from_bitmap(bitmap.get_buffer(),
-                                                 num_bits, ack, wi->first);
+        bool frags_modified =
+          recv_strategy_->remove_frags_from_bitmap(bitmap.get_buffer(),
+                                                   num_bits, ack, wi->first);
+        if (frags_modified && !final) { // change to final if bitmap is empty
+          final = true;
+          for (CORBA::ULong i = 0; i < bitmap.length(); ++i) {
+            if ((i + 1) * 32 <= num_bits) {
+              if (bitmap[i]) {
+                final = false;
+                break;
+              }
+            } else {
+              if ((0xffffffff << (32 - (num_bits % 32))) & bitmap[i]) {
+                final = false;
+                break;
+              }
+            }
+          }
+        }
 
         AckNackSubmessage acknack = {
           {ACKNACK,
-           CORBA::Octet(1 /*FLAG_E*/ | (nack ? 0 : 2 /*FLAG_F*/)),
+           CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
            0 /*length*/},
           rr->first.entityId,
           wi->first.entityId,

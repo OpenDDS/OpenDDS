@@ -1,3 +1,13 @@
+Fri Jan 11 23:16:49 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          For fragmented data, check to make sure the same sequence
+          number is not effectively nack'd (due to the absence of the
+          final flag) that's also taken care of by NackFrag.
+
 Fri Jan 11 21:35:03 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/ShmemDataLink.cpp:

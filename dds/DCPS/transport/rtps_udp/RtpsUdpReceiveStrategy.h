@@ -41,7 +41,8 @@ public:
   /// For each "1" bit in the bitmap, change it to a "0" if there are
   /// fragments from publication "pub_id" for the sequence number represented
   /// by that position in the bitmap.
-  void remove_frags_from_bitmap(CORBA::Long bitmap[], CORBA::ULong num_bits,
+  /// Returns true if the bitmap was changed.
+  bool remove_frags_from_bitmap(CORBA::Long bitmap[], CORBA::ULong num_bits,
                                 const SequenceNumber& base,
                                 const RepoId& pub_id);
 

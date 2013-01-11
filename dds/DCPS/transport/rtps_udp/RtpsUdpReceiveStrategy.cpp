@@ -246,12 +246,13 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
   return false;
 }
 
-void
+bool
 RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
                                                  CORBA::ULong num_bits,
                                                  const SequenceNumber& base,
                                                  const RepoId& pub_id)
 {
+  bool modified = false;
   for (CORBA::ULong i = 0, x = 0, bit = 0; i < num_bits; ++i, ++bit) {
     if (bit == 32) bit = 0;
 
@@ -272,8 +273,10 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
     if ((x & mask) && reassembly_.has_frags(base + i, pub_id)) {
       x &= ~mask;
       bitmap[i / 32] = x;
+      modified = true;
     }
   }
+  return modified;
 }
 
 void
