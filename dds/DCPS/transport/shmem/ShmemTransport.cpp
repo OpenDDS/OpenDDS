@@ -189,6 +189,7 @@ ShmemTransport::configure_i(TransportInst* config)
 #ifdef ACE_WIN32
   alloc_opts.max_size_ = config_i_->pool_size_;
 #elif !defined ACE_LACKS_SYSV_SHMEM
+  alloc_opts.base_addr_ = 0;
   alloc_opts.segment_size_ = config_i_->pool_size_;
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
@@ -253,7 +254,7 @@ ShmemTransport::shutdown_i()
   }
   links_.clear();
 
-  read_task_->stop();
+  if (read_task_) read_task_->stop();
   delete read_task_;
   read_task_ = 0;
 

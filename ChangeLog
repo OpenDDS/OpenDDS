@@ -1,3 +1,15 @@
+Fri Jan 11 16:15:31 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Need to explicitly request mapping at address 0 (use any address)
+          on POSIX systems, or else ACE uses a hard-coded value that doesn't
+          always work (if something else is mapped there).
+
+        * tests/DCPS/SharedTransport/shmem.ini:
+
+          Increase buffer size, test writes all data before it begins to read.
+
 Thu Jan 10 16:06:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
