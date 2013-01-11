@@ -153,8 +153,9 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
 
   if (current_data_->status_ == SHMEM_DATA_FREE) {
     VDBG((LM_DEBUG, "(%P|%t) ShmemSendStrategy for link %@ "
-          "writing at control block #%d\n",
-          link_, current_data_ - reinterpret_cast<ShmemData*>(mem)));
+          "writing at control block #%d header %@ payload %@ len %B\n",
+          link_, current_data_ - reinterpret_cast<ShmemData*>(mem),
+          current_data_->transport_header_, payload, pool_alloc_size));
     std::memcpy(current_data_->transport_header_, iov[0].iov_base,
                 sizeof(current_data_->transport_header_));
     current_data_->payload_ = payload;

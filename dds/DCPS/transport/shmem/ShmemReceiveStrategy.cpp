@@ -86,9 +86,8 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   void* mem;
   if (-1 == alloc->find(bound_name_.c_str(), mem)
       || current_data_->status_ != SHMEM_DATA_IN_USE) {
-    VDBG_LVL((LM_INFO,
-              "(%P|%t) ShmemReceiveStrategy::receive_bytes link %@ closing\n",
-              link_), 1);
+    VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
+             1);
     gracefully_disconnected_ = true; // do not attempt reconnect via relink()
     return 0; // close "connection"
   }
@@ -111,13 +110,16 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
     const size_t hdr_sz = sizeof(current_data_->transport_header_);
     // BUFFER_LOW_WATER in the framework ensures a large enough buffer
     if (iov[0].iov_len <= hdr_sz) {
-      VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy for link %@ "
+      VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy::receive_bytes "
                 "receive buffer of length %d is too small\n",
-                link_, iov[0].iov_len), 0);
+                iov[0].iov_len), 0);
       errno = ENOBUFS;
       return -1;
     }
 
+    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes "
+          "header %@ payload %@ len %B\n", current_data_->transport_header_,
+          (char*)current_data_->payload_, remaining));
     std::memcpy(iov[0].iov_base, current_data_->transport_header_, hdr_sz);
     total += hdr_sz;
     src_iter = current_data_->payload_;
@@ -132,6 +134,16 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   for (; i < n && remaining; ++i) {
     const size_t space = (i == 0) ? iov[i].iov_len - total : iov[i].iov_len,
       chunk = std::min(space, remaining);
+
+#ifdef ACE_WIN32
+    if (alloc->memory_pool().remap((void*)(src_iter + chunk - 1)) == -1) {
+      VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy::receive_bytes "
+                "shared memory pool couldn't be extended\n"), 0);
+      errno = ENOMEM;
+      return -1;
+    }
+#endif
+
     std::memcpy(dst_iter, src_iter, chunk);
     if (i < n - 1) {
       dst_iter = (char*)iov[i + 1].iov_base;
@@ -144,15 +156,15 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   if (remaining) {
     partial_recv_remaining_ = remaining;
     partial_recv_ptr_ = src_iter;
-    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy for link %@ "
-          "receive was partial\n", link_));
+    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes "
+          "receive was partial\n"));
     link_->signal_semaphore();
 
   } else {
     partial_recv_remaining_ = 0;
     partial_recv_ptr_ = 0;
-    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy for link %@ "
-          "receive done\n", link_));
+    VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes "
+          "receive done\n"));
     current_data_->status_ = SHMEM_DATA_RECV_DONE;
   }
 

@@ -35,9 +35,35 @@ bool
 ShmemDataLink::open(const std::string& peer_address)
 {
   peer_address_ = peer_address;
+  const ACE_TString name = ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str());
+  ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 
-  peer_alloc_ =
-    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str()));
+#ifdef ACE_WIN32
+  const bool use_opts = true;
+  const ACE_TString name_under = name + ACE_TEXT('_');
+  // Find max size of peer's pool so enough local address space is reserved.
+  HANDLE fm = ACE_TEXT_CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READONLY,
+    0, ACE_DEFAULT_PAGEFILE_POOL_CHUNK, name_under.c_str());
+  void* view;
+  if (fm == 0 || (view = MapViewOfFile(fm, FILE_MAP_READ, 0, 0, 0)) == 0) {
+    stop_i();
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ShmemDataLink::open: ")
+                      ACE_TEXT("peer's shared memory area not found (%C)\n"),
+                      peer_address.c_str()),
+                     false);
+  }
+  // location of max_size_ in ctrl block: a size_t after two void*s
+  const size_t* pmax = (const size_t*)(((void**)view) + 2);
+  alloc_opts.max_size_ = *pmax;
+  UnmapViewOfFile(view);
+  CloseHandle(fm);
+#else
+  const bool use_opts = false;
+#endif
+
+  peer_alloc_ = new ShmemAllocator(name.c_str(), 0 /*lock_name*/,
+                                   use_opts ? &alloc_opts : 0);
 
   if (-1 == peer_alloc_->find("Semaphore")) {
     stop_i();

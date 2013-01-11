@@ -1,3 +1,17 @@
+Fri Jan 11 21:35:03 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+
+          Allow for reading a shared memory pool that has been grown
+          by the other process.  Additional code is for Win32, POSIX
+          seems to handle this already.
+
+        * tests/DCPS/LargeSample/shmem.ini:
+
+          Increase buffer size for OpenDDS transport headers.
+
 Fri Jan 11 16:15:31 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/ShmemTransport.cpp:
