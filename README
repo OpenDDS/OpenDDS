@@ -89,9 +89,9 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-*** TAO 1.6a patch 13
+*** TAO 1.6a patch 14
 *** TAO 2.0a patch 4
-*** TAO 2.1.4 (DOC Group)
+*** TAO 2.1.7 (DOC Group)
 
 Note that the 1.6a and 2.0a releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -134,7 +134,7 @@ Windows family:
 ** Windows Mobile 6 (ARM)
 
 Others:
-** SunOS 5.9 (Solaris 9) (x86)
+** Android NDK
 ** SunOS 5.10 (Solaris 10) (SPARC)
 ** SunOS 5.11 (OpenSolaris 2009.06) (x86)
 ** QNX Neutrino 6.3.2 (x86)
@@ -151,17 +151,15 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
-** Microsoft Visual C++ 11 (Visual Studio 2012)
-** gcc 3.3.2
+** Microsoft Visual C++ 11 (Visual Studio 2012 / nmake projects)
 ** gcc 4.1.x
 ** gcc 4.2.1 (Apple Inc. build 5646 dot 1)
 ** gcc 4.4.x
 ** gcc 4.5.x
 ** gcc 4.6.x
-** gcc 4.7.1
+** gcc 4.7.x
 ** QNX gcc 3.3.5
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
-** Sun C++ 5.9 SunOS_i386 Patch 124864-07 2008/08/22
 ** Sun C++ 5.10 SunOS_i386 2009/06/03
 
 * Building and Installing

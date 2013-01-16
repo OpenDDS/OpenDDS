@@ -1,3 +1,13 @@
+Wed Jan 16 22:38:48 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+
+          Updated for upcoming release.
+
+        * tests/DCPS/LargeSample/rtps.ini:
+
+          Test RTPS transport unicast.
+
 Wed Jan 16 15:06:25 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
