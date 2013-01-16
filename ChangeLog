@@ -1,3 +1,13 @@
+Wed Jan 16 15:06:25 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/*/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/*.gmfgen:
+
+          Updated version numbers for the upcoming release.
+
 Fri Jan 11 23:16:49 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
