@@ -47,10 +47,10 @@ public:
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
   typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
 
-  //Constructor
+  /// Constructor
   <%TYPE%>DataWriterImpl (void);
 
-  //Destructor
+  /// Destructor
   virtual ~<%TYPE%>DataWriterImpl (void);
 
   virtual ::DDS::InstanceHandle_t register_instance (
@@ -112,8 +112,7 @@ public:
         const ::DDS::StatusMask &              mask,
         OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
         OpenDDS::DCPS::PublisherImpl*          publisher_servant,
-        ::DDS::DataWriter_ptr                  dw_objref
-      );
+        ::DDS::DataWriter_ptr                  dw_objref);
 
   /**
    * Do parts of enable specific to the datatype.
@@ -141,7 +140,6 @@ private:
    * Serialize the instance data.
    *
    * @param instance_data The data to serialize.
-   * @param for_write If 1 use the fast allocator; otherwise use the heap.
    * @param marshaling_type Enumerated type specifying whether to marshal
    *        just the keys or the entire message.
    * @return returns the serialized data.
@@ -188,10 +186,10 @@ public:
   typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<<%SCOPED%>, ACE_Null_Mutex>  DataAllocator;
   typedef <%TYPE%>DataReader Interface;
 
-  //Constructor
+  /// Constructor
   <%TYPE%>DataReaderImpl (void);
 
-  //Destructor
+  /// Destructor
   virtual ~<%TYPE%>DataReaderImpl (void);
 
   /**
@@ -449,16 +447,14 @@ public:
          const OpenDDS::DCPS::DataSampleHeader& header,
          OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
          bool & just_registered,
-         bool & filtered
-         );
+         bool & filtered);
 
-    /// common input read* & take* input processing and precondition checks
+    /// Common input read* & take* input processing and precondition checks
     ::DDS::ReturnCode_t check_inputs (
         const char* method_name,
         ::<%SCOPED%><%SEQ%> & received_data,
         ::DDS::SampleInfoSeq & info_seq,
-        ::CORBA::Long max_samples
-        );
+        ::CORBA::Long max_samples);
 
    InstanceMap  instance_map_;
    DataAllocator* data_allocator_;

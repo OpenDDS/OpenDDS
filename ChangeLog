@@ -1,3 +1,8 @@
+Mon Jan 21 15:53:58 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/idl/HTemplate.txt:
+          Doxygen and layout changes
+
 Fri Jan 18 19:09:25 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * ChangeLog:
