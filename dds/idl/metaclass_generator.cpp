@@ -15,23 +15,31 @@ using namespace AstTypeClassification;
 
 namespace {
   struct ContentSubscriptionGuard {
-    ContentSubscriptionGuard()
+    explicit ContentSubscriptionGuard(bool activate = true)
+      : activate_(activate)
     {
-      be_global->header_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
-      be_global->impl_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
+      if (activate) {
+        be_global->header_ <<
+          "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
+        be_global->impl_ <<
+          "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
+      }
     }
     ~ContentSubscriptionGuard()
     {
-      be_global->header_ << "#endif\n";
-      be_global->impl_ << "#endif\n";
+      if (activate_) {
+        be_global->header_ << "#endif\n";
+        be_global->impl_ << "#endif\n";
+      }
     }
+    bool activate_;
   };
 }
 
 bool metaclass_generator::gen_enum(UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
-  ContentSubscriptionGuard csg;
+  ContentSubscriptionGuard csg(!be_global->v8());
   NamespaceGuard ng;
   std::string decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
   be_global->header_ << "extern " << decl << ";\n";

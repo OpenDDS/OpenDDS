@@ -1,3 +1,20 @@
+Mon Jan 21 22:44:03 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/V8TypeConverter.h:
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_util.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+        * dds/idl/v8_generator.h:
+        * dds/idl/v8_generator.cpp:
+
+          Initial version of type support for copying data samples
+          to JavaScript data types for the V8 JavaScript engine.
+          Enable with -Wb,v8.  Generated code links with libv8.
+
 Mon Jan 21 16:19:32 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/Watchdog.h:

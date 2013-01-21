@@ -114,6 +114,9 @@ public:
   bool java() const;
   void java(bool b);
 
+  bool v8() const;
+  void v8(bool b);
+
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
@@ -130,7 +133,7 @@ private:
   const char* filename_;
   // Name of the IDL file we are processing.
 
-  bool java_, suppress_idl_, generate_wireshark_;
+  bool java_, suppress_idl_, generate_wireshark_, v8_;
 
   ACE_CString export_macro_, export_include_, pch_include_, java_arg_, seq_;
 };

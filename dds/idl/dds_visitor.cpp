@@ -39,6 +39,7 @@
 #include "marshal_generator.h"
 #include "keys_generator.h"
 #include "wireshark_generator.h"
+#include "v8_generator.h"
 
 #include <iostream>
 #include <vector>
@@ -53,6 +54,7 @@ namespace {
   ts_generator ts_gen_;
   metaclass_generator mc_gen_;
   wireshark_generator ws_gen_;
+  v8_generator v8_gen_;
 
   dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_, &ws_gen_};
   const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
@@ -88,6 +90,9 @@ namespace {
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   : scope_(scope), error_(false), java_ts_only_(java_ts_only)
 {
+  if (be_global->v8()) {
+    gen_target_.add_generator(&v8_gen_);
+  }
 }
 
 dds_visitor::~dds_visitor()

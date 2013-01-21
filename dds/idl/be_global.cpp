@@ -34,6 +34,7 @@ BE_GlobalData::BE_GlobalData()
     java_(false),
     suppress_idl_(false),
     generate_wireshark_(false),
+    v8_(false),
     seq_("Seq")
 {
 }
@@ -117,6 +118,16 @@ void BE_GlobalData::java(bool b)
 bool BE_GlobalData::java() const
 {
   return this->java_;
+}
+
+void BE_GlobalData::v8(bool b)
+{
+  this->v8_ = b;
+}
+
+bool BE_GlobalData::v8() const
+{
+  return this->v8_;
 }
 
 bool

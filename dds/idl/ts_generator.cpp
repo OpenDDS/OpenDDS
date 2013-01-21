@@ -37,31 +37,6 @@ namespace {
     return oss.str();
   }
 
-  struct TS_NamespaceGuard  {
-    TS_NamespaceGuard(UTL_ScopedName* name, std::ostream& os,
-      const char* keyword = "namespace")
-      : os_(os)
-    {
-      for (n_ = 0; name->tail();
-          name = static_cast<UTL_ScopedName*>(name->tail())) {
-        const char* str = name->head()->get_string();
-        if (str && str[0]) {
-          ++n_;
-          os << keyword << (name->head()->escaped() ? " _" : " ")
-            << str << " {\n";
-        }
-      }
-      if (std::strcmp(keyword, "module") == 0) semi_ = ";";
-    }
-    ~TS_NamespaceGuard()
-    {
-      for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
-    }
-    std::ostream& os_;
-    std::string semi_;
-    int n_;
-  };
-
   void replaceAll(std::string& s,
                   const std::map<std::string, std::string>& rep) {
     typedef std::map<std::string, std::string>::const_iterator mapiter_t;

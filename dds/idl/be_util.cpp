@@ -34,6 +34,8 @@ be_util::prep_be_arg (char *arg)
   static const size_t SZ_WB_JAVA = sizeof(WB_JAVA) - 1;
   static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
   static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
+  static const char WB_V8[] = "v8";
+  static const size_t SZ_WB_V8 = sizeof(WB_V8) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
     be_global->export_macro(arg + SZ_WB_EXPORT_MACRO);
@@ -53,6 +55,9 @@ be_util::prep_be_arg (char *arg)
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
     be_global->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
+
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_V8, SZ_WB_V8)) {
+    be_global->v8(true);
   }
 }
 
@@ -79,6 +84,8 @@ be_util::usage (void)
     ACE_TEXT("except for special cases.\n")
     ACE_TEXT(" -Wb,tao_include_prefix=<path>\t\tPrefix for including the TAO-")
     ACE_TEXT("generated header file.\n")
+    ACE_TEXT(" -Wb,v8\t\t\tgenerate TypeSupport for converting data samples ")
+    ACE_TEXT("to v8 JavaScript objects\n")
   ));
 }
 
