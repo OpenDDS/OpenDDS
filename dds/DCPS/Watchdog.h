@@ -77,17 +77,17 @@ public:
   virtual void reschedule_deadline() = 0;
 
   /// Reset interval for a specific timer.
-  int  reset_timer_interval(long const & timer_id);
+  int reset_timer_interval(long const & timer_id);
 
 protected:
 
-  // Reactor with which the timer will be registered.
+  /// Reactor with which the timer will be registered.
   ACE_Reactor_Timer_Interface* const reactor_;
 
-  // Event handler that handles timeout.
+  /// Event handler that handles timeout.
   WatchdogTimer timer_;
 
-  // Current time interval.
+  /// Current time interval.
   ACE_Time_Value interval_;
 };
 

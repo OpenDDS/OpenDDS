@@ -308,7 +308,7 @@ public:
   bool persist_data();
 #endif
 
-  // Reset time interval for each instance.
+  /// Reset time interval for each instance.
   void reschedule_deadline();
 
   /**
