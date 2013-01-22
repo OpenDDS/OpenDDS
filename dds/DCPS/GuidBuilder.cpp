@@ -31,13 +31,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 GuidBuilder::GuidBuilder()
-  : guid_cxx_(create()),
-    guid_(guid_cxx_)
+  : guid_cxx_(create())
+  , guid_(guid_cxx_)
 {
 }
 
 GuidBuilder::GuidBuilder(GUID_t& guid)
-  : guid_(guid)
+  : guid_cxx_()
+  , guid_(guid)
 {
 }
 

@@ -38,8 +38,10 @@ namespace Federator {
 ManagerImpl::ManagerImpl(Config& config)
   : joining_(this->lock_),
     joiner_(NIL_REPOSITORY),
+    joinRepo_(NIL_REPOSITORY),
     federated_(false),
     config_(config),
+    info_(0),
     ownerListener_(*this),
     topicListener_(*this),
     participantListener_(*this),

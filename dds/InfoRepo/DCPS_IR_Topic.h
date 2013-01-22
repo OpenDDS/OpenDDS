@@ -41,8 +41,8 @@ class DCPS_IR_Subscription;
  */
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic {
 public:
-  DCPS_IR_Topic(OpenDDS::DCPS::RepoId id,
-                DDS::TopicQos qos,
+  DCPS_IR_Topic(const OpenDDS::DCPS::RepoId& id,
+                const DDS::TopicQos& qos,
                 DCPS_IR_Domain* domain,
                 DCPS_IR_Participant* creator,
                 DCPS_IR_Topic_Description* description);

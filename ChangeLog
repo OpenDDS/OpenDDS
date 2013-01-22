@@ -1,3 +1,37 @@
+Tue Jan 22 22:34:30 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidBuilder.cpp:
+        * dds/DCPS/transport/framework/PriorityKey.inl:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Coverity warnings:
+          - pass large structures by const&
+          - initialize all scalar fields
+
+        * dds/DCPS/Service_Participant.h:
+
+          Removed unused members.
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+          Pass large structures by const&.
+          Updated logic for copy-from-topic QoS.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Added take_generic() for unit test.
+
 Tue Jan 22 19:56:33 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

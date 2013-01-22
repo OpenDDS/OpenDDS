@@ -23,7 +23,7 @@ OpenDDS::Model::Delegate::service()
 DDS::DomainParticipant*
 OpenDDS::Model::Delegate::createParticipant(
   unsigned long             domain,
-  DDS::DomainParticipantQos participantQos,
+  const DDS::DomainParticipantQos& participantQos,
   DDS::StatusMask           mask,
   const std::string&        transportConfig
 )
@@ -53,7 +53,7 @@ OpenDDS::Model::Delegate::createTopic(
   DDS::DomainParticipant* participant,
   const std::string&      topicName,
   const std::string&      typeName,
-  DDS::TopicQos           topicQos,
+  const DDS::TopicQos&    topicQos,
   DDS::StatusMask         mask
 )
 {
@@ -71,7 +71,7 @@ OpenDDS::Model::Delegate::createTopic(
 DDS::Publisher*
 OpenDDS::Model::Delegate::createPublisher(
   DDS::DomainParticipant*       participant,
-  DDS::PublisherQos             publisherQos,
+  const DDS::PublisherQos&      publisherQos,
   DDS::StatusMask               mask,
   const std::string&            transportConfig
 )
@@ -102,7 +102,7 @@ OpenDDS::Model::Delegate::createPublisher(
 DDS::Subscriber*
 OpenDDS::Model::Delegate::createSubscriber(
   DDS::DomainParticipant*       participant,
-  DDS::SubscriberQos            subscriberQos,
+  const DDS::SubscriberQos&     subscriberQos,
   DDS::StatusMask               mask,
   const std::string&            transportConfig
 )
@@ -135,7 +135,7 @@ OpenDDS::Model::Delegate::createPublication(
   unsigned int       which,
   DDS::Publisher*    publisher,
   DDS::Topic*        topic,
-  DDS::DataWriterQos writerQos,
+  const DDS::DataWriterQos& writerQos,
   DDS::StatusMask    mask,
   const std::string& transportConfig,
   bool               copyQosFromTopic
@@ -145,18 +145,18 @@ OpenDDS::Model::Delegate::createPublication(
     return 0;
   }
 
-  DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
-  topic->get_qos( topicQos);
-  publisher->get_default_datawriter_qos( writerQos);
+  DDS::TopicQos topicQos;
+  topic->get_qos(topicQos);
+  DDS::DataWriterQos dw_qos = writerQos;
   if (copyQosFromTopic) {
-    publisher->copy_from_topic_qos(writerQos, topicQos);
+    publisher->copy_from_topic_qos(dw_qos, topicQos);
   }
-  this->service_->copyPublicationQos( which, writerQos);
+  this->service_->copyPublicationQos(which, dw_qos);
 
   return this->createWriter(
            publisher,
            topic,
-           writerQos,
+           dw_qos,
            mask,
            transportConfig
          );
@@ -166,7 +166,7 @@ DDS::DataWriter*
 OpenDDS::Model::Delegate::createWriter(
   DDS::Publisher*    publisher,
   DDS::Topic*        topic,
-  DDS::DataWriterQos writerQos,
+  const DDS::DataWriterQos& writerQos,
   DDS::StatusMask    mask,
   const std::string& transportConfig
 )
@@ -205,7 +205,7 @@ OpenDDS::Model::Delegate::createSubscription(
   unsigned int           which,
   DDS::Subscriber*       subscriber,
   DDS::TopicDescription* topic,
-  DDS::DataReaderQos     readerQos,
+  const DDS::DataReaderQos& readerQos,
   DDS::StatusMask        mask,
   const std::string&     transportConfig,
   bool                   copyQosFromTopic
@@ -214,8 +214,7 @@ OpenDDS::Model::Delegate::createSubscription(
   if( !this->service_) {
     return 0;
   }
-
-  subscriber->get_default_datareader_qos( readerQos);
+  DDS::DataReaderQos dr_qos = readerQos;
   if (copyQosFromTopic) {
     // Per the DDS Spec, copy from related topic for CF topic,
     // Error if copy from mulitopic
@@ -228,18 +227,19 @@ OpenDDS::Model::Delegate::createSubscription(
       DDS::ContentFilteredTopic* qosCfTopic =
                     dynamic_cast<DDS::ContentFilteredTopic*>(topic);
       if (qosCfTopic != NULL) {
-        qosCfTopic->get_related_topic()->get_qos(topicQos);
+        DDS::Topic_var related = qosCfTopic->get_related_topic();
+        related->get_qos(topicQos);
       }
 #endif
     }
-    subscriber->copy_from_topic_qos(readerQos, topicQos);
+    subscriber->copy_from_topic_qos(dr_qos, topicQos);
   }
-  this->service_->copySubscriptionQos( which, readerQos);
+  this->service_->copySubscriptionQos(which, dr_qos);
 
   return this->createReader(
            subscriber,
            topic,
-           readerQos,
+           dr_qos,
            mask,
            transportConfig
          );
@@ -249,7 +249,7 @@ DDS::DataReader*
 OpenDDS::Model::Delegate::createReader(
   DDS::Subscriber*       subscriber,
   DDS::TopicDescription* topic,
-  DDS::DataReaderQos     readerQos,
+  const DDS::DataReaderQos& readerQos,
   DDS::StatusMask        mask,
   const std::string&     transportConfig
 )

@@ -19,13 +19,13 @@
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
-DCPS_IR_Subscription::DCPS_IR_Subscription(OpenDDS::DCPS::RepoId id,
+DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
                                            DCPS_IR_Participant* participant,
                                            DCPS_IR_Topic* topic,
                                            OpenDDS::DCPS::DataReaderRemote_ptr reader,
-                                           DDS::DataReaderQos qos,
+                                           const DDS::DataReaderQos& qos,
                                            const OpenDDS::DCPS::TransportLocatorSeq& info,
-                                           DDS::SubscriberQos subscriberQos,
+                                           const DDS::SubscriberQos& subscriberQos,
                                            const char* filterExpression,
                                            const DDS::StringSeq& exprParams)
   : id_(id),

@@ -8,7 +8,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::PriorityKey::PriorityKey()
-  : priority_(0)
+  : priority_(0), is_loopback_(false), is_active_(false)
 {
 }
 

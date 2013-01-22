@@ -37,7 +37,7 @@ namespace OpenDDS { namespace Model {
       DDS::DomainParticipant*
       createParticipant(
         unsigned long             domain,
-        DDS::DomainParticipantQos participantQos,
+        const DDS::DomainParticipantQos& participantQos,
         DDS::StatusMask           mask,
         const std::string&        transportConfig
       );
@@ -47,14 +47,14 @@ namespace OpenDDS { namespace Model {
         DDS::DomainParticipant* participant,
         const std::string&      topicName,
         const std::string&      typeName,
-        DDS::TopicQos           topicQos,
+        const DDS::TopicQos&    topicQos,
         DDS::StatusMask         mask
       );
 
       DDS::Publisher*
       createPublisher(
         DDS::DomainParticipant*       participant,
-        DDS::PublisherQos             publisherQos,
+        const DDS::PublisherQos&      publisherQos,
         DDS::StatusMask               mask,
         const std::string&            transportConfig
       );
@@ -62,7 +62,7 @@ namespace OpenDDS { namespace Model {
       DDS::Subscriber*
       createSubscriber(
         DDS::DomainParticipant*       participant,
-        DDS::SubscriberQos            subscriberQos,
+        const DDS::SubscriberQos&     subscriberQos,
         DDS::StatusMask               mask,
         const std::string&            transportConfig
       );
@@ -72,7 +72,7 @@ namespace OpenDDS { namespace Model {
         unsigned int       which,
         DDS::Publisher*    publisher,
         DDS::Topic*        topic,
-        DDS::DataWriterQos writerQos,
+        const DDS::DataWriterQos& writerQos,
         DDS::StatusMask    mask,
         const std::string& transportConfig,
         bool               copyQosFromTopic
@@ -82,7 +82,7 @@ namespace OpenDDS { namespace Model {
       createWriter(
         DDS::Publisher*        publisher,
         DDS::Topic*            topic,
-        DDS::DataWriterQos     writerQos,
+        const DDS::DataWriterQos& writerQos,
         DDS::StatusMask        mask,
         const std::string&     transportConfig
       );
@@ -92,7 +92,7 @@ namespace OpenDDS { namespace Model {
         unsigned int           which,
         DDS::Subscriber*       subscriber,
         DDS::TopicDescription* topic,
-        DDS::DataReaderQos     readerQos,
+        const DDS::DataReaderQos& readerQos,
         DDS::StatusMask        mask,
         const std::string&     transportConfig,
         bool                   copyQosFromTopic
@@ -102,7 +102,7 @@ namespace OpenDDS { namespace Model {
       createReader(
         DDS::Subscriber*       subscriber,
         DDS::TopicDescription* topic,
-        DDS::DataReaderQos     readerQos,
+        const DDS::DataReaderQos& readerQos,
         DDS::StatusMask        mask,
         const std::string&     transportConfig
       );

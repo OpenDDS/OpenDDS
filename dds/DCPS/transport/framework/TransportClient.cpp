@@ -28,7 +28,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : repo_id_(GUID_UNKNOWN)
+  : swap_bytes_(false)
+  , cdr_encapsulation_(false)
+  , reliable_(false)
+  , durable_(false)
+  , repo_id_(GUID_UNKNOWN)
 {
 }
 

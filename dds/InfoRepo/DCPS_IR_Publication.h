@@ -38,13 +38,13 @@ typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
  */
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication {
 public:
-  DCPS_IR_Publication(OpenDDS::DCPS::RepoId id,
+  DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
                       DCPS_IR_Participant* participant,
                       DCPS_IR_Topic* topic,
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
-                      DDS::DataWriterQos qos,
+                      const DDS::DataWriterQos& qos,
                       const OpenDDS::DCPS::TransportLocatorSeq& info,
-                      DDS::PublisherQos publisherQos);
+                      const DDS::PublisherQos& publisherQos);
 
   ~DCPS_IR_Publication();
 

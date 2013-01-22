@@ -21,8 +21,8 @@
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
-DCPS_IR_Topic::DCPS_IR_Topic(OpenDDS::DCPS::RepoId id,
-                             DDS::TopicQos qos,
+DCPS_IR_Topic::DCPS_IR_Topic(const OpenDDS::DCPS::RepoId& id,
+                             const DDS::TopicQos& qos,
                              DCPS_IR_Domain* domain,
                              DCPS_IR_Participant* creator,
                              DCPS_IR_Topic_Description* description)

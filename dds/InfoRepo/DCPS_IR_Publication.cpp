@@ -20,13 +20,13 @@
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
-DCPS_IR_Publication::DCPS_IR_Publication(OpenDDS::DCPS::RepoId id,
+DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
                                          DCPS_IR_Participant* participant,
                                          DCPS_IR_Topic* topic,
                                          OpenDDS::DCPS::DataWriterRemote_ptr writer,
-                                         DDS::DataWriterQos qos,
+                                         const DDS::DataWriterQos& qos,
                                          const OpenDDS::DCPS::TransportLocatorSeq& info,
-                                         DDS::PublisherQos publisherQos)
+                                         const DDS::PublisherQos& publisherQos)
   : id_(id),
     participant_(participant),
     topic_(topic),

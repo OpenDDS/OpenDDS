@@ -96,6 +96,9 @@ public:
     OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask);
 
+  DDS::ReturnCode_t take_generic(DDS::SampleStateMask,
+    DDS::ViewStateMask, DDS::InstanceStateMask) { return 0; }
+
   DDS::InstanceHandle_t lookup_instance_generic(const void* data);
 
   DDS::ReturnCode_t read_instance_generic(void*& data,

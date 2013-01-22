@@ -22,6 +22,12 @@ RtpsTransportHeader::RtpsTransportHeader()
   : length_(0)
   , valid_(false)
 {
+  for (int i = 0; i < 4; ++i) header_.prefix[i] = 0;
+  header_.version.major = 0;
+  header_.version.minor = 0;
+  header_.vendorId.vendorId[0] = 0;
+  header_.vendorId.vendorId[1] = 0;
+  for (int i = 0; i < 12; ++i) header_.guidPrefix[i] = 0;
 }
 
 ACE_INLINE

@@ -28,6 +28,7 @@ ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(DataLink* link)
   , work_available_(lock_)
   , shutdown_initiated_(false)
   , opened_(false)
+  , thr_id_(ACE_OS::NULL_thread)
   , link_(link)
 {
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "ThreadPerConnectionSendTask", 6);

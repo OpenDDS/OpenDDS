@@ -53,7 +53,7 @@ void
 RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                                        const ACE_INET_Addr& /*remote_address*/)
 {
-  using namespace OpenDDS::RTPS;
+  using namespace RTPS;
 
   if (std::memcmp(receiver_.dest_guid_prefix_, link_->local_prefix(),
                   sizeof(GuidPrefix_t))) {
@@ -220,7 +220,7 @@ RtpsUdpReceiveStrategy::withhold_data_from(const RepoId& sub_id)
 bool
 RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
 {
-  using namespace OpenDDS::RTPS;
+  using namespace RTPS;
   receiver_.fill_header(data.header_); // set publication_id_.guidPrefix
   if (reassembly_.reassemble(frags_, data)) {
 
@@ -317,17 +317,25 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
 
 // MessageReceiver nested class
 
-RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(
-  const OpenDDS::RTPS::GuidPrefix_t& local)
+RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(const GuidPrefix_t& local)
+  : have_timestamp_(false)
 {
-  OpenDDS::RTPS::assign(local_, local);
+  RTPS::assign(local_, local);
+  source_version_.major = source_version_.minor = 0;
+  source_vendor_.vendorId[0] = source_vendor_.vendorId[1] = 0;
+  for (int i = 0; i < sizeof(GuidPrefix_t); ++i) {
+    source_guid_prefix_[i] = 0;
+    dest_guid_prefix_[i] = 0;
+  }
+  timestamp_.seconds = 0;
+  timestamp_.fraction = 0;
 }
 
 void
 RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
-                                               const OpenDDS::RTPS::Header& hdr)
+                                               const RTPS::Header& hdr)
 {
-  using namespace OpenDDS::RTPS;
+  using namespace RTPS;
   // see RTPS spec v2.1 section 8.3.4 table 8.16 and section 8.3.6.4
   source_version_ = hdr.version;
   source_vendor_ = hdr.vendorId;
@@ -352,10 +360,9 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
 }
 
 void
-RtpsUdpReceiveStrategy::MessageReceiver::submsg(
-  const OpenDDS::RTPS::Submessage& s)
+RtpsUdpReceiveStrategy::MessageReceiver::submsg(const RTPS::Submessage& s)
 {
-  using namespace OpenDDS::RTPS;
+  using namespace RTPS;
 
   switch (s._d()) {
   case INFO_TS:
@@ -385,21 +392,20 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
 
 void
 RtpsUdpReceiveStrategy::MessageReceiver::submsg(
-  const OpenDDS::RTPS::InfoDestinationSubmessage& id)
+  const RTPS::InfoDestinationSubmessage& id)
 {
   // see RTPS spec v2.1 section 8.3.7.7.4
   for (size_t i = 0; i < sizeof(GuidPrefix_t); ++i) {
     if (id.guidPrefix[i]) { // if some byte is > 0, it's not UNKNOWN
-      OpenDDS::RTPS::assign(dest_guid_prefix_, id.guidPrefix);
+      RTPS::assign(dest_guid_prefix_, id.guidPrefix);
       return;
     }
   }
-  OpenDDS::RTPS::assign(dest_guid_prefix_, local_);
+  RTPS::assign(dest_guid_prefix_, local_);
 }
 
 void
-RtpsUdpReceiveStrategy::MessageReceiver::submsg(
-  const OpenDDS::RTPS::InfoReplySubmessage& ir)
+RtpsUdpReceiveStrategy::MessageReceiver::submsg(const RTPS::InfoReplySubmessage& ir)
 {
   // see RTPS spec v2.1 section 8.3.7.8.4
   unicast_reply_locator_list_.length(ir.unicastLocatorList.length());
@@ -420,21 +426,19 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
 
 void
 RtpsUdpReceiveStrategy::MessageReceiver::submsg(
-  const OpenDDS::RTPS::InfoReplyIp4Submessage& iri4)
+  const RTPS::InfoReplyIp4Submessage& iri4)
 {
   // see RTPS spec v2.1 sections 8.3.7.8.4 and 9.4.5.14
   unicast_reply_locator_list_.length(1);
-  unicast_reply_locator_list_[0].kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
+  unicast_reply_locator_list_[0].kind = RTPS::LOCATOR_KIND_UDPv4;
   unicast_reply_locator_list_[0].port = iri4.unicastLocator.port;
-  OpenDDS::RTPS::assign(unicast_reply_locator_list_[0].address,
-                        iri4.unicastLocator.address);
+  RTPS::assign(unicast_reply_locator_list_[0].address, iri4.unicastLocator.address);
 
   if (iri4.smHeader.flags & 2 /* MulticastFlag */) {
     multicast_reply_locator_list_.length(1);
-    multicast_reply_locator_list_[0].kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
+    multicast_reply_locator_list_[0].kind = RTPS::LOCATOR_KIND_UDPv4;
     multicast_reply_locator_list_[0].port = iri4.multicastLocator.port;
-    OpenDDS::RTPS::assign(multicast_reply_locator_list_[0].address,
-                          iri4.multicastLocator.address);
+    RTPS::assign(multicast_reply_locator_list_[0].address, iri4.multicastLocator.address);
   } else {
     multicast_reply_locator_list_.length(0);
   }
@@ -442,7 +446,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
 
 void
 RtpsUdpReceiveStrategy::MessageReceiver::submsg(
-  const OpenDDS::RTPS::InfoTimestampSubmessage& it)
+  const RTPS::InfoTimestampSubmessage& it)
 {
   // see RTPS spec v2.1 section 8.3.7.9.10
   if (!(it.smHeader.flags & 2 /* InvalidateFlag */)) {
@@ -455,16 +459,16 @@ RtpsUdpReceiveStrategy::MessageReceiver::submsg(
 
 void
 RtpsUdpReceiveStrategy::MessageReceiver::submsg(
-  const OpenDDS::RTPS::InfoSourceSubmessage& is)
+  const RTPS::InfoSourceSubmessage& is)
 {
   // see RTPS spec v2.1 section 8.3.7.9.4
-  OpenDDS::RTPS::assign(source_guid_prefix_, is.guidPrefix);
+  RTPS::assign(source_guid_prefix_, is.guidPrefix);
   source_version_ = is.version;
   source_vendor_ = is.vendorId;
   unicast_reply_locator_list_.length(1);
-  unicast_reply_locator_list_[0] = OpenDDS::RTPS::LOCATOR_INVALID;
+  unicast_reply_locator_list_[0] = RTPS::LOCATOR_INVALID;
   multicast_reply_locator_list_.length(1);
-  multicast_reply_locator_list_[0] = OpenDDS::RTPS::LOCATOR_INVALID;
+  multicast_reply_locator_list_[0] = RTPS::LOCATOR_INVALID;
   have_timestamp_ = false;
 }
 
@@ -472,7 +476,7 @@ void
 RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
   DataSampleHeader& header) const
 {
-  using namespace OpenDDS::RTPS;
+  using namespace RTPS;
   if (have_timestamp_) {
     header.source_timestamp_sec_ = timestamp_.seconds;
     header.source_timestamp_nanosec_ =
