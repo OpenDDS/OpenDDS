@@ -1,3 +1,13 @@
+Tue Jan 22 19:56:33 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Added a take_generic() method, which allows samples that
+          may have previously been accessed with read_generic() to
+          be removed from the DataReader.
+
 Mon Jan 21 22:44:03 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/V8TypeConverter.h:

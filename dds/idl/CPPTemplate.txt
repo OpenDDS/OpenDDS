@@ -1672,6 +1672,17 @@ bool
   return rc;
 }
 
+::DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::take_generic(
+  ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+  ::DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%><%SEQ%> data;
+  ::DDS::SampleInfoSeq infos;
+  return take_i(data, infos, ::DDS::LENGTH_UNLIMITED,
+                sample_states, view_states, instance_states, 0);
+}
+
 ::DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::lookup_instance_generic(const void* data)
 {

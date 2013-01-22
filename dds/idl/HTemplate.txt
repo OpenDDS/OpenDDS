@@ -315,6 +315,10 @@ public:
     ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states);
 
+  ::DDS::ReturnCode_t take_generic(
+    ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+    ::DDS::InstanceStateMask instance_states);
+
   ::DDS::InstanceHandle_t lookup_instance_generic(const void* data);
 
   ::DDS::ReturnCode_t read_instance_generic(void*& data,
