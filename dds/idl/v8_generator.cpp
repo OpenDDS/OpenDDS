@@ -28,7 +28,6 @@ void v8_generator::fwd_decl()
 bool v8_generator::gen_enum(UTL_ScopedName*, const std::vector<AST_EnumVal*>&,
                             const char*)
 {
-  fwd_decl();
   return true;
 }
 
@@ -86,8 +85,10 @@ namespace {
 
       if (cls & CL_ENUM) {
         const std::string underscores =
-          dds_generator::scoped_helper(type->name(), "_");
-        prefix = "gen_" + underscores + "_names[static_cast<int>(";
+          dds_generator::scoped_helper(type->name(), "_"),
+          array = "gen_" + underscores + "_names";
+        prefix = '(' + std::string(src) + " >= sizeof(" + array + ")/sizeof(" +
+          array + "[0])) ? \"<<invalid>>\" : " + array + "[static_cast<int>(";
         suffix = ")]";
 
       } else if (cls & CL_STRING) {
