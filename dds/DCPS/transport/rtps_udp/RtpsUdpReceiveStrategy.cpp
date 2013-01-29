@@ -323,7 +323,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::MessageReceiver(const GuidPrefix_t& loc
   RTPS::assign(local_, local);
   source_version_.major = source_version_.minor = 0;
   source_vendor_.vendorId[0] = source_vendor_.vendorId[1] = 0;
-  for (int i = 0; i < sizeof(GuidPrefix_t); ++i) {
+  for (size_t i = 0; i < sizeof(GuidPrefix_t); ++i) {
     source_guid_prefix_[i] = 0;
     dest_guid_prefix_[i] = 0;
   }

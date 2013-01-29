@@ -1,3 +1,9 @@
+Tue Jan 29 14:34:12 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Fixed a warning that was introduced while fixing Coverity warnings.
+
 Mon Jan 28 17:31:01 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/v8_generator.cpp:
