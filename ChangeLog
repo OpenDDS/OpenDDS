@@ -1,3 +1,12 @@
+Tue Feb  5 15:26:27 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.cpp:
+
+          Restored earlier implementation of swapcpy().
+          ACE_CDR swapping helper functions can not be used here because
+          they assume alignment and some combinations of CPU and compiler
+          switches enforce strict alignment (SPARC/SunCC).
+
 Tue Jan 29 14:34:12 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:

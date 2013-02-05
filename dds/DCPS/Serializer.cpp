@@ -49,23 +49,9 @@ void
 Serializer::swapcpy(char* to, const char* from, size_t n)
 {
   // Unroll the loop...
-  switch (n) {                           // 2   4   8   16
+  switch (n) {               // 2   4   8   16
   case 16:
-    ACE_CDR::swap_16(from, to);
-    break;
-  case 8:
-    ACE_CDR::swap_8(from, to);
-    break;
-  case 4:
-    ACE_CDR::swap_4(from, to);
-    break;
-  case 2:
-    ACE_CDR::swap_2(from, to) ;
-    break;
-  case 1:
-    to[0] = from[0];
-    break;
-
+    to[ 15] = from[ n - 16]; // x   x   x    0
   case 15:
     to[ 14] = from[ n - 15]; // x   x   x    1
   case 14:
@@ -80,17 +66,21 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
     to[  9] = from[ n - 10]; // x   x   x    6
   case  9:
     to[  8] = from[ n -  9]; // x   x   x    7
-    to[  7] = from[ n -  8]; // x  s x   0    8
+  case  8:
+    to[  7] = from[ n -  8]; // x   x   0    8
   case  7:
     to[  6] = from[ n -  7]; // x   x   1    9
   case  6:
     to[  5] = from[ n -  6]; // x   x   2   10
   case  5:
     to[  4] = from[ n -  5]; // x   x   3   11
+  case  4:
     to[  3] = from[ n -  4]; // x   0   4   12
   case  3:
     to[  2] = from[ n -  3]; // x   1   5   13
+  case  2:
     to[  1] = from[ n -  2]; // 0   2   6   14
+  case  1:
     to[  0] = from[ n -  1]; // 1   3   7   15
   case  0:
     return;
