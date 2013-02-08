@@ -213,7 +213,7 @@ ACE_INLINE bool
 Serializer::skip(ACE_CDR::UShort n, int size)
 {
   if (size > 1 && this->alignment_ != ALIGN_NONE) {
-    this->align_r(size_t(size) > MAX_ALIGN ? MAX_ALIGN : size);
+    this->align_r(size_t(size) > MAX_ALIGN ? MAX_ALIGN : size_t(size));
   }
   for (size_t len = static_cast<size_t>(n * size); len;) {
     if (!this->current_) {

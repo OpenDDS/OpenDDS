@@ -1,3 +1,9 @@
+Fri Feb  8 21:52:00 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/Serializer.inl:
+
+          Silence a compiler warning on the Mac.
+
 Fri Feb  8 21:03:40 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/DCPS/Qos_Helper.inl:
