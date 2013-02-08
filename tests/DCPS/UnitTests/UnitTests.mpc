@@ -34,6 +34,14 @@ project(*DurationToTimeValue): dcpsexe {
   }
 }
 
+project(*TimeTSubtraction): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    TimeTSubtraction.cpp
+  }
+}
+
 project(*Fragmentation): dcpsexe {
   exename   = *
 

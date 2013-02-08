@@ -143,10 +143,11 @@ operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
   DDS::Time_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
 
-  if (t.nanosec > NSECS_IN_SEC) {
-    t.sec += t.nanosec / NSECS_IN_SEC;
-    t.nanosec -= t.nanosec % NSECS_IN_SEC;
-  }
+  if (t2.nanosec > t1.nanosec)
+    {
+      t.nanosec = (t1.nanosec + NSECS_IN_SEC) - t2.nanosec;
+      t.sec = (t1.sec - 1) - t2.sec;
+    }
 
   return t;
 }
