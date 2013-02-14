@@ -1,3 +1,16 @@
+Thu Feb 14 17:20:05 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_v8.mpb:
+
+          New mpb file, use to enable opendds_idl's V8 JavaScript codegen.
+          See "Mon Jan 21 22:44:03 UTC 2013" for details.
+
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          register_type()'s second parameter is a string.  The null pointer is
+          not a valid IDL string, but it's currently allowed as an extension.
+          The empty string is simply "".
+
 Fri Feb  8 21:52:00 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * dds/DCPS/Serializer.inl:

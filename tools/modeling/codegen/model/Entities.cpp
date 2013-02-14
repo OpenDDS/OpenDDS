@@ -47,7 +47,7 @@ OpenDDS::Model::Entities::registerTypes( const std::string& participant,
         participant.c_str()
       ));
     }
-    queue.front()->register_type( p, 0);
+    queue.front()->register_type(p, "");
     queue.pop();
   }
 }
