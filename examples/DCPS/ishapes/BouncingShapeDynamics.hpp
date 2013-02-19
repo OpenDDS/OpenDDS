@@ -13,8 +13,8 @@ public:
                           const QRect& constraints,
                           float speed,
                           float angle,
-                          const ShapeType& shape,
-                          ShapeTypeDataWriter_var shapeWriter);
+                          const org::omg::dds::demo::ShapeType& shape,
+                          org::omg::dds::demo::ShapeTypeDataWriter_var& shapeWriter);
 
     virtual ~BouncingShapeDynamics();
 
@@ -33,8 +33,8 @@ private:
     float alpha_;
     float angle_;
     float speed_;
-    ShapeType shape_;
-    ShapeTypeDataWriter_var  shapeWriter_;
+    org::omg::dds::demo::ShapeType shape_;
+    org::omg::dds::demo::ShapeTypeDataWriter_var  shapeWriter_;
 };
 
 #endif /* _BOUNCINGSHAPEDYNAMICS_HPP */

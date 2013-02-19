@@ -27,7 +27,7 @@ public:
 public:
   DDSShapeDynamics(
        int x0, int y0,
-       ShapeTypeDataReader_var shapeReader,
+       org::omg::dds::demo::ShapeTypeDataReader_var& shapeReader,
        const std::string& color,
        int colorIdx
        );
@@ -48,7 +48,7 @@ private:
   boost::shared_ptr<Shape> shape_;
   int x0_;
   int y0_;
-  ShapeTypeDataReader_var shapeReader_;
+  org::omg::dds::demo::ShapeTypeDataReader_var shapeReader_;
   bool attached_;
   std::string color_;
   int colorIdx_;

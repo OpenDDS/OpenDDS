@@ -13,6 +13,14 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 
+using org::omg::dds::demo::ShapeType;
+using org::omg::dds::demo::ShapeTypeTypeSupport_var;
+using org::omg::dds::demo::ShapeTypeTypeSupportImpl;
+using org::omg::dds::demo::ShapeTypeDataWriter;
+using org::omg::dds::demo::ShapeTypeDataWriter_var;
+using org::omg::dds::demo::ShapeTypeDataReader;
+using org::omg::dds::demo::ShapeTypeDataReader_var;
+
 static const float PI = 3.1415926535F;
 
 static QColor  color_[CN];

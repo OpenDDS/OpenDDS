@@ -1,3 +1,22 @@
+Tue Feb 19 21:55:04 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/ishapes/BouncingShapeDynamics.cpp:
+        * examples/DCPS/ishapes/BouncingShapeDynamics.hpp:
+        * examples/DCPS/ishapes/DDSShapeDynamics.cpp:
+        * examples/DCPS/ishapes/DDSShapeDynamics.hpp:
+        * examples/DCPS/ishapes/ShapeType.idl:
+        * examples/DCPS/ishapes/ShapesDialog.cpp:
+
+          Updated to use the common IDL for the March 2013 OMG demo.
+
+        * PROBLEM-REPORT-FORM:
+
+          Removed ASCII-art "cut here" line that nobody seems to use anyway.
+
+        * README:
+
+          Added Clang 3.2 as a supported compiler.
+
 Thu Feb 14 17:20:05 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_v8.mpb:
