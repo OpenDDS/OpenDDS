@@ -67,6 +67,7 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
                               const RepoId& /*remote_id*/,
                               const TransportBLOB& remote_data,
                               bool /*remote_reliable*/,
+                              bool /*remote_durable*/,
                               const ConnectionAttribs& attribs,
                               bool active)
 {
@@ -170,6 +171,7 @@ TcpTransport::connect_datalink_i(const RepoId& /*local_id*/,
                                  const RepoId& /*remote_id*/,
                                  const TransportBLOB& remote_data,
                                  bool /*remote_reliable*/,
+                                 bool /*remote_durable*/,
                                  const ConnectionAttribs& attribs)
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_datalink_i", 6);

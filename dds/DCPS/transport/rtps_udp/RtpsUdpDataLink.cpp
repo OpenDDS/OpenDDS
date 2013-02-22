@@ -215,7 +215,7 @@ RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
 void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
-                            bool local_durable)
+                            bool local_durable, bool remote_durable)
 {
   if (!local_reliable) {
     return;
@@ -228,7 +228,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   const EntityKind kind = conv.entityKind();
   if (kind == KIND_WRITER && remote_reliable) {
     RtpsWriter& w = writers_[local_id];
-    w.remote_readers_[remote_id];
+    w.remote_readers_[remote_id].durable_ = remote_durable;
     w.durable_ = local_durable;
     enable_heartbeat = true;
 
@@ -463,8 +463,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   if (rw != writers_.end() && !rw->second.remote_readers_.empty()) {
     for (ReaderInfoMap::iterator ri = rw->second.remote_readers_.begin();
          ri != rw->second.remote_readers_.end(); ++ri) {
-      if (!ri->second.durable_data_.empty()
-          || 0 == ri->second.acknack_recvd_count_) {
+      if (ri->second.expecting_durable_data()) {
         // Can't add an in-line GAP if some Data Reader is expecting durable
         // data, the GAP could cause that Data Reader to ignore the durable
         // data.  The other readers will eventually learn about the GAP by
@@ -1477,8 +1476,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     RtpsWriter& rw = iter->second;
     for (ReaderInfoMap::iterator ri = rw.remote_readers_.begin();
          ri != rw.remote_readers_.end(); ++ri) {
-      ReaderInfo& rinfo = ri->second;
-      if (rinfo.acknack_recvd_count_ && rinfo.durable_data_.empty()) {
+      if (!ri->second.expecting_durable_data()) {
         readers.push_back(ri->first);
       }
     }
@@ -1657,6 +1655,14 @@ RtpsUdpDataLink::ReaderInfo::expire_durable_data()
   for (iter_t it = durable_data_.begin(); it != durable_data_.end(); ++it) {
     it->second->data_dropped();
   }
+}
+
+bool
+RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
+{
+  return durable_ &&
+    (durable_timestamp_ == ACE_Time_Value::zero // DW hasn't resent yet
+     || !durable_data_.empty());                // DW resent, not sent to reader
 }
 
 SequenceNumber

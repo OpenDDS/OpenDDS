@@ -142,6 +142,7 @@ protected:
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
                                        bool remote_reliable,
+                                       bool remote_durable,
                                        const ConnectionAttribs& attribs) = 0;
 
   /// stop_accepting() is called from TransportClient::associate()
@@ -159,9 +160,9 @@ protected:
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
                                     bool remote_reliable,
+                                    bool remote_durable,
                                     const ConnectionAttribs& attribs,
                                     bool active) = 0;
-
 
   /// Concrete subclass gets a shot at the config object.  The subclass
   /// will likely downcast the TransportInst object to a

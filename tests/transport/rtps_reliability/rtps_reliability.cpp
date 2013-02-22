@@ -761,6 +761,7 @@ bool run_test()
   AssociationData part1_writer;
   part1_writer.remote_id_ = writer1;
   part1_writer.remote_reliable_ = true;
+  part1_writer.remote_durable_ = true;
   part1_writer.remote_data_.length(1);
   part1_writer.remote_data_[0].transport_type = "rtps_udp";
   part1_writer.remote_data_[0].data.replace(
@@ -886,6 +887,7 @@ bool run_test()
   ACE_DEBUG((LM_INFO, ">>> Starting test of DataWriter\n"));
   AssociationData part1_reader = part1_writer;
   part1_reader.remote_id_ = reader1;
+  part1_reader.remote_durable_ = false;
   ReactorTask rt;
   if (!sdw2.associate(part1_reader, true /*active*/)) {
     ACE_DEBUG((LM_DEBUG,

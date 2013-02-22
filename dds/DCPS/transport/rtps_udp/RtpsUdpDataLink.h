@@ -98,7 +98,7 @@ public:
 
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
-                  bool local_durable);
+                  bool local_durable, bool remote_durable);
 
   bool wait_for_handshake(const RepoId& local_id, const RepoId& remote_id);
 
@@ -170,7 +170,7 @@ private:
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     std::vector<RTPS::SequenceNumberSet> requested_changes_;
     std::map<SequenceNumber, RTPS::FragmentNumberSet> requested_frags_;
-    bool handshake_done_;
+    bool handshake_done_, durable_;
     std::map<SequenceNumber, TransportQueueElement*> durable_data_;
     ACE_Time_Value durable_timestamp_;
 
@@ -178,9 +178,11 @@ private:
       : acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , handshake_done_(false)
+      , durable_(false)
     {}
     ~ReaderInfo();
     void expire_durable_data();
+    bool expecting_durable_data() const;
   };
 
   typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> ReaderInfoMap;

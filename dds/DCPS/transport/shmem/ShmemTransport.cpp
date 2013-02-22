@@ -78,6 +78,7 @@ ShmemTransport::find_datalink_i(const RepoId& /*local_id*/,
                                 const RepoId& /*remote_id*/,
                                 const TransportBLOB& remote_data,
                                 bool /*remote_reliable*/,
+                                bool /*remote_durable*/,
                                 const ConnectionAttribs& /*attribs*/,
                                 bool /*active*/)
 {
@@ -108,6 +109,7 @@ ShmemTransport::connect_datalink_i(const RepoId& /*local_id*/,
                                    const RepoId& /*remote_id*/,
                                    const TransportBLOB& remote_data,
                                    bool /*remote_reliable*/,
+                                   bool /*remote_durable*/,
                                    const ConnectionAttribs& /*attribs*/)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote_data);

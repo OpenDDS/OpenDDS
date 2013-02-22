@@ -1,3 +1,41 @@
+Fri Feb 22 00:01:59 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Corrected the logic for determining when GAP submessages
+          can be sent to durable readers.  This required sending
+          more info about durability down to the transport.
+          Thanks to Mike dot Kohler at saabsensis dot com
+          for reporting the bug.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated to match the modified framework APIs.
+
+        * examples/DCPS/ishapes/main.cpp:
+
+          Removed some setup code that isn't needed.
+
 Tue Feb 19 21:55:04 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/ishapes/BouncingShapeDynamics.cpp:

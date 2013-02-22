@@ -74,6 +74,7 @@ RtpsUdpTransport::find_datalink_i(const RepoId& /*local_id*/,
                                   const RepoId& /*remote_id*/,
                                   const TransportBLOB& /*remote_data*/,
                                   bool /*remote_reliable*/,
+                                  bool /*remote_durable*/,
                                   const ConnectionAttribs& /*attribs*/,
                                   bool /*active*/)
 {
@@ -86,7 +87,7 @@ DataLink*
 RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
                                      const RepoId& remote_id,
                                      const TransportBLOB& remote_data,
-                                     bool remote_reliable,
+                                     bool remote_reliable, bool remote_durable,
                                      const ConnectionAttribs& attribs)
 {
   RtpsUdpDataLink_rch link = link_;
@@ -98,7 +99,8 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
   }
 
   use_datalink(local_id, remote_id, remote_data,
-               attribs.local_reliable_, remote_reliable, attribs.local_durable_);
+               attribs.local_reliable_, remote_reliable,
+               attribs.local_durable_, remote_durable);
 
   GuidConverter local(local_id), remote(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
@@ -141,7 +143,8 @@ RtpsUdpTransport::accept_datalink(ConnectionEvent& ce)
                    ce.remote_association_.remote_data_[idx].data,
                    ce.attribs_.local_reliable_,
                    ce.remote_association_.remote_reliable_,
-                   ce.attribs_.local_durable_);
+                   ce.attribs_.local_durable_,
+                   ce.remote_association_.remote_durable_);
       return link._retn();
     }
   }
@@ -160,15 +163,14 @@ void
 RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
-                               bool local_reliable,
-                               bool remote_reliable,
-                               bool local_durable)
+                               bool local_reliable, bool remote_reliable,
+                               bool local_durable, bool remote_durable)
 {
   bool requires_inline_qos;
   ACE_INET_Addr addr = get_connection_addr(remote_data, requires_inline_qos);
   link_->add_locator(remote_id, addr, requires_inline_qos);
   link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                    local_durable);
+                    local_durable, remote_durable);
 }
 
 ACE_INET_Addr

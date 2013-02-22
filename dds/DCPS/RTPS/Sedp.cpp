@@ -453,6 +453,7 @@ create_association_data_proto(DCPS::AssociationData& proto,
                               const SPDPdiscoveredParticipantData& pdata) {
   proto.publication_transport_priority_ = 0;
   proto.remote_reliable_ = true;
+  proto.remote_durable_ = true;
   std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
               sizeof(GuidPrefix_t));
 

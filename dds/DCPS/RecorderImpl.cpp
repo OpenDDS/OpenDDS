@@ -355,6 +355,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
       writer.writerQos.transport_priority.value;
     data.remote_reliable_ =
       (writer.writerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
+    data.remote_durable_ =
+      (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
     if (!this->associate(data, active)) {
       if (DCPS_debug_level) {

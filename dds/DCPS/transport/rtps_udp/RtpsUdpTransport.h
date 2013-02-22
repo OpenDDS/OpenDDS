@@ -35,6 +35,7 @@ private:
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
                                     bool remote_reliable,
+                                    bool remote_durable,
                                     const ConnectionAttribs& attribs,
                                     bool active);
 
@@ -42,6 +43,7 @@ private:
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
                                        bool remote_reliable,
+                                       bool remote_durable,
                                        const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);
@@ -65,9 +67,8 @@ private:
   void use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
-                    bool local_reliable,
-                    bool remote_reliable,
-                    bool local_durable);
+                    bool local_reliable, bool remote_reliable,
+                    bool local_durable, bool remote_durable);
 
   RcHandle<RtpsUdpInst> config_i_;
 

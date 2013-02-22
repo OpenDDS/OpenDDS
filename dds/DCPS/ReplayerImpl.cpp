@@ -453,6 +453,8 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   data.remote_data_ = reader.readerTransInfo;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
+  data.remote_durable_ =
+    (reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
   if (!this->associate(data, active)) {
     //FUTURE: inform inforepo and try again as passive peer

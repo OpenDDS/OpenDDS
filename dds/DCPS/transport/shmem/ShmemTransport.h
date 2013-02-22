@@ -38,6 +38,7 @@ protected:
                                     const RepoId& remote_id,
                                     const TransportBLOB& remote_data,
                                     bool remote_reliable,
+                                    bool remote_durable,
                                     const ConnectionAttribs& attribs,
                                     bool active);
 
@@ -45,6 +46,7 @@ protected:
                                        const RepoId& remote_id,
                                        const TransportBLOB& remote_data,
                                        bool remote_reliable,
+                                       bool remote_durable,
                                        const ConnectionAttribs& attribs);
 
   virtual DataLink* accept_datalink(ConnectionEvent& ce);

@@ -111,15 +111,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     TheServiceParticipant->add_discovery(static_rchandle_cast<Discovery>(disc));
     TheServiceParticipant->set_repo_domain(domain, disc->key());
 
-    // If the default RTPS discovery object has not been configured,
-    // instantiate it now.
-    const Service_Participant::RepoKeyDiscoveryMap& discoveryMap =
-      TheServiceParticipant->discoveryMap();
-    if (discoveryMap.find(Discovery::DEFAULT_RTPS) == discoveryMap.end()) {
-      RtpsDiscovery_rch discovery = new RtpsDiscovery(Discovery::DEFAULT_RTPS);
-      TheServiceParticipant->add_discovery(static_rchandle_cast<Discovery>(discovery));
-    }
-
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
       dpf->create_participant(domain,
