@@ -1,4 +1,4 @@
-project(ManyTopicTestPublisher): dcpsexe {
+project(ManyTopicTestPublisher): dcpsexe, dds_model {
   exename   = publisher
   libpaths += ../ManyTopicTypes
   libpaths += ../common

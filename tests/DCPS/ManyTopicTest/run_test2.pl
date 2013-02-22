@@ -13,7 +13,7 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-PerlDDS::add_lib_path('../MultiTopicTypes');
+PerlDDS::add_lib_path('../ManyTopicTypes');
 PerlDDS::add_lib_path('../common');
 
 $subscriber1_completed = "T1_subscriber_finished.txt";
@@ -94,8 +94,7 @@ $sub3_parameters = "-t 3" ;
 $pub_parameters = " -t all " ;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                               "-ORBSvcConf ../../tcp.conf -ORBDebugLevel 1 "
-                             . "-o $dcpsrepo_ior");
+                                     "-o $dcpsrepo_ior");
 
 
 print $DCPSREPO->CommandLine(), "\n";

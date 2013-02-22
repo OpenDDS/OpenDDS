@@ -1,3 +1,20 @@
+Fri Feb 22 20:16:37 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/rtps_disc.ini:
+        * tests/DCPS/ManyTopicTest/run_test.pl:
+        * tests/DCPS/ManyTopicTest/run_test1.pl:
+        * tests/DCPS/ManyTopicTest/run_test2.pl:
+        * tests/DCPS/ManyTopicTest/run_test3.pl:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Re-enable this test, add a fourth topic, and allow RTPS.
+          This can be used as a regression for the bug fixed yesterday.
+
 Fri Feb 22 00:01:59 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/AssociationData.h:

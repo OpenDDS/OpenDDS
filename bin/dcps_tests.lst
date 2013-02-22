@@ -258,4 +258,7 @@ tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPI
 tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN RTPS
 
+tests/DCPS/ManyTopicTest/run_test.pl: !DCPS_MIN
+tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS
+
 tests/DCPS/QoS_XML/dump/run_test.pl: DDS4CCM_OPENDDS
