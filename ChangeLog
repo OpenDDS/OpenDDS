@@ -1,3 +1,9 @@
+Sun Feb 24 20:16:21 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/idl/IDLTemplate.txt:
+          Also when compiling the typo support with something other
+          than tao_idl, use the sequence definition
+
 Fri Feb 22 20:16:37 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
