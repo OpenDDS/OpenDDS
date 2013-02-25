@@ -1,3 +1,11 @@
+Mon Feb 25 16:08:32 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Enable this test on static builds.
+
 Mon Feb 25 15:53:26 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ManyTopicTest/DataReaderListener.h:
