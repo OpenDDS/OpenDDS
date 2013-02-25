@@ -28,6 +28,10 @@
 
 static int topics = 0;
 
+static int num_ops_per_thread = 10;
+static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
+static int history_depth = 100;
+
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
 {

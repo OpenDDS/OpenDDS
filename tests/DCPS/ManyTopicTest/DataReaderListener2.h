@@ -8,7 +8,12 @@
 
 class DataReaderListenerImpl2 : public DataReaderListenerImpl
 {
-  virtual void read(::DDS::DataReader_ptr reader) ;
-} ;
+public:
+  explicit DataReaderListenerImpl2(int num_ops_per_thread)
+    : DataReaderListenerImpl(num_ops_per_thread)
+  {}
+
+  virtual void read(::DDS::DataReader_ptr reader);
+};
 #endif
 

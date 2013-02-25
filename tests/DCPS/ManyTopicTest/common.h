@@ -39,10 +39,6 @@ static const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
 static const int LEASE_DURATION_SEC = 5; // seconds
 
-static int num_ops_per_thread = 10;
-static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
-static int history_depth = 100;
-
 // These files need to be unlinked in the run test script before and
 // after running.
 //static ACE_TString pub_ready_filename = ACE_TEXT("publisher_ready.txt");

@@ -3,19 +3,18 @@
 // $Id$
 #include "DataReaderListener.h"
 
-// Implementation skeleton constructor
-DataReaderListenerImpl::DataReaderListenerImpl (void) : num_samples_(0)
-  {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
-  }
+DataReaderListenerImpl::DataReaderListenerImpl(int num_ops_per_thread)
+  : num_samples_(0), num_ops_per_thread_(num_ops_per_thread)
+{
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::")
+             ACE_TEXT("DataReaderListenerImpl\n")));
+}
 
-// Implementation skeleton destructor
-DataReaderListenerImpl::~DataReaderListenerImpl (void)
-  {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::~DataReaderListenerImpl\n")));
-  }
+DataReaderListenerImpl::~DataReaderListenerImpl()
+{
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::")
+             ACE_TEXT("~DataReaderListenerImpl\n")));
+}
 
 void DataReaderListenerImpl::on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,

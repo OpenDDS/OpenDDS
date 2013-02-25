@@ -12,9 +12,6 @@
 
   void DataReaderListenerImpl1::read(::DDS::DataReader_ptr reader)
   {
-    ACE_UNUSED_ARG(max_samples_per_instance);
-    ACE_UNUSED_ARG(history_depth);
-
     ::T1::Foo1DataReader_var foo_dr =
         ::T1::Foo1DataReader::_narrow(reader);
 
@@ -27,12 +24,12 @@
     ::T1::Foo1DataReaderImpl* dr_servant =
       dynamic_cast<T1::Foo1DataReaderImpl*> (foo_dr.in ());
 
-    ::T1::Foo1Seq foo(num_ops_per_thread) ;
-    ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
+    ::T1::Foo1Seq foo(num_ops_per_thread_);
+    ::DDS::SampleInfoSeq si(num_ops_per_thread_);
 
-    DDS::ReturnCode_t status  ;
+    DDS::ReturnCode_t status;
     status = dr_servant->read(foo, si,
-                              num_ops_per_thread,
+                              num_ops_per_thread_,
                               ::DDS::NOT_READ_SAMPLE_STATE,
                               ::DDS::ANY_VIEW_STATE,
                               ::DDS::ANY_INSTANCE_STATE);

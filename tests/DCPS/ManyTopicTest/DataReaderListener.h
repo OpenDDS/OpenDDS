@@ -11,17 +11,13 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
-//Class DataReaderListenerImpl
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
-  //Constructor
-  DataReaderListenerImpl (void);
+  explicit DataReaderListenerImpl(int num_ops_per_thread);
 
-  //Destructor
-  virtual ~DataReaderListenerImpl (void);
+  virtual ~DataReaderListenerImpl();
 
   virtual void on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
@@ -86,7 +82,7 @@ public:
   int num_samples() const { return num_samples_ ; }
 
 protected:
-  int num_samples_ ;
+  int num_samples_, num_ops_per_thread_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

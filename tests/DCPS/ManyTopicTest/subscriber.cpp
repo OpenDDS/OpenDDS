@@ -31,6 +31,10 @@
 
 static int topics = 0;
 
+static int num_ops_per_thread = 10;
+static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
+static int history_depth = 100;
+
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
 {
@@ -281,10 +285,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ::DDS::DataReader_var dr3;
     ::DDS::DataReader_var dr4;
 
-    ::DDS::DataReaderListener_var drl1(new DataReaderListenerImpl1);
-    ::DDS::DataReaderListener_var drl2(new DataReaderListenerImpl2);
-    ::DDS::DataReaderListener_var drl3(new DataReaderListenerImpl3);
-    ::DDS::DataReaderListener_var drl4(new DataReaderListenerImpl3);
+    ::DDS::DataReaderListener_var drl1 =
+        new DataReaderListenerImpl1(num_ops_per_thread);
+    ::DDS::DataReaderListener_var drl2 =
+        new DataReaderListenerImpl2(num_ops_per_thread);
+    ::DDS::DataReaderListener_var drl3 =
+        new DataReaderListenerImpl3(num_ops_per_thread);
+    ::DDS::DataReaderListener_var drl4 =
+        new DataReaderListenerImpl3(num_ops_per_thread);
 
     if (topics & TOPIC_T1)
     {
