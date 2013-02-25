@@ -1,3 +1,10 @@
+Mon Feb 25 21:59:32 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated docs for upcoming release.
+
 Mon Feb 25 16:08:32 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
