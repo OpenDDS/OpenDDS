@@ -16,10 +16,10 @@
         ::T3::Foo3DataReader::_narrow(reader);
 
     if (CORBA::is_nil (foo_dr.in ()))
-      {
-        ACE_ERROR ((LM_ERROR,
-               ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
-      }
+    {
+      ACE_ERROR ((LM_ERROR,
+              ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
+    }
 
     ::T3::Foo3DataReaderImpl* dr_servant =
       dynamic_cast< ::T3::Foo3DataReaderImpl*>(foo_dr.in());
@@ -35,24 +35,27 @@
                               ::DDS::ANY_INSTANCE_STATE);
 
     if (status == ::DDS::RETCODE_OK)
+    {
+      for (CORBA::ULong i = 0 ; i < si.length() ; i++)
       {
-        for (CORBA::ULong i = 0 ; i < si.length() ; i++)
+        if (si[i].valid_data)
         {
-          num_samples_++ ;
+          ++num_samples_;
 
-          ACE_OS::printf (
-              "foo3[%d]: c = %c,  s = %d, l = %d, text = %s, key = %d\n",
-              i, foo[i].c, foo[i].s, foo[i].l, foo[i].text.in(), foo[i].key);
-          PrintSampleInfo(si[i]) ;
+          ACE_OS::printf(
+            "foo3[%d]: c = %c,  s = %d, l = %d, text = %s, key = %d\n",
+            i, foo[i].c, foo[i].s, foo[i].l, foo[i].text.in(), foo[i].key);
         }
+        PrintSampleInfo(si[i]);
       }
-      else if (status == ::DDS::RETCODE_NO_DATA)
-      {
-        ACE_OS::printf ("read returned ::DDS::RETCODE_NO_DATA\n") ;
-      }
-      else
-      {
-        ACE_OS::printf ("read - Error: %d\n", status) ;
-      }
+    }
+    else if (status == ::DDS::RETCODE_NO_DATA)
+    {
+      ACE_OS::printf ("read returned ::DDS::RETCODE_NO_DATA\n") ;
+    }
+    else
+    {
+      ACE_OS::printf ("read - Error: %d\n", status) ;
+    }
   }
 

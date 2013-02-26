@@ -1,3 +1,11 @@
+Tue Feb 26 19:42:48 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+
+          Check valid_data before reading sample data.
+
 Mon Feb 25 21:59:32 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
