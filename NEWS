@@ -2,7 +2,8 @@ Version 3.4.1 of OpenDDS.
 
 - Added a new option to opendds_idl, -Wb,v8, which generates type support
   for copying DCPS structs from C++ objects to JavaScript objects -- requires
-  the V8 JavaScript engine.
+  the V8 JavaScript engine.  See https://npmjs.org/package/opendds for OpenDDS
+  integration with Node.js.
 
 - Fixed a bug in serialization with misaligned reads.  It only impacts
   certain platforms with strict alignment requirements such as SPARC/SunCC.
