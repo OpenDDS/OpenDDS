@@ -1,3 +1,7 @@
+Wed Feb 27 16:29:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * OpenDDS version 3.4.1 released.
+
 Tue Feb 26 19:42:48 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
