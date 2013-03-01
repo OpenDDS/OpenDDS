@@ -109,7 +109,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
     remaining = TransportHeader::get_length(current_data_->transport_header_);
     const size_t hdr_sz = sizeof(current_data_->transport_header_);
     // BUFFER_LOW_WATER in the framework ensures a large enough buffer
-    if (iov[0].iov_len <= hdr_sz) {
+    if (static_cast<size_t>(iov[0].iov_len) <= hdr_sz) {
       VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy::receive_bytes "
                 "receive buffer of length %d is too small\n",
                 iov[0].iov_len), 0);
@@ -123,7 +123,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
     std::memcpy(iov[0].iov_base, current_data_->transport_header_, hdr_sz);
     total += hdr_sz;
     src_iter = current_data_->payload_;
-    if (iov[0].iov_len > hdr_sz) {
+    if (static_cast<size_t>(iov[0].iov_len) > hdr_sz) {
       dst_iter = (char*)iov[0].iov_base + hdr_sz;
     } else if (n > 1) {
       dst_iter = (char*)iov[1].iov_base;

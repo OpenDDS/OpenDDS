@@ -77,7 +77,7 @@ ssize_t
 ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
   const size_t hdr_sz = sizeof(current_data_->transport_header_);
-  if (iov[0].iov_len != hdr_sz) {
+  if (static_cast<size_t>(iov[0].iov_len) != hdr_sz) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ "
               "expecting iov[0] of size %B, got %B\n",
               link_, hdr_sz, iov[0].iov_len), 0);

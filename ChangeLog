@@ -1,3 +1,17 @@
+Fri Mar  1 15:03:24 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+        * tools/dissector/giop_base.h:
+        * tools/dissector/packet-opendds.h:
+
+          Fixed compiler warnings.
+
 Wed Feb 27 16:41:15 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * ChangeLog:

@@ -38,6 +38,8 @@ namespace OpenDDS
     class dissector_Export GIOP_Base
     {
     public:
+      virtual ~GIOP_Base() {}
+
       int dissect_giop (MessageHeader *header,
                         gchar *operation,
                         gchar *idlname);

@@ -61,6 +61,8 @@ namespace OpenDDS
         :tvb_(0), pinfo_(0), tree_(0)
           {}
 
+      virtual ~Dissector_Base() {}
+
       void setPacket (tvbuff_t* buf, packet_info* pi, proto_tree* pt)
       {
         tvb_ = buf; pinfo_ = pi; tree_ = pt;
@@ -89,6 +91,8 @@ namespace OpenDDS
     {
     public:
       static DDS_Dissector &instance();
+
+      virtual ~DDS_Dissector() {}
 
       void dissect ();
       bool dissect_heur ();

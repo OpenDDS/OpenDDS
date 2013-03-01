@@ -84,7 +84,8 @@ parse_args(int argc, ACE_TCHAR *argv[])
     if (deadline.sec != ::DDS::DURATION_INFINITE_SEC) {
       reset_delay.sec(deadline.sec);
     }
-    if (liveliness.sec != ::DDS::DURATION_INFINITE_SEC && reset_delay.sec() < liveliness.sec) {
+    if (liveliness.sec != ::DDS::DURATION_INFINITE_SEC
+        && reset_delay.sec() < static_cast<time_t>(liveliness.sec)) {
       reset_delay.sec(liveliness.sec);
     }
 
