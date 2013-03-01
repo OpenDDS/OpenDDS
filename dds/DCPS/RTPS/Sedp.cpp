@@ -2278,9 +2278,10 @@ Sedp::populate_discovered_reader_msg(
   // Ignore drd.readerProxy.unicastLocatorList;
   // Ignore drd.readerProxy.multicastLocatorList;
   drd.readerProxy.allLocators = sub.trans_info_;
-  drd.contentFilterProperty.contentFilteredTopicName = "";
-  drd.contentFilterProperty.relatedTopicName = "";
-  drd.contentFilterProperty.filterClassName = ""; // See PL converter
+  drd.contentFilterProperty.contentFilteredTopicName =
+    std::string(DCPS::GuidConverter(subscription_id)).c_str();
+  drd.contentFilterProperty.relatedTopicName = topic_name.c_str();
+  drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
   drd.contentFilterProperty.filterExpression = sub.filter_.c_str();
   drd.contentFilterProperty.expressionParameters = sub.params_;
   for (RepoIdSet::const_iterator writer = sub.remote_opendds_associations_.begin();

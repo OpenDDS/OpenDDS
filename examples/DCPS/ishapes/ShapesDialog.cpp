@@ -148,6 +148,12 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
   mainWidget.colorList->setCurrentIndex(index);
 
   timer.start(40);
+
+  if (partition.length()) {
+    QString title = this->windowTitle();
+    title += (" PARTITION: " + partition).c_str();
+    this->setWindowTitle(title);
+  }
 }
 
 ShapesDialog::~ShapesDialog() {

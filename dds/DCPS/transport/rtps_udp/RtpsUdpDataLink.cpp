@@ -846,15 +846,13 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         if (recvd.empty()) {
           // Nack the entire heartbeat range.  Only reached when durable.
           ack = hb_low;
-          if (!(hb_low == hb_high && hb_low == 1)) { // Empty bitmap if HB[1,1]
-            bitmap.length(bitmap_num_longs(ack, hb_high));
-            const CORBA::ULong idx = (hb_high_val > hb_low_val + 255)
-                                     ? 255
-                                     : CORBA::ULong(hb_high_val - hb_low_val);
-            DisjointSequence::fill_bitmap_range(0, idx,
-                                                bitmap.get_buffer(),
-                                                bitmap.length(), num_bits);
-          }
+          bitmap.length(bitmap_num_longs(ack, hb_high));
+          const CORBA::ULong idx = (hb_high_val > hb_low_val + 255)
+                                    ? 255
+                                    : CORBA::ULong(hb_high_val - hb_low_val);
+          DisjointSequence::fill_bitmap_range(0, idx,
+                                              bitmap.get_buffer(),
+                                              bitmap.length(), num_bits);
         } else if (prev_empty && recvd.low() > hb_low) {
           // Nack the range between the heartbeat low and the recvd low.
           ack = hb_low;
@@ -1233,6 +1231,11 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       }
       if (sent_some) {
         return;
+      }
+      if (gaps.empty() && !requests.empty() &&
+          requests.high() < ri->second.durable_data_.begin()->first) {
+        // All nacks were below the start of the durable data.
+        send_durability_gaps(local, remote, requests);
       }
     }
   }

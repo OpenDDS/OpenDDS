@@ -1,3 +1,27 @@
+Fri Mar  1 21:29:21 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Interoperability fix for discovery with Content-Filtered
+          Topics: certain fields must be non-empty strings even
+          though they are not needed.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fixed two corner cases for DURABILITY QoS:
+          - Removed the work-around from Wed Dec 19 16:34:05 UTC 2012,
+            it is not needed due to Thu Jan 10 16:06:08 UTC 2013 and removing
+            the work-around improves interoperability.
+          - If the nacked range is entirely below the durable data range,
+            a Gap submessage is needed so that the reader can proceed to the
+            higher sequence numbers.
+
+        * examples/DCPS/ishapes/ShapesDialog.cpp:
+        * examples/DCPS/ishapes/main.cpp:
+
+          If the PARTITION QoS is non-default, add it to the
+          window's title bar so it is visible in the UI.
+
 Fri Mar  1 15:03:24 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:

@@ -51,13 +51,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     unsigned int resend = 1;
     std::string partition;
 
-    if (argc > 1) {
+    int curr = 1;
+    if (argc > 1 && argv[1][0] != ACE_TEXT('-')) {
       domain = ACE_OS::atoi (argv[1]);
       std::cout << "Connecting to domain: " << domain << std::endl;
+      ++curr;
     }
 
     RtpsDiscovery_rch disc = new RtpsDiscovery("RtpsDiscovery");
-    for (int curr = 2; curr < argc; ++curr) {
+    for (; curr < argc; ++curr) {
       if (ACE_OS::strcmp("-u", argv[curr]) == 0) {
         multicast = false;
         std::cout << "SEDP unicast only" << std::endl;
