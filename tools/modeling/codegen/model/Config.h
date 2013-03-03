@@ -17,8 +17,10 @@
 #include <string>
 #include <map>
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
 class ACE_Configuration_Section_Key;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS { namespace Model {
 
@@ -108,43 +110,37 @@ class OpenDDS_Model_Export Config  {
     void loadParticipant(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::basic_string<ACE_TCHAR> name
-         );
+           std::basic_string<ACE_TCHAR> name);
 
     /// Load specification for a Topic.
     void loadTopic(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::basic_string<ACE_TCHAR> name
-         );
+           std::basic_string<ACE_TCHAR> name);
 
     /// Load specification for a Publisher.
     void loadPublisher(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::basic_string<ACE_TCHAR> name
-         );
+           std::basic_string<ACE_TCHAR> name);
 
     /// Load specification for a Writer.
     void loadWriter(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::basic_string<ACE_TCHAR> name
-         );
+           std::basic_string<ACE_TCHAR> name);
 
     /// Load specification for a Subscriber.
     void loadSubscriber(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::basic_string<ACE_TCHAR> name
-         );
+           std::basic_string<ACE_TCHAR> name);
 
     /// Load specification for a Reader.
     void loadReader(
            ACE_Configuration_Heap& heap,
            ACE_Configuration_Section_Key& key,
-           std::basic_string<ACE_TCHAR> name
-         );
+           std::basic_string<ACE_TCHAR> name);
 
     /// Success of configuration steps.
     bool configured_;

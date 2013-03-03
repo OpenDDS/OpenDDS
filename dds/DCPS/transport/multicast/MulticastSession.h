@@ -22,7 +22,9 @@
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {

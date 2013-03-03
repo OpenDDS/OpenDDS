@@ -12,7 +12,9 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {

@@ -19,6 +19,8 @@
 #include "dds/DCPS/ZeroCopySeq_T.inl"
 #endif /* __//ACE_INLINE__ */
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace TAO {
 namespace DCPS {
 
@@ -149,5 +151,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer(
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* ZEROCOPYSEQ_H  */

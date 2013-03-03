@@ -14,8 +14,10 @@
 #include "ace/Condition_T.h"
 #include "ace/Task.h"
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
 class ACE_Reactor;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {

@@ -13,7 +13,9 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "TransportDefs.h"
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {

@@ -23,8 +23,10 @@
 #include <string>
 #include <map>
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
 class ACE_Configuration_Section_Key;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace Monitor {
 

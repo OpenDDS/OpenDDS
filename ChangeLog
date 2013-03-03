@@ -1,3 +1,43 @@
+Sun Mar  3 18:37:49 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/GuardCondition.h:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/WatchdogTimer.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.h:
+        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * dds/DCPS/transport/framework/BuildChainVisitor.h:
+        * dds/DCPS/transport/framework/CopyChainVisitor.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * performance-tests/Bench/src/Options.h:
+        * tools/modeling/codegen/model/Config.h:
+        * tools/monitor/Options.h:
+          Added missing versioned namespace macros
+
 Fri Mar  1 21:29:21 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

@@ -28,6 +28,8 @@ class ReceivedDataElement;
 } // namespace DCPS
 } // namespace OpenDDS
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 //This must stay in namespace "TAO" until the tao_idl compiler is changed
 namespace TAO {
 namespace DCPS {
@@ -203,6 +205,8 @@ private:
 
 } // namespace DCPS
 } // namespace TAO
+
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopySeq_T.inl"

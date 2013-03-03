@@ -13,6 +13,8 @@
 #include <utility>
 #include <algorithm>
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace TAO {
 namespace DCPS {
 
@@ -297,3 +299,5 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_sample(
 
 } // namespace DCPS
 } // namespace TAO
+
+TAO_END_VERSIONED_NAMESPACE_DECL

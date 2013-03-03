@@ -45,6 +45,8 @@ private:
 
 } // namespace DDS
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace TAO {
 
 template<>
@@ -57,6 +59,8 @@ struct OpenDDS_Dcps_Export Objref_Traits<DDS::GuardCondition> {
 };
 
 } // namespace TAO
+
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 namespace DDS {
 

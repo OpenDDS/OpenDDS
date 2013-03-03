@@ -17,7 +17,9 @@
 #include "ace/SString.h"
 #include "ace/os_include/os_dirent.h"
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Dirent;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include <iosfwd>
 #include <vector>

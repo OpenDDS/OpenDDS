@@ -33,7 +33,9 @@
 
 #include <iosfwd> // For operator<<() diagnostic formatter.
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_SOCK;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {

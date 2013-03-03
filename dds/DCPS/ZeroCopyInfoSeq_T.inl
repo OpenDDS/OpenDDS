@@ -8,6 +8,8 @@
 
 #include "ZeroCopyInfoSeq_T.h"
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace TAO {
 namespace DCPS {
 
@@ -38,3 +40,5 @@ ZeroCopyInfoSeq<InfoType, DEF_MAX>::ZeroCopyInfoSeq(
 
 } // namespace DCPS
 } // namespace TAO
+
+TAO_END_VERSIONED_NAMESPACE_DECL

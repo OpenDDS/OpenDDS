@@ -15,6 +15,8 @@
 # include "NetworkAddress.inl"
 #endif /* !__ACE_INLINE__ */
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_CDR::Boolean
 operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
 {
@@ -50,6 +52,8 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
 
   return inCdr.good_bit();
 }
+
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {

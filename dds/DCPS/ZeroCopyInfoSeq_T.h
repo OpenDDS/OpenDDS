@@ -24,6 +24,8 @@
 
 #include <tao/Unbounded_Value_Sequence_T.h>
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 //This must stay in namespace "TAO" until the tao_idl compiler is changed
 namespace TAO {
 namespace DCPS {
@@ -46,6 +48,8 @@ public:
 
 } // namespace DCPS
 } // namespace TAO
+
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "dds/DCPS/ZeroCopyInfoSeq_T.inl"

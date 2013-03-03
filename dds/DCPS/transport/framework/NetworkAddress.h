@@ -69,6 +69,8 @@ std::string get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
 } // namespace DCPS
 } // namespace OpenDDS
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
 /// Marshal into a buffer.
 extern OpenDDS_Dcps_Export
 ACE_CDR::Boolean
@@ -78,6 +80,8 @@ operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value);
 extern OpenDDS_Dcps_Export
 ACE_CDR::Boolean
 operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value);
+
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "NetworkAddress.inl"

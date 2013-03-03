@@ -16,8 +16,10 @@
 #include "TransportDebug.h"
 #include <vector>
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 class ACE_Data_Block;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 /**
  * Guard the allocations for the underlying memory management of the

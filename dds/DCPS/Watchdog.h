@@ -20,7 +20,9 @@
 #include <map>
 #include <vector>
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Time_Value;
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
