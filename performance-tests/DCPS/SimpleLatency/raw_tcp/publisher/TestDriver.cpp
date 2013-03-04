@@ -25,7 +25,7 @@ void set_rt()
   }
 
 #if (defined (MCL_CURRENT) && defined(MCL_FUTURE) && !defined(__ANDROID__))
-  if (mlockall(MCL_CURRENT || MCL_FUTURE)) {
+  if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
     ACE_DEBUG ((LM_DEBUG, "WARNING:  Could not lock memory - Run with root access.\n"));
   }
 #endif

@@ -1,3 +1,11 @@
+Mon Mar  4 16:48:39 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+
+          Fixed compiler warnings.
+
 Sun Mar  3 18:37:49 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DataDurabilityCache.h:
