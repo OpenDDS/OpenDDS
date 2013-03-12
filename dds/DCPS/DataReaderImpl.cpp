@@ -1626,7 +1626,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif
     }
     instance = 0;
-    this->dispose(sample, instance);
+    ReceivedDataSample dup(sample);
+    this->dispose(dup, instance);
     this->unregister(sample, instance);
   }
   this->notify_read_conditions();

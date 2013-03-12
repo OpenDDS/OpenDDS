@@ -150,7 +150,7 @@ private:
     ACE_SOCK_Dgram unicast_socket_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
     std::set<ACE_INET_Addr> send_addrs_;
-    ACE_Message_Block buff_;
+    ACE_Message_Block buff_, wbuff_;
 
   } *tport_;
 

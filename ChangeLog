@@ -1,3 +1,20 @@
+Tue Mar 12 21:31:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          If a single message is both dispose & unregister,
+          the message block needs to be duplicated so that each
+          operation can read the key fields.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Use a separate buffer for writing instead of sharing the
+          one used for reading.  The initial implementation never
+          overlapped reads and writes, but now receiving data from
+          a new remote participant causes our announcement to be
+          sent immediately.
+
 Tue Mar 12 19:03:26 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/ManyTopicMultiProcess:

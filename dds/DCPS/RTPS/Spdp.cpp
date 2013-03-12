@@ -327,6 +327,7 @@ Spdp::reactor() const
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)
+  , wbuff_(64 * 1024)
 {
   hdr_.prefix[0] = 'R';
   hdr_.prefix[1] = 'T';
@@ -434,8 +435,8 @@ Spdp::SpdpTransport::dispose_unregister()
   plist[0].guid(outer_->guid_);
   plist[0]._d(PID_PARTICIPANT_GUID);
 
-  buff_.reset();
-  DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
+  wbuff_.reset();
+  DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
   CORBA::UShort options = 0;
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
@@ -448,7 +449,7 @@ Spdp::SpdpTransport::dispose_unregister()
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
     const ssize_t res =
-      unicast_socket_.send(buff_.rd_ptr(), buff_.length(), *iter);
+      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
     if (res < 0) {
       ACE_TCHAR addr_buff[256] = {};
       iter->addr_to_string(addr_buff, 256, 0);
@@ -540,9 +541,9 @@ Spdp::SpdpTransport::write_i()
     return;
   }
 
-  buff_.reset();
+  wbuff_.reset();
   CORBA::UShort options = 0;
-  DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
+  DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
@@ -554,7 +555,7 @@ Spdp::SpdpTransport::write_i()
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
     const ssize_t res =
-      unicast_socket_.send(buff_.rd_ptr(), buff_.length(), *iter);
+      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
     if (res < 0) {
       ACE_TCHAR addr_buff[256] = {};
       iter->addr_to_string(addr_buff, 256, 0);
