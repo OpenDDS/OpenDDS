@@ -19,8 +19,8 @@
 #include "DataReaderListener1.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportImpl.h"
-#include "tests/DCPS/ManyTopicTypes/Foo4DefTypeSupportImpl.h"
+#include "../ManyTopicTypes/Foo1DefTypeSupportImpl.h"
+#include "../ManyTopicTypes/Foo4DefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 

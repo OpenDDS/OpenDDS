@@ -1,3 +1,23 @@
+Tue Mar 12 21:55:35 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add ManyTopicMultiProcess test
+
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+
+          Made include path to MultiTopicType relative and fixed
+          missing OS_NS_time include statements.
+
+        * tests/DCPS/ManyTopicMultiProcess/run_test.pl:
+
+          Added a missing unlink statement for the repo ior file.
+
+
 Tue Mar 12 21:31:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

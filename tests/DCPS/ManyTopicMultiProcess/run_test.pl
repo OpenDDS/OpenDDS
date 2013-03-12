@@ -185,6 +185,8 @@ unlink $publisher5_completed;
 unlink $publisher6_completed;
 unlink $publisher7_completed;
 
+unlink $dcpsrepo_ior;
+
 if ($status == 0) {
   print "test PASSED.\n";
 }

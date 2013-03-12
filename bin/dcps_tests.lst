@@ -261,4 +261,6 @@ tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/ManyTopicTest/run_test.pl: !DCPS_MIN
 tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS
 
+tests/DCPS/ManyTopicMultiProcess/run_test.pl: !DCPS_MIN
+
 tests/DCPS/QoS_XML/dump/run_test.pl: DDS4CCM_OPENDDS

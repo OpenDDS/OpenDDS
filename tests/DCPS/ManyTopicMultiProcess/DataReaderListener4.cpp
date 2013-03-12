@@ -7,8 +7,8 @@
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "tests/DCPS/ManyTopicTypes/Foo4DefTypeSupportC.h"
-#include "tests/DCPS/ManyTopicTypes/Foo4DefTypeSupportImpl.h"
+#include "../ManyTopicTypes/Foo4DefTypeSupportC.h"
+#include "../ManyTopicTypes/Foo4DefTypeSupportImpl.h"
 
   void DataReaderListenerImpl4::read(::DDS::DataReader_ptr reader)
   {

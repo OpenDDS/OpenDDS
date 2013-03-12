@@ -11,8 +11,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "model/Sync.h"
 
-#include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportC.h"
-#include "tests/DCPS/ManyTopicTypes/Foo4DefTypeSupportC.h"
+#include "../ManyTopicTypes/Foo1DefTypeSupportC.h"
+#include "../ManyTopicTypes/Foo4DefTypeSupportC.h"
 
 #include "ace/OS_NS_unistd.h"
 

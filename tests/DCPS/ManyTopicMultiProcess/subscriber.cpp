@@ -21,8 +21,8 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportImpl.h"
-#include "tests/DCPS/ManyTopicTypes/Foo4DefTypeSupportImpl.h"
+#include "../ManyTopicTypes/Foo1DefTypeSupportImpl.h"
+#include "../ManyTopicTypes/Foo4DefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -32,6 +32,7 @@
 #endif
 
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_time.h"
 
 #include "common.h"
 
