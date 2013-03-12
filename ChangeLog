@@ -1,3 +1,30 @@
+Tue Mar 12 19:03:26 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/ManyTopicMultiProcess:
+
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener.h:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.h:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.h:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/ManyTopicMultiProcess.mpc:
+        * tests/DCPS/ManyTopicMultiProcess/Writer.h:
+        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/common.h:
+        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/run_test.pl:
+        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+
+          Added a seven topic three process pub/sub test
+
+        * tests/DCPS/ManyTopicTypes/Foo4Def.idl:
+        * tests/DCPS/ManyTopicTypes/ManyTopicTypes.mpc:
+
+          Added the Foo4 type which contains FloatSeq for the
+          ManyTopicMultiProcess test
+
+
 Mon Mar  4 16:48:39 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:

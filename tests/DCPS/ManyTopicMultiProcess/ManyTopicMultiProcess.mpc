@@ -1,0 +1,39 @@
+project(ManyTopicMultiProcessPublisher): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
+  exename   = publisher
+  libpaths += ../ManyTopicTypes
+  libpaths += ../common
+  libs     += common ManyTopicTypes
+  after    += common ManyTopicTypes
+
+  Header_Files {
+    common.h
+  }
+
+  Source_Files {
+    publisher.cpp
+    DataReaderListener.cpp
+    DataReaderListener1.cpp
+    Writer.cpp
+  }
+}
+
+project(ManyTopicMultiProcessSubscriber): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
+  exename   = subscriber
+  libpaths += ../ManyTopicTypes
+  libpaths += ../common
+  libs     += common ManyTopicTypes
+  after    += common ManyTopicTypes
+
+  Header_Files {
+    common.h
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+    DataReaderListener1.cpp
+    DataReaderListener4.cpp
+    Writer.cpp
+  }
+}
+
