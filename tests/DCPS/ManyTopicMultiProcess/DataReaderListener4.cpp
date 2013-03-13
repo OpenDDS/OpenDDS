@@ -41,18 +41,18 @@
         if (si[i].valid_data)
         {
           ++num_samples_;
-          unsigned int len = foo[i].values.length();
+          CORBA::ULong len = foo[i].values.length();
 
           ACE_OS::printf(
-            "foo4[%d]: length = %u\n",
+            "foo4[%u]: length = %u\n",
             i,
             len
           );
 
-          for (int j = 0; j < len; j ++)
+          for (CORBA::ULong j = 0; j < len; j++)
           {
             ACE_OS::printf(
-              "foo4[%d][%d]: value = %f\n",
+              "foo4[%u][%u]: value = %f\n",
               i,
               j,
               foo[i].values[j]

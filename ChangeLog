@@ -1,3 +1,9 @@
+Wed Mar 13 20:45:37 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
+
+          Resolved signed/unsigned comparison warning
+
 Wed Mar 13 20:05:01 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
