@@ -11,7 +11,7 @@
 
 
 #include "Writer.h"
-#include "../common/TestException.h"
+#include "tests/DCPS/common/TestException.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -19,8 +19,8 @@
 #include "DataReaderListener1.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "../ManyTopicTypes/Foo1DefTypeSupportImpl.h"
-#include "../ManyTopicTypes/Foo4DefTypeSupportImpl.h"
+#include "Foo1DefTypeSupportImpl.h"
+#include "Foo4DefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 

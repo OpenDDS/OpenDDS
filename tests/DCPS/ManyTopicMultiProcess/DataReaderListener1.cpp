@@ -4,11 +4,11 @@
 
 #include "DataReaderListener1.h"
 #include "common.h"
-#include "../common/SampleInfo.h"
+#include "tests/DCPS/common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "../ManyTopicTypes/Foo1DefTypeSupportC.h"
-#include "../ManyTopicTypes/Foo1DefTypeSupportImpl.h"
+#include "Foo1DefTypeSupportC.h"
+#include "Foo1DefTypeSupportImpl.h"
 
   void DataReaderListenerImpl1::read(::DDS::DataReader_ptr reader)
   {

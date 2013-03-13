@@ -3,16 +3,16 @@
 // $Id$
 #include "Writer.h"
 #include "common.h"
-#include "../common/TestException.h"
-#include "../common/TestSupport.h"
+#include "tests/DCPS/common/TestException.h"
+#include "tests/DCPS/common/TestSupport.h"
 
 #include "ace/Atomic_Op_T.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "model/Sync.h"
 
-#include "../ManyTopicTypes/Foo1DefTypeSupportC.h"
-#include "../ManyTopicTypes/Foo4DefTypeSupportC.h"
+#include "Foo1DefTypeSupportC.h"
+#include "Foo4DefTypeSupportC.h"
 
 #include "ace/OS_NS_unistd.h"
 

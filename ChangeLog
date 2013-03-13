@@ -1,3 +1,17 @@
+Wed Mar 13 20:05:01 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/Foo1Def.idl:
+        * tests/DCPS/ManyTopicMultiProcess/Foo4Def.idl:
+        * tests/DCPS/ManyTopicMultiProcess/ManyTopicMultiProcess.mpc:
+        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/manyfoolib_export.h:
+        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+
+         Removed dependancy on tests/DCPS/ManyTopicTypes
+
 Tue Mar 12 21:55:35 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
         * bin/dcps_tests.lst:

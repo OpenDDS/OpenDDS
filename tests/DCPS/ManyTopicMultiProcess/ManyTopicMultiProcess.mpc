@@ -1,9 +1,23 @@
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,export_macro=ManyFooLib_Export -Wb,export_include=manyfoolib_export.h
+  dcps_ts_flags += -Wb,export_macro=ManyFooLib_Export
+  libout         = .
+  dynamicflags  += MANYFOOLIB_BUILD_DLL
+
+  TypeSupport_Files {
+    Foo1Def.idl
+    Foo4Def.idl
+  }
+}
+
 project(ManyTopicMultiProcessPublisher): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
   exename   = publisher
-  libpaths += ../ManyTopicTypes
   libpaths += ../common
-  libs     += common ManyTopicTypes
-  after    += common ManyTopicTypes
+  after    += common DDS*idl
+  libs     += common DDS*idl
+
+  Idl_Files {
+  }
 
   Header_Files {
     common.h
@@ -19,10 +33,12 @@ project(ManyTopicMultiProcessPublisher): dcpsexe_with_tcp, dcps_rtps_udp, dds_mo
 
 project(ManyTopicMultiProcessSubscriber): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
   exename   = subscriber
-  libpaths += ../ManyTopicTypes
   libpaths += ../common
-  libs     += common ManyTopicTypes
-  after    += common ManyTopicTypes
+  after    += common DDS*idl
+  libs     += common DDS*idl
+
+  Idl_Files {
+  }
 
   Header_Files {
     common.h
