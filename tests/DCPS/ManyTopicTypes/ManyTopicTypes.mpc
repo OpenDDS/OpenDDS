@@ -9,7 +9,6 @@ project : dcps {
     Foo1Def.idl
     Foo2Def.idl
     Foo3Def.idl
-    Foo4Def.idl
   }
 }
 

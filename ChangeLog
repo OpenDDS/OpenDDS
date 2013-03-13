@@ -1,3 +1,17 @@
+Wed Mar 13 22:44:14 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/ManyTopicMultiProcess/Foo4Def.idl:
+
+          Refactored to use a TAO built-in type per the OpenDDS faq.
+
+        * tests/DCPS/ManyTopicTypes/ManyTopicTypes.mpc:
+
+          Removed Foo4Def previously added for the ManyTopicMultiProcess test
+
+        * tests/DCPS/ManyTopicTypes/Foo4Def.idl:
+
+          Removed this file.
+
 Wed Mar 13 20:45:37 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
