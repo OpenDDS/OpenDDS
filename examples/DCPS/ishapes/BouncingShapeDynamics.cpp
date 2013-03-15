@@ -47,21 +47,21 @@ BouncingShapeDynamics::simulate()
   pos_.rx() = roundf(pos_.rx() + speed_*cosf(angle_));
   pos_.ry() = roundf(pos_.ry() + speed_*sinf(angle_));
 
-  if (pos_.x() <= 0) {
+  if (pos_.x() <= shapeBounds_.width()/2) {
     angle_ = this->flip() ? -alpha_ : alpha_;
-    pos_.rx() = 0;
+    pos_.rx() = shapeBounds_.width()/2;
   }
-  else if (pos_.x() >= (constraint_.width() - (shapeBounds_.width()))) {
+  else if (pos_.x() >= (constraint_.width() - (shapeBounds_.width()/2))) {
     angle_ = this->flip() ? (PI + alpha_) : (PI - alpha_);
-    pos_.rx() = constraint_.width() - shapeBounds_.width();
+    pos_.rx() = constraint_.width() - shapeBounds_.width()/2;
   }
-  else if (pos_.y() <= 0) {
+  else if (pos_.y() <= shapeBounds_.height()/2) {
     angle_ = this->flip() ? alpha_ : PI - alpha_;
-    pos_.ry() = 0;
+    pos_.ry() = shapeBounds_.height()/2;
   }
-  else if (pos_.y() >= (constraint_.height() - shapeBounds_.height())) {
+  else if (pos_.y() >= (constraint_.height() - shapeBounds_.height()/2)) {
     angle_ = this->flip() ? (PI+alpha_) : -alpha_;
-    pos_.ry() = constraint_.height() - shapeBounds_.height();
+    pos_.ry() = constraint_.height() - shapeBounds_.height()/2;
   }
 
   shape_.x = pos_.x();

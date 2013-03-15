@@ -279,7 +279,7 @@ ShapesDialog::onPublishButtonClicked() {
 void
 ShapesDialog::onSubscribeButtonClicked() {
 
-  int d = mainWidget.sizeSlider->value();
+  const int d = mainWidget.sizeSlider->value();
   QRect rect(0, 0, d, d);
   QRect constr(0, 0, IS_WIDTH, IS_HEIGHT);
   // QRect constr = this->geometry();
@@ -299,12 +299,12 @@ ShapesDialog::onSubscribeButtonClicked() {
     std::string x0 =
       boost::lexical_cast<std::string>(rect.x());
     std::string x1 =
-      boost::lexical_cast<std::string>(rect.x() + rect.width() -d);
+      boost::lexical_cast<std::string>(rect.x() + rect.width());
 
     std::string y0 =
       boost::lexical_cast<std::string>(rect.y());
     std::string y1 =
-      boost::lexical_cast<std::string>(rect.x() + rect.height()-d);
+      boost::lexical_cast<std::string>(rect.y() + rect.height());
     filterParams_.length(4);
     filterParams_[0] = x0.c_str();
     filterParams_[1] = x1.c_str();
@@ -321,10 +321,13 @@ ShapesDialog::onSubscribeButtonClicked() {
                              (!filterDialog_->filterOutside() ?
                               "(x < %0) OR (x > %1) OR (y < %2) OR (y > %3)" :
                               filterExpression_) ;
+  if (filterDialog_->isEnabled()) {
+    std::cout << "creating cft with filter=" << filter << std::endl;
+    std::cout << "%0=" << filterParams_[0] << ", %1=" << filterParams_[1] << ", %2=" << filterParams_[2] << ", %3=" << filterParams_[3] << std::endl;
+  }
   switch (sIdx) {
   case CIRCLE: {
     if (filterDialog_->isEnabled()) {
-      std::cout << "creating cft with filter=" << filter << std::endl;
       static unsigned int count = 0;
       tname << "CFCircle" << ++count;
 
@@ -339,7 +342,6 @@ ShapesDialog::onSubscribeButtonClicked() {
 
   case SQUARE: {
     if (filterDialog_->isEnabled()) {
-      std::cout << "creating cft" << std::endl;
       static unsigned int count = 0;
       tname << "CFSquare" << ++count;
 
@@ -353,7 +355,6 @@ ShapesDialog::onSubscribeButtonClicked() {
   }
   case TRIANGLE: {
     if (filterDialog_->isEnabled()) {
-      std::cout << "creating cft" << std::endl;
       static unsigned int count = 0;
       tname << "CFTriangle" << ++count;
 

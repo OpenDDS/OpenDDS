@@ -141,10 +141,10 @@
         <item>
          <widget class="QSlider" name="x0Slider">
           <property name="maximum">
-           <number>500</number>
+           <number>320</number>
           </property>
           <property name="singleStep">
-           <number>10</number>
+           <number>1</number>
           </property>
           <property name="value">
            <number>100</number>
@@ -177,10 +177,10 @@
         <item>
          <widget class="QSlider" name="y0Slider">
           <property name="maximum">
-           <number>360</number>
+           <number>361</number>
           </property>
           <property name="singleStep">
-           <number>10</number>
+           <number>1</number>
           </property>
           <property name="value">
            <number>100</number>
@@ -217,10 +217,10 @@
         <item>
          <widget class="QSlider" name="x1Slider">
           <property name="maximum">
-           <number>500</number>
+           <number>320</number>
           </property>
           <property name="singleStep">
-           <number>10</number>
+           <number>1</number>
           </property>
           <property name="value">
            <number>200</number>
@@ -250,10 +250,10 @@
         <item>
          <widget class="QSlider" name="y1Slider">
           <property name="maximum">
-           <number>360</number>
+           <number>361</number>
           </property>
           <property name="singleStep">
-           <number>10</number>
+           <number>1</number>
           </property>
           <property name="sliderPosition">
            <number>200</number>

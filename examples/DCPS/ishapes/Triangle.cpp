@@ -50,10 +50,11 @@ Triangle::paint(QPainter& painter) {
     QBrush brush;
 
     while (idx != plist.end()) {
-      painter.translate(*idx);
+      painter.translate(idx->x() - bounds_.width()/2,
+                        idx->y() - bounds_.height()/2);
       painter.drawPolygon(triangle_);
-      painter.translate(-(idx->x()),
-                        -(idx->y()));
+      painter.translate(-(idx->x() - bounds_.width()/2),
+                        -(idx->y() - bounds_.height()/2));
 
       if (targeted_)
         brush = black;
@@ -61,12 +62,12 @@ Triangle::paint(QPainter& painter) {
         brush = white;
 
       painter.setBrush(brush);
-      int X0 = idx->x() + (bounds_.width()/2);
-      int Y0 = idx->y() + 2*(bounds_.height()/3);
+      int X0 = idx->x();
+      int Y0 = idx->y() + (bounds_.height()/6);
       int W = bounds_.width()/3;
       int H = bounds_.height()/3;
       painter.setBrush(brush);
-      painter.drawEllipse(X0 -W/2,
+      painter.drawEllipse(X0 - W/2,
         Y0 - H/2,
         W,
         H);

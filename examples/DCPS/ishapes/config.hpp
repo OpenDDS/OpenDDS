@@ -6,7 +6,7 @@
 
 #if  (ISHAPES_WIDE_FORMAT == 1)
 #  define IS_WIDTH 500
-#  define IS_WIDTH 360
+#  define IS_HEIGHT 360
 #else
 #  define IS_WIDTH  321
 #  define IS_HEIGHT 361
