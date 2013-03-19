@@ -537,9 +537,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ")
+                      ACE_TEXT("completed file\n")));
+              status = 1;
             }
-            ACE_OS::fclose(writers_completed);
+          else
+            {
+              ACE_OS::fclose(writers_completed);
+            }
         }
 
       if (topics & TOPIC_T2)
@@ -552,9 +557,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ")
+                      ACE_TEXT("completed file\n")));
+              status = 1;
             }
-            ACE_OS::fclose(writers_completed);
+          else
+            {
+              ACE_OS::fclose(writers_completed);
+            }
         }
 
       if (topics & TOPIC_T3)
@@ -567,9 +577,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ")
+                      ACE_TEXT("completed file\n")));
+              status = 1;
             }
-            ACE_OS::fclose(writers_completed);
+          else
+            {
+              ACE_OS::fclose(writers_completed);
+            }
         }
 
       if (topics & TOPIC_T4)
@@ -582,9 +597,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ")
+                      ACE_TEXT("completed file\n")));
+              status = 1;
             }
-            ACE_OS::fclose(writers_completed);
+          else
+            {
+              ACE_OS::fclose(writers_completed);
+            }
         }
 
       if (topics & TOPIC_T5)
@@ -597,9 +617,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ")
+                      ACE_TEXT("completed file\n")));
+              status = 1;
             }
-            ACE_OS::fclose(writers_completed);
+          else
+            {
+              ACE_OS::fclose(writers_completed);
+            }
         }
 
       // Wait for the subscriber to finish.
@@ -689,59 +714,87 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_TString t6_fn = ACE_TEXT(MY_TOPIC6) + sub_finished_filename;
         FILE* readers_completed = ACE_OS::fopen(t6_fn.c_str(), ACE_TEXT("w"));
         if (readers_completed == 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
+          {
+            ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ")
+                    ACE_TEXT("completed file\n")));
+            status = 1;
         }
-        ACE_OS::fclose(readers_completed);
+        else
+          {
+            ACE_OS::fclose(readers_completed);
+          }
 
         DataReaderListenerImpl1* drl_servant =
           dynamic_cast<DataReaderListenerImpl1*>(drl.in());
 
-        ACE_OS::printf("\n*** %s received %d samples.\n",
-                       MY_TOPIC6,
-                       drl_servant->num_samples());
+        if (drl_servant == 0)
+          {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: Unable to dynamic cast data ")
+                       ACE_TEXT("reader listener \n")));
+            status = 1;
+          }
+        else
+          {
+            ACE_OS::printf("\n*** %s received %d samples.\n",
+                           MY_TOPIC6,
+                           drl_servant->num_samples());
 
-        if (drl_servant->num_samples() != num_ops_per_thread)
-        {
-          ACE_OS::fprintf(stderr,
-                          "%s: Expected %d samples, got %d samples.\n",
-                          MY_TOPIC6,
-                          num_ops_per_thread,
-                          drl_servant->num_samples());
-          status = 1;
-        }
-
+            if (drl_servant->num_samples() != num_ops_per_thread)
+              {
+                ACE_OS::fprintf(stderr,
+                                "%s: Expected %d samples, got %d samples.\n",
+                                MY_TOPIC6,
+                                num_ops_per_thread,
+                                drl_servant->num_samples());
+                status = 1;
+              }
+          }
       }
       else if (subscribe_topic & TOPIC_T7)
       {
         ACE_TString t7_fn = ACE_TEXT(MY_TOPIC7) + sub_finished_filename;
         FILE* readers_completed = ACE_OS::fopen(t7_fn.c_str(), ACE_TEXT("w"));
         if (readers_completed == 0)
-        {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
-        }
-        ACE_OS::fclose(readers_completed);
+          {
+            ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ")
+                    ACE_TEXT("completed file\n")));
+            status = 1;
+          }
+        else
+          {
+            ACE_OS::fclose(readers_completed);
+          }
 
         DataReaderListenerImpl1* drl_servant =
           dynamic_cast<DataReaderListenerImpl1*>(drl.in());
 
-        ACE_OS::printf("\n*** %s received %d samples.\n",
-                       MY_TOPIC7,
-                       drl_servant->num_samples());
+        if (drl_servant == 0)
+          {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: Unable to dynamic cast data ")
+                       ACE_TEXT("reader listener \n")));
+            status = 1;
+          }
+        else
+          {
+            ACE_OS::printf("\n*** %s received %d samples.\n",
+                           MY_TOPIC7,
+                           drl_servant->num_samples());
 
-        if (drl_servant->num_samples() != num_ops_per_thread)
-        {
-          ACE_OS::fprintf(stderr,
-                          "%s: Expected %d samples, got %d samples.\n",
-                          MY_TOPIC7,
-                          num_ops_per_thread,
-                          drl_servant->num_samples());
-          status = 1;
-        }
+            if (drl_servant->num_samples() != num_ops_per_thread)
+              {
+                ACE_OS::fprintf(stderr,
+                                "%s: Expected %d samples, got %d samples.\n",
+                                MY_TOPIC7,
+                                num_ops_per_thread,
+                                drl_servant->num_samples());
+                status = 1;
+              }
+          }
       }
-
 
       // Clean up publisher objects
       pub->delete_contained_entities();
