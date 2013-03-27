@@ -1,3 +1,11 @@
+Wed Mar 27 20:05:13 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.h:
+
+          Reverting previous change after discovering GNU C++
+          incorrectly allowed template based Directory::Iterator
+          to access File's private constructor.
+
 Wed Mar 27 19:44:12 UTC 2013  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.h:
