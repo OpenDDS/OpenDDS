@@ -1,3 +1,9 @@
+Wed Mar 27 19:44:12 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.h:
+
+          Removed unnecessary class friendship.
+
 Tue Mar 19 20:52:02 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:

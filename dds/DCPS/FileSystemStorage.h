@@ -228,7 +228,6 @@ public:
 
 private:
   friend class Directory;
-  template <typename Item> friend class Directory::Iterator;
   File(const ACE_TString& fname_phys, const ACE_TString& logical,
        Directory* parent);
 
