@@ -1297,7 +1297,7 @@ There is a separate configuration file supplied for each message size test to be
 Commands that can be used to structure the test execution for these tests is included in the file //$~BENCH_ROOT/tests/latency/test-commands.txt//.  This file contains a set of commands for each test configuration described above.  They can be used to structure tests for your specific environment.  Executing tests in a Linux environment can be done as follows:
 !Start the repostory
 &lt;&lt;&lt;
-repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h &lt;repohost&gt;:2809
 &lt;&lt;&lt;
 !Start the forwarding (loopback) process
 &lt;&lt;&lt;
