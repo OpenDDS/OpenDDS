@@ -156,6 +156,17 @@ DataReaderImpl::cleanup()
     }
   }
 
+  // Cancel any watchdog timers
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+       iter != instances_.end();
+       ++iter) {
+    SubscriptionInstance *ptr = iter->second;
+    if (this->watchdog_.get() && ptr->deadline_timer_id_ != -1)
+      {
+        this->watchdog_->cancel_timer(ptr);
+      }
+    }
+
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (owner_manager_) {
     owner_manager_->unregister_reader(topic_servant_->type_name(), this);

@@ -1,0 +1,35 @@
+//
+// $Id$
+//
+
+project(*publisher): dcpsexe_with_tcp {
+  exename   = publisher
+
+  after    += DcpsFooType
+  libs     += DcpsFooType
+
+  includes += $(DDS_ROOT)/tests/DCPS/FooType
+  libpaths += $(DDS_ROOT)/tests/DCPS/FooType
+
+  Source_Files {
+    Publisher.cpp
+    ParticipantTask.cpp
+    ProgressIndicator.cpp
+  }
+}
+
+project(*subscriber): dcpsexe_with_tcp {
+  exename   = subscriber
+
+  after    += DcpsFooType
+  libs     += DcpsFooType
+
+  includes += $(DDS_ROOT)/tests/DCPS/FooType
+  libpaths += $(DDS_ROOT)/tests/DCPS/FooType
+
+  Source_Files {
+    Subscriber.cpp
+    SubscriberListenerImpl.cpp
+    ProgressIndicator.cpp
+  }
+}

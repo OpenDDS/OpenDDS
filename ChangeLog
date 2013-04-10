@@ -1,3 +1,34 @@
+Wed Apr 10 20:19:29 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          During cleanup cancel any deadline watchdog timers associated
+          with the reader. This fixes a problem when the reader's subscriber
+          is deleted in one thread while deadline timeout handling in the
+          watchdog thread tries to access the deleted subscriber.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/SubscriberCycle:
+        * tests/DCPS/SubscriberCycle/ParticipantTask.h:
+        * tests/DCPS/SubscriberCycle/ParticipantTask.cpp:
+        * tests/DCPS/SubscriberCycle/ProgressIndicator.h:
+        * tests/DCPS/SubscriberCycle/ProgressIndicator.cpp:
+        * tests/DCPS/SubscriberCycle/Publisher.cpp:
+        * tests/DCPS/SubscriberCycle/README:
+        * tests/DCPS/SubscriberCycle/Subscriber.cpp:
+        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.h:
+        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.cpp:
+        * tests/DCPS/SubscriberCycle/run_test.pl:
+
+          A test that creates/deletes a subscriber multiple times while
+          a publisher is contining to publish samples. This test was
+          used to activate the deadline handling code trying to access
+          a deleted subscriber and verify the fix. The test has a
+          number of command line options described in the README that
+          can be used to help identify if there are other issues with
+          subscriber deletion in the presence of sample processing.
+
 Wed Mar 27 20:05:13 UTC 2013  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/FileSystemStorage.h:
