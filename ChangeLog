@@ -1,3 +1,9 @@
+Thu Apr 11 14:31:09 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.cpp:
+
+          Fixed Visual C++ compile error.
+
 Wed Apr 10 20:19:29 UTC 2013  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

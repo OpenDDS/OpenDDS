@@ -59,7 +59,8 @@ SubscriberListenerImpl::on_data_on_readers(::DDS::Subscriber_ptr sub)
       return;
     }
 
-  FooDataReader_var foo_reader = FooDataReader::_narrow(readers[0]);
+  FooDataReader_var foo_reader =
+    FooDataReader::_narrow(readers[static_cast<CORBA::ULong>(0)]);
 
   // The following is intentionally inefficient to simulate
   // backpressure with multiple writers; we should be especially
