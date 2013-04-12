@@ -1,3 +1,10 @@
+Fri Apr 12 14:14:23 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAOv2.mwc:
+
+          Added DynamicInterface to the list of TAO libraries used.
+          The DOC Group version now requires it for IORTable.
+
 Thu Apr 11 14:31:09 UTC 2013  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.cpp:
