@@ -1,3 +1,10 @@
+Mon Apr 15 12:57:37 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/SubscriberCycle/Subscriber.cpp:
+
+          Added #include to explicity pick up definition of
+          DDS::ContentFilteredTopic_ptr.
+
 Fri Apr 12 14:14:23 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAOv2.mwc:
