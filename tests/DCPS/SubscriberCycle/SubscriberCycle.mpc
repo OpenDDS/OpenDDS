@@ -8,8 +8,8 @@ project(*publisher): dcpsexe_with_tcp {
   after    += DcpsFooType
   libs     += DcpsFooType
 
-  includes += $(DDS_ROOT)/tests/DCPS/FooType
-  libpaths += $(DDS_ROOT)/tests/DCPS/FooType
+  includes += ../FooType
+  libpaths += ../FooType
 
   Source_Files {
     Publisher.cpp
