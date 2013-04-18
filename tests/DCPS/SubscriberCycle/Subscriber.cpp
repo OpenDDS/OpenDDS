@@ -32,7 +32,7 @@ namespace
   std::size_t missed_samples = 0;
 
   int n_publishers = 1;
-  int samples_per_cycle = 1;
+  std::size_t samples_per_cycle = 1;
   int sample_count_sleep_msec = 250;
   int delay_between_cycles_msec = 250;
   int deadline_msec = 250;

@@ -1,3 +1,21 @@
+Thu Apr 18 17:47:40 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Don't run SubscriberCycle test for DDS build
+          with content filtered topics disabled.
+
+        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+
+          Don't build SubscriberCycle test for DDS build
+          with content filtered topics disabled. Complete
+          fix from previous commit so builds using an
+          install of OpenDDS.
+
+        * tests/DCPS/SubscriberCycle/Subscriber.cpp:
+
+          Fixed warning about signed/unsigned comparison.
+
 Mon Apr 15 15:47:37 UTC 2013  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:

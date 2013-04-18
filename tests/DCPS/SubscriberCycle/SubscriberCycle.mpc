@@ -20,12 +20,13 @@ project(*publisher): dcpsexe_with_tcp {
 
 project(*subscriber): dcpsexe_with_tcp {
   exename   = subscriber
+  requires += content_filtered_topic
 
   after    += DcpsFooType
   libs     += DcpsFooType
 
-  includes += $(DDS_ROOT)/tests/DCPS/FooType
-  libpaths += $(DDS_ROOT)/tests/DCPS/FooType
+  includes += ../FooType
+  libpaths += ../FooType
 
   Source_Files {
     Subscriber.cpp
