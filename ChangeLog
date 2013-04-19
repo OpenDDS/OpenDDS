@@ -1,3 +1,10 @@
+Fri Apr 19 19:19:48 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAOv2.mwc:
+
+          Include a directory instead of an mpc file for IORTable.
+          Allows more flexibility for changes in different TAO versions.
+
 Fri Apr 19 17:30:19 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DataReaderImpl.cpp:
