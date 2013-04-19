@@ -1,3 +1,8 @@
+Fri Apr 19 17:30:19 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+          Fixed comment
+
 Fri Apr 19 14:53:21 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DomainParticipantImpl.cpp (delete_contentfilteredtopic):

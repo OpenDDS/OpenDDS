@@ -142,7 +142,7 @@ DataReaderImpl::~DataReaderImpl()
 #endif
 }
 
-// this method is called when delete_datawriter is called.
+// this method is called when delete_datareader is called.
 void
 DataReaderImpl::cleanup()
 {
