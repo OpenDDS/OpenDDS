@@ -743,9 +743,21 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   CORBA::String_var name = cft->get_name();
   TopicDescriptionMap::iterator iter = topic_descrs_.find(name.in());
   if (iter == topic_descrs_.end()) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+        ACE_TEXT("because it is not in the set.\n"), name.in ()));
+    }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
   if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_reader()) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+        ACE_TEXT("because it still is used by a reader.\n"), name.in ()));
+    }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
   topic_descrs_.erase(iter);

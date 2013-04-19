@@ -1,3 +1,8 @@
+Fri Apr 19 14:53:21 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantImpl.cpp (delete_contentfilteredtopic):
+          Log the reason why a cft couldn't be deleted
+
 Thu Apr 18 17:47:40 UTC 2013  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:
