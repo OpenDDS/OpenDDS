@@ -18,7 +18,7 @@ project(*publisher): dcpsexe_with_tcp {
   }
 }
 
-project(*subscriber): dcpsexe_with_tcp {
+project(*subscriber): dcpsexe_with_tcp, content_subscription {
   exename   = subscriber
   requires += content_filtered_topic
 
