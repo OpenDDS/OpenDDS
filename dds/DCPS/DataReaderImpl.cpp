@@ -131,15 +131,6 @@ DataReaderImpl::~DataReaderImpl()
   if (initialized_) {
     delete rd_allocator_;
   }
-
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  if (content_filtered_topic_.in()) {
-    ContentFilteredTopicImpl* cft =
-      dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
-    cft->remove_reader(*this);
-    cft->update_reader_count(false);
-  }
-#endif
 }
 
 // this method is called when delete_datareader is called.
@@ -179,6 +170,16 @@ DataReaderImpl::cleanup()
   }
 
   dr_local_objref_ = DDS::DataReader::_nil();
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  if (!CORBA::is_nil(content_filtered_topic_.in())) {
+    ContentFilteredTopicImpl* cft =
+      dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
+    cft->remove_reader(*this);
+    cft->update_reader_count(false);
+    content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
+  }
+#endif
 }
 
 void DataReaderImpl::init(

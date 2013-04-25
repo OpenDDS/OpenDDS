@@ -1,3 +1,10 @@
+Thu Apr 25 08:29:16 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+          Decouple the DataReader from the ContentFilteredTopic as
+          part of the delete_datareader call instead of doing it
+          in the destructor.
+
 Mon Apr 22 18:41:38 UTC 2013  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
