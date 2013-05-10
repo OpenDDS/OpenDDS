@@ -100,7 +100,10 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 #endif
 
   if (config_->use_multicast_) {
-    if (multicast_socket_.join(config_->multicast_group_address_) != 0) {
+    const std::string& net_if = config_->multicast_interface_;
+    if (multicast_socket_.join(config_->multicast_group_address_, 1,
+                               net_if.empty() ? 0 :
+                               ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("RtpsUdpDataLink::open: ")

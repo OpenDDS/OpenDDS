@@ -1,3 +1,19 @@
+Fri May 10 16:18:06 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Added config options to bind RTPS-related multicast sockets
+          to specific network interfaces, similar to the local_address
+          option in the multicast transport.  The new options are...
+          In rtps_udp transport instance: multicast_interface=<string>
+          In rtps_discovery: MulticastInterface=<string>
+
 Fri May 10 15:48:28 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/HTemplate.txt:

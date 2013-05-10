@@ -367,7 +367,10 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     throw std::runtime_error("failed to set default_multicast address");
   }
 
-  if (0 != multicast_socket_.join(default_multicast)) {
+  const std::string& net_if = outer_->disco_->multicast_interface();
+  if (0 != multicast_socket_.join(default_multicast, 1,
+                                  net_if.empty() ? 0 :
+                                  ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {
     ACE_DEBUG((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
         ACE_TEXT("failed to join multicast group %C:%hd %p\n"),

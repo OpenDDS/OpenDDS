@@ -225,6 +225,11 @@ public:
     sedp_multicast_ = sm;
   }
 
+  std::string multicast_interface() const { return multicast_interface_; }
+  void multicast_interface(const std::string& mi) {
+    multicast_interface_ = mi;
+  }
+
   typedef std::vector<std::string> AddrVec;
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
@@ -239,6 +244,7 @@ private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   bool sedp_multicast_;
+  std::string multicast_interface_;
   AddrVec spdp_send_addrs_;
 
   struct ReactorRunner : ACE_Task_Base {

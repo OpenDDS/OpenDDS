@@ -297,6 +297,9 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
                           mc_port));
       return DDS::RETCODE_ERROR;
     }
+
+    rtps_inst->multicast_interface_ = disco.multicast_interface();
+
   } else {
     rtps_inst->use_multicast_ = false;
   }

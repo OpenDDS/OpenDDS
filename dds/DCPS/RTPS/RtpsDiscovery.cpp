@@ -184,6 +184,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       int resend;
       u_short pb, dg, pg, d0, d1, dx;
       AddrVec spdp_send_addrs;
+      std::string mi;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
         sm = false;
@@ -275,6 +276,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                value.c_str(), rtps_name.c_str()), -1);
           }
           sm = bool(smInt);
+        } else if (name == "MulticastInterface") {
+          mi = it->second;
         } else if (name == "SpdpSendAddrs") {
           const std::string& value = it->second;
           size_t i = 0;
@@ -302,6 +305,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       if (has_d1) discovery->d1(d1);
       if (has_dx) discovery->dx(dx);
       if (has_sm) discovery->sedp_multicast(sm);
+      discovery->multicast_interface(mi);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
       TheServiceParticipant->add_discovery(
         DCPS::static_rchandle_cast<Discovery>(discovery));
