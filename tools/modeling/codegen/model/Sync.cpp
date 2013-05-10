@@ -21,7 +21,7 @@ OpenDDS::Model::WriterSync::~WriterSync()
 }
 
 int
-OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer)
+OpenDDS::Model::WriterSync::wait_match(const DDS::DataWriter_var& writer)
 {
   DDS::StatusCondition_var condition = writer->get_statuscondition();
   condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -62,7 +62,7 @@ OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer)
 }
 
 int
-OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer)
+OpenDDS::Model::WriterSync::wait_ack(const DDS::DataWriter_var& writer)
 {
   DDS::ReturnCode_t stat;
   DDS::Duration_t timeout = { 30, 0 };
@@ -95,7 +95,7 @@ OpenDDS::Model::ReaderSync::~ReaderSync()
 }
 
 int
-OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
+OpenDDS::Model::ReaderSync::wait_unmatch(const DDS::DataReader_var& reader)
 {
   DDS::ReturnCode_t stat;
   DDS::StatusCondition_var condition = reader->get_statuscondition();

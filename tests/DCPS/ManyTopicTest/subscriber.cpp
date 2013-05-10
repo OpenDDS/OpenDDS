@@ -11,9 +11,7 @@
 
 
 #include "../common/TestException.h"
-#include "DataReaderListener1.h"
-#include "DataReaderListener2.h"
-#include "DataReaderListener3.h"
+#include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -106,6 +104,48 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
+// We don't really need the type-specific data reader here, but we'll
+// return it anyway in order to demostrate the use of the nested typedefs.
+template<typename TSI> // TSI is some generated TypeSupportImpl
+DDS::DataReader_var
+create_reader(const DDS::Subscriber_var& sub, const char* topicName,
+  const DDS::DataReaderQos& qos = DATAREADER_QOS_DEFAULT,
+  const DDS::DataReaderListener_var& listener = 0,
+  const DDS::StatusMask& mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
+{
+  const DDS::TypeSupport_var ts = new TSI;
+  const DDS::DomainParticipant_var dp = sub->get_participant();
+  const CORBA::String_var typeName = ts->get_type_name();
+  ts->register_type(dp, typeName); // may have been registered before
+
+  const DDS::Topic_var topic =
+    dp->create_topic(topicName, typeName, TOPIC_QOS_DEFAULT, 0, 0);
+  if (!topic) return 0;
+
+  const DDS::DataReader_var dr =
+    sub->create_datareader(topic, qos, listener, mask);
+  return typename TSI::data_reader_type::_narrow(dr);
+}
+
+
+void print1(const T1::Foo1& foo, int i)
+{
+  ACE_OS::printf("foo1[%d]: c = %c, x = %f y = %f, key = %d\n",
+                 i, foo.c, foo.x, foo.y, foo.key);
+}
+
+void print2(const T2::Foo2& foo, int i)
+{
+  ACE_OS::printf("foo2[%d]: text = %s, key = %d\n",
+                 i, foo.text.in(), foo.key);
+}
+
+void print3(const T3::Foo3& foo, int i)
+{
+  ACE_OS::printf("foo3[%d]: c = %c,  s = %d, l = %d, text = %s, key = %d\n",
+                 i, foo.c, foo.s, foo.l, foo.text.in(), foo.key);
+}
+
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -131,25 +171,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-    ::T1::Foo1TypeSupport_var fts1;
-    ::T2::Foo2TypeSupport_var fts2;
-    ::T3::Foo3TypeSupport_var fts3;
-
-    if (topics & TOPIC_T1)
-    {
-      fts1 = new ::T1::Foo1TypeSupportImpl;
-    }
-
-    if (topics & TOPIC_T2)
-    {
-      fts2 = new ::T2::Foo2TypeSupportImpl;
-    }
-
-    if (topics & (TOPIC_T3 | TOPIC_T4))
-    {
-      fts3 = new ::T3::Foo3TypeSupportImpl;
-    }
-
     ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
@@ -163,106 +184,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-    if (topics & TOPIC_T1)
-    {
-      if (::DDS::RETCODE_OK != fts1->register_type(dp.in(), MY_TYPE1))
-      {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("Failed to register the Foo1TypeSupport.")));
-        return 1;
-      }
-    }
-
-    if (topics & TOPIC_T2)
-    {
-      if (::DDS::RETCODE_OK != fts2->register_type(dp.in(), MY_TYPE2))
-      {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("Failed to register the Foo2TypeSupport.")));
-        return 1;
-      }
-    }
-
-    if (topics & (TOPIC_T3 | TOPIC_T4))
-    {
-      if (::DDS::RETCODE_OK != fts3->register_type(dp.in(), MY_TYPE3))
-      {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("Failed to register the Foo3TypeSupport.")));
-        return 1;
-      }
-    }
-
-    ::DDS::TopicQos topic_qos;
-    dp->get_default_topic_qos(topic_qos);
-
-    topic_qos.resource_limits.max_samples_per_instance =
-      max_samples_per_instance;
-
-    topic_qos.history.depth = history_depth;
-
-    ::DDS::Topic_var topic1;
-    ::DDS::Topic_var topic2;
-    ::DDS::Topic_var topic3;
-    ::DDS::Topic_var topic4;
-
-    if (topics & TOPIC_T1)
-    {
-      topic1 = dp->create_topic(MY_TOPIC1,
-                                MY_TYPE1,
-                                topic_qos,
-                                ::DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(topic1.in()))
-      {
-        return 1;
-      }
-    }
-
-    if (topics & TOPIC_T2)
-    {
-      topic2 = dp->create_topic(MY_TOPIC2,
-                                MY_TYPE2,
-                                topic_qos,
-                                ::DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(topic2.in()))
-      {
-        return 1;
-      }
-    }
-
-    if (topics & TOPIC_T3)
-    {
-      topic3 = dp->create_topic(MY_TOPIC3,
-                                MY_TYPE3,
-                                topic_qos,
-                                ::DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(topic3.in()))
-      {
-        return 1;
-      }
-    }
-
-    if (topics & TOPIC_T4)
-    {
-      topic4 = dp->create_topic(MY_TOPIC4,
-                                MY_TYPE4,
-                                topic_qos,
-                                ::DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(topic4.in()))
-      {
-        return 1;
-      }
-    }
-
-    // Create the subscriber
     ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                               ::DDS::SubscriberListener::_nil(),
@@ -286,51 +207,43 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dr_qos.liveliness.lease_duration.nanosec = 0;
 
 
+    int drl1_num_samples = 0, drl2_num_samples = 0,
+      drl3_num_samples = 0, drl4_num_samples = 0;
+
+    ::DDS::DataReaderListener_var drl1 =
+        new DataReaderListenerImpl<T1::Foo1TypeSupportImpl>(num_ops_per_thread, drl1_num_samples, print1);
+    ::DDS::DataReaderListener_var drl2 =
+        new DataReaderListenerImpl<T2::Foo2TypeSupportImpl>(num_ops_per_thread, drl2_num_samples, print2);
+    ::DDS::DataReaderListener_var drl3 =
+        new DataReaderListenerImpl<T3::Foo3TypeSupportImpl>(num_ops_per_thread, drl3_num_samples, print3);
+    ::DDS::DataReaderListener_var drl4 =
+        new DataReaderListenerImpl<T3::Foo3TypeSupportImpl>(num_ops_per_thread, drl4_num_samples, print3);
+
     ::DDS::DataReader_var dr1;
     ::DDS::DataReader_var dr2;
     ::DDS::DataReader_var dr3;
     ::DDS::DataReader_var dr4;
 
-    ::DDS::DataReaderListener_var drl1 =
-        new DataReaderListenerImpl1(num_ops_per_thread);
-    ::DDS::DataReaderListener_var drl2 =
-        new DataReaderListenerImpl2(num_ops_per_thread);
-    ::DDS::DataReaderListener_var drl3 =
-        new DataReaderListenerImpl3(num_ops_per_thread);
-    ::DDS::DataReaderListener_var drl4 =
-        new DataReaderListenerImpl3(num_ops_per_thread);
-
     if (topics & TOPIC_T1)
     {
-      dr1 = sub->create_datareader(topic1.in(),
-                                   dr_qos,
-                                   drl1.in(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dr1 = create_reader<T1::Foo1TypeSupportImpl>(sub, MY_TOPIC1, dr_qos, drl1);
     }
 
     if (topics & TOPIC_T2)
     {
-      dr2 = sub->create_datareader(topic2.in(),
-                                   dr_qos,
-                                   drl2.in(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dr2 = create_reader<T2::Foo2TypeSupportImpl>(sub, MY_TOPIC2, dr_qos, drl2);
     }
 
     if (topics & TOPIC_T3)
     {
-      dr3 = sub->create_datareader(topic3.in(),
-                                   dr_qos,
-                                   drl3.in(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dr3 = create_reader<T3::Foo3TypeSupportImpl>(sub, MY_TOPIC3, dr_qos, drl3);
     }
 
     if (topics & TOPIC_T4)
     {
-      dr4 = sub->create_datareader(topic4.in(),
-                                   dr_qos,
-                                   drl4.in(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dr4 = create_reader<T3::Foo3TypeSupportImpl>(sub, MY_TOPIC4, dr_qos, drl4);
     }
+
     /*
     // Indicate that the subscriber is ready
     FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
@@ -440,61 +353,53 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (topics & TOPIC_T1)
     {
-      DataReaderListenerImpl1* drl_servant1 =
-        dynamic_cast<DataReaderListenerImpl1*>(drl1.in());
       ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC1,
-                     drl_servant1->num_samples());
-      if (drl_servant1->num_samples() != num_ops_per_thread)
+                     drl1_num_samples);
+      if (drl1_num_samples != num_ops_per_thread)
       {
         ACE_OS::fprintf(stderr,
                         "%s: Expected %d samples, got %d samples.\n",
                         MY_TOPIC1,
-                        num_ops_per_thread, drl_servant1->num_samples());
+                        num_ops_per_thread, drl1_num_samples);
         return 1;
       }
     }
     if (topics & TOPIC_T2)
     {
-      DataReaderListenerImpl2* drl_servant2 =
-        dynamic_cast<DataReaderListenerImpl2*>(drl2.in());
       ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC2,
-                     drl_servant2->num_samples());
-      if (drl_servant2->num_samples() != num_ops_per_thread)
+                     drl2_num_samples);
+      if (drl2_num_samples != num_ops_per_thread)
       {
         ACE_OS::fprintf(stderr,
                         "%s: Expected %d samples, got %d samples.\n",
                         MY_TOPIC2,
-                        num_ops_per_thread, drl_servant2->num_samples());
+                        num_ops_per_thread, drl2_num_samples);
         return 1;
       }
     }
     if (topics & TOPIC_T3)
     {
-      DataReaderListenerImpl3* drl_servant3 =
-        dynamic_cast<DataReaderListenerImpl3*>(drl3.in());
       ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC3,
-                     drl_servant3->num_samples());
-      if (drl_servant3->num_samples() != num_ops_per_thread)
+                     drl3_num_samples);
+      if (drl3_num_samples != num_ops_per_thread)
       {
         ACE_OS::fprintf(stderr,
                         "%s: Expected %d samples, got %d samples.\n",
                         MY_TOPIC3,
-                        num_ops_per_thread, drl_servant3->num_samples());
+                        num_ops_per_thread, drl3_num_samples);
         return 1;
       }
     }
     if (topics & TOPIC_T4)
     {
-      DataReaderListenerImpl3* drl_servant4 =
-        dynamic_cast<DataReaderListenerImpl3*>(drl4.in());
       ACE_OS::printf("\n*** %s received %d samples.\n", MY_TOPIC4,
-                     drl_servant4->num_samples());
-      if (drl_servant4->num_samples() != num_ops_per_thread)
+                     drl4_num_samples);
+      if (drl4_num_samples != num_ops_per_thread)
       {
         ACE_OS::fprintf(stderr,
                         "%s: Expected %d samples, got %d samples.\n",
                         MY_TOPIC4,
-                        num_ops_per_thread, drl_servant4->num_samples());
+                        num_ops_per_thread, drl4_num_samples);
         return 1;
       }
     }

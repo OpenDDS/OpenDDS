@@ -11,8 +11,8 @@ namespace OpenDDS {
     public:
       WriterSync(DDS::DataWriter_var writer);
       ~WriterSync();
-      static int wait_match(DDS::DataWriter_var& writer);
-      static int wait_ack(DDS::DataWriter_var& writer);
+      static int wait_match(const DDS::DataWriter_var& writer);
+      static int wait_ack(const DDS::DataWriter_var& writer);
     private:
       DDS::DataWriter_var writer_;
     };
@@ -21,7 +21,7 @@ namespace OpenDDS {
     public:
       ReaderSync(DDS::DataReader_var reader);
       ~ReaderSync();
-      static int wait_unmatch(DDS::DataReader_var& reader);
+      static int wait_unmatch(const DDS::DataReader_var& reader);
     private:
       DDS::DataReader_var reader_;
     };

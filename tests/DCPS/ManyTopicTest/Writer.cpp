@@ -6,10 +6,7 @@
 #include "../common/TestException.h"
 #include "../common/TestSupport.h"
 
-#include "ace/Atomic_Op_T.h"
-
 #include "dds/DCPS/Service_Participant.h"
-#include "model/Sync.h"
 
 #include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportC.h"
 #include "tests/DCPS/ManyTopicTypes/Foo2DefTypeSupportC.h"
@@ -17,18 +14,16 @@
 
 #include "ace/OS_NS_unistd.h"
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
-Writer::Writer(::DDS::DataWriter_ptr writer,
+Writer::Writer(DDS::DataWriter* writer,
                int num_thread_to_write,
                int num_writes_per_thread)
-  : writer_(::DDS::DataWriter::_duplicate(writer)),
-    num_thread_to_write_(num_thread_to_write),
+  : num_thread_to_write_(num_thread_to_write),
     num_writes_per_thread_(num_writes_per_thread),
     finished_sending_(false)
 {
   ::DDS::DataWriterQos dw_qos;
-  writer_->get_qos(dw_qos);
+  writer->get_qos(dw_qos);
   max_wait_ = dw_qos.liveliness.lease_duration.sec / 2;
 }
 
@@ -53,133 +48,6 @@ Writer::end()
              ACE_TEXT("(%P|%t) Writer::end \n")));
   wait();
 }
-
-
-int
-Writer::svc()
-{
-  try
-  {
-    finished_sending_ = false;
-
-    ::DDS::Topic_var topic = writer_->get_topic();
-
-    ACE_DEBUG((LM_DEBUG,"(%P|%t) %C: Writer::svc begins.\n",
-               topic->get_name()));
-
-    OpenDDS::Model::WriterSync::wait_match(writer_);
-
-    if (!ACE_OS::strcmp(topic->get_name(), MY_TOPIC1))
-    {
-      ::T1::Foo1 foo;
-      //foo.key set below.
-      foo.x = -1;
-      foo.y = -1;
-
-      foo.key = ++key;
-
-      ::T1::Foo1DataWriter_var foo_dw
-          = ::T1::Foo1DataWriter::_narrow(writer_.in());
-      TEST_CHECK(! CORBA::is_nil(foo_dw.in()));
-
-      rsleep1();
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
-
-      ::DDS::InstanceHandle_t handle
-          = foo_dw->register_instance(foo);
-
-      for (int i = 0; i< num_writes_per_thread_; i ++)
-      {
-        rsleep();
-
-        foo.x = (float)i;
-        foo.c = 'A' + (i % 26);
-
-        foo_dw->write(foo,
-                      handle);
-      }
-    }
-    else if (!ACE_OS::strcmp(topic->get_name(), MY_TOPIC2))
-    {
-      ::T2::Foo2 foo;
-
-      foo.key = ++key;
-
-      ::T2::Foo2DataWriter_var foo_dw
-          = ::T2::Foo2DataWriter::_narrow(writer_.in());
-      TEST_CHECK(! CORBA::is_nil(foo_dw.in()));
-
-      rsleep1();
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
-
-      ::DDS::InstanceHandle_t handle
-          = foo_dw->register_instance(foo);
-
-      char buff[512];
-      for (int i = 0; i< num_writes_per_thread_; i ++)
-      {
-        rsleep();
-
-        ACE_OS::sprintf(buff, "message %d", i + 1);
-
-        foo.text = (const char *)buff;
-
-        foo_dw->write(foo,
-                      handle);
-      }
-    }
-    else if (!ACE_OS::strcmp(topic->get_name(), MY_TOPIC3) ||
-             !ACE_OS::strcmp(topic->get_name(), MY_TOPIC4))
-    {
-      ::T3::Foo3 foo;
-
-      foo.key = ++key;
-
-      ::T3::Foo3DataWriter_var foo_dw
-          = ::T3::Foo3DataWriter::_narrow(writer_.in());
-      TEST_CHECK(! CORBA::is_nil(foo_dw.in()));
-
-      rsleep1();
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
-
-      ::DDS::InstanceHandle_t handle
-          = foo_dw->register_instance(foo);
-
-      char buff[512];
-      for (int i = 0; i< num_writes_per_thread_; i ++)
-      {
-        rsleep();
-
-        ACE_OS::sprintf(buff, "message %d", i + 1);
-
-        foo.c = 'A' + (i % 26);
-        foo.text = (const char *)buff;
-        foo.s = i + 1;
-        foo.l = i * 100;
-
-        foo_dw->write(foo,
-                      handle);
-      }
-    }
-  }
-  catch (const CORBA::Exception& ex)
-  {
-    ex._tao_print_exception("Exception caught in svc:");
-  }
-
-  finished_sending_ = true;
-
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
-  return 0;
-}
-
 
 bool
 Writer::is_finished() const

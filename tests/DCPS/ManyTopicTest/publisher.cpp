@@ -29,6 +29,7 @@
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_time.h"
+#include "ace/Atomic_Op_T.h"
 
 #include "common.h"
 
@@ -103,6 +104,68 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
+template<typename TSI> // TSI is some generated TypeSupportImpl
+typename TSI::data_writer_type::_var_type
+create_writer(const DDS::Publisher_var& pub, const char* topicName,
+  const DDS::DataWriterQos& qos = DATAWRITER_QOS_DEFAULT,
+  const DDS::DataWriterListener_var& listener = 0,
+  const DDS::StatusMask& mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
+{
+  const DDS::TypeSupport_var ts = new TSI;
+  const DDS::DomainParticipant_var dp = pub->get_participant();
+  const CORBA::String_var typeName = ts->get_type_name();
+  ts->register_type(dp, typeName); // may have been registered before
+
+  const DDS::Topic_var topic =
+    dp->create_topic(topicName, typeName, TOPIC_QOS_DEFAULT, 0, 0);
+  if (!topic) return 0;
+
+  const DDS::DataWriter_var dw =
+    pub->create_datawriter(topic, qos, listener, mask);
+  return typename TSI::data_writer_type::_narrow(dw);
+}
+
+ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
+
+void t1_init(T1::Foo1& foo, int)
+{
+  foo.x = -1;
+  foo.y = -1;
+  foo.key = ++key;
+}
+
+void t1_next(T1::Foo1& foo, int i)
+{
+  foo.x = (float)i;
+  foo.c = 'A' + (i % 26);
+}
+
+void t2_init(T2::Foo2& foo, int)
+{
+  foo.key = ++key;
+}
+
+void t2_next(T2::Foo2& foo, int i)
+{
+  static char buff[20];
+  ACE_OS::sprintf(buff, "message %d", i + 1);
+  foo.text = (const char*) buff;
+}
+
+void t3_init(T3::Foo3& foo, int)
+{
+  foo.key = ++key;
+}
+
+void t3_next(T3::Foo3& foo, int i)
+{
+  static char buff[20];
+  ACE_OS::sprintf(buff, "message %d", i + 1);
+  foo.c = 'A' + (i % 26);
+  foo.text = (const char*) buff;
+  foo.s = i + 1;
+  foo.l = i * 100;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -125,25 +188,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
-      ::T1::Foo1TypeSupport_var fts1;
-      ::T2::Foo2TypeSupport_var fts2;
-      ::T3::Foo3TypeSupport_var fts3;
-
-      if (topics & TOPIC_T1)
-        {
-          fts1 = new ::T1::Foo1TypeSupportImpl;
-        }
-
-      if (topics & TOPIC_T2)
-        {
-          fts2 = new ::T2::Foo2TypeSupportImpl;
-        }
-
-      if (topics & (TOPIC_T3 | TOPIC_T4))
-        {
-          fts3 = new ::T3::Foo3TypeSupportImpl;
-        }
-
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
                                 PARTICIPANT_QOS_DEFAULT,
@@ -155,105 +199,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                    ACE_TEXT("(%P|%t) create_participant failed.\n")));
         return 1;
       }
-
-      if (topics & TOPIC_T1)
-        {
-          if (::DDS::RETCODE_OK != fts1->register_type(dp.in(), MY_TYPE1))
-            {
-              ACE_ERROR((LM_ERROR,
-              ACE_TEXT("Failed to register the Foo1TypeSupport.")));
-              return 1;
-            }
-        }
-
-      if (topics & TOPIC_T2)
-        {
-          if (::DDS::RETCODE_OK != fts2->register_type(dp.in(), MY_TYPE2))
-            {
-              ACE_ERROR((LM_ERROR,
-              ACE_TEXT("Failed to register the Foo2TypeSupport.")));
-              return 1;
-            }
-        }
-
-      if (topics & (TOPIC_T3 | TOPIC_T4))
-        {
-          if (::DDS::RETCODE_OK != fts3->register_type(dp.in(), MY_TYPE3))
-            {
-              ACE_ERROR((LM_ERROR,
-              ACE_TEXT("Failed to register the Foo3TypeSupport.")));
-              return 1;
-            }
-        }
-
-      ::DDS::TopicQos topic_qos;
-      dp->get_default_topic_qos(topic_qos);
-
-      topic_qos.resource_limits.max_samples_per_instance =
-            max_samples_per_instance;
-
-      topic_qos.history.depth = history_depth;
-
-      ::DDS::Topic_var topic1;
-      ::DDS::Topic_var topic2;
-      ::DDS::Topic_var topic3;
-      ::DDS::Topic_var topic4;
-
-      if (topics & TOPIC_T1)
-        {
-          topic1 = dp->create_topic(MY_TOPIC1,
-                                     MY_TYPE1,
-                                     topic_qos,
-                                     ::DDS::TopicListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-          if (CORBA::is_nil(topic1.in()))
-            {
-              return 1;
-            }
-        }
-
-      if (topics & TOPIC_T2)
-        {
-          topic2 = dp->create_topic(MY_TOPIC2,
-                                     MY_TYPE2,
-                                     topic_qos,
-                                     ::DDS::TopicListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-          if (CORBA::is_nil(topic2.in()))
-            {
-              return 1;
-            }
-        }
-
-      if (topics & TOPIC_T3)
-        {
-          topic3 = dp->create_topic(MY_TOPIC3,
-                                     MY_TYPE3,
-                                     topic_qos,
-                                     ::DDS::TopicListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-          if (CORBA::is_nil(topic3.in()))
-            {
-              return 1;
-            }
-        }
-
-      if (topics & TOPIC_T4)
-        {
-          topic4 = dp->create_topic(MY_TOPIC4,
-                                     MY_TYPE4,
-                                     topic_qos,
-                                     ::DDS::TopicListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-          if (CORBA::is_nil(topic4.in()))
-            {
-              return 1;
-            }
-        }
 
       // Create the publisher
       ::DDS::Publisher_var pub =
@@ -278,70 +223,58 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
       dw_qos.liveliness.lease_duration.nanosec = 0;
 
-      ::DDS::DataWriter_var dw1;
-      ::DDS::DataWriter_var dw2;
-      ::DDS::DataWriter_var dw3;
-      ::DDS::DataWriter_var dw4;
+      T1::Foo1DataWriter_var dw1;
+      T2::Foo2DataWriter_var dw2;
+      T3::Foo3DataWriter_var dw3;
+      T3::Foo3DataWriter_var dw4;
 
       if (topics & TOPIC_T1)
-        {
-          dw1 = pub->create_datawriter(topic1.in(),
-                                      dw_qos,
-                                      ::DDS::DataWriterListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      {
+        dw1 = create_writer<T1::Foo1TypeSupportImpl>(pub, MY_TOPIC1, dw_qos);
 
-          if (CORBA::is_nil(dw1.in()))
-            {
-              ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
-              return 1;
-            }
+        if (CORBA::is_nil(dw1.in()))
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+          return 1;
         }
+      }
 
       if (topics & TOPIC_T2)
-        {
-          dw2 = pub->create_datawriter(topic2.in(),
-                                      dw_qos,
-                                      ::DDS::DataWriterListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      {
+        dw2 = create_writer<T2::Foo2TypeSupportImpl>(pub, MY_TOPIC2, dw_qos);
 
-          if (CORBA::is_nil(dw2.in()))
-            {
-              ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
-              return 1;
-            }
+        if (CORBA::is_nil(dw2.in()))
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+          return 1;
         }
+      }
 
       if (topics & TOPIC_T3)
-        {
-          dw3 = pub->create_datawriter(topic3.in(),
-                                      dw_qos,
-                                      ::DDS::DataWriterListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      {
+        dw3 = create_writer<T3::Foo3TypeSupportImpl>(pub, MY_TOPIC3, dw_qos);
 
-          if (CORBA::is_nil(dw3.in()))
-            {
-              ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
-              return 1;
-            }
+        if (CORBA::is_nil(dw3.in()))
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+          return 1;
         }
+      }
 
       if (topics & TOPIC_T4)
-        {
-          dw4 = pub->create_datawriter(topic4.in(),
-                                      dw_qos,
-                                      ::DDS::DataWriterListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      {
+        dw4 = create_writer<T3::Foo3TypeSupportImpl>(pub, MY_TOPIC4, dw_qos);
 
-          if (CORBA::is_nil(dw4.in()))
-            {
-              ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
-              return 1;
-            }
+        if (CORBA::is_nil(dw4.in()))
+        {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+          return 1;
         }
+      }
 /*
       // Indicate that the publisher is ready
       FILE* writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("w"));
@@ -388,30 +321,38 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T1)
       {
-        writers[idx++] = new Writer(dw1.in(),
-                                    1,
-                                    num_ops_per_thread);
+        TypedWriter<T1::Foo1TypeSupportImpl>* tw =
+          new TypedWriter<T1::Foo1TypeSupportImpl>(dw1, 1, num_ops_per_thread);
+        tw->init_instance_handler(t1_init);
+        tw->next_sample_handler(t1_next);
+        writers[idx++] = tw;
       }
 
       if (topics & TOPIC_T2)
       {
-        writers[idx++] = new Writer(dw2.in(),
-                                    1,
-                                    num_ops_per_thread);
+        TypedWriter<T2::Foo2TypeSupportImpl>* tw =
+          new TypedWriter<T2::Foo2TypeSupportImpl>(dw2, 1, num_ops_per_thread);
+        tw->init_instance_handler(t2_init);
+        tw->next_sample_handler(t2_next);
+        writers[idx++] = tw;
       }
 
       if (topics & TOPIC_T3)
       {
-        writers[idx++] = new Writer(dw3.in(),
-                                    1,
-                                    num_ops_per_thread);
+        TypedWriter<T3::Foo3TypeSupportImpl>* tw =
+          new TypedWriter<T3::Foo3TypeSupportImpl>(dw3, 1, num_ops_per_thread);
+        tw->init_instance_handler(t3_init);
+        tw->next_sample_handler(t3_next);
+        writers[idx++] = tw;
       }
 
       if (topics & TOPIC_T4)
       {
-        writers[idx++] = new Writer(dw4.in(),
-                                    1,
-                                    num_ops_per_thread);
+        TypedWriter<T3::Foo3TypeSupportImpl>* tw =
+          new TypedWriter<T3::Foo3TypeSupportImpl>(dw4, 1, num_ops_per_thread);
+        tw->init_instance_handler(t3_init);
+        tw->next_sample_handler(t3_next);
+        writers[idx++] = tw;
       }
 
       ACE_OS::srand((unsigned) ACE_OS::time(NULL));

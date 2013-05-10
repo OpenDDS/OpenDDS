@@ -1,3 +1,36 @@
+Fri May 10 15:48:28 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/HTemplate.txt:
+
+          Added nested typedefs to the generated FooTypeSupportImpl class
+          in order to facilitate template programming using these types.
+
+        * tests/DCPS/ManyTopicTest/DataReaderListener.h:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/ManyTopicTest/Writer.h:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Demonstrate the use of templates with the typedefs mentioned above.
+          This removes quite a bit of duplicated and almost-duplicated code
+          from the test which uses 4 topics and 3 topic types.
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Fixed const-correctness.
+
+        * tests/DCPS/ManyTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+
+          Removed these files.
+
 Thu Apr 25 08:29:16 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DataReaderImpl.cpp:
