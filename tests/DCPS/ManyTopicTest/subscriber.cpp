@@ -124,7 +124,7 @@ create_reader(const DDS::Subscriber_var& sub, const char* topicName,
 
   const DDS::DataReader_var dr =
     sub->create_datareader(topic, qos, listener, mask);
-  return typename TSI::data_reader_type::_narrow(dr);
+  return TSI::data_reader_type::_narrow(dr);
 }
 
 

@@ -122,7 +122,7 @@ create_writer(const DDS::Publisher_var& pub, const char* topicName,
 
   const DDS::DataWriter_var dw =
     pub->create_datawriter(topic, qos, listener, mask);
-  return typename TSI::data_writer_type::_narrow(dw);
+  return TSI::data_writer_type::_narrow(dw);
 }
 
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);

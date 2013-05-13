@@ -1,3 +1,10 @@
+Mon May 13 14:25:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Fixed errors that only occurred on some compilers.
+
 Fri May 10 16:18:06 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.h:
