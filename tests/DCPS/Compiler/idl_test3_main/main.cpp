@@ -543,38 +543,39 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   // -- //+# is keeping track of the find_size
   my_foo.key = 99; //4
   my_foo.octer = 0x13; //+1 = 5
-  my_foo.xcolor = orig_color; //+4 = 9            {padding 3}
-  my_foo.ooo[0] = 0xff; //+3 = 12
+  my_foo.theOctetTypedef = 0x14; //+1 = 6
+  my_foo.xcolor = orig_color; //+4 = 10           {padding 2}
+  my_foo.ooo[0] = 0xff; //+3 = 13
   my_foo.ooo[1] = 0x80;
   my_foo.ooo[2] = 0x3d;
-  my_foo.theString = "four"; //+9 = 21            {padding +1 = 4}
-  //  AStruct thestruct;     //+884 = 905         {padding +7+124 = 135}
+  my_foo.theString = "four"; //+9 = 22            {padding +1 = 3}
+  //  AStruct thestruct;     //+885 = 907         {padding +7+123 = 133}
   //    ** see breakdown in comment at the end of this file
-  //  AStructSeq theStructSeq; //+4 = 909
-  //  ArrayOfAStruct structArray; //+(3*884) = 3561 {padding +4+3*124 = 511}
-  my_foo.theUnion._d(Xyz::bluex); //+4 = 3565
+  //  AStructSeq theStructSeq; //+4 = 911
+  //  ArrayOfAStruct structArray; //+(3*885) = 3566 {padding +4+3*123 = 506}
+  my_foo.theUnion._d(Xyz::bluex); //+4 = 3570
 
   Xyz::SeqOfLong asol;
   asol.length(2);
   asol[0] = 77;
   asol[1] = 88;
-  my_foo.theUnion.bv(asol); //+4+8 = 3577
-  my_foo.theSeqOfUnion.length(2); //+4 = 3581
-  my_foo.theSeqOfUnion[0]._d(Xyz::redx); //+4 = 3585
-  my_foo.theSeqOfUnion[0].rv("Berkley"); //+4+8 = 3597
-  my_foo.theSeqOfUnion[1]._d(Xyz::greenx); //+4 = 3601
+  my_foo.theUnion.bv(asol); //+4+8 = 3582
+  my_foo.theSeqOfUnion.length(2); //+4 = 3586
+  my_foo.theSeqOfUnion[0]._d(Xyz::redx); //+4 = 3590
+  my_foo.theSeqOfUnion[0].rv("Berkley"); //+4+8 = 3602
+  my_foo.theSeqOfUnion[1]._d(Xyz::greenx); //+4 = 3606
   Xyz::AStruct as;
   as.f2 = 3.14F;
   as.f5 = 42;
-  my_foo.theSeqOfUnion[1].gv(as); //+884 = 4485   {padding +124 = 635}
+  my_foo.theSeqOfUnion[1].gv(as); //+885 = 4491   {padding +123 = 629}
 
-  //  BigUnion theBigUnion;        //+4 = 4489
-  //  BigUnionSeq theSeqOfBitUnion;//+4 = 4493
-  my_foo.x = 0.99f;                //+4 = 4497
-  my_foo.y = 0.11f;                //+4 = 4501
-  my_foo.theWChar = L'a';          //+3 = 4504
-  //  wstring theWString;          //+4 = 4508    {padding +1 = 636}
-  //  long double theLongDouble;  //+16 = 4524
+  //  BigUnion theBigUnion;        //+4 = 4495
+  //  BigUnionSeq theSeqOfBitUnion;//+4 = 4499
+  my_foo.x = 0.99f;                //+4 = 4503
+  my_foo.y = 0.11f;                //+4 = 4507
+  my_foo.theWChar = L'a';          //+3 = 4510
+  //  wstring theWString;          //+4 = 4514    {padding +1 = 630}
+  //  long double theLongDouble;  //+16 = 4530
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -630,7 +631,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 4524, pad = 636; // see running totals above
+  const size_t sz = 4530, pad = 630; // see running totals above
   if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
                      "Xyz::Foo")) {
 
@@ -702,43 +703,44 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     SevenStr f4;                    5         18          3
     char f5;                        1         19
     octet f6;                       1         20
-    long f7;                        4         24          1
-    AnEnum f8;                      4         28
-    ArrayOfBoolean f10;             5         33
-    ArrayOfString f11;             25         58         15 (3+4*3)
-    ArrayOfChar f12;                5         63
-    ArrayOfOctet f13;               5         68
-    ArrayOfLong f14;               20         88          1
-    ArrayOfAnEnum f15;             20        108
-    SeqOfBoolean f20;               4        112
-    SeqOfString f21;                4        116
-    SeqOfChar f22;                  4        120
-    SeqOfOctet f23;                 4        124
-    SeqOfLong f24;                  4        128
-    SeqOfAnEnum f25;                4        132
-    ArrayOfSeqOfBoolean f30;       24        156
-    ArrayOfSeqOfString f31;        24        180
-    ArrayOfSeqOfChar f32;          24        204
-    ArrayOfSeqOfOctet f33;         24        228
-    ArrayOfSeqOfLong f34;          24        252
-    ArrayOfSeqOfAnEnum f35;        24        276
-    SeqOfArrayOfBoolean f40;        4        280
-    SeqOfArrayOfString f41;         4        284
-    SeqOfArrayOfChar f42;           4        288
-    SeqOfArrayOfOctet f43;          4        292
-    SeqOfArrayOfLong f44;           4        296
-    SeqOfArrayOfAnEnum f45;         4        300
-    ArrayOfArrayOfBoolean f50;     35        335
-    ArrayOfArrayOfString f51;     175        510        103 (1+(5*7-1)*3)
-    ArrayOfArrayOfChar f52;        35        545
-    ArrayOfArrayOfOctet f53;       35        580
-    ArrayOfArrayOfLong f54;       140        720          1
-    ArrayOfArrayOfAnEnum f55;     140        860
-    SeqOfSeqOfBoolean f60;          4        864
-    SeqOfSeqOfString f61;           4        868
-    SeqOfSeqOfChar f62;             4        872
-    SeqOfSeqOfOctet f63;            4        876
-    SeqOfSeqOfLong f64;             4        880
-    SeqOfSeqOfAnEnum f65;           4        884
- (total internal padding    ====>                       124)
+    OctetTypedef f6a;               1         21
+    long f7;                        4         25
+    AnEnum f8;                      4         29
+    ArrayOfBoolean f10;             5         34
+    ArrayOfString f11;             25         59         15 (3+4*3)
+    ArrayOfChar f12;                5         64
+    ArrayOfOctet f13;               5         69
+    ArrayOfLong f14;               20         89          1
+    ArrayOfAnEnum f15;             20        109
+    SeqOfBoolean f20;               4        113
+    SeqOfString f21;                4        117
+    SeqOfChar f22;                  4        121
+    SeqOfOctet f23;                 4        125
+    SeqOfLong f24;                  4        129
+    SeqOfAnEnum f25;                4        133
+    ArrayOfSeqOfBoolean f30;       24        157
+    ArrayOfSeqOfString f31;        24        181
+    ArrayOfSeqOfChar f32;          24        205
+    ArrayOfSeqOfOctet f33;         24        229
+    ArrayOfSeqOfLong f34;          24        253
+    ArrayOfSeqOfAnEnum f35;        24        277
+    SeqOfArrayOfBoolean f40;        4        281
+    SeqOfArrayOfString f41;         4        285
+    SeqOfArrayOfChar f42;           4        289
+    SeqOfArrayOfOctet f43;          4        293
+    SeqOfArrayOfLong f44;           4        297
+    SeqOfArrayOfAnEnum f45;         4        301
+    ArrayOfArrayOfBoolean f50;     35        336
+    ArrayOfArrayOfString f51;     175        511        103 (1+(5*7-1)*3)
+    ArrayOfArrayOfChar f52;        35        546
+    ArrayOfArrayOfOctet f53;       35        581
+    ArrayOfArrayOfLong f54;       140        721          1
+    ArrayOfArrayOfAnEnum f55;     140        861
+    SeqOfSeqOfBoolean f60;          4        865
+    SeqOfSeqOfString f61;           4        869
+    SeqOfSeqOfChar f62;             4        873
+    SeqOfSeqOfOctet f63;            4        877
+    SeqOfSeqOfLong f64;             4        881
+    SeqOfSeqOfAnEnum f65;           4        885
+ (total internal padding    ====>                       123)
     */

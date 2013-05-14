@@ -1,3 +1,19 @@
+Tue May 14 21:18:14 UTC 2013  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fix a code generation bug with typedefs of types like
+          octets (char, wchar, boolean also) used in DCPS types.
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+
+          Add a typedef-ed octet to this regression test.
+
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Manually adjust the marshaling and padding sizes for
+          this test.
+
 Mon May 13 14:25:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ManyTopicTest/publisher.cpp:

@@ -44,6 +44,9 @@ module Xyz {
   typedef sequence<SeqOfLong,4>    SeqOfSeqOfLong;
   typedef sequence<SeqOfAnEnum,4>  SeqOfSeqOfAnEnum;
 
+  // typedef of a "special" scalar type
+  typedef octet OctetTypedef;
+
 #pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfSeqOfLong"
   struct StructOfSeqOfSeqOfLong { SeqOfSeqOfLong field; };
 
@@ -55,6 +58,7 @@ module Xyz {
    SevenStr f4;
        char f5;
       octet f6;
+    OctetTypedef f6a;
        long f7;
      AnEnum f8;
     ArrayOfBoolean f10;
@@ -95,7 +99,6 @@ module Xyz {
     SeqOfSeqOfOctet f63;
     SeqOfSeqOfLong f64;
     SeqOfSeqOfAnEnum f65;
-
   };
 
   typedef sequence<AStruct,2> SeqOfAStruct;
@@ -212,6 +215,8 @@ module Xyz {
       SeqOfSeqOfLong f64;
     case 65:
       SeqOfSeqOfAnEnum f65;
+    case 66:
+      OctetTypedef f6a;
 
     case 90:
       AStruct f90;
@@ -252,6 +257,7 @@ module Xyz {
   struct Foo {
     long key;
     octet octer;
+    OctetTypedef theOctetTypedef;
     AnEnum xcolor;
     OctetArray ooo;
     string theString;

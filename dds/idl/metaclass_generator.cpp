@@ -169,6 +169,7 @@ namespace {
     int size = 0;
     const std::string cxx_type = to_cxx_type(type, size);
     if (cls & CL_SCALAR) {
+      resolveActualType(type);
       const std::string val =
         (cls & CL_STRING) ? "val.out()" : getWrapper("val", type, WD_INPUT);
       be_global->impl_ <<
