@@ -2395,29 +2395,31 @@ Sedp::is_opendds(const GUID_t& endpoint)
                  sizeof(DCPS::VENDORID_OCI));
 }
 
-//---------------------------------------------------------------
-
 void
 Sedp::Task::enqueue(const SPDPdiscoveredParticipantData* pdata)
 {
+  if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata));
 }
 
 void
 Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata)
 {
+  if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_WRITER, id, wdata));
 }
 
 void
 Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata)
 {
+  if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_READER, id, rdata));
 }
 
 void
 Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
 {
+  if (spdp_->shutting_down()) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
 }
 
