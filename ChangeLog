@@ -77,7 +77,6 @@ Fri May 10 15:48:28 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
           Removed these files.
 
->>>>>>> .r5970
 Thu Apr 25 08:29:16 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DataReaderImpl.cpp:
