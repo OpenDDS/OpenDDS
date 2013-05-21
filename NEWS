@@ -1,6 +1,19 @@
-Version 3.5 of OpenDDS.
+Version 3.4.2 of OpenDDS.
 
--
+- Updates to RTPS support resulting from both interoperability
+  testing (March 2013 OMG meeting) and user feedback.
+
+- Fixed a bug in the DataReader relating to the Deadline timer.
+
+- Generated TypeSupportImpl classes now contain nested typedefs that
+  facilitate programming with C++ templates.
+  See tests/DCPS/ManyTopicTest for an example of usage.
+
+- Added config options to bind RTPS-related multicast sockets to
+  specific network interfaces.  See the ChangeLog for details.
+
+- Fixed an opendds_idl code generated bug when typedefs of basic
+  types are used as fields of structs.
 
 
 ========================================================================

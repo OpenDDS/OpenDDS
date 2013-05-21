@@ -1,3 +1,10 @@
+Tue May 21 16:39:02 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated for next release.  As of now that will be 3.4.2.
+
 Fri May 17 21:10:32 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
@@ -284,7 +291,6 @@ Tue Mar 12 21:55:35 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
           Added a missing unlink statement for the repo ior file.
 
-
 Tue Mar 12 21:31:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -327,7 +333,6 @@ Tue Mar 12 19:03:26 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
 
           Added the Foo4 type which contains FloatSeq for the
           ManyTopicMultiProcess test
-
 
 Mon Mar  4 16:48:39 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
