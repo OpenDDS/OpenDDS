@@ -29,14 +29,6 @@ sub orbsvcs {
 my $config = new PerlACE::ConfigList;
 $PerlDDS::Coverage_Test = $config->check_config("Coverage");
 
-$PerlDDS::Special_InfoRepo = $config->check_config("Special_InfoRepo");
-
-$PerlDDS::Special_Sub = $config->check_config("Special_Sub");
-
-$PerlDDS::Special_Pub = $config->check_config("Special_Pub");
-
-$PerlDDS::Special_Other = $config->check_config("Special_Other");
-
 # used to prevent multiple special processes from running remotely
 $PerlDDS::Special_Process_Created = 0;
 
@@ -44,6 +36,10 @@ $PerlDDS::Coverage_Count = 0;
 $PerlDDS::Coverage_MAX_COUNT = 6;
 $PerlDDS::Coverage_Overflow_Count = $PerlDDS::Coverage_MAX_COUNT;
 $PerlDDS::Coverage_Processes = [];
+
+# used for VxWorks
+$PerlDDS::vxworks_test_target = undef;
+$PerlDDS::added_lib_path = "";
 
 sub return_coverage_process {
   my $count = shift;
@@ -76,26 +72,6 @@ sub is_coverage_test()
   return $PerlDDS::Coverage_Test;
 }
 
-sub is_special_sub_test()
-{
-  return $PerlDDS::Special_Sub;
-}
-
-sub is_special_pub_test()
-{
-  return $PerlDDS::Special_Pub;
-}
-
-sub is_special_InfoRepo_test()
-{
-  return $PerlDDS::Special_InfoRepo;
-}
-
-sub is_special_other_test()
-{
-  return $PerlDDS::Special_Other;
-}
-
 sub is_special_process_created()
 {
   return $PerlDDS::Special_Process_Created;
@@ -104,6 +80,73 @@ sub is_special_process_created()
 sub special_process_created()
 {
   $PerlDDS::Special_Process_Created = 1;
+}
+
+sub get_test_target_config_name()
+{
+    # could refactor out of PerlACE::create_target
+    my $component = shift;
+
+    my $envname = "DOC_TEST_\U$component";
+    if (!exists $ENV{$envname}) {
+        # no test target config name
+        return undef;
+    }
+    my $config_name = $ENV{$envname};
+    # There's a configuration name
+    $config_name = uc $config_name;
+    return $config_name;
+}
+
+sub get_test_target_os()
+{
+    # could refactor out of PerlACE::create_target
+    my $config_name = shift;
+
+    $envname = $config_name.'_OS';
+    if (!exists $ENV{$envname}) {
+        print STDERR "$config_name requires an OS type in $envname\n";
+        return undef;
+    }
+    my $config_os = $ENV{$envname};
+    return $config_os;
+}
+
+sub create_test_target()
+{
+    # could refactor out of PerlACE::create_target
+    my $config_name = shift;
+    my $config_os = shift;
+
+    my $target = undef;
+    SWITCH: {
+      if ($config_os =~ m/local|remote/i) {
+        $target = new PerlACE::TestTarget ($config_name);
+        last SWITCH;
+      }
+      if ($config_os =~ m/LabVIEW_RT/i) {
+        require PerlACE::TestTarget_LVRT;
+        $target = new PerlACE::TestTarget_LVRT ($config_name);
+        last SWITCH;
+      }
+      if ($config_os =~ /VxWorks/i) {
+        require PerlACE::TestTarget_VxWorks;
+        $target = new PerlACE::TestTarget_VxWorks ($config_name);
+        last SWITCH;
+      }
+      if ($config_os =~ /WinCE/i) {
+        require PerlACE::TestTarget_WinCE;
+        $target = new PerlACE::TestTarget_WinCE ($config_name);
+        last SWITCH;
+      }
+      if ($config_os =~ /ANDROID/i) {
+        require PerlACE::TestTarget_Android;
+        $target = new PerlACE::TestTarget_Android ($config_name, $component);
+        last SWITCH;
+      }
+      print STDERR "$config_os is an unknown OS type!\n";
+    }
+    return $target;
 }
 
 sub swap_path {
@@ -128,14 +171,22 @@ sub swap_lib_path {
 }
 
 sub add_lib_path {
-  my($dir) = shift;
+    my($dir) = shift;
 
-  # add the cwd to the directory if it is relative
-  if (($dir =~ /^\.\//) || ($dir =~ /^\.\.\//)) {
-    $dir = Cwd::getcwd() . "/$dir";
-  }
+    # add the cwd to the directory if it is relative
+    if (($dir =~ /^\.\//) || ($dir =~ /^\.\.\//)) {
+      $dir = Cwd::getcwd() . "/$dir";
+    }
 
-  PerlACE::add_lib_path($dir);
+    PerlACE::add_lib_path($dir);
+
+    if (defined($PerlDDS::vxworks_test_target)) {
+        $PerlDDS::vxworks_test_target->AddLibPath($dir);
+    }
+    elsif (PerlACE::is_vxworks_test()) {
+        # store added lib path for late created TestTargets
+        $PerlDDS::added_lib_path .= $dir . ':';
+    }
 }
 
 # Add PWD to the load library path

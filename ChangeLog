@@ -1,3 +1,11 @@
+Thu May 23 19:39:50 UTC 2013  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/ProcessFactory.pm:
+        * bin/PerlDDS/Run_Test.pm:
+        
+          Added TestTarget handling for VxWorks and cleaned up unused
+          subroutines.
+
 Wed May 22 17:49:05 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * docs/html/guidelines:
