@@ -116,7 +116,7 @@ create_reader(const DDS::Subscriber_var& sub, const char* topicName,
   const DDS::TypeSupport_var ts = new TSI;
   const DDS::DomainParticipant_var dp = sub->get_participant();
   const CORBA::String_var typeName = ts->get_type_name();
-  ts->register_type(dp, typeName); // may have been registered before
+  (void) ts->register_type(dp, typeName); // may have been registered before
 
   const DDS::Topic_var topic =
     dp->create_topic(topicName, typeName, TOPIC_QOS_DEFAULT, 0, 0);

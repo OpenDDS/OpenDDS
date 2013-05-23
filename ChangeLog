@@ -1,8 +1,15 @@
+Thu May 23 21:01:04 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Attempting to fix Coverity warnings.
+
 Thu May 23 19:39:50 UTC 2013  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/ProcessFactory.pm:
         * bin/PerlDDS/Run_Test.pm:
-        
+
           Added TestTarget handling for VxWorks and cleaned up unused
           subroutines.
 
