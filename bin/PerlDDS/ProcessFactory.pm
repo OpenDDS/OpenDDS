@@ -22,7 +22,7 @@ sub create_process {
     my $config_name = undef;
     my $os = undef;
     if (defined($ext)) {
-        # identify the config name 
+        # identify the config name
         $config_name = get_test_target_config_name($ext);
         if (defined($config_name)) {
             $os = get_test_target_os($config_name);
