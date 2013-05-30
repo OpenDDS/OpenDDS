@@ -32,7 +32,6 @@ namespace DCPS {
 
 class TransportClient;
 class TransportReceiveListener;
-class ThreadSynchStrategy;
 class DataLink;
 class Monitor;
 struct AssociationData;

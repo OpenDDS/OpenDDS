@@ -192,8 +192,9 @@ unlink $debugFile if $debugFile;
 my $verboseDebug;
 $verboseDebug = "-ORBVerboseLogging 1 " if $orbVerbose;
 
-my $common_opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-    : "-ORBSvcConf $confFile ";
+my $confOpts = "";
+$confOpts = "-ORBSvcConf $confFile " if -r $confFile;
+my $common_opts = new PerlACE::ConfigList->check_config ('STATIC') ? '' : $confOpts;
 $common_opts .= $verboseDebug if $verboseDebug;
 $common_opts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 
@@ -212,7 +213,7 @@ my $ddsOpts = "$common_opts ";
 $ddsOpts .= "-DCPSConfigFile $iniFile " if $iniFile;
 $ddsOpts .= "-DCPSDebugLevel $ddsDebug " if $ddsDebug;
 $ddsOpts .= "-ORBLogFile $debugFile " if $debugFile;
-$ddsOpts .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo ";
+$ddsOpts .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo " if $repoHost;
 
 # Define the processes.
 my @PROCESSES;
