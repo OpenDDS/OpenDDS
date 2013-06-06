@@ -1,4 +1,4 @@
-project: dcps, install {
+project: dcpslib, install {
   sharedname    = OpenDDS_Shmem
   dynamicflags  = OPENDDS_SHMEM_BUILD_DLL
 

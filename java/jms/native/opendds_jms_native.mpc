@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project: dcps_java, dcps_inforepodiscovery {
+project: dcpslib, dcps_java, dcps_inforepodiscovery {
 
     // Ensure sharedname matches the opendds-jms jar naming scheme:
     sharedname       = opendds-jms-native
@@ -23,8 +23,6 @@ project: dcps_java, dcps_inforepodiscovery {
 
     libs            += OpenDDS_InfoRepoServ OpenDDS_InfoRepoLib \
                        OpenDDS_Federator
-
-    libout           = $(DDS_ROOT)/lib
 
     // Older versions of Visual Studio will create the intermediate directories
     // in all-lowercase, so we have to create them first to get the correct case.

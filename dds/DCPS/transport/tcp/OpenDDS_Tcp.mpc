@@ -1,4 +1,4 @@
-project: dcps, install {
+project: dcpslib, install {
   sharedname   = OpenDDS_Tcp
   dynamicflags = OPENDDS_TCP_BUILD_DLL
 

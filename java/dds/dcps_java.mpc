@@ -1,4 +1,4 @@
-project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
+project: dcpslib, idl2jni, optional_jni_check, dcps_java_optional {
 
   sharedname    = OpenDDS_DCPS_Java
   after        += tao_java

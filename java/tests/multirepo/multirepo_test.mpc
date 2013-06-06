@@ -1,5 +1,5 @@
 // $Id$
-project: dcps_tcp, dcps_java {
+project: dcpslib, dcps_tcp, dcps_java {
 
     sharedname      = multirepo_test
 

@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project: dcps_rtps, install {
+project: dcpslib, dcps_rtps, install {
   sharedname    = OpenDDS_Rtps_Udp
   dynamicflags  = OPENDDS_RTPS_UDP_BUILD_DLL
 

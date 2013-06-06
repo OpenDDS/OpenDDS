@@ -1,3 +1,38 @@
+Wed Jun  5 20:19:06 UTC 2013  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcpslib.mpb:
+
+          Bugzilla 4058: Split dcps base in half - one for internal use
+          (dcpslib) and one for external (dcps).  dcpslib adds in libout.
+
+        * contrib/wrapper/DDSWrapper_OpenDDS.mpc:
+        * contrib/wrapper/example/WrapperStockQuoter.mpc:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/DCPS/transport/multicast/OpenDDS_Multicast.mpc:
+        * dds/DCPS/transport/rtps_udp/OpenDDS_Rtps_Udp.mpc:
+        * dds/DCPS/transport/shmem/OpenDDS_Shmem.mpc:
+        * dds/DCPS/transport/tcp/OpenDDS_Tcp.mpc:
+        * dds/DCPS/transport/udp/OpenDDS_Udp.mpc:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/monitor/monitor.mpc:
+        * java/dds/dcps_java.mpc:
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/multirepo/multirepo_test.mpc:
+        * tests/DCPS/Compiler/idl_test1_lib/idl_test1_lib.mpc:
+        * tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+        * tools/dissector/dissector.mpc:
+        * tools/excelRTD/ExcelRTD.mpc:
+        * tools/modeling/codegen/model/Model.mpc:
+
+          Bugzilla 4058: Adapt to use dcpslib base where required or set libout 
+          manually.
+
 Thu May 30 22:55:43 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * bin/run_dds.pl:

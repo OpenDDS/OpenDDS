@@ -1,4 +1,4 @@
-project : dcps {
+project : dcpslib {
   sharedname     = idl_test2_lib
   libout         = .
   idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h

@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project : dcps, install {
+project : dcpslib, install {
   sharedname    = OpenDDS_Multicast
   dynamicflags  = OPENDDS_MULTICAST_BUILD_DLL
 

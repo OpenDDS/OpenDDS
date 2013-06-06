@@ -1,5 +1,5 @@
 
-project(*Common) : dcps {
+project(*Common) : dcpslib {
   sharedname     = StockQuoterCommon
   dynamicflags   = STOCKQUOTERCOMMON_BUILD_DLL
   libout         = .

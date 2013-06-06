@@ -1,4 +1,4 @@
-project (ExcelRTD): taolib, dcps, dcps_inforepodiscovery, dcps_tcp, dcps_monitor, qt4_gui {
+project (ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monitor, qt4_gui {
   requires += microsoft
   requires += built_in_topics
   includes += $(DDS_ROOT)/tools/monitor

@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project: dcps {
+project: dcpslib {
   sharedname     = TestFramework
 
   dcps_ts_flags += -Wb,export_macro=TestFramework_Export

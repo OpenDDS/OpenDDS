@@ -1,4 +1,4 @@
-project : dcps {
+project : dcpslib {
   sharedname = idl_test1_lib
   libout       = .
 
