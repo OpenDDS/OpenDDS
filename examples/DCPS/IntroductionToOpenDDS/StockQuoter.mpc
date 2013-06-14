@@ -29,7 +29,7 @@ project(*Common) : dcps {
   }
 }
 
-project(*Publisher) : dcpsexe, svc_utils {
+project(*Publisher) : dcpsexe_with_tcp, svc_utils {
   after    += *Common
   exename   = publisher
   requires += tao_orbsvcs
@@ -57,7 +57,7 @@ project(*Publisher) : dcpsexe, svc_utils {
 }
 
 
-project(*Subscriber) : dcpsexe {
+project(*Subscriber) : dcpsexe_with_tcp {
   after    += *Common
   exename   = subscriber
   requires += tao_orbsvcs

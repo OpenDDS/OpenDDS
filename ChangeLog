@@ -1,3 +1,11 @@
+Fri Jun 14 17:51:15 UTC 2013  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+
+          Modify this example to work with static builds.
+
 Fri Jun  7 18:14:52 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpTransport.cpp:

@@ -16,6 +16,8 @@
 #include <ace/streams.h>
 #include <orbsvcs/Time_Utilities.h>
 
+#include "dds/DCPS/StaticIncludes.h"
+
 // constants for Stock Quoter domain Id, types, and topic
 // (same as publisher)
 DDS::DomainId_t QUOTER_DOMAIN_ID = 1066;
