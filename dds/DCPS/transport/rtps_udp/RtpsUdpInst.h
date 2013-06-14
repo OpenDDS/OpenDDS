@@ -28,6 +28,7 @@ public:
   ACE_INET_Addr local_address_;
 
   bool use_multicast_;
+  short ttl_;
   ACE_INET_Addr multicast_group_address_;
   std::string multicast_interface_;
 

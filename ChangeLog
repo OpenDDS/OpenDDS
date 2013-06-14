@@ -1,3 +1,18 @@
+Fri Jun 14 22:57:38 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added DefaultMulticastGroup and TTL configuration settings.
+          TTL is set on the SPDP socket.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+
+          Set the TTL value for the multicast socket.
+
 Fri Jun 14 17:51:15 UTC 2013  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:

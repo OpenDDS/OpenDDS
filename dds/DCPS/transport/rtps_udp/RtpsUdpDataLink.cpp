@@ -23,6 +23,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
 #include "ace/Reactor.h"
+#include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
 #include <cstring>
 
@@ -108,6 +109,23 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("RtpsUdpDataLink::open: ")
                         ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")),
+                       false);
+    }
+
+    ACE_HANDLE handle = multicast_socket_.get_handle();
+    char ttl = static_cast<char>(config_->ttl_);
+
+    if (0 != ACE_OS::setsockopt(handle,
+                                IPPROTO_IP,
+                                IP_MULTICAST_TTL,
+                                &ttl,
+                                sizeof(ttl))) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: ")
+                        ACE_TEXT("failed to set TTL: %d %p\n"),
+                        config_->ttl_,
+                        ACE_TEXT("ACE_OS::setsockopt(TTL)")),
                        false);
     }
   }

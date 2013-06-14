@@ -182,12 +182,13 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       const std::string& rtps_name = it->first;
 
       int resend;
-      u_short pb, dg, pg, d0, d1, dx;
+      u_short pb, dg, pg, d0, d1, dx, ttl;
       AddrVec spdp_send_addrs;
+      std::string default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
       std::string mi;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
-        sm = false;
+        has_ttl = false, sm = false;
 
       DCPS::ValueMap values;
       DCPS::pullValues(cf, it->second, values);
@@ -264,6 +265,16 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                ACE_TEXT("[rtps_discovery/%C] section.\n"),
                value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "TTL") {
+          const std::string& value = it->second;
+          has_ttl = DCPS::convertToInteger(value, ttl);
+          if (!has_ttl) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+               ACE_TEXT("Invalid entry (%C) for TTL in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
         } else if (name == "SedpMulticast") {
           const std::string& value = it->second;
           int smInt;
@@ -278,6 +289,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           sm = bool(smInt);
         } else if (name == "MulticastInterface") {
           mi = it->second;
+        } else if (name == "DefaultMulticastGroup") {
+          default_multicast_group = it->second;
         } else if (name == "SpdpSendAddrs") {
           const std::string& value = it->second;
           size_t i = 0;
@@ -306,6 +319,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       if (has_dx) discovery->dx(dx);
       if (has_sm) discovery->sedp_multicast(sm);
       discovery->multicast_interface(mi);
+      discovery->default_multicast_group( default_multicast_group);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
       TheServiceParticipant->add_discovery(
         DCPS::static_rchandle_cast<Discovery>(discovery));

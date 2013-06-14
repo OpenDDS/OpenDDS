@@ -24,6 +24,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 
 #include "ace/Reactor.h"
+#include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
 #include <cstring>
 #include <stdexcept>
@@ -356,7 +357,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     // empty for-loop body, run until open_unicast_socket() works
   }
 
-  const char mc_addr[] = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
+  const char* mc_addr = outer_->disco_->default_multicast_group().c_str();
   ACE_INET_Addr default_multicast;
   if (0 != default_multicast.set(mc_port, mc_addr)) {
     ACE_DEBUG((
@@ -376,6 +377,23 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
         ACE_TEXT("failed to join multicast group %C:%hd %p\n"),
         mc_addr, mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     throw std::runtime_error("failed to join multicast group");
+  }
+
+  ACE_HANDLE handle = multicast_socket_.get_handle();
+  char ttl = static_cast<char>(outer_->disco_->ttl());
+
+  if (0 != ACE_OS::setsockopt(handle,
+                              IPPROTO_IP,
+                              IP_MULTICAST_TTL,
+                              &ttl,
+                              sizeof(ttl))) {
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
+               ACE_TEXT("failed to set TTL value to %d ")
+               ACE_TEXT("for multicast group %C:%hd %p\n"),
+               outer_->disco_->ttl(), mc_addr, mc_port,
+               ACE_TEXT("ACE_OS::setsockopt(TTL)")));
+    throw std::runtime_error("failed to set TTL");
   }
 
   send_addrs_.insert(default_multicast);

@@ -220,6 +220,11 @@ public:
     dx_ = offset_two;
   }
 
+  u_short ttl() const { return ttl_; }
+  void ttl(u_short time_to_live) {
+    ttl_ = time_to_live;
+  }
+
   bool sedp_multicast() const { return sedp_multicast_; }
   void sedp_multicast(bool sm) {
     sedp_multicast_ = sm;
@@ -228,6 +233,11 @@ public:
   std::string multicast_interface() const { return multicast_interface_; }
   void multicast_interface(const std::string& mi) {
     multicast_interface_ = mi;
+  }
+
+  std::string default_multicast_group() const { return default_multicast_group_; }
+  void default_multicast_group(const std::string& group) {
+    default_multicast_group_ = group;
   }
 
   typedef std::vector<std::string> AddrVec;
@@ -242,9 +252,10 @@ private:
                                 const DCPS::RepoId& part_id) const;
 
   ACE_Time_Value resend_period_;
-  u_short pb_, dg_, pg_, d0_, d1_, dx_;
+  u_short pb_, dg_, pg_, d0_, d1_, dx_, ttl_;
   bool sedp_multicast_;
   std::string multicast_interface_;
+  std::string default_multicast_group_;
   AddrVec spdp_send_addrs_;
 
   struct ReactorRunner : ACE_Task_Base {
