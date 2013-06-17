@@ -10,7 +10,7 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $result = 0;
-my @configs = qw/rtps_disc.ini rtps_disc_tcp.ini/;
+my @configs = qw/rtps_disc.ini rtps_disc_tcp.ini rtps_disc_group.ini/;
 
 for my $cfg (@configs) {
 

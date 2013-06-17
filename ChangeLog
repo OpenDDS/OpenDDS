@@ -1,3 +1,20 @@
+Mon Jun 17 22:13:36 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Actually save and use the configured TTL value.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Account for the ACE_INET_Addr assumption that values without a
+          colon are port numbers.
+          Actually save and use the configured TTL value.
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc_group.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Extend testing to include configurable group and ttl values.
+
 Mon Jun 17 16:28:08 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.cpp:

@@ -319,6 +319,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       if (has_d0) discovery->d0(d0);
       if (has_d1) discovery->d1(d1);
       if (has_dx) discovery->dx(dx);
+      if (has_ttl) discovery->ttl(ttl);
       if (has_sm) discovery->sedp_multicast(sm);
       discovery->multicast_interface(mi);
       discovery->default_multicast_group( default_multicast_group);

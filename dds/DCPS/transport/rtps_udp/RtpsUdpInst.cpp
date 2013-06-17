@@ -60,6 +60,10 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("multicast_group_address"),
                            group_address_s);
   if (!group_address_s.is_empty()) {
+    if (group_address_s.rfind(':') == group_address_s.npos) {
+      // Concatenate a colon on the end to avoid interpretation as a port number.
+      group_address_s += ":";
+    }
     multicast_group_address_.set(group_address_s.c_str());
   }
 
@@ -67,6 +71,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                           multicast_interface_);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, size_t);
 
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_response_delay"),
                         nak_response_delay_);
