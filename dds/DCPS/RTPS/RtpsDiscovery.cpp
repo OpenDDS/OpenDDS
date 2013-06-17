@@ -51,6 +51,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , dx_(2)
   , ttl_(1)
   , sedp_multicast_(true)
+  , default_multicast_group_("239.255.0.1")
 {
 }
 
