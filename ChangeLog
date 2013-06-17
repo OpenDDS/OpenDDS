@@ -1,3 +1,12 @@
+Mon Jun 17 15:40:44 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Resolve Coverity defects CID 1034542-1034545 from last checkin.
+
 Fri Jun 14 22:57:38 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.h:

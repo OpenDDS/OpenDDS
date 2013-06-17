@@ -49,6 +49,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , d0_(get_default_d0(0))
   , d1_(10)
   , dx_(2)
+  , ttl_(1)
   , sedp_multicast_(true)
 {
 }

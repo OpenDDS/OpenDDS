@@ -289,8 +289,8 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-    const char* mc_addr = disco.default_multicast_group().c_str();
-    if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr)) {
+    std::string mc_addr = disco.default_multicast_group();
+    if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
                  ACE_TEXT("failed setting multicast local_addr to port %hd\n"),

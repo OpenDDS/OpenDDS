@@ -357,14 +357,14 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     // empty for-loop body, run until open_unicast_socket() works
   }
 
-  const char* mc_addr = outer_->disco_->default_multicast_group().c_str();
+  std::string mc_addr = outer_->disco_->default_multicast_group();
   ACE_INET_Addr default_multicast;
-  if (0 != default_multicast.set(mc_port, mc_addr)) {
+  if (0 != default_multicast.set(mc_port, mc_addr.c_str())) {
     ACE_DEBUG((
           LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
           ACE_TEXT("failed setting default_multicast address %C:%hd %p\n"),
-          mc_addr, mc_port, ACE_TEXT("ACE_INET_Addr::set")));
+          mc_addr.c_str(), mc_port, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set default_multicast address");
   }
 
@@ -375,7 +375,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     ACE_DEBUG((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
         ACE_TEXT("failed to join multicast group %C:%hd %p\n"),
-        mc_addr, mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+        mc_addr.c_str(), mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     throw std::runtime_error("failed to join multicast group");
   }
 
@@ -391,7 +391,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
                ACE_TEXT("failed to set TTL value to %d ")
                ACE_TEXT("for multicast group %C:%hd %p\n"),
-               outer_->disco_->ttl(), mc_addr, mc_port,
+               outer_->disco_->ttl(), mc_addr.c_str(), mc_port,
                ACE_TEXT("ACE_OS::setsockopt(TTL)")));
     throw std::runtime_error("failed to set TTL");
   }
