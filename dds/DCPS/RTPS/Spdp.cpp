@@ -379,23 +379,6 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     throw std::runtime_error("failed to join multicast group");
   }
 
-  ACE_HANDLE handle = multicast_socket_.get_handle();
-  char ttl = static_cast<char>(outer_->disco_->ttl());
-
-  if (0 != ACE_OS::setsockopt(handle,
-                              IPPROTO_IP,
-                              IP_MULTICAST_TTL,
-                              &ttl,
-                              sizeof(ttl))) {
-    ACE_DEBUG((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-               ACE_TEXT("failed to set TTL value to %d ")
-               ACE_TEXT("for multicast group %C:%hd %p\n"),
-               outer_->disco_->ttl(), mc_addr.c_str(), mc_port,
-               ACE_TEXT("ACE_OS::setsockopt(TTL)")));
-    throw std::runtime_error("failed to set TTL");
-  }
-
   send_addrs_.insert(default_multicast);
 
   typedef RtpsDiscovery::AddrVec::iterator iter;
@@ -866,6 +849,23 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
           ACE_TEXT("opened unicast socket on port %d\n"),
           uni_port));
+  }
+
+  ACE_HANDLE handle = unicast_socket_.get_handle();
+  char ttl = static_cast<char>(outer_->disco_->ttl());
+
+  if (0 != ACE_OS::setsockopt(handle,
+                              IPPROTO_IP,
+                              IP_MULTICAST_TTL,
+                              &ttl,
+                              sizeof(ttl))) {
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
+               ACE_TEXT("failed to set TTL value to %d ")
+               ACE_TEXT("for port:%hd %p\n"),
+               outer_->disco_->ttl(), uni_port,
+               ACE_TEXT("ACE_OS::setsockopt(TTL)")));
+    throw std::runtime_error("failed to set TTL");
   }
   return true;
 }

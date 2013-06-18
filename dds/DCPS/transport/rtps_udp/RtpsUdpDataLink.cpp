@@ -98,6 +98,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
       }
     }
   }
+
+  /// @TODO: Determine if we need to set TTL on the alternate sockets.
 #endif
 
   if (config_->use_multicast_) {
@@ -111,23 +113,23 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                         ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")),
                        false);
     }
+  }
 
-    ACE_HANDLE handle = multicast_socket_.get_handle();
-    char ttl = static_cast<char>(config_->ttl_);
+  ACE_HANDLE handle = unicast_socket_.get_handle();
+  char ttl = static_cast<char>(config_->ttl_);
 
-    if (0 != ACE_OS::setsockopt(handle,
-                                IPPROTO_IP,
-                                IP_MULTICAST_TTL,
-                                &ttl,
-                                sizeof(ttl))) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: ")
-                        ACE_TEXT("failed to set TTL: %d %p\n"),
-                        config_->ttl_,
-                        ACE_TEXT("ACE_OS::setsockopt(TTL)")),
-                       false);
-    }
+  if (0 != ACE_OS::setsockopt(handle,
+                              IPPROTO_IP,
+                              IP_MULTICAST_TTL,
+                              &ttl,
+                              sizeof(ttl))) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpDataLink::open: ")
+                      ACE_TEXT("failed to set TTL: %d %p\n"),
+                      config_->ttl_,
+                      ACE_TEXT("ACE_OS::setsockopt(TTL)")),
+                     false);
   }
 
   send_strategy_->send_buffer(&multi_buff_);

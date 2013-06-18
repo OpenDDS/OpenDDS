@@ -1,3 +1,15 @@
+Tue Jun 18 20:23:16 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Set TTL on the socket used for sending.
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc_group.ini:
+
+          Change the TTL for each section so it can be identified when
+          validating the tests.
+
 Mon Jun 17 22:13:36 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.cpp:
