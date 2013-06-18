@@ -61,8 +61,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                            group_address_s);
   if (!group_address_s.is_empty()) {
     if (group_address_s.rfind(':') == group_address_s.npos) {
-      // Concatenate a colon on the end to avoid interpretation as a port number.
-      group_address_s += ":";
+      // Concatenate a port number if the user does not supply one.
+      group_address_s += ":7401";
     }
     multicast_group_address_.set(group_address_s.c_str());
   }

@@ -291,7 +291,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           sm = bool(smInt);
         } else if (name == "MulticastInterface") {
           mi = it->second;
-        } else if (name == "DefaultMulticastGroup") {
+        } else if (name == "InteropMulticastOverride") {
+          /// FUTURE: handle > 1 group.
           default_multicast_group = it->second;
         } else if (name == "SpdpSendAddrs") {
           const std::string& value = it->second;

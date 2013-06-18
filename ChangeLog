@@ -1,3 +1,25 @@
+Tue Jun 18 22:15:41 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Changed "DefaultMulticastGroup" configuration key to
+          "InteropMulticastOverride" to indicate the semantics better.
+          Added some documentation.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Include a port number if the user does not supply one with the
+          multicast group specification.  The default port added this way
+          is 7401.
+          Added some documentation.
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc_group.ini:
+
+          Migrated the multicast groups used to the un-routed local
+          groups (RFC 2365, Section 6.1).
+
 Tue Jun 18 20:23:16 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.cpp:

@@ -255,7 +255,7 @@ private:
   u_short pb_, dg_, pg_, d0_, d1_, dx_, ttl_;
   bool sedp_multicast_;
   std::string multicast_interface_;
-  std::string default_multicast_group_;
+  std::string default_multicast_group_;  /// FUTURE: handle > 1 group.
   AddrVec spdp_send_addrs_;
 
   struct ReactorRunner : ACE_Task_Base {

@@ -99,7 +99,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  /// @TODO: Determine if we need to set TTL on the alternate sockets.
+  /// FUTURE: Set TTL on the alternate sockets.
 #endif
 
   if (config_->use_multicast_) {
