@@ -1,3 +1,10 @@
+Thu Jun 20 17:08:37 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Allow configuration string for multicast default transport
+          port to be w_char.
+
 Tue Jun 18 22:15:41 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.h:
