@@ -1931,6 +1931,10 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
     }
   }
 
+  // Used after the lock scope ends.
+  ACE_Time_Value smallest(ACE_Time_Value::max_time);
+  int alive_writers = 0;
+
   // Limited scope for sample lock.
   { ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
@@ -1946,13 +1950,11 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
     // 6) unless it has been rescheduled.
     // We are using a changed timer Id value as a proxy for having been
     // rescheduled.
-    if( timer_was_reset && (liveiness_timer_id_ == local_timer_id)) {
+    if( timer_was_reset && (liveliness_timer_id_ == local_timer_id)) {
       liveliness_timer_id_ = -1;
     }
 
-    ACE_Time_Value smallest(ACE_Time_Value::max_time);
     ACE_Time_Value next_absolute;
-    int alive_writers = 0;
 
     // Iterate over each writer to this reader
     {

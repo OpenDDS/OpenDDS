@@ -1,3 +1,11 @@
+Thu Aug  1 23:08:51 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Correct spelling and scope errors introduced by the last
+          check-in that was done *prior* to compilation.  Ordering is
+          everything...
+
 Thu Aug  1 22:13:39 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
