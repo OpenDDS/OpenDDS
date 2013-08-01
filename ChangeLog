@@ -1,3 +1,11 @@
+Thu Aug  1 22:13:39 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          RT16148 - reduce lock scope to avoid a deadlock by attempting
+          to acquire the reactor and sample locks in different order on
+          different threads.
+
 Thu Jun 20 17:08:37 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
