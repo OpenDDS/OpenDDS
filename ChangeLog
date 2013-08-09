@@ -1,3 +1,14 @@
+Fri Aug  9 22:04:45 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+          Added methods to ZeroCopyDataSeq template support incrementing and decrementing zero copy references.  
+
 Thu Aug  1 23:08:51 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

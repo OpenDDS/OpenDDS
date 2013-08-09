@@ -149,6 +149,36 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer(
   return yours.sc_buffer_;
 }
 
+#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+#pragma warning (default:4996)
+#endif
+
+template <class Sample_T, size_t DEF_MAX>
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::increment_references(void){
+  if (is_zero_copy()) {
+    for (size_t ii = 0; ii < ptrs_.size(); ++ii) {
+      ptrs_[ii]->inc_ref();
+    }
+  }
+}
+
+#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+#pragma warning (default:4996)
+#endif
+
+template <class Sample_T, size_t DEF_MAX>
+void
+ZeroCopyDataSeq<Sample_T, DEF_MAX>::decrement_references(void){
+  if (is_zero_copy()) {
+    for (size_t ii = 0; ii < ptrs_.size(); ++ii) {
+      if (ptrs_[ii]->ref_count() > 0) {
+        ptrs_[ii]->dec_ref();
+      }
+    }
+  }
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

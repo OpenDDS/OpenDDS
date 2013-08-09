@@ -169,7 +169,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
   DataReaderImpl::GenericBundle gen;
   ReturnCode_t rc = dri->read_generic(gen, NOT_READ_SAMPLE_STATE,
-                                      ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+                                      ANY_VIEW_STATE, ANY_INSTANCE_STATE,false);
   if (rc == RETCODE_NO_DATA) {
     return;
   } else if (rc != RETCODE_OK) {

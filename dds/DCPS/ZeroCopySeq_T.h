@@ -105,6 +105,9 @@ public:
 
   static Sample_T* allocbuf(CORBA::ULong nelems);
   static void freebuf(Sample_T* buffer);
+ 
+  void increment_references(void);
+  void decrement_references(void);
 
   ///Only used by the FooDataReaderImpl and tests
   class PrivateMemberAccess {

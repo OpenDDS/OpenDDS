@@ -1660,7 +1660,8 @@ bool
 <%TYPE%>DataReaderImpl::read_generic(
   OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
   ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
-  ::DDS::InstanceStateMask instance_states)
+  ::DDS::InstanceStateMask instance_states,
+  bool adjust_ref_count)
 {
   <%SCOPED%><%SEQ%> data;
   ::DDS::ReturnCode_t rc = read_i(data, gen.info_, ::DDS::LENGTH_UNLIMITED,
@@ -1669,18 +1670,26 @@ bool
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     gen.samples_.push_back(&data[i]);
   }
+  if (true == adjust_ref_count ) {
+    data.increment_references();
+  }
   return rc;
 }
 
 ::DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_generic(
   ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
-  ::DDS::InstanceStateMask instance_states)
+  ::DDS::InstanceStateMask instance_states,
+  bool adjust_ref_count)
 {
   <%SCOPED%><%SEQ%> data;
   ::DDS::SampleInfoSeq infos;
-  return take_i(data, infos, ::DDS::LENGTH_UNLIMITED,
-                sample_states, view_states, instance_states, 0);
+  ::DDS::ReturnCode_t rc = take_i(data, infos, ::DDS::LENGTH_UNLIMITED,
+    sample_states, view_states, instance_states, 0);
+  if (true == adjust_ref_count ) {
+    data.decrement_references();
+  } 
+  return rc; 
 }
 
 ::DDS::InstanceHandle_t

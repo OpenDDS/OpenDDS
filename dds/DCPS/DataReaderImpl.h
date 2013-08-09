@@ -414,11 +414,11 @@ public:
 
   virtual DDS::ReturnCode_t read_generic(GenericBundle& gen,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states) = 0;
+    DDS::InstanceStateMask instance_states, bool adjust_ref_count ) = 0;
 
   virtual DDS::ReturnCode_t take_generic(
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states) = 0;
+    DDS::InstanceStateMask instance_states, bool adjust_ref_count) = 0;
 
   virtual DDS::InstanceHandle_t lookup_instance_generic(const void* data) = 0;
 
