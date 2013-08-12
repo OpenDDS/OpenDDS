@@ -65,7 +65,7 @@ public:
     // allocation in the above <new>.
 
     // Remember end of the pool.
-    last_ = reinterpret_cast<char*>(this->pool_ + n_chunks * chunk_size_);
+    last_ = reinterpret_cast<char*>(this->pool_ + n_chunks * chunk_size_ - 1);
   }
 
   /// Clear things up.

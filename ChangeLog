@@ -1,3 +1,13 @@
+Mon Aug 12 22:38:43 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+
+          RT16206: Changed the value of last_ to correspond to the actual
+          last byte of the pool.  This is how the value is used in the
+          malloc() implementation.  This is the correct usage, and there
+          is a possibly failure if the incorrect value is retained.
+
 Mon Aug 12 19:01:19 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * tests/DCPS/unit/MyTypeSupportImpl.h:
