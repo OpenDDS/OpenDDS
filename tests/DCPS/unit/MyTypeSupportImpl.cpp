@@ -88,7 +88,7 @@ MyTypeSupportImpl::getMetaStructForType()
 
 DDS::ReturnCode_t MyDataReaderImpl::read_generic(
   OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
-  DDS::ViewStateMask, DDS::InstanceStateMask)
+  DDS::ViewStateMask, DDS::InstanceStateMask, bool)
 {
   return DDS::RETCODE_UNSUPPORTED;
 }

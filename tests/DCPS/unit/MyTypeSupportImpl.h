@@ -94,10 +94,10 @@ public:
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::ReturnCode_t read_generic(
     OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
-    DDS::ViewStateMask, DDS::InstanceStateMask);
+    DDS::ViewStateMask, DDS::InstanceStateMask, bool);
 
   DDS::ReturnCode_t take_generic(DDS::SampleStateMask,
-    DDS::ViewStateMask, DDS::InstanceStateMask) { return 0; }
+    DDS::ViewStateMask, DDS::InstanceStateMask, bool) { return 0; }
 
   DDS::InstanceHandle_t lookup_instance_generic(const void* data);
 
