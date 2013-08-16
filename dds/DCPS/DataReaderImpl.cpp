@@ -1595,16 +1595,17 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
+      if( instance != 0) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      if (! this->is_exclusive_ownership_
-         || (this->is_exclusive_ownership_
-             && (instance != 0 )
-             && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+        if (! this->is_exclusive_ownership_
+            || (this->is_exclusive_ownership_
+                && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-        this->watchdog_->cancel_timer(instance);
+          this->watchdog_->cancel_timer(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+        }
+#endif
       }
-#endif
     }
     instance = 0;
     this->unregister(sample, instance);

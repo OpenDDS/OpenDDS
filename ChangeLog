@@ -1,3 +1,9 @@
+Fri Aug 16 02:25:15 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Ensure raw pointer validity before use.
+
 Mon Aug 12 22:38:43 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
@@ -12,8 +18,8 @@ Mon Aug 12 19:01:19 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * tests/DCPS/unit/MyTypeSupportImpl.h:
         * tests/DCPS/unit/MyTypeSupportImpl.cpp:
-          Updated test due to changes to ZeroCopyDataSeq template 
-          interface 
+          Updated test due to changes to ZeroCopyDataSeq template
+          interface
 
 Fri Aug  9 22:04:45 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
 
@@ -24,7 +30,7 @@ Fri Aug  9 22:04:45 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
         * dds/idl/HTemplate.txt:
-          Added methods to ZeroCopyDataSeq template support incrementing and 
+          Added methods to ZeroCopyDataSeq template support incrementing and
           decrementing zero copy references.
 
 Thu Aug  1 23:08:51 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
