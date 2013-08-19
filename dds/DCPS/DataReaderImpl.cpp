@@ -1901,9 +1901,7 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
                                const void * arg)
 {
   // Working copy of the active timer Id.
-  // N.B. Assume this is atomic so we do not need to hold a read lock
-  //      to grab it.
-  long local_timer_id = liveliness_timer_id_;
+  long local_timer_id = liveliness_timer_id_.value();
   bool timer_was_reset = false;
 
   if (local_timer_id != -1) {
@@ -1936,58 +1934,50 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
   ACE_Time_Value smallest(ACE_Time_Value::max_time);
   int alive_writers = 0;
 
-  // Limited scope for sample lock.
-  { ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->sample_lock_,
-                     DDS::RETCODE_ERROR);
+  // This is a bit convoluted.  The reasoning goes as follows:
+  // 1) We grab the current timer Id value when we enter the method.
+  // 2) We *might* cancel the timer if it is active.
+  // 3) The timer *might* be rescheduled while we do not hold the sample lock.
+  // 4) If we (or another thread) canceled the timer that we can tell, then
+  // 5) we should clear the Id value,
+  // 6) unless it has been rescheduled.
+  // We are using a changed timer Id value as a proxy for having been
+  // rescheduled.
+  if( timer_was_reset && (liveliness_timer_id_.value() == local_timer_id)) {
+    liveliness_timer_id_ = -1;
+  }
 
-    // This is a bit convoluted.  The reasoning goes as follows:
-    // 1) We grab the current timer Id value when we enter the method.
-    // 2) We *might* cancel the timer if it is active.
-    // 3) The timer *might* be rescheduled while we do not hold the sample lock.
-    // 4) If we (or another thread) canceled the timer that we can tell, then
-    // 5) we should clear the Id value,
-    // 6) unless it has been rescheduled.
-    // We are using a changed timer Id value as a proxy for having been
-    // rescheduled.
-    if( timer_was_reset && (liveliness_timer_id_ == local_timer_id)) {
-      liveliness_timer_id_ = -1;
-    }
+  ACE_Time_Value next_absolute;
 
-    ACE_Time_Value next_absolute;
+  // Iterate over each writer to this reader
+  {
+    ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
+                          read_guard,
+                          this->writers_lock_,
+                          0);
 
-    // Iterate over each writer to this reader
-    {
-      ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
-                            read_guard,
-                            this->writers_lock_,
-                            0);
+    for (WriterMapType::iterator iter = writers_.begin();
+         iter != writers_.end();
+         ++iter) {
+      // deal with possibly not being alive or
+      // tell when it will not be alive next (if no activity)
+      next_absolute = iter->second->check_activity(tv);
 
-      for (WriterMapType::iterator iter = writers_.begin();
-           iter != writers_.end();
-           ++iter) {
-        // deal with possibly not being alive or
-        // tell when it will not be alive next (if no activity)
-        next_absolute = iter->second->check_activity(tv);
+      if (next_absolute != ACE_Time_Value::max_time) {
+        alive_writers++;
 
-        if (next_absolute != ACE_Time_Value::max_time) {
-          alive_writers++;
-
-          if (next_absolute < smallest) {
-            smallest = next_absolute;
-          }
+        if (next_absolute < smallest) {
+          smallest = next_absolute;
         }
       }
     }
+  }
 
-    if (!alive_writers) {
-      // no live writers so no need to schedule a timer
-      // but be sure we don't try to cancel the timer later.
-      liveliness_timer_id_ = -1;
-    }
-
-  } // End of sample lock scope.
+  if (!alive_writers) {
+    // no live writers so no need to schedule a timer
+    // but be sure we don't try to cancel the timer later.
+    liveliness_timer_id_ = -1;
+  }
 
   if (DCPS_debug_level >= 5) {
     GuidConverter converter(subscription_id_);
@@ -2013,7 +2003,7 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
 
     liveliness_timer_id_ = reactor_->schedule_timer(this, 0, relative);
 
-    if (liveliness_timer_id_ == -1) {
+    if (liveliness_timer_id_.value() == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
                  ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));

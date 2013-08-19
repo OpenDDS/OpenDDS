@@ -38,6 +38,7 @@
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
+#include "ace/Atomic_Op.h"
 
 #include <vector>
 #include <list>
@@ -626,7 +627,7 @@ private:
 
 
   /// liveliness timer id; -1 if no timer is set
-  long liveliness_timer_id_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, long> liveliness_timer_id_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered

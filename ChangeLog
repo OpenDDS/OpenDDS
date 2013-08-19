@@ -1,3 +1,15 @@
+Mon Aug 19 10:26:32 UTC 2013  Mike Martinez  <martinez_m@aselsan.com.tr>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          RT16148: Removed acquisition of the sample_lock_ from the
+          handle_timeout() method.  There is yet-another-deadlock caused
+          by this acquisition.  The only member protected exclusively by
+          this lock is the liveliness_timer_id_, which has been changed
+          to an Atomic data type.  The writers_ container is protected
+          separately by the writers_lock_.
+
 Fri Aug 16 02:25:15 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
