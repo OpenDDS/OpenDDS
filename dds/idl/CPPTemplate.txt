@@ -634,6 +634,11 @@ void
     return precond;
   }
 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+
   return read_i(received_data, info_seq, max_samples, sample_states,
                 view_states, instance_states, 0);
 }
@@ -653,11 +658,6 @@ void
 #endif
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
-
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    this->sample_lock_,
-                    ::DDS::RETCODE_ERROR);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
@@ -752,6 +752,11 @@ void
     return precond;
   }
 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+
   return take_i(received_data, info_seq, max_samples, sample_states,
                 view_states, instance_states, 0);
 }
@@ -771,11 +776,6 @@ void
 #endif
 {
   ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
-
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    this->sample_lock_,
-                    ::DDS::RETCODE_ERROR);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
@@ -1663,17 +1663,27 @@ bool
   ::DDS::InstanceStateMask instance_states,
   bool adjust_ref_count)
 {
+
   <%SCOPED%><%SEQ%> data;
-  ::DDS::ReturnCode_t rc = read_i(data, gen.info_, ::DDS::LENGTH_UNLIMITED,
-    sample_states, view_states, instance_states, 0);
+  ::DDS::ReturnCode_t rc;
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+  {
+      rc = read_i(data, gen.info_,
+      	::DDS::LENGTH_UNLIMITED,
+        sample_states, view_states, instance_states, 0);
+      if (true == adjust_ref_count ) {
+        data.increment_references();
+      }
+  }
   gen.samples_.reserve(data.length());
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     gen.samples_.push_back(&data[i]);
   }
-  if (true == adjust_ref_count ) {
-    data.increment_references();
-  }
   return rc;
+
 }
 
 ::DDS::ReturnCode_t
@@ -1682,6 +1692,11 @@ bool
   ::DDS::InstanceStateMask instance_states,
   bool adjust_ref_count)
 {
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->sample_lock_,
+                    ::DDS::RETCODE_ERROR);
+
   <%SCOPED%><%SEQ%> data;
   ::DDS::SampleInfoSeq infos;
   ::DDS::ReturnCode_t rc = take_i(data, infos, ::DDS::LENGTH_UNLIMITED,

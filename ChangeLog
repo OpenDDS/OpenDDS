@@ -1,3 +1,9 @@
+Thu Aug 29 21:41:50 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+          Added locking to callers of take_i and read_i and 
+          removed locking within read_i and take_i
+
 Mon Aug 19 10:26:32 UTC 2013  Mike Martinez  <martinez_m@aselsan.com.tr>
 
         * dds/DCPS/DataReaderImpl.h:
