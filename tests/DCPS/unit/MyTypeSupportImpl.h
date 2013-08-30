@@ -101,6 +101,11 @@ public:
 
   DDS::InstanceHandle_t lookup_instance_generic(const void* data);
 
+  DDS::ReturnCode_t take(
+    OpenDDS::DCPS::AbstractSamples&,
+    DDS::SampleStateMask, DDS::ViewStateMask,
+    DDS::InstanceStateMask ) { return 0; }
+
   DDS::ReturnCode_t read_instance_generic(void*& data,
     DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,

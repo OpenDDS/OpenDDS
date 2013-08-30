@@ -97,6 +97,17 @@ private:
   Stats<double> stats_;
 };
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+class OpenDDS_Dcps_Export AbstractSamples
+{
+public:
+  virtual ~AbstractSamples(){}
+  virtual void reserve(CORBA::ULong size)=0;  
+  virtual void push_back(const DDS::SampleInfo& info, const void* sample)=0;
+};
+
+#endif
 
 /**
 * @class DataReaderImpl
@@ -420,6 +431,11 @@ public:
   virtual DDS::ReturnCode_t take_generic(
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states, bool adjust_ref_count) = 0;
+
+  virtual DDS::ReturnCode_t take(
+    AbstractSamples& samples,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states)=0;
 
   virtual DDS::InstanceHandle_t lookup_instance_generic(const void* data) = 0;
 

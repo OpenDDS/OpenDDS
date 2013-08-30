@@ -1707,6 +1707,26 @@ bool
   return rc; 
 }
 
+::DDS::ReturnCode_t 
+<%TYPE%>DataReaderImpl::take(
+  OpenDDS::DCPS::AbstractSamples& samples,
+  ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
+  ::DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%><%SEQ%> data;
+  ::DDS::SampleInfoSeq infos;
+  ::DDS::ReturnCode_t rc = take_i(data, infos, ::DDS::LENGTH_UNLIMITED,
+    sample_states, view_states, instance_states, 0);
+  
+  samples.reserve(data.length());
+  
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    samples.push_back(infos[i], &data[i]);
+  }
+  
+  return rc;   
+}
+
 ::DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::lookup_instance_generic(const void* data)
 {
