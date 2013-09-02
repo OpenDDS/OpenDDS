@@ -15,6 +15,7 @@
 #include "TransportDefs.h"
 #include "TransportHeader.h"
 
+#include "ace/INET_Addr.h"
 #include "ace/Synch.h"
 #include "ace/Lock_Adapter_T.h"
 

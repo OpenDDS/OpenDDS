@@ -1,3 +1,9 @@
+Mon Sep  2 18:01:30 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+
+          Explicit includes.
+
 Fri Aug 30 18:51:39 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
