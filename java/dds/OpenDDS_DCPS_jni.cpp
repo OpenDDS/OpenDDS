@@ -48,6 +48,7 @@
 #include "DdsDcpsPublicationJC.h"
 #include "DdsDcpsSubscriptionJC.h"
 
+#include "ace/Init_ACE.h"
 #include "ace/Service_Config.h"
 #include "ace/Service_Repository.h"
 
