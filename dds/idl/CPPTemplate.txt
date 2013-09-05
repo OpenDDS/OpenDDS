@@ -1719,6 +1719,7 @@ bool
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+
   <%SCOPED%><%SEQ%> data;
   ::DDS::SampleInfoSeq infos;
   ::DDS::ReturnCode_t rc = take_i(data, infos, ::DDS::LENGTH_UNLIMITED,

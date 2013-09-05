@@ -1,3 +1,8 @@
+Thu Sep  5 18:47:10 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+          Added lock to take() with AbstractSample interface to keep data from double deleting it's member pointers
+
 Wed Sep  4 02:20:35 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * java/dds/OpenDDS_DCPS_jni.cpp:
