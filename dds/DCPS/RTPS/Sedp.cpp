@@ -305,6 +305,10 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
     rtps_inst->use_multicast_ = false;
   }
 
+  if (!disco.local_address().empty()) {
+     rtps_inst->local_address_.set(disco.local_address().c_str());
+  }
+
   // Crete a config
   std::string config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                             std::string("_SEDP_TransportCfg_") + key +

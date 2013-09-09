@@ -240,6 +240,11 @@ public:
     default_multicast_group_ = group;
   }
 
+  std::string local_address() const { return local_address_; }
+  void local_address(const std::string& la) {
+    local_address_ = la;
+  }
+
   typedef std::vector<std::string> AddrVec;
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
@@ -256,6 +261,7 @@ private:
   bool sedp_multicast_;
   std::string multicast_interface_;
   std::string default_multicast_group_;  /// FUTURE: handle > 1 group.
+  std::string local_address_;
   AddrVec spdp_send_addrs_;
 
   struct ReactorRunner : ACE_Task_Base {

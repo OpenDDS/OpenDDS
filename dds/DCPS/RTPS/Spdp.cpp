@@ -558,8 +558,14 @@ Spdp::SpdpTransport::write_i()
 
   typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
-    const ssize_t res =
-      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
+    ssize_t res = -1;
+    int i =0;
+    // TODO do something better than this check to account for multiple multicast sockets
+    if (i++ == 0) {
+      res = multicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length());
+    } else {
+      res = unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
+    }
     if (res < 0) {
       ACE_TCHAR addr_buff[256] = {};
       iter->addr_to_string(addr_buff, 256, 0);

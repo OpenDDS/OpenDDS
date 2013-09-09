@@ -188,6 +188,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       AddrVec spdp_send_addrs;
       std::string default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
       std::string mi;
+      std::string la;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
         has_ttl = false, sm = false;
@@ -303,6 +304,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             spdp_send_addrs.push_back(value.substr(i, (n == std::string::npos) ? n : n - i));
             i = value.find(',', i);
           } while (i++ != std::string::npos); // skip past comma if there is one
+        } else if (name == "LocalAddress") {
+          la = it->second;
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -323,6 +326,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       if (has_ttl) discovery->ttl(ttl);
       if (has_sm) discovery->sedp_multicast(sm);
       discovery->multicast_interface(mi);
+      discovery->local_address(la);
       discovery->default_multicast_group( default_multicast_group);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
       TheServiceParticipant->add_discovery(
