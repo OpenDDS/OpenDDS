@@ -103,7 +103,7 @@ class OpenDDS_Dcps_Export AbstractSamples
 {
 public:
   virtual ~AbstractSamples(){}
-  virtual void reserve(CORBA::ULong size)=0;  
+  virtual void reserve(CORBA::ULong size)=0;
   virtual void push_back(const DDS::SampleInfo& info, const void* sample)=0;
 };
 
