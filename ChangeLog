@@ -1,3 +1,13 @@
+Tue Sep 10 18:18:26 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          In remove_all_msgs(pub_id), check to see if any queue elements
+          belonging to that publication are on the delayed notification list.
+          If so, remove them from the list and invoke the usual callback when
+          doing the removal.
+
 Mon Sep  9 15:39:08 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

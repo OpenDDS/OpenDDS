@@ -27,6 +27,8 @@
 
 #include "ace/Reverse_Lock_T.h"
 
+#include <vector>
+
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */
@@ -280,9 +282,7 @@ TransportSendStrategy::perform_work()
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The outcome of the send_packet() was %d.\n", outcome), 5);
 
-  TransportSendElement element(0, 0);
-  // Notify the Elements that were sent.
-  this->send_delayed_notifications(element);
+  send_delayed_notifications();
 
   // If we sent the whole packet (eg, partial_send is false), and the queue_
   // is now empty, then we've cleared the backpressure situation.
@@ -694,102 +694,98 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
   return rc;
 }
 
-void
-TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
+bool
+TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::MatchCriteria* match)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
 
-  TransportQueueElement* sample = NULL;
+  TransportQueueElement* sample = 0;
   SendMode mode = MODE_NOT_SET;
 
-  TransportQueueElement** samples = NULL;
-  SendMode* modes = NULL;
+  std::vector<TransportQueueElement*> samples;
+  std::vector<SendMode> modes;
 
   size_t num_delayed_notifications = 0;
-
-  TransportQueueElement* found_element = 0;
+  bool found_element = false;
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    num_delayed_notifications = this->num_delayed_notifications_;
+    num_delayed_notifications = num_delayed_notifications_;
 
     if (num_delayed_notifications == 0) {
-      return;
+      return false;
 
     } else if (num_delayed_notifications == 1) {
-      // Optimization for the most common case.
-      sample = delayed_delivered_notification_queue_ [0];
-      mode = delayed_notification_mode_ [0];
+      // Optimization for the most common case (doesn't need vectors)
 
-      if ((element.sample () != 0) && (element.msg () == sample->msg ()))
-      {
-        found_element = sample;
+      if (!match || match->matches(*delayed_delivered_notification_queue_[0])) {
+        found_element = true;
+        sample = delayed_delivered_notification_queue_[0];
+        mode = delayed_notification_mode_[0];
+
+        delayed_delivered_notification_queue_[0] = 0;
+        delayed_notification_mode_[0] = MODE_NOT_SET;
+        num_delayed_notifications_ = 0;
       }
-
-      delayed_delivered_notification_queue_ [0] = NULL;
-      delayed_notification_mode_ [0] = MODE_NOT_SET;
 
     } else {
-      samples = new TransportQueueElement* [num_delayed_notifications];
-      modes = new SendMode[num_delayed_notifications];
+      for (size_t i = 0; i < num_delayed_notifications; ++i) {
+        sample = delayed_delivered_notification_queue_[i];
+        if (!match || match->matches(*sample)) {
+          found_element = true;
+          samples.push_back(sample);
+          modes.push_back(delayed_notification_mode_[i]);
 
-      for (size_t i = 0; i < num_delayed_notifications; i++) {
-        samples[i] = delayed_delivered_notification_queue_[i];
-        modes[i] = delayed_notification_mode_[i];
-
-        if ((element.sample () != 0) && (element.msg () == samples[i]->msg ())) {
-          found_element = samples[i];
+          delayed_delivered_notification_queue_[i] = 0;
+          delayed_notification_mode_[i] = MODE_NOT_SET;
         }
+      }
 
-        delayed_delivered_notification_queue_[i] = NULL;
-        delayed_notification_mode_[i] = MODE_NOT_SET;
+      if (found_element) {
+        for (size_t i = 0, gap = 0; i < num_delayed_notifications; ++i) {
+          if (!delayed_delivered_notification_queue_[i]) {
+            ++gap;
+            --num_delayed_notifications_;
+          } else if (gap) {
+            delayed_delivered_notification_queue_[i - gap] =
+              delayed_delivered_notification_queue_[i];
+            delayed_notification_mode_[i - gap] = delayed_notification_mode_[i];
+          }
+        }
       }
     }
-
-    this->num_delayed_notifications_ = 0;
   }
 
-  if (modes == NULL) {
+  if (!found_element)
+    return false;
+
+  if (num_delayed_notifications == 1) {
     // optimization for the common case
-      if (mode == MODE_TERMINATED) {
-        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
-          bool deleted = sample->data_dropped(true);
-          if (found_element == sample) {
-            element.released (deleted);
-          }
-        }
-      } else {
-        if (! this->transport_shutdown_ || sample->owned_by_transport ()) {
-          bool deleted = sample->data_delivered();
-          if (found_element == sample) {
-            element.released (deleted);
-          }
-        }
+    if (mode == MODE_TERMINATED) {
+      if (!transport_shutdown_ || sample->owned_by_transport()) {
+        sample->data_dropped(true);
       }
+    } else {
+      if (!transport_shutdown_ || sample->owned_by_transport()) {
+        sample->data_delivered();
+      }
+    }
 
   } else {
-    for (size_t i = 0; i < num_delayed_notifications; i++) {
+    for (size_t i = 0; i < samples.size(); ++i) {
       if (modes[i] == MODE_TERMINATED) {
-        if (!this->transport_shutdown_ || samples[i]->owned_by_transport()) {
-          bool deleted = samples[i]->data_dropped(true);
-          if (found_element == samples[i]) {
-            element.released (deleted);
-          }
+        if (!transport_shutdown_ || samples[i]->owned_by_transport()) {
+          samples[i]->data_dropped(true);
         }
       } else {
-        if (!this->transport_shutdown_ || samples[i]->owned_by_transport()) {
-          bool deleted = samples[i]->data_delivered();
-          if (found_element == samples[i]) {
-            element.released (deleted);
-          }
+        if (!transport_shutdown_ || samples[i]->owned_by_transport()) {
+          samples[i]->data_delivered();
         }
       }
     }
-
-    delete [] samples;
-    delete [] modes;
   }
+  return true;
 }
 
 /// Remove all samples in the backpressure queue and packet queue.
@@ -829,9 +825,7 @@ TransportSendStrategy::clear(SendMode mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
 
-  TransportSendElement element (0, 0);
-  this->send_delayed_notifications(element);
-
+  send_delayed_notifications();
   QueueType* elems = 0;
   QueueType* queue = 0;
   {
@@ -982,7 +976,19 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
     GuardType guard(this->lock_);
 
     if (this->link_released_) {
-      this->add_delayed_notification(element);
+
+      if (this->num_delayed_notifications_ < this->max_samples_) {
+        this->add_delayed_notification(element);
+      } else {
+        const SendMode mode = this->mode_;
+        ACE_Reverse_Lock<LockType> reverse(this->lock_);
+        ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
+        if (mode == MODE_TERMINATED) {
+          element->data_dropped(true /*dropped_by_transport*/);
+        } else {
+          element->data_delivered();
+        }
+      }
 
     } else {
       if (this->mode_ == MODE_TERMINATED && !this->graceful_disconnecting_) {
@@ -1244,9 +1250,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
     }
   }
 
-  TransportSendElement delement (0, 0);
-  // Notify the Elements that were sent.
-  this->send_delayed_notifications(delement);
+  send_delayed_notifications();
 }
 
 void
@@ -1332,15 +1336,16 @@ TransportSendStrategy::send_stop()
     }
   }
 
-  TransportSendElement element(0, 0);
-  // Notify the Elements that were sent.
-  this->send_delayed_notifications(element);
+  send_delayed_notifications();
 }
 
 void
 TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
+
+  const TransportQueueElement::MatchOnPubId match(pub_id);
+  send_delayed_notifications(&match);
 
   GuardType guard(this->lock_);
 
@@ -1350,7 +1355,6 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
     this->send_buffer_->retain_all(pub_id);
   }
 
-  TransportQueueElement::MatchOnPubId match(pub_id);
   do_remove_sample(match);
 }
 
@@ -1371,17 +1375,13 @@ TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
   // in which case the element carry the info if the sample is released so the datalinkset
   // can stop calling rest datalinks to remove this sample if it's already released..
 
-  TransportSendElement tse(0, sample);
-  this->send_delayed_notifications(tse);
-
-  if (tse.released()) {
+  const char* const payload = sample->sample_->cont()->rd_ptr();
+  const TransportQueueElement::MatchOnDataPayload modp(payload);
+  if (send_delayed_notifications(&modp)) {
     return REMOVE_RELEASED;
   }
 
   GuardType guard(this->lock_);
-
-  const char* payload = sample->sample_->cont()->rd_ptr();
-  TransportQueueElement::MatchOnDataPayload modp(payload);
   return do_remove_sample(modp);
 }
 
