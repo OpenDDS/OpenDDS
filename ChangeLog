@@ -1,9 +1,20 @@
+Wed Sep 11 23:19:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          In remove_association(), there may be fewer instance
+          handles than rds_len.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Minor update to the prior commit.
+
 Wed Sep 11 14:26:27 UTC 2013  Huang-Ming Huang  <huangh@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
-        
-          Fixed problem where the quoted value of -ORB command line argument would be expanded before passed
-          into ORB_init().
+
+          Fixed problem where the quoted value of -ORB command line argument
+          would be expanded before passed into ORB_init().
 
 Wed Sep 11 00:46:49 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
@@ -33,12 +44,14 @@ Mon Sep  9 15:39:08 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
         * dds/DCPS/ZeroCopySeq_T.h:
         * dds/idl/CPPTemplate.txt:
 
-         Fixed fuzz errors.
+          Fixed fuzz errors.
 
 Thu Sep  5 18:47:10 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
-          Added lock to take() with AbstractSample interface to keep data from double deleting it's member pointers
+
+          Added lock to take() with AbstractSample interface to keep data from
+          double deleting it's member pointers.
 
 Wed Sep  4 02:20:35 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
 

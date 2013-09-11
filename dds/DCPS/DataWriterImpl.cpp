@@ -608,7 +608,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
 
         /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
         this->publication_match_status_.last_subscription_handle =
-          handles[rds_len - 1];
+          handles[fully_associated_len - 1];
 
         set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
 

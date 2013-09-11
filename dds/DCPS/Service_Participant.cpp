@@ -285,7 +285,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
           ORB_argv_.add(shifter.get_current());
           shifter.consume_arg();
           if (shifter.is_parameter_next()) {
-            ORB_argv_.add(shifter.get_current(),1);
+            ORB_argv_.add(shifter.get_current(), true /*quote_arg*/);
             shifter.consume_arg();
           }
         }
