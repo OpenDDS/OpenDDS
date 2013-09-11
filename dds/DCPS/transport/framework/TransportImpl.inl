@@ -12,6 +12,8 @@
 #include "DataLink.h"
 #include "EntryExit.h"
 
+#include "ace/Reactor.h"
+
 ACE_INLINE
 OpenDDS::DCPS::TransportInst*
 OpenDDS::DCPS::TransportImpl::config() const
