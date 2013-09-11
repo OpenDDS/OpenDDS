@@ -1359,6 +1359,7 @@ DataLink::handle_close(ACE_HANDLE h, ACE_Reactor_Mask m)
     // Take the same cleanup actions as if the timeout had expired.
     handle_timeout(ACE_Time_Value::zero, 0);
   }
+  return 0;
 }
 
 void
