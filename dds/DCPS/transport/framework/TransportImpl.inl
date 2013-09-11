@@ -32,6 +32,13 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
   return task._retn();
 }
 
+ACE_INLINE ACE_Reactor_Timer_Interface*
+OpenDDS::DCPS::TransportImpl::timer() const
+{
+  TransportReactorTask_rch task = this->reactor_task_;
+  return task.is_nil() ? 0 : task->get_reactor();
+}
+
 ACE_INLINE bool
 OpenDDS::DCPS::TransportImpl::connection_info
   (TransportLocator& local_info) const

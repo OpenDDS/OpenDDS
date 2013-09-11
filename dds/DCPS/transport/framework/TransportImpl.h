@@ -76,6 +76,9 @@ public:
   /// TransportLocator object.
   virtual bool connection_info_i(TransportLocator& local_info) const = 0;
 
+  /// Interface to the transport's reactor for scheduling timers.
+  ACE_Reactor_Timer_Interface* timer() const;
+
   /// Diagnostic aid.
   void dump();
   void dump(ostream& os);

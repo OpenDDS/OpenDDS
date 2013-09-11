@@ -1,3 +1,15 @@
+Wed Sep 11 00:46:49 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Use the transport's reactor for scheduled_delayed_release().
+          This avoids a deadlock scenario where two threads running
+          handle_timeout from different reactors each try to schedule/cancel
+          timers on the other reactor.
+
 Tue Sep 10 18:18:26 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:

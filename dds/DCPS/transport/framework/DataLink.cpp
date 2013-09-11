@@ -589,7 +589,7 @@ DataLink::schedule_delayed_release()
     this->send_strategy_->clear();
   }
 
-  ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
+  ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
   reactor->schedule_timer(this, 0, this->datalink_release_delay_);
   this->scheduled_ = true;
 }
@@ -598,7 +598,7 @@ bool
 DataLink::cancel_release()
 {
   if (scheduled_) {
-    ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
+    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
     return reactor->cancel_timer(this) > 0;
   }
   return false;
@@ -1349,6 +1349,16 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 
   this->_remove_ref();
   return 0;
+}
+
+int
+DataLink::handle_close(ACE_HANDLE h, ACE_Reactor_Mask m)
+{
+  if (h == ACE_INVALID_HANDLE && m == TIMER_MASK) {
+    // Reactor is shutting down with this timer still pending.
+    // Take the same cleanup actions as if the timeout had expired.
+    handle_timeout(ACE_Time_Value::zero, 0);
+  }
 }
 
 void

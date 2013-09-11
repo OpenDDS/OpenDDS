@@ -201,14 +201,8 @@ public:
   /// based on the snapshot in release_resources().
   void clear_associations();
 
-  // The second parameter (zero or non-zero) indicates whether the
-  // impl_->release_datalink() needs be called. The impl_->release_datalink()
-  // may result in the DataLink object deletion. Any access of DataLink object
-  // after that will get access violation. It's ok to release link in
-  // remove_association path (release_reservations()), but it would cause
-  // access violation during normal transport shutdown(transport_shutdown()).
-  int handle_timeout(const ACE_Time_Value &tv,
-                     const void * arg = 0);
+  int handle_timeout(const ACE_Time_Value& tv, const void* arg);
+  int handle_close(ACE_HANDLE h, ACE_Reactor_Mask m);
 
   // Set the DiffServ codepoint of the socket.  This is a stateless
   // method and is here only because this is a convenient common
