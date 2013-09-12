@@ -15,6 +15,7 @@
 #include "TransportImpl.h"
 #include "TransportInst.h"
 #include "SendResponseListener.h"
+#include "TransportClient.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
@@ -43,18 +44,16 @@ namespace DCPS {
 /// Only called by our TransportImpl object.
 DataLink::DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback,
                    bool is_active)
-  : stopped_(false),
-    default_listener_(0),
-    thr_per_con_send_task_(0),
-    transport_priority_(priority),
-    scheduled_(false),
-    strategy_condition_(strategy_lock_),
-    send_control_allocator_(0),
-    mb_allocator_(0),
-    db_allocator_(0),
-    is_loopback_(is_loopback),
-    is_active_(is_active),
-    start_failed_(false)
+  : stopped_(false)
+  , default_listener_(0)
+  , thr_per_con_send_task_(0)
+  , transport_priority_(priority)
+  , scheduled_(false)
+  , send_control_allocator_(0)
+  , mb_allocator_(0)
+  , db_allocator_(0)
+  , is_loopback_(is_loopback)
+  , is_active_(is_active)
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
@@ -122,13 +121,16 @@ DataLink::impl() const
 }
 
 void
-DataLink::wait_for_start()
+DataLink::invoke_on_start_callbacks(bool success)
 {
-  GuardType guard(this->strategy_lock_);
-  while ((this->send_strategy_.is_nil() || this->receive_strategy_.is_nil())
-         && !this->start_failed_) {
-    this->strategy_condition_.wait();
+  GuardType guard(strategy_lock_);
+  const DataLink_rch link(success ? this : 0, false);
+  for (size_t i = 0; i < on_start_callbacks_.size(); ++i) {
+    OnStartCallback& cb = on_start_callbacks_[i];
+    cb.first->use_datalink(cb.second, link);
   }
+  std::vector<OnStartCallback> empty;
+  on_start_callbacks_.swap(empty);
 }
 
 void

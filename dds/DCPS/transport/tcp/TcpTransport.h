@@ -49,25 +49,18 @@ public:
 
   virtual void unbind_link(DataLink* link);
 
-protected:
 
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
+private:
+  virtual DataLink* connect_datalink(const RemoteTransport& remote,
+                                     const ConnectionAttribs& attribs,
+                                     TransportClient* client);
+
+  virtual DataLink* accept_datalink(const RemoteTransport& remote,
                                     const ConnectionAttribs& attribs,
-                                    bool active);
+                                    TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
-
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -97,9 +90,11 @@ private:
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const TcpConnection_rch& connection);
 
-  /// Called by find_or_create_datalink().
   int make_active_connection(const ACE_INET_Addr& remote_address,
                              const TcpDataLink_rch& link);
+
+  bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
+                       TransportClient* client, const RepoId& remote_id);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
@@ -124,9 +119,6 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
-
-  void unbind_all(const std::vector<PriorityKey>& keys, GuardType* guard);
-  void unbind_all(const std::vector<PriorityKey>& keys);
 
 // TBD SOON - Something needs to protect the tcp_config_ reference
 //            because it gets set in our configure() method, and
@@ -170,11 +162,6 @@ private:
   /// TODO: reuse the reconnect_task in the TcpConnection
   ///       for new connection checking.
   TcpConnectionReplaceTask* con_checker_;
-
-  /// Locked by connections_lock_.  Tracks expected connections
-  /// that we have learned about in accept_datalink() but have not yet
-  /// arrived.
-  std::multimap<ConnectionEvent*, PriorityKey> pending_connections_;
 };
 
 } // namespace DCPS

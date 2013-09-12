@@ -150,6 +150,8 @@ public:
                                const WriterAssociation& writer,
                                bool active);
 
+  virtual void transport_assoc_done(int flags, const RepoId& remote_id);
+
   virtual void association_complete(const RepoId& remote_id);
 
   virtual void remove_associations(const WriterIdSeq& writers, bool callback);

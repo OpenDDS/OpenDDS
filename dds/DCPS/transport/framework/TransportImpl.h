@@ -79,6 +79,10 @@ public:
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;
 
+  /// Create the reactor task using sync send or optionally async send
+  /// by parameter on supported Windows platforms only.
+  void create_reactor_task(bool useAsyncSend = false);
+
   /// Diagnostic aid.
   void dump();
   void dump(ostream& os);
@@ -91,80 +95,47 @@ protected:
   bool configure(TransportInst* config);
 
   struct ConnectionAttribs {
+    RepoId local_id_;
     CORBA::Long priority_;
     bool local_reliable_, local_durable_;
   };
 
-  DataLink* find_datalink(const RepoId& local_id,
-                          const AssociationData& remote_association,
-                          const ConnectionAttribs& attribs,
-                          bool active);
-
-  DataLink* connect_datalink(const RepoId& local_id,
-                             const AssociationData& remote_association,
-                             const ConnectionAttribs& attribs);
-
-  struct OpenDDS_Dcps_Export ConnectionEvent {
-    ConnectionEvent(const RepoId& local_id,
-                    const AssociationData& remote_association,
-                    const ConnectionAttribs& attribs);
-
-    void wait(const ACE_Time_Value& timeout);
-    bool complete(const DataLink_rch& link);
-
-    const RepoId& local_id_;
-    const AssociationData& remote_association_;
-    const ConnectionAttribs& attribs_;
-    ACE_Thread_Mutex mtx_;
-    ACE_Condition_Thread_Mutex cond_;
-    DataLink_rch link_;
+  struct RemoteTransport {
+    RepoId repo_id_;
+    TransportBLOB blob_;
+    CORBA::Long publication_transport_priority_;
+    bool reliable_, durable_;
   };
 
-  /// accept_datalink() is called from TransportClient::associate()
-  /// for each TransportImpl on the passive side.  Any datalink
-  /// returned should be a fully connected datalink matching this
-  /// connection event.  Otherwise, this operation should return
-  /// 0 and passively wait for physical connection from the active
+  /// connect_datalink() is called from TransportClient to initiate an
+  /// association as the active peer.  A DataLink may be returned if
+  /// one is already connected and ready to use, otherwise
+  /// initiate a connection to the passive side and return from this
+  /// method.  Upon completion of the physical connection, the
+  /// transport calls back to TransportClient::use_datalink().
+  virtual DataLink* connect_datalink(const RemoteTransport& remote,
+                                     const ConnectionAttribs& attribs,
+                                     TransportClient* client) = 0;
+
+  /// accept_datalink() is called from TransportClient to initiate an
+  /// association as the passive peer.  A DataLink may be returned if
+  /// one is already connected and ready to use, otherwise
+  /// passively wait for a physical connection from the active
   /// side (either in the form of a connection event or handshaking
   /// message).  Upon completion of the physical connection, the
-  /// transport should signal the connection event, as
-  /// TransportClient::associate() is waiting on this.
-  virtual DataLink* accept_datalink(ConnectionEvent& ce) = 0;
-
-  /// connect_datalink_i() is called from TransportClient::associate()
-  /// (via TransportImpl::connect_datalink()) for each TransportImpl
-  /// on the active side, until a valid datalink is returned.  Any
-  /// datalink returned should be a fully connected datalink matching
-  /// this connection event.  This method should block and wait for
-  /// the physical connection (either in the form of a connection
-  /// event or handshaking message).  If the connection is unable to
-  /// be completed, returning 0 causes TransportClient::associate()
-  /// to try the next TransportImpl in the current configuration.
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs) = 0;
-
-  /// stop_accepting() is called from TransportClient::associate()
-  /// to terminate the accepting process begun by accept_datalink().
-  /// This allows the TransportImpl to clean up any resources
-  /// asssociated with this ConnectionEvent.
-  virtual void stop_accepting(ConnectionEvent& ce) = 0;
-
-  /// find_datalink_i() attempts to return a DataLink that was
-  /// previously created via either accept_datalink() or
-  /// connect_datalink_i().  If one is not available,
-  /// the transport framework proceeds with creating a new
-  /// datalink.
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
+  /// transport calls back to TransportClient::use_datalink().
+  virtual DataLink* accept_datalink(const RemoteTransport& remote,
                                     const ConnectionAttribs& attribs,
-                                    bool active) = 0;
+                                    TransportClient* client) = 0;
+
+  /// stop_accepting_or_connecting() is called from TransportClient
+  /// to terminate the accepting process begun by accept_datalink()
+  /// or connect_datalink().  This allows the TransportImpl to clean
+  /// up any resources asssociated with this pending connection.
+  /// The TransportClient* passed in to accept or connect is not
+  /// valid after this method is called.
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id) = 0;
 
   /// Concrete subclass gets a shot at the config object.  The subclass
   /// will likely downcast the TransportInst object to a
@@ -184,6 +155,9 @@ protected:
   /// Caller is responsible for the "copy" of the reference that is
   /// returned.
   TransportReactorTask* reactor_task();
+
+  std::multimap<TransportClient*, DataLink_rch> pending_connections_;
+  void add_pending_connection(TransportClient* client, DataLink* link);
 
 private:
   /// We have a few friends in the transport framework so that they
@@ -210,30 +184,6 @@ private:
   void detach_client(TransportClient* client);
   virtual void pre_detach(TransportClient*) {}
 
-  DataLink* find_connect_i(const RepoId& local_id,
-                           const AssociationData& remote_association,
-                           const ConnectionAttribs& attribs,
-                           bool active, bool connect);
-
-public:
-  /// Called by our friends, the TransportClient, and the DataLink.
-  /// Since this TransportImpl can be attached to many TransportClient
-  /// objects, and each TransportClient object could be "running" in
-  /// a separate thread, we need to protect all of the "reservation"
-  /// methods with a lock.  The protocol is that a client of ours
-  /// must "acquire" our reservation_lock_ before it can proceed to
-  /// call any methods that affect the DataLink reservations.  It
-  /// should release the reservation_lock_ as soon as it is done.
-  int acquire();
-  int tryacquire();
-  int release();
-  int remove();
-
-  /// Create the reactor task using sync send or optionally async send
-  /// by parameter on supported Windows platforms only.
-  void create_reactor_task(bool useAsyncSend = false);
-
-private:
   /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference
   /// to a TransportInterfaceInfo object that will be "populated"
@@ -245,11 +195,6 @@ private:
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
-
-  /// Our reservation lock.
-  typedef ACE_SYNCH_MUTEX                ReservationLockType;
-  ReservationLockType reservation_lock_;
-  ACE_thread_t rlock_thread_id_;
 
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;

@@ -254,144 +254,133 @@ DataReaderImpl::add_association(const RepoId& yourId,
                                 const WriterAssociation& writer,
                                 bool active)
 {
-  //
-  // The following block is for diagnostic purposes only.
-  //
-  if (DCPS_debug_level >= 1) {
+  if (DCPS_debug_level) {
     GuidConverter reader_converter(yourId);
     GuidConverter writer_converter(writer.writerId);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataReaderImpl::add_association - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association - ")
+               ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
                std::string(reader_converter).c_str(),
                std::string(writer_converter).c_str()));
   }
 
-  //
-  // This block prevents adding associations to deleted readers.
-  // Presumably this is a "good thing(tm)".
-  //
-  if (entity_deleted_ == true) {
-    if (DCPS_debug_level >= 1)
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataReaderImpl::add_association")
+  if (entity_deleted_.value()) {
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association")
                  ACE_TEXT(" This is a deleted datareader, ignoring add.\n")));
-
+    }
     return;
   }
 
-  //
   // We are being called back from the repository before we are done
   // processing after our call to the repository that caused this call
   // (from the repository) to be made.
-  //
   if (GUID_UNKNOWN == subscription_id_) {
-    // add_associations was invoked before DCSPInfoRepo::add_subscription() returned.
     subscription_id_ = yourId;
   }
 
-  //
-  // We do the following while holding the publication_handle_lock_.
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+
+  // For each writer in the list of writers to associate with, we
+  // create a WriterInfo and a WriterStats object and store them in
+  // our internal maps.
   //
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
+    ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-    //
-    // For each writer in the list of writers to associate with, we
-    // create a WriterInfo and a WriterStats object and store them in
-    // our internal maps.
-    //
-    {
-      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+    const PublicationId& writer_id = writer.writerId;
+    RcHandle<WriterInfo> info = new WriterInfo(this, writer_id,
+                                               writer.writerQos);
+    std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
+      // This insertion is idempotent.
+      WriterMapType::value_type(
+        writer_id,
+        info));
+    statistics_.insert(
+      StatsMapType::value_type(
+        writer_id,
+        WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
 
-      const PublicationId& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info = new WriterInfo(this, writer_id,
-                                                 writer.writerQos);
-      std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
-        // This insertion is idempotent.
-        WriterMapType::value_type(
-          writer_id,
-          info));
-      this->statistics_.insert(
-        StatsMapType::value_type(
-          writer_id,
-          WriterStats(
-            this->raw_latency_buffer_size_,
-            this->raw_latency_buffer_type_)));
+    if (DCPS_debug_level > 4) {
+      GuidConverter converter(writer_id);
+      ACE_DEBUG((LM_DEBUG,
+                  "(%P|%t) DataReaderImpl::add_association: "
+                  "inserted writer %C.return %d \n",
+                  std::string(converter).c_str(), bpair.second));
 
-      if (DCPS_debug_level > 4) {
-        GuidConverter converter(writer_id);
+      WriterMapType::iterator iter = writers_.find(writer_id);
+      if (iter != writers_.end()) {
+        // This may not be an error since it could happen that the sample
+        // is delivered to the datareader after the write is dis-associated
+        // with this datareader.
+        GuidConverter reader_converter(subscription_id_);
+        GuidConverter writer_converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
-                   "(%P|%t) DataReaderImpl::add_association: "
-                   "inserted writer %C.return %d \n",
-                   std::string(converter).c_str(), bpair.second));
-
-        WriterMapType::iterator iter = writers_.find(writer_id);
-        if (iter != writers_.end()) {
-          // This may not be an error since it could happen that the sample
-          // is delivered to the datareader after the write is dis-associated
-          // with this datareader.
-          GuidConverter reader_converter(subscription_id_);
-          GuidConverter writer_converter(writer_id);
-          ACE_DEBUG((LM_DEBUG,
-                    ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
-                    ACE_TEXT("reader %C is associated with writer %C.\n"),
-                    std::string(reader_converter).c_str(),
-                    std::string(writer_converter).c_str()));
-        }
-      }
-    }
-
-    //
-    // Propagate the add_associations processing down into the Transport
-    // layer here.  This will establish the transport support and reserve
-    // usage of an existing connection or initiate creation of a new
-    // connection if no suitable connection is available.
-    //
-    AssociationData data;
-    data.remote_id_ = writer.writerId;
-    data.remote_data_ = writer.writerTransInfo;
-    data.publication_transport_priority_ =
-      writer.writerQos.transport_priority.value;
-    data.remote_reliable_ =
-      (writer.writerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
-    data.remote_durable_ =
-      (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
-
-    if (!this->associate(data, active)) {
-      if (DCPS_debug_level) {
-        ACE_DEBUG((LM_ERROR,
                   ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
-                  ACE_TEXT("ERROR: transport layer failed to associate.\n")));
+                  ACE_TEXT("reader %C is associated with writer %C.\n"),
+                  std::string(reader_converter).c_str(),
+                  std::string(writer_converter).c_str()));
       }
-      return;
     }
+  }
 
+  // Propagate the add_associations processing down into the Transport
+  // layer here.  This will establish the transport support and reserve
+  // usage of an existing connection or initiate creation of a new
+  // connection if no suitable connection is available.
+  AssociationData data;
+  data.remote_id_ = writer.writerId;
+  data.remote_data_ = writer.writerTransInfo;
+  data.publication_transport_priority_ =
+    writer.writerQos.transport_priority.value;
+  data.remote_reliable_ =
+    (writer.writerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
+  data.remote_durable_ =
+    (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+
+  if (!associate(data, active)) {
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_ERROR,
+                ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                ACE_TEXT("ERROR: transport layer failed to associate.\n")));
+    }
+  }
+}
+
+void
+DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
+{
+  if (!(flags & ASSOC_OK)) {
+    if (DCPS_debug_level) {
+      const GuidConverter conv(remote_id);
+      ACE_DEBUG((LM_ERROR,
+                ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
+                ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
+                std::string(conv).c_str()));
+    }
+    return;
+  }
+
+  const bool active = flags & ASSOC_ACTIVE;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
     // Check if any publications have already sent a REQUEST_ACK message.
     {
-      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-
-      WriterMapType::iterator where = this->writers_.find(writer.writerId);
-
-      if (where != this->writers_.end()) {
+      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+      WriterMapType::iterator where = writers_.find(remote_id);
+      if (where != writers_.end()) {
         const ACE_Time_Value now = ACE_OS::gettimeofday();
-
-        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
-
+        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
         if (where->second->should_ack(now)) {
           const SequenceNumber sequence = where->second->ack_sequence();
           const DDS::Time_t timenow = time_value_to_time(now);
-          if (this->send_sample_ack(writer.writerId, sequence, timenow)) {
+          if (send_sample_ack(remote_id, sequence, timenow)) {
             where->second->clear_acks(sequence);
           }
         }
       }
     }
 
-    //
     // LIVELINESS policy timers are managed here.
-    //
     if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
       // this call will start the timer if it is not already set
       const ACE_Time_Value now = ACE_OS::gettimeofday();
@@ -399,45 +388,33 @@ DataReaderImpl::add_association(const RepoId& yourId,
       if (DCPS_debug_level >= 5) {
         GuidConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                   ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
                    ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
                    std::string(converter).c_str()));
       }
 
-      this->handle_timeout(now, this);
+      handle_timeout(now, this);
     }
-
-    // else - no timer needed when LIVELINESS.lease_duration is INFINITE
-
   }
-  //
   // We no longer hold the publication_handle_lock_.
-  //
 
-  //
-  // We only do the following processing for readers that are *not*
-  // readers of Builtin Topics.
-  //
   if (!is_bit_) {
 
-    DDS::InstanceHandle_t handle =
-      this->participant_servant_->get_handle(writer.writerId);
+    DDS::InstanceHandle_t handle = participant_servant_->get_handle(remote_id);
 
-    //
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
-    //
     {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
       // This insertion is idempotent.
-      this->id_to_handle_map_.insert(
-        RepoIdToHandleMap::value_type(writer.writerId, handle));
+      id_to_handle_map_.insert(
+        RepoIdToHandleMap::value_type(remote_id, handle));
 
       if (DCPS_debug_level > 4) {
-        GuidConverter converter(writer.writerId);
+        GuidConverter converter(remote_id);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
+                   ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
                    ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
                    std::string(converter).c_str(),
                    handle));
@@ -446,53 +423,50 @@ DataReaderImpl::add_association(const RepoId& yourId,
       // We need to adjust these after the insertions have all completed
       // since insertions are not guaranteed to increase the number of
       // currently matched publications.
-      int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
-      this->subscription_match_status_.current_count_change
-      = matchedPublications - this->subscription_match_status_.current_count;
-      this->subscription_match_status_.current_count = matchedPublications;
+      const int matchedPublications = static_cast<int>(id_to_handle_map_.size());
+      subscription_match_status_.current_count_change =
+        matchedPublications - subscription_match_status_.current_count;
+      subscription_match_status_.current_count = matchedPublications;
 
-      ++this->subscription_match_status_.total_count;
-      ++this->subscription_match_status_.total_count_change;
+      ++subscription_match_status_.total_count;
+      ++subscription_match_status_.total_count_change;
 
-      this->subscription_match_status_.last_publication_handle = handle;
+      subscription_match_status_.last_publication_handle = handle;
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
-      DDS::DataReaderListener_var listener
-      = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
+      DDS::DataReaderListener_var listener =
+        listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-      if (!CORBA::is_nil(listener.in())) {
-        listener->on_subscription_matched(
-          dr_local_objref_.in(),
-          this->subscription_match_status_);
+      if (!CORBA::is_nil(listener)) {
+        listener->on_subscription_matched(dr_local_objref_,
+                                          subscription_match_status_);
 
         // TBD - why does the spec say to change this but not change
         //       the ChangeFlagStatus after a listener call?
 
         // Client will look at it so next time it looks the change should be 0
-        this->subscription_match_status_.total_count_change = 0;
-        this->subscription_match_status_.current_count_change = 0;
+        subscription_match_status_.total_count_change = 0;
+        subscription_match_status_.current_count_change = 0;
       }
 
       notify_status_condition();
     }
 
     {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
-
-      this->writers_[writer.writerId]->handle_ = handle;
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+      writers_[remote_id]->handle_ = handle;
     }
   }
 
   if (!active) {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->association_complete(this->domain_id_,
-                                this->participant_servant_->get_id(),
-                                this->subscription_id_, writer.writerId);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    disco->association_complete(domain_id_, participant_servant_->get_id(),
+                                subscription_id_, remote_id);
   }
 
-  if (this->monitor_) {
-    this->monitor_->report();
+  if (monitor_) {
+    monitor_->report();
   }
 }
 

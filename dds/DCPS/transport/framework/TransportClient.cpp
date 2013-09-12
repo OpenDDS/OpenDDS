@@ -19,10 +19,13 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Service_Participant.h"
 
-#include "ace/Reverse_Lock_T.h"
+#include "ace/Reactor_Timer_Interface.h"
+
+#include <algorithm>
+#include <iterator>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -48,6 +51,14 @@ TransportClient::~TransportClient()
   for (DataLinkSet::MapType::iterator iter = links_.map().begin();
        iter != links_.map().end(); ++iter) {
     iter->second->remove_listener(repo_id_);
+  }
+
+  ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
+  for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+    for (size_t i = 0; i < impls_.size(); ++i) {
+      impls_[i]->stop_accepting_or_connecting(this, it->second.data_.remote_id_);
+    }
+    timer->cancel_timer(&it->second);
   }
 
   for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
@@ -161,6 +172,10 @@ TransportClient::transport_detached(TransportImpl* which)
        it != impls_.end(); ++it) {
     if (it->in() == which) {
       impls_.erase(it);
+      for (PendingMap::iterator it2 = pending_.begin();
+           it2 != pending_.end(); ++it2) {
+        which->stop_accepting_or_connecting(this, it2->first);
+      }
       return;
     }
   }
@@ -171,64 +186,147 @@ TransportClient::associate(const AssociationData& data, bool active)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
   repo_id_ = get_repo_id();
-  const TransportImpl::ConnectionAttribs attribs =
-    {get_priority_value(data), reliable_, durable_};
 
-  MultiReservLock mrl(impls_);
-  ACE_GUARD_RETURN(MultiReservLock, guard2, mrl, false);
+  if (impls_.empty()) {
+    return false;
+  }
 
-  // Attempt to find an existing DataLink that can be reused
-  for (size_t i = 0; i < impls_.size(); ++i) {
-
-    DataLink_rch link =
-      impls_[i]->find_datalink(repo_id_, data, attribs, active);
-    if (!link.is_nil()) {
-      add_link(link, data.remote_id_);
-      return true;
+  PendingMap::iterator iter = pending_.find(data.remote_id_);
+  if (iter == pending_.end()) {
+    iter = pending_.insert(std::make_pair(data.remote_id_, PendingAssoc())).first;
+  } else {
+    if (iter->second.removed_) {
+      iter->second.removed_ = false;
+    } else {
+      //TODO: ACE_ERROR blah blah... already associated with remote
+      return false;
     }
   }
 
-  // Create a new DataLink
-  if (active) {
+  PendingAssoc& pend = iter->second;
+  pend.active_ = active;
+  pend.impls_.clear();
+  pend.blob_index_ = 0;
+  pend.data_ = data;
+  pend.attribs_.local_id_ = repo_id_;
+  pend.attribs_.priority_ = get_priority_value(data);
+  pend.attribs_.local_reliable_ = reliable_;
+  pend.attribs_.local_durable_ = durable_;
 
+  if (active) {
+    pend.impls_.reserve(impls_.size());
+    std::reverse_copy(impls_.begin(), impls_.end(),
+      std::back_inserter(pend.impls_));
+    pend.initiate_connect(this);
+
+  } else { // passive
+    // call accept_datalink for each impl / blob pair of the same t ype
     for (size_t i = 0; i < impls_.size(); ++i) {
-      DataLink_rch link = impls_[i]->connect_datalink(repo_id_, data, attribs);
-      if (!link.is_nil()) {
-        add_link(link, data.remote_id_);
+      const std::string type = impls_[i]->transport_type();
+      for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
+        if (data.remote_data_[j].transport_type.in() == type) {
+          const TransportImpl::RemoteTransport remote = {data.remote_id_,
+            data.remote_data_[j].data,
+            data.publication_transport_priority_,
+            data.remote_reliable_, data.remote_durable_};
+          const DataLink_rch link =
+            impls_[i]->accept_datalink(remote, pend.attribs_, this);
+          if (!link.is_nil()) {
+            use_datalink_i(data.remote_id_, link);
+            return true;
+          }
+        }
+      }
+      pend.impls_.push_back(impls_[i]);
+    }
+
+    ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
+    timer->schedule_timer(&pend, this, passive_connect_duration_);
+  }
+
+  return true;
+}
+
+int
+TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
+                                              const void* arg)
+{
+  TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
+  tc->use_datalink(data_.remote_id_, 0);
+  return 0;
+}
+
+bool
+TransportClient::PendingAssoc::initiate_connect(TransportClient* tc)
+{
+  // find the next impl / blob entry that have matching types
+  while (!impls_.empty()) {
+    const TransportImpl_rch& impl = impls_.back();
+    const std::string type = impl->transport_type();
+    for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
+      if (data_.remote_data_[blob_index_].transport_type.in() == type) {
+        const TransportImpl::RemoteTransport remote = {data_.remote_id_,
+          data_.remote_data_[blob_index_].data,
+          data_.publication_transport_priority_,
+          data_.remote_reliable_, data_.remote_durable_};
+        const DataLink_rch link = impl->connect_datalink(remote, attribs_, tc);
+        ++blob_index_;
+        if (!link.is_nil()) {
+          tc->use_datalink_i(data_.remote_id_, link);
+        }
         return true;
       }
     }
-  } else { // passive
+    impls_.pop_back();
+    blob_index_ = 0;
+  }
+  return false;
+}
 
-    TransportImpl::ConnectionEvent ce(repo_id_, data, attribs);
-    for (size_t i = 0; i < impls_.size(); ++i) {
-      DataLink_rch link = impls_[i]->accept_datalink(ce);
-      if (!link.is_nil()) {
-        ce.link_ = link;
-        break;
-      }
-    }
-    if (ce.link_.is_nil()) {
-      // TransportImpl lock must be released for the loopback case, since the peer
-      // may be one of these impls, and it may need to make progress on the
-      // active side in order for this wait to complete.
-      ACE_Reverse_Lock<MultiReservLock> rev(mrl);
-      ACE_GUARD_RETURN(ACE_Reverse_Lock<MultiReservLock>, rguard, rev, false);
+void
+TransportClient::use_datalink(const RepoId& remote_id,
+                              const DataLink_rch& link)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  use_datalink_i(remote_id, link);
+}
 
-      ce.wait(passive_connect_duration_);
+void
+TransportClient::use_datalink_i(const RepoId& remote_id,
+                                const DataLink_rch& link)
+{
+  PendingMap::iterator iter = pending_.find(remote_id);
+  if (iter == pending_.end()) {
+    return;
+  }
+
+  PendingAssoc& pend = iter->second;
+  const int active_flag = pend.active_ ? ASSOC_ACTIVE : 0;
+
+  if (pend.removed_) {
+    transport_assoc_done(active_flag, remote_id);
+
+  } else if (link.is_nil()) {
+    if (pend.active_ && pend.initiate_connect(this)) {
+      return;
     }
-    for (size_t i = 0; i < impls_.size(); ++i) {
-      if (ce.link_.is_nil() || impls_[i].in() != ce.link_->impl().in()) {
-        impls_[i]->stop_accepting(ce);
-      }
-    }
-    if (!ce.link_.is_nil()) {
-      add_link(ce.link_, data.remote_id_);
-      return true;
+    transport_assoc_done(active_flag, remote_id);
+
+  } else { // link is ready to use
+    add_link(link, remote_id);
+    transport_assoc_done(active_flag | ASSOC_OK, remote_id);
+  }
+
+  // either link is valid or assoc failed, clean up pending object
+  if (!pend.active_) {
+    for (size_t i = 0; i < pend.impls_.size(); ++i) {
+      pend.impls_[i]->stop_accepting_or_connecting(this, pend.data_.remote_id_);
     }
   }
 
-  return false;
+  ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
+  timer->cancel_timer(&pend);
+  pending_.erase(iter);
 }
 
 void
@@ -249,11 +347,16 @@ void
 TransportClient::disassociate(const RepoId& peerId)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  const PendingMap::iterator iter = pending_.find(peerId);
+  if (iter != pending_.end()) {
+    iter->second.removed_ = true;
+    return;
+  }
 
-  DataLinkIndex::iterator found = data_link_index_.find(peerId);
+  const DataLinkIndex::iterator found = data_link_index_.find(peerId);
   if (found == data_link_index_.end()) {
     if (DCPS_debug_level > 4) {
-      GuidConverter converter(peerId);
+      const GuidConverter converter(peerId);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
                  ACE_TEXT("no link for remote peer %C\n"),
@@ -262,11 +365,7 @@ TransportClient::disassociate(const RepoId& peerId)
     return;
   }
 
-  DataLink_rch link = found->second;
-
-  MultiReservLock mrl(impls_);
-  ACE_GUARD(MultiReservLock, guard2, mrl);
-
+  const DataLink_rch link = found->second;
   DataLinkSetMap released;
   link->release_reservations(peerId, repo_id_, released);
   data_link_index_.erase(found);
@@ -450,75 +549,6 @@ bool
 TransportClient::remove_all_msgs()
 {
   return links_.remove_all_msgs(repo_id_);
-}
-
-
-// MultiReservLock nested class
-
-
-TransportClient::MultiReservLock::MultiReservLock(
-  const std::vector<TransportImpl_rch>& impls)
-  : impls_(impls)
-{
-  for (size_t i = 0; i < impls_.size(); ++i) {
-    sorted_.insert(impls_[i].in());
-  }
-}
-
-int
-TransportClient::MultiReservLock::action_fwd(
-  TransportClient::MultiReservLock::PMF function,
-  TransportClient::MultiReservLock::PMF undo)
-{
-  typedef std::set<TransportImpl*>::iterator iter_t;
-  for (iter_t iter = sorted_.begin(); iter != sorted_.end(); ++iter) {
-    int ret = ((*iter)->*function)();
-    if (ret != 0) {
-      while (iter != sorted_.begin()) {
-        ((*--iter)->*undo)();
-      }
-      return ret;
-    }
-  }
-  return 0;
-}
-
-int
-TransportClient::MultiReservLock::action_rev(
-  TransportClient::MultiReservLock::PMF function)
-{
-  int ret = 0;
-  typedef std::set<TransportImpl*>::reverse_iterator iter_t;
-  for (iter_t iter = sorted_.rbegin(); iter != sorted_.rend(); ++iter) {
-    ret += ((*iter)->*function)();
-  }
-  return ret;
-}
-
-int
-TransportClient::MultiReservLock::acquire()
-{
-  typedef TransportImpl Lock;
-  return action_fwd(&Lock::acquire, &Lock::release);
-}
-
-int
-TransportClient::MultiReservLock::tryacquire()
-{
-  typedef TransportImpl Lock;
-  return action_fwd(&Lock::tryacquire, &Lock::release);
-}
-
-int
-TransportClient::MultiReservLock::release()
-{
-  return action_rev(&TransportImpl::release);
-}
-
-int
-TransportClient::MultiReservLock::remove()
-{
-  return action_rev(&TransportImpl::remove);
 }
 
 }

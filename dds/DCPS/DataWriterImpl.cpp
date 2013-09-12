@@ -211,23 +211,19 @@ DataWriterImpl::add_association(const RepoId& yourId,
 {
   DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
 
-  if (DCPS_debug_level >= 1) {
+  if (DCPS_debug_level) {
     GuidConverter writer_converter(yourId);
     GuidConverter reader_converter(reader.readerId);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::add_association - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association - ")
+               ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
                std::string(writer_converter).c_str(),
                std::string(reader_converter).c_str()));
   }
 
-  if (entity_deleted_ == true) {
-    if (DCPS_debug_level >= 1)
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataWriterImpl::add_association")
+  if (entity_deleted_.value()) {
+    if (DCPS_debug_level)
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association")
                  ACE_TEXT(" This is a deleted datawriter, ignoring add.\n")));
-
     return;
   }
 
@@ -236,7 +232,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
                  reader.exprParams, participant_servant_,
@@ -260,38 +256,52 @@ DataWriterImpl::add_association(const RepoId& yourId,
   data.remote_durable_ =
     (reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
-  if (!this->associate(data, active)) {
+  if (!associate(data, active)) {
     //FUTURE: inform inforepo and try again as passive peer
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_ERROR,
                 ACE_TEXT("(%P|%t) DataWriterImpl::add_association: ")
                 ACE_TEXT("ERROR: transport layer failed to associate.\n")));
     }
+  }
+}
+
+void
+DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
+{
+  if (!(flags & ASSOC_OK)) {
+    if (DCPS_debug_level) {
+      const GuidConverter conv(remote_id);
+      ACE_DEBUG((LM_ERROR,
+                ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
+                ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
+                std::string(conv).c_str()));
+    }
     return;
   }
 
-  if (active) {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  if (flags & ASSOC_ACTIVE) {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
     // Have we already received an association_complete() callback?
-    if (assoc_complete_readers_.count(reader.readerId)) {
-      assoc_complete_readers_.erase(reader.readerId);
-      association_complete_i(reader.readerId);
+    if (assoc_complete_readers_.count(remote_id)) {
+      assoc_complete_readers_.erase(remote_id);
+      association_complete_i(remote_id);
 
     // Add to pending_readers_ -> pending means we are waiting
     // for the association_complete() callback.
-    } else if (OpenDDS::DCPS::insert(pending_readers_, reader.readerId) == -1) {
-      GuidConverter converter(reader.readerId);
+    } else if (OpenDDS::DCPS::insert(pending_readers_, remote_id) == -1) {
+      const GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::add_association: ")
+                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("failed to mark %C as pending.\n"),
                  std::string(converter).c_str()));
 
     } else {
-      if (DCPS_debug_level > 0) {
-        GuidConverter converter(reader.readerId);
+      if (DCPS_debug_level) {
+        const GuidConverter converter(remote_id);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::add_association: ")
+                   ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                    ACE_TEXT("marked %C as pending.\n"),
                    std::string(converter).c_str()));
       }
@@ -299,10 +309,9 @@ DataWriterImpl::add_association(const RepoId& yourId,
   } else {
     // In the current implementation, DataWriter is always active, so this
     // code will not be applicable.
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->association_complete(this->domain_id_,
-      this->participant_servant_->get_id(),
-      this->publication_id_, reader.readerId);
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    disco->association_complete(domain_id_, participant_servant_->get_id(),
+                                publication_id_, remote_id);
   }
 }
 

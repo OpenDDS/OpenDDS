@@ -31,23 +31,16 @@ public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
 
 private:
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
+  virtual DataLink* connect_datalink(const RemoteTransport& remote,
+                                     const ConnectionAttribs& attribs,
+                                     TransportClient* client);
+
+  virtual DataLink* accept_datalink(const RemoteTransport& remote,
                                     const ConnectionAttribs& attribs,
-                                    bool active);
+                                    TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
-
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 

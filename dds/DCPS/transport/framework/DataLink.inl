@@ -230,6 +230,7 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
   // make sure to stop() any strategy that was already start()'ed.
   if (send_strategy->start() != 0) {
     // Failed to start the TransportSendStrategy.
+    invoke_on_start_callbacks(false);
     return -1;
   }
 
@@ -239,7 +240,7 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
     // Remember to stop() the TransportSendStrategy since we did start it,
     // and now need to "undo" that action.
     send_strategy->stop();
-
+    invoke_on_start_callbacks(false);
     return -1;
   }
 
@@ -250,19 +251,32 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
 
     this->send_strategy_    = send_strategy;
     this->receive_strategy_ = receive_strategy;
-
-    this->strategy_condition_.broadcast();
   }
+  invoke_on_start_callbacks(true);
   return 0;
 }
 
 ACE_INLINE
-void
-DataLink::unblock_wait_for_start()
+bool
+DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
 {
-  GuardType guard(this->strategy_lock_);
-  this->start_failed_ = true;
-  this->strategy_condition_.broadcast();
+  GuardType guard(strategy_lock_);
+  if (!send_strategy_.is_nil()) {
+    return false; // link already started
+  }
+  on_start_callbacks_.push_back(std::make_pair(client, remote));
+  return true;
+}
+
+ACE_INLINE
+void
+DataLink::remove_on_start_callback(TransportClient* client, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+  on_start_callbacks_.erase(std::remove(on_start_callbacks_.begin(),
+                                        on_start_callbacks_.end(),
+                                        std::make_pair(client, remote)),
+                            on_start_callbacks_.end());
 }
 
 ACE_INLINE

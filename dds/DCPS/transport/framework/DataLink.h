@@ -30,6 +30,8 @@
 
 #include <list>
 #include <map>
+#include <utility>
+#include <vector>
 
 #include <iosfwd> // For operator<<() diagnostic formatter.
 
@@ -46,6 +48,7 @@ class  TransportQueueElement;
 class  ReceivedDataSample;
 struct DataSampleListElement;
 class  ThreadPerConnectionSendTask;
+class  TransportClient;
 
 typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
 
@@ -246,14 +249,11 @@ public:
 
   TransportImpl_rch impl() const;
 
-  /// A second thread may try to use this DataLink before the creating thread
-  /// has completed the start() method.  In this case, call wait_for_start()
-  /// to block the current thread until start() completes.
-  void wait_for_start();
-  void unblock_wait_for_start();
-
   void default_listener(TransportReceiveListener* trl);
   TransportReceiveListener* default_listener() const;
+
+  bool add_on_start_callback(TransportClient* client, const RepoId& remote);
+  void remove_on_start_callback(TransportClient* client, const RepoId& remote);
 
 protected:
 
@@ -423,7 +423,9 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
-  ACE_SYNCH_CONDITION strategy_condition_;
+  typedef std::pair<TransportClient*, RepoId> OnStartCallback;
+  std::vector<OnStartCallback> on_start_callbacks_;
+  void invoke_on_start_callbacks(bool success);
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.
@@ -442,7 +444,6 @@ protected:
   bool is_loopback_;
   /// Is pub or sub ?
   bool is_active_;
-  bool start_failed_;
 };
 
 } // namespace DCPS

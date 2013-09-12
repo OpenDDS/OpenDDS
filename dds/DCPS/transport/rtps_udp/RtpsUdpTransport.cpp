@@ -70,49 +70,30 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 }
 
 DataLink*
-RtpsUdpTransport::find_datalink_i(const RepoId& /*local_id*/,
-                                  const RepoId& /*remote_id*/,
-                                  const TransportBLOB& /*remote_data*/,
-                                  bool /*remote_reliable*/,
-                                  bool /*remote_durable*/,
-                                  const ConnectionAttribs& /*attribs*/,
-                                  bool /*active*/)
-{
-  // We're not going to use find_datalink_i() for this transport.
-  // Instead, each new association will use either connect or accept.
-  return 0;
-}
-
-DataLink*
-RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
-                                     const RepoId& remote_id,
-                                     const TransportBLOB& remote_data,
-                                     bool remote_reliable, bool remote_durable,
-                                     const ConnectionAttribs& attribs)
+RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
+                                   const ConnectionAttribs& attribs,
+                                   TransportClient* client)
 {
   RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
-    link = make_datalink(local_id.guidPrefix);
+    link = make_datalink(attribs.local_id_.guidPrefix);
     if (link.is_nil()) {
       return 0;
     }
   }
 
-  use_datalink(local_id, remote_id, remote_data,
-               attribs.local_reliable_, remote_reliable,
-               attribs.local_durable_, remote_durable);
+  use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
+               attribs.local_reliable_, remote.reliable_,
+               attribs.local_durable_, remote.durable_);
 
-  GuidConverter local(local_id), remote(remote_id);
+  const GuidConverter local_conv(attribs.local_id_), remote_conv(remote.repo_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
-    "waiting for handshake local %C remote %C\n", std::string(local).c_str(),
-    std::string(remote).c_str()), 2);
+    "waiting for handshake local %C remote %C\n", std::string(local_conv).c_str(),
+    std::string(remote_conv).c_str()), 2);
 
-  // Release the TransportImpl's lock here while we wait for the handshake.
-  // This avoids deadlocks involving handshaking when lots of connections
-  // are being made in the same process.
-  release();
+  //TODO: fix waiting
 
-  if (!link->wait_for_handshake(local_id, remote_id)) {
+  if (!link->wait_for_handshake(attribs.local_id_, remote.repo_id_)) {
     VDBG_LVL((LM_ERROR, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
       "ERROR: wait for handshake failed\n"), 2);
     return 0;
@@ -123,40 +104,29 @@ RtpsUdpTransport::connect_datalink_i(const RepoId& local_id,
 }
 
 DataLink*
-RtpsUdpTransport::accept_datalink(ConnectionEvent& ce)
+RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
+                                  const ConnectionAttribs& attribs,
+                                  TransportClient* client)
 {
-  const std::string ttype = "rtps_udp";
-  const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
   RtpsUdpDataLink_rch link = link_;
-
-  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
-    if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
-      if (link_.is_nil()) {
-        link = make_datalink(ce.local_id_.guidPrefix);
-        if (link.is_nil()) {
-          // we're not going to be able to recover in another iteration
-          return 0;
-        }
-      }
-
-      use_datalink(ce.local_id_, ce.remote_association_.remote_id_,
-                   ce.remote_association_.remote_data_[idx].data,
-                   ce.attribs_.local_reliable_,
-                   ce.remote_association_.remote_reliable_,
-                   ce.attribs_.local_durable_,
-                   ce.remote_association_.remote_durable_);
-      return link._retn();
+  if (link_.is_nil()) {
+    link = make_datalink(attribs.local_id_.guidPrefix);
+    if (link.is_nil()) {
+      return 0;
     }
   }
-
-  return 0;
+  use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
+               attribs.local_reliable_, remote.reliable_,
+               attribs.local_durable_, remote.durable_);
+  return link._retn();
 }
 
 
 void
-RtpsUdpTransport::stop_accepting(ConnectionEvent& /*ce*/)
+RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* client,
+                                               const RepoId& remote_id)
 {
-  // nothing to do here, we don't defer any accept actions in accept_datalink()
+  //TODO: implement
 }
 
 void
