@@ -102,8 +102,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   TcpConnection_rch reactor_refcount(connection); // increment for reactor callback
 
   const int ret =
-    connector_.connect(pConn, key.address(),
-                       ACE_Synch_Options::asynch, tcp_config_->local_address_);
+    connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
   if (ret == -1 && errno != EWOULDBLOCK) {
     VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
     return 0;
@@ -115,18 +114,18 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
   if (ret == 0) {
     // connect() completed synchronously and called TcpConnection::active_open().
-    VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink "
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink "
                         "completed synchronously.\n"), 2);
     return link._retn();
   }
 
   if (!link->add_on_start_callback(client, remote.repo_id_)) {
     // link was started by the reactor thread before we could add a callback
-    VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 2);
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 2);
     return link._retn();
   }
 
-  VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 2);
   return 0;
 }
 

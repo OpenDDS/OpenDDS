@@ -194,9 +194,10 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
   // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
   tcp_config->_add_ref();
-  this->tcp_config_ = tcp_config;
+  tcp_config_ = tcp_config;
+  local_address_ = tcp_config_->local_address_;
 
-  set_sock_options(this->tcp_config_.in());
+  set_sock_options(tcp_config_.in());
 
   // We expect that the active side of the connection (the remote side
   // in this case) will supply its listening ACE_INET_Addr as the first
@@ -226,8 +227,8 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE h)
     return 0;
   }
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::handle_setup_input "
-    "recv returned %b %m.\n"), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::handle_setup_input %@ "
+    "recv returned %b %m.\n", this, ret), 4);
 
   if (ret <= 0) {
     //TODO: connection closed, call back to transport?
