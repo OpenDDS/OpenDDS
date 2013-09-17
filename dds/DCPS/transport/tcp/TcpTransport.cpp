@@ -22,6 +22,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/debug.h"
+
 #include <sstream>
 
 namespace OpenDDS {
@@ -93,18 +94,52 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     }
   }
 
-  // Now we need to attempt to establish a connection for the DataLink.
-  int result = make_active_connection(key.address(), link);
+  TcpConnection_rch connection =
+    new TcpConnection(key.address(), link->transport_priority(), tcp_config_);
+  connection->set_datalink(link.in());
 
-  if (result != 0) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: Failed to make active connection.\n"));
-    GuardType guard(links_lock_);
-    links_.unbind(key);
+  TcpConnection* pConn = connection.in();
+  TcpConnection_rch reactor_refcount(connection); // increment for reactor callback
+
+  const int ret =
+    connector_.connect(pConn, key.address(),
+                       ACE_Synch_Options::asynch, tcp_config_->local_address_);
+  if (ret == -1 && errno != EWOULDBLOCK) {
+    VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
     return 0;
   }
 
-  return link._retn();
+  // Don't decrement count when reactor_refcount goes out of scope, see
+  // TcpConnection::open() 
+  (void) reactor_refcount._retn();
+
+  if (ret == 0) {
+    // connect() completed synchronously and called TcpConnection::active_open().
+    VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink "
+                        "completed synchronously.\n"), 2);
+    return link._retn();
+  }
+
+  if (!link->add_on_start_callback(client, remote.repo_id_)) {
+    // link was started by the reactor thread before we could add a callback
+    VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 2);
+    return link._retn();
+  }
+
+  VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 2);
+  return 0;
+}
+
+void
+TcpTransport::async_connect_failed(const PriorityKey& key)
+{
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to make active connection.\n"));
+  GuardType guard(links_lock_);
+  TcpDataLink_rch link;
+  links_.find(key, link);
+  links_.unbind(key);
+  guard.release();
+  link->invoke_on_start_callbacks(false);
 }
 
 bool
@@ -234,6 +269,8 @@ TcpTransport::configure_i(TransportInst* config)
 
   // Ask our base class for a "copy" of the reference to the reactor task.
   this->reactor_task_ = reactor_task();
+
+  connector_.open(reactor_task_->reactor());
 
   // Make a "copy" of the reference for ourselves.
   tcp_config->_add_ref();
@@ -568,7 +605,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   // accept_datalink() method to find.
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n", connections_.size()), 5);
-  const ConnectionMap::iterator where = this->connections_.find(key);
+  const ConnectionMap::iterator where = connections_.find(key);
   if (where != connections_.end()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpTransport::passive_connection() - ")
@@ -584,40 +621,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   con_checker_->add(connection);
 }
 
-/// Actively establish a connection to the remote address.
-int
-TcpTransport::make_active_connection(const ACE_INET_Addr& remote_address,
-                                     const TcpDataLink_rch& link)
-{
-  DBG_ENTRY_LVL("TcpTransport", "make_active_connection", 6);
-
-  // Create the connection object here.
-  TcpConnection_rch connection = new TcpConnection;
-
-  if (DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    buffer << *link;
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::make_active_connection() - ")
-               ACE_TEXT("established with %C:%d and priority %d.\n%C"),
-               remote_address.get_host_name(),
-               remote_address.get_port_number(),
-               link->transport_priority(),
-               buffer.str().c_str()));
-  }
-
-  // Ask the connection object to attempt the active connection establishment.
-  if (connection->active_connect(remote_address,
-                                 this->tcp_config_->local_address_,
-                                 link->transport_priority(),
-                                 this->tcp_config_) != 0) {
-    return -1;
-  }
-
-  return this->connect_tcp_datalink(link, connection);
-}
-
-/// Common code used by accept_datalink(), passive_connection(), and make_active_connection().
+/// Common code used by accept_datalink(), passive_connection(), and active completion.
 int
 TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
                                    const TcpConnection_rch& connection)

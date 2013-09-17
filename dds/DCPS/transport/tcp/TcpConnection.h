@@ -9,7 +9,6 @@
 #ifndef OPENDDS_TCPCONNECTION_H
 #define OPENDDS_TCPCONNECTION_H
 
-#include "TcpInst.h"
 #include "TcpInst_rch.h"
 #ifdef __BORLANDC__
 #  include "TcpDataLink.h"
@@ -19,7 +18,11 @@
 #include "TcpSendStrategy_rch.h"
 #include "TcpReceiveStrategy_rch.h"
 #include "TcpReconnectTask.h"
+#include "TcpTransport_rch.h"
+
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
+
 #include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"
 #include "ace/INET_Addr.h"
@@ -42,16 +45,20 @@ public:
     PASSIVE_TIMEOUT_CALLED_STATE
   };
 
+  /// Passive side constructor (acceptor)
   TcpConnection();
+
+  /// Active side constructor (connector)
+  TcpConnection(const ACE_INET_Addr& remote_address,
+                CORBA::Long priority,
+                const TcpInst_rch& config);
+
   virtual ~TcpConnection();
 
-  /// Attempt an active connection establishment to the remote address.
+  /// Protocol setup (handshake) on the active side.
   /// The local address is sent to the remote (passive) side to
   /// identify ourselves to the remote side.
-  int active_connect(const ACE_INET_Addr& remote_address,
-                     const ACE_INET_Addr& local_address,
-                     CORBA::Long          priority,
-                     TcpInst_rch tcp_config);
+  int active_open();
 
   /// This will be called by the DataLink (that "owns" us) when
   /// the TcpTransport has been told to shutdown(), or when
@@ -59,7 +66,7 @@ public:
   /// "self-releasing".
   void disconnect();
 
-  // Note that the acceptor that calls the open() method will pass
+  // Note that the acceptor or connector that calls the open() method will pass
   // itself in as a void*.
   virtual int open(void* arg);
 
@@ -124,13 +131,15 @@ private:
   /// identify ourselves to the remote side.
   /// Note this method is not thread protected. The caller need acquire
   /// the reconnect_lock_ before calling this function.
-  int active_establishment(const ACE_INET_Addr& remote_address,
-                           const ACE_INET_Addr& local_address,
-                           TcpInst_rch tcp_config);
+  int active_establishment(bool initiate_connect = true);
 
   int active_reconnect_i();
   int passive_reconnect_i();
   int active_reconnect_on_new_association();
+
+  /// During the connection setup phase, the passive side sets passive_setup_,
+  /// redirecting handle_input() events here (there is no recv strategy yet).
+  int handle_setup_input(ACE_HANDLE h);
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -190,6 +199,10 @@ private:
 
   /// shutdown flag
   bool shutdown_;
+
+  bool passive_setup_;
+  ACE_Message_Block passive_setup_buffer_;
+  TcpTransport_rch transport_during_setup_;
 };
 
 } // namespace DCPS

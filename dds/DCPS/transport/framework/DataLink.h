@@ -254,6 +254,7 @@ public:
 
   bool add_on_start_callback(TransportClient* client, const RepoId& remote);
   void remove_on_start_callback(TransportClient* client, const RepoId& remote);
+  void invoke_on_start_callbacks(bool success);
 
 protected:
 
@@ -425,7 +426,6 @@ protected:
   LockType strategy_lock_;
   typedef std::pair<TransportClient*, RepoId> OnStartCallback;
   std::vector<OnStartCallback> on_start_callbacks_;
-  void invoke_on_start_callbacks(bool success);
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.

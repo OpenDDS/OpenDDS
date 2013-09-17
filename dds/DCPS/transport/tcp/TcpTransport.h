@@ -14,12 +14,17 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "TcpInst_rch.h"
 #include "TcpDataLink_rch.h"
+#include "TcpConnection.h"
 #include "TcpConnection_rch.h"
+
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
+
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
+#include "ace/Connector.h"
+#include "ace/SOCK_Connector.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -74,7 +79,7 @@ private:
 
   virtual std::string transport_type() const { return "tcp"; }
 
-private:
+  void async_connect_failed(const PriorityKey& key);
 
   /// The TcpConnection is our friend.  It tells us when it
   /// has been created (by our acceptor_), and is seeking the
@@ -89,9 +94,6 @@ private:
   /// for this passive connection to appear.
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const TcpConnection_rch& connection);
-
-  int make_active_connection(const ACE_INET_Addr& remote_address,
-                             const TcpDataLink_rch& link);
 
   bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
                        TransportClient* client, const RepoId& remote_id);
@@ -135,6 +137,9 @@ private:
 
   /// Used to accept passive connections on our local_address_.
   TcpAcceptor* acceptor_;
+
+  /// Open TcpConnections using non-blocking connect.
+  ACE_Connector<TcpConnection, ACE_SOCK_Connector> connector_;
 
   /// Our configuration object, supplied to us in config_i().
   TcpInst_rch tcp_config_;
