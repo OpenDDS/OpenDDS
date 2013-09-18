@@ -56,13 +56,13 @@ public:
 
 
 private:
-  virtual DataLink* connect_datalink(const RemoteTransport& remote,
-                                     const ConnectionAttribs& attribs,
-                                     TransportClient* client);
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client);
 
-  virtual DataLink* accept_datalink(const RemoteTransport& remote,
-                                    const ConnectionAttribs& attribs,
-                                    TransportClient* client);
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client);
 
   virtual void stop_accepting_or_connecting(TransportClient* client,
                                             const RepoId& remote_id);

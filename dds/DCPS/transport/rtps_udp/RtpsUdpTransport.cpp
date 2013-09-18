@@ -69,7 +69,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   return RtpsUdpDataLink_rch(link_)._retn();
 }
 
-DataLink*
+TransportImpl::AcceptConnectResult
 RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
                                    TransportClient* client)
@@ -78,7 +78,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
   if (link_.is_nil()) {
     link = make_datalink(attribs.local_id_.guidPrefix);
     if (link.is_nil()) {
-      return 0;
+      return AcceptConnectResult();
     }
   }
 
@@ -96,14 +96,14 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
   if (!link->wait_for_handshake(attribs.local_id_, remote.repo_id_)) {
     VDBG_LVL((LM_ERROR, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
       "ERROR: wait for handshake failed\n"), 2);
-    return 0;
+    return AcceptConnectResult();
   }
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
     "wait for handshake completed\n"), 2);
-  return link._retn();
+  return AcceptConnectResult(link._retn());
 }
 
-DataLink*
+TransportImpl::AcceptConnectResult
 RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
                                   TransportClient* client)
@@ -112,13 +112,13 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
   if (link_.is_nil()) {
     link = make_datalink(attribs.local_id_.guidPrefix);
     if (link.is_nil()) {
-      return 0;
+      return AcceptConnectResult();
     }
   }
   use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
                attribs.local_reliable_, remote.reliable_,
                attribs.local_durable_, remote.durable_);
-  return link._retn();
+  return AcceptConnectResult(link._retn());
 }
 
 

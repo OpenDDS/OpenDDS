@@ -220,19 +220,19 @@ TransportClient::associate(const AssociationData& data, bool active)
     pend.initiate_connect(this);
 
   } else { // passive
-    // call accept_datalink for each impl / blob pair of the same t ype
+    // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
       const std::string type = impls_[i]->transport_type();
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
         if (data.remote_data_[j].transport_type.in() == type) {
-          const TransportImpl::RemoteTransport remote = {data.remote_id_,
-            data.remote_data_[j].data,
+          const TransportImpl::RemoteTransport remote = {
+            data.remote_id_, data.remote_data_[j].data,
             data.publication_transport_priority_,
             data.remote_reliable_, data.remote_durable_};
-          const DataLink_rch link =
+          const TransportImpl::AcceptConnectResult res =
             impls_[i]->accept_datalink(remote, pend.attribs_, this);
-          if (!link.is_nil()) {
-            use_datalink_i(data.remote_id_, link);
+          if (res.success_ && !res.link_.is_nil()) {
+            use_datalink_i(data.remote_id_, res.link_);
             return true;
           }
         }
@@ -265,16 +265,19 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc)
     const std::string type = impl->transport_type();
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
-        const TransportImpl::RemoteTransport remote = {data_.remote_id_,
-          data_.remote_data_[blob_index_].data,
+        const TransportImpl::RemoteTransport remote = {
+          data_.remote_id_, data_.remote_data_[blob_index_].data,
           data_.publication_transport_priority_,
           data_.remote_reliable_, data_.remote_durable_};
-        const DataLink_rch link = impl->connect_datalink(remote, attribs_, tc);
-        ++blob_index_;
-        if (!link.is_nil()) {
-          tc->use_datalink_i(data_.remote_id_, link);
+        const TransportImpl::AcceptConnectResult res =
+          impl->connect_datalink(remote, attribs_, tc);
+        if (res.success_) {
+          ++blob_index_;
+          if (!res.link_.is_nil()) {
+            tc->use_datalink_i(data_.remote_id_, res.link_);
+          }
+          return true;
         }
-        return true;
       }
     }
     impls_.pop_back();

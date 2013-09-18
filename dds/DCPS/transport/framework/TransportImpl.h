@@ -107,15 +107,29 @@ protected:
     bool reliable_, durable_;
   };
 
+  struct AcceptConnectResult {
+    enum Status { ACR_SUCCESS, ACR_FAILED };
+    explicit AcceptConnectResult(Status ok = ACR_FAILED)
+      : success_(ok == ACR_SUCCESS), link_(0) {}
+    explicit AcceptConnectResult(DataLink* link)
+      : success_(link), link_(link) {}
+    /// If false, the accept or connect has failed and link_ is ignored.
+    bool success_;
+    /// If success_ is true, link_ may either be null or have a valid DataLink.
+    /// If link_ is null the DataLink is not ready for use, and
+    /// TransportClient::use_datalink() is called later.
+    DataLink_rch link_;
+  };
+
   /// connect_datalink() is called from TransportClient to initiate an
   /// association as the active peer.  A DataLink may be returned if
   /// one is already connected and ready to use, otherwise
   /// initiate a connection to the passive side and return from this
   /// method.  Upon completion of the physical connection, the
   /// transport calls back to TransportClient::use_datalink().
-  virtual DataLink* connect_datalink(const RemoteTransport& remote,
-                                     const ConnectionAttribs& attribs,
-                                     TransportClient* client) = 0;
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client) = 0;
 
   /// accept_datalink() is called from TransportClient to initiate an
   /// association as the passive peer.  A DataLink may be returned if
@@ -124,9 +138,9 @@ protected:
   /// side (either in the form of a connection event or handshaking
   /// message).  Upon completion of the physical connection, the
   /// transport calls back to TransportClient::use_datalink().
-  virtual DataLink* accept_datalink(const RemoteTransport& remote,
-                                    const ConnectionAttribs& attribs,
-                                    TransportClient* client) = 0;
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client) = 0;
 
   /// stop_accepting_or_connecting() is called from TransportClient
   /// to terminate the accepting process begun by accept_datalink()

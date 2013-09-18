@@ -62,7 +62,7 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
 
-DataLink*
+TransportImpl::AcceptConnectResult
 TcpTransport::connect_datalink(const RemoteTransport& remote,
                                const ConnectionAttribs& attribs,
                                TransportClient* client)
@@ -82,15 +82,15 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   {
     GuardType guard(links_lock_);
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-      return link._retn();
+      return AcceptConnectResult(link._retn());
     }
     link = new TcpDataLink(key.address(), this, attribs.priority_,
                          key.is_loopback(), true /*active*/);
     if (links_.bind(key, link) != 0 /*OK*/) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: TcpTransport::connect_datalink "
-                        "Unable to bind new TcpDataLink to "
-                        "TcpTransport in links_ map.\n"), 0);
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
+                           "Unable to bind new TcpDataLink to "
+                           "TcpTransport in links_ map.\n"));
+      return AcceptConnectResult();
     }
   }
 
@@ -105,7 +105,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
   if (ret == -1 && errno != EWOULDBLOCK) {
     VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
-    return 0;
+    return AcceptConnectResult();
   }
 
   // Don't decrement count when reactor_refcount goes out of scope, see
@@ -116,17 +116,17 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     // connect() completed synchronously and called TcpConnection::active_open().
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink "
                         "completed synchronously.\n"), 2);
-    return link._retn();
+    return AcceptConnectResult(link._retn());
   }
 
   if (!link->add_on_start_callback(client, remote.repo_id_)) {
     // link was started by the reactor thread before we could add a callback
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 2);
-    return link._retn();
+    return AcceptConnectResult(link._retn());
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 2);
-  return 0;
+  return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 }
 
 void
@@ -175,7 +175,7 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
   return false;
 }
 
-DataLink*
+TransportImpl::AcceptConnectResult
 TcpTransport::accept_datalink(const RemoteTransport& remote,
                               const ConnectionAttribs& attribs,
                               TransportClient* client)
@@ -193,16 +193,17 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   {
     GuardType guard(links_lock_);
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-      return link._retn();
+      return AcceptConnectResult(link._retn());
 
     } else {
       link = new TcpDataLink(key.address(), this, key.priority(),
                              key.is_loopback(), key.is_active());
       if (links_.bind(key, link) != 0 /*OK*/) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "(%P|%t) ERROR: TcpTransport::accept_datalink "
-                          "Unable to bind new TcpDataLink to "
-                          "TcpTransport in links_ map.\n"), 0);
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: TcpTransport::accept_datalink "
+                   "Unable to bind new TcpDataLink to "
+                   "TcpTransport in links_ map.\n"));
+        return AcceptConnectResult();
       }
     }
   }
@@ -216,12 +217,15 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 
   if (connection.is_nil()) {
     if (!link->add_on_start_callback(client, remote.repo_id_)) {
-      return link._retn();
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
+                          "got started link %@.\n", link.in()), 2);
+      return AcceptConnectResult(link._retn());
     }
-    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::accept_datalink ")
-              ACE_TEXT("no existing TcpConnection.\n")), 2);
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
+                        "no existing TcpConnection.\n"), 2);
     add_pending_connection(client, link.in());
-    return 0; // no link ready, passive_connection will complete later
+    // no link ready, passive_connection will complete later
+    return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
 
   guard.release(); // connect_tcp_datalink() isn't called with connections_lock_
@@ -230,7 +234,9 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     links_.unbind(key);
     link = 0;
   }
-  return link._retn();
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
+                      "connected link %@.\n", link.in()), 2);
+  return AcceptConnectResult(link._retn());
 }
 
 void
