@@ -123,14 +123,15 @@ DataLink::impl() const
 void
 DataLink::invoke_on_start_callbacks(bool success)
 {
-  GuardType guard(strategy_lock_);
-  const DataLink_rch link(success ? this : 0, false);
-  for (size_t i = 0; i < on_start_callbacks_.size(); ++i) {
-    OnStartCallback& cb = on_start_callbacks_[i];
-    cb.first->use_datalink(cb.second, link);
+  std::vector<OnStartCallback> local;
+  {
+    GuardType guard(strategy_lock_);
+    local.swap(on_start_callbacks_);
   }
-  std::vector<OnStartCallback> empty;
-  on_start_callbacks_.swap(empty);
+  const DataLink_rch link(success ? this : 0, false);
+  for (size_t i = 0; i < local.size(); ++i) {
+    local[i].first->use_datalink(local[i].second, link);
+  }
 }
 
 void

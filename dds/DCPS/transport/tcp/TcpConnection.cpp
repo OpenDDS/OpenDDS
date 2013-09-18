@@ -213,12 +213,13 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
                       ACE_TEXT("register_handler")),
                      -1);
   }
-  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open passive done.\n"), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open passive handle=%d.\n",
+    int(get_handle())), 2);
   return 0;
 }
 
 int
-OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE h)
+OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
 {
   const ssize_t ret = peer().recv(passive_setup_buffer_.wr_ptr(),
                                   passive_setup_buffer_.space(),
@@ -264,13 +265,16 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE h)
         local_address_.get_host_addr(), local_address_.get_port_number(),
         transport_priority_, reconnect_state_));
 
+      // remove from reactor, normal recv strategy setup will add us back
+      if (reactor()->remove_handler(this, READ_MASK | DONT_CALL) == -1) {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::handle_setup_input "
+          "remove_handler falied %m.\n"));
+      }
+
       const TcpConnection_rch self(this, false);
       transport_during_setup_->passive_connection(remote_address_, self);
       transport_during_setup_ = 0;
       connected_ = true;
-
-      // remove from reactor, normal recv strategy setup will add us back
-      reactor()->remove_handler(this, READ_MASK | DONT_CALL);
       return 0;
     }
   }

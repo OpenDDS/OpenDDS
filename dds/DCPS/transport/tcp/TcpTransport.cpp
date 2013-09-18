@@ -269,7 +269,7 @@ TcpTransport::configure_i(TransportInst* config)
   // Ask our base class for a "copy" of the reference to the reactor task.
   this->reactor_task_ = reactor_task();
 
-  connector_.open(reactor_task_->reactor());
+  connector_.open(reactor_task_->get_reactor());
 
   // Make a "copy" of the reference for ourselves.
   tcp_config->_add_ref();
@@ -559,16 +559,6 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpTransport", "passive_connection", 6);
-  if (Transport_debug_level > 5) {
-    std::stringstream os;
-    dump(os);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
-               ACE_TEXT("established with %C:%d.\n%C"),
-               remote_address.get_host_name(),
-               remote_address.get_port_number(),
-               os.str().c_str()));
-  }
 
   const PriorityKey key(connection->transport_priority(),
                         remote_address,
@@ -580,7 +570,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
             remote_address.get_host_name(),
             remote_address.get_port_number()), 2);
 
-  GuardType guard(connections_lock_);
+  GuardType connection_guard(connections_lock_);
   TcpDataLink_rch link;
   {
     GuardType guard(links_lock_);
@@ -588,6 +578,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   }
 
   if (!link.is_nil()) {
+    connection_guard.release();
     if (connect_tcp_datalink(link, connection) == -1) {
       VDBG_LVL((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: connect_tcp_datalink failed\n")), 5);
@@ -602,7 +593,6 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   // If we reach this point, this link was not in links_, so the
   // accept_datalink() call hasn't happened yet.  Store in connections_ for the
   // accept_datalink() method to find.
-
   VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n", connections_.size()), 5);
   const ConnectionMap::iterator where = connections_.find(key);
   if (where != connections_.end()) {
