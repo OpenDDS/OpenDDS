@@ -22,7 +22,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   const TcpConnection_rch& connection,
   TcpSynchResource* synch_resource,
   const TransportReactorTask_rch& task,
-  CORBA::Long priority)
+  Priority priority)
   : TransportSendStrategy(static_rchandle_cast<TransportInst>(config),
                           synch_resource, priority,
                           new PerConnectionSynchStrategy)

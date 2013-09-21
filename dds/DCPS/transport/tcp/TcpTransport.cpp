@@ -53,7 +53,7 @@ TcpTransport::~TcpTransport()
 
 PriorityKey
 TcpTransport::blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
+                          Priority priority,
                           bool active)
 {
   const ACE_INET_Addr remote_address =
@@ -81,7 +81,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   TcpDataLink_rch link;
   {
     GuardType guard(links_lock_);
-    if (find_datalink_i(key, link, client, remote.repo_id_)) {
+    if (find_datalink_i(key, link, client, remote.repo_id_, true /*active*/)) {
       return AcceptConnectResult(link._retn());
     }
     link = new TcpDataLink(key.address(), this, attribs.priority_,
@@ -143,19 +143,20 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
 
 bool
 TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                              TransportClient* client, const RepoId& remote_id)
+                              TransportClient* client, const RepoId& remote_id,
+                              bool active)
 {
   if (links_.find(key, link) == 0 /*OK*/) {
     //TODO: check old TcpTransport::find_datalink_i interaction with TcpConnection
     if (!link->add_on_start_callback(client, remote_id)) {
       VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-                ACE_TEXT("existing link found, already started.\n")), 2);
+                ACE_TEXT("link found, already started.\n")), 2);
       // Since the link was already started, we won't get an "on start"
       // callback, and the link is immediately usable.
       return true;
     }
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-              ACE_TEXT("existing link found, pending.\n")), 2);
+              ACE_TEXT("link found, pending.\n")), 2);
     add_pending_connection(client, link.in());
     link = 0; // don't return link to TransportClient
     return true;
@@ -166,11 +167,29 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
       if (pending_release_links_.unbind(key, link) == 0 /*OK*/
           && links_.bind(key, link) == 0 /*OK*/) {
         VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-                  ACE_TEXT("existing link from pending release list.\n")), 2);
+                  ACE_TEXT("link from pending release list.\n")), 2);
         return true;
       }
     }
     link = 0; // don't return link to TransportClient
+    return false;
+  }
+  // Try to reuse a link with the opposite active-ness, only possible if it's
+  // already started.  If not, we are responsible for the setup protocol on the
+  // proper side (active or passive).
+  const PriorityKey key2(key.priority(), key.address(),
+                         key.is_loopback(), !key.is_active());
+  if (links_.find(key2, link) == 0 /*OK*/) {
+    if (link->add_on_start_callback(client, remote_id)) {
+      // not started, we can't use this link
+      link->remove_on_start_callback(client, remote_id);
+      link = 0;
+      return false;
+    }
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+              ACE_TEXT("link found with opposite activity, already started.\n")
+              ), 2);
+    return true;
   }
   return false;
 }
@@ -192,7 +211,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   TcpDataLink_rch link;
   {
     GuardType guard(links_lock_);
-    if (find_datalink_i(key, link, client, remote.repo_id_)) {
+    if (find_datalink_i(key, link, client, remote.repo_id_, false /*!active*/)) {
       return AcceptConnectResult(link._retn());
 
     } else {

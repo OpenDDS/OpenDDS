@@ -21,7 +21,7 @@
 #include "TcpTransport_rch.h"
 
 #include "dds/DCPS/RcObject_T.h"
-#include "dds/DCPS/transport/framework/PriorityKey.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"
@@ -50,7 +50,7 @@ public:
 
   /// Active side constructor (connector)
   TcpConnection(const ACE_INET_Addr& remote_address,
-                CORBA::Long priority,
+                Priority priority,
                 const TcpInst_rch& config);
 
   virtual ~TcpConnection();
@@ -121,8 +121,8 @@ public:
   void shutdown();
 
   /// Access TRANSPORT_PRIORITY.value policy value if set.
-  CORBA::Long& transport_priority();
-  CORBA::Long  transport_priority() const;
+  Priority& transport_priority();
+  Priority  transport_priority() const;
 
 private:
 
@@ -195,7 +195,7 @@ private:
   ACE_Time_Value last_reconnect_attempted_;
 
   /// TRANSPORT_PRIORITY.value policy value.
-  CORBA::Long transport_priority_;
+  Priority transport_priority_;
 
   /// shutdown flag
   bool shutdown_;

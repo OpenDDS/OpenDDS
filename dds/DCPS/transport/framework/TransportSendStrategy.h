@@ -141,7 +141,7 @@ protected:
 
   TransportSendStrategy(const TransportInst_rch& transport_inst,
                         ThreadSynchResource* synch_resource,
-                        CORBA::Long priority,
+                        Priority priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
 
   // Only our subclass knows how to do this.

@@ -21,7 +21,6 @@
 #include "TransportReactorTask_rch.h"
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
-#include "PriorityKey.h"
 #include "ace/Synch.h"
 #include <map>
 #include <set>
@@ -96,14 +95,14 @@ protected:
 
   struct ConnectionAttribs {
     RepoId local_id_;
-    CORBA::Long priority_;
+    Priority priority_;
     bool local_reliable_, local_durable_;
   };
 
   struct RemoteTransport {
     RepoId repo_id_;
     TransportBLOB blob_;
-    CORBA::Long publication_transport_priority_;
+    Priority publication_transport_priority_;
     bool reliable_, durable_;
   };
 

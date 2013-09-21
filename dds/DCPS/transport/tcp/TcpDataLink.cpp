@@ -22,7 +22,7 @@
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
   const ACE_INET_Addr& remote_address,
   OpenDDS::DCPS::TcpTransport*  transport_impl,
-  CORBA::Long priority,
+  Priority priority,
   bool        is_loopback,
   bool        is_active)
   : DataLink(transport_impl, priority, is_loopback, is_active),

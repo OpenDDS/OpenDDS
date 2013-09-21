@@ -15,6 +15,8 @@
 #include "TcpSendStrategy.h"
 #include "TcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
+#include "dds/DCPS/transport/framework/PriorityKey.h"
+
 #include "ace/os_include/netinet/os_tcp.h"
 #include "ace/OS_NS_arpa_inet.h"
 #include <sstream>
@@ -59,7 +61,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
 }
 
 OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
-                                            CORBA::Long priority,
+                                            Priority priority,
                                             const TcpInst_rch& config)
   : connected_(false)
   , is_connector_(true)

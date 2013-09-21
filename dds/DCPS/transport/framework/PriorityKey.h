@@ -10,9 +10,8 @@
 #define PRIORITY_KEY_H
 
 #include "dds/DCPS/dcps_export.h"
-
+#include "TransportDefs.h"
 #include "ace/INET_Addr.h"
-#include "tao/Basic_Types.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -22,7 +21,7 @@ namespace DCPS {
  *
  * @brief Encapsulate a priority value and internet address as a key.
  *
- * This class is encapsulates a CORBA::Long priority value and an
+ * This class is encapsulates a priority value and an
  * internet address value for use as a key in either an STL container
  * or an ACE hash container.  The '<' operator is used by the STL
  * containers and the '==' operator and hash() method are used by the
@@ -55,7 +54,7 @@ public:
   PriorityKey();
 
   // Construct with values.
-  PriorityKey(CORBA::Long priority, ACE_INET_Addr address, bool is_loopback, bool active);
+  PriorityKey(Priority priority, ACE_INET_Addr address, bool is_loopback, bool active);
 
   // Ordering for STL containers.
   bool operator<(const PriorityKey& rhs) const;
@@ -67,8 +66,8 @@ public:
   unsigned long hash() const;
 
   // Access priority value.
-  CORBA::Long& priority();
-  CORBA::Long  priority() const;
+  Priority& priority();
+  Priority  priority() const;
 
   // Access address value.
   ACE_INET_Addr& address();
@@ -82,7 +81,7 @@ public:
 
 private:
   // Priority value of key.
-  CORBA::Long priority_;
+  Priority priority_;
 
   // Address value of key.
   ACE_INET_Addr address_;

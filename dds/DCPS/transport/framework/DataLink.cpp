@@ -42,7 +42,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 /// Only called by our TransportImpl object.
-DataLink::DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback,
+DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false)
   , default_listener_(0)

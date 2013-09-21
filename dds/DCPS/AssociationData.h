@@ -21,7 +21,7 @@ namespace DCPS {
 struct AssociationData {
   RepoId               remote_id_;
   TransportLocatorSeq  remote_data_;
-  CORBA::Long          publication_transport_priority_;
+  Priority          publication_transport_priority_;
   bool                 remote_reliable_, remote_durable_;
 
   AssociationData()

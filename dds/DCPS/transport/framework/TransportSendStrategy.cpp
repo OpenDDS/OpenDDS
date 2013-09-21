@@ -59,7 +59,7 @@ namespace {
 TransportSendStrategy::TransportSendStrategy(
   const TransportInst_rch& transport_inst,
   ThreadSynchResource* synch_resource,
-  CORBA::Long priority,
+  Priority priority,
   const ThreadSynchStrategy_rch& thread_sync_strategy)
   : max_samples_(transport_inst->max_samples_per_packet_),
     optimum_size_(transport_inst->optimum_packet_size_),

@@ -33,7 +33,7 @@ UdpTransport::UdpTransport(const TransportInst_rch& inst)
 
 UdpDataLink*
 UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
-                            CORBA::Long          priority,
+                            Priority          priority,
                             bool                 active)
 {
   UdpDataLink_rch link;
@@ -277,7 +277,7 @@ UdpTransport::release_datalink(DataLink* link)
 
 PriorityKey
 UdpTransport::blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
+                          Priority priority,
                           bool active)
 {
   NetworkAddress network_order_address;
@@ -301,8 +301,8 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  ACE_Message_Block* data)
 {
   CORBA::ULong octet_size =
-    static_cast<CORBA::ULong>(data->length() - sizeof(CORBA::Long));
-  CORBA::Long priority;
+    static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
+  Priority priority;
   Serializer serializer(data);
   serializer >> priority;
   TransportBLOB blob(octet_size);

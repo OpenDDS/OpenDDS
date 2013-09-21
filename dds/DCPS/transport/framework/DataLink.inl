@@ -15,14 +15,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-CORBA::Long&
+Priority&
 DataLink::transport_priority()
 {
   return this->transport_priority_;
 }
 
 ACE_INLINE
-CORBA::Long
+Priority
 DataLink::transport_priority() const
 {
   return this->transport_priority_;

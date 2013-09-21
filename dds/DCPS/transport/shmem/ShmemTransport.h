@@ -34,23 +34,16 @@ public:
   void signal_semaphore();
 
 protected:
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
-                                    const ConnectionAttribs& attribs,
-                                    bool active);
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client);
 
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 

@@ -81,7 +81,7 @@ public:
   /// created this DataLink.  The ability to specifiy a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback, bool is_active);
+  DataLink(TransportImpl* impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
   /// The stop method is used to stop the DataLink prior to shutdown.
@@ -215,8 +215,8 @@ public:
 
   /// Accessors for the TRANSPORT_PRIORITY value associated with
   /// this link.
-  CORBA::Long& transport_priority();
-  CORBA::Long  transport_priority() const;
+  Priority& transport_priority();
+  Priority  transport_priority() const;
 
   bool& is_loopback();
   bool  is_loopback() const;
@@ -412,7 +412,7 @@ private:
   RepoIdSetMap sub_map_releasing_;
 
   /// TRANSPORT_PRIORITY value associated with the link.
-  CORBA::Long transport_priority_;
+  Priority transport_priority_;
 
   bool scheduled_;
 

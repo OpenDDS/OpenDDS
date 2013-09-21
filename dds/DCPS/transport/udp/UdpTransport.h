@@ -32,23 +32,16 @@ public:
                           ACE_Message_Block* data);
 
 protected:
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
-                                    const ConnectionAttribs& attribs,
-                                    bool active);
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client);
 
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -63,7 +56,7 @@ protected:
 
 private:
   UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address,
-                             CORBA::Long          priority,
+                             Priority          priority,
                              bool                 active);
 
   RcHandle<UdpInst> config_i_;
@@ -104,7 +97,7 @@ private:
   std::set<PriorityKey> pending_server_link_keys_;
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
+                          Priority priority,
                           bool active);
 };
 

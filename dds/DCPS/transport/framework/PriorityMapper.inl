@@ -6,22 +6,28 @@
  * See: http://www.opendds.org/license.html
  */
 
+namespace OpenDDS {
+namespace DCPS {
+
 ACE_INLINE
-OpenDDS::DCPS::PriorityMapper::PriorityMapper(CORBA::Long priority)
+PriorityMapper::PriorityMapper(Priority priority)
   : priority_(priority)
 {
 }
 
 ACE_INLINE
-CORBA::Long&
-OpenDDS::DCPS::PriorityMapper::priority()
+Priority&
+PriorityMapper::priority()
 {
   return this->priority_;
 }
 
 ACE_INLINE
-CORBA::Long
-OpenDDS::DCPS::PriorityMapper::priority() const
+Priority
+PriorityMapper::priority() const
 {
   return this->priority_;
+}
+
+}
 }

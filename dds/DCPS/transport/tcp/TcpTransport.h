@@ -96,7 +96,8 @@ private:
                           const TcpConnection_rch& connection);
 
   bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                       TransportClient* client, const RepoId& remote_id);
+                       TransportClient* client, const RepoId& remote_id,
+                       bool active);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
@@ -104,7 +105,7 @@ private:
                            const TcpConnection_rch& connection);
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
+                          Priority priority,
                           bool active);
 
   /// Map Type: (key) PriorityKey to (value) TcpDataLink_rch

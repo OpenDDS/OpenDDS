@@ -14,7 +14,6 @@
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpDataLink_rch.h"
 
-#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include "dds/DCPS/RTPS/RtpsBaseMessageTypesC.h"

@@ -95,7 +95,7 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
 
 MulticastDataLink*
 MulticastTransport::make_datalink(const RepoId& local_id,
-                                  CORBA::Long priority,
+                                  Priority priority,
                                   bool active)
 {
   RcHandle<MulticastSessionFactory> session_factory;

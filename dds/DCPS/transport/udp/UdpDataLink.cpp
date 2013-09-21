@@ -24,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 UdpDataLink::UdpDataLink(UdpTransport* transport,
-                         CORBA::Long   priority,
+                         Priority   priority,
                          bool          active)
   : DataLink(transport,
              priority,
@@ -135,7 +135,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     this->impl()->connection_info_i(info);
     ACE_Message_Block* data_block;
     ACE_NEW_RETURN(data_block,
-                   ACE_Message_Block(info.data.length()+sizeof(CORBA::Long),
+                   ACE_Message_Block(info.data.length()+sizeof(Priority),
                                      ACE_Message_Block::MB_DATA,
                                      0, //cont
                                      0, //data
