@@ -56,8 +56,10 @@ protected:
 
 private:
   UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address,
-                             Priority          priority,
-                             bool                 active);
+                             Priority priority, bool active);
+  
+  PriorityKey blob_to_key(const TransportBLOB& remote,
+                          Priority priority, bool active);
 
   RcHandle<UdpInst> config_i_;
 
@@ -86,19 +88,17 @@ private:
   /// ready for use and reuse via server_link_.
   std::set<PriorityKey> server_link_keys_;
 
+  typedef std::vector<DataLink::OnStartCallback> Callbacks;
+  typedef std::map<PriorityKey, Callbacks> PendConnMap;
   /// Locked by connections_lock_.  Tracks expected connections
   /// that we have learned about in accept_datalink() but have
   /// not yet performed the handshake.
-  std::multimap<ConnectionEvent*, PriorityKey> pending_connections_;
+  PendConnMap pending_connections_;
 
   /// Locked by connections_lock_.
   /// These are passive-side PriorityKeys that have finished handshaking,
   /// but have not been processed by accept_datalink()
   std::set<PriorityKey> pending_server_link_keys_;
-
-  PriorityKey blob_to_key(const TransportBLOB& remote,
-                          Priority priority,
-                          bool active);
 };
 
 } // namespace DCPS

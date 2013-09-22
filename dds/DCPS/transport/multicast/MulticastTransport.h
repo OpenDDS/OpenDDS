@@ -75,7 +75,9 @@ private:
   // have already sent the SYN message -- we can consider these "complete"
   // from the framework's point of view.
   ACE_SYNCH_MUTEX connections_lock_;
-  std::multimap<ConnectionEvent*, MulticastPeer> pending_connections_;
+  typedef std::vector<DataLink::OnStartCallback> Callbacks;
+  typedef std::map<MulticastPeer, Callbacks> PendConnMap;
+  PendConnMap pending_connections_;
   std::set<MulticastPeer> connections_;
 };
 

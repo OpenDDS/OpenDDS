@@ -16,6 +16,7 @@
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
 
@@ -33,8 +34,7 @@ UdpTransport::UdpTransport(const TransportInst_rch& inst)
 
 UdpDataLink*
 UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
-                            Priority          priority,
-                            bool                 active)
+                            Priority priority, bool active)
 {
   UdpDataLink_rch link;
   ACE_NEW_RETURN(link, UdpDataLink(this, priority, active), 0);
@@ -49,7 +49,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
 
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask = reactor_task();
-  link->configure(this->config_i_.in(), rtask.in());
+  link->configure(config_i_.in(), rtask.in());
 
   // Assign send strategy:
   UdpSendStrategy* send_strategy;
@@ -73,138 +73,98 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
   return link._retn();
 }
 
-DataLink*
-UdpTransport::find_datalink_i(const RepoId& /*local_id*/,
-                              const RepoId& /*remote_id*/,
-                              const TransportBLOB& remote_data,
-                              bool /*remote_reliable*/,
-                              bool /*remote_durable*/,
-                              const ConnectionAttribs& attribs,
-                              bool active)
+TransportImpl::AcceptConnectResult
+UdpTransport::connect_datalink(const RemoteTransport& remote,
+                               const ConnectionAttribs& attribs,
+                               TransportClient* client)
 {
-  ACE_INET_Addr remote_address = get_connection_addr(remote_data);
-
-  bool is_loopback = remote_address == this->config_i_->local_address_;
-  PriorityKey key(attribs.priority_, remote_address, is_loopback, active);
-
-  if (active) {
-    GuardType guard(this->client_links_lock_);
-    UdpDataLinkMap::iterator it(this->client_links_.find(key));
-    if (it != this->client_links_.end()) {
-      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::find_datalink_i found client\n"));
-      return UdpDataLink_rch(it->second)._retn(); // found
-    }
-  } else {
-    GuardType guard(this->connections_lock_);
-    if (this->server_link_keys_.find(key) == this->server_link_keys_.end()) {
-      return 0;
-    } else {
-      // return a reference to the one and only server data link
-      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::find_datalink_i found server\n"));
-      return UdpDataLink_rch(this->server_link_)._retn();
-    }
-  }
-
-  return 0;
-}
-
-DataLink*
-UdpTransport::connect_datalink_i(const RepoId& /*local_id*/,
-                                 const RepoId& /*remote_id*/,
-                                 const TransportBLOB& remote_data,
-                                 bool /*remote_reliable*/,
-                                 bool /*remote_durable*/,
-                                 const ConnectionAttribs& attribs)
-{
-  ACE_INET_Addr remote_address = get_connection_addr(remote_data);
+  const ACE_INET_Addr remote_address = get_connection_addr(remote.blob_);
   const bool active = true;
+  const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, active);
+  GuardType guard(client_links_lock_);
 
-  PriorityKey key = this->blob_to_key(remote_data, attribs.priority_, active);
+  const UdpDataLinkMap::iterator it(client_links_.find(key));
+  if (it != client_links_.end()) {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink found\n"));
+    return AcceptConnectResult(UdpDataLink_rch(it->second)._retn());
+  }
 
   // Create new DataLink for logical connection:
   UdpDataLink_rch link = make_datalink(remote_address,
                                        attribs.priority_,
                                        active);
-  GuardType guard(this->client_links_lock_);
-  this->client_links_.insert(UdpDataLinkMap::value_type(key, link));
+  client_links_.insert(UdpDataLinkMap::value_type(key, link));
 
-  VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink_i\n"));
-  return link._retn();
+  VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink connected\n"));
+  return AcceptConnectResult(link._retn());
 }
 
-DataLink*
-UdpTransport::accept_datalink(ConnectionEvent& ce)
+TransportImpl::AcceptConnectResult
+UdpTransport::accept_datalink(const RemoteTransport& remote,
+                              const ConnectionAttribs& attribs,
+                              TransportClient* client)
 {
-  const std::string ttype = "udp";
-  const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
-
-  std::vector<PriorityKey> keys;
-  GuardType guard(this->connections_lock_);
-
-  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
-    if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
-      const PriorityKey key =
-        this->blob_to_key(ce.remote_association_.remote_data_[idx].data,
-                          ce.attribs_.priority_, false /*active == false*/);
-
-      keys.push_back(key);
-    }
+  GuardType guard(connections_lock_);
+  const PriorityKey key = blob_to_key(remote.blob_,
+                                      attribs.priority_, false /* !active */);
+  if (server_link_keys_.count(key)) {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
+    return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
   }
 
-  for (size_t i = 0; i < keys.size(); ++i) {
-    if (this->pending_server_link_keys_.find(keys[i]) !=
-        this->pending_server_link_keys_.end()) {
-      // Handshake already seen, add to server_link_keys_ and
-      // return server_link_
-      this->pending_server_link_keys_.erase(keys[i]);
-      this->server_link_keys_.insert(keys[i]);
-      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink completing\n"));
-      return UdpDataLink_rch(this->server_link_)._retn();
-    } else {
-      // Add to pending and wait for handshake
-      this->pending_connections_.insert(
-        std::pair<ConnectionEvent* const, PriorityKey>(&ce, keys[i]));
-      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink pending\n"));
-    }
+  if (pending_server_link_keys_.count(key)) {
+    pending_server_link_keys_.erase(key);
+    server_link_keys_.insert(key);
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink completed\n"));
+    return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
+  } else {
+    const DataLink::OnStartCallback callback(client, remote.repo_id_);
+    pending_connections_[key].push_back(callback);
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink pending\n"));
+    return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
-
-  // Let TransportClient::associate() wait for the handshake
-  return 0;
 }
 
 void
-UdpTransport::stop_accepting(ConnectionEvent& ce)
+UdpTransport::stop_accepting_or_connecting(TransportClient* client,
+                                           const RepoId& remote_id)
 {
-  GuardType guard(this->connections_lock_);
-  typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
-  std::pair<iter_t, iter_t> range = this->pending_connections_.equal_range(&ce);
-  this->pending_connections_.erase(range.first, range.second);
-  VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting\n"));
+  VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting_or_connecting\n"));
+  GuardType guard(connections_lock_);
+  for (PendConnMap::iterator it = pending_connections_.begin();
+       it != pending_connections_.end(); ++it) {
+    for (size_t i = 0; i < it->second.size(); ++i) {
+      if (it->second[i].first == client && it->second[i].second == remote_id) {
+        it->second.erase(it->second.begin() + i);
+        break;
+      }
+    }
+    if (it->second.empty()) {
+      pending_connections_.erase(it);
+      return;
+    }
+  }
 }
 
 bool
 UdpTransport::configure_i(TransportInst* config)
 {
-  this->config_i_ = dynamic_cast<UdpInst*>(config);
-  if (this->config_i_ == 0) {
+  config_i_ = dynamic_cast<UdpInst*>(config);
+  if (config_i_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpTransport::configure_i: ")
                       ACE_TEXT("invalid configuration!\n")),
                      false);
   }
-  this->config_i_->_add_ref();
+  config_i_->_add_ref();
 
-  this->create_reactor_task();
+  create_reactor_task();
 
   // Our "server side" data link is created here, similar to the acceptor_
   // in the TcpTransport implementation.  This establishes a socket as an
   // endpoint that we can advertise to peers via connection_info_i().
-
-  this->server_link_ = make_datalink(ACE_INET_Addr(),
-                                     0,   // priority = 0
-                                     false);
-
+  server_link_ = make_datalink(ACE_INET_Addr(), 0 /* priority */, false);
   return true;
 }
 
@@ -212,24 +172,24 @@ void
 UdpTransport::shutdown_i()
 {
   // Shutdown reserved datalinks and release configuration:
-  GuardType guard(this->client_links_lock_);
-  for (UdpDataLinkMap::iterator it(this->client_links_.begin());
-       it != this->client_links_.end(); ++it) {
+  GuardType guard(client_links_lock_);
+  for (UdpDataLinkMap::iterator it(client_links_.begin());
+       it != client_links_.end(); ++it) {
     it->second->transport_shutdown();
   }
-  this->client_links_.clear();
+  client_links_.clear();
 
-  this->server_link_->transport_shutdown();
-  this->server_link_ = 0;
+  server_link_->transport_shutdown();
+  server_link_ = 0;
 
-  this->config_i_ = 0;
+  config_i_ = 0;
 }
 
 bool
 UdpTransport::connection_info_i(TransportLocator& info) const
 {
-  NetworkAddress network_address(this->config_i_->local_address_,
-                                 this->config_i_->local_address_.is_any());
+  NetworkAddress network_address(config_i_->local_address_,
+                                 config_i_->local_address_.is_any());
   ACE_OutputCDR cdr;
   cdr << network_address;
 
@@ -262,14 +222,14 @@ UdpTransport::get_connection_addr(const TransportBLOB& data) const
 void
 UdpTransport::release_datalink(DataLink* link)
 {
-  GuardType guard(this->client_links_lock_);
-  for (UdpDataLinkMap::iterator it(this->client_links_.begin());
-       it != this->client_links_.end(); ++it) {
+  GuardType guard(client_links_lock_);
+  for (UdpDataLinkMap::iterator it(client_links_.begin());
+       it != client_links_.end(); ++it) {
     // We are guaranteed to have exactly one matching DataLink
     // in the map; release any resources held and return.
     if (link == static_cast<DataLink*>(it->second.in())) {
       link->stop();
-      this->client_links_.erase(it);
+      client_links_.erase(it);
       return;
     }
   }
@@ -291,7 +251,7 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
 
   ACE_INET_Addr remote_address;
   network_order_address.to_addr(remote_address);
-  const bool is_loopback = remote_address == this->config_i_->local_address_;
+  const bool is_loopback = remote_address == config_i_->local_address_;
 
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
@@ -309,52 +269,31 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   blob.length(octet_size);
   serializer.read_octet_array(blob.get_buffer(), octet_size);
 
-  PriorityKey key = this->blob_to_key(blob, priority, false /* passive */);
+  // Send an ack so that the active side can return from
+  // connect_datalink_i().  This is just a single byte of
+  // arbitrary data, the remote side is not yet using the
+  // framework (TransportHeader, DataSampleHeader,
+  // ReceiveStrategy).
+  const char ack_data = 23;
+  server_link_->socket().send(&ack_data, 1, remote_address);
 
-  // Use the key to find this connection in pending connections_ and
-  // to locate the ConnectionEvent
-  ConnectionEvent* evt = 0;
-  {
-    GuardType guard(this->connections_lock_);
-    typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
-    for (iter_t iter = this->pending_connections_.begin();
-         iter != pending_connections_.end(); ++iter) {
-      if (iter->second == key) {
-        evt = iter->first;
-        break;
-      }
+  const PriorityKey key = blob_to_key(blob, priority, false /* passive */);
+  GuardType guard(connections_lock_);
+  const PendConnMap::iterator pend = pending_connections_.find(key);
+
+  if (pend != pending_connections_.end()) {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection completing\n"));
+    const DataLink_rch link = static_rchandle_cast<DataLink>(server_link_);
+    for (size_t i = 0; i < pend->second.size(); ++i) {
+      pend->second[i].first->use_datalink(pend->second[i].second, link);
     }
+    pending_connections_.erase(pend);
+    server_link_keys_.insert(key);
 
-    // Send an ack so that the active side can return from
-    // connect_datalink_i().  This is just a single byte of
-    // arbitrary data, the remote side is not yet using the
-    // framework (TransportHeader, DataSampleHeader,
-    // ReceiveStrategy).
-    const char ack_data = 23;
-    this->server_link_->socket().send(&ack_data, 1, remote_address);
-
-    if (evt != 0) { // found in pending_connections_
-      // remove other entries for this ConnectionEvent in pending_connections_
-      std::pair<iter_t, iter_t> range =
-        this->pending_connections_.equal_range(evt);
-      this->pending_connections_.erase(range.first, range.second);
-
-      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection completing\n"));
-      // Signal TransportClient::associate() via the ConnectionEvent
-      // to let it know that we found a good connection.
-      evt->complete(static_rchandle_cast<DataLink>(this->server_link_));
-
-      // Add an entry to server_link_keys_ so we can find the
-      // "connection" for that key.
-      this->server_link_keys_.insert(key);
-    } else {
-
-      // Add an entry to pending_server_link_keys_ so we can finish
-      // associating in accept_datalink().
-      this->pending_server_link_keys_.insert(key);
-
-      VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection pending\n"));
-    }
+  } else {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection pending\n"));
+    // accept_datalink() will complete the connection.
+    pending_server_link_keys_.insert(key);
   }
 }
 

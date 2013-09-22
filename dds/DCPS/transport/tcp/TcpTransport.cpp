@@ -81,7 +81,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   TcpDataLink_rch link;
   {
     GuardType guard(links_lock_);
-    if (find_datalink_i(key, link, client, remote.repo_id_, true /*active*/)) {
+    if (find_datalink_i(key, link, client, remote.repo_id_)) {
       return AcceptConnectResult(link._retn());
     }
     link = new TcpDataLink(key.address(), this, attribs.priority_,
@@ -143,8 +143,7 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
 
 bool
 TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                              TransportClient* client, const RepoId& remote_id,
-                              bool active)
+                              TransportClient* client, const RepoId& remote_id)
 {
   if (links_.find(key, link) == 0 /*OK*/) {
     //TODO: check old TcpTransport::find_datalink_i interaction with TcpConnection
@@ -174,23 +173,6 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
     link = 0; // don't return link to TransportClient
     return false;
   }
-  // Try to reuse a link with the opposite active-ness, only possible if it's
-  // already started.  If not, we are responsible for the setup protocol on the
-  // proper side (active or passive).
-  const PriorityKey key2(key.priority(), key.address(),
-                         key.is_loopback(), !key.is_active());
-  if (links_.find(key2, link) == 0 /*OK*/) {
-    if (link->add_on_start_callback(client, remote_id)) {
-      // not started, we can't use this link
-      link->remove_on_start_callback(client, remote_id);
-      link = 0;
-      return false;
-    }
-    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-              ACE_TEXT("link found with opposite activity, already started.\n")
-              ), 2);
-    return true;
-  }
   return false;
 }
 
@@ -211,7 +193,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   TcpDataLink_rch link;
   {
     GuardType guard(links_lock_);
-    if (find_datalink_i(key, link, client, remote.repo_id_, false /*!active*/)) {
+    if (find_datalink_i(key, link, client, remote.repo_id_)) {
       return AcceptConnectResult(link._retn());
 
     } else {

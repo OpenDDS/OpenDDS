@@ -217,7 +217,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     pend.impls_.reserve(impls_.size());
     std::reverse_copy(impls_.begin(), impls_.end(),
       std::back_inserter(pend.impls_));
-    pend.initiate_connect(this);
+    pend.initiate_connect(this, guard);
 
   } else { // passive
     // call accept_datalink for each impl / blob pair of the same type
@@ -232,7 +232,7 @@ TransportClient::associate(const AssociationData& data, bool active)
           const TransportImpl::AcceptConnectResult res =
             impls_[i]->accept_datalink(remote, pend.attribs_, this);
           if (res.success_ && !res.link_.is_nil()) {
-            use_datalink_i(data.remote_id_, res.link_);
+            use_datalink_i(data.remote_id_, res.link_, guard);
             return true;
           }
         }
@@ -257,7 +257,8 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
 }
 
 bool
-TransportClient::PendingAssoc::initiate_connect(TransportClient* tc)
+TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
+                                                Guard& guard)
 {
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
@@ -274,7 +275,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc)
         if (res.success_) {
           ++blob_index_;
           if (!res.link_.is_nil()) {
-            tc->use_datalink_i(data_.remote_id_, res.link_);
+            tc->use_datalink_i(data_.remote_id_, res.link_, guard);
           }
           return true;
         }
@@ -291,12 +292,13 @@ TransportClient::use_datalink(const RepoId& remote_id,
                               const DataLink_rch& link)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-  use_datalink_i(remote_id, link);
+  use_datalink_i(remote_id, link, guard);
 }
 
 void
 TransportClient::use_datalink_i(const RepoId& remote_id,
-                                const DataLink_rch& link)
+                                const DataLink_rch& link,
+                                Guard& guard)
 {
   PendingMap::iterator iter = pending_.find(remote_id);
   if (iter == pending_.end()) {
@@ -305,19 +307,18 @@ TransportClient::use_datalink_i(const RepoId& remote_id,
 
   PendingAssoc& pend = iter->second;
   const int active_flag = pend.active_ ? ASSOC_ACTIVE : 0;
+  bool ok = false;
 
-  if (pend.removed_) {
-    transport_assoc_done(active_flag, remote_id);
+  if (pend.removed_) { // no-op
 
   } else if (link.is_nil()) {
-    if (pend.active_ && pend.initiate_connect(this)) {
+    if (pend.active_ && pend.initiate_connect(this, guard)) {
       return;
     }
-    transport_assoc_done(active_flag, remote_id);
 
   } else { // link is ready to use
     add_link(link, remote_id);
-    transport_assoc_done(active_flag | ASSOC_OK, remote_id);
+    ok = true;
   }
 
   // either link is valid or assoc failed, clean up pending object
@@ -330,6 +331,9 @@ TransportClient::use_datalink_i(const RepoId& remote_id,
   ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
   timer->cancel_timer(&pend);
   pending_.erase(iter);
+
+  guard.release();
+  transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
 }
 
 void

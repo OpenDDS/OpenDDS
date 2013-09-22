@@ -96,8 +96,7 @@ private:
                           const TcpConnection_rch& connection);
 
   bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                       TransportClient* client, const RepoId& remote_id,
-                       bool active);
+                       TransportClient* client, const RepoId& remote_id);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().

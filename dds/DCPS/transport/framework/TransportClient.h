@@ -98,7 +98,10 @@ private:
   void transport_detached(TransportImpl* which);
 
   // helpers
-  void use_datalink_i(const RepoId& remote_id, const DataLink_rch& link);
+  typedef ACE_Guard<ACE_Thread_Mutex> Guard;
+  void use_datalink_i(const RepoId& remote_id,
+                      const DataLink_rch& link,
+                      Guard& guard);
   void add_link(const DataLink_rch& link, const RepoId& peer);
   TransportSendListener* get_send_listener();
   TransportReceiveListener* get_receive_listener();
@@ -121,7 +124,7 @@ private:
       : active_(false), removed_(false), blob_index_(0)
     {}
 
-    bool initiate_connect(TransportClient* tc);
+    bool initiate_connect(TransportClient* tc, Guard& guard);
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
 

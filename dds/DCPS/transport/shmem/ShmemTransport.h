@@ -72,7 +72,6 @@ private:
   typedef ACE_Thread_Mutex        LockType;
   typedef ACE_Guard<LockType>     GuardType;
 
-  /// This lock is used to protect the client_links_ data member.
   LockType links_lock_;
 
   /// Map of fully associated DataLinks for this transport.  Protected

@@ -73,93 +73,48 @@ ShmemTransport::make_datalink(const std::string& remote_address)
   return link._retn();
 }
 
-DataLink*
-ShmemTransport::find_datalink_i(const RepoId& /*local_id*/,
-                                const RepoId& /*remote_id*/,
-                                const TransportBLOB& remote_data,
-                                bool /*remote_reliable*/,
-                                bool /*remote_durable*/,
-                                const ConnectionAttribs& /*attribs*/,
-                                bool /*active*/)
+TransportImpl::AcceptConnectResult
+ShmemTransport::connect_datalink(const RemoteTransport& remote,
+                                 const ConnectionAttribs&,
+                                 TransportClient*)
 {
-  const std::pair<std::string, std::string> key = blob_to_key(remote_data);
+  const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
   if (key.first != hostname_) {
-    return 0;
+    return AcceptConnectResult();
   }
-
   GuardType guard(links_lock_);
   ShmemDataLinkMap::iterator iter = links_.find(key.second);
   if (iter != links_.end()) {
     ShmemDataLink_rch link = iter->second;
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) ShmemTransport::find_datalink_i ")
-              ACE_TEXT("link found, waiting for start.\n")), 2);
-    guard.release();
-    link->wait_for_start();
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) ShmemTransport::find_datalink_i ")
-              ACE_TEXT("done waiting for start.\n")), 2);
-    return link._retn();
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
+              ACE_TEXT("link found.\n")), 2);
+    return AcceptConnectResult(link._retn());
   }
-  return 0;
-}
-
-DataLink*
-ShmemTransport::connect_datalink_i(const RepoId& /*local_id*/,
-                                   const RepoId& /*remote_id*/,
-                                   const TransportBLOB& remote_data,
-                                   bool /*remote_reliable*/,
-                                   bool /*remote_durable*/,
-                                   const ConnectionAttribs& /*attribs*/)
-{
-  const std::pair<std::string, std::string> key = blob_to_key(remote_data);
-  if (key.first != hostname_) {
-    return 0;
-  }
-
-  return add_datalink(key.second);
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
+              ACE_TEXT("new link.\n")), 2);
+  return AcceptConnectResult(add_datalink(key.second));
 }
 
 DataLink*
 ShmemTransport::add_datalink(const std::string& remote_address)
 {
   ShmemDataLink_rch link = make_datalink(remote_address);
-  {
-    GuardType guard(links_lock_);
-    std::pair<ShmemDataLinkMap::iterator, bool> result =
-      links_.insert(ShmemDataLinkMap::value_type(remote_address, link));
-    if (!result.second) { // another thread inserted before us
-      link = result.first->second;
-      guard.release();
-      link->wait_for_start();
-    }
-  }
+  links_.insert(ShmemDataLinkMap::value_type(remote_address, link));
   return link._retn();
 }
 
-DataLink*
-ShmemTransport::accept_datalink(ConnectionEvent& ce)
+TransportImpl::AcceptConnectResult
+ShmemTransport::accept_datalink(const RemoteTransport& remote,
+                                const ConnectionAttribs& attribs,
+                                TransportClient* client)
 {
-  const std::string ttype = "shmem";
-  const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
-
-  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
-    if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
-      const std::pair<std::string, std::string> key =
-        blob_to_key(ce.remote_association_.remote_data_[idx].data);
-      if (key.first == hostname_) {
-        return add_datalink(key.second);
-      }
-    }
-  }
-
-  return 0;
+  return connect_datalink(remote, attribs, client);
 }
 
 void
-ShmemTransport::stop_accepting(ConnectionEvent& /*ce*/)
+ShmemTransport::stop_accepting_or_connecting(TransportClient*, const RepoId&)
 {
-  // no-op: accept_datalink() completes or fails immediately
+  // no-op: accept and connect either complete or fail immediately
 }
 
 bool

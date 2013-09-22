@@ -252,6 +252,7 @@ public:
   void default_listener(TransportReceiveListener* trl);
   TransportReceiveListener* default_listener() const;
 
+  typedef std::pair<TransportClient*, RepoId> OnStartCallback;
   bool add_on_start_callback(TransportClient* client, const RepoId& remote);
   void remove_on_start_callback(TransportClient* client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
@@ -424,7 +425,6 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
-  typedef std::pair<TransportClient*, RepoId> OnStartCallback;
   std::vector<OnStartCallback> on_start_callbacks_;
 
   /// Configurable delay in milliseconds that the datalink

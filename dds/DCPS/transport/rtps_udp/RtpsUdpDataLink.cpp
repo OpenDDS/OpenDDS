@@ -738,7 +738,15 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
     SequenceNumber base;
     base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
     sr.second = base.previous();
-    wi->second.recvd_.insert(sr);
+    if (sr.first <= sr.second) {
+      wi->second.recvd_.insert(sr);
+    } else {
+      const GuidConverter conv(src);
+      VDBG_LVL((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_gap_i "
+                "received GAP with invalid range [%q, %q] from %C\n",
+                sr.first.getValue(), sr.second.getValue(),
+                std::string(conv).c_str()), 2);
+    }
     wi->second.recvd_.insert(base, gap.gapList.numBits,
                              gap.gapList.bitmap.get_buffer());
     deliver_held_data(rr.first, wi->second, rr.second.durable_);
