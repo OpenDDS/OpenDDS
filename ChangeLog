@@ -1,3 +1,14 @@
+Thu Nov  7 00:58:11 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/run_dds.pl:
+
+          Made this more generally useful:
+          -) added '-g' argument to allow specification of the service
+             configurator configuration file;
+          -) allow fully rooted commands to be executed;
+          -) changed default netstat data gathering from '--inet' to
+             '--tcp' which is more generally available.
+
 Wed Sep 11 23:19:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
