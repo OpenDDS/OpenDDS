@@ -148,15 +148,16 @@ DataReaderImpl::cleanup()
   }
 
   // Cancel any watchdog timers
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-       iter != instances_.end();
-       ++iter) {
-    SubscriptionInstance *ptr = iter->second;
-    if (this->watchdog_.get() && ptr->deadline_timer_id_ != -1)
-      {
+  { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end();
+         ++iter) {
+      SubscriptionInstance *ptr = iter->second;
+      if (this->watchdog_.get() && ptr->deadline_timer_id_ != -1) {
         this->watchdog_->cancel_timer(ptr);
       }
     }
+  }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (owner_manager_) {
@@ -1546,12 +1547,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     // tell all instances they got a liveliness message
-    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-         iter != instances_.end();
-         ++iter) {
-      SubscriptionInstance *ptr = iter->second;
+    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+           iter != instances_.end();
+           ++iter) {
+        SubscriptionInstance *ptr = iter->second;
 
-      ptr->instance_state_.lively(sample.header_.publication_id_);
+        ptr->instance_state_.lively(sample.header_.publication_id_);
+      }
     }
 
   }
@@ -1757,6 +1760,8 @@ bool DataReaderImpl::have_sample_states(
   DDS::SampleStateMask sample_states) const
 {
   //!!!caller should have acquired sample_lock_
+  /// @TODO: determine correct failed lock return value.
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, false);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
        iter != instances_.end();
@@ -1778,6 +1783,9 @@ bool
 DataReaderImpl::have_view_states(DDS::ViewStateMask view_states) const
 {
   //!!!caller should have acquired sample_lock_
+  /// @TODO: determine correct failed lock return value.
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
+
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
        iter != instances_.end();
        ++iter) {
@@ -1795,6 +1803,9 @@ bool DataReaderImpl::have_instance_states(
   DDS::InstanceStateMask instance_states) const
 {
   //!!!caller should have acquired sample_lock_
+  /// @TODO: determine correct failed lock return value.
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
+
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
        iter != instances_.end();
        ++iter) {
@@ -1814,6 +1825,7 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
                                      DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
        end = instances_.end(); iter != end; ++iter) {
@@ -1883,6 +1895,8 @@ void DataReaderImpl::sample_info(DDS::SampleInfo & sample_info,
 CORBA::Long DataReaderImpl::total_samples() const
 {
   //!!!caller should have acquired sample_lock_
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,0);
+
   CORBA::Long count(0);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
@@ -2033,7 +2047,9 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 
   this->purge_data(instance);
 
-  this->instances_.erase(handle);
+  { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    this->instances_.erase(handle);
+  }
   this->release_instance_i(handle);
   if (this->monitor_) {
     this->monitor_->report();
@@ -2187,6 +2203,9 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
+    // RT7273: possible solution is to release the sample lock for the
+    //         duration of this call
+    // ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
     this->notify_liveliness_change();
   }
 
@@ -2274,6 +2293,7 @@ void
 DataReaderImpl::instances_liveliness_update(WriterInfo& info,
                                             const ACE_Time_Value& when)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
        next = iter; iter != instances_.end(); iter = next) {
     ++next;
@@ -2451,8 +2471,9 @@ DataReaderImpl::statistics_enabled(
 SubscriptionInstance*
 DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 {
-  SubscriptionInstanceMapType::iterator iter = instances_.find(handle);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, 0);
 
+  SubscriptionInstanceMapType::iterator iter = instances_.find(handle);
   if (iter == instances_.end()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -2772,6 +2793,7 @@ DataReaderImpl::num_zero_copies()
                    guard,
                    this->sample_lock_,
                    1 /* assume we have loans */);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,1);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
        iter != instances_.end();
@@ -2839,6 +2861,7 @@ void DataReaderImpl::post_read_or_take()
 void DataReaderImpl::reschedule_deadline()
 {
   if (this->watchdog_.get() != 0) {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
     for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
          iter != this->instances_.end();
          ++iter) {
@@ -2874,6 +2897,7 @@ void
 DataReaderImpl::get_instance_handles(InstanceHandleVec& instance_handles)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
        end = instances_.end(); iter != end; ++iter) {
@@ -2981,6 +3005,7 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
 
   for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
                 iter != this->instances_.end(); ++iter) {
@@ -3006,6 +3031,7 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
 
   for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
       iter != this->instances_.end(); ++iter) {
@@ -3126,6 +3152,7 @@ void DataReaderImpl::get_ordered_data (GroupRakeData& data,
                                        DDS::InstanceStateMask instance_states)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
     iter != instances_.end(); ++iter) {
