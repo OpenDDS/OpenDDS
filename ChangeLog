@@ -4,6 +4,10 @@ Tue Nov 19 00:13:25 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
         * dds/DCPS/InstanceState.cpp:
         * dds/idl/CPPTemplate.txt:
 
+          Replaced redundant use of sample_lock_ with instances_lock_ to
+          allow protecting access of the internal InstanceState::writers_
+          container.
+
 Wed Nov 13 22:07:19 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
