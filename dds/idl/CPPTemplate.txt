@@ -2046,7 +2046,7 @@ void
     ACE_NEW (instance,
              OpenDDS::DCPS::SubscriptionInstance(this,
                                                  this->qos_,
-                                                 this->sample_lock_,
+                                                 this->instances_lock_,
                                                  handle));
 
     instance->instance_handle_ = handle;

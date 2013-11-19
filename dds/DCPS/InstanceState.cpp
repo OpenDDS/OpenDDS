@@ -88,11 +88,6 @@ int
 OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& /* current_time */,
                                              const void* /* arg */)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->lock_,
-                   0);
-
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE:")
@@ -108,6 +103,9 @@ OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& /* current_ti
 bool
 OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard, this->lock_, false);
+
   writers_.erase(writer_id);
 
   //
@@ -134,6 +132,8 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
 bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard, this->lock_, false);
   writers_.erase(writer_id);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->exclusive_) {
@@ -159,6 +159,8 @@ OpenDDS::DCPS::InstanceState::writer_became_dead(
   int                   /*num_alive_writers*/,
   const ACE_Time_Value& /* when */)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard, this->lock_);
   writers_.erase(writer_id);
 
   if (writers_.empty() && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
