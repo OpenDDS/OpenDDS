@@ -20,6 +20,11 @@
 #include <sstream>
 #include <string>
 
+#include <iostream> // DEVELOPMENT DIAGNOSTICS ONLY
+#ifndef DEVELOPMENT
+#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
+#endif
+
 #if !defined (__ACE_INLINE__)
 #include "TcpConnection.inl"
 #endif /* __ACE_INLINE__ */
@@ -243,6 +248,31 @@ OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE fd)
   }
 
   return this->receive_strategy_->handle_dds_input(fd);
+}
+
+int
+OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
+{
+  DBG_ENTRY_LVL("TcpConnection","handle_output",6);
+
+  if (!this->send_strategy_.is_nil()) {
+    if(DEVELOPMENT) {
+      std::cerr << std::dec << getpid()
+                << " [" << id_ << "] SENDING QUEUED DATA " << std::endl;
+    }
+
+    // Process data to be sent from the queue.
+    if (ThreadSynchWorker::WORK_OUTCOME_MORE_TO_DO
+        != send_strategy_->perform_work()) {
+
+      // Stop handling output ready events when there is nothing to output.
+      // N.B. This calls back into the reactor.  Is the reactor lock
+      //      recursive?
+      (int)send_strategy_->cancel_wakeup( ACE_Event_Handler::WRITE_MASK);
+    }
+  }
+
+  return 0;
 }
 
 int

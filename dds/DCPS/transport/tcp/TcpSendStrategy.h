@@ -24,7 +24,8 @@ class TcpSynchResource;
 class TcpSendStrategy : public TransportSendStrategy {
 public:
 
-  TcpSendStrategy(const TcpDataLink_rch& link,
+  TcpSendStrategy(std::size_t id,
+                  const TcpDataLink_rch& link,
                   const TcpInst_rch& config,
                   const TcpConnection_rch& connection,
                   TcpSynchResource* synch_resource,
@@ -37,6 +38,11 @@ public:
   /// object is registered for sending. The implementation of this method is borrowed from
   /// the ReceiveStrategy.
   int reset(TcpConnection* connection);
+
+  /// @{ @name Reactor pass through methods from ThreadSynchWorker and the connection.
+  virtual int schedule_wakeup( ACE_Reactor_Mask masks_to_be_added);
+  virtual int cancel_wakeup( ACE_Reactor_Mask masks_to_be_cleared);
+  /// @}
 
 protected:
 
@@ -51,6 +57,8 @@ protected:
   virtual void stop_i();
 
 private:
+  /// Whether we are in queue mode (data ready to send).
+  bool pending_output_;
 
   TcpConnection_rch connection_;
   TcpDataLink_rch   link_;

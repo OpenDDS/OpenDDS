@@ -28,6 +28,7 @@
 #include "ace/Reverse_Lock_T.h"
 
 #include <vector>
+#include <iostream> // DEVELOPMENT DIAGNOSTICS ONLY
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
@@ -57,6 +58,7 @@ namespace {
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy(
+  std::size_t id,
   const TransportInst_rch& transport_inst,
   ThreadSynchResource* synch_resource,
   CORBA::Long priority,
@@ -89,7 +91,8 @@ TransportSendStrategy::TransportSendStrategy(
     graceful_disconnecting_(false),
     link_released_(true),
     send_buffer_(0),
-    transport_shutdown_(false)
+    transport_shutdown_(false),
+    id_(id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 

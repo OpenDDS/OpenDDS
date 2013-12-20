@@ -1,3 +1,46 @@
+Fri Dec 20 00:25:35 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.h:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/ThreadSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.inl:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Replacing the PerConnectionSynch thread with processing of the
+          queued outbound data by the TransportReactorTask thread via its
+          handle_output() callback.
+
 Tue Nov 19 00:13:25 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/InstanceState.inl:

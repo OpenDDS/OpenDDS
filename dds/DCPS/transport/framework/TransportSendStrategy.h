@@ -139,7 +139,8 @@ public:
 
 protected:
 
-  TransportSendStrategy(const TransportInst_rch& transport_inst,
+  TransportSendStrategy(std::size_t id,
+                        const TransportInst_rch& transport_inst,
                         ThreadSynchResource* synch_resource,
                         CORBA::Long priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
@@ -396,6 +397,9 @@ private:
 protected:
   /// Current transport packet header.
   TransportHeader header_;
+
+  /// Small id value to uniquely identify the connection.
+  std::size_t  id_;
 };
 
 } // namespace DCPS

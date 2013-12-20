@@ -293,6 +293,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
         }
 
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) publisher (main) - writing complete, exiting\n")));
+
       // Clean up publisher objects
       pub->delete_contained_entities() ;
 

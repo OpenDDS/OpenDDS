@@ -73,7 +73,7 @@ elsif ($ARGV[0] eq 'bp_timeout') {
   $read_delay_ms=5000;
   $num_writes = 10000;
   $num_expected_reads = $num_writes;
-  $lost_publication_callback = 1;
+  $lost_publication_callback = 0;
   $verify_lost_sub_notification = 0;
 
   $end_with_publisher = 1;

@@ -9,6 +9,7 @@
 #include "ace/OS_NS_unistd.h"
 
 
+namespace { bool verbose = false; }
 
 extern ACE_Condition<ACE_Recursive_Thread_Mutex> done_condition_;
 
@@ -34,17 +35,22 @@ void write (long id,
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
   ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
+            ACE_TEXT("(%P|%t) %T Writer::svc starting to write %d messages.\n"),num_messages));
 
   ::DDS::InstanceHandle_t handle
       = pt_dw->register_instance(data);
 
+// int write_delay_ms = 0;
   {  // Extra scope for VC6
   for (int i = 0; i < num_messages; i ++)
   {
     data.sequence_num = i;
+    if(verbose) {
+      ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) Writer{write<>()} - writing sample: %d\n"),i));
+    }
     pt_dw->write(data,
                  handle);
+// ACE_OS::sleep (ACE_Time_Value (write_delay_ms/1000, write_delay_ms%1000*1000));
   }
   }
 }

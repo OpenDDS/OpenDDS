@@ -19,6 +19,13 @@ OpenDDS::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
   DBG_ENTRY_LVL("ThreadSynch","ThreadSynch",6);
 }
 
+ACE_INLINE
+OpenDDS::DCPS::ThreadSynchWorker*
+OpenDDS::DCPS::ThreadSynch::worker()
+{
+  return worker_;
+}
+
 ACE_INLINE int
 OpenDDS::DCPS::ThreadSynch::register_worker(ThreadSynchWorker* worker)
 {
@@ -62,9 +69,8 @@ OpenDDS::DCPS::ThreadSynch::wait_on_clogged_resource()
   } else {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ThreadSynch cannot wait on a NULL clogged resource.\n"));
-//MJM: Do the %P|%t thing here, and identify where we are at.  This
-//MJM: could become a critical message.
   }
 
   return result;
 }
+

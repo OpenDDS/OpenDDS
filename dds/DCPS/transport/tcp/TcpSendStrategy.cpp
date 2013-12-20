@@ -16,16 +16,23 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 
+#include <iostream> // DEVELOPMENT DIAGNOSTICS ONLY
+#ifndef DEVELOPMENT
+#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
+#endif
+
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
+  std::size_t id,
   const TcpDataLink_rch& link,
   const TcpInst_rch& config,
   const TcpConnection_rch& connection,
   TcpSynchResource* synch_resource,
   const TransportReactorTask_rch& task,
   CORBA::Long priority)
-  : TransportSendStrategy(static_rchandle_cast<TransportInst>(config),
+  : TransportSendStrategy(id, static_rchandle_cast<TransportInst>(config),
                           synch_resource, priority,
                           new PerConnectionSynchStrategy)
+  , pending_output_(false)
   , connection_(connection)
   , link_(link)
   , reactor_task_(task)
@@ -38,6 +45,38 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
 OpenDDS::DCPS::TcpSendStrategy::~TcpSendStrategy()
 {
   DBG_ENTRY_LVL("TcpSendStrategy","~TcpSendStrategy",6);
+}
+
+int
+OpenDDS::DCPS::TcpSendStrategy::schedule_wakeup( ACE_Reactor_Mask masks_to_be_added)
+{
+  if(!pending_output_) {
+    if(DEVELOPMENT) {
+      std::cerr << std::dec << getpid()
+                <<" [" << id_ << "] START QUEUEING DATA " << std::endl;
+    }
+    pending_output_ = true;
+    return reactor_task_->get_reactor()->schedule_wakeup( get_handle(), masks_to_be_added);
+
+  } else {
+    return 0;
+  }
+}
+
+int
+OpenDDS::DCPS::TcpSendStrategy::cancel_wakeup( ACE_Reactor_Mask masks_to_be_cleared)
+{
+  if(pending_output_) {
+    if(DEVELOPMENT) {
+      std::cerr << std::dec << getpid()
+                << " [" << id_  << "] STOP QUEUEING DATA " << std::endl;
+    }
+    pending_output_ = false;
+    return reactor_task_->get_reactor()->cancel_wakeup( get_handle(), masks_to_be_cleared);
+
+  } else {
+    return 0;
+  }
 }
 
 int

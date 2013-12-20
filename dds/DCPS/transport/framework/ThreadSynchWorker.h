@@ -11,6 +11,8 @@
 
 #include "dds/DCPS/dcps_export.h"
 
+#include "ace/Event_Handler.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -27,6 +29,20 @@ public:
   };
 
   virtual WorkOutcome perform_work() = 0;
+
+  /// @{ @name Reactor controls.
+  /// These methods are used to pass through start and end events to a
+  /// reactor if one is being used to manage sending activity.  A
+  /// subclass would have a reference to the reactor to forward the
+  /// events to.
+
+  /// Indicate the start of when there is work to be done.
+  virtual int schedule_wakeup( ACE_Reactor_Mask masks_to_be_added);
+
+  /// Indicate that there is no more work to be done.
+  virtual int cancel_wakeup( ACE_Reactor_Mask masks_to_be_cleared);
+
+  /// @}
 
 protected:
 

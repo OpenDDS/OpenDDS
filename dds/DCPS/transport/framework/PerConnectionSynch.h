@@ -17,36 +17,13 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class PerConnectionSynch : public ACE_Task_Base,
-      public ThreadSynch {
+class PerConnectionSynch : public ThreadSynch {
 public:
 
-  PerConnectionSynch(ThreadSynchResource* synch_resource, long priority, int scheduler);
+  PerConnectionSynch(ThreadSynchResource* synch_resource);
   virtual ~PerConnectionSynch();
 
   virtual void work_available();
-
-  virtual int open(void*);
-  virtual int svc();
-  virtual int close(u_long);
-
-protected:
-
-  virtual int register_worker_i();
-  virtual void unregister_worker_i();
-
-private:
-
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
-
-  LockType      lock_;
-  ConditionType condition_;
-  int           work_available_;
-  int           shutdown_;
-  long          dds_priority_;
-  long          scheduler_;
 };
 
 } // namespace DCPS

@@ -269,6 +269,10 @@ private:
 
   /// Monitor object for this entity
   Monitor* monitor_;
+
+protected:
+  /// Id of the last link established.
+  std::size_t last_link_;
 };
 
 } // namespace DCPS

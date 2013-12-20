@@ -88,7 +88,8 @@ my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
 print $DCPSREPO->CommandLine(), "\n";
 
 my $sub_parameters = "$app_bit_conf -DCPSConfigFile $conf_file"
-#              . " -DCPSDebugLevel 6"
+#              . " -DCPSDebugLevel 10"
+#              . " -DCPSTransportDebugLevel 6"
               . " -p $num_writers"
               . " -i $num_msgs_btwn_rec"
               . " -n $num_messages -d $data_size"
@@ -107,7 +108,8 @@ for ($i = 0; $i < $num_readers; $i++) {
 
 #NOTE: above 1000 queue samples does not give any better performance.
 my $pub_parameters = "$app_bit_conf -DCPSConfigFile $conf_file"
-#              . " -DCPSDebugLevel 6"
+#              . " -DCPSDebugLevel 10"
+#              . " -DCPSTransportDebugLevel 6"
               . " -p 1"
               . " -r $num_readers"
               . " -n $num_messages -d $data_size"

@@ -30,7 +30,8 @@ namespace DCPS {
 
 TransportImpl::TransportImpl()
   : rlock_thread_id_(0),
-    monitor_(0)
+    monitor_(0),
+    last_link_(0)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
