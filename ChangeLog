@@ -1,3 +1,10 @@
+Thu Jan  2 15:37:16 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Correct Coverity issue 1141707.  The value is initialized
+          before use, but now is always defined.
+
 Fri Dec 20 00:25:35 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/PerConnectionSynch.h:

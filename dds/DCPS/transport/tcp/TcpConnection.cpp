@@ -50,7 +50,8 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
     reconnect_state_(INIT_STATE),
     last_reconnect_attempted_(ACE_Time_Value::zero),
     transport_priority_(0),  // TRANSPORT_PRIORITY.value default value - 0.
-    shutdown_(false)
+    shutdown_(false),
+    id_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
