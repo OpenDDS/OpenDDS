@@ -397,9 +397,6 @@ private:
 protected:
   /// Current transport packet header.
   TransportHeader header_;
-
-  /// Small id value to uniquely identify the connection.
-  std::size_t  id_;
 };
 
 } // namespace DCPS

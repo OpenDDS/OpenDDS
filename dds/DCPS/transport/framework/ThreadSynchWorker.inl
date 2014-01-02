@@ -9,9 +9,17 @@
 #include "EntryExit.h"
 
 ACE_INLINE
-OpenDDS::DCPS::ThreadSynchWorker::ThreadSynchWorker()
+OpenDDS::DCPS::ThreadSynchWorker::ThreadSynchWorker( std::size_t id)
+ : id_(id)
 {
   DBG_ENTRY_LVL("ThreadSynchWorker","ThreadSynchWorker",6);
+}
+
+ACE_INLINE
+std::size_t
+OpenDDS::DCPS::ThreadSynchWorker::id() const
+{
+  return id_;
 }
 
 ACE_INLINE

@@ -16,7 +16,6 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 
-#include <iostream> // DEVELOPMENT DIAGNOSTICS ONLY
 #ifndef DEVELOPMENT
 #define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
 #endif
@@ -52,8 +51,10 @@ OpenDDS::DCPS::TcpSendStrategy::schedule_wakeup( ACE_Reactor_Mask masks_to_be_ad
 {
   if(!pending_output_) {
     if(DEVELOPMENT) {
-      std::cerr << std::dec << getpid()
-                <<" [" << id_ << "] START QUEUEING DATA " << std::endl;
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TcpSendStrategy::schedule_wakeup() [%d] - ")
+                 ACE_TEXT("starting data queueing.\n"),
+                 id()));
     }
     pending_output_ = true;
     return reactor_task_->get_reactor()->schedule_wakeup( get_handle(), masks_to_be_added);
@@ -68,8 +69,10 @@ OpenDDS::DCPS::TcpSendStrategy::cancel_wakeup( ACE_Reactor_Mask masks_to_be_clea
 {
   if(pending_output_) {
     if(DEVELOPMENT) {
-      std::cerr << std::dec << getpid()
-                << " [" << id_  << "] STOP QUEUEING DATA " << std::endl;
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TcpSendStrategy::cancel_wakeup() [%d] - ")
+                 ACE_TEXT("stopping data queueing.\n"),
+                 id()));
     }
     pending_output_ = false;
     return reactor_task_->get_reactor()->cancel_wakeup( get_handle(), masks_to_be_cleared);

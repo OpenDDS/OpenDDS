@@ -33,7 +33,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   Tseq samples(use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
   Iseq infos(  use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
 
-  int samples_recvd = 0;
+  std::size_t samples_recvd = 0;
   DDS::ReturnCode_t status;
   // initialize to zero.
 
@@ -48,6 +48,16 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   if (status == ::DDS::RETCODE_OK)
     {
       samples_recvd = samples.length ();
+
+      for( std::size_t index = 0; index < samples_recvd; ++index) {
+        if(verbose) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DataReaderListenerImpl::read<>() - ")
+            ACE_TEXT("sample %d, of total %d from writer %d.\n"),
+            index, samples_recvd, infos[index].publication_handle
+          ));
+        }
+      }
     }
   else if (status == ::DDS::RETCODE_NO_DATA)
     {

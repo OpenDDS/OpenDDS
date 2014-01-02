@@ -20,7 +20,6 @@
 #include <sstream>
 #include <string>
 
-#include <iostream> // DEVELOPMENT DIAGNOSTICS ONLY
 #ifndef DEVELOPMENT
 #define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
 #endif
@@ -258,8 +257,10 @@ OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
 
   if (!this->send_strategy_.is_nil()) {
     if(DEVELOPMENT) {
-      std::cerr << std::dec << getpid()
-                << " [" << id_ << "] SENDING QUEUED DATA " << std::endl;
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TcpConnection::handle_output() [%d] - ")
+                 ACE_TEXT("sending queued data.\n"),
+                 id_));
     }
 
     // Process data to be sent from the queue.

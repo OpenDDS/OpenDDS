@@ -10,7 +10,6 @@
 #include "PerConnectionSynch.h"
 #include "dds/DCPS/debug.h"
 
-#include <iostream> // DEVELOPMENT DIAGNOSTICS ONLY
 #ifndef DEVELOPMENT
 #define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
 #endif
@@ -23,10 +22,14 @@ OpenDDS::DCPS::PerConnectionSynch::~PerConnectionSynch()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","~PerConnectionSynch",6);
     if(DEVELOPMENT) {
-      std::cerr << std::dec << getpid()
-                << " DISMANTLING SYNCH "
-                << (worker()? "WITH ": "WITHOUT ") << " WORKER"
-                << std::hex << this << std::endl;
+      std::size_t id = 0;
+      if( worker()) {
+        id = worker()->id();
+      }
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) PerConnectionSynch::~PerConnectionSynch() [%d] - ")
+                 ACE_TEXT("dismantling synch %C worker.\n"),
+                 id,(worker()?"with":"without")));
     }
   
   // Belts and suspenders.

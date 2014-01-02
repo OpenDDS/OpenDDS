@@ -28,7 +28,10 @@
 #include "ace/Reverse_Lock_T.h"
 
 #include <vector>
-#include <iostream> // DEVELOPMENT DIAGNOSTICS ONLY
+
+#ifndef DEVELOPMENT
+#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
+#endif
 
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
@@ -63,7 +66,8 @@ TransportSendStrategy::TransportSendStrategy(
   ThreadSynchResource* synch_resource,
   CORBA::Long priority,
   const ThreadSynchStrategy_rch& thread_sync_strategy)
-  : max_samples_(transport_inst->max_samples_per_packet_),
+  : ThreadSynchWorker(id),
+    max_samples_(transport_inst->max_samples_per_packet_),
     optimum_size_(transport_inst->optimum_packet_size_),
     max_size_(transport_inst->max_packet_size_),
     queue_(new QueueType(transport_inst->queue_messages_per_pool_,
@@ -91,8 +95,7 @@ TransportSendStrategy::TransportSendStrategy(
     graceful_disconnecting_(false),
     link_released_(true),
     send_buffer_(0),
-    transport_shutdown_(false),
-    id_(id)
+    transport_shutdown_(false)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
@@ -974,6 +977,13 @@ TransportSendStrategy::stop()
 void
 TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
+  if(DEVELOPMENT) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportSendStrategy::send() [%d] - ")
+               ACE_TEXT("sending data at 0x%x.\n"),
+               id(), element));
+  }
+
   DBG_ENTRY_LVL("TransportSendStrategy", "send", 6);
   {
     GuardType guard(this->lock_);
@@ -1783,6 +1793,12 @@ TransportSendStrategy::prepare_packet_i()
 ssize_t
 TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 {
+  if(DEVELOPMENT) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportSendStrategy::do_send_packet() [%d] - ")
+               ACE_TEXT("sending data at 0x%x.\n"),
+               id(), packet));
+  }
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "

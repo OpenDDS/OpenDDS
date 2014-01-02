@@ -1,3 +1,35 @@
+Thu Jan  2 23:29:23 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Hoisted the link id value from the strategy to the base class
+          for use in additional diagnostic messages.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Promoted iostream based development messages to ACE_DEBUG
+          messages that I will demote to high debug level logs once
+          development is complete.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+
+          Added more diagnostics messaging.
+
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+
+          work-in-progress
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Updated command line handling to allow additional and finer
+          grained control of the testing and diagnostics.
+
 Thu Jan  2 15:37:16 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpConnection.cpp:

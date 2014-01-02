@@ -44,9 +44,15 @@ public:
 
   /// @}
 
+  /// DataLink reference value for diagnostics.
+  std::size_t id() const;
+
 protected:
 
-  ThreadSynchWorker();
+  ThreadSynchWorker( std::size_t id = 0);
+
+private:
+  std::size_t id_;
 };
 
 } // namespace DCPS
