@@ -259,6 +259,7 @@ private:
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
+public:
   enum SendMode {
     // MODE_NOT_SET is used as the initial value of mode_before_suspend_ so
     // we can check if the resume_send is paired with suspend_send.
@@ -275,7 +276,6 @@ private:
     MODE_TERMINATED
   };
 
-public:
   /// Clear queued messages and messages in current packet.
   // The API now has a defaulted mode (the default is the same as
   // as the earlier hard-coded value).
@@ -284,6 +284,9 @@ public:
   // Since the default is the earlier hard-coded value, this
   // shouldn't have any impact.
   void clear(SendMode mode = MODE_DIRECT);
+
+  /// Access the current sending mode.
+  SendMode mode() const;
 
 private:
   /// Implement framework chain visitations to remove a sample.
@@ -395,6 +398,8 @@ private:
   bool transport_shutdown_;
 
 protected:
+  ThreadSynch* synch() const;
+
   /// Current transport packet header.
   TransportHeader header_;
 };

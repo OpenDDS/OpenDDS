@@ -1,3 +1,10 @@
+Wed Jan  8 04:40:24 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+
+          Left out of last checkin.  Declares the new mode() and synch()
+          accessors.
+
 Wed Jan  8 02:59:39 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/PerConnectionSynch.h:
