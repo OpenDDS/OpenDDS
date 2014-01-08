@@ -1,3 +1,16 @@
+Wed Jan  8 19:54:37 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReactorSynch.inl:
+        * dds/DCPS/transport/framework/ReactorSynch.cpp:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+
+          Converted development diagnostics to debug messages.
+
 Wed Jan  8 04:40:24 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:

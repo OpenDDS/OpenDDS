@@ -9,10 +9,6 @@
 #include "EntryExit.h"
 #include "dds/DCPS/debug.h"
 
-#ifndef DEVELOPMENT
-#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
-#endif
-
 ACE_INLINE
 OpenDDS::DCPS::ReactorSynch::ReactorSynch(
   ThreadSynchResource* synch_resource,
@@ -28,7 +24,7 @@ OpenDDS::DCPS::ReactorSynch::ReactorSynch(
   // Manage the handler storage using the provided _var.
   safeHandler_ = scheduleOutputHandler_;
 
-  if(DEVELOPMENT) {
+  if (DCPS_debug_level > 4) {
     std::size_t id = 0;
     if( worker()) {
       id = worker()->id();

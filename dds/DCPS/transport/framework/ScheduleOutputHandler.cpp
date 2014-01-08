@@ -6,6 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ScheduleOutputHandler.h"
 
 #include "TransportSendStrategy.h"
@@ -13,10 +14,6 @@
 #if !defined (__ACE_INLINE__)
 #include "ScheduleOutputHandler.inl"
 #endif /* __ACE_INLINE__ */
-
-#ifndef DEVELOPMENT
-#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
-#endif
 
 void
 OpenDDS::DCPS::ScheduleOutputHandler::schedule_output()
@@ -77,7 +74,7 @@ OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
     }
   }
 
-  if(DEVELOPMENT) {
+  if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ScheduleOutputHandler::handle_exception() - [%d] ")
                ACE_TEXT("%C data queueing for handle %d.\n"),

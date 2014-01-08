@@ -10,10 +10,6 @@
 #include "ReactorSynch.h"
 #include "dds/DCPS/debug.h"
 
-#ifndef DEVELOPMENT
-#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
-#endif
-
 #if !defined (__ACE_INLINE__)
 #include "ReactorSynch.inl"
 #endif /* __ACE_INLINE__ */
@@ -22,7 +18,7 @@ OpenDDS::DCPS::ReactorSynch::~ReactorSynch()
 {
   DBG_ENTRY_LVL("ReactorSynch","~ReactorSynch",6);
 
-  if(DEVELOPMENT) {
+  if (DCPS_debug_level > 4) {
     std::size_t id = 0;
     if( worker()) {
       id = worker()->id();

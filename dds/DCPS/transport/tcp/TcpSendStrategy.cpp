@@ -17,10 +17,6 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/ReactorSynchStrategy.h"
 
-#ifndef DEVELOPMENT
-#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
-#endif
-
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   std::size_t id,
   const TcpDataLink_rch& link,
@@ -57,7 +53,7 @@ OpenDDS::DCPS::TcpSendStrategy::schedule_output()
   // Notify the reactor to adjust its processing policy according to mode_.
   synch()->work_available();
 
-  if(DEVELOPMENT) {
+  if (DCPS_debug_level > 4) {
     const char* action = "";
     if( mode() == MODE_DIRECT) {
       action = "canceling";

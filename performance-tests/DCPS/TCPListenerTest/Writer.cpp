@@ -8,12 +8,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 
-
-namespace { bool verbose = false; }
-
 extern ACE_Condition<ACE_Recursive_Thread_Mutex> done_condition_;
-
-
 
 template<class T, class W, class W_var, class W_ptr, class Wimpl>
 void write (long id,
@@ -45,7 +40,7 @@ void write (long id,
   for (int i = 0; i < num_messages; i ++)
   {
     data.sequence_num = i;
-    if(verbose) {
+    if(OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) Writer{write<>()} - writing sample: %d\n"),i));
     }
     pt_dw->write(data,

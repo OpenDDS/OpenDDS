@@ -20,10 +20,6 @@
 #include <sstream>
 #include <string>
 
-#ifndef DEVELOPMENT
-#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
-#endif
-
 #if !defined (__ACE_INLINE__)
 #include "TcpConnection.inl"
 #endif /* __ACE_INLINE__ */
@@ -256,7 +252,7 @@ OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
   DBG_ENTRY_LVL("TcpConnection","handle_output",6);
 
   if (!this->send_strategy_.is_nil()) {
-    if(DEVELOPMENT) {
+    if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TcpConnection::handle_output() [%d] - ")
                  ACE_TEXT("sending queued data.\n"),

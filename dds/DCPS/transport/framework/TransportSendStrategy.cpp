@@ -29,10 +29,6 @@
 
 #include <vector>
 
-#ifndef DEVELOPMENT
-#define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
-#endif
-
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */
@@ -978,7 +974,7 @@ TransportSendStrategy::stop()
 void
 TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
-  if(DEVELOPMENT) {
+  if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportSendStrategy::send() [%d] - ")
                ACE_TEXT("sending data at 0x%x.\n"),
@@ -1796,7 +1792,7 @@ TransportSendStrategy::prepare_packet_i()
 ssize_t
 TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 {
-  if(DEVELOPMENT) {
+  if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportSendStrategy::do_send_packet() [%d] - ")
                ACE_TEXT("sending data at 0x%x.\n"),

@@ -6,9 +6,6 @@
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
-/// Enable (or disable) detailed process tracing.
-namespace { bool verbose = false; }
-
 extern long subscriber_delay_msec; // from common.h
 
 template<class Tseq, class Iseq, class R, class R_ptr, class R_var, class Rimpl>
@@ -50,7 +47,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
       samples_recvd = samples.length ();
 
       for( std::size_t index = 0; index < samples_recvd; ++index) {
-        if(verbose) {
+        if(OpenDDS::DCPS::DCPS_debug_level > 8) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderListenerImpl::read<>() - ")
             ACE_TEXT("sample %d, of total %d from writer %d.\n"),
@@ -123,7 +120,7 @@ DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
         total_samples));
     }
 
-    if(verbose) {
+    if(OpenDDS::DCPS::DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("%P|%t) DataReaderListenerImpl (constructor) - ")
         ACE_TEXT("read interval: %d, zero copy: %C, total samples: %d.\n"),
@@ -251,7 +248,7 @@ void DataReaderListenerImpl::on_data_available(
     samples_received_count_++;
     total_samples_count_++;
 
-    if(verbose) {
+    if(OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available() - ")
         ACE_TEXT("received sample %d, of total %d\n"),
