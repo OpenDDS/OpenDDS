@@ -13,6 +13,7 @@
 #include "TcpInst.h"
 #include "TcpSynchResource.h"
 #include "TcpDataLink.h"
+#include "dds/DCPS/transport/framework/ThreadSynch.h"
 #include "dds/DCPS/transport/framework/ScheduleOutputHandler.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/ReactorSynchStrategy.h"

@@ -1,3 +1,9 @@
+Wed Jan  8 23:41:25 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Include ThreadSynch.h for when inlining is disabled.
+
 Wed Jan  8 19:54:37 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/ReactorSynch.inl:
