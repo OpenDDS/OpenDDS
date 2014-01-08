@@ -270,7 +270,7 @@ OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
       // Stop handling output ready events when there is nothing to output.
       // N.B. This calls back into the reactor.  Is the reactor lock
       //      recursive?
-      (int)send_strategy_->cancel_wakeup( ACE_Event_Handler::WRITE_MASK);
+      send_strategy_->schedule_output();
     }
   }
 

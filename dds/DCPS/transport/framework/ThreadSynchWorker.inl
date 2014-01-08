@@ -19,24 +19,15 @@ ACE_INLINE
 std::size_t
 OpenDDS::DCPS::ThreadSynchWorker::id() const
 {
+  DBG_ENTRY_LVL("ThreadSynchWorker","id",6);
+
   return id_;
 }
 
 ACE_INLINE
-int
-OpenDDS::DCPS::ThreadSynchWorker::schedule_wakeup( ACE_Reactor_Mask)
+void
+OpenDDS::DCPS::ThreadSynchWorker::schedule_output()
 {
-  DBG_ENTRY_LVL("ThreadSynchWorker","schedule_wakeup",6);
-
-  return 0;
-}
-
-ACE_INLINE
-int
-OpenDDS::DCPS::ThreadSynchWorker::cancel_wakeup( ACE_Reactor_Mask)
-{
-  DBG_ENTRY_LVL("ThreadSynchWorker","cancel_wakeup",6);
-
-  return 0;
+  DBG_ENTRY_LVL("ThreadSynchWorker","schedule_output",6);
 }
 

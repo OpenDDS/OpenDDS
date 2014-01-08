@@ -30,19 +30,8 @@ public:
 
   virtual WorkOutcome perform_work() = 0;
 
-  /// @{ @name Reactor controls.
-  /// These methods are used to pass through start and end events to a
-  /// reactor if one is being used to manage sending activity.  A
-  /// subclass would have a reference to the reactor to forward the
-  /// events to.
-
-  /// Indicate the start of when there is work to be done.
-  virtual int schedule_wakeup( ACE_Reactor_Mask masks_to_be_added);
-
-  /// Indicate that there is no more work to be done.
-  virtual int cancel_wakeup( ACE_Reactor_Mask masks_to_be_cleared);
-
-  /// @}
+  /// Indicate that queued data is available to be sent.
+  virtual void schedule_output();
 
   /// DataLink reference value for diagnostics.
   std::size_t id() const;

@@ -13,8 +13,9 @@
 #include "TcpInst.h"
 #include "TcpSynchResource.h"
 #include "TcpDataLink.h"
+#include "dds/DCPS/transport/framework/ScheduleOutputHandler.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
+#include "dds/DCPS/transport/framework/ReactorSynchStrategy.h"
 
 #ifndef DEVELOPMENT
 #define DEVELOPMENT 0 // DEVELOPMENT DIAGNOSTICS ONLY
@@ -30,8 +31,10 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   CORBA::Long priority)
   : TransportSendStrategy(id, static_rchandle_cast<TransportInst>(config),
                           synch_resource, priority,
-                          new PerConnectionSynchStrategy)
-  , pending_output_(false)
+                          new ReactorSynchStrategy(
+                                this,
+                                task->get_reactor(),
+                                connection->peer().get_handle()))
   , connection_(connection)
   , link_(link)
   , reactor_task_(task)
@@ -46,39 +49,26 @@ OpenDDS::DCPS::TcpSendStrategy::~TcpSendStrategy()
   DBG_ENTRY_LVL("TcpSendStrategy","~TcpSendStrategy",6);
 }
 
-int
-OpenDDS::DCPS::TcpSendStrategy::schedule_wakeup( ACE_Reactor_Mask masks_to_be_added)
+void
+OpenDDS::DCPS::TcpSendStrategy::schedule_output()
 {
-  if(!pending_output_) {
-    if(DEVELOPMENT) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TcpSendStrategy::schedule_wakeup() [%d] - ")
-                 ACE_TEXT("starting data queueing.\n"),
-                 id()));
+  DBG_ENTRY_LVL("TcpSendStrategy","schedule_output",6);
+
+  // Notify the reactor to adjust its processing policy according to mode_.
+  synch()->work_available();
+
+  if(DEVELOPMENT) {
+    const char* action = "";
+    if( mode() == MODE_DIRECT) {
+      action = "canceling";
+    } else if( (mode() == MODE_QUEUE)
+            || (mode() == MODE_SUSPEND)) {
+      action = "starting";
     }
-    pending_output_ = true;
-    return reactor_task_->get_reactor()->schedule_wakeup( get_handle(), masks_to_be_added);
-
-  } else {
-    return 0;
-  }
-}
-
-int
-OpenDDS::DCPS::TcpSendStrategy::cancel_wakeup( ACE_Reactor_Mask masks_to_be_cleared)
-{
-  if(pending_output_) {
-    if(DEVELOPMENT) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TcpSendStrategy::cancel_wakeup() [%d] - ")
-                 ACE_TEXT("stopping data queueing.\n"),
-                 id()));
-    }
-    pending_output_ = false;
-    return reactor_task_->get_reactor()->cancel_wakeup( get_handle(), masks_to_be_cleared);
-
-  } else {
-    return 0;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TcpSendStrategy::schedule_output() [%d] - ")
+               ACE_TEXT("%C data queueing for handle %d.\n"),
+               id(),action,get_handle()));
   }
 }
 

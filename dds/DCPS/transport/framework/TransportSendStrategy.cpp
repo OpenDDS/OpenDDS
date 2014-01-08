@@ -335,7 +335,8 @@ TransportSendStrategy::perform_work()
                 "Reconnect succeeded, Notify synch thread of work "
                 "availablity.\n"), 5);
       // If the datalink is re-established then notify the synch
-      // thread to perform work.
+      // thread to perform work.  We do not hold the object lock at
+      // this point.
       this->synch_->work_available();
     }
   }
@@ -1134,6 +1135,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
                     "Queue elem and leave.\n"), 5);
           this->queue_->put(element);
           this->synch_->work_available();
+
           return;
         }
       }
@@ -1221,6 +1223,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             if (this->mode_ == MODE_QUEUE) {
               this->queue_->put(next_fragment);
               this->synch_->work_available();
+
             } else {
               next_fragment->data_dropped(true /* dropped by transport */);
             }

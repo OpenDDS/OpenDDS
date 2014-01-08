@@ -1,3 +1,49 @@
+Wed Jan  8 02:59:39 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+
+          Reverted to previous implementation.
+
+        * dds/DCPS/transport/framework/ReactorSynch.h:
+        * dds/DCPS/transport/framework/ReactorSynch.inl:
+        * dds/DCPS/transport/framework/ReactorSynch.cpp:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.h:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.inl:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.cpp:
+
+          Implementatino of ThreadSynch using an ACE_Reactor.
+
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.h:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.inl:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+
+          Notification scheduler for reactor write mask updates.
+
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+
+          Changed new interface to simplify write mask updates.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added protected mode() and synch() accessors.  Documentation
+          updates.
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Migrate to new mask update interface.
+
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+
+          Revert diagnostic extensions.
+
 Thu Jan  2 23:29:23 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/framework/ThreadSynchWorker.h:

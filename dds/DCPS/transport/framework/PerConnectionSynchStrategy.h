@@ -23,8 +23,8 @@ public:
 
   virtual ThreadSynch* create_synch_object(
     ThreadSynchResource* synch_resource,
-    long                 priority = 0,
-    int                  scheduler = 0);
+    long                 priority,
+    int                  scheduler);
 };
 
 } // namespace DCPS

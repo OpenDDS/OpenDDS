@@ -39,10 +39,8 @@ public:
   /// the ReceiveStrategy.
   int reset(TcpConnection* connection);
 
-  /// @{ @name Reactor pass through methods from ThreadSynchWorker and the connection.
-  virtual int schedule_wakeup( ACE_Reactor_Mask masks_to_be_added);
-  virtual int cancel_wakeup( ACE_Reactor_Mask masks_to_be_cleared);
-  /// @}
+  /// Enable or disable output processing by the reactor according to mode.
+  virtual void schedule_output();
 
 protected:
 
@@ -57,9 +55,6 @@ protected:
   virtual void stop_i();
 
 private:
-  /// Whether we are in queue mode (data ready to send).
-  bool pending_output_;
-
   TcpConnection_rch connection_;
   TcpDataLink_rch   link_;
   TransportReactorTask_rch reactor_task_;

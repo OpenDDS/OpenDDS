@@ -8,6 +8,25 @@
 
 #include "ThreadSynch.h"
 
+
+ACE_INLINE
+OpenDDS::DCPS::TransportSendStrategy::SendMode
+OpenDDS::DCPS::TransportSendStrategy::mode() const
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","mode",6);
+
+  return mode_;
+}
+
+ACE_INLINE
+OpenDDS::DCPS::ThreadSynch*
+OpenDDS::DCPS::TransportSendStrategy::synch() const
+{
+  DBG_ENTRY_LVL("TransportSendStrategy","synch",6);
+
+  return synch_;
+}
+
 ACE_INLINE void
 OpenDDS::DCPS::TransportSendStrategy::send_start()
 {

@@ -184,7 +184,6 @@ Writer::svc ()
   {
     ex._tao_print_exception ("Exception caught in svc:");
   }
-ACE_OS::sleep(10);
 
   ::DDS::InstanceHandleSeq handles;
   while (!finished_sending_)
