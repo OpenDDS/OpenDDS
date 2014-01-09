@@ -48,13 +48,12 @@ namespace
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
-  parse_args(argc, argv);
-
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> PUBLISHER STARTED\n")));
-
   try
   {
     TheParticipantFactoryWithArgs(argc, argv);
+    parse_args(argc, argv);
+
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> PUBLISHER STARTED\n")));
 
     // Spawn Participant threads
     ParticipantTask task(samples_per_thread);
