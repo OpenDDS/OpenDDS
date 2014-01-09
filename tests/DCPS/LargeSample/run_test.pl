@@ -14,40 +14,40 @@ use strict;
 
 my $status = 0;
 
-my $logging_p = "-ORBDebugLevel 1 -ORBVerboseLogging 1 " .
+my $logging_p = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
     "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $logging_s = "-ORBDebugLevel 1 -ORBVerboseLogging 1 " .
+my $logging_s = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
     "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
 my $pub_opts = "$logging_p -ORBLogFile pub.log ";
 my $sub_opts = "$logging_s -ORBLogFile sub.log ";
 my $repo_bit_opt = '';
 my $reliable = 1;
 
+my $nobit; # Set to a non-zero value to disable the Builtin Topics.
+my $app_bit_opt = '-DCPSBit 0 ' if $nobit;
+$repo_bit_opt = '-NOBITS' if $nobit;
+
+
 if ($ARGV[0] eq 'udp') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile udp.ini";
-    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile udp.ini";
+    $pub_opts .= "$app_bit_opt -DCPSConfigFile udp.ini";
+    $sub_opts .= "$app_bit_opt -DCPSConfigFile udp.ini";
     $reliable = 0;
 }
 elsif ($ARGV[0] eq 'multicast') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile multicast.ini";
-    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile multicast.ini";
+    $pub_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini";
+    $sub_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini";
 }
 elsif ($ARGV[0] eq 'multicast_async') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile pub_multicast_async.ini";
-    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile multicast.ini";
+    $pub_opts .= "$app_bit_opt -DCPSConfigFile pub_multicast_async.ini";
+    $sub_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini";
 }
 elsif ($ARGV[0] eq 'shmem') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= "-DCPSBit 0 -DCPSConfigFile shmem.ini";
-    $sub_opts .= "-DCPSBit 0 -DCPSConfigFile shmem.ini";
+    $pub_opts .= "$app_bit_opt -DCPSConfigFile shmem.ini";
+    $sub_opts .= "$app_bit_opt -DCPSConfigFile shmem.ini";
 }
 elsif ($ARGV[0] eq 'rtps') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= '-DCPSBit 0 -DCPSConfigFile rtps.ini';
-    $sub_opts .= '-DCPSBit 0 -DCPSConfigFile rtps.ini';
+    $pub_opts .= '$app_bit_opt -DCPSConfigFile rtps.ini';
+    $sub_opts .= '$app_bit_opt -DCPSConfigFile rtps.ini';
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";

@@ -1,3 +1,10 @@
+Thu Jan  9 16:30:31 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Enable Builtin Topics.  This stabilizes the test on some
+          platforms.
+
 Thu Jan  9 00:18:43 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/DCPS/TCPListenerTest/run_test.pl:
