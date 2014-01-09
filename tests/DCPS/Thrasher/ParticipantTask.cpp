@@ -49,6 +49,8 @@ ParticipantTask::svc()
                                                 DDS::DomainParticipantListener::_nil(),
                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+    } // End of lock scope.
+
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
@@ -114,8 +116,6 @@ ParticipantTask::svc()
     cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
     ws->attach_condition(cond);
-
-    } // End of lock scope.
 
     DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };

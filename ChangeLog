@@ -1,3 +1,11 @@
+Thu Jan  9 18:12:54 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Thrasher/ParticipantTask.h:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+
+          Reduce the scope of Entity creation serialization to only the
+          participant.
+
 Thu Jan  9 17:46:36 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Thrasher/ParticipantTask.h:
