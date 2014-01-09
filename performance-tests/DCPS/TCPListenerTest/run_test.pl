@@ -61,7 +61,7 @@ GetOptions( "verbose!"            => \$verbose,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "bit|b"               => \$bit,
-            "zerocopy|z"          => \$copy_sample,
+            "zerocopy|c"          => \$copy_sample,
             "pubs|p=i"            => \$num_writers,
             "subs|s=i"            => \$num_readers,
 

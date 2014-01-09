@@ -1,3 +1,9 @@
+Thu Jan  9 00:18:43 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Specify correct command line argument for zero copy.
+
 Wed Jan  8 23:41:25 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
