@@ -18,6 +18,10 @@ OpenDDS::DCPS::ReactorSynch::~ReactorSynch()
 {
   DBG_ENTRY_LVL("ReactorSynch","~ReactorSynch",6);
 
+  // Release out unmanaged copy of the handler.
+  // The managed copy will perform the actual delete.
+  scheduleOutputHandler_ = 0;
+
   if (DCPS_debug_level > 4) {
     std::size_t id = 0;
     if( worker()) {

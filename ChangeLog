@@ -1,3 +1,12 @@
+Tue Jan 14 16:08:32 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReactorSynch.cpp:
+
+          Coverity issue #1154613: explicitly reset the raw pointer copy
+          of the event handler.  We are letting the EventHandler_var
+          actually perform the delete, but be safe(r) here and reset the
+          raw (narrowed) pointer as well.
+
 Thu Jan  9 18:12:54 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * tests/DCPS/Thrasher/ParticipantTask.h:
