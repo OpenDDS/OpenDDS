@@ -1,4 +1,4 @@
-Version 3.4.2 of OpenDDS.
+Version 3.5 of OpenDDS.
 
 - Updates to RTPS support resulting from both interoperability
   testing (March 2013 OMG meeting) and user feedback.
@@ -15,6 +15,7 @@ Version 3.4.2 of OpenDDS.
 - Fixed an opendds_idl code generated bug when typedefs of basic
   types are used as fields of structs.
 
+- Corrected e number of other bugs related to discovery and scaling.
 
 ========================================================================
 
