@@ -1,8 +1,0 @@
-//
-// $Id$
-//
-
-project : dcps_rtps {
-  libs        += OpenDDS_Rtps_Udp
-  after       += OpenDDS_Rtps_Udp
-}

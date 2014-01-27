@@ -1,6 +1,0 @@
-// $Id$
-
-project {
-  libs        += OpenDDS_Tcp
-  after       += OpenDDS_Tcp
-}

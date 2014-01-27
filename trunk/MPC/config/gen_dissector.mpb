@@ -1,6 +1,0 @@
-// -*- MPC -*-
-// $Id$
-
-project : dcps_ts_defaults {
-  dcps_ts_flags += -Gws
-}
